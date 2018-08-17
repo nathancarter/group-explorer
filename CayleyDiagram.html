@@ -146,7 +146,9 @@
       </script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=MML_CHTML"></script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/95/three.js"></script>
-      <script src="./lib/TrackballControls.js"></script>
+      <script>module = { };</script>
+      <script src="https://cdn.jsdelivr.net/npm/three-trackballcontrols@0.0.7/index.js"></script>
+      <script>THREE.TrackballControls = module.exports;</script>
       <script src="https://cdn.jsdelivr.net/npm/jquery-resizable@1.0.6/resizable.js"></script>
       <script src="./lib/THREE.MeshLine.js"></script>
       <script src="./js/allGroupExplorer.js"></script>
