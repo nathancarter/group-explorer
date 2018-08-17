@@ -10,7 +10,7 @@
           },
        });
       </script>
-      <script src="./lib/MathJax-2.7.2/MathJax.js?config=MML_CHTML"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=MML_CHTML"></script>
       <script src="./js/allGroupExplorer.js"></script>
 
       <script>
@@ -62,7 +62,7 @@
           const g = (group.name === undefined ? group.isIsomorphicTo : group);
           return `<a href="javascript:groupRef(${g.libraryIndex})">${math(g.name)}</a>`;
        }
-       
+
        function groupRef(groupIndex) {
           const blobURL = URL.createObjectURL(
              new Blob([libraryJSON], {type: 'application/json'}));
