@@ -13,18 +13,17 @@ version has held up remarkably well.)
 
 **Alpha**
 
-You can place it on a web server and visit the server to visualize some
-groups.  But not all functionality is yet implemented, and testing and bug
-fixing has been minimal so far.
+[Try the alpha version here.](http://nathancarter.github.io/group-explorer/index.html)
 
-We may eventually update this repository to host a copy of the application
-on GitHub as well, but have not yet done so.
+Some functionality is not yet implemented and only a little testing has been
+done.  You have been warned.
 
 ## Credits: Thanks, Ray!
 
 Most of the code so far has been written by Ray Ellis, following the design
 patterns and ideas in the original application's source code.  I (Nathan)
-will be helping out as often as time permits.
+will be helping out as often as time permits, but Ray has been by far the
+largest contributor so far.
 
 ## License
 
