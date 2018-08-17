@@ -10,8 +10,8 @@ SUB_FILES = subsetDisplay/subsets.js           subsetDisplay/Subset.js		\
             subsetDisplay/ConjugacyClasses.js  subsetDisplay/Cosets.js		\
             subsetDisplay/OrderClasses.js      subsetDisplay/Subgroup.js
 
-# PRODUCTS = js/allGroupExplorer.js js/allGroupExplorer.min.js subsetDisplay/allSubsetDisplay.js
-PRODUCTS = js/allGroupExplorer.js subsetDisplay/allSubsetDisplay.js
+# PRODUCTS = build/allGroupExplorer.js build/allGroupExplorer.min.js build/allSubsetDisplay.js
+PRODUCTS = build/allGroupExplorer.js build/allSubsetDisplay.js
 
 #COMBINE = uglifyjs
 #COMBINE_OPTS = --compress
@@ -29,11 +29,11 @@ clean :
 	rm -f *~ js/*~ subsetDisplay/*~
 	rm -f ${PRODUCTS}
 
-js/allGroupExplorer.js : ${JS_FILES}
-	${COMBINE} ${JS_FILES} ${COMBINE_OPTS} > js/allGroupExplorer.js
+build/allGroupExplorer.js : ${JS_FILES}
+	${COMBINE} ${JS_FILES} ${COMBINE_OPTS} > build/allGroupExplorer.js
 
-js/allGroupExplorer.min.js : ${JS_FILES}
-	${MINIFY} ${JS_FILES} ${MINIFY_OPTS} > js/allGroupExplorer.min.js
+build/allGroupExplorer.min.js : ${JS_FILES}
+	${MINIFY} ${JS_FILES} ${MINIFY_OPTS} > build/allGroupExplorer.min.js
 
-subsetDisplay/allSubsetDisplay.js : ${SUB_FILES}
-	${COMBINE} ${SUB_FILES} ${COMBINE_OPTS} > subsetDisplay/allSubsetDisplay.js
+build/allSubsetDisplay.js : ${SUB_FILES}
+	${COMBINE} ${SUB_FILES} ${COMBINE_OPTS} > build/allSubsetDisplay.js
