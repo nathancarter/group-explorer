@@ -1,0 +1,198 @@
+<html>
+   <head>
+      <title>Group Explorer Library</title>
+
+      <link rel="icon" type="image/png" href="./images/favicon.png"></link>
+      <link rel="stylesheet" href="./style/fonts.css" type="text/css"></link>
+
+      <style type="text/css">
+       .hidden {
+          display: none;
+       }
+       table, th, td {
+          border: 1px solid #A0A0A0;
+          border-collapse: collapse;
+          vertical-align: middle;
+       }
+       .diagramHeader {
+          width: 100px;
+       }
+       .groupName {
+          font-size: large;
+       }
+       .groupOrder {
+          text-align: center;
+       }
+
+       .sort-up:after,
+       .sort-down:after,
+       .sort-none:after {
+          content: '';
+          position: relative;
+          left: 10px;
+          border: 7px solid transparent;
+       }
+       .sort-down:after {
+          top: 10px;
+          border-top-color: #787878;
+       }
+       .sort-up:after {
+          bottom: 10px;
+          border-bottom-color: #787878;
+       }
+       .sort-none:after {
+          border-top-color: transparent;
+          border-bottom-color: transparent;
+       }
+       .sort-up,
+       .sort-down,
+       .sort-none {
+          padding-right: 10px;
+       }
+      </style>
+
+      <script src="./lib/jquery-3.2.1.js"></script>
+      <script type="text/x-mathjax-config">
+       MathJax.Hub.Config({
+          CommonHTML: {
+             scale: 95,
+          },
+       });
+      </script>
+      <script src="./lib/MathJax-2.7.2/MathJax.js?config=MML_CHTML"></script>
+      <script src="./lib/three.js"></script>
+      <script src="./js/allGroupExplorer.js"></script>
+      <script src="./groupURLs.js"></script>
+
+      <script>
+       // Global variables
+       var graphicContext;	// hidden scratchpad, re-used to reduce WebGL contexts
+       var multtableContext;
+
+       // Constants
+       var MULTTABLE_BACKGROUND = 0x000000;
+       var CYCLE_BACKGROUND = 0xC8C8E8;
+
+       // Static event managers (setup after document is available)
+       $(function() {
+          $('#GroupTableHeaders th:nth-child(1)').on('click', () => columnSort(0));
+          $('#GroupTableHeaders th:nth-child(2)').on('click', () => columnSort(1));
+       });
+       $(window).on('load', readLibrary);	// like onload handler in body
+
+       // Load group library from urls
+       function readLibrary() {
+          // only read in a few groups if URL specifies 'debug' (for impatient programmers)
+          const urlDebug = new URL(window.location.href).searchParams.get('debug');
+          const numRows = (urlDebug == null) ? urls.length : Math.min(urls.length, (urlDebug || 10));
+
+          let baseURL = new URL(window.location.href);			// get this window URL
+          baseURL = (baseURL.origin + baseURL.pathname);		// trim off search string
+          baseURL = baseURL.slice(0, baseURL.lastIndexOf('/') + 1);	// trim off html page
+          for (let inx = 0; inx < numRows; inx++) {
+             Library.getGroupFromURL(baseURL + urls[inx])
+                    .then( (group) => {
+                       Library.add(group);
+                       displayGroup(group);
+                    } )
+                    .catch( (error) => alert(error) );
+          }
+
+          window.graphicContext = new DisplayDiagram({width: 50, height: 50, fog: false});
+          window.multtableContext = new DisplayMulttable({height: 32, width: 32});
+       }
+
+       // add row to table that displays this name, order, etc. of group
+       function displayGroup(group) {
+          const index = Library.findIndex(group);
+          const $row = $(eval(Template.HTML('#row_template')))
+             .on('click', () => Library.openWithLibrary('GroupInfo.html', index))
+             .appendTo($('#GroupTable tbody'));
+
+          // typeset this row
+          MathJax.Hub.Queue(['Typeset', MathJax.Hub, $row.attr('id')]);
+
+          // draw Cayley diagram
+          let graphicTitle = (group.cayleyDiagrams.length != 0) ?
+                             group.cayleyDiagrams[0].name :
+                             undefined;
+          let graphicData = CayleyDiagram.generate(group, graphicTitle);
+          let img = graphicContext.getImageURL(graphicData);
+          group.imageSource = img.src;
+          img.height = img.width = 32;
+          $row.children("td.cayleyDiagram").append(img);
+
+          // draw Multtable
+          graphicData = new Multtable(group);
+          img = multtableContext.getImageURL(graphicData);
+          $row.children("td.multiplicationTable").append(img);
+
+          // draw Symmetry Object
+          if (group.symmetryObjects.length != 0) {
+             graphicTitle = group.symmetryObjects[0].name;
+             graphicData = SymmetryObject.generate(group, graphicTitle);
+             img = graphicContext.getImageURL(graphicData);
+             img.height = img.width = 32;
+             $row.children("td.symmetryObject").html(img);
+          }
+       }
+
+       // callback to sort table on column value, invoked by clicking on column head
+       function columnSort(columnIndex) {
+          const makeSortUp = ! $($('th')[columnIndex]).hasClass('sort-up');
+          for (let i = 0; i < 2; i++) {
+             $($('th')[i]).removeClass('sort-down')
+                          .removeClass('sort-up')
+                          .addClass('sort-none');
+          }
+          $($('th')[columnIndex]).removeClass('sort-none')
+                                 .addClass(makeSortUp ? 'sort-up' : 'sort-down');
+
+          const getCellValue = (tr, idx) => tr.children[idx].textContent;
+
+          const compareFunction =
+             (idx, asc) =>
+                (a, b) =>
+                   ((v1, v2) => v1 !== '' &&
+                              v2 !== '' &&
+                              !isNaN(v1) &&
+                              !isNaN(v2) ? v1 - v2 : v1.toString().localeCompare(v2)
+                   )(getCellValue(asc ? a : b, idx), getCellValue(asc ? b : a, idx));
+
+          $('#GroupTable tbody').find('tr:nth-child(n+1)')
+                                .sort(compareFunction(columnIndex, makeSortUp))
+                                .each((_,tr) => $('#GroupTable tbody').append(tr))
+       }
+      </script>
+   </head>
+   <body>
+      <h2 align="center">Group Explorer</h2>
+      <br>
+      <table id="GroupTable" style="width: 100%;">
+         <thead>
+            <tr id="GroupTableHeaders" height="32px">
+               <th class="sort-none">Name</th>
+               <th class="sort-none">Order</th>
+               <th>Definition</th>
+               <th class="diagramHeader">Cayley diagram</th>
+               <th class="diagramHeader">Multiplication table</th>
+               <th class="diagramHeader">Object of symmetry</th>
+               <th class="diagramHeader">Cycle graph</th>
+            </tr>
+         </thead>
+         <tbody>
+         </tbody>
+      </table>
+      <template id="row_template">
+         <tr id="g_${index}">
+            <td class="groupName">${ math(group.name) }</td>
+            <td class="groupOrder">${ group.order }</td>
+            <td class="description">${ math(group.definition) }</td>
+            <td class="cayleyDiagram"></td>
+            <td class="multiplicationTable"></td>
+            <td class="symmetryObject">none</td>
+            <td class="cycleGraph"></td>
+         </tr>
+      </template>
+   </body>
+</html>

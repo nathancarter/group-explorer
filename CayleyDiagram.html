@@ -1,0 +1,343 @@
+<html>
+   <head>
+      <link rel="icon" type="image/png" href="./images/favicon.png"></link>
+      <link rel="stylesheet" href="./style/fonts.css" type="text/css"></link>
+
+      <style>
+       body {
+          background-color: #ECECEC;
+          margin: 0;
+          height: 100%;
+          width: 100%;
+       }
+       button {
+          -webkit-appearance: none;
+          background-color: white;
+          border: 1px solid #A4A4A4;
+          height: 30px;
+          font-size: 14pt;
+       }
+       button:focus {
+          outline: 0;
+       }
+       .vert {
+          display: flex;
+          flex-direction: column;
+       }
+       .horiz {
+          display: flex;
+          flex-direction: row;
+       }
+       #head {
+          background-color: #D0D0D0;
+          justify-content: center;
+          align-items: center;
+          height: 60px;
+       }
+       #header {
+          font-size: 40px;
+          display: block;
+       }
+
+       #horiz_layout {
+          height: 100%;
+          xtouch-action: none;
+       }
+
+       #graphic {
+          flex: 1 1 auto;
+          background-color: #E8C8C8;
+          width: 100%;
+       }
+       #splitter {
+          flex: 0 0 auto;
+          width: 8px;
+          background: #ECECEC;
+          cursor: col-resize;
+       }
+       #text {
+          flex: 0 0 auto;
+          width: 400px;
+       }
+
+       #options {
+          justify-content: center;
+          height: 42px;
+       }
+       #options > button {
+          min-width: 15%;
+       }
+
+       .info {
+          height: 100%;
+       }
+       #subset_page {
+          background-color: white;
+          overflow: auto;
+       }
+       #view, #diagram {
+          display: none;
+          background: #E2E2E2;
+       }
+       #help_reset {
+          justify-content: space-around;
+          align-items: center;
+          height: 44px;
+       }
+       #help_reset > button {
+          width: 48%;
+       }
+
+       /* styling sliders -- tested on Chrome, Firefox, Edge */
+       input[type=range] {
+          -webkit-appearance: none;
+          width: 90%;
+          height: 16px;
+          background: transparent;
+          margin: 25px 5% 25px 5%;
+       }
+
+       input[type=range]:focus {
+          outline: none;
+       }
+
+       input[type=range]::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 16px;
+          height: 16px;
+          border-radius: 50%;
+          background: white;
+          box-shadow: 1px 0px #d3d3d3, -1px 0px #d3d3d3, 0px 1px #d3d3d3, 0px -1px #d3d3d3;
+          margin-top: -6px;
+       }
+       input[type=range]::-moz-range-thumb {
+       }
+       input[type=range]::-ms-thumb {
+          margin: 0;
+          width: 16px;
+          height: 16px;
+          border-radius: 8px;
+          background: white;
+          box-shadow: 1px 0px #d3d3d3, -1px 0px #d3d3d3, 0px 1px #d3d3d3, 0px -1px #d3d3d3;
+
+       }
+
+       input[type=range]::-webkit-slider-runnable-track {
+          background: #c9c9c9;
+          height: 4px;
+       }
+       input[type=range]::-moz-range-track {
+       }
+       input[type=range]::-ms-track {
+          background: #c9c9c9;
+          height: 1px;
+       }
+      </style>
+      <link rel="stylesheet" href="./subsetDisplay/subsets.css" type="text/css"></link>
+
+      <script src="./lib/jquery-3.2.1.js"></script>
+      <script type="text/x-mathjax-config">
+       MathJax.Hub.Config({
+          CommonHTML: {
+             scale: 95,
+          },
+       });
+      </script>
+      <script src="./lib/MathJax-2.7.2/MathJax.js?config=MML_CHTML"></script>
+      <script src="./lib/three.js"></script>
+      <script src="./lib/TrackballControls.js"></script>
+      <script src="./lib/jquery-resizable.js"></script>
+      <script src="./lib/THREE.MeshLine.js"></script>
+      <script src="./js/allGroupExplorer.js"></script>
+      <script src="./subsetDisplay/allSubsetDisplay.js"></script>
+
+      <script>
+       // global variables
+       var group,		// group about which information will be displayed
+           diagramName,		// name of Cayley diagram, or undefined if generated
+           graphicData,		// data being displayed in large diagram
+           graphicContext;	// graphic context for large diagram
+
+       // Static event managers (setup after document is available)
+       $(function() {
+          $('#subset_page_select').on('click', show_subset_page);
+          $('#view_select').on('click', show_view);
+          $('#diagram_select').on('click', show_diagram);
+          $('#help').on('click', help);
+          $('#reset').on('click', load);
+          $('#zoom_level').on('input', set_zoom_level);
+          $('#line_thickness').on('input', set_line_thickness);
+          $('#node_radius').on('input', set_node_radius);
+          $('#fog_level').on('input', set_fog_level);
+          $('#use_fog').on('input', set_fog_level);
+          $('#label_size').on('input', set_label_size);
+          $('#show_labels').on('input', set_label_size);
+          $('#arrowhead_placement').on('input', set_arrowhead_placement);
+       });
+       $(window).on('load', load);	// like onload handler in body
+
+       function load() {
+          Library.loadFromInvocation()
+                 .then( ({library, groupIndex}) => {
+                    const hrefURL = new URL(window.location.href);
+                    window.diagramName = hrefURL.searchParams.get('diagram') || undefined;
+                    window.group = library[groupIndex];
+                    importSubsetDisplay()
+                 } )
+                 .catch( (error) => alert(error) );
+       }
+
+       // this should be replaced with HTML5 import when it's available
+       function importSubsetDisplay() {
+          const xhr = new XMLHttpRequest();
+          xhr.open('GET', './subsetDisplay/subsets.html', true);
+          xhr.responseType = 'document';
+          xhr.onload = function(e) {
+             const document = $(e.target.response);
+             $('#subset_page').html(document.find('body > *'));
+             setup();
+          };
+          xhr.send();
+       }
+
+       function setup() {
+          $('#header').text('Cayley Diagram for ')
+                      .append(math(group.name));
+
+          graphicData = CayleyDiagram.generate(group, diagramName)
+                                     .setNodeLabels(group.representation);
+          graphicData.lineWidth = 10;
+          graphicContext = new DisplayDiagram({container: $('#graphic'), trackballControlled: true});
+          graphicContext.showGraphic(graphicData);
+
+          $(window).on('resize', () => resizeBody());
+
+          $('#text').resizable({
+             handleSelector: '#splitter',
+             resizeHeight: false,
+             resizeWidthFrom: 'left',
+             onDrag: function () {
+                resizeGraphic(graphicContext.camera, graphicContext.renderer);
+             }
+          });
+
+          SSD.setup_subset_page();
+          show_subset_page();
+
+          resizeBody();
+       }
+
+       function resizeBody() {
+          $('#graphic').height(window.innerHeight - $('#header').height());
+          $('#text').height(window.innerHeight - $('#header').height());
+
+          resizeGraphic(graphicContext.camera, graphicContext.renderer);
+       };
+
+       function resizeGraphic(camera, renderer) {
+          if (camera !== undefined) {
+             // get graphic size from window size
+             // graphic height = window height - header height
+             $('#graphic > canvas').remove();
+             camera.aspect = $('#graphic').width() / $('#graphic').height();
+             camera.updateProjectionMatrix();
+             renderer.setSize($('#graphic').width(), $('#graphic').height());
+             $('#graphic').append(renderer.domElement);
+          }
+       }
+
+       function show_subset_page() {
+          $('#subset_page').show();
+          $('#view').hide();
+          $('#diagram').hide();
+       }
+
+       function show_view() {
+          $('#subset_page').hide();
+          $('#view').show();
+          $('#diagram').hide();
+       }
+
+       function show_diagram() {
+          $('#subset_page').hide();
+          $('#view').hide();
+          $('#diagram').show();
+       }
+
+       function help() {
+          alert('There is no help for you. (yet)');
+       }
+
+       function set_zoom_level() {
+          graphicData.zoomLevel = Math.exp( $('#zoom_level')[0].valueAsNumber/10 );
+          graphicContext.updateZoomLevel(graphicData);
+       }
+
+       function set_line_thickness() {
+          graphicData.lineWidth = $('#line_thickness')[0].valueAsNumber;
+          graphicContext.updateLineWidth(graphicData);
+       }
+
+       function set_node_radius() {
+          graphicData.nodeScale = Math.exp( $('#node_radius')[0].valueAsNumber/10 );
+          graphicContext.updateNodeRadius(graphicData);
+       }
+
+       function set_fog_level() {
+          graphicData.fogLevel = $('#use_fog')[0].checked ? $('#fog_level')[0].valueAsNumber/10 : 0;
+          graphicContext.updateFogLevel(graphicData);
+       }
+
+       function set_label_size() {
+          graphicData.labelSize = $('#show_labels')[0].checked ?
+                                  Math.exp( $('#label_size')[0].valueAsNumber/10 ) : 0;
+          graphicContext.updateLabelSize(graphicData);
+       }
+
+       function set_arrowhead_placement() {
+          graphicData.arrowheadPlacement = $('#arrowhead_placement')[0].valueAsNumber/20;
+          graphicContext.updateArrowheadPlacement(graphicData);
+       }
+      </script>
+   </head>
+   <body class="vert">
+      <div id="head" class="horiz"><div id="header">Cayley Diagram for ...</div></div>
+      <div id="horiz_layout" class="horiz">
+         <div id="graphic"></div>
+         <div id="splitter"></div>
+         <div id="text" class="vert">
+            <div id="options" class="horiz">
+               <button id="subset_page_select">Subsets</button>
+               <button id="view_select">View</button>
+               <button id="diagram_select">Diagram</button>
+            </div>
+            <div id="subset_page" class="info">
+               <!-- insert subsetDisplay/subsets.html here -->
+            </div>
+            <div id="view" class="info">
+               Zoom level:
+               <input id="zoom_level" type="range" min="-10" max="10" value="0">
+               Line thickness:
+               <input id="line_thickness" type="range" min="1" max="20" value="10">
+               Node radius:
+               <input id="node_radius" type="range" min="-10" max="10" value="0">
+               <input id="use_fog" type="checkbox">
+               Use this much fog:
+               <input id="fog_level" type="range" min="1" max="10" value="5">
+               <input id="show_labels" type="checkbox" checked>
+               Show labels of this size:
+               <input id="label_size" type="range" min="-10" max="10" value="0">
+               Arrowhead placement:
+               <input id="arrowhead_placement" type="range" min="0" max="20" value="20">
+            </div>
+            <div id="diagram" class="info">
+            </div>
+            <div id="help_reset" class="horiz">
+               <button id="help">Help</button>
+               <button id="reset">Reset</button>
+            </div>
+         </div>
+      </div>
+   </body>
+</html>

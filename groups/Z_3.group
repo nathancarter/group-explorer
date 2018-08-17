@@ -1,0 +1,106 @@
+<!DOCTYPE groupexplorerml>
+<group>
+    <name text="Z_3"><mrow><msub><mi>&Zopf;</mi><mn>3</mn></msub></mrow></name>
+    <definition text="&amp;lt; &lt;i&gt;a&lt;/i&gt; | &lt;i&gt;a&lt;/i&gt;&lt;sup&gt;3&lt;/sup&gt;=1 &amp;gt;">
+        <mfenced open="&lt;" close="&gt;" separators=":">
+            <mrow><mi>a</mi></mrow>
+            <mrow><msup><mi>a</mi><mn>3</mn></msup><mo>=</mo><mn>1</mn></mrow>
+        </mfenced>
+    </definition>
+    <phrase>Cyclic group of order 3</phrase>
+    <author>Nathan Carter (ncarter@bentley.edu)</author>
+    <multtable>
+        <row> 0 1 2 </row>
+        <row> 1 2 0 </row>
+        <row> 2 0 1 </row>
+    </multtable>
+    <generators list="1"/>
+    <representation>
+        <element text="e"><mi>e</mi></element>
+        <element text="a"><mi>a</mi></element>
+        <element text="a^2"><msup><mi>a</mi><mn>2</mn></msup></element>
+    </representation>
+    <representation>
+        <element text="()"><mrow><mo>(</mo><mo>)</mo></mrow></element>
+        <element text="(0 1 2)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn><mspace width="1em"/><mn>2</mn></mrow><mo>)</mo></mrow></element>
+        <element text="(0 2 1)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>2</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow></element>
+    </representation>
+    <symmetryobject name="Propeller with 3 blades: front view">
+        <operation element="1" degrees="120.0"><point x="0.0" y="1.0" z="0.0"/></operation>
+        <sphere radius="0.1" color="#FF0000"><point x="0.0" y="-1.0" z="0.0"/></sphere>
+        <sphere radius="0.1" color="#0500FF"><point x="0.0" y="0.5" z="0.86603"/></sphere>
+        <sphere radius="0.1" color="#05FF00"><point x="0.0" y="0.5" z="-0.86603"/></sphere>
+        <path color="#000000">
+            <point x="0.0" y="0.5" z="0.86603"/>
+            <point x="0.0" y="0.32597" z="0.8382"/>
+            <point x="0.0" y="0.16622" z="0.80213"/>
+            <point x="0.0" y="0.03333" z="0.75056"/>
+            <point x="0.0" y="-0.06337" z="0.67809"/>
+            <point x="0.0" y="-0.11893" z="0.58186"/>
+            <point x="0.0" y="-0.13333" z="0.46188"/>
+            <point x="0.0" y="-0.11156" z="0.32101"/>
+            <point x="0.0" y="-0.06292" z="0.16463"/>
+            <point x="0.0" y="0.0" z="0.0"/>
+            <point x="0.0" y="-0.11111" z="-0.13681"/>
+            <point x="0.0" y="-0.22222" z="-0.25712"/>
+            <point x="0.0" y="-0.33333" z="-0.34641"/>
+            <point x="0.0" y="-0.44444" z="-0.39392"/>
+            <point x="0.0" y="-0.55556" z="-0.39392"/>
+            <point x="0.0" y="-0.66667" z="-0.34641"/>
+            <point x="0.0" y="-0.77778" z="-0.25712"/>
+            <point x="0.0" y="-0.88889" z="-0.13681"/>
+            <point x="0.0" y="-1.0" z="0.0"/>
+        </path>
+        <path color="#000000">
+            <point x="0.0" y="0.0" z="0.0"/>
+            <point x="0.0" y="0.17403" z="-0.02782"/>
+            <point x="0.0" y="0.33378" z="-0.06389"/>
+            <point x="0.0" y="0.46667" z="-0.11547"/>
+            <point x="0.0" y="0.56337" z="-0.18794"/>
+            <point x="0.0" y="0.61893" z="-0.28416"/>
+            <point x="0.0" y="0.63333" z="-0.40415"/>
+            <point x="0.0" y="0.61156" z="-0.54502"/>
+            <point x="0.0" y="0.56292" z="-0.7014"/>
+            <point x="0.0" y="0.5" z="-0.86603"/>
+        </path>
+    </symmetryobject>
+    <symmetryobject name="Propeller with 3 blades: above view">
+        <operation element="1" degrees="120.0"><point x="0.0" y="1.0" z="0.0"/></operation>
+        <sphere radius="0.1" color="#FF0000"><point x="1.0" y="-0.75" z="0.0"/></sphere>
+        <sphere radius="0.1" color="#0500FF"><point x="-0.5" y="-0.75" z="0.86603"/></sphere>
+        <sphere radius="0.1" color="#05FF00"><point x="-0.5" y="-0.75" z="-0.86603"/></sphere>
+        <path color="#000000">
+            <point x="-0.5" y="-0.75" z="0.86603"/>
+            <point x="-0.32597" y="-0.75" z="0.8382"/>
+            <point x="-0.16622" y="-0.75" z="0.80213"/>
+            <point x="-0.03333" y="-0.75" z="0.75056"/>
+            <point x="0.06337" y="-0.75" z="0.67809"/>
+            <point x="0.11893" y="-0.75" z="0.58186"/>
+            <point x="0.13333" y="-0.75" z="0.46188"/>
+            <point x="0.11156" y="-0.75" z="0.32101"/>
+            <point x="0.06292" y="-0.75" z="0.16463"/>
+            <point x="0.0" y="-0.75" z="0.0"/>
+            <point x="0.11111" y="-0.75" z="-0.13681"/>
+            <point x="0.22222" y="-0.75" z="-0.25712"/>
+            <point x="0.33333" y="-0.75" z="-0.34641"/>
+            <point x="0.44444" y="-0.75" z="-0.39392"/>
+            <point x="0.55556" y="-0.75" z="-0.39392"/>
+            <point x="0.66667" y="-0.75" z="-0.34641"/>
+            <point x="0.77778" y="-0.75" z="-0.25712"/>
+            <point x="0.88889" y="-0.75" z="-0.13681"/>
+            <point x="1.0" y="-0.75" z="0.0"/>
+        </path>
+        <path color="#000000">
+            <point x="0.0" y="-0.75" z="0.0"/>
+            <point x="-0.17403" y="-0.75" z="-0.02782"/>
+            <point x="-0.33378" y="-0.75" z="-0.06389"/>
+            <point x="-0.46667" y="-0.75" z="-0.11547"/>
+            <point x="-0.56337" y="-0.75" z="-0.18794"/>
+            <point x="-0.61893" y="-0.75" z="-0.28416"/>
+            <point x="-0.63333" y="-0.75" z="-0.40415"/>
+            <point x="-0.61156" y="-0.75" z="-0.54502"/>
+            <point x="-0.56292" y="-0.75" z="-0.7014"/>
+            <point x="-0.5" y="-0.75" z="-0.86603"/>
+        </path>
+    </symmetryobject>
+</group>

@@ -1,0 +1,65 @@
+<html>
+   <head>
+      <link rel="stylesheet" href="./style/fonts.css" type="text/css">
+
+      <script src="./lib/jquery-3.2.1.js"></script>
+      <script type="text/x-mathjax-config">
+       MathJax.Hub.Config({
+      	  CommonHTML: {
+             scale: 85,
+          },
+       });
+      </script>
+      <script src="./lib/MathJax-2.7.2/MathJax.js?config=MML_CHTML"></script>
+      <script src="./js/allGroupExplorer.js"></script>
+
+      <script>
+       $(window).on('load', load);	// like onload handler in body
+
+       function load() {
+          Library.loadFromInvocation()
+                 .then( ({library, groupIndex}) => formatGroup(library[groupIndex]) )
+                 .catch( (error) => alert(error) );
+       }
+
+       function formatGroup(group) {
+          const $rslt = $(document.createDocumentFragment())
+             .append(eval(Template.HTML('#header')));
+          if (group.isAbelian) {
+             $rslt.append(eval(Template.HTML('#abelian')));
+          } else {
+             outerLoop:
+             for (let i = 1; i < group.order; i++) {
+                for (let j = i; j < group.order; j++) {
+                   if (group.multtable[i][j] != group.multtable[j][i]) {
+                      $rslt.append(eval(Template.HTML('#non-abelian')));
+                      break outerLoop;
+                   }
+                }
+             }
+          }
+
+          $('body').append($rslt);
+          MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
+       }
+      </script>
+   </head>
+
+   <body>
+      <template id="header">
+         <h3>Results of "Abelian group" computation for ${math(group.name)}</h3>
+      </template>
+      <template id="abelian">
+         ${math(group.name)} is <a href="./help/rf-groupterms.html#abelian">abelian</a>;
+         every pair of elements commutes.
+      </template>
+      <template id="non-abelian">
+         ${math(group.name)} is not <a href="./help/rf-groupterms.html#abelian">abelian</a>.
+         We can find two elements that do not commute:
+         ${math(group.representation[i])} &#x2219 ${math(group.representation[j])}
+         = ${math(group.representation[group.multtable[i][j]])},
+         but ${math(group.representation[j])} &#x2219 ${math(group.representation[i])}
+         = ${math(group.representation[group.multtable[j][i]])}
+      </template>
+   </body>
+</html>

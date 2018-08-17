@@ -1,0 +1,74 @@
+<!DOCTYPE groupexplorerml>
+<group>
+    <name text="2801"><mtext>2801</mtext></name>
+    <definition text="not included"><mtext>not included</mtext></definition>
+    <phrase>Order 28 #01</phrase>
+    <notes>&lt;i&gt;Dihedral(&lt;/i&gt;14&lt;i&gt;) &lt;/i&gt;=&lt;i&gt; Cyclic(&lt;/i&gt;2&lt;i&gt;) * Dihedral(&lt;/i&gt;7&lt;i&gt;)&lt;/i&gt;<br/>
+Relations:<br/>
+&lt;i&gt;    a&lt;/i&gt;&lt;sup&gt;2&lt;/sup&gt;=1,<br/>
+&lt;i&gt;    b&lt;/i&gt;&lt;sup&gt;2&lt;/sup&gt;=1,<br/>
+&lt;i&gt;    c&lt;/i&gt;&lt;sup&gt;7&lt;/sup&gt;=1,<br/>
+&lt;i&gt;    c&lt;sup&gt;a&lt;/sup&gt; &lt;/i&gt;=&lt;i&gt; c&lt;/i&gt;&lt;sup&gt;6&lt;/sup&gt;<br/>
+Thanks to Bayard Webb and Ed Keppelmann for extracting this group data from GAP (http://www.gap-system.org) and making it available in their software package FGB (http://unr.edu/homepage/keppelma/fgb.html).</notes>
+    <author>Nathan Carter (ncarter@bentley.edu)</author>
+    <multtable>
+        <row>0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27</row>
+        <row>1 0 23 19 13 18 24 9 27 7 25 16 21 4 15 14 11 26 5 3 22 12 20 2 6 10 17 8</row>
+        <row>2 26 0 13 21 7 14 5 22 16 27 23 25 3 6 20 9 24 19 18 15 4 8 11 17 12 1 10</row>
+        <row>3 27 22 20 14 17 21 10 0 6 26 15 24 2 16 13 12 25 8 1 23 11 19 4 7 9 18 5</row>
+        <row>4 25 27 14 24 6 13 8 23 15 0 22 26 1 7 19 10 21 20 17 16 2 5 12 18 11 3 9</row>
+        <row>5 20 14 27 22 0 10 21 17 26 6 24 15 16 2 12 13 8 25 23 1 7 4 19 11 18 9 3</row>
+        <row>6 16 7 9 5 4 0 2 21 3 13 18 19 10 27 26 1 23 11 12 25 8 24 17 22 20 15 14</row>
+        <row>7 15 6 10 8 2 27 4 24 1 14 17 20 9 0 25 3 22 12 11 26 5 21 18 23 19 16 13</row>
+        <row>8 19 13 0 23 27 9 24 18 25 7 21 16 15 4 11 14 5 26 22 3 6 2 20 12 17 10 1</row>
+        <row>9 14 24 25 27 23 8 13 6 0 15 26 22 7 1 10 19 20 21 16 17 18 12 5 2 3 11 4</row>
+        <row>10 13 21 26 0 22 5 14 7 27 16 25 23 6 3 9 20 19 24 15 18 17 11 8 4 1 12 2</row>
+        <row>11 24 26 21 25 16 20 19 15 23 22 0 27 18 17 8 5 14 13 7 6 3 10 9 1 4 2 12</row>
+        <row>12 21 25 24 26 15 19 20 16 22 23 27 0 17 18 5 8 13 14 6 7 1 9 10 3 2 4 11</row>
+        <row>13 10 8 15 6 24 4 27 2 14 1 20 17 0 9 3 25 12 22 26 11 23 18 21 5 16 19 7</row>
+        <row>14 9 5 16 7 21 2 0 4 13 3 19 18 27 10 1 26 11 23 25 12 22 17 24 8 15 20 6</row>
+        <row>15 7 18 11 9 12 23 1 13 4 19 3 5 8 25 0 17 16 2 10 21 20 26 6 27 14 22 24</row>
+        <row>16 6 17 12 10 11 22 3 14 2 20 1 8 5 26 27 18 15 4 9 24 19 25 7 0 13 23 21</row>
+        <row>17 23 16 5 19 3 26 11 25 18 21 7 13 12 22 24 2 0 9 4 27 10 14 1 15 8 6 20</row>
+        <row>18 22 15 8 20 1 25 12 26 17 24 6 14 11 23 21 4 27 10 2 0 9 13 3 16 5 7 19</row>
+        <row>19 8 20 22 15 26 12 25 1 24 17 14 6 23 11 4 21 10 27 0 2 16 3 13 9 7 5 18</row>
+        <row>20 5 19 23 16 25 11 26 3 21 18 13 7 22 12 2 24 9 0 27 4 15 1 14 10 6 8 17</row>
+        <row>21 12 10 6 17 14 3 22 11 20 2 8 1 26 5 18 27 4 15 24 9 0 7 25 19 23 13 16</row>
+        <row>22 18 3 2 11 10 16 17 19 12 5 4 9 20 21 23 6 7 1 8 13 14 0 15 25 24 27 26</row>
+        <row>23 17 1 4 12 9 15 18 20 11 8 2 10 19 24 22 7 6 3 5 14 13 27 16 26 21 0 25</row>
+        <row>24 11 9 7 18 13 1 23 12 19 4 5 3 25 8 17 0 2 16 21 10 27 6 26 20 22 14 15</row>
+        <row>25 4 12 17 1 20 18 15 9 8 11 10 2 24 19 7 22 3 6 14 5 26 16 27 13 0 21 23</row>
+        <row>26 2 11 18 3 19 17 16 10 5 12 9 4 21 20 6 23 1 7 13 8 25 15 0 14 27 24 22</row>
+        <row>27 3 4 1 2 8 7 6 5 10 9 12 11 14 13 16 15 18 17 20 19 24 23 22 21 26 25 0</row>
+    </multtable>
+    <representation>
+        <element text="1"><mrow><mi>1</mi></mrow></element>
+        <element text="abc^5"><mrow><mi>a</mi><mi>b</mi><msup><mi>c</mi><mn>5</mn></msup></mrow></element>
+        <element text="ac^6"><mrow><mi>a</mi><msup><mi>c</mi><mn>6</mn></msup></mrow></element>
+        <element text="bc^5"><mrow><mi>b</mi><msup><mi>c</mi><mn>5</mn></msup></mrow></element>
+        <element text="c^6"><mrow><msup><mi>c</mi><mn>6</mn></msup></mrow></element>
+        <element text="abc^2"><mrow><mi>a</mi><mi>b</mi><msup><mi>c</mi><mn>2</mn></msup></mrow></element>
+        <element text="abc^3"><mrow><mi>a</mi><mi>b</mi><msup><mi>c</mi><mn>3</mn></msup></mrow></element>
+        <element text="bc^3"><mrow><mi>b</mi><msup><mi>c</mi><mn>3</mn></msup></mrow></element>
+        <element text="bc^2"><mrow><mi>b</mi><msup><mi>c</mi><mn>2</mn></msup></mrow></element>
+        <element text="ac"><mrow><mi>a</mi><mi>c</mi></mrow></element>
+        <element text="c"><mrow><mi>c</mi></mrow></element>
+        <element text="ab"><mrow><mi>a</mi><mi>b</mi></mrow></element>
+        <element text="b"><mrow><mi>b</mi></mrow></element>
+        <element text="abc^4"><mrow><mi>a</mi><mi>b</mi><msup><mi>c</mi><mn>4</mn></msup></mrow></element>
+        <element text="bc^4"><mrow><mi>b</mi><msup><mi>c</mi><mn>4</mn></msup></mrow></element>
+        <element text="ac^2"><mrow><mi>a</mi><msup><mi>c</mi><mn>2</mn></msup></mrow></element>
+        <element text="c^2"><mrow><msup><mi>c</mi><mn>2</mn></msup></mrow></element>
+        <element text="ac^4"><mrow><mi>a</mi><msup><mi>c</mi><mn>4</mn></msup></mrow></element>
+        <element text="c^4"><mrow><msup><mi>c</mi><mn>4</mn></msup></mrow></element>
+        <element text="ac^3"><mrow><mi>a</mi><msup><mi>c</mi><mn>3</mn></msup></mrow></element>
+        <element text="c^3"><mrow><msup><mi>c</mi><mn>3</mn></msup></mrow></element>
+        <element text="ac^5"><mrow><mi>a</mi><msup><mi>c</mi><mn>5</mn></msup></mrow></element>
+        <element text="abc"><mrow><mi>a</mi><mi>b</mi><mi>c</mi></mrow></element>
+        <element text="bc"><mrow><mi>b</mi><mi>c</mi></mrow></element>
+        <element text="c^5"><mrow><msup><mi>c</mi><mn>5</mn></msup></mrow></element>
+        <element text="abc^6"><mrow><mi>a</mi><mi>b</mi><msup><mi>c</mi><mn>6</mn></msup></mrow></element>
+        <element text="bc^6"><mrow><mi>b</mi><msup><mi>c</mi><mn>6</mn></msup></mrow></element>
+        <element text="a"><mrow><mi>a</mi></mrow></element>
+    </representation>
+</group>

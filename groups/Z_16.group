@@ -1,0 +1,441 @@
+<!DOCTYPE groupexplorerml>
+<group>
+    <name text="Z_16"><mrow><msub><mi>&Zopf;</mi><mn>16</mn></msub></mrow></name>
+    <definition text="&amp;lt; &lt;i&gt;a&lt;/i&gt; | &lt;i&gt;a&lt;/i&gt;&lt;sup&gt;16&lt;/sup&gt;=1 &amp;gt;">
+        <mfenced open="&lt;" close="&gt;" separators=":">
+            <mrow><mi>a</mi></mrow>
+            <mrow><msup><mi>a</mi><mn>16</mn></msup><mo>=</mo><mn>1</mn></mrow>
+        </mfenced>
+    </definition>
+    <phrase>Cyclic group of order 16</phrase>
+    <author>Nathan Carter (ncarter@bentley.edu)</author>
+    <multtable>
+        <row> 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 </row>
+        <row> 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 0 </row>
+        <row> 2 3 4 5 6 7 8 9 10 11 12 13 14 15 0 1 </row>
+        <row> 3 4 5 6 7 8 9 10 11 12 13 14 15 0 1 2 </row>
+        <row> 4 5 6 7 8 9 10 11 12 13 14 15 0 1 2 3 </row>
+        <row> 5 6 7 8 9 10 11 12 13 14 15 0 1 2 3 4 </row>
+        <row> 6 7 8 9 10 11 12 13 14 15 0 1 2 3 4 5 </row>
+        <row> 7 8 9 10 11 12 13 14 15 0 1 2 3 4 5 6 </row>
+        <row> 8 9 10 11 12 13 14 15 0 1 2 3 4 5 6 7 </row>
+        <row> 9 10 11 12 13 14 15 0 1 2 3 4 5 6 7 8 </row>
+        <row> 10 11 12 13 14 15 0 1 2 3 4 5 6 7 8 9 </row>
+        <row> 11 12 13 14 15 0 1 2 3 4 5 6 7 8 9 10 </row>
+        <row> 12 13 14 15 0 1 2 3 4 5 6 7 8 9 10 11 </row>
+        <row> 13 14 15 0 1 2 3 4 5 6 7 8 9 10 11 12 </row>
+        <row> 14 15 0 1 2 3 4 5 6 7 8 9 10 11 12 13 </row>
+        <row> 15 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 </row>
+    </multtable>
+    <generators list="1"/>
+    <representation>
+        <element text="e"><mi>e</mi></element>
+        <element text="a"><mi>a</mi></element>
+        <element text="a^2"><msup><mi>a</mi><mn>2</mn></msup></element>
+        <element text="a^3"><msup><mi>a</mi><mn>3</mn></msup></element>
+        <element text="a^4"><msup><mi>a</mi><mn>4</mn></msup></element>
+        <element text="a^5"><msup><mi>a</mi><mn>5</mn></msup></element>
+        <element text="a^6"><msup><mi>a</mi><mn>6</mn></msup></element>
+        <element text="a^7"><msup><mi>a</mi><mn>7</mn></msup></element>
+        <element text="a^8"><msup><mi>a</mi><mn>8</mn></msup></element>
+        <element text="a^9"><msup><mi>a</mi><mn>9</mn></msup></element>
+        <element text="a^{10}"><msup><mi>a</mi><mn>10</mn></msup></element>
+        <element text="a^{11}"><msup><mi>a</mi><mn>11</mn></msup></element>
+        <element text="a^{12}"><msup><mi>a</mi><mn>12</mn></msup></element>
+        <element text="a^{13}"><msup><mi>a</mi><mn>13</mn></msup></element>
+        <element text="a^{14}"><msup><mi>a</mi><mn>14</mn></msup></element>
+        <element text="a^{15}"><msup><mi>a</mi><mn>15</mn></msup></element>
+    </representation>
+    <representation>
+        <element text="()"><mrow><mo>(</mo><mo>)</mo></mrow></element>
+        <element text="(0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn><mspace width="1em"/><mn>2</mn><mspace width="1em"/><mn>3</mn><mspace width="1em"/><mn>4</mn><mspace width="1em"/><mn>5</mn><mspace width="1em"/><mn>6</mn><mspace width="1em"/><mn>7</mn><mspace width="1em"/><mn>8</mn><mspace width="1em"/><mn>9</mn><mspace width="1em"/><mn>10</mn><mspace width="1em"/><mn>11</mn><mspace width="1em"/><mn>12</mn><mspace width="1em"/><mn>13</mn><mspace width="1em"/><mn>14</mn><mspace width="1em"/><mn>15</mn></mrow><mo>)</mo></mrow></element>
+        <element text="(0 2 4 6 8 10 12 14)(1 3 5 7 9 11 13 15)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>2</mn><mspace width="1em"/><mn>4</mn><mspace width="1em"/><mn>6</mn><mspace width="1em"/><mn>8</mn><mspace width="1em"/><mn>10</mn><mspace width="1em"/><mn>12</mn><mspace width="1em"/><mn>14</mn></mrow><mo>)</mo><mo>(</mo><mrow><mn>1</mn><mspace width="1em"/><mn>3</mn><mspace width="1em"/><mn>5</mn><mspace width="1em"/><mn>7</mn><mspace width="1em"/><mn>9</mn><mspace width="1em"/><mn>11</mn><mspace width="1em"/><mn>13</mn><mspace width="1em"/><mn>15</mn></mrow><mo>)</mo></mrow></element>
+        <element text="(0 3 6 9 12 15 2 5 8 11 14 1 4 7 10 13)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>3</mn><mspace width="1em"/><mn>6</mn><mspace width="1em"/><mn>9</mn><mspace width="1em"/><mn>12</mn><mspace width="1em"/><mn>15</mn><mspace width="1em"/><mn>2</mn><mspace width="1em"/><mn>5</mn><mspace width="1em"/><mn>8</mn><mspace width="1em"/><mn>11</mn><mspace width="1em"/><mn>14</mn><mspace width="1em"/><mn>1</mn><mspace width="1em"/><mn>4</mn><mspace width="1em"/><mn>7</mn><mspace width="1em"/><mn>10</mn><mspace width="1em"/><mn>13</mn></mrow><mo>)</mo></mrow></element>
+        <element text="(0 4 8 12)(1 5 9 13)(2 6 10 14)(3 7 11 15)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>4</mn><mspace width="1em"/><mn>8</mn><mspace width="1em"/><mn>12</mn></mrow><mo>)</mo><mo>(</mo><mrow><mn>1</mn><mspace width="1em"/><mn>5</mn><mspace width="1em"/><mn>9</mn><mspace width="1em"/><mn>13</mn></mrow><mo>)</mo><mo>(</mo><mrow><mn>2</mn><mspace width="1em"/><mn>6</mn><mspace width="1em"/><mn>10</mn><mspace width="1em"/><mn>14</mn></mrow><mo>)</mo><mo>(</mo><mrow><mn>3</mn><mspace width="1em"/><mn>7</mn><mspace width="1em"/><mn>11</mn><mspace width="1em"/><mn>15</mn></mrow><mo>)</mo></mrow></element>
+        <element text="(0 5 10 15 4 9 14 3 8 13 2 7 12 1 6 11)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>5</mn><mspace width="1em"/><mn>10</mn><mspace width="1em"/><mn>15</mn><mspace width="1em"/><mn>4</mn><mspace width="1em"/><mn>9</mn><mspace width="1em"/><mn>14</mn><mspace width="1em"/><mn>3</mn><mspace width="1em"/><mn>8</mn><mspace width="1em"/><mn>13</mn><mspace width="1em"/><mn>2</mn><mspace width="1em"/><mn>7</mn><mspace width="1em"/><mn>12</mn><mspace width="1em"/><mn>1</mn><mspace width="1em"/><mn>6</mn><mspace width="1em"/><mn>11</mn></mrow><mo>)</mo></mrow></element>
+        <element text="(0 6 12 2 8 14 4 10)(1 7 13 3 9 15 5 11)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>6</mn><mspace width="1em"/><mn>12</mn><mspace width="1em"/><mn>2</mn><mspace width="1em"/><mn>8</mn><mspace width="1em"/><mn>14</mn><mspace width="1em"/><mn>4</mn><mspace width="1em"/><mn>10</mn></mrow><mo>)</mo><mo>(</mo><mrow><mn>1</mn><mspace width="1em"/><mn>7</mn><mspace width="1em"/><mn>13</mn><mspace width="1em"/><mn>3</mn><mspace width="1em"/><mn>9</mn><mspace width="1em"/><mn>15</mn><mspace width="1em"/><mn>5</mn><mspace width="1em"/><mn>11</mn></mrow><mo>)</mo></mrow></element>
+        <element text="(0 7 14 5 12 3 10 1 8 15 6 13 4 11 2 9)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>7</mn><mspace width="1em"/><mn>14</mn><mspace width="1em"/><mn>5</mn><mspace width="1em"/><mn>12</mn><mspace width="1em"/><mn>3</mn><mspace width="1em"/><mn>10</mn><mspace width="1em"/><mn>1</mn><mspace width="1em"/><mn>8</mn><mspace width="1em"/><mn>15</mn><mspace width="1em"/><mn>6</mn><mspace width="1em"/><mn>13</mn><mspace width="1em"/><mn>4</mn><mspace width="1em"/><mn>11</mn><mspace width="1em"/><mn>2</mn><mspace width="1em"/><mn>9</mn></mrow><mo>)</mo></mrow></element>
+        <element text="(0 8)(1 9)(2 10)(3 11)(4 12)(5 13)(6 14)(7 15)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>8</mn></mrow><mo>)</mo><mo>(</mo><mrow><mn>1</mn><mspace width="1em"/><mn>9</mn></mrow><mo>)</mo><mo>(</mo><mrow><mn>2</mn><mspace width="1em"/><mn>10</mn></mrow><mo>)</mo><mo>(</mo><mrow><mn>3</mn><mspace width="1em"/><mn>11</mn></mrow><mo>)</mo><mo>(</mo><mrow><mn>4</mn><mspace width="1em"/><mn>12</mn></mrow><mo>)</mo><mo>(</mo><mrow><mn>5</mn><mspace width="1em"/><mn>13</mn></mrow><mo>)</mo><mo>(</mo><mrow><mn>6</mn><mspace width="1em"/><mn>14</mn></mrow><mo>)</mo><mo>(</mo><mrow><mn>7</mn><mspace width="1em"/><mn>15</mn></mrow><mo>)</mo></mrow></element>
+        <element text="(0 9 2 11 4 13 6 15 8 1 10 3 12 5 14 7)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>9</mn><mspace width="1em"/><mn>2</mn><mspace width="1em"/><mn>11</mn><mspace width="1em"/><mn>4</mn><mspace width="1em"/><mn>13</mn><mspace width="1em"/><mn>6</mn><mspace width="1em"/><mn>15</mn><mspace width="1em"/><mn>8</mn><mspace width="1em"/><mn>1</mn><mspace width="1em"/><mn>10</mn><mspace width="1em"/><mn>3</mn><mspace width="1em"/><mn>12</mn><mspace width="1em"/><mn>5</mn><mspace width="1em"/><mn>14</mn><mspace width="1em"/><mn>7</mn></mrow><mo>)</mo></mrow></element>
+        <element text="(0 10 4 14 8 2 12 6)(1 11 5 15 9 3 13 7)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>10</mn><mspace width="1em"/><mn>4</mn><mspace width="1em"/><mn>14</mn><mspace width="1em"/><mn>8</mn><mspace width="1em"/><mn>2</mn><mspace width="1em"/><mn>12</mn><mspace width="1em"/><mn>6</mn></mrow><mo>)</mo><mo>(</mo><mrow><mn>1</mn><mspace width="1em"/><mn>11</mn><mspace width="1em"/><mn>5</mn><mspace width="1em"/><mn>15</mn><mspace width="1em"/><mn>9</mn><mspace width="1em"/><mn>3</mn><mspace width="1em"/><mn>13</mn><mspace width="1em"/><mn>7</mn></mrow><mo>)</mo></mrow></element>
+        <element text="(0 11 6 1 12 7 2 13 8 3 14 9 4 15 10 5)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>11</mn><mspace width="1em"/><mn>6</mn><mspace width="1em"/><mn>1</mn><mspace width="1em"/><mn>12</mn><mspace width="1em"/><mn>7</mn><mspace width="1em"/><mn>2</mn><mspace width="1em"/><mn>13</mn><mspace width="1em"/><mn>8</mn><mspace width="1em"/><mn>3</mn><mspace width="1em"/><mn>14</mn><mspace width="1em"/><mn>9</mn><mspace width="1em"/><mn>4</mn><mspace width="1em"/><mn>15</mn><mspace width="1em"/><mn>10</mn><mspace width="1em"/><mn>5</mn></mrow><mo>)</mo></mrow></element>
+        <element text="(0 12 8 4)(1 13 9 5)(2 14 10 6)(3 15 11 7)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>12</mn><mspace width="1em"/><mn>8</mn><mspace width="1em"/><mn>4</mn></mrow><mo>)</mo><mo>(</mo><mrow><mn>1</mn><mspace width="1em"/><mn>13</mn><mspace width="1em"/><mn>9</mn><mspace width="1em"/><mn>5</mn></mrow><mo>)</mo><mo>(</mo><mrow><mn>2</mn><mspace width="1em"/><mn>14</mn><mspace width="1em"/><mn>10</mn><mspace width="1em"/><mn>6</mn></mrow><mo>)</mo><mo>(</mo><mrow><mn>3</mn><mspace width="1em"/><mn>15</mn><mspace width="1em"/><mn>11</mn><mspace width="1em"/><mn>7</mn></mrow><mo>)</mo></mrow></element>
+        <element text="(0 13 10 7 4 1 14 11 8 5 2 15 12 9 6 3)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>13</mn><mspace width="1em"/><mn>10</mn><mspace width="1em"/><mn>7</mn><mspace width="1em"/><mn>4</mn><mspace width="1em"/><mn>1</mn><mspace width="1em"/><mn>14</mn><mspace width="1em"/><mn>11</mn><mspace width="1em"/><mn>8</mn><mspace width="1em"/><mn>5</mn><mspace width="1em"/><mn>2</mn><mspace width="1em"/><mn>15</mn><mspace width="1em"/><mn>12</mn><mspace width="1em"/><mn>9</mn><mspace width="1em"/><mn>6</mn><mspace width="1em"/><mn>3</mn></mrow><mo>)</mo></mrow></element>
+        <element text="(0 14 12 10 8 6 4 2)(1 15 13 11 9 7 5 3)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>14</mn><mspace width="1em"/><mn>12</mn><mspace width="1em"/><mn>10</mn><mspace width="1em"/><mn>8</mn><mspace width="1em"/><mn>6</mn><mspace width="1em"/><mn>4</mn><mspace width="1em"/><mn>2</mn></mrow><mo>)</mo><mo>(</mo><mrow><mn>1</mn><mspace width="1em"/><mn>15</mn><mspace width="1em"/><mn>13</mn><mspace width="1em"/><mn>11</mn><mspace width="1em"/><mn>9</mn><mspace width="1em"/><mn>7</mn><mspace width="1em"/><mn>5</mn><mspace width="1em"/><mn>3</mn></mrow><mo>)</mo></mrow></element>
+        <element text="(0 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>15</mn><mspace width="1em"/><mn>14</mn><mspace width="1em"/><mn>13</mn><mspace width="1em"/><mn>12</mn><mspace width="1em"/><mn>11</mn><mspace width="1em"/><mn>10</mn><mspace width="1em"/><mn>9</mn><mspace width="1em"/><mn>8</mn><mspace width="1em"/><mn>7</mn><mspace width="1em"/><mn>6</mn><mspace width="1em"/><mn>5</mn><mspace width="1em"/><mn>4</mn><mspace width="1em"/><mn>3</mn><mspace width="1em"/><mn>2</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow></element>
+    </representation>
+    <symmetryobject name="Propeller with 16 blades: front view">
+        <operation element="1" degrees="22.5"><point x="0.0" y="1.0" z="0.0"/></operation>
+        <sphere radius="0.1" color="#FF0000"><point x="0.0" y="-1.0" z="0.0"/></sphere>
+        <sphere radius="0.1" color="#FF005C"><point x="0.0" y="-0.92388" z="0.38268"/></sphere>
+        <sphere radius="0.1" color="#FF00B8"><point x="0.0" y="-0.70711" z="0.70711"/></sphere>
+        <sphere radius="0.1" color="#DC00FF"><point x="0.0" y="-0.38268" z="0.92388"/></sphere>
+        <sphere radius="0.1" color="#8000FF"><point x="0.0" y="0.0" z="1.0"/></sphere>
+        <sphere radius="0.1" color="#2300FF"><point x="0.0" y="0.38268" z="0.92388"/></sphere>
+        <sphere radius="0.1" color="#0038FF"><point x="0.0" y="0.70711" z="0.70711"/></sphere>
+        <sphere radius="0.1" color="#00A3FF"><point x="0.0" y="0.92388" z="0.38268"/></sphere>
+        <sphere radius="0.1" color="#00FFFF"><point x="0.0" y="1.0" z="0.0"/></sphere>
+        <sphere radius="0.1" color="#00FFA3"><point x="0.0" y="0.92388" z="-0.38268"/></sphere>
+        <sphere radius="0.1" color="#00FF47"><point x="0.0" y="0.70711" z="-0.70711"/></sphere>
+        <sphere radius="0.1" color="#23FF00"><point x="0.0" y="0.38268" z="-0.92388"/></sphere>
+        <sphere radius="0.1" color="#7FFF00"><point x="0.0" y="0.0" z="-1.0"/></sphere>
+        <sphere radius="0.1" color="#DCFF00"><point x="0.0" y="-0.38268" z="-0.92388"/></sphere>
+        <sphere radius="0.1" color="#FFC700"><point x="0.0" y="-0.70711" z="-0.70711"/></sphere>
+        <sphere radius="0.1" color="#FF5C00"><point x="0.0" y="-0.92388" z="-0.38268"/></sphere>
+        <path color="#000000">
+            <point x="0.0" y="-0.92388" z="0.38268"/>
+            <point x="0.0" y="-0.84399" z="0.28521"/>
+            <point x="0.0" y="-0.76135" z="0.19436"/>
+            <point x="0.0" y="-0.67356" z="0.11597"/>
+            <point x="0.0" y="-0.57881" z="0.05437"/>
+            <point x="0.0" y="-0.47616" z="0.01185"/>
+            <point x="0.0" y="-0.3656" z="-0.01159"/>
+            <point x="0.0" y="-0.24809" z="-0.01824"/>
+            <point x="0.0" y="-0.12542" z="-0.01243"/>
+            <point x="0.0" y="0.0" z="0.0"/>
+            <point x="0.0" y="-0.11111" z="-0.05948"/>
+            <point x="0.0" y="-0.22222" z="-0.11179"/>
+            <point x="0.0" y="-0.33333" z="-0.15061"/>
+            <point x="0.0" y="-0.44444" z="-0.17127"/>
+            <point x="0.0" y="-0.55556" z="-0.17127"/>
+            <point x="0.0" y="-0.66667" z="-0.15061"/>
+            <point x="0.0" y="-0.77778" z="-0.11179"/>
+            <point x="0.0" y="-0.88889" z="-0.05948"/>
+            <point x="0.0" y="-1.0" z="0.0"/>
+        </path>
+        <path color="#000000">
+            <point x="0.0" y="-0.38268" z="0.92388"/>
+            <point x="0.0" y="-0.39512" z="0.79846"/>
+            <point x="0.0" y="-0.40092" z="0.67579"/>
+            <point x="0.0" y="-0.39427" z="0.55828"/>
+            <point x="0.0" y="-0.37084" z="0.44772"/>
+            <point x="0.0" y="-0.32832" z="0.34507"/>
+            <point x="0.0" y="-0.26671" z="0.25032"/>
+            <point x="0.0" y="-0.18832" z="0.16253"/>
+            <point x="0.0" y="-0.09747" z="0.07989"/>
+            <point x="0.0" y="0.0" z="0.0"/>
+            <point x="0.0" y="-0.12063" z="0.03651"/>
+            <point x="0.0" y="-0.23618" z="0.07809"/>
+            <point x="0.0" y="-0.3422" z="0.1292"/>
+            <point x="0.0" y="-0.43538" z="0.19316"/>
+            <point x="0.0" y="-0.51394" z="0.27173"/>
+            <point x="0.0" y="-0.5779" z="0.3649"/>
+            <point x="0.0" y="-0.62902" z="0.47093"/>
+            <point x="0.0" y="-0.6706" z="0.58648"/>
+            <point x="0.0" y="-0.70711" z="0.70711"/>
+        </path>
+        <path color="#000000">
+            <point x="0.0" y="0.38268" z="0.92388"/>
+            <point x="0.0" y="0.28521" z="0.84399"/>
+            <point x="0.0" y="0.19436" z="0.76135"/>
+            <point x="0.0" y="0.11597" z="0.67356"/>
+            <point x="0.0" y="0.05437" z="0.57881"/>
+            <point x="0.0" y="0.01185" z="0.47616"/>
+            <point x="0.0" y="-0.01159" z="0.3656"/>
+            <point x="0.0" y="-0.01824" z="0.24809"/>
+            <point x="0.0" y="-0.01243" z="0.12542"/>
+            <point x="0.0" y="0.0" z="0.0"/>
+            <point x="0.0" y="-0.05948" z="0.11111"/>
+            <point x="0.0" y="-0.11179" z="0.22222"/>
+            <point x="0.0" y="-0.15061" z="0.33333"/>
+            <point x="0.0" y="-0.17127" z="0.44444"/>
+            <point x="0.0" y="-0.17127" z="0.55556"/>
+            <point x="0.0" y="-0.15061" z="0.66667"/>
+            <point x="0.0" y="-0.11179" z="0.77778"/>
+            <point x="0.0" y="-0.05948" z="0.88889"/>
+            <point x="0.0" y="0.0" z="1.0"/>
+        </path>
+        <path color="#000000">
+            <point x="0.0" y="0.92388" z="0.38268"/>
+            <point x="0.0" y="0.79846" z="0.39512"/>
+            <point x="0.0" y="0.67579" z="0.40092"/>
+            <point x="0.0" y="0.55828" z="0.39427"/>
+            <point x="0.0" y="0.44772" z="0.37084"/>
+            <point x="0.0" y="0.34507" z="0.32832"/>
+            <point x="0.0" y="0.25032" z="0.26671"/>
+            <point x="0.0" y="0.16253" z="0.18832"/>
+            <point x="0.0" y="0.07989" z="0.09747"/>
+            <point x="0.0" y="0.0" z="0.0"/>
+            <point x="0.0" y="0.03651" z="0.12063"/>
+            <point x="0.0" y="0.07809" z="0.23618"/>
+            <point x="0.0" y="0.1292" z="0.3422"/>
+            <point x="0.0" y="0.19316" z="0.43538"/>
+            <point x="0.0" y="0.27173" z="0.51394"/>
+            <point x="0.0" y="0.3649" z="0.5779"/>
+            <point x="0.0" y="0.47093" z="0.62902"/>
+            <point x="0.0" y="0.58648" z="0.6706"/>
+            <point x="0.0" y="0.70711" z="0.70711"/>
+        </path>
+        <path color="#000000">
+            <point x="0.0" y="0.92388" z="-0.38268"/>
+            <point x="0.0" y="0.84399" z="-0.28521"/>
+            <point x="0.0" y="0.76135" z="-0.19436"/>
+            <point x="0.0" y="0.67356" z="-0.11597"/>
+            <point x="0.0" y="0.57881" z="-0.05437"/>
+            <point x="0.0" y="0.47616" z="-0.01185"/>
+            <point x="0.0" y="0.3656" z="0.01159"/>
+            <point x="0.0" y="0.24809" z="0.01824"/>
+            <point x="0.0" y="0.12542" z="0.01243"/>
+            <point x="0.0" y="0.0" z="0.0"/>
+            <point x="0.0" y="0.11111" z="0.05948"/>
+            <point x="0.0" y="0.22222" z="0.11179"/>
+            <point x="0.0" y="0.33333" z="0.15061"/>
+            <point x="0.0" y="0.44444" z="0.17127"/>
+            <point x="0.0" y="0.55556" z="0.17127"/>
+            <point x="0.0" y="0.66667" z="0.15061"/>
+            <point x="0.0" y="0.77778" z="0.11179"/>
+            <point x="0.0" y="0.88889" z="0.05948"/>
+            <point x="0.0" y="1.0" z="0.0"/>
+        </path>
+        <path color="#000000">
+            <point x="0.0" y="0.38268" z="-0.92388"/>
+            <point x="0.0" y="0.39512" z="-0.79846"/>
+            <point x="0.0" y="0.40092" z="-0.67579"/>
+            <point x="0.0" y="0.39427" z="-0.55828"/>
+            <point x="0.0" y="0.37084" z="-0.44772"/>
+            <point x="0.0" y="0.32832" z="-0.34507"/>
+            <point x="0.0" y="0.26671" z="-0.25032"/>
+            <point x="0.0" y="0.18832" z="-0.16253"/>
+            <point x="0.0" y="0.09747" z="-0.07989"/>
+            <point x="0.0" y="0.0" z="0.0"/>
+            <point x="0.0" y="0.12063" z="-0.03651"/>
+            <point x="0.0" y="0.23618" z="-0.07809"/>
+            <point x="0.0" y="0.3422" z="-0.1292"/>
+            <point x="0.0" y="0.43538" z="-0.19316"/>
+            <point x="0.0" y="0.51394" z="-0.27173"/>
+            <point x="0.0" y="0.5779" z="-0.3649"/>
+            <point x="0.0" y="0.62902" z="-0.47093"/>
+            <point x="0.0" y="0.6706" z="-0.58648"/>
+            <point x="0.0" y="0.70711" z="-0.70711"/>
+        </path>
+        <path color="#000000">
+            <point x="0.0" y="-0.38268" z="-0.92388"/>
+            <point x="0.0" y="-0.28521" z="-0.84399"/>
+            <point x="0.0" y="-0.19436" z="-0.76135"/>
+            <point x="0.0" y="-0.11597" z="-0.67356"/>
+            <point x="0.0" y="-0.05437" z="-0.57881"/>
+            <point x="0.0" y="-0.01185" z="-0.47616"/>
+            <point x="0.0" y="0.01159" z="-0.3656"/>
+            <point x="0.0" y="0.01824" z="-0.24809"/>
+            <point x="0.0" y="0.01243" z="-0.12542"/>
+            <point x="0.0" y="0.0" z="0.0"/>
+            <point x="0.0" y="0.05948" z="-0.11111"/>
+            <point x="0.0" y="0.11179" z="-0.22222"/>
+            <point x="0.0" y="0.15061" z="-0.33333"/>
+            <point x="0.0" y="0.17127" z="-0.44444"/>
+            <point x="0.0" y="0.17127" z="-0.55556"/>
+            <point x="0.0" y="0.15061" z="-0.66667"/>
+            <point x="0.0" y="0.11179" z="-0.77778"/>
+            <point x="0.0" y="0.05948" z="-0.88889"/>
+            <point x="0.0" y="0.0" z="-1.0"/>
+        </path>
+        <path color="#000000">
+            <point x="0.0" y="-0.92388" z="-0.38268"/>
+            <point x="0.0" y="-0.79846" z="-0.39512"/>
+            <point x="0.0" y="-0.67579" z="-0.40092"/>
+            <point x="0.0" y="-0.55828" z="-0.39427"/>
+            <point x="0.0" y="-0.44772" z="-0.37084"/>
+            <point x="0.0" y="-0.34507" z="-0.32832"/>
+            <point x="0.0" y="-0.25032" z="-0.26671"/>
+            <point x="0.0" y="-0.16253" z="-0.18832"/>
+            <point x="0.0" y="-0.07989" z="-0.09747"/>
+            <point x="0.0" y="0.0" z="0.0"/>
+            <point x="0.0" y="-0.03651" z="-0.12063"/>
+            <point x="0.0" y="-0.07809" z="-0.23618"/>
+            <point x="0.0" y="-0.1292" z="-0.3422"/>
+            <point x="0.0" y="-0.19316" z="-0.43538"/>
+            <point x="0.0" y="-0.27173" z="-0.51394"/>
+            <point x="0.0" y="-0.3649" z="-0.5779"/>
+            <point x="0.0" y="-0.47093" z="-0.62902"/>
+            <point x="0.0" y="-0.58648" z="-0.6706"/>
+            <point x="0.0" y="-0.70711" z="-0.70711"/>
+        </path>
+    </symmetryobject>
+    <symmetryobject name="Propeller with 16 blades: above view">
+        <operation element="1" degrees="22.5"><point x="0.0" y="1.0" z="0.0"/></operation>
+        <sphere radius="0.1" color="#FF0000"><point x="1.0" y="-0.75" z="0.0"/></sphere>
+        <sphere radius="0.1" color="#FF005C"><point x="0.92388" y="-0.75" z="0.38268"/></sphere>
+        <sphere radius="0.1" color="#FF00B8"><point x="0.70711" y="-0.75" z="0.70711"/></sphere>
+        <sphere radius="0.1" color="#DC00FF"><point x="0.38268" y="-0.75" z="0.92388"/></sphere>
+        <sphere radius="0.1" color="#8000FF"><point x="0.0" y="-0.75" z="1.0"/></sphere>
+        <sphere radius="0.1" color="#2300FF"><point x="-0.38268" y="-0.75" z="0.92388"/></sphere>
+        <sphere radius="0.1" color="#0038FF"><point x="-0.70711" y="-0.75" z="0.70711"/></sphere>
+        <sphere radius="0.1" color="#00A3FF"><point x="-0.92388" y="-0.75" z="0.38268"/></sphere>
+        <sphere radius="0.1" color="#00FFFF"><point x="-1.0" y="-0.75" z="0.0"/></sphere>
+        <sphere radius="0.1" color="#00FFA3"><point x="-0.92388" y="-0.75" z="-0.38268"/></sphere>
+        <sphere radius="0.1" color="#00FF47"><point x="-0.70711" y="-0.75" z="-0.70711"/></sphere>
+        <sphere radius="0.1" color="#23FF00"><point x="-0.38268" y="-0.75" z="-0.92388"/></sphere>
+        <sphere radius="0.1" color="#7FFF00"><point x="0.0" y="-0.75" z="-1.0"/></sphere>
+        <sphere radius="0.1" color="#DCFF00"><point x="0.38268" y="-0.75" z="-0.92388"/></sphere>
+        <sphere radius="0.1" color="#FFC700"><point x="0.70711" y="-0.75" z="-0.70711"/></sphere>
+        <sphere radius="0.1" color="#FF5C00"><point x="0.92388" y="-0.75" z="-0.38268"/></sphere>
+        <path color="#000000">
+            <point x="0.92388" y="-0.75" z="0.38268"/>
+            <point x="0.84399" y="-0.75" z="0.28521"/>
+            <point x="0.76135" y="-0.75" z="0.19436"/>
+            <point x="0.67356" y="-0.75" z="0.11597"/>
+            <point x="0.57881" y="-0.75" z="0.05437"/>
+            <point x="0.47616" y="-0.75" z="0.01185"/>
+            <point x="0.3656" y="-0.75" z="-0.01159"/>
+            <point x="0.24809" y="-0.75" z="-0.01824"/>
+            <point x="0.12542" y="-0.75" z="-0.01243"/>
+            <point x="0.0" y="-0.75" z="0.0"/>
+            <point x="0.11111" y="-0.75" z="-0.05948"/>
+            <point x="0.22222" y="-0.75" z="-0.11179"/>
+            <point x="0.33333" y="-0.75" z="-0.15061"/>
+            <point x="0.44444" y="-0.75" z="-0.17127"/>
+            <point x="0.55556" y="-0.75" z="-0.17127"/>
+            <point x="0.66667" y="-0.75" z="-0.15061"/>
+            <point x="0.77778" y="-0.75" z="-0.11179"/>
+            <point x="0.88889" y="-0.75" z="-0.05948"/>
+            <point x="1.0" y="-0.75" z="0.0"/>
+        </path>
+        <path color="#000000">
+            <point x="0.38268" y="-0.75" z="0.92388"/>
+            <point x="0.39512" y="-0.75" z="0.79846"/>
+            <point x="0.40092" y="-0.75" z="0.67579"/>
+            <point x="0.39427" y="-0.75" z="0.55828"/>
+            <point x="0.37084" y="-0.75" z="0.44772"/>
+            <point x="0.32832" y="-0.75" z="0.34507"/>
+            <point x="0.26671" y="-0.75" z="0.25032"/>
+            <point x="0.18832" y="-0.75" z="0.16253"/>
+            <point x="0.09747" y="-0.75" z="0.07989"/>
+            <point x="0.0" y="-0.75" z="0.0"/>
+            <point x="0.12063" y="-0.75" z="0.03651"/>
+            <point x="0.23618" y="-0.75" z="0.07809"/>
+            <point x="0.3422" y="-0.75" z="0.1292"/>
+            <point x="0.43538" y="-0.75" z="0.19316"/>
+            <point x="0.51394" y="-0.75" z="0.27173"/>
+            <point x="0.5779" y="-0.75" z="0.3649"/>
+            <point x="0.62902" y="-0.75" z="0.47093"/>
+            <point x="0.6706" y="-0.75" z="0.58648"/>
+            <point x="0.70711" y="-0.75" z="0.70711"/>
+        </path>
+        <path color="#000000">
+            <point x="-0.38268" y="-0.75" z="0.92388"/>
+            <point x="-0.28521" y="-0.75" z="0.84399"/>
+            <point x="-0.19436" y="-0.75" z="0.76135"/>
+            <point x="-0.11597" y="-0.75" z="0.67356"/>
+            <point x="-0.05437" y="-0.75" z="0.57881"/>
+            <point x="-0.01185" y="-0.75" z="0.47616"/>
+            <point x="0.01159" y="-0.75" z="0.3656"/>
+            <point x="0.01824" y="-0.75" z="0.24809"/>
+            <point x="0.01243" y="-0.75" z="0.12542"/>
+            <point x="0.0" y="-0.75" z="0.0"/>
+            <point x="0.05948" y="-0.75" z="0.11111"/>
+            <point x="0.11179" y="-0.75" z="0.22222"/>
+            <point x="0.15061" y="-0.75" z="0.33333"/>
+            <point x="0.17127" y="-0.75" z="0.44444"/>
+            <point x="0.17127" y="-0.75" z="0.55556"/>
+            <point x="0.15061" y="-0.75" z="0.66667"/>
+            <point x="0.11179" y="-0.75" z="0.77778"/>
+            <point x="0.05948" y="-0.75" z="0.88889"/>
+            <point x="0.0" y="-0.75" z="1.0"/>
+        </path>
+        <path color="#000000">
+            <point x="-0.92388" y="-0.75" z="0.38268"/>
+            <point x="-0.79846" y="-0.75" z="0.39512"/>
+            <point x="-0.67579" y="-0.75" z="0.40092"/>
+            <point x="-0.55828" y="-0.75" z="0.39427"/>
+            <point x="-0.44772" y="-0.75" z="0.37084"/>
+            <point x="-0.34507" y="-0.75" z="0.32832"/>
+            <point x="-0.25032" y="-0.75" z="0.26671"/>
+            <point x="-0.16253" y="-0.75" z="0.18832"/>
+            <point x="-0.07989" y="-0.75" z="0.09747"/>
+            <point x="0.0" y="-0.75" z="0.0"/>
+            <point x="-0.03651" y="-0.75" z="0.12063"/>
+            <point x="-0.07809" y="-0.75" z="0.23618"/>
+            <point x="-0.1292" y="-0.75" z="0.3422"/>
+            <point x="-0.19316" y="-0.75" z="0.43538"/>
+            <point x="-0.27173" y="-0.75" z="0.51394"/>
+            <point x="-0.3649" y="-0.75" z="0.5779"/>
+            <point x="-0.47093" y="-0.75" z="0.62902"/>
+            <point x="-0.58648" y="-0.75" z="0.6706"/>
+            <point x="-0.70711" y="-0.75" z="0.70711"/>
+        </path>
+        <path color="#000000">
+            <point x="-0.92388" y="-0.75" z="-0.38268"/>
+            <point x="-0.84399" y="-0.75" z="-0.28521"/>
+            <point x="-0.76135" y="-0.75" z="-0.19436"/>
+            <point x="-0.67356" y="-0.75" z="-0.11597"/>
+            <point x="-0.57881" y="-0.75" z="-0.05437"/>
+            <point x="-0.47616" y="-0.75" z="-0.01185"/>
+            <point x="-0.3656" y="-0.75" z="0.01159"/>
+            <point x="-0.24809" y="-0.75" z="0.01824"/>
+            <point x="-0.12542" y="-0.75" z="0.01243"/>
+            <point x="0.0" y="-0.75" z="0.0"/>
+            <point x="-0.11111" y="-0.75" z="0.05948"/>
+            <point x="-0.22222" y="-0.75" z="0.11179"/>
+            <point x="-0.33333" y="-0.75" z="0.15061"/>
+            <point x="-0.44444" y="-0.75" z="0.17127"/>
+            <point x="-0.55556" y="-0.75" z="0.17127"/>
+            <point x="-0.66667" y="-0.75" z="0.15061"/>
+            <point x="-0.77778" y="-0.75" z="0.11179"/>
+            <point x="-0.88889" y="-0.75" z="0.05948"/>
+            <point x="-1.0" y="-0.75" z="0.0"/>
+        </path>
+        <path color="#000000">
+            <point x="-0.38268" y="-0.75" z="-0.92388"/>
+            <point x="-0.39512" y="-0.75" z="-0.79846"/>
+            <point x="-0.40092" y="-0.75" z="-0.67579"/>
+            <point x="-0.39427" y="-0.75" z="-0.55828"/>
+            <point x="-0.37084" y="-0.75" z="-0.44772"/>
+            <point x="-0.32832" y="-0.75" z="-0.34507"/>
+            <point x="-0.26671" y="-0.75" z="-0.25032"/>
+            <point x="-0.18832" y="-0.75" z="-0.16253"/>
+            <point x="-0.09747" y="-0.75" z="-0.07989"/>
+            <point x="0.0" y="-0.75" z="0.0"/>
+            <point x="-0.12063" y="-0.75" z="-0.03651"/>
+            <point x="-0.23618" y="-0.75" z="-0.07809"/>
+            <point x="-0.3422" y="-0.75" z="-0.1292"/>
+            <point x="-0.43538" y="-0.75" z="-0.19316"/>
+            <point x="-0.51394" y="-0.75" z="-0.27173"/>
+            <point x="-0.5779" y="-0.75" z="-0.3649"/>
+            <point x="-0.62902" y="-0.75" z="-0.47093"/>
+            <point x="-0.6706" y="-0.75" z="-0.58648"/>
+            <point x="-0.70711" y="-0.75" z="-0.70711"/>
+        </path>
+        <path color="#000000">
+            <point x="0.38268" y="-0.75" z="-0.92388"/>
+            <point x="0.28521" y="-0.75" z="-0.84399"/>
+            <point x="0.19436" y="-0.75" z="-0.76135"/>
+            <point x="0.11597" y="-0.75" z="-0.67356"/>
+            <point x="0.05437" y="-0.75" z="-0.57881"/>
+            <point x="0.01185" y="-0.75" z="-0.47616"/>
+            <point x="-0.01159" y="-0.75" z="-0.3656"/>
+            <point x="-0.01824" y="-0.75" z="-0.24809"/>
+            <point x="-0.01243" y="-0.75" z="-0.12542"/>
+            <point x="0.0" y="-0.75" z="0.0"/>
+            <point x="-0.05948" y="-0.75" z="-0.11111"/>
+            <point x="-0.11179" y="-0.75" z="-0.22222"/>
+            <point x="-0.15061" y="-0.75" z="-0.33333"/>
+            <point x="-0.17127" y="-0.75" z="-0.44444"/>
+            <point x="-0.17127" y="-0.75" z="-0.55556"/>
+            <point x="-0.15061" y="-0.75" z="-0.66667"/>
+            <point x="-0.11179" y="-0.75" z="-0.77778"/>
+            <point x="-0.05948" y="-0.75" z="-0.88889"/>
+            <point x="0.0" y="-0.75" z="-1.0"/>
+        </path>
+        <path color="#000000">
+            <point x="0.92388" y="-0.75" z="-0.38268"/>
+            <point x="0.79846" y="-0.75" z="-0.39512"/>
+            <point x="0.67579" y="-0.75" z="-0.40092"/>
+            <point x="0.55828" y="-0.75" z="-0.39427"/>
+            <point x="0.44772" y="-0.75" z="-0.37084"/>
+            <point x="0.34507" y="-0.75" z="-0.32832"/>
+            <point x="0.25032" y="-0.75" z="-0.26671"/>
+            <point x="0.16253" y="-0.75" z="-0.18832"/>
+            <point x="0.07989" y="-0.75" z="-0.09747"/>
+            <point x="0.0" y="-0.75" z="0.0"/>
+            <point x="0.03651" y="-0.75" z="-0.12063"/>
+            <point x="0.07809" y="-0.75" z="-0.23618"/>
+            <point x="0.1292" y="-0.75" z="-0.3422"/>
+            <point x="0.19316" y="-0.75" z="-0.43538"/>
+            <point x="0.27173" y="-0.75" z="-0.51394"/>
+            <point x="0.3649" y="-0.75" z="-0.5779"/>
+            <point x="0.47093" y="-0.75" z="-0.62902"/>
+            <point x="0.58648" y="-0.75" z="-0.6706"/>
+            <point x="0.70711" y="-0.75" z="-0.70711"/>
+        </path>
+    </symmetryobject>
+</group>

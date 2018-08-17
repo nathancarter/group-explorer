@@ -1,0 +1,65 @@
+<html>
+   <head>
+      <link rel="stylesheet" href="./style/fonts.css" type="text/css">
+
+      <script src="./lib/jquery-3.2.1.js"></script>
+      <script type="text/x-mathjax-config">
+       MathJax.Hub.Config({
+      	  CommonHTML: {
+             scale: 95,
+          },
+       });
+      </script>
+      <script src="./lib/MathJax-2.7.2/MathJax.js?config=MML_CHTML"></script>
+      <script src="./js/allGroupExplorer.js"></script>
+
+      <script>
+       $(window).on('load', load);	// like onload handler in body
+
+       function load() {
+          Library.loadFromInvocation()
+                 .then( ({library, groupIndex}) => formatGroup(library[groupIndex]) )
+                 .catch( (error) => alert(error) );
+       }
+
+       function formatGroup(group) {
+          const numOrderClasses = group.orderClasses.reduce( count => count + 1, 0);
+          let $rslt = $(document.createDocumentFragment())
+             .append(eval(Template.HTML('#header')));
+          if (numOrderClasses == 1) {
+             $rslt.append(eval(Template.HTML('#single')));
+          } else {
+             $rslt.append(eval(Template.HTML('#multiple')));
+             group.orderClasses.forEach( (members, order) =>
+                $rslt.find('#order_class_list')
+                     .append($('<li>').html(
+                        eval('`Elements of order ${order}: ' +
+                             members.toArray()
+                                    .map( member => math(group.representation[member]) )
+                                    .join(', ') + '`') ) ) );
+          }
+
+          $('body').append($rslt);
+          MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
+       }
+      </script>
+   </head>
+
+   <body>
+      <template id="header">
+         <h3>Results of "Order classes" computation for ${math(group.name)}</h3>
+      </template>
+      <template id="single">
+         <p>In ${math(group.name)}, there is just one
+            <a href="./help/rf-groupterms.html#orderclasses">order class</a>
+            containing all the elements of the group.
+      </template>
+      <template id="multiple">
+         <p>In ${math(group.name)} there are ${numOrderClasses}
+            <a href="./help/rf-groupterms.html#orderclasses">order classes</a>.
+            Each is listed here:
+            <ul id="order_class_list">
+            </ul>
+      </template>
+   </body>
+</html>

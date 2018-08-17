@@ -1,0 +1,90 @@
+<!DOCTYPE groupexplorerml>
+<group>
+    <name text="Z_2 x Z_2 x Z_2 x Z_3"><mrow><msub><mi>&Zopf;</mi><mn>2</mn></msub><mo>&times;</mo><msub><mi>&Zopf;</mi><mn>2</mn></msub><mo>&times;</mo><msub><mi>&Zopf;</mi><mn>2</mn></msub><mo>&times;</mo><msub><mi>&Zopf;</mi><mn>3</mn></msub></mrow></name>
+    <definition text="&amp;lt; &lt;i&gt;a&lt;/i&gt;, &lt;i&gt;b&lt;/i&gt;, &lt;i&gt;c&lt;/i&gt;, &lt;i&gt;d&lt;/i&gt; | &lt;i&gt;a&lt;/i&gt;&lt;sup&gt;2&lt;/sup&gt;=&lt;i&gt;b&lt;/i&gt;&lt;sup&gt;2&lt;/sup&gt;=&lt;i&gt;c&lt;/i&gt;&lt;sup&gt;2&lt;/sup&gt;=&lt;i&gt;d&lt;/i&gt;&lt;sup&gt;3&lt;/sup&gt;=1, &lt;i&gt;ab&lt;/i&gt;=&lt;i&gt;ba&lt;/i&gt;, &lt;i&gt;ac&lt;/i&gt;=&lt;i&gt;ca&lt;/i&gt;, &lt;i&gt;ad&lt;/i&gt;=&lt;i&gt;da&lt;/i&gt;, &lt;i&gt;bc&lt;/i&gt;=&lt;i&gt;cb&lt;/i&gt;, &lt;i&gt;bd&lt;/i&gt;=&lt;i&gt;db&lt;/i&gt;, &lt;i&gt;cd&lt;/i&gt;=&lt;i&gt;dc&lt;/i&gt; &amp;gt;">
+        <mfenced open="&lt;" close="&gt;" separators=":">
+            <mrow><mi>a</mi><mo>,</mo><mi>b</mi><mo>,</mo><mi>c</mi><mo>,</mo><mi>d</mi></mrow>
+            <mrow><msup><mi>a</mi><mn>2</mn></msup><mo>=</mo><msup><mi>b</mi><mn>2</mn></msup><mo>=</mo><msup><mi>c</mi><mn>2</mn></msup><mo>=</mo><msup><mi>d</mi><mn>3</mn></msup><mo>=</mo><mn>1</mn><mo>,</mo><mi>a</mi><mi>b</mi><mo>=</mo><mi>b</mi><mi>a</mi><mo>,</mo><mi>a</mi><mi>c</mi><mo>=</mo><mi>c</mi><mi>a</mi><mo>,</mo><mi>a</mi><mi>d</mi><mo>=</mo><mi>d</mi><mi>a</mi><mo>,</mo><mi>b</mi><mi>c</mi><mo>=</mo><mi>c</mi><mi>b</mi><mo>,</mo><mi>b</mi><mi>d</mi><mo>=</mo><mi>d</mi><mi>b</mi><mo>,</mo><mi>c</mi><mi>d</mi><mo>=</mo><mi>d</mi><mi>c</mi></mrow>
+        </mfenced>
+    </definition>
+    <author>Nathan Carter (ncarter@bentley.edu)</author>
+    <multtable>
+        <row> 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 </row>
+        <row> 1 0 3 2 5 4 7 6 9 8 11 10 13 12 15 14 17 16 19 18 21 20 23 22 </row>
+        <row> 2 3 0 1 6 7 4 5 10 11 8 9 14 15 12 13 18 19 16 17 22 23 20 21 </row>
+        <row> 3 2 1 0 7 6 5 4 11 10 9 8 15 14 13 12 19 18 17 16 23 22 21 20 </row>
+        <row> 4 5 6 7 0 1 2 3 12 13 14 15 8 9 10 11 20 21 22 23 16 17 18 19 </row>
+        <row> 5 4 7 6 1 0 3 2 13 12 15 14 9 8 11 10 21 20 23 22 17 16 19 18 </row>
+        <row> 6 7 4 5 2 3 0 1 14 15 12 13 10 11 8 9 22 23 20 21 18 19 16 17 </row>
+        <row> 7 6 5 4 3 2 1 0 15 14 13 12 11 10 9 8 23 22 21 20 19 18 17 16 </row>
+        <row> 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 0 1 2 3 4 5 6 7 </row>
+        <row> 9 8 11 10 13 12 15 14 17 16 19 18 21 20 23 22 1 0 3 2 5 4 7 6 </row>
+        <row> 10 11 8 9 14 15 12 13 18 19 16 17 22 23 20 21 2 3 0 1 6 7 4 5 </row>
+        <row> 11 10 9 8 15 14 13 12 19 18 17 16 23 22 21 20 3 2 1 0 7 6 5 4 </row>
+        <row> 12 13 14 15 8 9 10 11 20 21 22 23 16 17 18 19 4 5 6 7 0 1 2 3 </row>
+        <row> 13 12 15 14 9 8 11 10 21 20 23 22 17 16 19 18 5 4 7 6 1 0 3 2 </row>
+        <row> 14 15 12 13 10 11 8 9 22 23 20 21 18 19 16 17 6 7 4 5 2 3 0 1 </row>
+        <row> 15 14 13 12 11 10 9 8 23 22 21 20 19 18 17 16 7 6 5 4 3 2 1 0 </row>
+        <row> 16 17 18 19 20 21 22 23 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 </row>
+        <row> 17 16 19 18 21 20 23 22 1 0 3 2 5 4 7 6 9 8 11 10 13 12 15 14 </row>
+        <row> 18 19 16 17 22 23 20 21 2 3 0 1 6 7 4 5 10 11 8 9 14 15 12 13 </row>
+        <row> 19 18 17 16 23 22 21 20 3 2 1 0 7 6 5 4 11 10 9 8 15 14 13 12 </row>
+        <row> 20 21 22 23 16 17 18 19 4 5 6 7 0 1 2 3 12 13 14 15 8 9 10 11 </row>
+        <row> 21 20 23 22 17 16 19 18 5 4 7 6 1 0 3 2 13 12 15 14 9 8 11 10 </row>
+        <row> 22 23 20 21 18 19 16 17 6 7 4 5 2 3 0 1 14 15 12 13 10 11 8 9 </row>
+        <row> 23 22 21 20 19 18 17 16 7 6 5 4 3 2 1 0 15 14 13 12 11 10 9 8 </row>
+    </multtable>
+    <generators list="1 2 4 8"/>
+    <representation>
+        <element text="&lt;0,0,0,e&gt;"><mfenced open="&lt;" close="&gt;"><mn>0</mn><mo>,</mo><mn>0</mn><mo>,</mo><mn>0</mn><mo>,</mo><mi>e</mi></mfenced></element>
+        <element text="&lt;1,0,0,e&gt;"><mfenced open="&lt;" close="&gt;"><mn>1</mn><mo>,</mo><mn>0</mn><mo>,</mo><mn>0</mn><mo>,</mo><mi>e</mi></mfenced></element>
+        <element text="&lt;0,1,0,e&gt;"><mfenced open="&lt;" close="&gt;"><mn>0</mn><mo>,</mo><mn>1</mn><mo>,</mo><mn>0</mn><mo>,</mo><mi>e</mi></mfenced></element>
+        <element text="&lt;1,1,0,e&gt;"><mfenced open="&lt;" close="&gt;"><mn>1</mn><mo>,</mo><mn>1</mn><mo>,</mo><mn>0</mn><mo>,</mo><mi>e</mi></mfenced></element>
+        <element text="&lt;0,0,1,e&gt;"><mfenced open="&lt;" close="&gt;"><mn>0</mn><mo>,</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo>,</mo><mi>e</mi></mfenced></element>
+        <element text="&lt;1,0,1,e&gt;"><mfenced open="&lt;" close="&gt;"><mn>1</mn><mo>,</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo>,</mo><mi>e</mi></mfenced></element>
+        <element text="&lt;0,1,1,e&gt;"><mfenced open="&lt;" close="&gt;"><mn>0</mn><mo>,</mo><mn>1</mn><mo>,</mo><mn>1</mn><mo>,</mo><mi>e</mi></mfenced></element>
+        <element text="&lt;1,1,1,e&gt;"><mfenced open="&lt;" close="&gt;"><mn>1</mn><mo>,</mo><mn>1</mn><mo>,</mo><mn>1</mn><mo>,</mo><mi>e</mi></mfenced></element>
+        <element text="&lt;0,0,0,a&gt;"><mfenced open="&lt;" close="&gt;"><mn>0</mn><mo>,</mo><mn>0</mn><mo>,</mo><mn>0</mn><mo>,</mo><mi>a</mi></mfenced></element>
+        <element text="&lt;1,0,0,a&gt;"><mfenced open="&lt;" close="&gt;"><mn>1</mn><mo>,</mo><mn>0</mn><mo>,</mo><mn>0</mn><mo>,</mo><mi>a</mi></mfenced></element>
+        <element text="&lt;0,1,0,a&gt;"><mfenced open="&lt;" close="&gt;"><mn>0</mn><mo>,</mo><mn>1</mn><mo>,</mo><mn>0</mn><mo>,</mo><mi>a</mi></mfenced></element>
+        <element text="&lt;1,1,0,a&gt;"><mfenced open="&lt;" close="&gt;"><mn>1</mn><mo>,</mo><mn>1</mn><mo>,</mo><mn>0</mn><mo>,</mo><mi>a</mi></mfenced></element>
+        <element text="&lt;0,0,1,a&gt;"><mfenced open="&lt;" close="&gt;"><mn>0</mn><mo>,</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo>,</mo><mi>a</mi></mfenced></element>
+        <element text="&lt;1,0,1,a&gt;"><mfenced open="&lt;" close="&gt;"><mn>1</mn><mo>,</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo>,</mo><mi>a</mi></mfenced></element>
+        <element text="&lt;0,1,1,a&gt;"><mfenced open="&lt;" close="&gt;"><mn>0</mn><mo>,</mo><mn>1</mn><mo>,</mo><mn>1</mn><mo>,</mo><mi>a</mi></mfenced></element>
+        <element text="&lt;1,1,1,a&gt;"><mfenced open="&lt;" close="&gt;"><mn>1</mn><mo>,</mo><mn>1</mn><mo>,</mo><mn>1</mn><mo>,</mo><mi>a</mi></mfenced></element>
+        <element text="&lt;0,0,0,a^2&gt;"><mfenced open="&lt;" close="&gt;"><mn>0</mn><mo>,</mo><mn>0</mn><mo>,</mo><mn>0</mn><mo>,</mo><msup><mi>a</mi><mn>2</mn></msup></mfenced></element>
+        <element text="&lt;1,0,0,a^2&gt;"><mfenced open="&lt;" close="&gt;"><mn>1</mn><mo>,</mo><mn>0</mn><mo>,</mo><mn>0</mn><mo>,</mo><msup><mi>a</mi><mn>2</mn></msup></mfenced></element>
+        <element text="&lt;0,1,0,a^2&gt;"><mfenced open="&lt;" close="&gt;"><mn>0</mn><mo>,</mo><mn>1</mn><mo>,</mo><mn>0</mn><mo>,</mo><msup><mi>a</mi><mn>2</mn></msup></mfenced></element>
+        <element text="&lt;1,1,0,a^2&gt;"><mfenced open="&lt;" close="&gt;"><mn>1</mn><mo>,</mo><mn>1</mn><mo>,</mo><mn>0</mn><mo>,</mo><msup><mi>a</mi><mn>2</mn></msup></mfenced></element>
+        <element text="&lt;0,0,1,a^2&gt;"><mfenced open="&lt;" close="&gt;"><mn>0</mn><mo>,</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo>,</mo><msup><mi>a</mi><mn>2</mn></msup></mfenced></element>
+        <element text="&lt;1,0,1,a^2&gt;"><mfenced open="&lt;" close="&gt;"><mn>1</mn><mo>,</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo>,</mo><msup><mi>a</mi><mn>2</mn></msup></mfenced></element>
+        <element text="&lt;0,1,1,a^2&gt;"><mfenced open="&lt;" close="&gt;"><mn>0</mn><mo>,</mo><mn>1</mn><mo>,</mo><mn>1</mn><mo>,</mo><msup><mi>a</mi><mn>2</mn></msup></mfenced></element>
+        <element text="&lt;1,1,1,a^2&gt;"><mfenced open="&lt;" close="&gt;"><mn>1</mn><mo>,</mo><mn>1</mn><mo>,</mo><mn>1</mn><mo>,</mo><msup><mi>a</mi><mn>2</mn></msup></mfenced></element>
+    </representation>
+    <representation>
+        <element text="&lt;(),(),(),()&gt;"><mfenced open="&lt;" close="&gt;"><mrow><mo>(</mo><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mo>)</mo></mrow></mfenced></element>
+        <element text="&lt;(0 1),(),(),()&gt;"><mfenced open="&lt;" close="&gt;"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mo>)</mo></mrow></mfenced></element>
+        <element text="&lt;(),(0 1),(),()&gt;"><mfenced open="&lt;" close="&gt;"><mrow><mo>(</mo><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mo>)</mo></mrow></mfenced></element>
+        <element text="&lt;(0 1),(0 1),(),()&gt;"><mfenced open="&lt;" close="&gt;"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mo>)</mo></mrow></mfenced></element>
+        <element text="&lt;(),(),(0 1),()&gt;"><mfenced open="&lt;" close="&gt;"><mrow><mo>(</mo><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mo>)</mo></mrow></mfenced></element>
+        <element text="&lt;(0 1),(),(0 1),()&gt;"><mfenced open="&lt;" close="&gt;"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mo>)</mo></mrow></mfenced></element>
+        <element text="&lt;(),(0 1),(0 1),()&gt;"><mfenced open="&lt;" close="&gt;"><mrow><mo>(</mo><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mo>)</mo></mrow></mfenced></element>
+        <element text="&lt;(0 1),(0 1),(0 1),()&gt;"><mfenced open="&lt;" close="&gt;"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mo>)</mo></mrow></mfenced></element>
+        <element text="&lt;(),(),(),(0 1 2)&gt;"><mfenced open="&lt;" close="&gt;"><mrow><mo>(</mo><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn><mspace width="1em"/><mn>2</mn></mrow><mo>)</mo></mrow></mfenced></element>
+        <element text="&lt;(0 1),(),(),(0 1 2)&gt;"><mfenced open="&lt;" close="&gt;"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn><mspace width="1em"/><mn>2</mn></mrow><mo>)</mo></mrow></mfenced></element>
+        <element text="&lt;(),(0 1),(),(0 1 2)&gt;"><mfenced open="&lt;" close="&gt;"><mrow><mo>(</mo><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn><mspace width="1em"/><mn>2</mn></mrow><mo>)</mo></mrow></mfenced></element>
+        <element text="&lt;(0 1),(0 1),(),(0 1 2)&gt;"><mfenced open="&lt;" close="&gt;"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn><mspace width="1em"/><mn>2</mn></mrow><mo>)</mo></mrow></mfenced></element>
+        <element text="&lt;(),(),(0 1),(0 1 2)&gt;"><mfenced open="&lt;" close="&gt;"><mrow><mo>(</mo><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn><mspace width="1em"/><mn>2</mn></mrow><mo>)</mo></mrow></mfenced></element>
+        <element text="&lt;(0 1),(),(0 1),(0 1 2)&gt;"><mfenced open="&lt;" close="&gt;"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn><mspace width="1em"/><mn>2</mn></mrow><mo>)</mo></mrow></mfenced></element>
+        <element text="&lt;(),(0 1),(0 1),(0 1 2)&gt;"><mfenced open="&lt;" close="&gt;"><mrow><mo>(</mo><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn><mspace width="1em"/><mn>2</mn></mrow><mo>)</mo></mrow></mfenced></element>
+        <element text="&lt;(0 1),(0 1),(0 1),(0 1 2)&gt;"><mfenced open="&lt;" close="&gt;"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn><mspace width="1em"/><mn>2</mn></mrow><mo>)</mo></mrow></mfenced></element>
+        <element text="&lt;(),(),(),(0 2 1)&gt;"><mfenced open="&lt;" close="&gt;"><mrow><mo>(</mo><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>2</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow></mfenced></element>
+        <element text="&lt;(0 1),(),(),(0 2 1)&gt;"><mfenced open="&lt;" close="&gt;"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>2</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow></mfenced></element>
+        <element text="&lt;(),(0 1),(),(0 2 1)&gt;"><mfenced open="&lt;" close="&gt;"><mrow><mo>(</mo><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>2</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow></mfenced></element>
+        <element text="&lt;(0 1),(0 1),(),(0 2 1)&gt;"><mfenced open="&lt;" close="&gt;"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>2</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow></mfenced></element>
+        <element text="&lt;(),(),(0 1),(0 2 1)&gt;"><mfenced open="&lt;" close="&gt;"><mrow><mo>(</mo><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>2</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow></mfenced></element>
+        <element text="&lt;(0 1),(),(0 1),(0 2 1)&gt;"><mfenced open="&lt;" close="&gt;"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>2</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow></mfenced></element>
+        <element text="&lt;(),(0 1),(0 1),(0 2 1)&gt;"><mfenced open="&lt;" close="&gt;"><mrow><mo>(</mo><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>2</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow></mfenced></element>
+        <element text="&lt;(0 1),(0 1),(0 1),(0 2 1)&gt;"><mfenced open="&lt;" close="&gt;"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>2</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow></mfenced></element>
+    </representation>
+</group>

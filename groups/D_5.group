@@ -1,0 +1,66 @@
+<!DOCTYPE groupexplorerml>
+<group>
+    <name text="D_5"><mrow><msub><mi>D</mi><mn>5</mn></msub></mrow></name>
+    <definition text="&amp;lt; &lt;i&gt;a&lt;/i&gt;, &lt;i&gt;b&lt;/i&gt; | &lt;i&gt;a&lt;/i&gt;&lt;sup&gt;2&lt;/sup&gt;=&lt;i&gt;b&lt;/i&gt;&lt;sup&gt;5&lt;/sup&gt;=1, &lt;i&gt;bab&lt;/i&gt;=&lt;i&gt;a&lt;/i&gt;&lt;sup&gt;-1&lt;/sup&gt; &amp;gt;">
+        <mfenced open="&lt;" close="&gt;" separators=":">
+            <mrow><mi>a</mi><mo>,</mo><mi>b</mi></mrow>
+            <mrow><msup><mi>a</mi><mn>2</mn></msup><mo>=</mo><msup><mi>b</mi><mn>5</mn></msup><mo>=</mo><mn>1</mn><mo>,</mo><mi>b</mi><mi>a</mi><mi>b</mi><mo>=</mo><msup><mi>a</mi><mn>-1</mn></msup></mrow>
+        </mfenced>
+    </definition>
+    <phrase>Dihedral group on 5 vertices</phrase>
+    <author>Nathan Carter (ncarter@bentley.edu)</author>
+    <multtable>
+        <row> 0 1 2 3 4 5 6 7 8 9 </row>
+        <row> 1 2 3 4 0 9 5 6 7 8 </row>
+        <row> 2 3 4 0 1 8 9 5 6 7 </row>
+        <row> 3 4 0 1 2 7 8 9 5 6 </row>
+        <row> 4 0 1 2 3 6 7 8 9 5 </row>
+        <row> 5 6 7 8 9 0 1 2 3 4 </row>
+        <row> 6 7 8 9 5 4 0 1 2 3 </row>
+        <row> 7 8 9 5 6 3 4 0 1 2 </row>
+        <row> 8 9 5 6 7 2 3 4 0 1 </row>
+        <row> 9 5 6 7 8 1 2 3 4 0 </row>
+    </multtable>
+    <generators list="1 5"/>
+    <representation>
+        <element text="e"><mi>e</mi></element>
+        <element text="r"><mi>r</mi></element>
+        <element text="r^2"><msup><mi>r</mi><mn>2</mn></msup></element>
+        <element text="r^3"><msup><mi>r</mi><mn>3</mn></msup></element>
+        <element text="frf"><mi>frf</mi></element>
+        <element text="f"><mi>f</mi></element>
+        <element text="fr"><mi>fr</mi></element>
+        <element text="fr^2"><mrow><mi>f</mi><msup><mi>r</mi><mn>2</mn></msup></mrow></element>
+        <element text="r^2f"><mrow><msup><mi>r</mi><mn>2</mn></msup><mi>f</mi></mrow></element>
+        <element text="rf"><mi>rf</mi></element>
+    </representation>
+    <representation>
+        <element text="()"><mrow><mo>(</mo><mo>)</mo></mrow></element>
+        <element text="(0 1 2 3 4)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn><mspace width="1em"/><mn>2</mn><mspace width="1em"/><mn>3</mn><mspace width="1em"/><mn>4</mn></mrow><mo>)</mo></mrow></element>
+        <element text="(0 2 4 1 3)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>2</mn><mspace width="1em"/><mn>4</mn><mspace width="1em"/><mn>1</mn><mspace width="1em"/><mn>3</mn></mrow><mo>)</mo></mrow></element>
+        <element text="(0 3 1 4 2)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>3</mn><mspace width="1em"/><mn>1</mn><mspace width="1em"/><mn>4</mn><mspace width="1em"/><mn>2</mn></mrow><mo>)</mo></mrow></element>
+        <element text="(0 4 3 2 1)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>4</mn><mspace width="1em"/><mn>3</mn><mspace width="1em"/><mn>2</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow></element>
+        <element text="(1 4)(2 3)"><mrow><mo>(</mo><mrow><mn>1</mn><mspace width="1em"/><mn>4</mn></mrow><mo>)</mo><mo>(</mo><mrow><mn>2</mn><mspace width="1em"/><mn>3</mn></mrow><mo>)</mo></mrow></element>
+        <element text="(0 4)(1 3)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>4</mn></mrow><mo>)</mo><mo>(</mo><mrow><mn>1</mn><mspace width="1em"/><mn>3</mn></mrow><mo>)</mo></mrow></element>
+        <element text="(0 3)(1 2)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>3</mn></mrow><mo>)</mo><mo>(</mo><mrow><mn>1</mn><mspace width="1em"/><mn>2</mn></mrow><mo>)</mo></mrow></element>
+        <element text="(0 2)(3 4)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>2</mn></mrow><mo>)</mo><mo>(</mo><mrow><mn>3</mn><mspace width="1em"/><mn>4</mn></mrow><mo>)</mo></mrow></element>
+        <element text="(0 1)(2 4)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo><mo>(</mo><mrow><mn>2</mn><mspace width="1em"/><mn>4</mn></mrow><mo>)</mo></mrow></element>
+    </representation>
+    <symmetryobject name="Pentagon">
+        <operation element="1" degrees="72.0"><point x="1.0" y="0.0" z="0.0"/></operation>
+        <operation element="5" degrees="180.0"><point x="0.0" y="1.0" z="0.0"/></operation>
+        <sphere radius="0.1" color="#FF0000"><point x="0.0" y="1.0" z="0.0"/></sphere>
+        <sphere radius="0.1" color="#CCFF00"><point x="0.0" y="0.309" z="0.951"/></sphere>
+        <sphere radius="0.1" color="#00FF66"><point x="0.0" y="-0.809" z="0.588"/></sphere>
+        <sphere radius="0.1" color="#0066FF"><point x="0.0" y="-0.809" z="-0.588"/></sphere>
+        <sphere radius="0.1" color="#CC00FF"><point x="0.0" y="0.309" z="-0.951"/></sphere>
+        <path color="#000000">
+            <point x="0.0" y="0.309" z="-0.951"/>
+            <point x="0.0" y="1.0" z="0.0"/>
+            <point x="0.0" y="0.309" z="0.951"/>
+            <point x="0.0" y="-0.809" z="0.588"/>
+            <point x="0.0" y="-0.809" z="-0.588"/>
+            <point x="0.0" y="0.309" z="-0.951"/>
+        </path>
+    </symmetryobject>
+</group>

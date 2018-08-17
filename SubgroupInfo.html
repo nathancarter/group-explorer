@@ -1,0 +1,253 @@
+<html>
+   <head>
+      <link rel="stylesheet" href="./style/fonts.css" type="text/css">
+      <style>
+       sub, sup {
+          font-size: 70%;
+       }
+       table {
+          width: 100%;
+       }
+       table, th, td {
+          border: 3px solid silver;
+          padding: 5px;
+          border-collapse: collapse;
+       }
+       ul {
+          margin: 0;
+          list-style-type: disc;
+       }
+       .intro {
+          margin-bottom: 6px;
+       }
+      </style>
+
+      <script src="./lib/jquery-3.2.1.js"></script>
+      <script type="text/x-mathjax-config">
+       MathJax.Hub.Config({
+      	  CommonHTML: {
+             scale: 85,
+          },
+       });
+      </script>
+      <script src="./lib/MathJax-2.7.2/MathJax.js?config=MML_CHTML"></script>
+      <script src="./js/allGroupExplorer.js"></script>
+
+      <script>
+       // Global variables
+       var group;	// group for which subgroups are being displayed
+
+       $(window).on('load', load);	// like onload handler in body
+
+       function load() {
+          Library.loadFromInvocation()
+                 .then( ({library, groupIndex}) => {
+                    window.group = library[groupIndex];
+                    displayGroup()
+                 } )
+                 .catch( (error) => alert(error) );
+       }
+
+       function displayGroup() {
+          const $rslt = $(document.createDocumentFragment())
+             .append(eval(Template.HTML('#header_template')));
+          if (group.isSimple) {
+             $rslt.find('#not-simple').remove();
+          } else {
+             $rslt.find('#simple').remove();
+          }
+
+          for (let inx = 0; inx < group.subgroups.length; inx++) {
+             $rslt.find('tbody').append(subgroupInfo(inx)).html();
+          }
+
+          if ($rslt.find('li.no_isomorphism').length == 0) {
+             $rslt.find('#no_isomorphism_reason').remove();
+          }
+          if ($rslt.find('li.no_quotient_group').length == 0) {
+             $rslt.find('#no_quotient_group_reason').remove();
+          }
+
+          $('body').append($rslt);
+          MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
+       }
+
+       function subgroupInfo(index) {
+          const subgroup = group.subgroups[index];
+          const subgroupOrder = subgroup.members.popcount();
+          const optionalDescription = shortDescription(subgroup);
+          const elements = subgroup.members.toArray()
+                                   .map( el => math(group.representation[el]) )
+                                   .join(', ');
+          const $row = $(eval(Template.HTML('#data_row_template')));
+
+          let isomorphicGroup = IsomorphicGroups.findForSubgroup(group, subgroup);
+          if (isomorphicGroup === undefined) {
+             $row.find('ul').append(eval(Template.HTML('#no_isomorphism_template')));
+          } else {
+             const img = new Image();
+             img.src = isomorphicGroup.imageSource;
+             img.height = img.width = 50;
+             $row.find('.image').html(img);
+             $row.find('ul').append(eval(Template.HTML('#isomorphism_template')));
+          }
+
+          if (group.isNormal(subgroup)) {
+             if (subgroupOrder == 1) {
+                isomorphicGroup = group;
+             } else {
+                const quotientGroup = group.getQuotientGroup(subgroup.members);
+                isomorphicGroup = IsomorphicGroups.find(quotientGroup);
+             }
+
+             if (isomorphicGroup === undefined) {
+                $row.find('ul').append(eval(Template.HTML('#no_quotient_group_template')));
+             } else {
+                $row.find('ul').append(eval(Template.HTML('#quotient_group_template')));
+             }
+          }
+
+          return $row;
+       }
+
+       function shortDescription(subgroup) {
+          let rslt = '';
+
+          const elements = subgroup.members.toArray();
+          if (elements.length == 1) {
+             rslt = ', the trivial subgroup, ';
+          } else if (elements.length == group.order) {
+             rslt = ', the whole group, '
+             if (MathUtils.isPrimePower(group.order)) {
+                const prime = MathUtils.getFactors(group.order)[0];
+                rslt += `a <a href="./help/rf-groupterms.html#psubgroup">
+                         ${prime}-group</a>, `;
+             }
+          } else {
+             // get first non-one element,
+             // find prime for group,
+             // test all other elements for even divisibility
+             const subgroupElementOrders = elements.map( el => group.elementOrders[el] );
+             const prime = MathUtils.getFactors(subgroupElementOrders[1])[0];
+             if (subgroupElementOrders.every(el => el == 1 || el % prime == 0)) {
+                if (group.order / subgroup.members.popcount() % prime != 0) {
+                   rslt = `, a <a href="./help/rf-groupterms.html#sylowpsubgroup">
+                        Sylow ${prime}-subgroup</a>, `;
+                } else {
+                   rslt = `, a <a href="./help/rf-groupterms.html#psubgroup">
+                        ${prime}-subgroup</a>, `;
+                }
+             }
+          };
+
+          return rslt;
+       }
+      </script>
+   </head>
+
+   <body>
+      <template id="header_template">
+         <h3>Results of "Subgroup" computation for ${math(group.name)}</h3>
+         <p>All <a href="./help/rf-groupterms.html#subgroup">subgroups</a> of
+            ${math(group.name)} are listed in the following table. Also, a link
+            which exhibits the embedding for each subgroup is also provided, or in
+            some cases a reason why it is not possible right now. Subgroup
+            <a href="./help/rf-groupterms.html#ordersub">order</a> and
+            <a href="./help/rf-groupterms.html#indexsub">index</a> are also given.</p>
+         <p>The column entitled "normal" reports whether the subgroup is
+            <a href="./help/rf-groupterms.html#normalsubgroup">normal</a>
+            in ${math(group.name)}, and if so, tries to provide a link to
+            showing that normality by means of a sheet showing a
+            short exact sequence (SES) which exhibits the
+            <a href="./help/rf-groupterms.html#IT')">First Isomorphism Theorem</a>
+            applied to the subgroup.</p>
+         <p>The subgroups can also be shown arranged in a
+            <a href="./help/rf-groupterms.html#subgrouplattice">lattice</a>, each shown as
+            highlighted portions of the whole group, connected by the identity (inclusion)
+            homomorphism. You may see that lattice by Cayley Diagram or by Cycle Graph or
+            by Multiplication Table. <i>(Not implemented)</i>.</p>
+         <p id="simple">None of the subgroups on the list below is
+            <a href="./help/rf-groupterms.html#normalsubgroup">normal</a>.
+            For this reason, ${math(group.name)} is a
+            <a href="./help/rf-groupterms.html#normalsubgroup">simple</a> group.</p>
+         <p id="not-simple">At least one of the subgroups on the list below is
+            <a href="./help/rf-groupterms.html#normalsubgroup">normal</a>.
+            For this reason, ${math(group.name)} is not a
+            <a href="./help/rf-groupterms.html#normalsubgroup">simple</a> group.</p>
+         <table>
+            <thead>
+               <tr>
+                  <th>Image</th>
+                  <th>Name</th>
+                  <th>Order</th>
+                  <th>Index</th>
+                  <th>Normal</th>
+               </tr>
+            </thead>
+            <tbody>
+            </tbody>
+         </table>
+         <p id="no_isomorphism_reason">* No group
+            <a href="./help/rf-groupterms.html#isomorphism">isomorphic</a>
+            to this subgroup appears in the group library. This makes it
+            impossible to draw embedding diagrams, or examples of the
+            <a href="./help/rf-groupterms.html#IT')">First Isomorphism Theorem</a>.
+            You can choose what groups to include in your group library in the
+            <a href="">options window</a>.</p>
+         <p id="no_quotient_group_reason">** No group
+            <a href="./help/rf-groupterms.html#isomorphism">isomorphic</a>
+            to the quotient of ${math(group.name)} by the normal subgroup appears
+            in the group library. This makes it impossible to illustrate the quotient
+            group. You can choose what groups to include in your group library in the
+            <a href="">options window</a>.</p>
+      </template>
+      <template id="data_row_template">
+         <tr>
+            <td class="image">image</td>
+            <td><i>H</i><sub>${index}</sub></td>
+            <td>${subgroup.order}</td>
+            <td>${subgroup.index}</td>
+            <td>${group.isNormal(subgroup) ? 'yes' : 'no'}</td>
+         </tr>
+         <tr>
+            <td colspan="5">
+               <p class="intro"><i>H</i><sub>${index}</sub>${optionalDescription}
+                  is {${elements}}.</p>
+               <ul class="points">
+               </ul>
+            </td>
+         </tr>
+      </template>
+      <template id="isomorphism_template">
+         <li>It is
+            <a href="./help/rf-groupterms.html#isomorphism">isomorphic</a> to
+            ${math(isomorphicGroup.name)}, and you can see the embedding by
+            <a href="">Cayley Diagram</a> or by
+            <a href="">Cycle Graph</a> or by
+            <a href="">Multiplication Table</a>.
+            <i>(Not implemented)</i>
+         </li>
+      </template>
+      <template id="no_isomorphism_template">
+         <li class="no_isomorphism">I cannot show you the embedding
+            right now (see <a href="#no_isomorphism_reason">below*</a>).
+         </li>
+      </template>
+      <template id="quotient_group_template">
+         <li >See the <a href="./help/rf-groupterms.html#ses">short exact sequence</a>
+            exhibiting the
+            <a href="./help/rf-groupterms.html#quotient">quotient group</a>,
+            isomorphic to ${math(isomorphicGroup.name)}, by
+            <a href="">Cayley Diagram</a> or by
+            <a href="">Cycle Graph</a> or by
+            <a href="">Multiplication Table</a>.
+            <i>(Not implemented)</i>
+         </li>
+      </template>
+      <template id="no_quotient_group_template">
+         <li class="no_quotient_group">I cannot show you the quotient group
+            right now (see <a href="#no_quotient_group_reason">below**</a>).
+         </li>
+      </template>
+   </body>
+</html>

@@ -1,0 +1,388 @@
+<html>
+   <head>
+      <link rel="icon" type="image/png" href="./images/favicon.png"></link>
+
+      <link rel="STYLESHEET" href="./style/fonts.css" type="text/css">
+      <style>
+       table, th, td {
+          border: 3px solid silver;
+          padding: 5px;
+          border-collapse: collapse;
+       }
+       .views {
+          border: none;
+          text-align: left;
+          min-width: 150px;
+       }
+       .thumbnail {
+          border: none;
+          height: 100%;
+          vertical-align: top;
+          text-align: center;
+       }
+       .programLink{
+          color: #0000EE;
+          cursor: pointer;
+       }
+       img {
+          display: block;
+          margin: auto;
+       }
+       .indent1 {
+          margin-left: 1cm;
+       }
+       .indent2 {
+          margin-left: 2cm;
+       }
+       .nobr {
+          white-space: nowrap;
+       }
+      </style>
+
+
+      <script src="./lib/jquery-3.2.1.js"></script>
+      <script type="text/x-mathjax-config">
+       MathJax.Hub.Config({
+      	  CommonHTML: {
+             scale: 95,
+          },
+       });
+      </script>
+      <script src="./lib/MathJax-2.7.2/MathJax.js?config=MML_CHTML"></script>
+      <script src="./lib/three.js"></script>
+      <script src="./lib/TrackballControls.js"></script>
+      <script src="./lib/THREE.MeshLine.js"></script>
+      <script src="./js/allGroupExplorer.js"></script>
+
+      <script>
+       // Global variables
+       var group;	// group this page displays information about
+
+       // Static event managers (setup after document is available)
+       $(function() {
+          $('#Computed_properties + p')
+             .on('click', (ev) => Library.openWithLibrary($(ev.target).attr('page'), group));
+       });
+       $(window).on('load', load);	// like onload handler in body
+
+       // read in library, group from invocation
+       function load() {
+          Library.loadFromInvocation()
+                 .then( ({library, groupIndex}) => {
+                    window.group = library[groupIndex];
+                    displayStatic();
+                    displayDynamic()
+                 } )
+                 .catch( (error) => alert(error) );
+       }
+
+       // displays group information that is independent of the representation
+       function displayStatic() {
+          window.graphicContext = new DisplayDiagram({width: 100, height: 100, fog: false});
+
+          // Header
+          $('#heading').html(eval(Template.HTML('#heading_template')));
+
+          // Basic facts
+          $('#Basic_facts + p').html(eval(Template.HTML('#basicFacts_template')));
+
+          // Views --
+          //   Add rows to ViewTable until there are no more Cayley Diagrams (including
+          //   the generated one) && no more Symmetry Objects
+          for (let inx = 0;
+             inx < group.cayleyDiagrams.length + 1 || inx < group.symmetryObjects.length;
+             inx++) {
+             const $row = $('#ViewTable').append(eval(Template.HTML('#view_row_template')))
+                                         .children()
+                                         .last();
+
+             if (inx < group.cayleyDiagrams.length + 1) {
+                const diagramName = (inx == group.cayleyDiagrams.length)
+                                  ? undefined
+                                  : group.cayleyDiagrams[inx].name;
+                const graphicData = CayleyDiagram.generate(group, diagramName);
+                const img = graphicContext.getImageURL(graphicData);
+                $row.children(':nth-child(1)')
+                    .addClass('programLink')
+                    .text(diagramName)
+                    .on('click', () =>
+                       Library.openWithGroup('CayleyDiagram.html', group, {diagram: diagramName}))
+                    .prepend(img);
+             }
+
+             if (inx == 0) {
+                const graphicData = new Multtable(group);
+                window.multtableContext = new DisplayMulttable({height: 100, width: 100});
+                const img = multtableContext.getImageURL(graphicData);
+                   $row.children(':nth-child(3)')
+                   .addClass('programLink')
+                   .text('')
+                   .on('click', () => Library.openWithGroup('Multtable.html', group))
+                   .prepend(img);
+             }
+
+             if (inx < group.symmetryObjects.length) {
+                const objectName = group.symmetryObjects[inx].name;
+                const graphicData = SymmetryObject.generate(group, objectName);
+                const img = graphicContext.getImageURL(graphicData);
+                $row.children(':nth-child(4)')
+                    .addClass('programLink')
+                    .text(objectName)
+                    .on('click', () =>
+                       Library.openWithGroup('SymmetryObject.html', group, {diagram: objectName}))
+                    .prepend(img);
+             }
+          }
+
+          // Description
+          $('#Description + p').html(eval(Template.HTML('#description_template')));
+
+          // Computed properties:
+          $('#Computed_properties + p').html(eval(Template.HTML('#computedProperties_template')));
+
+          // File data
+          $('#File_data + p').html(eval(Template.HTML('#fileData_template')));
+       }
+
+       // (Re-)paints group information that depends on the representation (which may change)
+       function displayDynamic() {
+          // Generators
+          if (group.generators.length != 0) {
+             $('#Generators + p').html(displayGenerators());
+          }
+
+          // Default element names
+          if (group.representation.length != 0) {
+             $('#default_element_names').html(displayDefaultElementNames());
+          }
+
+          // Loaded element names
+          if (group.representations.length > 1) {
+             $('#loaded_naming_schemes').html(displayNamingSchemes());
+          }
+
+          MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
+       }
+
+       function displayClassEquation() {
+          if (   group.order > 5
+              && group.conjugacyClasses.every( (el) => el.popcount() == 1 )) {
+             return `1 + 1 + ... (${group.order} times) ... + 1 = ${group.order}`;
+          } else {
+             return group.conjugacyClasses
+                         .map( (el) => el.popcount() )
+                         .join(' + ') +
+                    ` = ${group.order}`;
+          }
+       }
+
+       function displayOrderClasses() {
+          return `${(new Set(group.elementOrders)).size} order
+                  class${(group.order != 1) ? 'es' : ''}`;
+       }
+
+       function displayGenerators() {
+          return group.generators.map(
+             (gen) => gen.reduce(
+                (acc, el, inx) => {
+                   const rep = math(group.representation[el]);
+                   if (gen.length == 1) {
+                      return `The element ${rep} generates the group.`;
+                   } else if (inx == 0) {
+                      return `The elements ${rep}`;
+                   } else if (inx == gen.length-1) {
+                      return acc + ` and ${rep} generate the group.`;
+                   } else {
+                      return acc + `, ${rep}`;
+                   }
+                },
+                '')
+          ).join('<br>');
+       }
+
+       function displayDefaultElementNames() {
+          return '<span class="nobr">' +
+                 group.elements.map( (el) => math(group.representation[el]) ).join(', ') +
+                 '</span><br>This representation was loaded from the group file.';
+       }
+
+       function displayNamingSchemes() {
+          const def = group.representation;
+          const oneScheme = (rep, repNum) =>
+             group.elements
+                  .reduce( (acc, el) => acc.append(`${math(def[el])} = ${math(rep[el])}<br>`),
+                           $('<li>') )
+                  .append($('<span class="programLink">Click here</span>')
+                     .on('click', () => setRepresentation(repNum)) )
+                  .append(' to make this the default representation.');
+          return group.representations
+                      .reduce( (frag, rep, inx) => inx == group.representationIndex ?
+                                                 frag : frag.append(oneScheme(rep, inx)),
+                               $('<ol>') );
+       }
+
+       function setRepresentation(index) {
+          group.representationIndex = index;
+          displayDynamic();
+       }
+      </script>
+   </head>
+
+   <body>
+      <h2 id="heading" align="center">
+         <template id="heading_template">
+            ${math(group.name)} ${(group.phrase == "") ? '' : ' - ' + group.phrase}
+         </template>
+      </h2>
+      <p align="center">
+         Contents: &nbsp;
+         <a href="#Basic_facts">Facts</a> &nbsp; | &nbsp;
+         <a href="#Views">Views</a>  &nbsp; | &nbsp;
+         <a href="#Description">Description</a> &nbsp; | &nbsp;
+         <a href="#Computed_properties">Computed properties</a> &nbsp; | &nbsp;
+         <a href="#Related_sheets">Related sheets</a> &nbsp; | &nbsp;
+         <a href="#File_data">File data</a> &nbsp; | &nbsp;
+         <a href="#Other_definitions">Other definitions</a> &nbsp; | &nbsp;
+         <a href="#Generators">Generators</a> &nbsp; | &nbsp;
+         <a href="#Naming_schemes">Naming schemes</a> &nbsp; | &nbsp;
+         <a href="#Notes">Notes</a>
+      </p>
+      <hr>
+
+      <h3 id="Basic_facts">Basic facts</h3>
+      <p class="indent1">
+         <template id="basicFacts_template">
+            <table>
+               <tr><th align="right">Definition</th>
+                  <td align="left">${math(group.definition)}</td>
+               </tr>
+               <tr><th align="right">Order</th>
+                  <td align="left">${group.order}</td>
+               </tr>
+            </table>
+         </template>
+      </p>
+
+      <h3 id="Views">Views</h3>
+      <p class="indent1">
+         Click any view to open a copy for exploration.
+         <br>
+         <table id="ViewTable" class="views">
+            <!-- 100x100 thumbnails for pictures -->
+            <tr>
+               <th class="views">Cayley Diagram</th>
+               <th class="views">Cycle Graph</th>
+               <th class="views">Multiplication Table</th>
+               <th class="views">Object of Symmetry</th>
+            </tr>
+            <tr>
+               <td class="views">
+                  <a href="help/rf-groupterms.html#cayleydiagram">Help on this</a></td>
+               <td class="views">
+                  <a href="help/rf-groupterms.html#cyclegraph">Help on this</a></td>
+               <td class="views">
+                  <a href="help/rf-groupterms.html#multtable">Help on this</a></td>
+               <td class="views">
+                  <a href="help/rf-groupterms.html#symmetryobject">Help on this</a></td>
+            </tr>
+            <template id="view_row_template">
+               <tr>
+                  <td class="thumbnail"></td>
+                  <td class="thumbnail"></td>
+                  <td class="thumbnail"></td>
+                  <td class="thumbnail"></td>
+               </tr>
+            </template>
+         </table>
+      </p>
+
+      <h3 id="Description">Description</h3>
+      <p class="indent1">
+         <template id="description_template">
+            ${(group.notes == "") ? '<i>None</i>' : group.notes}
+         </template>
+      </p>
+
+      <h3 id="Computed_properties">Computed Properties</h3>
+      <p class="indent1">
+         <template id="computedProperties_template">
+            <table>
+               <tr>
+                  <th align="right">Abelian group</th>
+                  <td>${group.isAbelian ? 'yes' : 'no'}</td>
+                  <td page="AbelianInfo.html" class="programLink">Tell me more</td>
+               </tr>
+               <tr>
+                  <th align="right">Class equation</th>
+                  <td>${displayClassEquation()}</td>
+                  <td page="ClassEquationInfo.html" class="programLink">Tell me more</td>
+               </tr>
+               <tr>
+                  <th align="right">Cyclic group</th>
+                  <td>${group.isCyclic ? 'yes' : 'no'}</td>
+                  <td page="CyclicInfo.html" class="programLink">Tell me more</td>
+               </tr>
+               <tr>
+                  <th align="right">Subgroups</th>
+                  <td>${group.subgroups.length}</td>
+                  <td page="SubgroupInfo.html" class="programLink">Tell me more</td>
+               </tr>
+               <tr>
+                  <th align="right">Order classes</th>
+                  <td>${displayOrderClasses()}</td>
+                  <td page="OrderClassesInfo.html" class="programLink">Tell me more</td>
+               </tr>
+               <tr>
+                  <th align="right">Solvable group</th>
+                  <td>${group.isSolvable ? 'yes' : 'no'}</td>
+                  <td page="SolvableInfo.html" class="programLink">Tell me more</td>
+               </tr>
+            </table>
+         </template>
+      </p>
+
+      <h3 id="Related_sheets">Related Sheets</h3>
+      <p class="indent1">
+         <i>(Not implemented)</i>
+      </p>
+
+      <h3 id="File_data">File Data</h3>
+      <p class="indent1">
+         <template id="fileData_template">
+            <table>
+               <tr><th align="right">Author</th><td align="left">${group.author}</td></tr>
+               <tr><th align="right">URL</th><td align="left">${group.URL}</td></tr>
+            </table>
+         </template>
+      </p>
+
+      <h3 id="Other_definitions">Other definitions</h3>
+      <p class="indent1">
+         <i>(Not implemented)</i>
+      </p>
+
+      <h3 id="Generators">Generators</h3>
+      <p class="indent1">
+         There are no generators in this group, only the identity element.
+      </p>
+
+      <h3 id="Naming_schemes">Naming Schemes</h3>
+      <h4 class="indent1">Default element names</h4>
+      <p id="default_element_names" class="indent2">
+         <i>None</i>
+      </p>
+      <h4 class="indent1">Loaded naming schemes</h4>
+      <p id="loaded_naming_schemes" class="indent1">
+         <i>None</i>
+      </p>
+      <h4 class="indent1">User-defined naming schemes</h4>
+      <p class="indent2">
+         <i>(Not implemented)</i>
+      </p>
+
+      <h3 id="Notes">Notes</h3>
+      <p class="indent1">
+         <i>(Not implemented)</i>
+      </p>
+   </body>
+</html>

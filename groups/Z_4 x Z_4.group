@@ -1,0 +1,66 @@
+<!DOCTYPE groupexplorerml>
+<group>
+    <name text="Z_4 x Z_4"><mrow><msub><mi>&Zopf;</mi><mn>4</mn></msub><mo>&times;</mo><msub><mi>&Zopf;</mi><mn>4</mn></msub></mrow></name>
+    <definition text="&amp;lt; &lt;i&gt;a&lt;/i&gt;, &lt;i&gt;b&lt;/i&gt; | &lt;i&gt;a&lt;/i&gt;&lt;sup&gt;4&lt;/sup&gt;=&lt;i&gt;b&lt;/i&gt;&lt;sup&gt;4&lt;/sup&gt;=1, &lt;i&gt;ab&lt;/i&gt;=&lt;i&gt;ba&lt;/i&gt; &amp;gt;">
+        <mfenced open="&lt;" close="&gt;" separators=":">
+            <mrow><mi>a</mi><mo>,</mo><mi>b</mi></mrow>
+            <mrow><msup><mi>a</mi><mn>4</mn></msup><mo>=</mo><msup><mi>b</mi><mn>4</mn></msup><mo>=</mo><mn>1</mn><mo>,</mo><mi>a</mi><mi>b</mi><mo>=</mo><mi>b</mi><mi>a</mi></mrow>
+        </mfenced>
+    </definition>
+    <author>Nathan Carter (ncarter@bentley.edu)</author>
+    <multtable>
+        <row> 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 </row>
+        <row> 1 2 3 0 5 6 7 4 9 10 11 8 13 14 15 12 </row>
+        <row> 2 3 0 1 6 7 4 5 10 11 8 9 14 15 12 13 </row>
+        <row> 3 0 1 2 7 4 5 6 11 8 9 10 15 12 13 14 </row>
+        <row> 4 5 6 7 8 9 10 11 12 13 14 15 0 1 2 3 </row>
+        <row> 5 6 7 4 9 10 11 8 13 14 15 12 1 2 3 0 </row>
+        <row> 6 7 4 5 10 11 8 9 14 15 12 13 2 3 0 1 </row>
+        <row> 7 4 5 6 11 8 9 10 15 12 13 14 3 0 1 2 </row>
+        <row> 8 9 10 11 12 13 14 15 0 1 2 3 4 5 6 7 </row>
+        <row> 9 10 11 8 13 14 15 12 1 2 3 0 5 6 7 4 </row>
+        <row> 10 11 8 9 14 15 12 13 2 3 0 1 6 7 4 5 </row>
+        <row> 11 8 9 10 15 12 13 14 3 0 1 2 7 4 5 6 </row>
+        <row> 12 13 14 15 0 1 2 3 4 5 6 7 8 9 10 11 </row>
+        <row> 13 14 15 12 1 2 3 0 5 6 7 4 9 10 11 8 </row>
+        <row> 14 15 12 13 2 3 0 1 6 7 4 5 10 11 8 9 </row>
+        <row> 15 12 13 14 3 0 1 2 7 4 5 6 11 8 9 10 </row>
+    </multtable>
+    <generators list="1 4"/>
+    <representation>
+        <element text="&lt;e,e&gt;"><mfenced open="&lt;" close="&gt;"><mi>e</mi><mi>e</mi></mfenced></element>
+        <element text="&lt;a,e&gt;"><mfenced open="&lt;" close="&gt;"><mi>a</mi><mi>e</mi></mfenced></element>
+        <element text="&lt;a^2,e&gt;"><mfenced open="&lt;" close="&gt;"><msup><mi>a</mi><mn>2</mn></msup><mi>e</mi></mfenced></element>
+        <element text="&lt;a^3,e&gt;"><mfenced open="&lt;" close="&gt;"><msup><mi>a</mi><mn>3</mn></msup><mi>e</mi></mfenced></element>
+        <element text="&lt;e,a&gt;"><mfenced open="&lt;" close="&gt;"><mi>e</mi><mi>a</mi></mfenced></element>
+        <element text="&lt;a,a&gt;"><mfenced open="&lt;" close="&gt;"><mi>a</mi><mi>a</mi></mfenced></element>
+        <element text="&lt;a^2,a&gt;"><mfenced open="&lt;" close="&gt;"><msup><mi>a</mi><mn>2</mn></msup><mi>a</mi></mfenced></element>
+        <element text="&lt;a^3,a&gt;"><mfenced open="&lt;" close="&gt;"><msup><mi>a</mi><mn>3</mn></msup><mi>a</mi></mfenced></element>
+        <element text="&lt;e,a^2&gt;"><mfenced open="&lt;" close="&gt;"><mi>e</mi><msup><mi>a</mi><mn>2</mn></msup></mfenced></element>
+        <element text="&lt;a,a^2&gt;"><mfenced open="&lt;" close="&gt;"><mi>a</mi><msup><mi>a</mi><mn>2</mn></msup></mfenced></element>
+        <element text="&lt;a^2,a^2&gt;"><mfenced open="&lt;" close="&gt;"><msup><mi>a</mi><mn>2</mn></msup><msup><mi>a</mi><mn>2</mn></msup></mfenced></element>
+        <element text="&lt;a^3,a^2&gt;"><mfenced open="&lt;" close="&gt;"><msup><mi>a</mi><mn>3</mn></msup><msup><mi>a</mi><mn>2</mn></msup></mfenced></element>
+        <element text="&lt;e,a^3&gt;"><mfenced open="&lt;" close="&gt;"><mi>e</mi><msup><mi>a</mi><mn>3</mn></msup></mfenced></element>
+        <element text="&lt;a,a^3&gt;"><mfenced open="&lt;" close="&gt;"><mi>a</mi><msup><mi>a</mi><mn>3</mn></msup></mfenced></element>
+        <element text="&lt;a^2,a^3&gt;"><mfenced open="&lt;" close="&gt;"><msup><mi>a</mi><mn>2</mn></msup><msup><mi>a</mi><mn>3</mn></msup></mfenced></element>
+        <element text="&lt;a^3,a^3&gt;"><mfenced open="&lt;" close="&gt;"><msup><mi>a</mi><mn>3</mn></msup><msup><mi>a</mi><mn>3</mn></msup></mfenced></element>
+    </representation>
+    <representation>
+        <element text="&lt;(),()&gt;"><mfenced open="&lt;" close="&gt;"><mrow><mo>(</mo><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mo>)</mo></mrow></mfenced></element>
+        <element text="&lt;(0 1 2 3),()&gt;"><mfenced open="&lt;" close="&gt;"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn><mspace width="1em"/><mn>2</mn><mspace width="1em"/><mn>3</mn></mrow><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mo>)</mo></mrow></mfenced></element>
+        <element text="&lt;(0 2)(1 3),()&gt;"><mfenced open="&lt;" close="&gt;"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>2</mn></mrow><mo>)</mo><mo>(</mo><mrow><mn>1</mn><mspace width="1em"/><mn>3</mn></mrow><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mo>)</mo></mrow></mfenced></element>
+        <element text="&lt;(0 3 2 1),()&gt;"><mfenced open="&lt;" close="&gt;"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>3</mn><mspace width="1em"/><mn>2</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mo>)</mo></mrow></mfenced></element>
+        <element text="&lt;(),(0 1 2 3)&gt;"><mfenced open="&lt;" close="&gt;"><mrow><mo>(</mo><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn><mspace width="1em"/><mn>2</mn><mspace width="1em"/><mn>3</mn></mrow><mo>)</mo></mrow></mfenced></element>
+        <element text="&lt;(0 1 2 3),(0 1 2 3)&gt;"><mfenced open="&lt;" close="&gt;"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn><mspace width="1em"/><mn>2</mn><mspace width="1em"/><mn>3</mn></mrow><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn><mspace width="1em"/><mn>2</mn><mspace width="1em"/><mn>3</mn></mrow><mo>)</mo></mrow></mfenced></element>
+        <element text="&lt;(0 2)(1 3),(0 1 2 3)&gt;"><mfenced open="&lt;" close="&gt;"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>2</mn></mrow><mo>)</mo><mo>(</mo><mrow><mn>1</mn><mspace width="1em"/><mn>3</mn></mrow><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn><mspace width="1em"/><mn>2</mn><mspace width="1em"/><mn>3</mn></mrow><mo>)</mo></mrow></mfenced></element>
+        <element text="&lt;(0 3 2 1),(0 1 2 3)&gt;"><mfenced open="&lt;" close="&gt;"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>3</mn><mspace width="1em"/><mn>2</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn><mspace width="1em"/><mn>2</mn><mspace width="1em"/><mn>3</mn></mrow><mo>)</mo></mrow></mfenced></element>
+        <element text="&lt;(),(0 2)(1 3)&gt;"><mfenced open="&lt;" close="&gt;"><mrow><mo>(</mo><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>2</mn></mrow><mo>)</mo><mo>(</mo><mrow><mn>1</mn><mspace width="1em"/><mn>3</mn></mrow><mo>)</mo></mrow></mfenced></element>
+        <element text="&lt;(0 1 2 3),(0 2)(1 3)&gt;"><mfenced open="&lt;" close="&gt;"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn><mspace width="1em"/><mn>2</mn><mspace width="1em"/><mn>3</mn></mrow><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>2</mn></mrow><mo>)</mo><mo>(</mo><mrow><mn>1</mn><mspace width="1em"/><mn>3</mn></mrow><mo>)</mo></mrow></mfenced></element>
+        <element text="&lt;(0 2)(1 3),(0 2)(1 3)&gt;"><mfenced open="&lt;" close="&gt;"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>2</mn></mrow><mo>)</mo><mo>(</mo><mrow><mn>1</mn><mspace width="1em"/><mn>3</mn></mrow><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>2</mn></mrow><mo>)</mo><mo>(</mo><mrow><mn>1</mn><mspace width="1em"/><mn>3</mn></mrow><mo>)</mo></mrow></mfenced></element>
+        <element text="&lt;(0 3 2 1),(0 2)(1 3)&gt;"><mfenced open="&lt;" close="&gt;"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>3</mn><mspace width="1em"/><mn>2</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>2</mn></mrow><mo>)</mo><mo>(</mo><mrow><mn>1</mn><mspace width="1em"/><mn>3</mn></mrow><mo>)</mo></mrow></mfenced></element>
+        <element text="&lt;(),(0 3 2 1)&gt;"><mfenced open="&lt;" close="&gt;"><mrow><mo>(</mo><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>3</mn><mspace width="1em"/><mn>2</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow></mfenced></element>
+        <element text="&lt;(0 1 2 3),(0 3 2 1)&gt;"><mfenced open="&lt;" close="&gt;"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn><mspace width="1em"/><mn>2</mn><mspace width="1em"/><mn>3</mn></mrow><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>3</mn><mspace width="1em"/><mn>2</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow></mfenced></element>
+        <element text="&lt;(0 2)(1 3),(0 3 2 1)&gt;"><mfenced open="&lt;" close="&gt;"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>2</mn></mrow><mo>)</mo><mo>(</mo><mrow><mn>1</mn><mspace width="1em"/><mn>3</mn></mrow><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>3</mn><mspace width="1em"/><mn>2</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow></mfenced></element>
+        <element text="&lt;(0 3 2 1),(0 3 2 1)&gt;"><mfenced open="&lt;" close="&gt;"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>3</mn><mspace width="1em"/><mn>2</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow><mo>,</mo><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>3</mn><mspace width="1em"/><mn>2</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow></mfenced></element>
+    </representation>
+</group>

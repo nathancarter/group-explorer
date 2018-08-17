@@ -1,0 +1,83 @@
+<!DOCTYPE groupexplorerml>
+<group>
+    <name text="3239"><mtext>3239</mtext></name>
+    <definition text="not included"><mtext>not included</mtext></definition>
+    <phrase>Order 32 #39</phrase>
+    <notes>Relations:<br/>
+&lt;i&gt;    b&lt;/i&gt;&lt;sup&gt;2&lt;/sup&gt;=&lt;i&gt; y,&lt;/i&gt;<br/>
+&lt;i&gt;    x&lt;/i&gt;&lt;sup&gt;2&lt;/sup&gt;=&lt;i&gt; y,&lt;/i&gt;<br/>
+&lt;i&gt;    b&lt;sup&gt;a&lt;/sup&gt; &lt;/i&gt;=&lt;i&gt; bx,&lt;/i&gt;<br/>
+&lt;i&gt;    c&lt;sup&gt;a&lt;/sup&gt; &lt;/i&gt;=&lt;i&gt; cy,&lt;/i&gt;<br/>
+&lt;i&gt;    x&lt;sup&gt;a&lt;/sup&gt; &lt;/i&gt;=&lt;i&gt; xy,&lt;/i&gt;<br/>
+&lt;i&gt;    x&lt;sup&gt;b&lt;/sup&gt; &lt;/i&gt;=&lt;i&gt; xy&lt;/i&gt;<br/>
+Thanks to Bayard Webb and Ed Keppelmann for extracting this group data from GAP (http://www.gap-system.org) and making it available in their software package FGB (http://unr.edu/homepage/keppelma/fgb.html).</notes>
+    <author>Nathan Carter (ncarter@bentley.edu)</author>
+    <multtable>
+        <row>0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31</row>
+        <row>1 22 3 6 21 19 23 31 27 30 12 15 9 28 13 4 24 5 11 2 17 0 18 20 10 8 16 7 25 26 29 14</row>
+        <row>2 23 0 18 6 22 4 9 29 7 14 20 25 30 10 19 28 21 3 15 11 17 5 1 27 12 31 24 16 8 13 26</row>
+        <row>3 20 1 11 23 18 21 30 26 31 13 17 8 29 12 2 25 0 6 4 15 5 19 22 7 9 14 10 24 27 28 16</row>
+        <row>4 21 5 19 11 20 2 8 28 10 16 22 24 31 7 18 29 23 1 17 6 15 0 3 26 13 30 25 14 9 12 27</row>
+        <row>5 3 4 1 2 0 11 10 9 8 7 6 13 12 16 17 14 15 19 18 22 23 20 21 25 24 27 26 29 28 31 30</row>
+        <row>6 17 22 15 20 11 0 29 16 14 28 5 27 26 9 3 8 1 23 21 4 19 2 18 31 30 13 12 10 7 25 24</row>
+        <row>7 27 9 12 14 29 10 11 4 20 5 28 17 1 22 13 2 26 25 30 16 31 8 24 19 21 3 15 0 6 23 18</row>
+        <row>8 25 10 24 7 9 16 22 11 6 20 14 23 21 0 31 5 30 13 12 29 27 28 26 17 15 19 18 4 2 3 1</row>
+        <row>9 24 7 25 10 8 14 20 6 11 22 16 21 23 5 30 0 31 12 13 28 26 29 27 15 17 18 19 2 4 1 3</row>
+        <row>10 26 8 13 16 28 7 6 2 22 0 29 15 3 20 12 4 27 24 31 14 30 9 25 18 23 1 17 5 11 21 19</row>
+        <row>11 15 20 17 22 6 5 28 14 16 29 0 26 27 8 1 9 3 21 23 2 18 4 19 30 31 12 13 7 10 24 25</row>
+        <row>12 16 27 28 24 25 31 23 3 18 1 26 4 6 17 9 21 7 10 14 13 29 30 8 11 20 22 5 19 15 0 2</row>
+        <row>13 14 26 29 25 24 30 21 1 19 3 27 2 11 15 8 23 10 7 16 12 28 31 9 6 22 20 0 18 17 5 4</row>
+        <row>14 31 29 30 28 16 9 4 0 5 2 8 19 18 11 25 6 24 27 26 10 13 7 12 3 1 23 21 22 20 17 15</row>
+        <row>15 4 17 5 18 23 19 25 13 24 26 1 16 7 27 22 30 6 0 20 3 11 21 2 29 14 9 28 31 12 10 8</row>
+        <row>16 30 28 31 29 14 8 2 5 0 4 9 18 19 6 24 11 25 26 27 7 12 10 13 1 3 21 23 20 22 15 17</row>
+        <row>17 2 15 0 19 21 18 24 12 25 27 3 14 10 26 20 31 11 5 22 1 6 23 4 28 16 8 29 30 13 7 9</row>
+        <row>18 11 23 20 1 3 17 13 31 26 30 21 29 8 25 0 12 2 4 6 19 22 15 5 9 7 10 14 27 24 16 28</row>
+        <row>19 6 21 22 3 1 15 12 30 27 31 23 28 9 24 5 13 4 2 11 18 20 17 0 8 10 7 16 26 25 14 29</row>
+        <row>20 19 11 21 5 4 22 16 10 28 8 2 31 24 29 23 7 18 17 1 0 3 6 15 13 26 25 30 9 14 27 12</row>
+        <row>21 0 19 2 15 17 3 27 25 12 24 18 10 14 31 11 26 20 22 5 23 4 1 6 16 28 29 8 13 30 9 7</row>
+        <row>22 18 6 23 0 2 20 14 7 29 9 4 30 25 28 21 10 19 15 3 5 1 11 17 12 27 24 31 8 16 26 13</row>
+        <row>23 5 18 4 17 15 1 26 24 13 25 19 7 16 30 6 27 22 20 0 21 2 3 11 14 29 28 9 12 31 8 10</row>
+        <row>24 29 25 14 26 13 27 3 19 1 21 30 11 2 23 10 15 8 16 7 31 9 12 28 22 6 0 20 17 18 4 5</row>
+        <row>25 28 24 16 27 12 26 1 18 3 23 31 6 4 21 7 17 9 14 10 30 8 13 29 20 11 5 22 15 19 2 0</row>
+        <row>26 9 13 7 30 31 25 19 17 21 15 12 22 5 3 16 18 28 29 8 27 10 24 14 0 2 4 6 23 1 11 20</row>
+        <row>27 8 12 10 31 30 24 18 15 23 17 13 20 0 1 14 19 29 28 9 26 7 25 16 5 4 2 11 21 3 6 22</row>
+        <row>28 13 16 26 8 10 29 0 22 2 6 7 3 15 4 27 20 12 31 24 9 25 14 30 23 18 17 1 11 5 19 21</row>
+        <row>29 12 14 27 9 7 28 5 20 4 11 10 1 17 2 26 22 13 30 25 8 24 16 31 21 19 15 3 6 0 18 23</row>
+        <row>30 10 31 8 12 27 13 17 23 15 18 24 0 20 19 29 1 14 9 28 25 16 26 7 4 5 11 2 3 21 22 6</row>
+        <row>31 7 30 9 13 26 12 15 21 17 19 25 5 22 18 28 3 16 8 29 24 14 27 10 2 0 6 4 1 23 20 11</row>
+    </multtable>
+    <representation>
+        <element text="1"><mrow><mi>1</mi></mrow></element>
+        <element text="abx"><mrow><mi>a</mi><mi>b</mi><mi>x</mi></mrow></element>
+        <element text="ax"><mrow><mi>a</mi><mi>x</mi></mrow></element>
+        <element text="bx"><mrow><mi>b</mi><mi>x</mi></mrow></element>
+        <element text="x"><mrow><mi>x</mi></mrow></element>
+        <element text="a"><mrow><mi>a</mi></mrow></element>
+        <element text="ay"><mrow><mi>a</mi><mi>y</mi></mrow></element>
+        <element text="acy"><mrow><mi>a</mi><mi>c</mi><mi>y</mi></mrow></element>
+        <element text="acx"><mrow><mi>a</mi><mi>c</mi><mi>x</mi></mrow></element>
+        <element text="cx"><mrow><mi>c</mi><mi>x</mi></mrow></element>
+        <element text="cy"><mrow><mi>c</mi><mi>y</mi></mrow></element>
+        <element text="y"><mrow><mi>y</mi></mrow></element>
+        <element text="abcxy"><mrow><mi>a</mi><mi>b</mi><mi>c</mi><mi>x</mi><mi>y</mi></mrow></element>
+        <element text="bcxy"><mrow><mi>b</mi><mi>c</mi><mi>x</mi><mi>y</mi></mrow></element>
+        <element text="acxy"><mrow><mi>a</mi><mi>c</mi><mi>x</mi><mi>y</mi></mrow></element>
+        <element text="abxy"><mrow><mi>a</mi><mi>b</mi><mi>x</mi><mi>y</mi></mrow></element>
+        <element text="cxy"><mrow><mi>c</mi><mi>x</mi><mi>y</mi></mrow></element>
+        <element text="bxy"><mrow><mi>b</mi><mi>x</mi><mi>y</mi></mrow></element>
+        <element text="ab"><mrow><mi>a</mi><mi>b</mi></mrow></element>
+        <element text="b"><mrow><mi>b</mi></mrow></element>
+        <element text="axy"><mrow><mi>a</mi><mi>x</mi><mi>y</mi></mrow></element>
+        <element text="aby"><mrow><mi>a</mi><mi>b</mi><mi>y</mi></mrow></element>
+        <element text="xy"><mrow><mi>x</mi><mi>y</mi></mrow></element>
+        <element text="by"><mrow><mi>b</mi><mi>y</mi></mrow></element>
+        <element text="abc"><mrow><mi>a</mi><mi>b</mi><mi>c</mi></mrow></element>
+        <element text="bc"><mrow><mi>b</mi><mi>c</mi></mrow></element>
+        <element text="abcx"><mrow><mi>a</mi><mi>b</mi><mi>c</mi><mi>x</mi></mrow></element>
+        <element text="bcx"><mrow><mi>b</mi><mi>c</mi><mi>x</mi></mrow></element>
+        <element text="ac"><mrow><mi>a</mi><mi>c</mi></mrow></element>
+        <element text="c"><mrow><mi>c</mi></mrow></element>
+        <element text="abcy"><mrow><mi>a</mi><mi>b</mi><mi>c</mi><mi>y</mi></mrow></element>
+        <element text="bcy"><mrow><mi>b</mi><mi>c</mi><mi>y</mi></mrow></element>
+    </representation>
+</group>

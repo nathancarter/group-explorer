@@ -1,0 +1,86 @@
+<html>
+   <head>
+      <link rel="stylesheet" href="./style/fonts.css" type="text/css">
+
+      <script src="./lib/jquery-3.2.1.js"></script>
+      <script type="text/x-mathjax-config">
+       MathJax.Hub.Config({
+      	  CommonHTML: {
+             scale: 95,
+          },
+       });
+      </script>
+      <script src="./lib/MathJax-2.7.2/MathJax.js?config=MML_CHTML"></script>
+      <script src="./js/allGroupExplorer.js"></script>
+
+      <script>
+       $(window).on('load', load);	// like onload handler in body
+
+       function load() {
+          Library.loadFromInvocation()
+                 .then( ({library, groupIndex}) => formatGroup(library[groupIndex]) )
+                 .catch( (error) => alert(error) );
+       }
+
+       function formatGroup(group) {
+          const $rslt = $(document.createDocumentFragment())
+             .append(eval(Template.HTML('#header')));
+          if (group.isAbelian) {
+             $rslt.append(eval(Template.HTML('#abelian')));
+          } else {
+             $rslt.append(eval(Template.HTML('#non-abelian')));
+             for (const conjugacyClass of group.conjugacyClasses) {
+                $rslt.find('#conjugacy_list')
+                     .append($('<li>').html(
+                        conjugacyClass.toArray()
+                                      .map(el => math(group.representation[el]))
+                                      .join(', ')
+                     ) );
+             }
+          }
+          $rslt.append(eval(Template.HTML('#trailer')));
+          $('body').append($rslt);
+          MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
+       }
+
+       function formatClassEquation(group) {
+          let classEquation;
+          if (   group.order > 5
+              && group.conjugacyClasses.every(function (el) { return el.popcount() == 1; })) {
+             classEquation =
+                eval('`' + '1 + 1 + ... (${group.order} times) ... + 1 = ${group.order}' + '`');
+          } else {
+             classEquation =
+                group.conjugacyClasses
+                     .map(function (el) { return el.popcount(); })
+                     .join(' + ') +
+                ' = ' + group.order;
+          }
+          return classEquation;
+       }
+      </script>
+   </head>
+
+   <body>
+      <template id="header">
+         <h3>Results of "Class equation" computation for ${math(group.name)}</h3>
+         <p>The <a href="./help/rf-groupterms.html#classequation">class equation</a>
+            for ${math(group.name)} is ${formatClassEquation(group)}.</p>
+      </template>
+      <template id="abelian">
+         <p>Each of the ${group.order} elements in the group is in a conjugacy class of its own,
+            because the group is abelian.</p>
+      </template>
+      <template id="non-abelian">
+         <p>The <a href="./help/rf-groupterms.html#conjclasses">conjugacy classes</a>
+            used in the class equation are listed here:</p>
+         <ul id="conjugacy_list">
+         </ul>
+      </template>
+      <template id="trailer">
+         To see a visual representation of this class equation, click one of the following links:
+         <br>
+         <i>(Not implemented)</i>
+      </template>
+   </body>
+</html>

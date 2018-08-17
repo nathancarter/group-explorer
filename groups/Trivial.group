@@ -1,0 +1,20 @@
+<!DOCTYPE groupexplorerml>
+<group>
+    <name text="Z_1"><mrow><msub><mi>&Zopf;</mi><mn>1</mn></msub></mrow></name>
+    <definition text="{ e }">
+        <mfenced open="{" close="}" separators=":">
+            <mrow><mi>e</mi></mrow>
+        </mfenced>
+    </definition>
+    <phrase>Trivial group</phrase>
+    <author>Nathan Carter (ncarter@bentley.edu)</author>
+    <multtable>
+        <row>0</row>
+    </multtable>
+    <representation>
+        <element text="e"><mi>e</mi></element>
+    </representation>
+    <representation>
+        <element text="1"><mn>1</mn></element>
+    </representation>
+</group>

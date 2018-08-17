@@ -1,0 +1,400 @@
+<!--
+     make multtable yellow
+-->
+<html>
+   <head>
+      <link rel="icon" type="image/png" href="./images/favicon.png"></link>
+      <link rel="stylesheet" href="./style/fonts.css" type="text/css"></link>
+
+      <style>
+       body {
+          background-color: #ECECEC;
+          margin: 0;
+          height: 100%;
+          width: 100%;
+       }
+       button {
+          -webkit-appearance: none;
+          background-color: white;
+          border: 1px solid #A4A4A4;
+          height: 30px;
+          font-size: 14pt;
+       }
+       button:focus {
+          outline: 0;
+       }
+       .vert {
+          display: flex;
+          flex-direction: column;
+       }
+       .horiz {
+          display: flex;
+          flex-direction: row;
+       }
+       #head {
+          background-color: #D0D0D0;
+          justify-content: center;
+          align-items: center;
+          height: 60px;
+       }
+       #header {
+          font-size: 40px;
+          display: block;
+       }
+
+       #horiz_layout {
+          height: 100%;
+          xtouch-action: none;
+       }
+
+       #graphic {
+          flex: 1 1 auto;
+          /*
+             background-color: #C8E8C8;
+           */
+          background-color: #ECECEC;
+          overflow-x: auto;
+          width: 100%;
+       }
+       .srollable {
+          overflow: auto;
+       }
+       #splitter {
+          flex: 0 0 auto;
+          width: 8px;
+          background: #ECECEC;
+          cursor: col-resize;
+       }
+       #text {
+          flex: 0 0 auto;
+          width: 400px;
+       }
+
+       #options {
+          justify-content: center;
+          height: 42px;
+       }
+       #options > button {
+          min-width: 15%;
+       }
+
+       .info {
+          height: 100%;
+       }
+       #subset_page {
+          background-color: white;
+          overflow: auto;
+       }
+       #view, #diagram {
+          display: none;
+          background: #E2E2E2;
+       }
+
+       select {
+          display: block;
+          margin: 25px;
+          font-size: 11pt;
+          padding: 3px;
+       }
+
+       #help_reset {
+          justify-content: space-around;
+          align-items: center;
+          height: 44px;
+       }
+       #help_reset > button {
+          width: 48%;
+       }
+
+       /* styling sliders -- tested on Chrome, Firefox, Edge */
+       input[type=range] {
+          -webkit-appearance: none;
+          width: 90%;
+          height: 16px;
+          background: transparent;
+          margin: 25px 5% 25px 5%;
+       }
+
+       input[type=range]:focus {
+          outline: none;
+       }
+
+       input[type=range]::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 16px;
+          height: 16px;
+          border-radius: 50%;
+          background: white;
+          box-shadow: 1px 0px #d3d3d3, -1px 0px #d3d3d3, 0px 1px #d3d3d3, 0px -1px #d3d3d3;
+          margin-top: -6px;
+       }
+       input[type=range]::-moz-range-thumb {
+       }
+       input[type=range]::-ms-thumb {
+          margin: 0;
+          width: 16px;
+          height: 16px;
+          border-radius: 8px;
+          background: white;
+          box-shadow: 1px 0px #d3d3d3, -1px 0px #d3d3d3, 0px 1px #d3d3d3, 0px -1px #d3d3d3;
+
+       }
+
+       input[type=range]::-webkit-slider-runnable-track {
+          background: #c9c9c9;
+          height: 4px;
+       }
+       input[type=range]::-moz-range-track {
+       }
+       input[type=range]::-ms-track {
+          background: #c9c9c9;
+          height: 1px;
+       }
+      </style>
+      <style>
+       #organization_choice input[type=checkbox] {
+          visibility: hidden;
+       }
+      </style>
+      <link rel="stylesheet" href="./subsetDisplay/subsets.css" type="text/css"></link>
+
+      <script src="./lib/jquery-3.2.1.js"></script>
+      <script type="text/x-mathjax-config">
+       MathJax.Hub.Config({
+          CommonHTML: {
+             scale: 95,
+          },
+       });
+      </script>
+      <script src="./lib/MathJax-2.7.2/MathJax.js?config=MML_CHTML"></script>
+      <script src="./lib/three.js"></script>
+      <script src="./lib/TrackballControls.js"></script>
+      <script src="./lib/jquery-resizable.js"></script>
+      <script src="./lib/THREE.MeshLine.js"></script>
+      <script src="./js/allGroupExplorer.js"></script>
+      <script src="./subsetDisplay/allSubsetDisplay.js"></script>
+
+      <script>
+       // global variables
+       var group,		// group about which information will be displayed
+           multtable,		// data being displayed in large diagram
+           graphicContext,	// graphic context for large diagram
+           organization;	// subgroup by which the diagram will be organized
+
+       // Static event managers (setup after document is available)
+       $(function() {
+          $('#subset_page_select').on('click', show_subset_page);
+          $('#table_page_select').on('click', show_table_page);
+          $('#help').on('click', help);
+          $('#reset').on('click', load);
+          $('#rainbow').on('click', () => color('Rainbow'));
+          $('#grayscale').on('click', () => color('Grayscale'));
+          $('#no_coloration').on('click', () => color('None'));
+          $('#organization_choice').on('click', organize);
+          $('#separation_slider').on('input', separation);
+       });
+       $(window).on('load', load);	// like onload handler in body
+       $(window).on('resize', resizeBody);
+
+       function load() {
+          Library.loadFromInvocation()
+                 .then( ({library, groupIndex}) => {
+                    const hrefURL = new URL(window.location.href);
+                    window.group = library[groupIndex];
+                    importSubsetDisplay()
+                 } )
+                 .catch( (error) => alert(error) );
+       }
+
+       // this should be replaced with HTML5 import when it's available
+       function importSubsetDisplay() {
+          const xhr = new XMLHttpRequest();
+          xhr.open('GET', './subsetDisplay/subsets.html', true);
+          xhr.responseType = 'document';
+          xhr.onload = function(e) {
+             const document = $(e.target.response);
+             $('#subset_page').html(document.find('body > *'));
+             setup();
+          };
+          xhr.send();
+       }
+
+       function setup() {
+          $('#header').html(eval(Template.HTML('#header')));
+          MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'header']);
+
+          multtable = new Multtable(group);
+          graphicContext = new DisplayMulttable({container: $('#graphic')});
+
+          choose(0);
+          /*
+             $('#text').resizable({
+             handleSelector: '#splitter',
+             resizeHeight: false,
+             resizeWidthFrom: 'left',
+             onDrag: function () {
+             resizeGraphic(graphicContext.camera, graphicContext.renderer);
+             }
+             });
+           */
+          SSD.setup_subset_page();
+          // show_subset_page();
+
+          show_table_page();
+          resizeBody();
+       }
+
+       function organize(ev) {
+          ev.stopPropagation();
+          const $organizationList = $(eval(Template.HTML('#organization_list_template')));
+          group.subgroups.forEach( (subgroup, inx) => {
+             const templateName =
+                (subgroup.order == 1) ? '#organization_element_none_template' : '#organization_element_template';
+             if (subgroup.order != group.order) {
+                $organizationList.append(
+                   $(`<li id=${inx}>`).html(eval(Template.HTML(templateName)))
+                                      .on('click', (ev) => choose(ev.target.id, ev)));
+             }
+          } )
+          $('#organization_current').html($organizationList);
+          $('#organization_current input[type=checkbox]').each( (_, el) => el.style.visibility = 'hidden' );
+          if (window.organization !== undefined) {
+             $(`#${window.organization} input`)[0].style.visibility = 'visible';
+          }
+       }
+
+       function choose(inx, ev) {
+          if (ev !== undefined) {
+             ev.stopPropagation();
+          }
+          window.organization = inx
+          $('#organization_current').children().remove();
+          const subgroup = group.subgroups[inx];
+          const templateName =
+             (subgroup.order == 1) ? '#organization_element_none_template' : '#organization_element_template';
+          $('#organization_current').html(eval(Template.HTML(templateName)));
+          if (inx == 0) {
+             window.multtable.reset();
+          } else {
+             window.multtable.organizeBySubgroup(group.subgroups[inx]);
+          }
+          window.graphicContext.showLargeGraphic(window.multtable);
+       }
+
+       function separation() {
+          window.multtable.separation = $('#separation_slider')[0].valueAsNumber/100;
+          window.graphicContext.showLargeGraphic(window.multtable);
+       }
+       
+       function color(coloration) {
+          multtable.coloration = coloration;
+          graphicContext.showLargeGraphic(multtable);
+       }
+
+       function resizeBody() {
+          $('#graphic').height(window.innerHeight - $('#header').height());
+          $('#text').height(window.innerHeight - $('#header').height());
+       };
+
+       function show_subset_page() {
+          $('#subset_page').show();
+          $('#table_page').hide();
+       }
+
+       function show_table_page() {
+          $('#subset_page').hide();
+          $('#table_page').show();
+       }
+
+       function help() {
+          alert('There is no help for you. (yet)');
+       }
+      </script>
+      <style>
+       #graphic {
+          background-color: #F0F0F0;
+       }
+       .t {
+          background-color: gray;
+          border: 1px solid red;
+       }
+       .r {
+          border: 1px solid green;
+       }
+       .c {
+          border: 1px solid blue;
+          background-color: hsl(90,100%,80%);
+          white-space: normal;
+          text-align: center;
+          height: 100px;
+          width: 100px;
+       }
+       .d {
+          text-align: left;
+          padding: 10px;
+          display: inline-block;
+       }
+
+       .s {
+          border: 1px solid #A5A5A5;
+          background: white;
+          height: 20px;
+          width: 80%;
+          margin: auto;
+       }
+       .s0 {
+          float: left;
+          height: 20px;
+       }
+       .s1 {
+          float: right;
+          height: 20px;
+          background: #D0D0D0;
+       }
+      </style>
+   </head>
+   <body class="vert">
+      <div id="head" class="horiz"><div id="header">Multiplication Table for ${math(group.name)}</div></div>
+      <div id="horiz_layout" class="horiz">
+         <div id="graphic"></div>
+         <div id="splitter"></div>
+         <div id="text" class="vert">
+            <div id="options" class="horiz">
+               <button id="subset_page_select">Subsets</button>
+               <button id="table_page_select">Table</button>
+            </div>
+            <div id="subset_page" class="info">
+               <!-- insert subsetDisplay/subsets.html here -->
+            </div>
+            <div id="table_page" class="info" style="background-color: #E2E2E2">
+               <p>Organize by subgroup:
+                  <div id="organization_choice" class="s">
+                     <span id="organization_current" class="s0"></span>
+                     <span class="s1">&#9660;</span>
+                  </div>
+                  <template id="organization_list_template"><ul id="organization_list" class="menu"></ul></template>
+                  <template id="organization_element_none_template">
+                     <input type="checkbox" checked>none
+                  </template>
+                  <template id="organization_element_template">
+                     <input type="checkbox" checked><i>H<sub>${inx}</sub></i>, a subgroup of order ${subgroup.order}
+                  </template>
+               </select>
+               <p>Separate cosets by:
+                  <input id="separation_slider" type="range" min="0" max="20" value="0"> <!-- [0-20] => [0,box width] -->
+                  <p>Default coloration:
+                     <form>
+                        <input id="rainbow" name="coloration" type="radio">Spectrum/rainbow<br>
+                        <input id="grayscale" name="coloration" type="radio">Grayscale<br>
+                        <input id="no_coloration" name="coloration" type="radio">None<br>
+                     </form>
+            </div>
+            <div id="help_reset" class="horiz">
+               <button id="help">Help</button>
+               <button id="reset">Reset</button>
+            </div>
+         </div>
+      </div>
+   </body>
+</html>

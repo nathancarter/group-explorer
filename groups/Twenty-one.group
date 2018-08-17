@@ -1,0 +1,60 @@
+<!DOCTYPE groupexplorerml>
+<group>
+    <name text="Twenty-one"><mtext>Twenty-one</mtext></name>
+    <definition text="&amp;lt; &lt;i&gt;a&lt;/i&gt;, &lt;i&gt;b&lt;/i&gt; | &lt;i&gt;a&lt;/i&gt;&lt;sup&gt;7&lt;/sup&gt;=&lt;i&gt;b&lt;/i&gt;&lt;sup&gt;3&lt;/sup&gt;=1, &lt;i&gt;bab&lt;/i&gt;&lt;sup&gt;-1&lt;/sup&gt;=&lt;i&gt;a&lt;/i&gt;&lt;sup&gt;2&lt;/sup&gt; &amp;gt;">
+        <mfenced open="&lt;" close="&gt;" separators=":">
+            <mrow><mi>a</mi><mo>,</mo><mi>b</mi></mrow>
+            <mrow><msup><mi>a</mi><mn>7</mn></msup><mo>=</mo><msup><mi>b</mi><mn>3</mn></msup><mo>=</mo><mn>1</mn><mo>,</mo><mi>b</mi><mi>a</mi><msup><mi>b</mi><mn>-1</mn></msup><mo>=</mo><msup><mi>a</mi><mn>2</mn></msup></mrow>
+        </mfenced>
+    </definition>
+    <phrase>Nonabelian group of order 21</phrase>
+    <notes>This is the only nonabelian group of order 21.</notes>
+    <author>Nathan Carter (ncarter@bentley.edu)</author>
+    <multtable>
+        <row> 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 </row>
+        <row> 1 2 3 4 5 6 0 9 10 11 12 13 7 8 18 19 20 14 15 16 17 </row>
+        <row> 2 3 4 5 6 0 1 11 12 13 7 8 9 10 15 16 17 18 19 20 14 </row>
+        <row> 3 4 5 6 0 1 2 13 7 8 9 10 11 12 19 20 14 15 16 17 18 </row>
+        <row> 4 5 6 0 1 2 3 8 9 10 11 12 13 7 16 17 18 19 20 14 15 </row>
+        <row> 5 6 0 1 2 3 4 10 11 12 13 7 8 9 20 14 15 16 17 18 19 </row>
+        <row> 6 0 1 2 3 4 5 12 13 7 8 9 10 11 17 18 19 20 14 15 16 </row>
+        <row> 7 8 9 10 11 12 13 14 15 16 17 18 19 20 0 1 2 3 4 5 6 </row>
+        <row> 8 9 10 11 12 13 7 16 17 18 19 20 14 15 4 5 6 0 1 2 3 </row>
+        <row> 9 10 11 12 13 7 8 18 19 20 14 15 16 17 1 2 3 4 5 6 0 </row>
+        <row> 10 11 12 13 7 8 9 20 14 15 16 17 18 19 5 6 0 1 2 3 4 </row>
+        <row> 11 12 13 7 8 9 10 15 16 17 18 19 20 14 2 3 4 5 6 0 1 </row>
+        <row> 12 13 7 8 9 10 11 17 18 19 20 14 15 16 6 0 1 2 3 4 5 </row>
+        <row> 13 7 8 9 10 11 12 19 20 14 15 16 17 18 3 4 5 6 0 1 2 </row>
+        <row> 14 15 16 17 18 19 20 0 1 2 3 4 5 6 7 8 9 10 11 12 13 </row>
+        <row> 15 16 17 18 19 20 14 2 3 4 5 6 0 1 11 12 13 7 8 9 10 </row>
+        <row> 16 17 18 19 20 14 15 4 5 6 0 1 2 3 8 9 10 11 12 13 7 </row>
+        <row> 17 18 19 20 14 15 16 6 0 1 2 3 4 5 12 13 7 8 9 10 11 </row>
+        <row> 18 19 20 14 15 16 17 1 2 3 4 5 6 0 9 10 11 12 13 7 8 </row>
+        <row> 19 20 14 15 16 17 18 3 4 5 6 0 1 2 13 7 8 9 10 11 12 </row>
+        <row> 20 14 15 16 17 18 19 5 6 0 1 2 3 4 10 11 12 13 7 8 9 </row>
+    </multtable>
+    <generators list="1 7"/>
+    <representation>
+        <element text="e"><mrow><mi>e</mi></mrow></element>
+        <element text="a"><mrow><mi>a</mi></mrow></element>
+        <element text="aa"><mrow><msup><mi>a</mi><mn>2</mn></msup></mrow></element>
+        <element text="aaa"><mrow><msup><mi>a</mi><mn>3</mn></msup></mrow></element>
+        <element text="aaaa"><mrow><msup><mi>a</mi><mn>4</mn></msup></mrow></element>
+        <element text="aaaaa"><mrow><msup><mi>a</mi><mn>5</mn></msup></mrow></element>
+        <element text="aaaaaa"><mrow><msup><mi>a</mi><mn>6</mn></msup></mrow></element>
+        <element text="b"><mrow><mi>b</mi></mrow></element>
+        <element text="aaaab"><mrow><msup><mi>a</mi><mn>4</mn></msup><mi>b</mi></mrow></element>
+        <element text="ab"><mrow><mi>a</mi><mi>b</mi></mrow></element>
+        <element text="aaaaab"><mrow><msup><mi>a</mi><mn>5</mn></msup><mi>b</mi></mrow></element>
+        <element text="aab"><mrow><msup><mi>a</mi><mn>2</mn></msup><mi>b</mi></mrow></element>
+        <element text="aaaaaab"><mrow><msup><mi>a</mi><mn>6</mn></msup><mi>b</mi></mrow></element>
+        <element text="aaab"><mrow><msup><mi>a</mi><mn>3</mn></msup><mi>b</mi></mrow></element>
+        <element text="bb"><mrow><msup><mi>b</mi><mn>2</mn></msup></mrow></element>
+        <element text="baaaab"><mrow><mi>b</mi><msup><mi>a</mi><mn>4</mn></msup><mi>b</mi></mrow></element>
+        <element text="bab"><mrow><mi>b</mi><mi>a</mi><mi>b</mi></mrow></element>
+        <element text="baaaaab"><mrow><mi>b</mi><msup><mi>a</mi><mn>5</mn></msup><mi>b</mi></mrow></element>
+        <element text="baab"><mrow><mi>b</mi><msup><mi>a</mi><mn>2</mn></msup><mi>b</mi></mrow></element>
+        <element text="baaaaaab"><mrow><mi>b</mi><msup><mi>a</mi><mn>6</mn></msup><mi>b</mi></mrow></element>
+        <element text="baaab"><mrow><mi>b</mi><msup><mi>a</mi><mn>3</mn></msup><mi>b</mi></mrow></element>
+    </representation>
+</group>

@@ -1,0 +1,174 @@
+<html>
+   <head>
+      <link rel="stylesheet" href="./style/fonts.css" type="text/css">
+
+      <script src="./lib/jquery-3.2.1.js"></script>
+      <script type="text/x-mathjax-config">
+       MathJax.Hub.Config({
+      	  CommonHTML: {
+             scale: 90,
+          },
+       });
+      </script>
+      <script src="./lib/MathJax-2.7.2/MathJax.js?config=MML_CHTML"></script>
+      <script src="./js/allGroupExplorer.js"></script>
+
+      <script>
+       $(window).on('load', load);	// like onload handler in body
+
+       function load() {
+          Library.loadFromInvocation()
+                 .then( ({library, groupIndex}) => formatGroup(library[groupIndex]) )
+                 .catch( (error) => alert(error) );
+       }
+
+       function formatGroup(group) {
+          let $rslt = $(document.createDocumentFragment())
+             .append(eval(Template.HTML('#header')));
+          if (group.isAbelian) {
+             $rslt.append(eval(Template.HTML('#abelian')));
+          } else if (group.isSolvable) {
+             try {
+                const decomposition = findSolvableDecomposition(group);
+                let decompositionDisplay = decomposition
+                   .reverse()
+                   .map( el => makeGroupRef(el) );
+                decompositionDisplay.push(makeGroupRef(IsomorphicGroups.map.get(1)[0]));
+                decompositionDisplay = decompositionDisplay.reverse().join(' &#x25c5; ');
+                $rslt.append(eval(Template.HTML('#solvable')));
+                for (let i = 0; i < decomposition.length - 1; i++) {
+                   let g = decomposition[i];
+                   $rslt.find('#decomposition')
+                        .append(eval(Template.HTML('#decomposition_element')));
+                }
+                let g = decomposition[decomposition.length - 1];
+                $rslt.find('#decomposition')
+                     .append(eval(Template.HTML('#decomposition_termination')));
+             } catch (err) {
+                $rslt.append(eval(Template.HTML('#failure')));
+             }
+          } else {
+             $rslt.append(eval(Template.HTML('#unsolvable')));
+             if (group.isSimple) {
+                $rslt.append(eval(Template.HTML('#simple')));
+             }
+          }
+
+          $('body').append($rslt);
+          MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
+       }
+
+       function makeGroupRef(group) {
+          const g = (group.name === undefined ? group.isIsomorphicTo : group);
+          return `<a href="javascript:groupRef(${g.libraryIndex})">${math(g.name)}</a>`;
+       }
+       
+       function groupRef(groupIndex) {
+          const blobURL = URL.createObjectURL(
+             new Blob([libraryJSON], {type: 'application/json'}));
+          window.open(`GroupInfo.html?library=${blobURL}&index=${groupIndex}`);
+       }
+
+       // given group, returns sequence of subgroups as BasicGroups
+       function findSolvableDecomposition(group) {
+          if (group.isAbelian) {
+             return [group];
+          }
+
+          // search subgroups for normal subgroup with Abelian quotient group
+          const subgroups = group.subgroups;
+          for (let i = 0; i < subgroups.length; i++) {
+             const subgroup = subgroups[i];
+             if (   subgroup.members.popcount() == 1
+                 || subgroup.members.popcount() == group.order
+                 || !group.isNormal(subgroup) ) {
+                continue;
+             }
+
+             // check that quotient group is Abelian
+             const quotientGroup = group.getQuotientGroup(subgroup.members);
+             if (!quotientGroup.isAbelian) {
+                continue;
+             }
+
+             // convert subgroup to BasicGroup
+             const subgroupAsGroup = group.getSubgroupAsGroup(subgroup);
+             const decomposition = findSolvableDecomposition(subgroupAsGroup);
+             if (decomposition === undefined) {
+                throw {subgroupIndex: i};
+             } else {
+                subgroupAsGroup.isIsomorphicTo = IsomorphicGroups.find(subgroupAsGroup);
+                group.subgroupIndex = i;
+                group.subgroupIsomorphicTo = subgroupAsGroup.isIsomorphicTo;
+                group.quotientIsomorphicTo = IsomorphicGroups.find(quotientGroup);
+                decomposition.push(group);
+                return decomposition;
+             }
+          }
+          return undefined;
+       }
+      </script>
+   </head>
+
+   <body>
+      <template id="header">
+         <h3>Results of "Solvable group" computation for ${math(group.name)}</h3>
+      </template>
+      <template id="abelian">
+         ${math(group.name)} is <a href="./help/rf-groupterms.html#solvable">solvable</a>
+         because it is <a href="./help/rf-groupterms.html#abelian">abelian</a>.
+      </template>
+      <template id="solvable">
+         ${math(group.name)} is a <a href="./help/rf-groupterms.html#solvable">solvable</a>
+         group by the following solvable decomposition:
+         <ul id="decomposition" style="list-style-type: none">
+         </ul>
+
+         <p>In summary, ${decompositionDisplay}.</p>
+
+         <p>You can see a diagram of all the groups in the solvable decomposition,
+            including quotient maps, by
+            <a href="">Cayley Diagram</a> or by
+            <a href="">Cycle Graph</a> or by
+            <a href="">Multiplication Table</a>.
+            <i>(Not implemented)</i>
+         </p>
+      </template>
+      <template id="decomposition_element">
+         <li>The <a href="./help/rf-groupterms.html#quotient">quotient</a> of
+            ${makeGroupRef(g)}</a> by its
+            <a href="./help/rf-groupterms.html#normalsubgroup">normal subgroup</a>
+            <i>H<sub>${g.subgroupIndex}</sub></i>
+            (<a href="./help/rf-groupterms.html#isomorphism">isomorphic</a> to
+            ${makeGroupRef(g.subgroupIsomorphicTo)}) gives
+            ${makeGroupRef(g.quotientIsomorphicTo)}.</li>
+      </template>
+      <template id="decomposition_termination">
+         <li>The group ${makeGroupRef(g)} is
+            <a href="./help/rf-groupterms.html#abelian">abelian</a>.</li>
+      </template>
+      <template id="unsolvable">
+         ${math(group.name)} is not a <a href="./help/rf-groupterms.html#solvable">solvable</a>
+         group.
+      </template>
+      <template id ="simple">
+         In fact, it does not even have a
+         <a href="./help/rf-groupterms.html#normalsubgroup">normal subgroup</a>
+         that can be used to form an <a href="./help/rf-groupterms.html#abelian">abelian</a>
+         <a href="./help/rf-groupterms.html#quotient">quotient</a> group.
+      </template>
+      <template id="failure">
+         <p>Group Explorer is currently unable to determine whether ${math(group.name)} is a
+            <a href="./help/rf-groupterms.html#solvable">solvable</a> group because it does
+            not have access to all the groups it needs. For example, the
+            <a href="./help/rf-groupterms.html#normalsubgroup">normal subgroup</a>
+            <i>H<sub>{subgroupIndex}</sub></i> yields an
+            <a href="./help/rf-groupterms.html#abelian">abelian</a>
+            <a href="./help/rf-groupterms.html#quotient">quotient</a> group, but it is not
+            <a href="./help/rf-groupterms.html#isomorphism">isomorphic</a> to any group in
+            the library currently loaded.</p>
+         <p>You will need to more groups loaded (see <a href="">options window</a> for starters)
+            to make this computation possible.</p>
+      </template>
+   </body>
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE groupexplorerml>
+<group>
+    <name text="Q_8"><mrow><msub><mi>Q</mi><mn>8</mn></msub></mrow></name>
+    <definition text="&amp;lt; &lt;i&gt;a&lt;/i&gt;, &lt;i&gt;b&lt;/i&gt; | &lt;i&gt;a&lt;/i&gt;&lt;sup&gt;8&lt;/sup&gt;=1, &lt;i&gt;a&lt;/i&gt;&lt;sup&gt;4&lt;/sup&gt;=&lt;i&gt;b&lt;/i&gt;&lt;sup&gt;2&lt;/sup&gt;, &lt;i&gt;aba&lt;/i&gt;=&lt;i&gt;b&lt;/i&gt; &amp;gt;">
+        <mfenced open="&lt;" close="&gt;" separators=":">
+            <mrow><mi>a</mi><mo>,</mo><mi>b</mi></mrow>
+            <mrow><msup><mi>a</mi><mn>8</mn></msup><mo>=</mo><mn>1</mn><mo>,</mo><msup><mi>a</mi><mn>4</mn></msup><mo>=</mo><msup><mi>b</mi><mn>2</mn></msup><mo>,</mo><mi>a</mi><mi>b</mi><mi>a</mi><mo>=</mo><mi>b</mi></mrow>
+        </mfenced>
+    </definition>
+    <phrase>Higher Quaternion group (order 16)</phrase>
+    <author>Nathan Carter (ncarter@bentley.edu)</author>
+    <multtable>
+        <row> 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 </row>
+        <row> 1 2 3 4 5 6 7 0 15 8 9 10 11 12 13 14 </row>
+        <row> 2 3 4 5 6 7 0 1 14 15 8 9 10 11 12 13 </row>
+        <row> 3 4 5 6 7 0 1 2 13 14 15 8 9 10 11 12 </row>
+        <row> 4 5 6 7 0 1 2 3 12 13 14 15 8 9 10 11 </row>
+        <row> 5 6 7 0 1 2 3 4 11 12 13 14 15 8 9 10 </row>
+        <row> 6 7 0 1 2 3 4 5 10 11 12 13 14 15 8 9 </row>
+        <row> 7 0 1 2 3 4 5 6 9 10 11 12 13 14 15 8 </row>
+        <row> 8 9 10 11 12 13 14 15 4 5 6 7 0 1 2 3 </row>
+        <row> 9 10 11 12 13 14 15 8 3 4 5 6 7 0 1 2 </row>
+        <row> 10 11 12 13 14 15 8 9 2 3 4 5 6 7 0 1 </row>
+        <row> 11 12 13 14 15 8 9 10 1 2 3 4 5 6 7 0 </row>
+        <row> 12 13 14 15 8 9 10 11 0 1 2 3 4 5 6 7 </row>
+        <row> 13 14 15 8 9 10 11 12 7 0 1 2 3 4 5 6 </row>
+        <row> 14 15 8 9 10 11 12 13 6 7 0 1 2 3 4 5 </row>
+        <row> 15 8 9 10 11 12 13 14 5 6 7 0 1 2 3 4 </row>
+    </multtable>
+    <generators list="1 8"/>
+    <representation>
+        <element text="e"><mi>e</mi></element>
+        <element text="a"><mi>a</mi></element>
+        <element text="a^2"><msup><mi>a</mi><mn>2</mn></msup></element>
+        <element text="a^3"><msup><mi>a</mi><mn>3</mn></msup></element>
+        <element text="b^2"><msup><mi>b</mi><mn>2</mn></msup></element>
+        <element text="ab^2"><mrow><mi>a</mi><msup><mi>b</mi><mn>2</mn></msup></mrow></element>
+        <element text="a^2b^2"><mrow><msup><mi>a</mi><mn>2</mn></msup><msup><mi>b</mi><mn>2</mn></msup></mrow></element>
+        <element text="a^3b^2"><mrow><msup><mi>a</mi><mn>3</mn></msup><msup><mi>b</mi><mn>2</mn></msup></mrow></element>
+        <element text="b"><mi>b</mi></element>
+        <element text="ba"><mi>ba</mi></element>
+        <element text="ba^2"><mrow><mi>b</mi><msup><mi>a</mi><mn>2</mn></msup></mrow></element>
+        <element text="ab^3"><mrow><mi>a</mi><msup><mi>b</mi><mn>3</mn></msup></mrow></element>
+        <element text="b^3"><msup><mi>b</mi><mn>3</mn></msup></element>
+        <element text="a^3b"><mrow><msup><mi>a</mi><mn>3</mn></msup><mi>b</mi></mrow></element>
+        <element text="a^2b"><mrow><msup><mi>a</mi><mn>2</mn></msup><mi>b</mi></mrow></element>
+        <element text="ab"><mi>ab</mi></element>
+    </representation>
+</group>

@@ -1,0 +1,158 @@
+<!DOCTYPE groupexplorerml>
+<group>
+    <name text="Z_5"><mrow><msub><mi>&Zopf;</mi><mn>5</mn></msub></mrow></name>
+    <definition text="&amp;lt; &lt;i&gt;a&lt;/i&gt; | &lt;i&gt;a&lt;/i&gt;&lt;sup&gt;5&lt;/sup&gt;=1 &amp;gt;">
+        <mfenced open="&lt;" close="&gt;" separators=":">
+            <mrow><mi>a</mi></mrow>
+            <mrow><msup><mi>a</mi><mn>5</mn></msup><mo>=</mo><mn>1</mn></mrow>
+        </mfenced>
+    </definition>
+    <phrase>Cyclic group of order 5</phrase>
+    <author>Nathan Carter (ncarter@bentley.edu)</author>
+    <multtable>
+        <row> 0 1 2 3 4 </row>
+        <row> 1 2 3 4 0 </row>
+        <row> 2 3 4 0 1 </row>
+        <row> 3 4 0 1 2 </row>
+        <row> 4 0 1 2 3 </row>
+    </multtable>
+    <generators list="1"/>
+    <representation>
+        <element text="e"><mi>e</mi></element>
+        <element text="a"><mi>a</mi></element>
+        <element text="a^2"><msup><mi>a</mi><mn>2</mn></msup></element>
+        <element text="a^3"><msup><mi>a</mi><mn>3</mn></msup></element>
+        <element text="a^4"><msup><mi>a</mi><mn>4</mn></msup></element>
+    </representation>
+    <representation>
+        <element text="()"><mrow><mo>(</mo><mo>)</mo></mrow></element>
+        <element text="(0 1 2 3 4)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn><mspace width="1em"/><mn>2</mn><mspace width="1em"/><mn>3</mn><mspace width="1em"/><mn>4</mn></mrow><mo>)</mo></mrow></element>
+        <element text="(0 2 4 1 3)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>2</mn><mspace width="1em"/><mn>4</mn><mspace width="1em"/><mn>1</mn><mspace width="1em"/><mn>3</mn></mrow><mo>)</mo></mrow></element>
+        <element text="(0 3 1 4 2)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>3</mn><mspace width="1em"/><mn>1</mn><mspace width="1em"/><mn>4</mn><mspace width="1em"/><mn>2</mn></mrow><mo>)</mo></mrow></element>
+        <element text="(0 4 3 2 1)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>4</mn><mspace width="1em"/><mn>3</mn><mspace width="1em"/><mn>2</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow></element>
+    </representation>
+    <symmetryobject name="Propeller with 5 blades: front view">
+        <operation element="1" degrees="72.0"><point x="0.0" y="1.0" z="0.0"/></operation>
+        <sphere radius="0.1" color="#FF0000"><point x="0.0" y="-1.0" z="0.0"/></sphere>
+        <sphere radius="0.1" color="#CC00FF"><point x="0.0" y="-0.30902" z="0.95106"/></sphere>
+        <sphere radius="0.1" color="#0066FF"><point x="0.0" y="0.80902" z="0.58779"/></sphere>
+        <sphere radius="0.1" color="#00FF66"><point x="0.0" y="0.80902" z="-0.58779"/></sphere>
+        <sphere radius="0.1" color="#CCFF00"><point x="0.0" y="-0.30902" z="-0.95106"/></sphere>
+        <path color="#000000">
+            <point x="0.0" y="-0.30902" z="0.95106"/>
+            <point x="0.0" y="-0.38311" z="0.81015"/>
+            <point x="0.0" y="-0.44412" z="0.6735"/>
+            <point x="0.0" y="-0.48056" z="0.54483"/>
+            <point x="0.0" y="-0.48388" z="0.42692"/>
+            <point x="0.0" y="-0.44954" z="0.32125"/>
+            <point x="0.0" y="-0.37755" z="0.22781"/>
+            <point x="0.0" y="-0.27245" z="0.14514"/>
+            <point x="0.0" y="-0.14276" z="0.07044"/>
+            <point x="0.0" y="0.0" z="0.0"/>
+            <point x="0.0" y="-0.11111" z="-0.11401"/>
+            <point x="0.0" y="-0.22222" z="-0.21426"/>
+            <point x="0.0" y="-0.33333" z="-0.28868"/>
+            <point x="0.0" y="-0.44444" z="-0.32827"/>
+            <point x="0.0" y="-0.55556" z="-0.32827"/>
+            <point x="0.0" y="-0.66667" z="-0.28868"/>
+            <point x="0.0" y="-0.77778" z="-0.21426"/>
+            <point x="0.0" y="-0.88889" z="-0.11401"/>
+            <point x="0.0" y="-1.0" z="0.0"/>
+        </path>
+        <path color="#000000">
+            <point x="0.0" y="0.80902" z="-0.58779"/>
+            <point x="0.0" y="0.78614" z="-0.43024"/>
+            <point x="0.0" y="0.75518" z="-0.28382"/>
+            <point x="0.0" y="0.70902" z="-0.15831"/>
+            <point x="0.0" y="0.64241" z="-0.06097"/>
+            <point x="0.0" y="0.55251" z="0.00434"/>
+            <point x="0.0" y="0.43935" z="0.03761"/>
+            <point x="0.0" y="0.30572" z="0.04272"/>
+            <point x="0.0" y="0.1569" z="0.02692"/>
+            <point x="0.0" y="0.0" z="0.0"/>
+            <point x="0.0" y="0.02288" z="0.15754"/>
+            <point x="0.0" y="0.05384" z="0.30396"/>
+            <point x="0.0" y="0.09999" z="0.42947"/>
+            <point x="0.0" y="0.16661" z="0.52681"/>
+            <point x="0.0" y="0.2565" z="0.59212"/>
+            <point x="0.0" y="0.36967" z="0.6254"/>
+            <point x="0.0" y="0.5033" z="0.63051"/>
+            <point x="0.0" y="0.65211" z="0.61471"/>
+            <point x="0.0" y="0.80902" z="0.58779"/>
+        </path>
+        <path color="#000000">
+            <point x="0.0" y="0.0" z="0.0"/>
+            <point x="0.0" y="0.07409" z="-0.1409"/>
+            <point x="0.0" y="0.13511" z="-0.27756"/>
+            <point x="0.0" y="0.17154" z="-0.40622"/>
+            <point x="0.0" y="0.17486" z="-0.52413"/>
+            <point x="0.0" y="0.14053" z="-0.62981"/>
+            <point x="0.0" y="0.06854" z="-0.72324"/>
+            <point x="0.0" y="-0.03657" z="-0.80592"/>
+            <point x="0.0" y="-0.16625" z="-0.88061"/>
+            <point x="0.0" y="-0.30902" z="-0.95106"/>
+        </path>
+    </symmetryobject>
+    <symmetryobject name="Propeller with 5 blades: above view">
+        <operation element="1" degrees="72.0"><point x="0.0" y="1.0" z="0.0"/></operation>
+        <sphere radius="0.1" color="#FF0000"><point x="1.0" y="-0.75" z="0.0"/></sphere>
+        <sphere radius="0.1" color="#CC00FF"><point x="0.30902" y="-0.75" z="0.95106"/></sphere>
+        <sphere radius="0.1" color="#0066FF"><point x="-0.80902" y="-0.75" z="0.58779"/></sphere>
+        <sphere radius="0.1" color="#00FF66"><point x="-0.80902" y="-0.75" z="-0.58779"/></sphere>
+        <sphere radius="0.1" color="#CCFF00"><point x="0.30902" y="-0.75" z="-0.95106"/></sphere>
+        <path color="#000000">
+            <point x="0.30902" y="-0.75" z="0.95106"/>
+            <point x="0.38311" y="-0.75" z="0.81015"/>
+            <point x="0.44412" y="-0.75" z="0.6735"/>
+            <point x="0.48056" y="-0.75" z="0.54483"/>
+            <point x="0.48388" y="-0.75" z="0.42692"/>
+            <point x="0.44954" y="-0.75" z="0.32125"/>
+            <point x="0.37755" y="-0.75" z="0.22781"/>
+            <point x="0.27245" y="-0.75" z="0.14514"/>
+            <point x="0.14276" y="-0.75" z="0.07044"/>
+            <point x="0.0" y="-0.75" z="0.0"/>
+            <point x="0.11111" y="-0.75" z="-0.11401"/>
+            <point x="0.22222" y="-0.75" z="-0.21426"/>
+            <point x="0.33333" y="-0.75" z="-0.28868"/>
+            <point x="0.44444" y="-0.75" z="-0.32827"/>
+            <point x="0.55556" y="-0.75" z="-0.32827"/>
+            <point x="0.66667" y="-0.75" z="-0.28868"/>
+            <point x="0.77778" y="-0.75" z="-0.21426"/>
+            <point x="0.88889" y="-0.75" z="-0.11401"/>
+            <point x="1.0" y="-0.75" z="0.0"/>
+        </path>
+        <path color="#000000">
+            <point x="-0.80902" y="-0.75" z="-0.58779"/>
+            <point x="-0.78614" y="-0.75" z="-0.43024"/>
+            <point x="-0.75518" y="-0.75" z="-0.28382"/>
+            <point x="-0.70902" y="-0.75" z="-0.15831"/>
+            <point x="-0.64241" y="-0.75" z="-0.06097"/>
+            <point x="-0.55251" y="-0.75" z="0.00434"/>
+            <point x="-0.43935" y="-0.75" z="0.03761"/>
+            <point x="-0.30572" y="-0.75" z="0.04272"/>
+            <point x="-0.1569" y="-0.75" z="0.02692"/>
+            <point x="0.0" y="-0.75" z="0.0"/>
+            <point x="-0.02288" y="-0.75" z="0.15754"/>
+            <point x="-0.05384" y="-0.75" z="0.30396"/>
+            <point x="-0.09999" y="-0.75" z="0.42947"/>
+            <point x="-0.16661" y="-0.75" z="0.52681"/>
+            <point x="-0.2565" y="-0.75" z="0.59212"/>
+            <point x="-0.36967" y="-0.75" z="0.6254"/>
+            <point x="-0.5033" y="-0.75" z="0.63051"/>
+            <point x="-0.65211" y="-0.75" z="0.61471"/>
+            <point x="-0.80902" y="-0.75" z="0.58779"/>
+        </path>
+        <path color="#000000">
+            <point x="0.0" y="-0.75" z="0.0"/>
+            <point x="-0.07409" y="-0.75" z="-0.1409"/>
+            <point x="-0.13511" y="-0.75" z="-0.27756"/>
+            <point x="-0.17154" y="-0.75" z="-0.40622"/>
+            <point x="-0.17486" y="-0.75" z="-0.52413"/>
+            <point x="-0.14053" y="-0.75" z="-0.62981"/>
+            <point x="-0.06854" y="-0.75" z="-0.72324"/>
+            <point x="0.03657" y="-0.75" z="-0.80592"/>
+            <point x="0.16625" y="-0.75" z="-0.88061"/>
+            <point x="0.30902" y="-0.75" z="-0.95106"/>
+        </path>
+    </symmetryobject>
+</group>

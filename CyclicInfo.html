@@ -1,0 +1,54 @@
+<html>
+   <head>
+      <link rel="stylesheet" href="./style/fonts.css" type="text/css">
+
+      <script src="./lib/jquery-3.2.1.js"></script>
+      <script type="text/x-mathjax-config">
+       MathJax.Hub.Config({
+      	  CommonHTML: {
+             scale: 95,
+          },
+       });
+      </script>
+      <script src="./lib/MathJax-2.7.2/MathJax.js?config=MML_CHTML"></script>
+      <script src="./js/allGroupExplorer.js"></script>
+
+      <script>
+       $(window).on('load', load);	// like onload handler in body
+
+       function load() {
+          Library.loadFromInvocation()
+                 .then( ({library, groupIndex}) => formatGroup(library[groupIndex]) )
+                 .catch( (error) => alert(error) );
+       }
+
+       function formatGroup(group) {
+          let $rslt = $(document.createDocumentFragment())
+             .append(eval(Template.HTML('#header')));
+          if (group.isCyclic) {
+             const gen = group.generators[0][0];
+             $rslt.append(eval(Template.HTML('#cyclic')));
+          } else {
+             $rslt.append(eval(Template.HTML('#non-cyclic')));
+          }
+
+          $('body').append($rslt);
+          MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
+       }
+      </script>
+   </head>
+
+   <body>
+      <template id="header">
+         <h3>Results of "Cyclic group" computation for ${math(group.name)}</h3>
+      </template>
+      <template id="cyclic">
+         <p>${math(group.name)} is <a href="./help/rf-groupterms.html#cyclic">cyclic</a>;
+            an element that generates the group is ${math(group.representation[gen])}.</p>
+      </template>
+      <template id="non-cyclic">
+         <p>${math(group.name)} is not <a href="./help/rf-groupterms.html#cyclic">cyclic</a>;
+            no element generates the whole group.</p>
+      </template>
+   </body>
+</html>
