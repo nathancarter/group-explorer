@@ -1,6 +1,5 @@
 sources of various javascript files:
 
-jquery-3.2.1.js: https://code.jquery.com/jquery/
 three.js:  https://threejs.org (https://github.com/mrdoob/three.js)
 TrackballControls.js: https://github.com/mrdoob/three.js
 THREE.MeshLine.js: https://github.com/spite/THREE.MeshLine
