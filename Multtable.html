@@ -217,9 +217,11 @@
           xhr.onload = function(e) {
              const document = $(e.target.response);
              $('#subset_page').html(document.find('body > *'));
-             setup();
+             SSD.setup_subset_page();
+             show_subset_page();
           };
           xhr.send();
+          setup();
        }
 
        function setup() {
@@ -230,20 +232,13 @@
           graphicContext = new DisplayMulttable({container: $('#graphic')});
 
           choose(0);
-          /*
-             $('#text').resizable({
+
+          $('#text').resizable({
              handleSelector: '#splitter',
              resizeHeight: false,
              resizeWidthFrom: 'left',
-             onDrag: function () {
-             resizeGraphic(graphicContext.camera, graphicContext.renderer);
-             }
-             });
-           */
-          SSD.setup_subset_page();
-          // show_subset_page();
+          });
 
-          show_table_page();
           resizeBody();
        }
 
