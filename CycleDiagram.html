@@ -1,0 +1,191 @@
+<html>
+   <head>
+      <link rel="icon" type="image/png" href="./images/favicon.png"></link>
+      <link rel="stylesheet" href="./style/fonts.css" type="text/css"></link>
+
+      <style>
+       body {
+          background-color: #ECECEC;
+          margin: 0;
+          height: 100%;
+          width: 100%;
+       }
+       button {
+          -webkit-appearance: none;
+          background-color: white;
+          border: 1px solid #A4A4A4;
+          height: 30px;
+          font-size: 14pt;
+       }
+       button:focus {
+          outline: 0;
+       }
+       .vert {
+          display: flex;
+          flex-direction: column;
+       }
+       .horiz {
+          display: flex;
+          flex-direction: row;
+       }
+       #head {
+          background-color: #D0D0D0;
+          justify-content: center;
+          align-items: center;
+          height: 60px;
+       }
+       #header {
+          font-size: 40px;
+          display: block;
+       }
+
+       #horiz_layout {
+          height: 100%;
+          xtouch-action: none;
+       }
+
+       #graphic {
+          flex: 1 1 auto;
+          background-color: #C8C8F0;
+          overflow-x: auto;
+          width: 100%;
+       }
+       .srollable {
+          overflow: auto;
+       }
+       #splitter {
+          flex: 0 0 auto;
+          width: 8px;
+          background: #ECECEC;
+          cursor: col-resize;
+       }
+       #text {
+          flex: 0 0 auto;
+          width: 400px;
+       }
+
+       .info {
+          height: 100%;
+       }
+       #subset_page {
+          background-color: white;
+          overflow: auto;
+       }
+
+       select {
+          display: block;
+          margin: 25px;
+          font-size: 11pt;
+          padding: 3px;
+       }
+
+       #help_reset {
+          justify-content: space-around;
+          align-items: center;
+          height: 44px;
+       }
+       #help_reset > button {
+          width: 48%;
+       }
+      </style>
+      <style>
+       #organization_choice input[type=checkbox] {
+          visibility: hidden;
+       }
+      </style>
+      <link rel="stylesheet" href="./subsetDisplay/subsets.css" type="text/css"></link>
+
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
+      <script type="text/x-mathjax-config">
+       MathJax.Hub.Config({
+          CommonHTML: {
+             scale: 95,
+          },
+       });
+      </script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=MML_CHTML"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/95/three.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/jquery-resizable-dom@0.32.0/dist/jquery-resizable.js"></script>
+      <script src="./build/allGroupExplorer.js"></script>
+      <script src="./build/allSubsetDisplay.js"></script>
+      <script src="./js/DisplayCycleGraph.js"></script>
+      <script>
+       // global variables
+       var group,		// group about which information will be displayed
+           graphicContext;	// graphic context for large diagram
+
+       // Static event managers (setup after document is available)
+       $(function() {
+          $('#help').on('click', help);
+          $('#reset').on('click', load);
+       });
+       $(window).on('load', load);	// like onload handler in body
+       $(window).on('resize', resizeBody);
+
+       function load() {
+          Library.loadFromInvocation()
+                 .then( ({library, groupIndex}) => {
+                    const hrefURL = new URL(window.location.href);
+                    window.group = library[groupIndex];
+                    importSubsetDisplay()
+                 } )
+                 .catch( (error) => alert(error) );
+       }
+
+       // this should be replaced with HTML5 import when it's available
+       function importSubsetDisplay() {
+          const xhr = new XMLHttpRequest();
+          xhr.open('GET', './subsetDisplay/subsets.html', true);
+          xhr.responseType = 'document';
+          xhr.onload = function(e) {
+             const document = $(e.target.response);
+             $('#subset_page').html(document.find('body > *'));
+             SSD.setup_subset_page();
+          };
+          xhr.send();
+          setup();
+       }
+
+       function setup() {
+          $('#header').html(eval(Template.HTML('#header')));
+          MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'header']);
+
+          graphicContext = new DisplayCycleGraph({container: $('#graphic')});
+          graphicContext.showLargeGraphic('Coming soon...');
+
+          $('#text').resizable({
+             handleSelector: '#splitter',
+             resizeHeight: false,
+             resizeWidthFrom: 'left',
+          });
+
+          resizeBody();
+       }
+
+       function resizeBody() {
+          $('#graphic').height(window.innerHeight - $('#header').height());
+          $('#text').height(window.innerHeight - $('#header').height());
+       };
+
+       function help() {
+          alert('There is no help for you. (yet)');
+       }
+      </script>
+   </head>
+   <body class="vert">
+      <div id="head" class="horiz"><div id="header">Cycle Graph for ${math(group.name)}</div></div>
+      <div id="horiz_layout" class="horiz">
+         <div id="graphic"></div>
+         <div id="splitter"></div>
+         <div id="text" class="vert">
+            <div id="subset_page" class="info">
+               <!-- insert subsetDisplay/subsets.html here -->
+            </div>
+            <div id="help_reset" class="horiz">
+               <button id="help">Help</button>
+               <button id="reset">Reset</button>
+            </div>
+         </div>
+      </div>
+   </body>
+</html>
