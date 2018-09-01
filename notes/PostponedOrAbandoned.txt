@@ -1,0 +1,20 @@
+
+Postponed:
+
+specialize thumbnails, especially on opening page:
+  small diagrams don't a need complex spheres, labels, thick lines, arrows
+  but performance seems OK, let's leave it for now
+
+literate programming: nothing widely accepted for javascript (!?)
+  litpro -- extract code from .md file (into build directory)
+  maked -- converts .md into .html
+  vmd -- displays .md exactly as github would
+
+
+
+Abandoned:
+
+use web workers to improve performance:
+  web workers can't modify DOM
+  can't make .png without DOM <canvas> for context (and you need document to create <canvas>)
+  most of our time is spent rendering, there's not much work we can offload
