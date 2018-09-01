@@ -49,9 +49,6 @@
 
        #graphic {
           flex: 1 1 auto;
-          /*
-             background-color: #C8E8C8;
-           */
           background-color: #ECECEC;
           overflow-x: auto;
           width: 100%;
@@ -219,9 +216,9 @@
              $('#subset_page').html(document.find('body > *'));
              SSD.setup_subset_page();
              show_subset_page();
+             setup();
           };
           xhr.send();
-          setup();
        }
 
        function setup() {
@@ -290,8 +287,9 @@
        }
 
        function resizeBody() {
-          $('#graphic').height(window.innerHeight - $('#header').height());
-          $('#text').height(window.innerHeight - $('#header').height());
+          const newHeight = window.innerHeight - $('#header').height();
+          $('#graphic').height(newHeight);
+          $('#text').height(newHeight);
        };
 
        function show_subset_page() {
