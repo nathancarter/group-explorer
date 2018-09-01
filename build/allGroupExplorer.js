@@ -2413,9 +2413,6 @@ class Multtable {
 Multtable._init();
 
 
-// can we change size of canvas?
-
-
 class DisplayMulttable {
    // height & width, or container
    constructor(options) {
@@ -2427,19 +2424,29 @@ class DisplayMulttable {
          options = {};
       }
 
-      if (options.container === undefined) {
-         // take canvas dimensions from container (if specified), option, or default
-         const width = (options.width === undefined) ? DisplayMulttable.DEFAULT_CANVAS_WIDTH : options.width;
-         const height = (options.height === undefined) ? DisplayMulttable.DEFAULT_CANVAS_HEIGHT : options.height;
-         this.canvas = $(`<canvas width="${width}" height="${height}">`)[0];
-      } else {         
-         this.container = options.container;
+      // take canvas dimensions from container (if specified), option, or default
+      let width, height;
+      if (options.container !== undefined) {
+         width = options.container.width();
+         height = options.container.height();
+      } else {
+         width = (options.width === undefined) ? DisplayDiagram.DEFAULT_CANVAS_WIDTH : options.width;
+         height = (options.height === undefined) ? DisplayDiagram.DEFAULT_CANVAS_HEIGHT : options.height;
+      }
+
+      this.canvas = $(`<canvas width="${width}" height="${height}">`)[0];
+
+      if (options.container !== undefined) {
+         options.container.append(this.canvas);
       }
    }
 
    static _setDefaults() {
       DisplayMulttable.DEFAULT_CANVAS_HEIGHT = 100;
       DisplayMulttable.DEFAULT_CANVAS_WIDTH = 100;
+      DisplayMulttable.BACKGROUND = '#F0F0F0';
+      DisplayMulttable.DEFAULT_FONT = '14pt Arial';
+      DisplayMulttable.DEFAULT_FONT_HEIGHT = 19;
    }
 
    getImageURL(multtable) {
@@ -2449,7 +2456,7 @@ class DisplayMulttable {
       return img;
    }
 
-   // use original size of canvas
+   // Small graphic has no grouping, no labels, doesn't change canvas size
    showSmallGraphic(multtable) {
       const frac = (inx, max) => Math.floor(0.5 + inx * max / multtable.group.order);
       const colors = this._colors(multtable);
@@ -2485,132 +2492,93 @@ class DisplayMulttable {
       }
    }
 
-   // Make order X order table
-   //   Find largest representation, calculate #rows, chars/row, and row length * 1.5 to set box dimension
+   // Write order X order matrix to canvas
+   //   Resize canvas make labels readable
+   //     Find longest label; find length of longest label as drawn
+   //     Estimate the maximum number of rows that can occur (if a permutation is continued over multiple rows)
+   //       if longest row is a permutation, expect that it can be formatted into a roughly square box
+   //     Size the box so that it is
+   //       at least 3 times the height of all the rows
+   //       at least 25% longer than the longest row divided by the maximum number of rows expected
+   //   Draw each box
+   //     Color according to row/column product
+   //     Write label in center, breaking permutation cycle text if necessary
    //
-   // Make table within table to organize by subgroup
-   //
-   // Slider 0-1 => 0-box width
-
-   // Note width/height for Arial font:
-   // from https://www.math.utah.edu/~beebe/fonts/afm-widths.html:
-   // Font height is 1000 font design size in TeX big points:
-   // FontName   Chars	Letters	    All	 Digits	  Upper	  Lower
-   //   Arial     472  3 583.44	 537.37	 556.00	 677.42	 489.46
-   
-   // Or: draw directly on context
-   // Or: draw to SVG
+   // Separation slider maps [0,1] => [0,boxSize]
 
    showLargeGraphic(multtable) {
+      const font = DisplayMulttable.DEFAULT_FONT;
+      const fontHeight = DisplayMulttable.DEFAULT_FONT_HEIGHT;
+
       const colors = this._colors(multtable);
 
-      const labels = multtable.group.elements.map( (el) => mathml2html(multtable.group.representation[el]) );
-      const maxLength = labels.reduce( (len,rep) => (rep.textContent.length > len) ? rep.textContent.length : len, 0 );
-      let rows = 0;
-      if (maxLength <= 10) {
-         rows = 1;
-      } else if (maxLength > 10 && maxLength <= 30) {
-         rows = 2;
-      } else if (maxLength > 30 && maxLength <= 50) {
-         rows = 3;
-      } else {
-         rows = 4;
-      }
-//      const rows = Math.ceil(Math.sqrt(maxLength)/2);
-      const font = 18;  // ~14pt
-      const dim = Math.floor(font*Math.max(3*rows, 0.75*maxLength/rows));
+      const context = this.canvas.getContext('2d');
+      const measuredWidth = (str) => { context.font = font; return context.measureText(str).width };
+      const isPermutation = (str) => str[0] == '(';
+
+      const labels = multtable.group.elements.map( (el) => mathml2text(multtable.group.representation[el]) );
+      const longestLabel = labels.reduce( (longest, label) => (label.length > longest.length) ? label : longest, '' );
+      const longestLabelWidth = measuredWidth(longestLabel);
+      const rowEstimate = isPermutation(longestLabel) ? Math.ceil(Math.sqrt(longestLabelWidth/fontHeight)/2) : 1;
+      const boxSize = Math.floor(Math.max(3*fontHeight*rowEstimate, 1.25*longestLabelWidth/rowEstimate));
+
       const order = multtable.group.order;
       const stride = multtable.stride;
 
-      $('.bar, .outerTable').remove();
-      $(`<style class="bar" type="text/css">
-          .outerTable { 
-             font: italic 16pt arial;
-             width: ${dim*order + 2*multtable.separation*dim*order/stride};
-             height: ${dim*order};
-             border-collapse: collapse;
-          }
-         </style>`)
-         .appendTo('head');
-      $(`<style class="bar" type="text/css">
-          .outerCell {
-             padding: ${multtable.separation*dim};
-             border-collapse: collapse;
-          }
-         </style>`)
-         .appendTo('head');
-      $(`<style class="bar" type="text/css">
-          .innerTable {
-             border-collapse: collapse;
-          }
-         </style>`)
-         .appendTo('head'); 
-      $(`<style class="bar" type="text/css">
-          .innerCell {
-              text-align: center;
-              padding: 0;
-              width: ${dim};
-              height: ${dim};
-          }
-         </style>`)
-         .appendTo('head');
-      $(`<style class="bar" type="text/css">
-          .txt {
-              display: inline-block;
-              text-align: left;
-              padding: ${dim*0.16};
-          }
-         </style>`)
-         .appendTo('head');
+      const separation = multtable.separation*boxSize;
+      const canvasSize = order*boxSize;
+      this.canvas.height = canvasSize;
+      this.canvas.width = canvasSize;
 
-      const $outerTable = $('<table class="outerTable">');
-      for (let ii = 0; ii < order/stride; ii++) { // for each coset
-         const $outerRow = $('<tr>').appendTo($outerTable);
-         for (let jj = 0; jj < order/stride; jj++) {
-            const $outerCell = $('<td class="outerCell">').appendTo($outerRow);
-            const $innerTable = $('<table class="innerTable">').appendTo($outerCell);
-            for (let i = 0; i < stride; i++) {
-               const $innerRow = $('<tr>').appendTo($innerTable);
-               for (let j = 0; j < stride; j++) {
-                  const r = multtable.elements[ii*stride + i],
-                        c = multtable.elements[jj*stride + j];
-                  const product = multtable.group.mult(r,c);
-                  const color = colors[product];
-                  const $div = $('<div class="txt">').append($(labels[product]).clone());
-                  $(`<td id="${r}_${c}" class="innerCell" style="background-color: ${color}">`)
-                     .append($div)
-                     .appendTo($innerRow);
+      context.font = font;
+      context.textAlign = 'left';       // fillText x coordinate is left-most end of string
+      context.textBaseline = 'middle';  // fillText y coordinate is center of upper-case letter
+
+      context.fillStyle = DisplayMulttable.BACKGROUND;  // background shows through in separations between cosets
+      context.fillRect(0, 0, canvasSize, canvasSize);
+
+      for (let inx = 0; inx < group.order; inx++) {
+         for (let jnx = 0; jnx < group.order; jnx++) {
+            const x = boxSize*inx + separation*Math.floor(inx/stride);  // skip separation between cosets as needed
+            const y = boxSize*jnx + separation*Math.floor(jnx/stride);
+            
+            const product = multtable.group.mult(multtable.elements[inx], multtable.elements[jnx]);
+
+            // color box according to product
+            context.fillStyle = colors[product];
+            context.fillRect(x, y, boxSize, boxSize);
+
+            // write labels
+            context.fillStyle = 'black';
+            const label = labels[product];
+            const rows = [];
+            if (isPermutation(label)) {
+               // this looks like a permutation -- they can be long, so split it into multiple lines if needed
+               const cycles = label.match(/[(][^)]*[)]/g);
+               rows.push('');
+               let last = 0;
+               for (const cycle of cycles) {
+                  if (measuredWidth(rows[last]) + measuredWidth(cycle) < 0.75*boxSize) {
+                     rows[last] = rows[last].concat(cycle);
+                  } else {
+                     rows.push(cycle);
+                     last++;
+                  }
                }
+            } else {
+               rows[0] = label;
+            }
+
+            const maxRowWidth = rows.reduce( (max, row) => (max > measuredWidth(row)) ? max : measuredWidth(row), 0 );
+            let xStart = x + boxSize/2 - maxRowWidth/2;
+            let yStart = y + boxSize/2 - fontHeight*(rows.length - 1)/2;
+            for (const row of rows) {
+               context.fillText(row, xStart, yStart);
+               yStart += fontHeight;
             }
          }
       }
-      $outerTable.appendTo(this.container);
-
-         /*
-         const $table = $('<table class="outerTable">');
-      for (const r of multtable.elements) {
-         const $row = $('<tr>').appendTo($table)
-         for (const c of multtable.elements) {
-            const product = multtable.group.mult(r,c);
-            const color = colors[product];
-            const $div = $('<div class="txt">').append($(labels[product]).clone());
-            $(`<td id="${r}_${c}" class="cell" style="background-color: ${color}">`).append($div).appendTo($row);
-         }
-      }
-      $table.appendTo(this.container);
-      */
    }
 }
 
-/*
 
-   mm = [];
-   for (const group of Library.groups) {
-   group.representations.forEach( (rep,inx) => {
-   const mx = rep.reduce( (len, r) => Math.max(len, mathml2text(r).length), 0);
-   mm.push([group.shortName, mx]);
-   } );
-   }
-   mm.sort( ([_na,la],[_nb,lb]) => lb - la )
-
- */
