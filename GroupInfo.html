@@ -34,9 +34,6 @@
        .indent2 {
           margin-left: 2cm;
        }
-       .nobr {
-          white-space: nowrap;
-       }
       </style>
 
 
@@ -116,11 +113,11 @@
                 const graphicData = new Multtable(group);
                 window.multtableContext = new DisplayMulttable({height: 100, width: 100});
                 const img = multtableContext.getImageURL(graphicData);
-                   $row.children(':nth-child(3)')
-                   .addClass('programLink')
-                   .text('')
-                   .on('click', () => Library.openWithGroup('Multtable.html', group))
-                   .prepend(img);
+                $row.children(':nth-child(3)')
+                    .addClass('programLink')
+                    .text('')
+                    .on('click', () => Library.openWithGroup('Multtable.html', group))
+                    .prepend(img);
              }
 
              if (inx < group.symmetryObjects.length) {
@@ -203,9 +200,8 @@
        }
 
        function displayDefaultElementNames() {
-          return '<span class="nobr">' +
-                 group.elements.map( (el) => math(group.representation[el]) ).join(', ') +
-                 '</span><br>This representation was loaded from the group file.';
+          return group.elements.map( (el) => math(group.representation[el]) ).join(', ') +
+                 '<br>This representation was loaded from the group file.';
        }
 
        function displayNamingSchemes() {
