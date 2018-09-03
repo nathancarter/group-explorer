@@ -30,7 +30,7 @@ SSD.Subgroup = class Subgroup {
 
    static createNormalizer(index) {
       new SSD.Subset(
-         new SubGroupFinder(window.group).findNormalizer(window.group.subgroups[index]).members );
+         new SubgroupFinder(window.group).findNormalizer(window.group.subgroups[index]).members );
    }
 
 
