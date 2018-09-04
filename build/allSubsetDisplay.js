@@ -20,10 +20,8 @@ class SSD {
       $('p.placeholder').show();
 
       // clear displayed menus, highlighting
-      $(window).off('click', SSD.clearMenus)
-               .on('click', SSD.clearMenus)
-               .off('contextmenu', SSD.clearMenus)
-               .on('contextmenu', SSD.clearMenus);
+      $(window).off('click', SSD.clearMenus).on('click', SSD.clearMenus)
+               .off('contextmenu', SSD.clearMenus).on('contextmenu', SSD.clearMenus);
       SSD.clearMenus();
 
       // Display from data
@@ -31,26 +29,33 @@ class SSD {
       SSD.Subset.displayAll();
       SSD.Partition.displayAll();
 
-      $('#subset_page').off('click', SSD.clickHandler).on('click', SSD.clickHandler);
+      $('#subset_page').off('contextmenu', SSD.contextMenuHandler).on('contextmenu', SSD.contextMenuHandler);
 
       MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
    }
 
-   static clickHandler(event) {
+   static menuClickHandler(event) {
       event.preventDefault();
       const $curr = $(event.target).closest('[action]');
       if ($curr.attr('action') !== undefined) {
-         if ($curr.hasClass('hasMenu')) {
-            SSD.clearMenus();
-            const $menu = eval($curr.attr('action'));
-            $curr.addClass('highlighted').append($menu);
-            SSD.setMenuLocations(event, $menu);
-            event.stopPropagation();
-         } else {
-            eval($curr.attr('action'));
-         }
+         eval($curr.attr('action'));
+         SSD.clearMenus();
+         event.stopPropagation();
+         MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
       }
-      MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
+   }
+
+   static contextMenuHandler(event) {
+      event.preventDefault();
+      const $curr = $(event.target).closest('[action]');
+      if ($curr.attr('action') !== undefined) {
+         SSD.clearMenus();
+         const $menu = eval($curr.attr('action')).on('click', SSD.menuClickHandler);
+         $curr.addClass('highlighted').append($menu);
+         SSD.setMenuLocations(event, $menu);
+         event.stopPropagation();
+         MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
+      }
    }
 
    static setMenuLocations(event, $menu) {
@@ -504,7 +509,7 @@ SSD.Subgroup = class Subgroup {
 
    static createNormalizer(index) {
       new SSD.Subset(
-         new SubGroupFinder(window.group).findNormalizer(window.group.subgroups[index]).members );
+         new SubgroupFinder(window.group).findNormalizer(window.group.subgroups[index]).members );
    }
 
 

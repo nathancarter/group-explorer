@@ -1,39 +1,39 @@
 
 
-<p class="subset_page_header hasMenu" action="SSD.getHeaderMenu($curr)">Subgroups</p>
+<p class="subset_page_header" action="SSD.getHeaderMenu($curr)">Subgroups</p>
 <ul id="subgroups" class="subset_page_content"></ul>
 
-<p class="subset_page_header hasMenu" action="SSD.getHeaderMenu($curr)">User-defined subsets</p>
-<p id="subsets_placeholder" class="placeholder hasMenu" action="SSD.getHeaderMenu($curr)">
+<p class="subset_page_header" action="SSD.getHeaderMenu($curr)">User-defined subsets</p>
+<p id="subsets_placeholder" class="placeholder" action="SSD.getHeaderMenu($curr)">
    <i>(None)</i></p>
 <ul id="subsets" class="subset_page_content"></ul>
 
-<p class="subset_page_header hasMenu" action="SSD.getHeaderMenu($curr)">Partitions</p>
-<p id="partitions_placeholder" class="placeholder hasMenu" action="SSD.getHeaderMenu($curr)">
+<p class="subset_page_header" action="SSD.getHeaderMenu($curr)">Partitions</p>
+<p id="partitions_placeholder" class="placeholder" action="SSD.getHeaderMenu($curr)">
    <i>(None)</i></p>
 <ul id="partitions" class="subset_page_content"></ul>
 
 <div id="subgroup_templates">
    <template id="firstSubgroup_template">
-      <li class="hasMenu" action="SSD.Subgroup.getMenu($curr, ${index})">
+      <li action="SSD.Subgroup.getMenu($curr, ${index})">
          ${this.name} = &lt; ${items} &gt; is the trivial subgroup { ${items} }.
       </li>
    </template>
    <template id="subgroup_template">
-      <li class="hasMenu" action="SSD.Subgroup.getMenu($curr, ${index})">
+      <li action="SSD.Subgroup.getMenu($curr, ${index})">
          ${this.name} = &lt; ${items} &gt;
          is a subgroup of order ${group.subgroups[index].members.popcount()}.
       </li>
    </template>
    <template id="lastSubgroup_template">
-      <li class="hasMenu" action="SSD.Subgroup.getMenu($curr, ${index})">
+      <li action="SSD.Subgroup.getMenu($curr, ${index})">
          ${this.name} = &lt; ${items} &gt; is the group itself.
       </li>
    </template>
 </div>
 
 <template id="subset_template">
-   <li class="hasMenu" action="SSD.Subset.getMenu($curr, ${index})">
+   <li action="SSD.Subset.getMenu($curr, ${index})">
       ${this.name} = { ${items} } is
       ${ (numElements == 0 || numElements == group.order) ? 'the' : 'a' }
       subset of size ${numElements}.
@@ -41,7 +41,7 @@
 </template>
 
 <template id="orderClass_template">
-   <li class="orderClass hasMenu"
+   <li class="orderClass"
        action="SSD.Partition.getMenu($curr, ${this.parent.partitionIndex}, ${this.subIndex})">
       ${this.name} = { ${this.elementRepresentations} } is an order class of
       size ${this.elements.popcount()}.
@@ -49,7 +49,7 @@
 </template>
 
 <template id="conjugacyClass_template">
-   <li class="conjugacyClass hasMenu"
+   <li class="conjugacyClass"
        action="SSD.Partition.getMenu($curr, ${this.parent.partitionIndex}, ${this.subIndex})">
       ${this.name} = { ${this.elementRepresentations} } is a conjugacy class of
       size ${this.elements.popcount()}.
@@ -57,13 +57,20 @@
 </template>
 
 <template id="cosetClass_template">
-   <li class="${this.parent.side}coset${this.parent.subgroupIndex} hasMenu"
+   <li class="${this.parent.side}coset${this.parent.subgroupIndex}"
        action="SSD.Partition.getMenu($curr, ${this.parent.partitionIndex}, ${this.subIndex})">
       ${this.name} = { ${this.elementRepresentations} } is the ${this.parent.side} coset of
       ${this.parent.subgroupName} by ${math(group.representation[this.elements.toArray()[0]])}
    </li>
 </template>
 
+<template id="subsetElements_template">
+   <div class="elements">
+      <div><b>Elements of ${subsetName}:</b></div>
+      <p></p>
+      <div>${subsetElements}</div>
+   </div>
+</template>
 
 <template id="headerMenu_template">
    <ul class="menu">
