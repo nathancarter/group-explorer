@@ -142,10 +142,11 @@ class DisplayMulttable {
             if (isPermutation(label)) {
                // this looks like a permutation -- they can be long, so split it into multiple lines if needed
                const cycles = label.match(/[(][^)]*[)]/g);
-               rows.push('');
                let last = 0;
                for (const cycle of cycles) {
-                  if (measuredWidth(rows[last]) + measuredWidth(cycle) < 0.75*boxSize) {
+                  if (measuredWidth(rows[last]) == 0) {
+                     rows.push(cycle);
+                  } else if (measuredWidth(rows[last]) + measuredWidth(cycle) < 0.75*boxSize) {
                      rows[last] = rows[last].concat(cycle);
                   } else {
                      rows.push(cycle);
