@@ -21,6 +21,16 @@ SSD.BasicSubset = class BasicSubset {
       SSD.displayList[this.id] = this;
    }
 
+   get closure() {
+      return new SSD.Subset(group.closure(this.elements));
+   }
+
+   // delete is a javascript keyword...
+   destroy() {
+      delete(SSD.displayList[this.id]);
+      $(`#${this.id}`).remove();
+   }
+
 
    /*
     * Operations that create new SSD.Subsets by performing
@@ -46,16 +56,6 @@ SSD.BasicSubset = class BasicSubset {
          }
       }
       return new SSD.Subset(newElements);      
-   }
-
-   get closure() {
-      return new SSD.Subset(group.closure(this.elements));
-   }
-
-   // delete is a javascript keyword...
-   destroy() {
-      delete(SSD.displayList[this.id]);
-      $(`#${this.id}`).remove();
    }
    
    menuItems(operation) {
