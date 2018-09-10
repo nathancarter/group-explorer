@@ -30,7 +30,9 @@ class SSD {
       MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
    }
 
-   // Double-click displays elements in subset
+   /*
+    * Double-click displays elements in subset
+    */
    static dblClickHandler(event) {
       event.preventDefault();
       SSD.clearMenus();
@@ -54,7 +56,9 @@ class SSD {
       }
    }
 
-   // Left-click executes "action" attribute in menu item
+   /*
+    * Left-click executes "action" attribute in menu item
+    */
    static menuClickHandler(event) {
       event.preventDefault();
       const $curr = $(event.target).closest('[action]');
@@ -66,17 +70,23 @@ class SSD {
       }
    }
 
-   // Right-click executes action, which displays context menu
+   /*
+    * Right-click displays context menu according to
+    *   -- target class (subset_page_header or placeholder)
+    *   -- li element id (<subset>.menu)
+    */
    static contextMenuHandler(event) {
       event.preventDefault();
-      const $curr = $(event.target).closest('[action]');
-      if ($curr.attr('action') !== undefined) {
+      const $curr = $(event.target).closest('p.subset_page_header, p.placeholder, li[id]');
+      if ($curr.length != 0) {
          SSD.clearMenus();
-         const $menu = eval($curr.attr('action')).on('click', SSD.menuClickHandler);
+         const $menu =($curr.hasClass('subset_page_header') || $curr.hasClass('placeholder')) ?
+                      $(eval(Template.HTML('#headerMenu_template'))) :
+                      $(SSD.displayList[$curr.attr('id')].menu);
+         $menu.on('click', SSD.menuClickHandler);
          $curr.addClass('highlighted').append($menu);
          SSD.setMenuLocations(event, $menu);
          event.stopPropagation();
-         MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
       }
    }
 
@@ -142,7 +152,7 @@ class SSD {
            });
    }
 
-   static getHeaderMenu($curr) {
+   static getHeaderMenu() {
       return $(eval(Template.HTML('#headerMenu_template')));
    }
 }
@@ -252,7 +262,7 @@ SSD.Subgroup = class Subgroup extends SSD.BasicSubset {
    }
 
    get menu() {
-      return $(eval(Template.HTML('#subgroupMenu_template')));
+      return eval(Template.HTML('#subgroupMenu_template'));
    }
 
    get normalizer() {
@@ -312,7 +322,7 @@ SSD.Subset = class Subset extends SSD.BasicSubset {
    }
 
    get menu() {
-      return $(eval(Template.HTML('#subsetMenu_template')));
+      return eval(Template.HTML('#subsetMenu_template'));
    }
 
    destroy() {
@@ -419,7 +429,7 @@ SSD.PartitionSubset = class PartitionSubset extends SSD.BasicSubset {
    }
 
    get menu() {
-      return $(eval(Template.HTML('#partitionMenu_template')));
+      return eval(Template.HTML('#partitionMenu_template'));
    }
 
    get displayLine() {

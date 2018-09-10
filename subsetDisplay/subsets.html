@@ -1,39 +1,38 @@
 
-
-<p class="subset_page_header" action="SSD.getHeaderMenu($curr)">Subgroups</p>
+<p class="subset_page_header">Subgroups</p>
 <ul id="subgroups" class="subset_page_content"></ul>
 
-<p class="subset_page_header" action="SSD.getHeaderMenu($curr)">User-defined subsets</p>
-<p id="subsets_placeholder" class="placeholder" action="SSD.getHeaderMenu($curr)">
+<p class="subset_page_header">User-defined subsets</p>
+<p id="subsets_placeholder" class="placeholder">
    <i>(None)</i></p>
 <ul id="subsets" class="subset_page_content"></ul>
 
-<p class="subset_page_header" action="SSD.getHeaderMenu($curr)">Partitions</p>
-<p id="partitions_placeholder" class="placeholder" action="SSD.getHeaderMenu($curr)">
+<p class="subset_page_header">Partitions</p>
+<p id="partitions_placeholder" class="placeholder">
    <i>(None)</i></p>
 <ul id="partitions" class="subset_page_content"></ul>
 
 <div id="subgroup_templates">
    <template id="firstSubgroup_template">
-      <li id="${this.id}" action="SSD.displayList[${this.id}].menu">
+      <li id="${this.id}">
          ${this.name} = &lt; ${generators} &gt; is the trivial subgroup { ${generators} }.
       </li>
    </template>
    <template id="subgroup_template">
-      <li id="${this.id}" action="SSD.displayList[${this.id}].menu">
+      <li id="${this.id}">
          ${this.name} = &lt; ${generators} &gt;
          is a subgroup of order ${group.subgroups[this.subgroupIndex].members.popcount()}.
       </li>
    </template>
    <template id="lastSubgroup_template">
-      <li id="${this.id}" action="SSD.displayList[${this.id}].menu">
+      <li id="${this.id}">
          ${this.name} = &lt; ${generators} &gt; is the group itself.
       </li>
    </template>
 </div>
 
 <template id="subset_template">
-   <li id="${this.id}" action="SSD.displayList[${this.id}].menu">
+   <li id="${this.id}">
       ${this.name} = { ${items} } is
       ${ (numElements == 0 || numElements == group.order) ? 'the' : 'a' }
       subset of size ${numElements}.
@@ -41,24 +40,21 @@
 </template>
 
 <template id="orderClass_template">
-   <li id="${this.id}" class="orderClass"
-       action="SSD.displayList[${this.id}].menu">
+   <li id="${this.id}" class="orderClass">
       ${this.name} = { ${this.elementRepresentations} } is an order class of
       size ${this.elements.popcount()}.
    </li>
 </template>
 
 <template id="conjugacyClass_template">
-   <li id="${this.id}" class="conjugacyClass"
-       action="SSD.displayList[${this.id}].menu">
+   <li id="${this.id}" class="conjugacyClass">
       ${this.name} = { ${this.elementRepresentations} } is a conjugacy class of
       size ${this.elements.popcount()}.
    </li>
 </template>
 
 <template id="cosetClass_template">
-   <li id="${this.id}" class="${this.parent.side}coset${this.parent.subgroup.id}"
-       action="SSD.displayList[${this.id}].menu">
+   <li id="${this.id}" class="${this.parent.side}coset${this.parent.subgroup.id}">
       ${this.name} = { ${this.elementRepresentations} } is the ${this.parent.side} coset of
       ${this.parent.subgroup.name} by ${math(group.representation[this.elements.toArray()[0]])}
    </li>

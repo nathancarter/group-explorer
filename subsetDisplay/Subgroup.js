@@ -27,7 +27,7 @@ SSD.Subgroup = class Subgroup extends SSD.BasicSubset {
    }
 
    get menu() {
-      return $(eval(Template.HTML('#subgroupMenu_template')));
+      return eval(Template.HTML('#subgroupMenu_template'));
    }
 
    get normalizer() {
