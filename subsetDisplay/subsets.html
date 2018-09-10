@@ -15,25 +15,25 @@
 
 <div id="subgroup_templates">
    <template id="firstSubgroup_template">
-      <li action="SSD.Subgroup.getMenu($curr, ${index})">
-         ${this.name} = &lt; ${items} &gt; is the trivial subgroup { ${items} }.
+      <li id="${this.id}" action="SSD.displayList[${this.id}].menu">
+         ${this.name} = &lt; ${generators} &gt; is the trivial subgroup { ${generators} }.
       </li>
    </template>
    <template id="subgroup_template">
-      <li action="SSD.Subgroup.getMenu($curr, ${index})">
-         ${this.name} = &lt; ${items} &gt;
-         is a subgroup of order ${group.subgroups[index].members.popcount()}.
+      <li id="${this.id}" action="SSD.displayList[${this.id}].menu">
+         ${this.name} = &lt; ${generators} &gt;
+         is a subgroup of order ${group.subgroups[this.subgroupIndex].members.popcount()}.
       </li>
    </template>
    <template id="lastSubgroup_template">
-      <li action="SSD.Subgroup.getMenu($curr, ${index})">
-         ${this.name} = &lt; ${items} &gt; is the group itself.
+      <li id="${this.id}" action="SSD.displayList[${this.id}].menu">
+         ${this.name} = &lt; ${generators} &gt; is the group itself.
       </li>
    </template>
 </div>
 
 <template id="subset_template">
-   <li action="SSD.Subset.getMenu($curr, ${index})">
+   <li id="${this.id}" action="SSD.displayList[${this.id}].menu">
       ${this.name} = { ${items} } is
       ${ (numElements == 0 || numElements == group.order) ? 'the' : 'a' }
       subset of size ${numElements}.
@@ -41,26 +41,26 @@
 </template>
 
 <template id="orderClass_template">
-   <li class="orderClass"
-       action="SSD.Partition.getMenu($curr, ${this.parent.partitionIndex}, ${this.subIndex})">
+   <li id="${this.id}" class="orderClass"
+       action="SSD.displayList[${this.id}].menu">
       ${this.name} = { ${this.elementRepresentations} } is an order class of
       size ${this.elements.popcount()}.
    </li>
 </template>
 
 <template id="conjugacyClass_template">
-   <li class="conjugacyClass"
-       action="SSD.Partition.getMenu($curr, ${this.parent.partitionIndex}, ${this.subIndex})">
+   <li id="${this.id}" class="conjugacyClass"
+       action="SSD.displayList[${this.id}].menu">
       ${this.name} = { ${this.elementRepresentations} } is a conjugacy class of
       size ${this.elements.popcount()}.
    </li>
 </template>
 
 <template id="cosetClass_template">
-   <li class="${this.parent.side}coset${this.parent.subgroupIndex}"
-       action="SSD.Partition.getMenu($curr, ${this.parent.partitionIndex}, ${this.subIndex})">
+   <li id="${this.id}" class="${this.parent.side}coset${this.parent.subgroup.id}"
+       action="SSD.displayList[${this.id}].menu">
       ${this.name} = { ${this.elementRepresentations} } is the ${this.parent.side} coset of
-      ${this.parent.subgroupName} by ${math(group.representation[this.elements.toArray()[0]])}
+      ${this.parent.subgroup.name} by ${math(group.representation[this.elements.toArray()[0]])}
    </li>
 </template>
 
@@ -107,27 +107,27 @@
             <li class="${ $('#partitions li.orderClass').length != 0 ? 'hidden' : '' }"
                 action="new SSD.OrderClasses()">
                all order classes <i>OC<sub>i</sub></i></li>
-            <li action="SSD.Subgroup.createNormalizer(${this.index})">
+            <li action="SSD.displayList[${this.id}].normalizer">
                the normalizer of ${this.name}, Norm(${this.name})</li>
-            <li class="${ $('#partitions li.leftCoset'+this.index).length != 0?'hidden':'' }"
-                action="new SSD.Cosets(${this.index}, 'left')">
+            <li class="${ $('#partitions li.leftCoset'+this.subgroupIndex).length != 0?'hidden':'' }"
+                action="SSD.displayList[${this.id}].leftCosets">
                all left cosets g${this.name} of ${this.name}</li>
-            <li class="${ $('#partitions li.rightCoset'+this.index).length != 0?'hidden':'' }"
-                action="new SSD.Cosets(${this.index}, 'right')">
+            <li class="${ $('#partitions li.rightCoset'+this.subgroupIndex).length != 0?'hidden':'' }"
+                action="SSD.displayList[${this.id}].rightCosets">
                all right cosets ${this.name}g of ${this.name}</a></li>
             <li>an intersection<span class="menu-arrow"></span>
                <ul class="intersection">
-                  ${SSD.Subset.intersectionMenu(this.name)}
+                  ${SSD.displayList[this.id].menuItems('intersection')}
                </ul>
             </li>
             <li>a union<span class="menu-arrow"></span>
                <ul class="union">
-                  ${SSD.Subset.unionMenu(this.name)}
+                  ${SSD.displayList[this.id].menuItems('union')}
                </ul>
             </li>
             <li>an elementwise product<span class="menu-arrow"></span>
                <ul class="elementwise-product">
-                  ${SSD.Subset.elementwiseProductMenu(this.name)}
+                  ${SSD.displayList[this.id].menuItems('elementwiseProduct')}
                </ul>
             </li>
          </ul>
@@ -149,9 +149,9 @@
 
 <template id="subsetMenu_template">
    <ul class="menu">
-      <li action="SSD.SubsetEditor.open(${this.index})">
+      <li action="SSD.SubsetEditor.open(${this.id})">
          Edit list of elements in ${this.name}</sub></li>
-      <li action="SSD.Subset.delete($curr, ${this.index})">Delete ${this.name}</li>
+      <li action="SSD.displayList[${this.id}].destroy()">Delete ${this.name}</li>
       <li action="SSD.SubsetEditor.open()">Create ${SSD.Subset.nextName()}</li>
       <hr>
       <li>Compute<span class="menu-arrow"></span>
@@ -162,21 +162,21 @@
             <li class="${ $('#partitions li.orderClass').length != 0 ? 'hidden' : '' }"
                 action="new SSD.OrderClasses()">
                all order classes <i>OC<sub>i</sub></i></li>
-            <li action="SSD.Subset.closure(SSD.Subset.list[this.index].elements)">
+            <li action="SSD.displayList[${this.id}].closure">
                the closure of ${this.name}, &lt; ${this.name} &gt;</li>
             <li>an intersection<span class="menu-arrow"></span>
                <ul class="intersection">
-                  ${SSD.Subset.intersectionMenu(this.name)}
+                  ${SSD.displayList[this.id].menuItems('intersection')}
                </ul>
             </li>
             <li>a union<span class="menu-arrow"></span>
                <ul class="union">
-                  ${SSD.Subset.unionMenu(this.name)}
+                  ${SSD.displayList[this.id].menuItems('union')}
                </ul>
             </li>
             <li>an elementwise product<span class="menu-arrow"></span>
                <ul class="elementwise-product">
-                  ${SSD.Subset.elementwiseProductMenu(this.name)}
+                  ${SSD.displayList[this.id].menuItems('elementwiseProduct')}
                </ul>
             </li>
          </ul>
@@ -198,7 +198,7 @@
 
 <template id="partitionMenu_template">
    <ul class="menu">
-      <li action="SSD.Partition.delete($curr, ${this.parent.partitionIndex})">
+      <li action="SSD.displayList[${this.id}].parent.destroy()">
          Delete partition { ${this.parent.name} }</li>
       <li action="SSD.SubsetEditor.open()">Create ${SSD.Subset.nextName()}</li>
       <hr>
@@ -210,21 +210,21 @@
             <li class="${ $('#partitions li.orderClass').length != 0 ? 'hidden' : '' }"
                 action="new SSD.OrderClasses()">
                all order classes <i>OC<sub>i</sub></i></li>
-            <li action="SSD.Subset.closure(SSD.Partition.list[${this.parent.partitionIndex}].items[${this.subIndex}].elements)">
+            <li action="SSD.displayList[${this.id}].closure">
                the closure of ${this.name}, &lt; ${this.name} &gt;</li>
             <li>an intersection<span class="menu-arrow"></span>
                <ul class="intersection">
-                  ${SSD.Subset.intersectionMenu(this.name)}
+                  ${SSD.displayList[this.id].menuItems('intersection')}
                </ul>
             </li>
             <li>a union<span class="menu-arrow"></span>
                <ul class="union">
-                  ${SSD.Subset.unionMenu(this.name)}
+                  ${SSD.displayList[this.id].menuItems('union')}
                </ul>
             </li>
             <li>an elementwise product<span class="menu-arrow"></span>
                <ul class="elementwise-product">
-                  ${SSD.Subset.elementwiseProductMenu(this.name)}
+                  ${SSD.displayList[this.id].menuItems('elementwiseProduct')}
                </ul>
             </li>
          </ul>

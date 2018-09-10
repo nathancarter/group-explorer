@@ -5,10 +5,12 @@ JS_FILES = js/init.js             js/Log.js            js/BitSet.js        js/Ma
            js/DisplayDiagram.js   js/mathmlUtils.js    js/Diagram3D.js     js/SymmetryObject.js  \
            js/Multtable.js        js/DisplayMulttable.js
 
-SUB_FILES = subsetDisplay/subsets.js           subsetDisplay/Subset.js		\
+SUB_FILES = subsetDisplay/subsets.js           subsetDisplay/BasicSubset.js     \
+            subsetDisplay/Subgroup.js          subsetDisplay/Subset.js		\
             subsetDisplay/SubsetEditor.js      subsetDisplay/Partition.js	\
+	    subsetDisplay/PartitionSubset.js					\
             subsetDisplay/ConjugacyClasses.js  subsetDisplay/Cosets.js		\
-            subsetDisplay/OrderClasses.js      subsetDisplay/Subgroup.js
+            subsetDisplay/OrderClasses.js
 
 # PRODUCTS = build/allGroupExplorer.js build/allGroupExplorer.min.js build/allSubsetDisplay.js
 PRODUCTS = build/allGroupExplorer.js build/allSubsetDisplay.js

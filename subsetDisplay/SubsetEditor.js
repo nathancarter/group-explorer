@@ -1,11 +1,9 @@
 
 SSD.SubsetEditor = class SubsetEditor {
-   static open(setIndex) {
-      const elements = setIndex === undefined ?
-                       new BitSet(group.order) : SSD.Subset.list[setIndex].elements;
-      const setName = setIndex === undefined ?
-                      `<i>S<sub>${SSD.Subset.list.length}</sub></i>` :
-                      SSD.Subset.list[setIndex].name;
+   static open(displayId) {
+      const subset = displayId === undefined ? undefined : SSD.displayList[displayId];
+      const elements = subset === undefined ? new BitSet(group.order) : subset.elements;
+      const setName = subset === undefined ? SSD.Subset.nextName() : subset.name;
       const $subsetEditor = $('body').append(eval(Template.HTML('#subsetEditor_template')))
                                      .find('#subset_editor').show();
       $subsetEditor.find('.ssedit_setName').html(setName);

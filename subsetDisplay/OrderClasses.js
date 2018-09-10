@@ -1,21 +1,24 @@
 SSD.OrderClasses = class OrderClasses extends SSD.Partition {
    constructor() {
-      super([]);
+      super();
 
-      window.group.orderClasses.forEach(
-         elements => this.items.push(
-            new SSD.Partition.item(this,
-                                   this.items.length,
-                                   elements,
-                                   `<i>OC<sub>${this.items.length}</sub></i>`,
-                                   'orderClass')
-         ));
+      this.subsets = window
+         .group
+         .orderClasses
+         .filter( (orderClass) => orderClass != undefined )
+         .map( (orderClass, inx) => 
+            new SSD.PartitionSubset(this, inx, orderClass, `<i>OC<sub>${inx}</sub></i>`, 'orderClass')
+         );
 
       $('#partitions_placeholder').hide();
-      $('#partitions').append(this.listItem).show();
+      $('#partitions').append(
+         this.subsets.reduce( ($frag, subset) => $frag.append(subset.displayLine),
+                              $(document.createDocumentFragment()) ))
+                      .show();
    }
 
-   delete($curr) {
+   destroy($curr) {
       $('#partitions li.orderClass').remove();
+      super.destroy();
    }
 }

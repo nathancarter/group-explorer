@@ -5,32 +5,36 @@ class SSD {
       $('.menu:visible').remove();
    }
 
-   static setup_subset_page() {
-      SSD.Subgroup.init();
-      SSD.Subset.init();
-      SSD.Partition.init();
-
-      SSD.redisplay_subset_page();
+   static SubgroupList() {
+      return SSD.displayList.filter( (el) => el instanceof SSD.Subgroup )
    }
+   static SubsetList() {
+      return SSD.displayList.filter( (el) => el instanceof SSD.Subset )
+   }
+   static PartitionList() {
+      return SSD.displayList.filter( (el) => el instanceof SSD.Partition )
+   }
+   
+   static setup_subset_page() {
+      // Initialize list of all displayed subsets
+      SSD.nextId = 0;
+      SSD.nextSubsetIndex = 0;
+      SSD.displayList = [];
 
-   // this will pick up a change in group.representation
-   static redisplay_subset_page() {
+      // clear displayed menus, highlighting
+      SSD.clearMenus();
+
+      // Set up event handlers
+      $(window).off('click', SSD.clearMenus).on('click', SSD.clearMenus)
+               .off('contextmenu', SSD.clearMenus).on('contextmenu', SSD.clearMenus);
+      $('#subset_page').off('contextmenu', SSD.contextMenuHandler).on('contextmenu', SSD.contextMenuHandler);
+
       // clear out displayed lists; show '(None)' placeholders
       $('ul.subset_page_content li').remove();
       $('p.placeholder').show();
 
-      // clear displayed menus, highlighting
-      $(window).off('click', SSD.clearMenus).on('click', SSD.clearMenus)
-               .off('contextmenu', SSD.clearMenus).on('contextmenu', SSD.clearMenus);
-      SSD.clearMenus();
-
-      // Display from data
+      // Display all subgroups
       SSD.Subgroup.displayAll();
-      SSD.Subset.displayAll();
-      SSD.Partition.displayAll();
-
-      $('#subset_page').off('contextmenu', SSD.contextMenuHandler).on('contextmenu', SSD.contextMenuHandler);
-
       MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
    }
 

@@ -5,32 +5,36 @@ class SSD {
       $('.menu:visible').remove();
    }
 
-   static setup_subset_page() {
-      SSD.Subgroup.init();
-      SSD.Subset.init();
-      SSD.Partition.init();
-
-      SSD.redisplay_subset_page();
+   static SubgroupList() {
+      return SSD.displayList.filter( (el) => el instanceof SSD.Subgroup )
    }
+   static SubsetList() {
+      return SSD.displayList.filter( (el) => el instanceof SSD.Subset )
+   }
+   static PartitionList() {
+      return SSD.displayList.filter( (el) => el instanceof SSD.Partition )
+   }
+   
+   static setup_subset_page() {
+      // Initialize list of all displayed subsets
+      SSD.nextId = 0;
+      SSD.nextSubsetIndex = 0;
+      SSD.displayList = [];
 
-   // this will pick up a change in group.representation
-   static redisplay_subset_page() {
+      // clear displayed menus, highlighting
+      SSD.clearMenus();
+
+      // Set up event handlers
+      $(window).off('click', SSD.clearMenus).on('click', SSD.clearMenus)
+               .off('contextmenu', SSD.clearMenus).on('contextmenu', SSD.clearMenus);
+      $('#subset_page').off('contextmenu', SSD.contextMenuHandler).on('contextmenu', SSD.contextMenuHandler);
+
       // clear out displayed lists; show '(None)' placeholders
       $('ul.subset_page_content li').remove();
       $('p.placeholder').show();
 
-      // clear displayed menus, highlighting
-      $(window).off('click', SSD.clearMenus).on('click', SSD.clearMenus)
-               .off('contextmenu', SSD.clearMenus).on('contextmenu', SSD.clearMenus);
-      SSD.clearMenus();
-
-      // Display from data
+      // Display all subgroups
       SSD.Subgroup.displayAll();
-      SSD.Subset.displayAll();
-      SSD.Partition.displayAll();
-
-      $('#subset_page').off('contextmenu', SSD.contextMenuHandler).on('contextmenu', SSD.contextMenuHandler);
-
       MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
    }
 
@@ -124,8 +128,142 @@ class SSD {
       return $(eval(Template.HTML('#headerMenu_template')));
    }
 }
-SSD.Subset = class Subset {
+
+/*
+ * SSD.BasicSubset --
+ *   Direct superclass of SSD.Subgroup, SSD.Subset, and SSD.Partition
+ *   Assigns an id to every element displayed in the subsetDisplay,
+ *     and adds it to SSD.displayList
+ *   Implements set operations unions, intersection, and elementwise product
+ *
+ *   Subclasses must implement name, elements, displayLine, and menu properties
+ *     name - subset name for display (e.g., "H₂" or "S₃")
+ *     elements - elements of subset (as bitset)
+ *     displayLine - line for this subset in display (e.g., "H₁ = < f > is a subgroup of order 2.")
+ *     menu - context menu brought up by this element in display
+ *
+ *   (BasicSubset would be an abstract superclass in another language.)
+ */
+
+SSD.BasicSubset = class BasicSubset {
+   constructor () {
+      this.id = SSD.nextId++;
+      SSD.displayList[this.id] = this;
+   }
+
+
+   /*
+    * Operations that create new SSD.Subsets by performing
+    *   union, intersection, and elementwise product on this set
+    */
+   union(other) {
+      return new SSD.Subset(BitSet.union(this.elements, other.elements));
+   }
+
+   intersection(other) {
+      return new SSD.Subset(BitSet.intersection(this.elements, other.elements));
+   }
+
+   elementwiseProduct(other) {
+      const newElements = new BitSet(group.order);
+      for (let i = 0; i < this.elements.len; i++) {
+         if (this.elements.isSet(i)) {
+            for (let j = 0; j < other.elements.len; j++) {
+               if (other.elements.isSet(j)) {
+                  newElements.set(group.multtable[i][j]);
+               }
+            }
+         }
+      }
+      return new SSD.Subset(newElements);      
+   }
+
+   get closure() {
+      return new SSD.Subset(group.closure(this.elements));
+   }
+
+   // delete is a javascript keyword...
+   destroy() {
+      delete(SSD.displayList[this.id]);
+      $(`#${this.id}`).remove();
+   }
+   
+   menuItems(operation) {
+      const printOp = operation == 'elementwiseProduct' ? 'elementwise product' : operation;
+      const action = (other) => `SSD.displayList[${this.id}].${operation}(SSD.displayList[${other.id}])`;      
+      const li = (other) => eval('`' + `<li action="${action(other)}">the ${printOp} of ` +
+                                    `${math(this.name)} with ${math(other.name)}</li>` + '`');
+
+      const otherSubsets = SSD.displayList.filter( (el) => el != this );
+      const frag =
+         otherSubsets.filter( (el) => el instanceof SSD.Subgroup )
+                     .reduce( (frag, el) => frag += li(el), '' ) +
+         otherSubsets.filter( (el) => el instanceof SSD.Subset )
+                     .reduce( (frag, el) => frag += li(el), '' ) +
+         otherSubsets.filter( (el) => el instanceof SSD.PartitionSubset )
+                     .reduce( (frag, el) => frag += li(el), '' );
+      return frag;
+   }
+}
+
+SSD.Subgroup = class Subgroup extends SSD.BasicSubset {
+   constructor (subgroupIndex) {
+      super();
+
+      this.subgroupIndex = subgroupIndex;
+      this.elements = window.group.subgroups[subgroupIndex].members;
+   }
+
+   get name() {
+      return `<i>H<sub>${this.subgroupIndex}</sub></i>`;
+   }
+
+   get displayLine() {
+      const generators = window.group.subgroups[this.subgroupIndex].generators.toArray()
+                               .map( el => math(group.representation[el]) ).join(', ');
+      let templateName;
+      switch (this.subgroupIndex) {
+         case 0:
+            templateName = '#firstSubgroup_template';	break;
+         case window.group.subgroups.length - 1:
+            templateName = '#lastSubgroup_template';	break;
+         default:
+            templateName = '#subgroup_template';	break;
+      }
+      return eval(Template.HTML(templateName));
+   }
+
+   get menu() {
+      return $(eval(Template.HTML('#subgroupMenu_template')));
+   }
+
+   get normalizer() {
+      new SSD.Subset(
+         new SubgroupFinder(window.group)
+            .findNormalizer(window.group.subgroups[this.subgroupIndex]).members );
+   }
+
+   get leftCosets() {
+      return new SSD.Cosets(this, 'left');
+   }
+
+   get rightCosets() {
+      return new SSD.Cosets(this, 'right');
+   }
+
+   static displayAll() {
+      $('#subgroups').html(
+         window.group
+               .subgroups
+               .reduce( (frag, _, inx) => frag.append(new SSD.Subgroup(inx).displayLine),
+                        $(document.createDocumentFragment()) )
+      );
+   }
+}
+SSD.Subset = class Subset extends SSD.BasicSubset {
    constructor (elements) {
+      super();
+      
       if (elements === undefined) {
          this.elements = new BitSet(group.order);
       } else if (Array.isArray(elements)) {
@@ -133,23 +271,21 @@ SSD.Subset = class Subset {
       } else {
          this.elements = elements;
       }
-      this.index = SSD.Subset.list.length;
-      SSD.Subset.list[this.index] = this;
+      this.subsetIndex = SSD.nextSubsetIndex++;
       $('#subsets_placeholder').hide();
-      $('#subsets').append(this.listItem).show();
+      $('#subsets').append(this.displayLine).show();
    }
 
    get name() {
-      return `<i>S<sub>${this.index}</sub></i>`;
+      return `<i>S<sub>${this.subsetIndex}</sub></i>`;
    }
 
-   get listItem() {
-      const index = this.index,
-            numElements = this.elements.popcount();
+   get displayLine() {
+      const numElements = this.elements.popcount();
       let items = this.elements
                       .toArray()
                       .slice(0, 3)
-                      .map( el => math(window.group.representation[el]) )
+                      .map( (el) => math(window.group.representation[el]) )
                       .join(', ');
       if (numElements > 3) {
          items += ', ...';
@@ -158,128 +294,26 @@ SSD.Subset = class Subset {
    }
 
    get menu() {
-      return eval(Template.HTML('#subsetMenu_template'));
+      return $(eval(Template.HTML('#subsetMenu_template')));
    }
 
-   static closure(elements) {
-      new SSD.Subset(group.closure(elements));
-   }
-
-   static displayAll() {
-      if (SSD.Subset.list.every( _ => false )) { // defined elements?
-         $('#subsets_placeholder').show();
-         $('#subsets').hide();
-      } else {
-         $('#subsets_placeholder').hide();
-         $('#subsets').html(SSD.Subset.list.reduce( ($acc, el) => $acc.append(el.listItem),
-                                                    $(document.createDocumentFragment()) ))
-                      .show();
-      }
-   }
-
-   static delete($curr, index) {
-      delete(SSD.Subset.list[index]);
-      $curr.closest('li.highlighted').remove()
-      if (SSD.Subset.list.every( _ => false )) { // no defined elements?
-         $('#subsets').hide();
+   destroy() {
+      super.destroy();
+      if ($('#subsets').length == 0) {
          $('#subsets_placeholder').show();
       }
-   }
-
-   static getMenu($curr, index) {
-      return $(SSD.Subset.list[index].menu)
-   }
-
-   static init() {
-      SSD.Subset.list = [];
    }
 
    static nextName() {
-      return `<i>S<sub>${SSD.Subset.list.length}</sub></i>`;
-   }
-
-   static createFromOperation(operation, name_1, name_2) {
-      const getElements = el => {
-         const thisName = el.name;
-         if (name_1 == thisName) {
-            elements_1 = el.elements;
-         } else if (name_2 == thisName) {
-            elements_2 = el.elements;
-         }
-      }
-
-      let elements_1, elements_2;
-      SSD.Subgroup.list.forEach( el => getElements(el) );
-      SSD.Subset.list.forEach( el => getElements(el) );
-      SSD.Partition.list.forEach( p =>
-         p.items.forEach( el => getElements(el) )
-      );
-
-      let newElements;
-      switch (operation) {
-         case 'intersection':
-            newElements = BitSet.intersection(elements_1, elements_2);
-            break;
-         case 'union':
-            newElements = BitSet.union(elements_1, elements_2);
-            break;
-         case 'elementwise product':
-            newElements = new BitSet(group.order);
-            for (let i = 0; i < elements_1.len; i++) {
-               if (elements_1.isSet(i)) {
-                  for (let j = 0; j < elements_2.len; j++) {
-                     if (elements_2.isSet(j)) {
-                        newElements.set(group.multtable[i][j]);
-                     }
-                  }
-               }
-            }
-            break;
-         default: alert('big problem!');
-      }
-
-      new SSD.Subset(newElements);
-   }
-
-   static intersectionMenu(exceptionName) {
-      const action =
-         "SSD.Subset.createFromOperation('intersection', '${exceptionName}', '${thisName}')";
-      return SSD.Subset.menuItems(exceptionName, action, "intersection");
-   }
-
-   static unionMenu(exceptionName) {
-      const action =
-         "SSD.Subset.createFromOperation('union', '${exceptionName}', '${thisName}')";
-      return SSD.Subset.menuItems(exceptionName, action, "union");
-   }
-
-   static elementwiseProductMenu(exceptionName) {
-      const action =
-         "SSD.Subset.createFromOperation('elementwise product', '${exceptionName}', '${thisName}')";
-      return SSD.Subset.menuItems(exceptionName, action, "elementwise product");
-   }
-
-   static menuItems(exceptionName, action, setOperation) {
-      const li = thisName => (thisName == exceptionName) ? '' :
-                           eval('`' + `<li action="${action}">the ${setOperation} of ` +
-                                `${math(exceptionName)} with ${math(thisName)}</li>` + '`');
-      let frag = '';
-      SSD.Subgroup.list.forEach( el => frag += li(el.name) );
-      SSD.Subset.list.forEach( el => frag += li(el.name) );
-      SSD.Partition.list.forEach( p =>
-         p.items.forEach( el => frag += li(el.name) )
-      );
-      return frag;
+      return `<i>S<sub>${SSD.nextSubsetIndex}</sub></i>`;
    }
 }
 
 SSD.SubsetEditor = class SubsetEditor {
-   static open(setIndex) {
-      const elements = setIndex === undefined ?
-                       new BitSet(group.order) : SSD.Subset.list[setIndex].elements;
-      const setName = setIndex === undefined ?
-                      `<i>S<sub>${SSD.Subset.list.length}</sub></i>` :
-                      SSD.Subset.list[setIndex].name;
+   static open(displayId) {
+      const subset = displayId === undefined ? undefined : SSD.displayList[displayId];
+      const elements = subset === undefined ? new BitSet(group.order) : subset.elements;
+      const setName = subset === undefined ? SSD.Subset.nextName() : subset.name;
       const $subsetEditor = $('body').append(eval(Template.HTML('#subsetEditor_template')))
                                      .find('#subset_editor').show();
       $subsetEditor.find('.ssedit_setName').html(setName);
@@ -328,202 +362,122 @@ SSD.SubsetEditor = class SubsetEditor {
    }
 }
 SSD.Partition = class Partition {
-   constructor (items) {
-      this.partitionIndex = SSD.Partition.list.length;
-      SSD.Partition.list.push(this);
-
-      this.items = items;
-   }
-
-   static init() {
-      SSD.Partition.list = [];
-      if (SSD.Partition.item === undefined) {
-         SSD.Partition.item = class  {
-            constructor(parent, subIndex, elements, name, partitionClass) {
-               this.parent = parent;
-               this.subIndex = subIndex;
-               this.elements = elements;
-               this.name = name;
-               this.partitionClass = partitionClass;
-            }
-
-            get elementRepresentations() {
-               const result = [];
-               for (let i = 0; i < this.elements.len && result.length < 3; i++) {
-                  if (this.elements.isSet(i)) {
-                     result.push(math(group.representation[i]));
-                  }
-               }
-               return result.join(', ') + (this.elements.popcount() > 3 ? ', ...' : '');
-            }
-
-            get menu() {
-               return eval(Template.HTML('#partitionMenu_template'));
-            }
-
-            get listItem() {
-               return eval(Template.HTML('#' + this.partitionClass + '_template'));
-            }
-         }
-      }
-   }
-
-   get listItem() {
-      return this.items
-                 .map( item => item.listItem )
-                 .join('');
+   constructor () {
+      this.subsets = [];
    }
 
    get name() {
-      return this.items[0].name +
+      return this.subsets[0].name +
              ', ..., ' +
-             this.items[this.items.length - 1].name;
+             this.subsets[this.subsets.length - 1].name;
    }
 
-   static delete($curr, index) {
-      SSD.Partition.list[index].delete($curr);
-      delete(SSD.Partition.list[index]);
-      if (SSD.Partition.list.every( _ => false )) { // no defined elements?
-         $('#partitions').hide();
+   destroy() {
+      this.subsets.forEach( (subset) => subset.destroy() );
+      if ($('#partitions').length == 0) {
          $('#partitions_placeholder').show();
       }
    }
-
-   static displayAll() {
-      if (SSD.Partition.list.every( _ => false )) { // no defined elements?
-         $('#partitions_placeholder').show();
-         $('#partitions').hide();
-      } else {
-         $('#partitions_placeholder').hide();
-         $('#partitions').html(
-            SSD.Partition.list.reduce( ($acc, el) => $acc.append(el.listItem),
-                                       $(document.createDocumentFragment()) ))
-                         .show();
-      }
+}
+SSD.PartitionSubset = class PartitionSubset extends SSD.BasicSubset {
+   constructor(parent, subIndex, elements, name, partitionClass) {
+      super();
+      
+      this.parent = parent;
+      this.subIndex = subIndex;
+      this.elements = elements;
+      this.name = name;
+      this.partitionClass = partitionClass;
    }
 
-   static getMenu($curr, index, subIndex) {
-      return $(SSD.Partition.list[index].items[subIndex].menu)
+   get elementRepresentations() {
+      const result = [];
+      for (let i = 0; i < this.elements.len && result.length < 3; i++) {
+         if (this.elements.isSet(i)) {
+            result.push(math(group.representation[i]));
+         }
+      }
+      return result.join(', ') + (this.elements.popcount() > 3 ? ', ...' : '');
+   }
+
+   get menu() {
+      return $(eval(Template.HTML('#partitionMenu_template')));
+   }
+
+   get displayLine() {
+      return eval(Template.HTML('#' + this.partitionClass + '_template'));
    }
 }
 
 SSD.ConjugacyClasses = class ConjugacyClasses extends SSD.Partition {
    constructor() {
-      super([]);
+      super();
 
-      group.conjugacyClasses.forEach(
-         elements => this.items.push(
-            new SSD.Partition.item(this,
-                                   this.items.length,
-                                   elements,
-                                   `<i>CC<sub>${this.items.length}</sub></i>`,
-                                   'conjugacyClass')
-         ));
-
+      this.subsets = window.group.conjugacyClasses.map( (conjugacyClass, inx) => 
+         new SSD.PartitionSubset(this, inx, conjugacyClass, `<i>CC<sub>${inx}</sub></i>`, 'conjugacyClass') );
+      
       $('#partitions_placeholder').hide();
-      $('#partitions').append(this.listItem).show();
+      $('#partitions').append(
+         this.subsets.reduce( ($frag, subset) => $frag.append(subset.displayLine),
+                              $(document.createDocumentFragment()) ))
+                      .show();
    }
 
-   delete($curr) {
+   destroy() {
       $('#partitions li.conjugacyClass').remove();
+      super.destroy();
    }
 }
 SSD.Cosets = class Cosets extends SSD.Partition {
-   constructor(index, side) {
-      super([]);
+   constructor(subgroup, side) {
+      super();
 
-      this.subgroupIndex = index;
-      this.subgroupName = SSD.Subgroup.list[index].name;
+      this.subgroup = subgroup;
       this.isLeft = side == 'left';
       this.side = side;
 
-      const cosets = group.getCosets(SSD.Subgroup.list[index].elements, this.isLeft);
-      for (const coset of cosets) {
-         const rep = math(group.representation[coset.first()]);
-         const name = this.isLeft ? rep + this.subgroupName : this.subgroupName + rep;
-         this.items.push(new SSD.Partition.item(this,
-                                                this.items.length,
-                                                coset,
-                                                name,
-                                                'cosetClass'));
-      }
+      this.subsets = window
+         .group
+         .getCosets(this.subgroup.elements, this.isLeft)
+         .map( (coset, inx) => {
+            const rep = math(window.group.representation[coset.first()]);
+            const name = this.isLeft ? rep + this.subgroup.name : this.subgroup.name + rep;
+            return new SSD.PartitionSubset(this, inx, coset, name, 'cosetClass');
+         } );
 
       $('#partitions_placeholder').hide();
-      $('#partitions').append(this.listItem).show();
+      $('#partitions').append(
+         this.subsets.reduce( ($frag, subset) => $frag.append(subset.displayLine),
+                              $(document.createDocumentFragment()) ))
+                      .show();
    }
 
-   delete() {
+   destroy() {
       $(`#partitions li.${this.side}coset${this.subgroupIndex}`).remove();
+      super.destroy();
    }
 }
 SSD.OrderClasses = class OrderClasses extends SSD.Partition {
    constructor() {
-      super([]);
+      super();
 
-      window.group.orderClasses.forEach(
-         elements => this.items.push(
-            new SSD.Partition.item(this,
-                                   this.items.length,
-                                   elements,
-                                   `<i>OC<sub>${this.items.length}</sub></i>`,
-                                   'orderClass')
-         ));
+      this.subsets = window
+         .group
+         .orderClasses
+         .filter( (orderClass) => orderClass != undefined )
+         .map( (orderClass, inx) => 
+            new SSD.PartitionSubset(this, inx, orderClass, `<i>OC<sub>${inx}</sub></i>`, 'orderClass')
+         );
 
       $('#partitions_placeholder').hide();
-      $('#partitions').append(this.listItem).show();
+      $('#partitions').append(
+         this.subsets.reduce( ($frag, subset) => $frag.append(subset.displayLine),
+                              $(document.createDocumentFragment()) ))
+                      .show();
    }
 
-   delete($curr) {
+   destroy($curr) {
       $('#partitions li.orderClass').remove();
-   }
-}
-
-SSD.Subgroup = class Subgroup {
-   constructor (index) {
-      this.index = index;
-      this.elements = group.subgroups[index].members;
-      SSD.Subgroup.list[index] = this;
-   }
-
-   get name() {
-      return `<i>H<sub>${this.index}</sub></i>`;
-   }
-
-   get listItem() {
-      const index = this.index,
-            items = window.group.subgroups[index].generators.toArray()
-                          .map( el => math(group.representation[el]) ).join(', ');
-      switch (index) {
-         case 0:
-            return eval(Template.HTML('#firstSubgroup_template'));
-         case window.group.subgroups.length - 1:
-            return eval(Template.HTML('#lastSubgroup_template'));
-         default:
-            return eval(Template.HTML('#subgroup_template'));
-      }
-   }
-
-   get menu() {
-      return eval(Template.HTML('#subgroupMenu_template'));
-   }
-
-   static createNormalizer(index) {
-      new SSD.Subset(
-         new SubgroupFinder(window.group).findNormalizer(window.group.subgroups[index]).members );
-   }
-
-
-   static displayAll() {
-      const $frag = $(document.createDocumentFragment());
-      window.group.subgroups.forEach( (_, inx) => $frag.append(new SSD.Subgroup(inx).listItem) );
-      $('#subgroups').html($frag);
-   }
-
-   static getMenu($curr, index) {
-      return $(SSD.Subgroup.list[index].menu);
-   }
-
-   static init() {
-      SSD.Subgroup.list = [];
+      super.destroy();
    }
 }
