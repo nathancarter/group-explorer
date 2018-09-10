@@ -11,7 +11,7 @@ SSD.Partition = class Partition {
 
    destroy() {
       this.subsets.forEach( (subset) => subset.destroy() );
-      if ($('#partitions').length == 0) {
+      if ($('#partitions li').length == 0) {
          $('#partitions_placeholder').show();
       }
    }

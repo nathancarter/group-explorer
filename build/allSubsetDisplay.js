@@ -323,7 +323,7 @@ SSD.Subset = class Subset extends SSD.BasicSubset {
 
    destroy() {
       super.destroy();
-      if ($('#subsets').length == 0) {
+      if ($('#subsets li').length == 0) {
          $('#subsets_placeholder').show();
       }
    }
@@ -398,7 +398,7 @@ SSD.Partition = class Partition {
 
    destroy() {
       this.subsets.forEach( (subset) => subset.destroy() );
-      if ($('#partitions').length == 0) {
+      if ($('#partitions li').length == 0) {
          $('#partitions_placeholder').show();
       }
    }

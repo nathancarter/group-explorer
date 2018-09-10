@@ -37,7 +37,7 @@ SSD.Subset = class Subset extends SSD.BasicSubset {
 
    destroy() {
       super.destroy();
-      if ($('#subsets').length == 0) {
+      if ($('#subsets li').length == 0) {
          $('#subsets_placeholder').show();
       }
    }
