@@ -3,18 +3,9 @@ class SSD {
    static clearMenus() {
       $('.highlighted').removeClass('highlighted');
       $('.menu:visible').remove();
+      $('.elements').remove();
    }
 
-   static SubgroupList() {
-      return SSD.displayList.filter( (el) => el instanceof SSD.Subgroup )
-   }
-   static SubsetList() {
-      return SSD.displayList.filter( (el) => el instanceof SSD.Subset )
-   }
-   static PartitionList() {
-      return SSD.displayList.filter( (el) => el instanceof SSD.Partition )
-   }
-   
    static setup_subset_page() {
       // Initialize list of all displayed subsets
       SSD.nextId = 0;
@@ -24,10 +15,11 @@ class SSD {
       // clear displayed menus, highlighting
       SSD.clearMenus();
 
-      // Set up event handlers
+      // Register event handlers
       $(window).off('click', SSD.clearMenus).on('click', SSD.clearMenus)
                .off('contextmenu', SSD.clearMenus).on('contextmenu', SSD.clearMenus);
-      $('#subset_page').off('contextmenu', SSD.contextMenuHandler).on('contextmenu', SSD.contextMenuHandler);
+      $('#subset_page').off('contextmenu', SSD.contextMenuHandler).on('contextmenu', SSD.contextMenuHandler)
+                       .off('dblclick', SSD.dblClickHandler).on('dblclick', SSD.dblClickHandler);
 
       // clear out displayed lists; show '(None)' placeholders
       $('ul.subset_page_content li').remove();
@@ -38,6 +30,31 @@ class SSD {
       MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
    }
 
+   // Double-click displays elements in subset
+   static dblClickHandler(event) {
+      event.preventDefault();
+      SSD.clearMenus();
+      const $curr = $(event.target).closest('li');
+      const id = $curr.attr('id');
+      if (id != undefined) {
+         const subset = SSD.displayList[id];
+         const subsetName = subset.name;
+         const subsetElements = subset
+            .elements.toArray()
+            .reduce( (elements, element) => {
+               elements.push(math(group.representation[element]));
+               return elements;
+            }, [] )
+            .join(', ');
+         const $menu = $(eval(Template.HTML('#subsetElements_template')));
+         $curr.addClass('highlighted').append($menu);
+         SSD.setMenuLocations(event, $menu);
+         event.stopPropagation();
+         MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
+      }
+   }
+
+   // Left-click executes "action" attribute in menu item
    static menuClickHandler(event) {
       event.preventDefault();
       const $curr = $(event.target).closest('[action]');
@@ -49,6 +66,7 @@ class SSD {
       }
    }
 
+   // Right-click executes action, which displays context menu
    static contextMenuHandler(event) {
       event.preventDefault();
       const $curr = $(event.target).closest('[action]');
@@ -151,6 +169,16 @@ SSD.BasicSubset = class BasicSubset {
       SSD.displayList[this.id] = this;
    }
 
+   get closure() {
+      return new SSD.Subset(group.closure(this.elements));
+   }
+
+   // delete is a javascript keyword...
+   destroy() {
+      delete(SSD.displayList[this.id]);
+      $(`#${this.id}`).remove();
+   }
+
 
    /*
     * Operations that create new SSD.Subsets by performing
@@ -176,16 +204,6 @@ SSD.BasicSubset = class BasicSubset {
          }
       }
       return new SSD.Subset(newElements);      
-   }
-
-   get closure() {
-      return new SSD.Subset(group.closure(this.elements));
-   }
-
-   // delete is a javascript keyword...
-   destroy() {
-      delete(SSD.displayList[this.id]);
-      $(`#${this.id}`).remove();
    }
    
    menuItems(operation) {
