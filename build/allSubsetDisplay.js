@@ -151,10 +151,6 @@ class SSD {
               setCascadeDirections( $(child_menu) );
            });
    }
-
-   static getHeaderMenu() {
-      return $(eval(Template.HTML('#headerMenu_template')));
-   }
 }
 
 /*
