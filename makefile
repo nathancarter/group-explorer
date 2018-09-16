@@ -39,3 +39,15 @@ build/allGroupExplorer.min.js : ${JS_FILES}
 
 build/allSubsetDisplay.js : ${SUB_FILES}
 	${COMBINE} ${SUB_FILES} ${COMBINE_OPTS} > build/allSubsetDisplay.js
+
+
+
+#################
+
+DOCS = docs/Template.md
+
+docs : ${DOCS}
+
+docs/Template.md : js/Template.js
+	cp js/Template.js docs/Template.md
+
