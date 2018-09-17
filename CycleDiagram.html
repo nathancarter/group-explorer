@@ -148,7 +148,7 @@
        }
 
        function setup() {
-          $('#header').html(eval(Template.HTML('#header')));
+          $('#header').html(eval(Template.HTML('header')));
           MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'header']);
 
           graphicContext = new DisplayCycleGraph({container: $('#graphic')});

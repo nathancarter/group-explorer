@@ -48,7 +48,7 @@ class SSD {
                return elements;
             }, [] )
             .join(', ');
-         const $menu = $(eval(Template.HTML('#subsetElements_template')));
+         const $menu = $(eval(Template.HTML('subsetElements_template')));
          $curr.addClass('highlighted').append($menu);
          SSD.setMenuLocations(event, $menu);
          event.stopPropagation();
@@ -81,7 +81,7 @@ class SSD {
       if ($curr.length != 0) {
          SSD.clearMenus();
          const $menu =($curr.hasClass('subset_page_header') || $curr.hasClass('placeholder')) ?
-                      $(eval(Template.HTML('#headerMenu_template'))) :
+                      $(eval(Template.HTML('headerMenu_template'))) :
                       $(SSD.displayList[$curr.attr('id')].menu);
          $menu.on('click', SSD.menuClickHandler);
          $curr.addClass('highlighted').append($menu);
@@ -248,17 +248,17 @@ SSD.Subgroup = class Subgroup extends SSD.BasicSubset {
       let templateName;
       switch (this.subgroupIndex) {
          case 0:
-            templateName = '#firstSubgroup_template';	break;
+            templateName = 'firstSubgroup_template';	break;
          case window.group.subgroups.length - 1:
-            templateName = '#lastSubgroup_template';	break;
+            templateName = 'lastSubgroup_template';	break;
          default:
-            templateName = '#subgroup_template';	break;
+            templateName = 'subgroup_template';	break;
       }
       return eval(Template.HTML(templateName));
    }
 
    get menu() {
-      return eval(Template.HTML('#subgroupMenu_template'));
+      return eval(Template.HTML('subgroupMenu_template'));
    }
 
    get normalizer() {
@@ -314,11 +314,11 @@ SSD.Subset = class Subset extends SSD.BasicSubset {
       if (numElements > 3) {
          items += ', ...';
       }
-      return eval(Template.HTML('#subset_template'));
+      return eval(Template.HTML('subset_template'));
    }
 
    get menu() {
-      return eval(Template.HTML('#subsetMenu_template'));
+      return eval(Template.HTML('subsetMenu_template'));
    }
 
    destroy() {
@@ -338,7 +338,7 @@ SSD.SubsetEditor = class SubsetEditor {
       const subset = displayId === undefined ? undefined : SSD.displayList[displayId];
       const elements = subset === undefined ? new BitSet(group.order) : subset.elements;
       const setName = subset === undefined ? SSD.Subset.nextName() : subset.name;
-      const $subsetEditor = $('body').append(eval(Template.HTML('#subsetEditor_template')))
+      const $subsetEditor = $('body').append(eval(Template.HTML('subsetEditor_template')))
                                      .find('#subset_editor').show();
       $subsetEditor.find('.ssedit_setName').html(setName);
       $subsetEditor.find('#ssedit_cancel_button').on('click', SSD.SubsetEditor.close);
@@ -425,11 +425,11 @@ SSD.PartitionSubset = class PartitionSubset extends SSD.BasicSubset {
    }
 
    get menu() {
-      return eval(Template.HTML('#partitionMenu_template'));
+      return eval(Template.HTML('partitionMenu_template'));
    }
 
    get displayLine() {
-      return eval(Template.HTML('#' + this.partitionClass + '_template'));
+      return eval(Template.HTML(this.partitionClass + '_template'));
    }
 }
 

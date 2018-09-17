@@ -105,7 +105,7 @@
        // add row to table that displays this name, order, etc. of group
        function displayGroup(group) {
           const index = Library.findIndex(group);
-          const $row = $(eval(Template.HTML('#row_template')))
+          const $row = $(eval(Template.HTML('row_template')))
              .on('click', () => Library.openWithLibrary('GroupInfo.html', index))
              .appendTo($('#GroupTable tbody'));
 

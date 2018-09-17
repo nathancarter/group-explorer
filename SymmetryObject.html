@@ -177,14 +177,14 @@
        }
 
        function setup() {
-          $('#header').html(eval(Template.HTML('#header')));
+          $('#header').html(eval(Template.HTML('header')));
           MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'header']);
 
           graphicContext = new DisplayDiagram({container: $('#graphic'), trackballControlled: true});
 
           group.symmetryObjects.forEach( (symmetryObject, symmetryObjectIndex) => {
              const template = (symmetryObject.name == diagramName) ?
-                              '#diagram_selected_option_template' : '#diagram_option_template';
+                              'diagram_selected_option_template' : 'diagram_option_template';
              $('#diagram_choice').append(eval(Template.HTML($(template))));
           } );
 

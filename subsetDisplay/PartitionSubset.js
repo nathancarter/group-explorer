@@ -20,10 +20,10 @@ SSD.PartitionSubset = class PartitionSubset extends SSD.BasicSubset {
    }
 
    get menu() {
-      return eval(Template.HTML('#partitionMenu_template'));
+      return eval(Template.HTML('partitionMenu_template'));
    }
 
    get displayLine() {
-      return eval(Template.HTML('#' + this.partitionClass + '_template'));
+      return eval(Template.HTML(this.partitionClass + '_template'));
    }
 }

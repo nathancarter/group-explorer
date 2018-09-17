@@ -24,9 +24,9 @@
 
        function formatGroup(group) {
           let $rslt = $(document.createDocumentFragment())
-             .append(eval(Template.HTML('#header')));
+             .append(eval(Template.HTML('header')));
           if (group.isAbelian) {
-             $rslt.append(eval(Template.HTML('#abelian')));
+             $rslt.append(eval(Template.HTML('abelian')));
           } else if (group.isSolvable) {
              try {
                 const decomposition = findSolvableDecomposition(group);
@@ -35,22 +35,22 @@
                    .map( el => makeGroupRef(el) );
                 decompositionDisplay.push(makeGroupRef(IsomorphicGroups.map.get(1)[0]));
                 decompositionDisplay = decompositionDisplay.reverse().join(' &#x25c5; ');
-                $rslt.append(eval(Template.HTML('#solvable')));
+                $rslt.append(eval(Template.HTML('solvable')));
                 for (let i = 0; i < decomposition.length - 1; i++) {
                    let g = decomposition[i];
                    $rslt.find('#decomposition')
-                        .append(eval(Template.HTML('#decomposition_element')));
+                        .append(eval(Template.HTML('decomposition_element')));
                 }
                 let g = decomposition[decomposition.length - 1];
                 $rslt.find('#decomposition')
-                     .append(eval(Template.HTML('#decomposition_termination')));
+                     .append(eval(Template.HTML('decomposition_termination')));
              } catch (err) {
-                $rslt.append(eval(Template.HTML('#failure')));
+                $rslt.append(eval(Template.HTML('failure')));
              }
           } else {
-             $rslt.append(eval(Template.HTML('#unsolvable')));
+             $rslt.append(eval(Template.HTML('unsolvable')));
              if (group.isSimple) {
-                $rslt.append(eval(Template.HTML('#simple')));
+                $rslt.append(eval(Template.HTML('simple')));
              }
           }
 

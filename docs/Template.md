@@ -23,28 +23,27 @@ To use the template it is retrieved with a jQuery call, its HTML extracted as a 
 '`' + $('template[id="subgroup_template"]').html() + '`'
 ```
 
-When executed, this `Template.HTML` produces the template contents as a string literal:
+When executed, `Template.HTML` produces the template contents as a string literal:
 
 ```js
 `<li id="${this.id}">
-   ${this.name} = &lt; ${generators} &gt; is a subgroup of order ${subgroupOrder}
+     ${this.name} = &lt; ${generators} &gt; is a subgroup of order ${subgroupOrder}
  </li>`
 ```
 
-Note the back ticks ` at the start and end of the string: this is an ES6 template literal.  When it is eval'd in a scope which has the referenced values defined, as excer[ted from [SSD.Subgroups](../subsetDisplay/Subgroup.js):
+Note the back ticks ` at the start and end of the string: this is an ES6 template literal.  When it is eval'd in a scope which has the referenced values defined, as excerpted from [SSD.Subgroups](../subsetDisplay/Subgroup.js):
 
 ```js
-const generators = this.subgroup.generators.toArray()
-                       .map( el => math(group.representation[el]) ).join(', ');
+const generators = this.generators.toArray().map( el => math(group.representation[el]) ).join(', ');
 const subgroupOrder = this.subgroup.order;
 const subgroupLine = eval(Template.HTML('subgroup_template');
 ```
 
-the expressions enclosed by curly braces ${...} are evaluated and replaced in the string. At this point (for one of the subgroups of <i>D<sub>4</sub></i>), `subgroupLine` will be a string of HTML something like:
+The expressions enclosed by curly braces ${...} are evaluated and replaced in the string. At this point (for one of the subgroups of <i>D<sub>4</sub></i>), `subgroupLine` will be a string of HTML like the following:
 
 ```html
 <li id="1">
-   <i>H<sub>1</sub></i> = &lt; <i>r<sup>2</sup></i> &gt; is a subgroup of order 2.
+    <i>H<sub>1</sub></i> = &lt; <i>r<sup>2</sup></i> &gt; is a subgroup of order 2.
 </li>
 ```
 
@@ -58,31 +57,35 @@ to give the following line in the list of subgroups:
 
 &nbsp;&nbsp;&nbsp;&nbsp;<i>H<sub>1</sub></i> = &lt; <i>r<sup>2</sup></i> &gt; is a subgroup of order 2.
 
+While this example may seem too simple to provide much justification for introducing a sort of arcane use of HTML5 templates, in practice they get considerably more involved. There are quite a number of three-deep floating menus in `subsetDisplay`, for example.
+
 
 ## Template retrieval caching
 
-Since template retrieval is done repeatedly, the actual template retrieval function caches results by template id in a class static variable, which it creates and initializes on the first call.
+Since template retrieval is done repeatedly, the actual template retrieval code caches results by template id in a class static variable, as you can see here: [Template.js](../js/Template.js).
 
 ```js
 */
 
 /*
  * Caching template fetch --
- *   returns html of selector HTML as `string` for subsequent eval
-   */
+ *   returns the html of template with id = templateId as a `string literal` for subsequent eval'ing
+ */
 
-   class Template {
-   static HTML(selector) {
+class Template {
+   static HTML(templateId) {
+
       Template._map = (Template._map === undefined) ? new Map() : Template._map;
 
-      if (!Template._map.has(selector)) {
-         Template._map.set(selector,  '`' + $(selector).html() + '`');
+      if (!Template._map.has(templateId)) {
+         Template._map.set(templateId,  '`' + $(`template[id="${templateId}"]`).html() + '`');
       };
 
-      return Template._map.get(selector);
+      return Template._map.get(templateId);
    }
 }
 
 /*
-```
-*/
+   ```
+ */
+

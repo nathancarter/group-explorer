@@ -17,17 +17,17 @@ SSD.Subgroup = class Subgroup extends SSD.BasicSubset {
       let templateName;
       switch (this.subgroupIndex) {
          case 0:
-            templateName = '#firstSubgroup_template';	break;
+            templateName = 'firstSubgroup_template';	break;
          case window.group.subgroups.length - 1:
-            templateName = '#lastSubgroup_template';	break;
+            templateName = 'lastSubgroup_template';	break;
          default:
-            templateName = '#subgroup_template';	break;
+            templateName = 'subgroup_template';	break;
       }
       return eval(Template.HTML(templateName));
    }
 
    get menu() {
-      return eval(Template.HTML('#subgroupMenu_template'));
+      return eval(Template.HTML('subgroupMenu_template'));
    }
 
    get normalizer() {

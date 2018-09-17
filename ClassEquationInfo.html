@@ -24,11 +24,11 @@
 
        function formatGroup(group) {
           const $rslt = $(document.createDocumentFragment())
-             .append(eval(Template.HTML('#header')));
+             .append(eval(Template.HTML('header')));
           if (group.isAbelian) {
-             $rslt.append(eval(Template.HTML('#abelian')));
+             $rslt.append(eval(Template.HTML('abelian')));
           } else {
-             $rslt.append(eval(Template.HTML('#non-abelian')));
+             $rslt.append(eval(Template.HTML('non-abelian')));
              for (const conjugacyClass of group.conjugacyClasses) {
                 $rslt.find('#conjugacy_list')
                      .append($('<li>').html(
@@ -38,7 +38,7 @@
                      ) );
              }
           }
-          $rslt.append(eval(Template.HTML('#trailer')));
+          $rslt.append(eval(Template.HTML('trailer')));
           $('body').append($rslt);
           MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
        }

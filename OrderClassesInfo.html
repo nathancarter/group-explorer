@@ -25,11 +25,11 @@
        function formatGroup(group) {
           const numOrderClasses = group.orderClasses.reduce( count => count + 1, 0);
           let $rslt = $(document.createDocumentFragment())
-             .append(eval(Template.HTML('#header')));
+             .append(eval(Template.HTML('header')));
           if (numOrderClasses == 1) {
-             $rslt.append(eval(Template.HTML('#single')));
+             $rslt.append(eval(Template.HTML('single')));
           } else {
-             $rslt.append(eval(Template.HTML('#multiple')));
+             $rslt.append(eval(Template.HTML('multiple')));
              group.orderClasses.forEach( (members, order) =>
                 $rslt.find('#order_class_list')
                      .append($('<li>').html(

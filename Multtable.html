@@ -223,7 +223,7 @@
        }
 
        function setup() {
-          $('#header').html(eval(Template.HTML('#header')));
+          $('#header').html(eval(Template.HTML('header')));
           MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'header']);
 
           multtable = new Multtable(group);
@@ -242,10 +242,10 @@
 
        function organize(ev) {
           ev.stopPropagation();
-          const $organizationList = $(eval(Template.HTML('#organization_list_template')));
+          const $organizationList = $(eval(Template.HTML('organization_list_template')));
           group.subgroups.forEach( (subgroup, inx) => {
              const templateName =
-                (subgroup.order == 1) ? '#organization_element_none_template' : '#organization_element_template';
+                (subgroup.order == 1) ? 'organization_element_none_template' : 'organization_element_template';
              if (subgroup.order != group.order) {
                 $organizationList.append(
                    $(`<li id=${inx}>`).html(eval(Template.HTML(templateName)))

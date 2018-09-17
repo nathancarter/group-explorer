@@ -50,7 +50,7 @@
 
        function displayGroup() {
           const $rslt = $(document.createDocumentFragment())
-             .append(eval(Template.HTML('#header_template')));
+             .append(eval(Template.HTML('header_template')));
           if (group.isSimple) {
              $rslt.find('#not-simple').remove();
           } else {
@@ -79,17 +79,17 @@
           const elements = subgroup.members.toArray()
                                    .map( el => math(group.representation[el]) )
                                    .join(', ');
-          const $row = $(eval(Template.HTML('#data_row_template')));
+          const $row = $(eval(Template.HTML('data_row_template')));
 
           let isomorphicGroup = IsomorphicGroups.findForSubgroup(group, subgroup);
           if (isomorphicGroup === undefined) {
-             $row.find('ul').append(eval(Template.HTML('#no_isomorphism_template')));
+             $row.find('ul').append(eval(Template.HTML('no_isomorphism_template')));
           } else {
              const img = new Image();
              img.src = isomorphicGroup.imageSource;
              img.height = img.width = 50;
              $row.find('.image').html(img);
-             $row.find('ul').append(eval(Template.HTML('#isomorphism_template')));
+             $row.find('ul').append(eval(Template.HTML('isomorphism_template')));
           }
 
           if (group.isNormal(subgroup)) {
@@ -101,9 +101,9 @@
              }
 
              if (isomorphicGroup === undefined) {
-                $row.find('ul').append(eval(Template.HTML('#no_quotient_group_template')));
+                $row.find('ul').append(eval(Template.HTML('no_quotient_group_template')));
              } else {
-                $row.find('ul').append(eval(Template.HTML('#quotient_group_template')));
+                $row.find('ul').append(eval(Template.HTML('quotient_group_template')));
              }
           }
 

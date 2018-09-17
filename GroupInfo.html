@@ -80,10 +80,10 @@
           window.graphicContext = new DisplayDiagram({width: 100, height: 100, fog: false});
 
           // Header
-          $('#heading').html(eval(Template.HTML('#heading_template')));
+          $('#heading').html(eval(Template.HTML('heading_template')));
 
           // Basic facts
-          $('#Basic_facts + p').html(eval(Template.HTML('#basicFacts_template')));
+          $('#Basic_facts + p').html(eval(Template.HTML('basicFacts_template')));
 
           // Views --
           //   Add rows to ViewTable until there are no more Cayley Diagrams (including
@@ -91,7 +91,7 @@
           for (let inx = 0;
              inx < group.cayleyDiagrams.length + 1 || inx < group.symmetryObjects.length;
              inx++) {
-             const $row = $('#ViewTable').append(eval(Template.HTML('#view_row_template')))
+             const $row = $('#ViewTable').append(eval(Template.HTML('view_row_template')))
                                          .children()
                                          .last();
 
@@ -134,13 +134,13 @@
           }
 
           // Description
-          $('#Description + p').html(eval(Template.HTML('#description_template')));
+          $('#Description + p').html(eval(Template.HTML('description_template')));
 
           // Computed properties:
-          $('#Computed_properties + p').html(eval(Template.HTML('#computedProperties_template')));
+          $('#Computed_properties + p').html(eval(Template.HTML('computedProperties_template')));
 
           // File data
-          $('#File_data + p').html(eval(Template.HTML('#fileData_template')));
+          $('#File_data + p').html(eval(Template.HTML('fileData_template')));
        }
 
        // (Re-)paints group information that depends on the representation (which may change)

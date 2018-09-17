@@ -24,12 +24,12 @@
 
        function formatGroup(group) {
           let $rslt = $(document.createDocumentFragment())
-             .append(eval(Template.HTML('#header')));
+             .append(eval(Template.HTML('header')));
           if (group.isCyclic) {
              const gen = group.generators[0][0];
-             $rslt.append(eval(Template.HTML('#cyclic')));
+             $rslt.append(eval(Template.HTML('cyclic')));
           } else {
-             $rslt.append(eval(Template.HTML('#non-cyclic')));
+             $rslt.append(eval(Template.HTML('non-cyclic')));
           }
 
           $('body').append($rslt);

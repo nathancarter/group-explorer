@@ -24,15 +24,15 @@
 
        function formatGroup(group) {
           const $rslt = $(document.createDocumentFragment())
-             .append(eval(Template.HTML('#header')));
+             .append(eval(Template.HTML('header')));
           if (group.isAbelian) {
-             $rslt.append(eval(Template.HTML('#abelian')));
+             $rslt.append(eval(Template.HTML('abelian')));
           } else {
              outerLoop:
              for (let i = 1; i < group.order; i++) {
                 for (let j = i; j < group.order; j++) {
                    if (group.multtable[i][j] != group.multtable[j][i]) {
-                      $rslt.append(eval(Template.HTML('#non-abelian')));
+                      $rslt.append(eval(Template.HTML('non-abelian')));
                       break outerLoop;
                    }
                 }

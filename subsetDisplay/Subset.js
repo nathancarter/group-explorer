@@ -28,11 +28,11 @@ SSD.Subset = class Subset extends SSD.BasicSubset {
       if (numElements > 3) {
          items += ', ...';
       }
-      return eval(Template.HTML('#subset_template'));
+      return eval(Template.HTML('subset_template'));
    }
 
    get menu() {
-      return eval(Template.HTML('#subsetMenu_template'));
+      return eval(Template.HTML('subsetMenu_template'));
    }
 
    destroy() {

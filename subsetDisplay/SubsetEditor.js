@@ -4,7 +4,7 @@ SSD.SubsetEditor = class SubsetEditor {
       const subset = displayId === undefined ? undefined : SSD.displayList[displayId];
       const elements = subset === undefined ? new BitSet(group.order) : subset.elements;
       const setName = subset === undefined ? SSD.Subset.nextName() : subset.name;
-      const $subsetEditor = $('body').append(eval(Template.HTML('#subsetEditor_template')))
+      const $subsetEditor = $('body').append(eval(Template.HTML('subsetEditor_template')))
                                      .find('#subset_editor').show();
       $subsetEditor.find('.ssedit_setName').html(setName);
       $subsetEditor.find('#ssedit_cancel_button').on('click', SSD.SubsetEditor.close);

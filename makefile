@@ -49,5 +49,5 @@ DOCS = docs/Template.md
 docs : ${DOCS}
 
 docs/Template.md : js/Template.js
-	cp js/Template.js docs/Template.md
+	echo '' | cat js/Template.js - > docs/Template.md
 
