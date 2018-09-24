@@ -2599,7 +2599,7 @@ class DisplayMulttable {
       const stride = multtable.stride;
 
       const separation = multtable.separation*boxSize;
-      const canvasSize = order*boxSize;
+      const canvasSize = order*boxSize + (order/stride - 1)*separation;
       this.canvas.height = canvasSize;
       this.canvas.width = canvasSize;
 
