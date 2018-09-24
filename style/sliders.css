@@ -1,0 +1,46 @@
+/* styling sliders -- tested on Chrome, Firefox, Edge */
+
+input[type=range] {
+    -webkit-appearance: none;
+    width: 90%;
+    height: 16px;
+    background: transparent;
+    margin: 25px 5% 25px 5%;
+}
+
+input[type=range]:focus {
+    outline: none;
+}
+
+input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: white;
+    box-shadow: 1px 0px #d3d3d3, -1px 0px #d3d3d3, 0px 1px #d3d3d3, 0px -1px #d3d3d3;
+    margin-top: -6px;
+}
+input[type=range]::-moz-range-thumb {
+}
+input[type=range]::-ms-thumb {
+    margin: 0;
+    width: 16px;
+    height: 16px;
+    border-radius: 8px;
+    background: white;
+    box-shadow: 1px 0px #d3d3d3, -1px 0px #d3d3d3, 0px 1px #d3d3d3, 0px -1px #d3d3d3;
+
+}
+
+input[type=range]::-webkit-slider-runnable-track {
+    background: #c9c9c9;
+    height: 4px;
+}
+input[type=range]::-moz-range-track {
+}
+input[type=range]::-ms-track {
+    background: #c9c9c9;
+    height: 1px;
+}
