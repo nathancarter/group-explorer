@@ -1,0 +1,72 @@
+<html>
+   <head>
+      <link rel="stylesheet" href="../style/fonts.css" type="text/css"></link>
+      <link rel="stylesheet" href="../style/visualizer.css" type="text/css"></style>
+      <style>
+       /* colors from https://sashat.me/2017/01/11/list-of-20-simple-distinct-colors */
+       body {
+          border: 6px solid #e6beff;  /* lavender */
+       }
+       #header {
+          border: 6px solid #000075;  /* navy */
+       }
+       #horiz-container {
+          border: 6px solid #42d4f4;  /* cyan */
+       }
+       #graphic {
+          border: 6px solid #800000;  /* maroon */
+       }
+       #splitter {
+          border: 6px solid #bfef45;  /* lime */
+       }
+       #vert-container {
+          border: 6px solid #000000;  /* black */
+       }
+       #controls {
+          border: 6px solid #f58231;  /* orange */
+       }
+       #help-reset {
+          border: 6px solid #f032e6;  /* magenta */
+       }
+       .center-text {
+          font-size: 40px;
+          text-align: center;
+          line-height: 100px;
+       }
+       #splitter-text {
+          text-align: right;
+          position: absolute;
+          font-size: 30px;
+          width: 10px;
+       }
+      </style>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
+      <script>
+       $(window).one('load', resize);
+       $(window).on('resize', resize);
+
+       function resize() {
+          $('body').height(window.innerHeight - 2*6 - 15);  // 6px border
+          $('body').width(window.innerWidth - 2*6 - 15);  // 6px border
+          const {top: splitter_top, height: splitter_height} = $('#splitter')[0].getBoundingClientRect();
+          const splitter_text_height = $('#splitter-text')[0].getBoundingClientRect().height;
+          $('.center-text').each( (_inx, el) => $(el).css("line-height", 0.8*splitter_height + "px") );
+          $('#splitter-text')[0].style.top = splitter_top + 0.4*(splitter_height - splitter_text_height);
+       };
+      </script>
+   </head>
+   <body class="vert">
+      <div id="header" class="horiz">Header</div>
+      <div id="horiz-container" class="horiz">
+         <div id="graphic" class="center-text">Graphic</div>
+         <div id="splitter"><div id="splitter-text">S p l i t t e r</div></div>
+         <div id="vert-container" class="vert">
+            <div id="controls" class="center-text">Controls</div>
+            <div id="help-reset" class="horiz">
+               <button id="help">Help</button>
+               <button id="reset">Reset</button>
+            </div>
+         </div>
+      </div>
+   </body>
+</html>
