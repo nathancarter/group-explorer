@@ -100,7 +100,7 @@ class DisplayMulttable {
       const colors = this._colors(multtable);
 
       const context = this.canvas.getContext('2d');
-      const measuredWidth = (str) => { context.font = font; return context.measureText(str).width };
+      const measuredWidth = (str) => { context.font = font; return str === undefined ? 0 : context.measureText(str).width };
       const isPermutation = (str) => str[0] == '(';
 
       const labels = multtable.group.elements.map( (el) => mathml2text(multtable.group.representation[el]) );
@@ -144,13 +144,28 @@ class DisplayMulttable {
                const cycles = label.match(/[(][^)]*[)]/g);
                let last = 0;
                for (const cycle of cycles) {
-                  if (measuredWidth(rows[last]) == 0) {
-                     rows.push(cycle);
-                  } else if (measuredWidth(rows[last]) + measuredWidth(cycle) < 0.75*boxSize) {
-                     rows[last] = rows[last].concat(cycle);
+                  if (measuredWidth(rows[last]) + measuredWidth(cycle) < 0.75*boxSize) {
+                     rows[last] = (rows[last] === undefined) ? cycle : rows[last].concat(cycle);
                   } else {
-                     rows.push(cycle);
-                     last++;
+                     if (rows[last] !== undefined) {
+                        last++;
+                     }
+                     if (measuredWidth(cycle) < 0.75*boxSize) {
+                        rows[last] = cycle;
+                     } else {
+                        // cut cycle up into row-sized pieces
+                        const widthPerCharacter = measuredWidth(cycle) / cycle.length;
+                        const charactersPerRow = Math.ceil(0.75*boxSize / widthPerCharacter);
+                        for (let c = cycle;;) {
+                           if (measuredWidth(c) < 0.75*boxSize) {
+                              rows[last++] = c;
+                              break;
+                           } else {
+                              rows[last++] = c.slice(0, c.lastIndexOf(' ', charactersPerRow));
+                              c = c.slice(c.lastIndexOf(' ', charactersPerRow)).trim();
+                           }
+                        }
+                     }
                   }
                }
             } else {
