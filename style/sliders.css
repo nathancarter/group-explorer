@@ -5,7 +5,7 @@ input[type=range] {
     width: 90%;
     height: 16px;
     background: transparent;
-    margin: 25px 5% 25px 5%;
+    margin: 0 5% 25px 5%;
 }
 
 input[type=range]:focus {

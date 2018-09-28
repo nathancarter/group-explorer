@@ -47,7 +47,7 @@ button:focus {
 /* container for main graphic, generally a <canvas>; flexes to fill the width available */
 #graphic {
    flex: 1 1 auto;
-   background-color: #E8C8C8;
+   background-color: #F0F0F0;
    width: 100%;
 }
 
@@ -65,10 +65,32 @@ button:focus {
    width: 400px;
 }
 
-/* container for visualizer-specific controls */
-#controls  {
-   flex: 1 1 auto;
-   background-color: #F0E68C;
+/* control panel style */
+#control-options {
+   background-color: #ECECEC;
+   justify-content: center;
+   height: 42px;
+}
+#control-options > button {
+   min-width: 15%;
+}
+
+/* element stretches to fill vertical spaces */
+.fill-vert {
+   height: 100%;
+}
+
+/* background for visualizer-specific controls */
+.control {
+   background-color: #E2E2E2;
+}
+
+/* style select pull-downs */
+.select {
+   height: 30px;
+   font-size: 16px;
+   width: 90%;
+   margin: 0 5% 25px 5%;
 }
 
 /* container to hold help and reset buttons */
