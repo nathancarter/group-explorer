@@ -25,11 +25,15 @@ MINIFY = uglifyjs
 MINIFY_OPTS = --compress --mangle
 
 
-all : ${PRODUCTS}
+all : products docs
 
 clean :
 	rm -f *~ js/*~ subsetDisplay/*~
 	rm -f ${PRODUCTS}
+
+#################
+
+products : ${PRODUCTS}
 
 build/allGroupExplorer.js : ${JS_FILES}
 	${COMBINE} ${JS_FILES} ${COMBINE_OPTS} > build/allGroupExplorer.js
@@ -40,8 +44,6 @@ build/allGroupExplorer.min.js : ${JS_FILES}
 build/allSubsetDisplay.js : ${SUB_FILES}
 	${COMBINE} ${SUB_FILES} ${COMBINE_OPTS} > build/allSubsetDisplay.js
 
-
-
 #################
 
 DOCS = docs/Template.md
@@ -50,4 +52,3 @@ docs : ${DOCS}
 
 docs/Template.md : js/Template.js
 	echo '' | cat js/Template.js - > docs/Template.md
-
