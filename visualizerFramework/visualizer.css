@@ -75,9 +75,10 @@ button:focus {
    min-width: 15%;
 }
 
-/* element stretches to fill vertical spaces */
+/* element stretches to fill vertical spaces, and adds scroll bar if needed */
 .fill-vert {
    height: 100%;
+   overflow: auto;
 }
 
 /* background for visualizer-specific controls */

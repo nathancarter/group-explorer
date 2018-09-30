@@ -1,9 +1,29 @@
 
 class SSD {
+   static _init() {
+      SSD.subsetsURL = './subsetDisplay/subsets.html';
+   }
+
    static clearMenus() {
       $('.highlighted').removeClass('highlighted');
       $('.menu:visible').remove();
       $('.elements').remove();
+   }
+
+   /* Load, initialize subset display */
+   static load($subsetWrapper) {
+      return new Promise( (resolve, reject) => {
+         $.ajax( { url: SSD.subsetsURL,
+                   success: (data) => {
+                      $subsetWrapper.html(data);
+                      SSD.setup_subset_page();
+                      resolve();
+                   },
+                   error: (_jqXHR, _status, err) => {
+                      reject(`Error loading ${SSD.subsetsURL}: ${err}`);
+                   }
+         } )
+      } )
    }
 
    static setup_subset_page() {
@@ -152,6 +172,8 @@ class SSD {
            });
    }
 }
+
+SSD._init();
 
 /*
  * SSD.BasicSubset --
@@ -505,3 +527,29 @@ SSD.OrderClasses = class OrderClasses extends SSD.Partition {
       super.destroy();
    }
 }
+
+class VC {
+   static _init() {
+      VC.visualizerLayoutURL = './visualizerFramework/visualizer.html';
+   }
+
+   /* Load custom code into visualizer framework */
+   static load() {
+      return new Promise( (resolve, reject) => {
+         $.ajax( { url: VC.visualizerLayoutURL,
+                   success: (data) => {
+                          const $customCode = $('body').children().detach();
+                          $('body').html(data);
+                          $('#controls-placeholder').remove();
+                          $('#vert-container').prepend($customCode);
+                          resolve();
+                       },
+                       error: (_jqXHR, _status, err) => {
+                          reject(`Error loading ${VC.visualizerLayoutURL}: ${err}`);
+                       }
+             } );
+          } )
+       }
+}
+
+VC._init();

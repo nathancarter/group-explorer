@@ -9,10 +9,10 @@ The top-level visual components of the visualizers are
 - **graphic**: the major component of the visualizer, a large graphic depicting the group according to the type of visualization
 - **splitter**: a thin bar to the right of the graphic; grab the splitter with the mouse to resize the graphic
 - **vert-container**: a flex container to arrange the controls and the help/reset buttons into a vertical stack
-- **controls**: functions to modify the visualization, such as modifying their arrangement or highlighting a subset
+- **controls**: visualizer-specific panels that control the visualization, perhaps modifying their arrangement or highlighting a subset
 - **help-reset**: buttons with the obvious functions
 
-These visual components are outlined in the following HTML snippet:
+These visual components are outlined in the following HTML snippet, from [visualizer.html](../visualizerFramework/visualizer.html):
 
 ```html
 <body class="vert">
@@ -21,7 +21,7 @@ These visual components are outlined in the following HTML snippet:
       <div id="graphic"></div>
       <div id="splitter"></div>
       <div id="vert-container" class="vert">
-         <div id="controls"></div>
+         <div id="control-placeholder"></div>
          <div id="help-reset" class="horiz">
             <button id="help">Help</button>
             <button id="reset">Reset</button>
@@ -30,6 +30,7 @@ These visual components are outlined in the following HTML snippet:
    </div>
 </body>
 ```
+The `control-placeholder` element is replaced during initialization in by the visualizer-specific control panels in `VC.load()`([visualizer.js](../visualizerFramework/visualizer.js)). For a more complete example see the `load()` function in the [visualizerExemplar](./visualizerExemplar.html).
 
 ## Graphical layout
      
@@ -43,10 +44,9 @@ The elements may be identified in this diagram from their borders according to t
   
 ## CSS
 
-The following CSS (from [visualizer.css](../style/visualizer.css)) formats the elements and styles them to fit the page, as described in the embedded comments:
+The following CSS (from [visualizer.css](../visualizerFramework/visualizer.css)) formats the elements and styles them to fit the page, as described in the embedded comments:
 
 ```css
-<style>
 /* causes web page to fill the window */
 body {
    margin: 0;
@@ -96,7 +96,7 @@ button:focus {
 /* container for main graphic, generally a <canvas>; flexes to fill the width available */
 #graphic {
    flex: 1 1 auto;
-   background-color: #E8C8C8;
+   background-color: #F0F0F0;
    width: 100%;
 }
 
@@ -114,14 +114,38 @@ button:focus {
    width: 400px;
 }
 
-/* container for visualizer-specific controls */
-#controls  {
-   flex: 1 1 auto;
-   background-color: #F0E68C;
+/* control panel style */
+#control-options {
+   background-color: #ECECEC;
+   justify-content: center;
+   height: 42px;
+}
+#control-options > button {
+   min-width: 15%;
+}
+
+/* element stretches to fill vertical spaces, and adds scroll bar if needed */
+.fill-vert {
+   height: 100%;
+   overflow: auto;
+}
+
+/* background for visualizer-specific controls */
+.control {
+   background-color: #E2E2E2;
+}
+
+/* style select pull-downs */
+.select {
+   height: 30px;
+   font-size: 16px;
+   width: 90%;
+   margin: 0 5% 25px 5%;
 }
 
 /* container to hold help and reset buttons */
 #help-reset {
+   background-color: #ECECEC;
    justify-content: space-around;
    align-items: center;
    height: 44px;
@@ -136,5 +160,4 @@ button:focus {
    height: 30px;
    font-size: 14pt;
 }
-</style>
 ```

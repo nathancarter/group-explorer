@@ -1,8 +1,18 @@
+
 <!--
-     Multiplication table visualizer
+     # Visualizer examplar
+
+     This is the pattern used to make the visualizers.  It can be run standalone from a local server with a groupURL as an argument, thus:
+
+     http://localhost:8080/group-explorer/docs/visualizerExample.html?groupURL=http://localhost:8080/group-explorer/groups/D_4.group
+
+     and it displays a formatted header, a blank graphic panel, and buttons to choose between a subgroup control panel and a second view control panel with a couple of sample widgets.
 -->
 <html>
    <head>
+      <meta charset="utf-8" />
+      <base href=".."></base>
+
       <link rel="icon" type="image/png" href="./images/favicon.png"></link>
       <link rel="stylesheet" href="./style/fonts.css" type="text/css"></link>
       <link rel="stylesheet" href="./style/sliders.css" type="text/css"></link>
@@ -10,10 +20,12 @@
       <link rel="stylesheet" href="./subsetDisplay/subsets.css" type="text/css"></link>
 
       <style>
-       #graphic {
-          overflow-x: auto;
+       #view-control {
+          background: #E2E2E2;
+          display: none;
        }
       </style>
+
       <script type="text/x-mathjax-config">
        MathJax.Hub.Config({
           CommonHTML: {
@@ -30,25 +42,22 @@
 
       <script>
        /* Global variables */
-       var group,		// group about which information will be displayed
-           multtable,		// data being displayed in large diagram
-           graphicContext;	// graphic context for large diagram
-       const panelNames = ['#subset-control', '#table-control'];
+       var group;  // group about which information will be displayed
+       const panelNames = ['#subset-control', '#view-control'];
 
-       /* Initial entry to javascript, called once after document load */
+       /* Initial entry to javascript -- called once after document load */
        $(window).one('load', load);
 
-       /* Register static event managers (called after document is assembled) */
-       function registerCallbacks() {
-          $('#subset-button').off('click', () => showPanel('#subset-control') ).on('click', () => showPanel('#subset-control') );
-          $('#table-button').off('click', () => showPanel('#table-control') ).on('click', () => showPanel('#table-control') );
+       /*
+        * Register static event managers -- called after document is assembled
+        *    (The .off(--).on(--) sequence is used to avoid accumulating event handlers after a reset.)
+        */
+       function registerEventHandlers() {
+          $('#subset-button').off('click', () => show('#subset-control') ).on('click', () => show('#subset-control') );
+          $('#view-button').off('click', () => show('#view-control') ).on('click', () => show('#view-control') );
           $('#help').off('click', help).on('click', help);
           $('#reset').off('click', reset).on('click', reset);
-          $('#organization-select').off('change', selectSubgroup).on('change', selectSubgroup);
-          $('#separation-slider').off('input', separation).on('input', separation);
-          $('#rainbow').off('click', () => color('Rainbow')).on('click', () => color('Rainbow'));
-          $('#grayscale').off('click', () => color('Grayscale')).on('click', () => color('Grayscale'));
-          $('#no-coloration').off('click', () => color('None')).on('click', () => color('None'));
+          $('#organization-select').off('change', choose).on('change', choose);
           $(window).off('resize', resizeBody).on('resize', resizeBody);
        }
 
@@ -70,20 +79,18 @@
                  .catch( (error) => alert(error) );
        }
 
-       /* Now that subsetDisplay is loaded, complete the setup */
+       /* Now that all the static HTML is loaded, complete the setup */
        function completeSetup() {
-          // Register event handlers
-          registerCallbacks();
+          // Document is assembled, register event handlers
+          registerEventHandlers();
 
           // Create header from group name and queue MathJax to typeset it
-          $('#header').html('Multiplication Table for&nbsp;' + math(group.name));
-          MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
+          $('#header').html('Visualizer Example for&nbsp;' + math(group.name));
+          MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'header']);
 
           // Create list of subgroups for select options, one choice for each proper subgroup
-          //   (Note that counting starts at 1; subgroup 0, the identity group, is already filled in by static HTML)
           for (let inx = 1; inx < group.subgroups.length - 1; inx++) {
-             // Recursive routine calculates multi-character subscript as Unicode text, since <option> tags cannot contain HTML
-             // (We could also roll our own <select> here)
+             // Recursive routine calculates multi-character subscript as Unicode text, since option tags cannot contain HTML
              const subscript = (jnx) =>
                 (jnx == 0) ? '' : (subscript(Math.floor(jnx / 10)) + subscripts[jnx % 10]);  // subscripts defined in js/mathmlUtils.js
              const subgroup = group.subgroups[inx];
@@ -91,60 +98,32 @@
              $('#organization-select').append(option);
           }
 
-          // Draw Multtable in graphic
-
-          multtable = new Multtable(group);
-          graphicContext = new DisplayMulttable({container: $('#graphic')});
-          organizeBySubgroup(0);  // Initialize Multtable to display with no grouping
-
           // Register the splitter with jquery-resizable, so you can resize the graphic horizontally
           // by grabbing the border between the graphic and the subset control and dragging it
           $('#vert-container').resizable({
              handleSelector: '#splitter',
              resizeHeight: false,
              resizeWidthFrom: 'left',
+             onDrag: function () {
+                // Code to resize the graphic goes here, if needed
+             }
           });
 
-          showPanel('#subset-control');
+          show('#subset-control');
           resizeBody();
        }
 
-       /* Find subgroup index (the "value" attribute of the option selected) and display multtable accordingly */
-       function selectSubgroup(ev) {
-          ev.stopPropagation();
-          organizeBySubgroup(ev.target.value);
-       }
-
-       /* Display multtable grouped by group.subgroup[inx] */
-       function organizeBySubgroup(inx) {
-          if (inx == 0) {
-             multtable.reset();
-          } else {
-             multtable.organizeBySubgroup(group.subgroups[inx]);
-          }
-          graphicContext.showLargeGraphic(multtable);
-       }
-
-       /* Set separation between cosets in multtable display, and re-draw graphic */
-       function separation() {
-          multtable.separation = $('#separation-slider')[0].valueAsNumber/100;
-          graphicContext.showLargeGraphic(multtable);
-       }
-
-       /* Set coloration option in multtable, and re-draw graphic */
-       function color(coloration) {
-          multtable.coloration = coloration;
-          graphicContext.showLargeGraphic(multtable);
-       }
-
-       /* Resize the body (don't need to re-size the graphic, it scrolls) */
+       /*
+        * Resize the body, accounting for the body margins
+        *    (Note that this routine would have to resize the graphic, too, if needed.)
+        */
        function resizeBody() {
           $('body').height(window.innerHeight - 8);
           $('body').width(window.innerWidth - 8);
        }
 
        /* Show the desired panel, hide the rest */
-       function showPanel(panel_name) {
+       function show(panel_name) {
           for (const name of panelNames) {
              if (name == panel_name) {
                 $(name).show();
@@ -154,12 +133,16 @@
           }
        }
 
-       /* Help routine */
-       function help() {
-          alert('There is no help for you -- yet :-)');
+       /* Example event handler, set up in registerCallback */
+       function choose(ev) {
+          alert(`subgroup ${ev.target.value} selected`);
        }
 
-       /* Reset function -- just starts over */
+       /* Routines for Help, Reset buttons at bottom of control panel */
+       function help() {
+          alert('This is a simple example to show how visualizers are built.');
+       }
+
        function reset() {
           load();
        }
@@ -168,14 +151,14 @@
    <body class="vert">
       <div id="control-options" class="horiz">
          <button id="subset-button">Subsets</button>
-         <button id="table-button">Table</button>
+         <button id="view-button">View</button>
       </div>
 
       <div id="subset-control" class="fill-vert">
          <!-- This is filled in by subsetDisplay/subsets.html -->
       </div>
 
-      <div id="table-control" class="fill-vert control">
+      <div id="view-control" class="fill-vert">
          <p>Organize by subgroup:</p>
          <select id="organization-select" class="select">
             <option value="0">none</option>
@@ -184,14 +167,11 @@
             <option value="${inx}">H${subscript(inx)}, a subgroup of order ${subgroup.order}</option>
          </template>
 
-         <p>Separate cosets by:</p>
-         <input id="separation-slider" type="range" min="0" max="20" value="0"> <!-- [0-20] => [0,box width] -->
-         <p>Default coloration:</p>
-         <form>
-            <input id="rainbow" name="coloration" type="radio">Spectrum/rainbow<br>
-            <input id="grayscale" name="coloration" type="radio">Grayscale<br>
-            <input id="no-coloration" name="coloration" type="radio">None<br>
-         </form>
+         <p>Zoom level:</p>
+         <input id="zoom-level" type="range" min="-10" max="10" value="0">
+
+         <p>Line thickness:</p>
+         <input id="line-thickness" type="range" min="1" max="20" value="10">
       </div>
    </body>
 </html>

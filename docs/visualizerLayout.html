@@ -1,7 +1,10 @@
 <html>
    <head>
-      <link rel="stylesheet" href="../style/fonts.css" type="text/css"></link>
-      <link rel="stylesheet" href="../style/visualizer.css" type="text/css"></style>
+      <meta charset="utf-8" />
+      <base href=".."></head>
+
+      <link rel="stylesheet" href="./style/fonts.css" type="text/css"></link>
+      <link rel="stylesheet" href="./visualizerFramework/visualizer.css" type="text/css"></style>
       <style>
        /* colors from https://sashat.me/2017/01/11/list-of-20-simple-distinct-colors */
        body {
@@ -37,7 +40,7 @@
           text-align: right;
           position: absolute;
           font-size: 30px;
-          width: 10px;
+          width: 10px;   /* wider than real splitter, so you can see the text */
        }
       </style>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
@@ -48,6 +51,8 @@
        function resize() {
           $('body').height(window.innerHeight - 2*6 - 15);  // 6px border
           $('body').width(window.innerWidth - 2*6 - 15);  // 6px border
+
+          // move the vertical 'Splitter' text around on re-sizing
           const {top: splitter_top, height: splitter_height} = $('#splitter')[0].getBoundingClientRect();
           const splitter_text_height = $('#splitter-text')[0].getBoundingClientRect().height;
           $('.center-text').each( (_inx, el) => $(el).css("line-height", 0.8*splitter_height + "px") );
@@ -61,7 +66,7 @@
          <div id="graphic" class="center-text">Graphic</div>
          <div id="splitter"><div id="splitter-text">S p l i t t e r</div></div>
          <div id="vert-container" class="vert">
-            <div id="controls" class="center-text">Controls</div>
+            <div id="controls" class="center-text fill-vert">Controls</div>
             <div id="help-reset" class="horiz">
                <button id="help">Help</button>
                <button id="reset">Reset</button>
