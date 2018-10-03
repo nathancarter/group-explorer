@@ -1,9 +1,7 @@
-<!--
 # Visualizer framework HTML
 
 Used by CayleyDiagram.html, CycleDiagram.html, Multtable.html, and SymmetryObject.html
 ```html
--->
 <body class="vert">
    <div id="header" class="horiz"></div>
    <div id="horiz-container" class="horiz">
@@ -18,6 +16,4 @@ Used by CayleyDiagram.html, CycleDiagram.html, Multtable.html, and SymmetryObjec
       </div>
    </div>
 </body>
-<!--
 ```
--->

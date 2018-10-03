@@ -1,5 +1,4 @@
 
-<!--
 # Visualizer examplar
 
 This is the pattern used to write the visualizers.  It can be run standalone from a local server with a groupURL argument
@@ -12,7 +11,6 @@ It displays
 - a non-functional view control panel, with a select element and a couple of sliders
 - buttons to choose between viewing the subgroup control panel and the view control panel
 ```html
--->
 <html>
    <head>
       <meta charset="utf-8" />
@@ -162,13 +160,11 @@ It displays
        }
       </script>
    </head>
-<!--
 ```
 ## Visualizer-specific HTML
 
 The body contains the visualizer-specific HTML to lay out the controls for this visualizer.  This HTML will be wrapped in the visualizer framework by the `VC.load()` routine called during [initialization](#visualizer-framework-loading).
 ```html
--->
    <body class="vert">
       <div id="control-options" class="horiz">
          <button id="subset-button">Subsets</button>
@@ -176,7 +172,6 @@ The body contains the visualizer-specific HTML to lay out the controls for this 
       </div>
 
       <div id="subset-control" class="fill-vert">
-         <!-- This is filled in by subsetDisplay/subsets.html -->
       </div>
 
       <div id="view-control" class="fill-vert">
@@ -196,6 +191,4 @@ The body contains the visualizer-specific HTML to lay out the controls for this 
       </div>
    </body>
 </html>
-<!--
 ```
--->

@@ -15,6 +15,9 @@ SUB_FILES = subsetDisplay/subsets.js           subsetDisplay/BasicSubset.js     
 # PRODUCTS = build/allGroupExplorer.js build/allGroupExplorer.min.js build/allVisualizer.js
 PRODUCTS = build/allGroupExplorer.js build/allVisualizer.js
 
+DOCS =  docs/Template.md	docs/visualizerExemplar.md	\
+	docs/visualizerFramework_css.md	docs/visualizerFramework_js.md	docs/visualizerFramework_html.md
+
 #COMBINE = uglifyjs
 #COMBINE_OPTS = --compress
 
@@ -28,8 +31,8 @@ MINIFY_OPTS = --compress --mangle
 all : products docs
 
 clean :
-	rm -f *~ js/*~ subsetDisplay/*~ visualizerFramework/*~
-	rm -f ${PRODUCTS}
+	rm -f *~ js/*~ subsetDisplay/*~ visualizerFramework/*~ docs/*~
+	rm -f ${PRODUCTS} ${DOCS}
 
 #################
 
@@ -46,9 +49,21 @@ build/allVisualizer.js : ${SUB_FILES}
 
 #################
 
-DOCS = docs/Template.md
-
 docs : ${DOCS}
 
 docs/Template.md : js/Template.js
 	echo '' | cat js/Template.js - > docs/Template.md
+
+# make markdown files from html by removing lines starting with <!-- and -->, which comment out markdown
+# (you can still use comments, just don't put the delimiters at the start of a line)
+docs/visualizerExemplar.md : docs/visualizerExemplar.html
+	sed -e '/^<!--/d' -e '/^-->/d' < docs/visualizerExemplar.html > docs/visualizerExemplar.md
+
+docs/visualizerFramework_css.md : visualizerFramework/visualizer.css
+	echo '' | cat visualizerFramework/visualizer.css - > docs/visualizerFramework_css.md
+
+docs/visualizerFramework_js.md : visualizerFramework/visualizer.js
+	echo '' | cat visualizerFramework/visualizer.js - > docs/visualizerFramework_js.md
+
+docs/visualizerFramework_html.md : visualizerFramework/visualizer.html
+	sed -e '/^<!--/d' -e '/^-->/d' < visualizerFramework/visualizer.html > docs/visualizerFramework_html.md
