@@ -10,6 +10,7 @@ It displays
 - a functional subgroup control panel, common to several of the visualizers
 - a non-functional view control panel, with a select element and a couple of sliders
 - buttons to choose between viewing the subgroup control panel and the view control panel
+
 ```html
 <html>
    <head>
@@ -67,6 +68,8 @@ It displays
        /*
 ```
 ## Visualizer framework loading
+
+Invokes [VC.load()](./visualizerFramework_js.md#vc-load-) to wrap visualizer framework layout around visualizer-specific controls
 ```javascript
        /* Load the static components of the page */
        function load() {
@@ -87,10 +90,6 @@ It displays
                  .catch( (error) => alert(error) );
        }
 
-       /*
-```
-## Remaining javascript      
-```javascript
        /* Now that all the static HTML is loaded, complete the setup */
        function completeSetup() {
           // Document is assembled, register event handlers
@@ -155,7 +154,15 @@ It displays
           alert('This is a simple example to show how visualizers are built.');
        }
 
+       /*
+```
+## Visualizer framework reset
+
+Uses [VC.restore()](./visualizerFramework_js.md#vs-restore-) to recover visualizer-specific layout
+```javascript
+       */
        function reset() {
+          VC.reset();
           load();
        }
       </script>
@@ -163,7 +170,7 @@ It displays
 ```
 ## Visualizer-specific HTML
 
-The body contains the visualizer-specific HTML to lay out the controls for this visualizer.  This HTML will be wrapped in the visualizer framework by the `VC.load()` routine called during [initialization](#visualizer-framework-loading).
+The body contains the visualizer-specific HTML to lay out the controls for this visualizer.  This HTML will be wrapped in the visualizer framework by [VC.load()](./visualizerFramework_js.md#vc-load-), called during [initialization](#visualizer-framework-loading).
 ```html
    <body class="vert">
       <div id="control-options" class="horiz">
@@ -172,6 +179,7 @@ The body contains the visualizer-specific HTML to lay out the controls for this 
       </div>
 
       <div id="subset-control" class="fill-vert">
+         <!-- This is filled in by subsetDisplay/subsets.html -->
       </div>
 
       <div id="view-control" class="fill-vert">
