@@ -105,6 +105,8 @@
              resizeWidthFrom: 'left',
           });
 
+          setupDragAndDrop();
+
           showPanel('#subset-control');
           resizeBody();
        }
@@ -154,6 +156,92 @@
           }
        }
 
+       /*
+        * Drag and drop handling for large graphic
+        */
+       function setupDragAndDrop() {
+          $('#graphic > canvas').attr('draggable', 'true');
+          $('#graphic > canvas').off('dragstart', dragstart).on('dragstart', dragstart);
+          $('#graphic > canvas').off('drop', drop).on('drop', drop);
+          $('#graphic > canvas').off('dragover', dragover).on('dragover', dragover);
+       }
+
+       /* These are needed to work around Chrome limitation that dragover handler cannot read the event dataTransfer object */
+       var DnD_startElements,       // {row:, column:} of start of drag
+           DnD_elementCoordinates;  // array of top/left cell pixel coordinates relative to canvas
+       
+       /* Start drag */
+       function dragstart(ev) {
+          // Set dragImage to a single blank pixel (the default is to drag an image of the whole canvas)
+          ev.originalEvent.dataTransfer.setDragImage($('#blank')[0], 0, 0);
+
+          // Calculate top/left pixel coordinate of each cell relative to canvas, taking account of coset separation
+          //   (used to figure which cell an event occurred in)
+          const cellSize = $('#graphic > canvas').height()/(group.order + multtable.separation*(group.order/multtable.stride - 1));
+          window.DnD_elementCoordinates =
+             group.elements.map( (inx) => cellSize*(inx + multtable.separation*(Math.floor(inx/multtable.stride))) );
+          
+          // Calculate which cell we're starting in -- has to be in first row or column (but not 0x0 cell)
+          const {row, column} = getElements(ev);
+          if ( (row != 0 && column != 0) || (row == 0 && column == 0) ) {
+             ev.preventDefault();  // don't continue with DnD -- abort operation
+             return;
+          }
+
+          // Save start location
+          window.DnD_startElements = {row: row, column: column};
+       }
+
+
+       /* Drop swaps starting element and current element (if appropriate) and re-displays large graphic */
+       function drop(ev) {
+          ev.preventDefault();
+          const swap = (el1, el2) => {
+             const tmp = multtable.elements[el1];
+             multtable.elements[el1] = multtable.elements[el2];
+             multtable.elements[el2] = tmp;
+          }
+          const curr = getElements(ev);
+          if (curr.column == 0 && window.DnD_startElements.column == 0 && curr.row != window.DnD_startElements.row) {
+             swap(window.DnD_startElements.row, curr.row);
+          } else if (curr.row == 0 && window.DnD_startElements.row == 0 && curr.column != window.DnD_startElements.column) {
+             swap(window.DnD_startElements.column, curr.column);
+          }
+          graphicContext.showLargeGraphic(multtable);
+       }
+
+       /* Dragover changes the cursor and disables drop events when cursor is not over the first row or column */
+       function dragover(ev) {
+          ev.preventDefault();
+          const curr = getElements(ev);
+          if (   curr.row == 0 && DnD_startElements.row == 0 && curr.column != 0
+              || curr.column == 0 && DnD_startElements.column == 0 && curr.row != 0 ) {
+             ev.originalEvent.dataTransfer.dropEffect = 'move';
+          } else {
+             ev.originalEvent.dataTransfer.dropEffect = 'none';
+          }
+       }
+
+       /* Calculate {row, column} from originalEvent layerX/layerY coordinates */
+       function getElements(ev) {
+          // search elementCoordinates for value -- have good starting guess if coset separation is small
+          const find = (val) => {
+             const avgCellSize = $('#graphic > canvas').height()/group.order;
+             for (let inx = Math.floor(val/avgCellSize);;) {
+                if (window.DnD_elementCoordinates[inx] > val) {
+                   inx--;
+                } else if (window.DnD_elementCoordinates[inx+1] < val) {
+                   inx++;
+                } else {
+                   return inx;
+                }
+             }
+          }
+
+          return {row: find(ev.originalEvent.layerY), column: find(ev.originalEvent.layerX)};
+       }
+
+
        /* Help routine */
        function help() {
           alert('There is no help for you -- yet :-)');
@@ -194,5 +282,6 @@
             <input id="no-coloration" name="coloration" type="radio">None<br>
          </form>
       </div>
+      <img id="blank" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAQAAAAnOwc2AAAAD0lEQVR42mNkwAIYh7IgAAVVAAuInjI5AAAAAElFTkSuQmCC" height="1px" width="1px" class="hidden">
    </body>
 </html>
