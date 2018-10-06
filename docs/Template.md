@@ -70,6 +70,7 @@ Since template retrieval is done repeatedly, the actual template retrieval code 
 /*
  * Caching template fetch --
  *   returns the html of template with id = templateId as a `string literal` for subsequent eval'ing
+ *   returns the value undefined if template does not exist
  */
 
 class Template {
@@ -78,7 +79,8 @@ class Template {
       Template._map = (Template._map === undefined) ? new Map() : Template._map;
 
       if (!Template._map.has(templateId)) {
-         Template._map.set(templateId,  '`' + $(`template[id="${templateId}"]`).html() + '`');
+         const $template = $(`template[id="${templateId}"]`);
+         Template._map.set(templateId,  ($template.length == 0) ? undefined : '`' + $template.html() + '`');
       };
 
       return Template._map.get(templateId);
@@ -86,6 +88,6 @@ class Template {
 }
 
 /*
-   ```
+```
  */
 
