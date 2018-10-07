@@ -72,7 +72,6 @@ class DisplayMulttable {
    //     Write label in center, breaking permutation cycle text if necessary
    //
    // Separation slider maps [0,1] => [0,boxSize]
-
    showLargeGraphic(multtable) {
       const font = DisplayMulttable.DEFAULT_FONT;
       const fontHeight = DisplayMulttable.DEFAULT_FONT_HEIGHT;
@@ -113,20 +112,20 @@ class DisplayMulttable {
 
             // draw borders if cell has border highlighting
             if (multtable.borders !== undefined && multtable.borders[product] !== undefined) {
-               this.drawBorder(x, y, boxSize, boxSize, multtable.borders[product]);
+               this._drawBorder(x, y, boxSize, boxSize, multtable.borders[product]);
             }
 
             // draw corner if cell has corner highlighting
             if (multtable.corners !== undefined && multtable.corners[product] !== undefined) {
-               this.drawCorner(x, y, boxSize, boxSize, multtable.corners[product]);
+               this._drawCorner(x, y, boxSize, boxSize, multtable.corners[product]);
             }
 
-            this.drawLabel(x, y, boxSize, boxSize, labels[product], fontHeight);
+            this._drawLabel(x, y, boxSize, boxSize, labels[product], fontHeight);
          }
       }
    }
 
-   drawBorder(x, y, width, height, color) {
+   _drawBorder(x, y, width, height, color) {
       this.context.beginPath();
       this.context.strokeStyle = color;
       this.context.lineWidth = 2;
@@ -146,7 +145,7 @@ class DisplayMulttable {
       this.context.stroke();
    }
 
-   drawCorner(x, y, width, height, color) {
+   _drawCorner(x, y, width, height, color) {
       this.context.fillStyle = color;
       this.context.beginPath();
       this.context.strokeStyle = 'black';
@@ -156,7 +155,7 @@ class DisplayMulttable {
       this.context.fill();
    }
 
-   drawLabel(x, y, width, height, label, fontHeight) {
+   _drawLabel(x, y, width, height, label, fontHeight) {
       this.context.fillStyle = 'black';
       const rows = [];
       if (this._isPermutation(label)) {
