@@ -45,8 +45,8 @@ class DisplayMulttable {
 
    // Small graphic has no grouping, no labels, doesn't change canvas size
    showSmallGraphic(multtable) {
-      const frac = (inx, max) => Math.floor(0.5 + inx * max / multtable.group.order);
-      const colors = this._colors(multtable);
+      const frac = (inx, max) => Math.round(max * inx / multtable.group.order);
+      const colors = multtable._colors;
 
       const context = this.canvas.getContext('2d');
       const width = this.canvas.width;
@@ -57,26 +57,6 @@ class DisplayMulttable {
             context.fillRect(frac(inx, width), frac(jnx, height), frac(inx+1, width), frac(jnx+1, height));
          } )
       } )
-   }
-
-   _colors(multtable) {
-      const frac = (inx, max, min) => {
-         const _min = (min === undefined) ? 0 : min;
-         return Math.floor(0.5 + _min + inx * (max - _min) / multtable.group.order);
-      }
-      switch(multtable.coloration) {
-         case Multtable.COLORATION_RAINBOW:
-            return multtable.group.elements.map( (el, inx) => `hsl(${frac(inx, 360)}, 100%, 80%)` )
-         case Multtable.COLORATION_GRAYSCALE:
-            // start from 40, not 0 (too dark and you can't see the label)
-            return multtable.group.elements.map( (el, inx) => {
-               const lev = frac(inx, 255, 40);
-               return `rgb(${lev}, ${lev}, ${lev})`
-            } )
-         case Multtable.COLORATION_NONE:
-         default:
-            return new Array(multtable.group.order).fill('#ECECEC');
-      }
    }
 
    // Write order X order matrix to canvas
@@ -96,8 +76,6 @@ class DisplayMulttable {
    showLargeGraphic(multtable) {
       const font = DisplayMulttable.DEFAULT_FONT;
       const fontHeight = DisplayMulttable.DEFAULT_FONT_HEIGHT;
-
-      const colors = this._colors(multtable);
 
       const context = this.canvas.getContext('2d');
       const measuredWidth = (str) => { context.font = font; return str === undefined ? 0 : context.measureText(str).width };
@@ -121,26 +99,61 @@ class DisplayMulttable {
       context.textAlign = 'left';       // fillText x coordinate is left-most end of string
       context.textBaseline = 'middle';  // fillText y coordinate is center of upper-case letter
 
-      context.fillStyle = DisplayMulttable.BACKGROUND;  // background shows through in separations between cosets
+      // note that background shows through in separations between cosets
+      context.fillStyle = DisplayMulttable.BACKGROUND;
       context.fillRect(0, 0, canvasSize, canvasSize);
 
       for (let inx = 0; inx < group.order; inx++) {
          for (let jnx = 0; jnx < group.order; jnx++) {
-            const x = boxSize*inx + separation*Math.floor(inx/stride);  // skip separation between cosets as needed
+            // be sure to skip the separation between cosets as needed
+            const x = boxSize*inx + separation*Math.floor(inx/stride);
             const y = boxSize*jnx + separation*Math.floor(jnx/stride);
             
             const product = multtable.group.mult(multtable.elements[inx], multtable.elements[jnx]);
 
             // color box according to product
-            context.fillStyle = colors[product];
+            context.fillStyle = multtable.colors[product];
             context.fillRect(x, y, boxSize, boxSize);
+
+            // draw borders if cell has border highlighting
+            if (multtable.borders !== undefined && multtable.borders[product] !== undefined) {
+               context.beginPath();
+               context.strokeStyle = multtable.borders[product];
+               context.lineWidth = 2;
+               context.moveTo(x, y+boxSize-1);
+               context.lineTo(x, y);
+               context.lineTo(x+boxSize-1, y);
+               context.stroke();
+
+               context.beginPath();
+               context.strokeStyle = 'black';
+               context.lineWidth = 1;
+               context.moveTo(x+2.5, y+boxSize-2.5);
+               context.lineTo(x+2.5, y+2.5);
+               context.lineTo(x+boxSize-2.5, y+2.5);
+               context.lineTo(x+boxSize-2.5, y+boxSize-2.5);
+               context.closePath();
+               context.stroke();
+            }
+
+            // draw corner if cell has corner highlighting
+            if (multtable.corners !== undefined && multtable.corners[product] !== undefined) {
+               context.fillStyle = multtable.corners[product];
+               context.beginPath();
+               context.strokeStyle = 'black';
+               context.moveTo(x, y);
+               context.lineTo(x+0.2*boxSize, y);
+               context.lineTo(x, y+0.2*boxSize);
+               context.fill();
+            }
 
             // write labels
             context.fillStyle = 'black';
             const label = labels[product];
             const rows = [];
             if (isPermutation(label)) {
-               // this looks like a permutation -- they can be long, so split it into multiple lines if needed
+               // this looks like a permutation --
+               //    they can be long, so split it into multiple lines if needed
                const cycles = label.match(/[(][^)]*[)]/g);
                let last = 0;
                for (const cycle of cycles) {

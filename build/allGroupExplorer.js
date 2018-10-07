@@ -1281,6 +1281,7 @@ Since template retrieval is done repeatedly, the actual template retrieval code 
 /*
  * Caching template fetch --
  *   returns the html of template with id = templateId as a `string literal` for subsequent eval'ing
+ *   returns the value undefined if template does not exist
  */
 
 class Template {
@@ -1289,7 +1290,8 @@ class Template {
       Template._map = (Template._map === undefined) ? new Map() : Template._map;
 
       if (!Template._map.has(templateId)) {
-         Template._map.set(templateId,  '`' + $(`template[id="${templateId}"]`).html() + '`');
+         const $template = $(`template[id="${templateId}"]`);
+         Template._map.set(templateId,  ($template.length == 0) ? undefined : '`' + $template.html() + '`');
       };
 
       return Template._map.get(templateId);
@@ -1297,7 +1299,7 @@ class Template {
 }
 
 /*
-   ```
+```
  */
 
 class Library {
@@ -2448,16 +2450,14 @@ class Multtable {
       Multtable.COLORATION_RAINBOW = 'Rainbow';
       Multtable.COLORATION_GRAYSCALE = 'Grayscale';
       Multtable.COLORATION_NONE = 'None';
-      Multtable.COLORATIONS = [Multtable.COLORATION_RAINBOW,
-                               Multtable.COLORATION_GRAYSCALE,
-                               Multtable.COLORATION_NONE];
    }
 
    reset() {
       this.elements = this.group.elements.slice();
       this.separation = 0;
-      this.coloration = Multtable.COLORATION_RAINBOW;
+      this.colors = Multtable.COLORATION_RAINBOW;
       this._stride = this.group.order;
+      this.clearHighlights();
    }
 
    organizeBySubgroup(subgroup) {
@@ -2468,14 +2468,83 @@ class Multtable {
       return this;
    }
 
-   get coloration() {
-      return this._coloration;
+   get colors() {
+      return (this._backgrounds === undefined) ? this._colors : this._backgrounds;
    }
 
-   set coloration(color) {
-      if (Multtable.COLORATIONS.includes(color)) {
-         this._coloration = color;
+   get borders() {
+      return this._borders;
+   }
+
+   get corners() {
+      return this._corners;
+   }
+
+   set colors(coloration) {
+      const frac = (inx, max, min) => Math.round(min + inx * (max - min) / this.group.order);
+      let fn;
+      switch (coloration) {
+         case Multtable.COLORATION_RAINBOW:
+            fn = (inx) => `hsl(${frac(inx, 360, 0)}, 100%, 80%)`;
+            break;
+         case Multtable.COLORATION_GRAYSCALE:
+            fn = (inx) => {
+               const lev = frac(inx, 255, 60);  // start at 60 (too dark and you can't see the label)
+               return `rgb(${lev}, ${lev}, ${lev})`;
+            };
+            break;
+         case Multtable.COLORATION_NONE:
+            fn = (inx) => DisplayMulttable.BACKGROUND;
+            break;
       }
+      this._colors = this.group.elements.map( (_, inx) => fn(inx) );
+   }
+
+   /*
+    * Highlight routines
+    *   if only one color is needed (a common case) make each highlight color different
+    *   if n colors are needed just start with hsl(0,100%,80%) and move 360/n for each new color
+    */
+   highlightByBackground(elements) {
+      this._backgrounds = new Array(this.group.order).fill(DisplayMulttable.BACKGROUND);
+      elements.forEach( (els, colorIndex) => {
+         const colorFraction = Math.round(360 * colorIndex / elements.length);
+         const color = `hsl(${colorFraction}, 100%, 80%)`;
+         els.forEach( (el) => this._backgrounds[el] = color );
+      } );
+   }
+
+   highlightByBorder(elements) {
+      this._borders = new Array(this.group.order).fill(undefined);
+      if (elements.length == 1) {
+         elements[0].forEach( (el) => this._borders[el] = 'hsl(120, 100%, 80%)' );
+      } else {
+         elements.forEach( (els, colorIndex) => {
+            const colorFraction = Math.round(360 * colorIndex / elements.length);
+            const color = `hsl(${colorFraction}, 100%, 80%)`;
+            els.forEach( (el) => this._borders[el] = color );
+         } );
+      }
+   }
+
+   highlightByCorner(elements) {
+      this._corners = new Array(this.group.order).fill(undefined);
+      if (elements.length == 1) {
+         elements[0].forEach( (el) => this._corners[el] = 'hsl(240, 100%, 80%)' );
+      } else {
+         this._corners = new Array(this.group.order).fill(undefined);
+         elements.forEach( (els, colorIndex) => {
+            const colorFraction = Math.round(360 * colorIndex / elements.length);
+            const color = `hsl(${colorFraction}, 100%, 80%)`;
+            els.forEach( (el) => this._corners[el] = color );
+         } );
+      }
+   }
+
+   clearHighlights() {
+      this._backgrounds = undefined;
+      this._borders = undefined;
+      this._corners = undefined;
    }
 
    get stride() {
@@ -2531,8 +2600,8 @@ class DisplayMulttable {
 
    // Small graphic has no grouping, no labels, doesn't change canvas size
    showSmallGraphic(multtable) {
-      const frac = (inx, max) => Math.floor(0.5 + inx * max / multtable.group.order);
-      const colors = this._colors(multtable);
+      const frac = (inx, max) => Math.round(max * inx / multtable.group.order);
+      const colors = multtable._colors;
 
       const context = this.canvas.getContext('2d');
       const width = this.canvas.width;
@@ -2543,26 +2612,6 @@ class DisplayMulttable {
             context.fillRect(frac(inx, width), frac(jnx, height), frac(inx+1, width), frac(jnx+1, height));
          } )
       } )
-   }
-
-   _colors(multtable) {
-      const frac = (inx, max, min) => {
-         const _min = (min === undefined) ? 0 : min;
-         return Math.floor(0.5 + _min + inx * (max - _min) / multtable.group.order);
-      }
-      switch(multtable.coloration) {
-         case Multtable.COLORATION_RAINBOW:
-            return multtable.group.elements.map( (el, inx) => `hsl(${frac(inx, 360)}, 100%, 80%)` )
-         case Multtable.COLORATION_GRAYSCALE:
-            // start from 40, not 0 (too dark and you can't see the label)
-            return multtable.group.elements.map( (el, inx) => {
-               const lev = frac(inx, 255, 40);
-               return `rgb(${lev}, ${lev}, ${lev})`
-            } )
-         case Multtable.COLORATION_NONE:
-         default:
-            return new Array(multtable.group.order).fill('#ECECEC');
-      }
    }
 
    // Write order X order matrix to canvas
@@ -2582,8 +2631,6 @@ class DisplayMulttable {
    showLargeGraphic(multtable) {
       const font = DisplayMulttable.DEFAULT_FONT;
       const fontHeight = DisplayMulttable.DEFAULT_FONT_HEIGHT;
-
-      const colors = this._colors(multtable);
 
       const context = this.canvas.getContext('2d');
       const measuredWidth = (str) => { context.font = font; return str === undefined ? 0 : context.measureText(str).width };
@@ -2607,26 +2654,61 @@ class DisplayMulttable {
       context.textAlign = 'left';       // fillText x coordinate is left-most end of string
       context.textBaseline = 'middle';  // fillText y coordinate is center of upper-case letter
 
-      context.fillStyle = DisplayMulttable.BACKGROUND;  // background shows through in separations between cosets
+      // note that background shows through in separations between cosets
+      context.fillStyle = DisplayMulttable.BACKGROUND;
       context.fillRect(0, 0, canvasSize, canvasSize);
 
       for (let inx = 0; inx < group.order; inx++) {
          for (let jnx = 0; jnx < group.order; jnx++) {
-            const x = boxSize*inx + separation*Math.floor(inx/stride);  // skip separation between cosets as needed
+            // be sure to skip the separation between cosets as needed
+            const x = boxSize*inx + separation*Math.floor(inx/stride);
             const y = boxSize*jnx + separation*Math.floor(jnx/stride);
             
             const product = multtable.group.mult(multtable.elements[inx], multtable.elements[jnx]);
 
             // color box according to product
-            context.fillStyle = colors[product];
+            context.fillStyle = multtable.colors[product];
             context.fillRect(x, y, boxSize, boxSize);
+
+            // draw borders if cell has border highlighting
+            if (multtable.borders !== undefined && multtable.borders[product] !== undefined) {
+               context.beginPath();
+               context.strokeStyle = multtable.borders[product];
+               context.lineWidth = 2;
+               context.moveTo(x, y+boxSize-1);
+               context.lineTo(x, y);
+               context.lineTo(x+boxSize-1, y);
+               context.stroke();
+
+               context.beginPath();
+               context.strokeStyle = 'black';
+               context.lineWidth = 1;
+               context.moveTo(x+2.5, y+boxSize-2.5);
+               context.lineTo(x+2.5, y+2.5);
+               context.lineTo(x+boxSize-2.5, y+2.5);
+               context.lineTo(x+boxSize-2.5, y+boxSize-2.5);
+               context.closePath();
+               context.stroke();
+            }
+
+            // draw corner if cell has corner highlighting
+            if (multtable.corners !== undefined && multtable.corners[product] !== undefined) {
+               context.fillStyle = multtable.corners[product];
+               context.beginPath();
+               context.strokeStyle = 'black';
+               context.moveTo(x, y);
+               context.lineTo(x+0.2*boxSize, y);
+               context.lineTo(x, y+0.2*boxSize);
+               context.fill();
+            }
 
             // write labels
             context.fillStyle = 'black';
             const label = labels[product];
             const rows = [];
             if (isPermutation(label)) {
-               // this looks like a permutation -- they can be long, so split it into multiple lines if needed
+               // this looks like a permutation --
+               //    they can be long, so split it into multiple lines if needed
                const cycles = label.match(/[(][^)]*[)]/g);
                let last = 0;
                for (const cycle of cycles) {

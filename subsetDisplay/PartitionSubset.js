@@ -20,7 +20,9 @@ SSD.PartitionSubset = class PartitionSubset extends SSD.BasicSubset {
    }
 
    get menu() {
-      return eval(Template.HTML('partitionMenu_template'));
+      const $menu = $(eval(Template.HTML('partitionMenu_template')));
+      $('template.partition-extension').each( (_, template) => $menu.append(eval('`' + $(template).html() + '`')) );
+      return $menu;
    }
 
    get displayLine() {

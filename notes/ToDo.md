@@ -24,7 +24,7 @@
 ## Highlighting
 
  * CayleyDiagram
- * Multtable
+ * ~~Multtable~~
  * (CycleGraph)
 
 ## Local files

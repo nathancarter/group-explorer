@@ -190,6 +190,31 @@
           graphicContext.updateArrowheadPlacement(graphicData);
        }
 
+       /* Highlighting routines */
+       function display(elements) {
+          return '[' + elements.map( (el) => '[' + el.toString() + ']').join(',') + ']';
+       }
+
+       function highlightByNodeColor(elements) {
+          alert('Not implemented yet');
+          console.log(`Highlight by node color -- ${display(elements)}`);
+       }
+
+       function highlightByRingAroundNode(elements) {
+          alert('Not implemented yet');
+          console.log(`Highlight by ring around node -- ${display(elements)}`);
+       }
+
+       function highlightBySquareAroundNode(elements) {
+          alert('Not implemented yet');
+          console.log(`Highlight by square around node -- ${display(elements)}`);
+       }
+
+       function clearHighlights() {
+          alert('Not implemented yet');
+          console.log('Clear highlights');
+       }
+
        /* Help, Reset routines */
        function help() {
           alert('There is no help for you -- yet :-)');
@@ -237,5 +262,40 @@
       <div id="display-control" class="fill-vert">
          <!-- Insert display control here -- as soon as it's developed -->
       </div>
+
+      <!-- Templates for highlighting control menus in subsetDisplay -->
+      <template class="subgroup-extension subset-extension partition-extension">
+         <li>Highlight item by<span class="menu-arrow"></span>
+            <ul>
+               <li action="highlightByNodeColor([${this.elementString}])">
+                  <img src="./images/hightype-sphere-node.jpg">&nbsp;Node color
+               </li>
+               <li action="highlightByRingAroundNode([${this.elementString}])">
+                  <img src="./images/hightype-sphere-ring.jpg">&nbsp;Ring around node
+               </li>
+               <li action="highlightBySquareAroundNode([${this.elementString}])">
+                  <img src="./images/hightype-sphere-square.jpg">&nbsp;Square around node
+               </li>
+            </ul>
+         </li>
+      </template>
+      <template class="partition-extension">
+         <li>Highlight partition by<span class="menu-arrow"></span>
+            <ul>
+               <li action="highlightByNodeColor(${this.parent.allElementString})">
+                  <img src="./images/hightype-sphere-node.jpg">&nbsp;Node color
+               </li>
+               <li action="highlightByRingAroundNode(${this.parent.allElementString})">
+                  <img src="./images/hightype-sphere-ring.jpg">&nbsp;Ring around node
+               </li>
+               <li action="highlightBySquareAroundNode(${this.parent.allElementString})">
+                  <img src="./images/hightype-sphere-square.jpg">&nbsp;Square around node
+               </li>
+            </ul>
+         </li>
+      </template>
+      <template class="subgroup-extension subset-extension partition-extension">
+         <li action="clearHighlights()">Clear all highlighting</li>
+      </template>
    </body>
 </html>

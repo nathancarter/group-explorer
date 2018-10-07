@@ -32,7 +32,9 @@ SSD.Subset = class Subset extends SSD.BasicSubset {
    }
 
    get menu() {
-      return eval(Template.HTML('subsetMenu_template'));
+      const $menu = $(eval(Template.HTML('subsetMenu_template')));
+      $('template.subset-extension').each( (_, template) => $menu.append(eval('`' + $(template).html() + '`')) );
+      return $menu;
    }
 
    destroy() {

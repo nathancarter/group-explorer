@@ -102,7 +102,7 @@ class SSD {
          SSD.clearMenus();
          const $menu =($curr.hasClass('subset_page_header') || $curr.hasClass('placeholder')) ?
                       $(eval(Template.HTML('headerMenu_template'))) :
-                      $(SSD.displayList[$curr.attr('id')].menu);
+                      SSD.displayList[$curr.attr('id')].menu;
          $menu.on('click', SSD.menuClickHandler);
          $curr.addClass('highlighted').append($menu);
          SSD.setMenuLocations(event, $menu);

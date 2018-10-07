@@ -74,4 +74,8 @@ SSD.BasicSubset = class BasicSubset {
                      .reduce( (frag, el) => frag += li(el), '' );
       return frag;
    }
+
+   get elementString() {
+      return '[' + this.elements.toString() + ']';
+   }
 }

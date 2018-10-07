@@ -15,4 +15,8 @@ SSD.Partition = class Partition {
          $('#partitions_placeholder').show();
       }
    }
+
+   get allElementString() {
+      return '[[' + this.subsets.map( (el) => el.elements.toString() ).join('],[') + ']]';
+   }
 }

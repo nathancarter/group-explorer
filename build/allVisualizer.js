@@ -102,7 +102,7 @@ class SSD {
          SSD.clearMenus();
          const $menu =($curr.hasClass('subset_page_header') || $curr.hasClass('placeholder')) ?
                       $(eval(Template.HTML('headerMenu_template'))) :
-                      $(SSD.displayList[$curr.attr('id')].menu);
+                      SSD.displayList[$curr.attr('id')].menu;
          $menu.on('click', SSD.menuClickHandler);
          $curr.addClass('highlighted').append($menu);
          SSD.setMenuLocations(event, $menu);
@@ -250,6 +250,10 @@ SSD.BasicSubset = class BasicSubset {
                      .reduce( (frag, el) => frag += li(el), '' );
       return frag;
    }
+
+   get elementString() {
+      return '[' + this.elements.toString() + ']';
+   }
 }
 
 SSD.Subgroup = class Subgroup extends SSD.BasicSubset {
@@ -280,7 +284,9 @@ SSD.Subgroup = class Subgroup extends SSD.BasicSubset {
    }
 
    get menu() {
-      return eval(Template.HTML('subgroupMenu_template'));
+      const $menu = $(eval(Template.HTML('subgroupMenu_template')));
+      $('template.subgroup-extension').each( (_, template) => $menu.append(eval('`' + $(template).html() + '`')) );
+      return $menu;
    }
 
    get normalizer() {
@@ -340,7 +346,9 @@ SSD.Subset = class Subset extends SSD.BasicSubset {
    }
 
    get menu() {
-      return eval(Template.HTML('subsetMenu_template'));
+      const $menu = $(eval(Template.HTML('subsetMenu_template')));
+      $('template.subset-extension').each( (_, template) => $menu.append(eval('`' + $(template).html() + '`')) );
+      return $menu;
    }
 
    destroy() {
@@ -424,6 +432,10 @@ SSD.Partition = class Partition {
          $('#partitions_placeholder').show();
       }
    }
+
+   get allElementString() {
+      return '[[' + this.subsets.map( (el) => el.elements.toString() ).join('],[') + ']]';
+   }
 }
 SSD.PartitionSubset = class PartitionSubset extends SSD.BasicSubset {
    constructor(parent, subIndex, elements, name, partitionClass) {
@@ -447,7 +459,9 @@ SSD.PartitionSubset = class PartitionSubset extends SSD.BasicSubset {
    }
 
    get menu() {
-      return eval(Template.HTML('partitionMenu_template'));
+      const $menu = $(eval(Template.HTML('partitionMenu_template')));
+      $('template.partition-extension').each( (_, template) => $menu.append(eval('`' + $(template).html() + '`')) );
+      return $menu;
    }
 
    get displayLine() {

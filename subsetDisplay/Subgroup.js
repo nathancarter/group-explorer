@@ -27,7 +27,9 @@ SSD.Subgroup = class Subgroup extends SSD.BasicSubset {
    }
 
    get menu() {
-      return eval(Template.HTML('subgroupMenu_template'));
+      const $menu = $(eval(Template.HTML('subgroupMenu_template')));
+      $('template.subgroup-extension').each( (_, template) => $menu.append(eval('`' + $(template).html() + '`')) );
+      return $menu;
    }
 
    get normalizer() {

@@ -135,7 +135,7 @@
 
        /* Set coloration option in multtable, and re-draw graphic */
        function color(coloration) {
-          multtable.coloration = coloration;
+          multtable.colors = coloration;
           graphicContext.showLargeGraphic(multtable);
        }
 
@@ -252,6 +252,28 @@
           VC.reset();
           load();
        }
+
+
+       /* Highlighting routines */
+       function highlightByBackground(elements) {
+          multtable.highlightByBackground(elements);
+          graphicContext.showLargeGraphic(multtable);
+       }
+
+       function highlightByBorder(elements) {
+          multtable.highlightByBorder(elements);
+          graphicContext.showLargeGraphic(multtable);
+       }
+
+       function highlightByCorner(elements) {
+          multtable.highlightByCorner(elements);
+          graphicContext.showLargeGraphic(multtable);
+       }
+
+       function clearHighlights() {
+          multtable.clearHighlights();
+          graphicContext.showLargeGraphic(multtable);
+       }
       </script>
    </head>
    <body class="vert">
@@ -283,5 +305,28 @@
          </form>
       </div>
       <img id="blank" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAQAAAAnOwc2AAAAD0lEQVR42mNkwAIYh7IgAAVVAAuInjI5AAAAAElFTkSuQmCC" height="1px" width="1px" class="hidden">
+
+      <!-- Templates for highlighting control menus in subsetDisplay -->
+      <template class="subgroup-extension subset-extension partition-extension">
+         <li>Highlight item by<span class="menu-arrow"></span>
+            <ul>
+               <li action="highlightByBackground([${this.elementString}])">Background</li>
+               <li action="highlightByBorder([${this.elementString}])">Border</li>
+               <li action="highlightByCorner([${this.elementString}])">Corner</li>
+            </ul>
+         </li>
+      </template>
+      <template class="partition-extension">
+         <li>Highlight partition by<span class="menu-arrow"></span>
+            <ul>
+               <li action="highlightByBackground(${this.parent.allElementString})">Background</li>
+               <li action="highlightByBorder(${this.parent.allElementString})">Border</li>
+               <li action="highlightByCorner(${this.parent.allElementString})">Corner</li>
+            </ul>
+         </li>
+      </template>
+      <template class="subgroup-extension subset-extension partition-extension">
+         <li action="clearHighlights()">Clear all highlighting</li>
+      </template>
    </body>
 </html>
