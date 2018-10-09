@@ -23,7 +23,7 @@
 
 ## Highlighting
 
- * CayleyDiagram
+ * ~~CayleyDiagram~~
  * ~~Multtable~~
  * (CycleGraph)
 
@@ -43,6 +43,16 @@
  * SolvableInfo
  * Z_nm group
  * Ad hoc
+ 
+## Group Explorer load performance thoughts (measure/compare?)
+ * Load group files
+     * Concatenate group files (download entire library at once)
+     * Load group files in web workers, pass XMLGroup(s) back to main thread
+ * Pre-calculate thumbnail png's as files
+     * Just Cayley diagrams?
+     * Concatenate png files and shred them on client?
+     * Download to web workers, pass back as data to main thread?
+ * Initially display MathML as HTML, then replace with MathJax output as it's rendered
 
 # Nathan's List
 
