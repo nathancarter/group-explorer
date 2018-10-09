@@ -1852,7 +1852,7 @@ class DisplayDiagram {
          group.name = name;
          this.scene.add(group);
       } );
-      
+
       if (options.fog === undefined || options.fog) {
          this.scene.fog = new THREE.Fog(DisplayDiagram.DEFAULT_FOG_COLOR, 2, 100);
       }
@@ -1882,7 +1882,7 @@ class DisplayDiagram {
    }
 
    static setDefaults() {
-      DisplayDiagram.groupNames = ['lights', 'spheres', 'labels', 'lines', 'arrowheads'];
+      DisplayDiagram.groupNames = ['lights', 'spheres', 'labels', 'lines', 'arrowheads', 'nodeHighlights']
       DisplayDiagram.DEFAULT_CANVAS_HEIGHT = 50;
       DisplayDiagram.DEFAULT_CANVAS_WIDTH = 50;
       DisplayDiagram.DEFAULT_BACKGROUND = 0xE8C8C8;  // Cayley diagram background
@@ -1914,23 +1914,15 @@ class DisplayDiagram {
 
       diagram3D.normalize();
 
-      var t0, t1, t2, t3, t4, t5;
-      t0 = performance.now();
       this.setCamera(diagram3D);
       this.setBackground(diagram3D);
       this.updateLights(diagram3D);
-      t1 = performance.now();
       this.updateNodes(diagram3D);
-      t2 = performance.now();
+      this.updateHighlights(diagram3D);
       this.updateLabels(diagram3D);
-      t3 = performance.now();
       this.updateLines(diagram3D);
       this.updateArrowheads(diagram3D);
-      t4 = performance.now();
       this.render();
-      t5 = performance.now();
-      Log.log(
-         `setup ${t1-t0}; nodes ${t2-t1}; labels ${t3-t2}; lines ${t4-t3}; render ${t5-t4}`);
    }
 
    getGroup(name) {
@@ -1988,17 +1980,110 @@ class DisplayDiagram {
       spheres.remove(...spheres.children);
 
       diagram3D.nodes.forEach( (node) => {
-         const nodeColor = (node.color == undefined) ?
-                           DisplayDiagram.DEFAULT_NODE_COLOR : node.color,
-               nodeRadius = diagram3D.nodeScale * ((node.radius == undefined) ?
-                                                   defaultNodeRadius : node.radius),
+         const nodeColor = (node.color === undefined) ? DisplayDiagram.DEFAULT_NODE_COLOR : node.color,
+               nodeRadius = (node.radius === undefined) ? defaultNodeRadius : node.radius,
+               scaledNodeRadius = diagram3D.nodeScale * nodeRadius,
                sphereMaterial = new THREE.MeshPhongMaterial({color: nodeColor}),
-               sphereGeometry = new THREE.SphereGeometry(nodeRadius, 20, 20),
+               sphereGeometry = new THREE.SphereGeometry(scaledNodeRadius, 20, 20),
                sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
          sphere.userData = {node: node};
          sphere.position.set(node.point.x, node.point.y, node.point.z);
          spheres.add(sphere);
       } )
+   }
+
+   updateHighlights(diagram3D) {
+      const highlights = this.getGroup('nodeHighlights');
+      highlights.remove(...highlights.children);
+
+      this.getGroup('spheres').children.forEach( (sphere) => {
+         const node = diagram3D.nodes[sphere.userData.node.element];
+
+         // Find sphere's desired color: priority is colorHighlight, color, or default
+         const desiredColor = new THREE.Color(
+            (node.colorHighlight !== undefined) ? node.colorHighlight :
+            ((node.color !== undefined) ? node.color :
+             DisplayDiagram.DEFAULT_NODE_COLOR) );
+         // If sphere is not desired color set material color to desired color
+         if (!sphere.material.color.equals(desiredColor)) {
+            sphere.material.color = new THREE.Color(desiredColor);
+         }
+
+         // if node has ring, draw it
+         if (node.ringHighlight !== undefined) {
+            this._drawRing(node, sphere.geometry.parameters.radius);
+         }
+
+         // if node has square, draw it
+         if (node.squareHighlight !== undefined) {
+            this._drawSquare(node, sphere.geometry.parameters.radius);
+         }
+      } );
+   }
+
+   _drawRing(node, nodeRadius) {
+      // Expand ring to clear sphere
+      const scale = 2.5 * nodeRadius;  // 2.5: experimental computer science in action...
+
+      // create new canvas with enough pixels to get smooth circle
+      const canvas = document.createElement('canvas');
+      canvas.width = 128;
+      canvas.height = 128;
+
+      // get context, draw circle
+      const context = canvas.getContext('2d');
+      context.lineWidth = 0.66 / scale;  // scales to webGl lineWidth = 10
+      context.strokeStyle = node.ringHighlight;
+      context.beginPath();
+      context.arc(canvas.width/2, canvas.height/2, canvas.width/2-6, 0, 2*Math.PI);
+      context.stroke();
+
+      // create texture
+      const texture = new THREE.Texture(canvas);
+      texture.needsUpdate = true;
+
+      // create material, sprite
+      const ringMaterial = new THREE.SpriteMaterial({ map: texture });
+      const ring = new THREE.Sprite(ringMaterial);
+
+      // scale, position middle of ring
+      ring.scale.set(scale, scale, 1);
+      ring.center = new THREE.Vector2(0.5, 0.5);
+      ring.position.set(node.point.x, node.point.y, node.point.z);
+
+      this.getGroup('nodeHighlights').add(ring);
+   }
+
+   _drawSquare(node, nodeRadius) {
+      // Expand square to clear ring (which clears sphere)
+      const scale = 2.65 * nodeRadius;
+
+      // create new canvas
+      const canvas = document.createElement('canvas');
+      canvas.width = 128;
+      canvas.height = 128;
+
+      // get context, draw square
+      const context = canvas.getContext('2d');
+      context.lineWidth = 1.2 / scale;  // scales to webGl lineWidth = 10
+      context.strokeStyle = node.squareHighlight;
+      context.rect(0, 0, canvas.width, canvas.height);
+      context.stroke();
+
+      // create texture
+      const texture = new THREE.Texture(canvas);
+      texture.needsUpdate = true;
+
+      // create material, sprite
+      const squareMaterial = new THREE.SpriteMaterial({ map: texture });
+      const square = new THREE.Sprite(squareMaterial);
+
+      // scale, position middle of square
+      square.scale.set(scale, scale, 1);
+      square.center = new THREE.Vector2(0.5, 0.5);
+      square.position.set(node.point.x, node.point.y, node.point.z);
+
+      this.getGroup('nodeHighlights').add(square);
    }
 
    // Draw labels on sprites positioned at nodes
@@ -2183,7 +2268,6 @@ class DisplayDiagram {
       this.scene.fog.far = (diagram3D.fogLevel == 0) ? 100 : (cameraDistance + 6 - 7*diagram3D.fogLevel);
    }
 
-   // ToDo: adjust label placement as well
    updateLabelSize(diagram3D) {
       this.updateLabels(diagram3D);
    }
@@ -2335,7 +2419,7 @@ class Diagram3D {
    }
 
    setNodeColor(color) {
-      this.nodes.forEach( (nd) => nd.color = color );
+      this._setNodeField('color', group.elements, color);
       return this;
    }
 
@@ -2374,6 +2458,51 @@ class Diagram3D {
                                            }
                                         } ) );
    }
+
+   _setNodeField(field, nodes, value) {
+      nodes.forEach( (node) => this.nodes[node][field] = value );
+   }
+   
+   highlightByNodeColor(elements) {
+      this._setNodeField('colorHighlight', group.elements, undefined);
+      elements.forEach( (els, colorIndex) => {
+         const hue = 360 * colorIndex / elements.length;
+         const color = `hsl(${hue}, 53%, 30%)`;
+         this._setNodeField('colorHighlight', els, color);
+      } );
+   }
+
+   highlightByRingAroundNode(elements) {
+      this._setNodeField('ringHighlight', group.elements, undefined);
+      if (elements.length == 1) {
+         this._setNodeField('ringHighlight', elements[0], 'hsl(120, 53%, 30%)');
+      } else {
+         elements.forEach( (els, colorIndex) => {
+            const hue = 360 * colorIndex / elements.length;
+            const color = `hsl(${hue}, 53%, 30%)`;
+            this._setNodeField('ringHighlight', els, color);
+         } );
+      }
+   }
+
+   highlightBySquareAroundNode(elements) {
+      this._setNodeField('squareHighlight', group.elements, undefined);
+      if (elements.length == 1) {
+         this._setNodeField('squareHighlight', elements[0], 'hsl(240, 53%, 30%)');
+      } else {
+         elements.forEach( (els, colorIndex) => {
+            const hue = 360 * colorIndex / elements.length;
+            const color = `hsl(${hue}, 53%, 30%)`;
+            this._setNodeField('squareHighlight', els, color);
+         } );
+      }
+   }
+
+   clearHighlights() {
+      this._setNodeField('colorHighlight', group.elements, undefined);
+      this._setNodeField('ringHighlight', group.elements, undefined);
+      this._setNodeField('squareHighlight', group.elements, undefined);
+   }
 }
 
 Diagram3D.Point = class Point {
@@ -2389,6 +2518,9 @@ Diagram3D.Node = class Node extends Diagram3D.Point {
       this.color = 0xDDDDDD;
       this.label = '';
       this.radius = undefined;
+      this.colorHighlight = undefined;
+      this.ringHighlight = undefined;
+      this.squareHighlight = undefined;
       if (options !== undefined) {
          for (const opt in options) {
             this[opt] = options[opt];
@@ -2627,7 +2759,6 @@ class DisplayMulttable {
    //     Write label in center, breaking permutation cycle text if necessary
    //
    // Separation slider maps [0,1] => [0,boxSize]
-
    showLargeGraphic(multtable) {
       const font = DisplayMulttable.DEFAULT_FONT;
       const fontHeight = DisplayMulttable.DEFAULT_FONT_HEIGHT;
@@ -2668,20 +2799,20 @@ class DisplayMulttable {
 
             // draw borders if cell has border highlighting
             if (multtable.borders !== undefined && multtable.borders[product] !== undefined) {
-               this.drawBorder(x, y, boxSize, boxSize, multtable.borders[product]);
+               this._drawBorder(x, y, boxSize, boxSize, multtable.borders[product]);
             }
 
             // draw corner if cell has corner highlighting
             if (multtable.corners !== undefined && multtable.corners[product] !== undefined) {
-               this.drawCorner(x, y, boxSize, boxSize, multtable.corners[product]);
+               this._drawCorner(x, y, boxSize, boxSize, multtable.corners[product]);
             }
 
-            this.drawLabel(x, y, boxSize, boxSize, labels[product], fontHeight);
+            this._drawLabel(x, y, boxSize, boxSize, labels[product], fontHeight);
          }
       }
    }
 
-   drawBorder(x, y, width, height, color) {
+   _drawBorder(x, y, width, height, color) {
       this.context.beginPath();
       this.context.strokeStyle = color;
       this.context.lineWidth = 2;
@@ -2701,7 +2832,7 @@ class DisplayMulttable {
       this.context.stroke();
    }
 
-   drawCorner(x, y, width, height, color) {
+   _drawCorner(x, y, width, height, color) {
       this.context.fillStyle = color;
       this.context.beginPath();
       this.context.strokeStyle = 'black';
@@ -2711,7 +2842,7 @@ class DisplayMulttable {
       this.context.fill();
    }
 
-   drawLabel(x, y, width, height, label, fontHeight) {
+   _drawLabel(x, y, width, height, label, fontHeight) {
       this.context.fillStyle = 'black';
       const rows = [];
       if (this._isPermutation(label)) {

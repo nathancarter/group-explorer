@@ -23,7 +23,7 @@ class Diagram3D {
    }
 
    setNodeColor(color) {
-      this.nodes.forEach( (nd) => nd.color = color );
+      this._setNodeField('color', group.elements, color);
       return this;
    }
 
@@ -62,6 +62,51 @@ class Diagram3D {
                                            }
                                         } ) );
    }
+
+   _setNodeField(field, nodes, value) {
+      nodes.forEach( (node) => this.nodes[node][field] = value );
+   }
+   
+   highlightByNodeColor(elements) {
+      this._setNodeField('colorHighlight', group.elements, undefined);
+      elements.forEach( (els, colorIndex) => {
+         const hue = 360 * colorIndex / elements.length;
+         const color = `hsl(${hue}, 53%, 30%)`;
+         this._setNodeField('colorHighlight', els, color);
+      } );
+   }
+
+   highlightByRingAroundNode(elements) {
+      this._setNodeField('ringHighlight', group.elements, undefined);
+      if (elements.length == 1) {
+         this._setNodeField('ringHighlight', elements[0], 'hsl(120, 53%, 30%)');
+      } else {
+         elements.forEach( (els, colorIndex) => {
+            const hue = 360 * colorIndex / elements.length;
+            const color = `hsl(${hue}, 53%, 30%)`;
+            this._setNodeField('ringHighlight', els, color);
+         } );
+      }
+   }
+
+   highlightBySquareAroundNode(elements) {
+      this._setNodeField('squareHighlight', group.elements, undefined);
+      if (elements.length == 1) {
+         this._setNodeField('squareHighlight', elements[0], 'hsl(240, 53%, 30%)');
+      } else {
+         elements.forEach( (els, colorIndex) => {
+            const hue = 360 * colorIndex / elements.length;
+            const color = `hsl(${hue}, 53%, 30%)`;
+            this._setNodeField('squareHighlight', els, color);
+         } );
+      }
+   }
+
+   clearHighlights() {
+      this._setNodeField('colorHighlight', group.elements, undefined);
+      this._setNodeField('ringHighlight', group.elements, undefined);
+      this._setNodeField('squareHighlight', group.elements, undefined);
+   }
 }
 
 Diagram3D.Point = class Point {
@@ -77,6 +122,9 @@ Diagram3D.Node = class Node extends Diagram3D.Point {
       this.color = 0xDDDDDD;
       this.label = '';
       this.radius = undefined;
+      this.colorHighlight = undefined;
+      this.ringHighlight = undefined;
+      this.squareHighlight = undefined;
       if (options !== undefined) {
          for (const opt in options) {
             this[opt] = options[opt];

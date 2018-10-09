@@ -190,30 +190,28 @@
           graphicContext.updateArrowheadPlacement(graphicData);
        }
 
-       /* Highlighting routines */
-       function display(elements) {
-          return '[' + elements.map( (el) => '[' + el.toString() + ']').join(',') + ']';
-       }
 
+       /* Highlighting routines */
        function highlightByNodeColor(elements) {
-          alert('Not implemented yet');
-          console.log(`Highlight by node color -- ${display(elements)}`);
+          graphicData.highlightByNodeColor(elements);
+          graphicContext.updateHighlights(graphicData);
        }
 
        function highlightByRingAroundNode(elements) {
-          alert('Not implemented yet');
-          console.log(`Highlight by ring around node -- ${display(elements)}`);
+          graphicData.highlightByRingAroundNode(elements);
+          graphicContext.updateHighlights(graphicData);
        }
 
        function highlightBySquareAroundNode(elements) {
-          alert('Not implemented yet');
-          console.log(`Highlight by square around node -- ${display(elements)}`);
+          graphicData.highlightBySquareAroundNode(elements);
+          graphicContext.updateHighlights(graphicData);
        }
 
        function clearHighlights() {
-          alert('Not implemented yet');
-          console.log('Clear highlights');
+          graphicData.clearHighlights();
+          graphicContext.updateHighlights(graphicData);
        }
+
 
        /* Help, Reset routines */
        function help() {
