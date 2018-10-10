@@ -288,8 +288,10 @@ class BasicGroup {
       if (multtable === undefined) return;
 
       this.multtable = multtable;
+      this.setDerivedProperties();
+   }
 
-      // derived properties
+   setDerivedProperties() {
       this.order = this.multtable.length;
       this.elements = this.multtable[0];
       this.inverses = this.elements.map(el => this.multtable[el].indexOf(0));
@@ -311,16 +313,9 @@ class BasicGroup {
    static parseJSON(jsonObject, _group) {
       const group = (_group === undefined) ? Object.assign(new BasicGroup, jsonObject) : _group;
 
-      group.elementPowers = jsonObject.elementPowers.map(
-         (el, inx) => Object.assign(new BitSet, jsonObject.elementPowers[inx]));
-      group.elementPrimePowers = jsonObject.elementPrimePowers.map(
-         (el, inx) => Object.assign(new BitSet, jsonObject.elementPrimePowers[inx]));
-      group.conjugacyClasses = jsonObject.conjugacyClasses.map(
-         (el, inx) => Object.assign(new BitSet, jsonObject.conjugacyClasses[inx]));
-      group.orderClasses = group.orderClasses.reduce(
-         (acc, el, inx) => { if (el != null) {
-            acc[inx] = Object.assign(new BitSet, el);
-         }; return acc; }, [] );
+      group.multtable = jsonObject.multtable;
+      group.setDerivedProperties();
+
       if (group._subgroups !== undefined) {
          group._subgroups = jsonObject._subgroups.map(
             (el, inx) => {
@@ -658,7 +653,19 @@ class XMLGroup extends BasicGroup {
    }
 
    static parseJSON(jsonObject) {
-      return BasicGroup.parseJSON(jsonObject, Object.assign(new XMLGroup, jsonObject));
+      const defaultValues = [
+         {name: 'author', value: ''},
+         {name: 'notes', value: ''},
+         {name: 'phrase', value: ''},
+         {name: 'representationIndex', value: 0},
+         {name: 'cayleyDiagrams', value: []},
+         {name: 'symmetryObjects', value: []},
+      ];
+      const group = BasicGroup.parseJSON(jsonObject, Object.assign(new XMLGroup, jsonObject));
+      for (const {name, value} of defaultValues) {
+         group[name] = (group[name] === undefined) ? value : group[name];
+      }
+      return group;
    }
 
    get representation() {
@@ -1326,6 +1333,12 @@ class Library {
                    .then( (group) =>
                       resolve({library: Library.add(group), groupIndex: Library.findIndex(group)}))
                    .catch( (error) => reject(error) );
+         } else if (hrefURL.searchParams.get('groupJSON') !== null) {
+            const groupJSON = hrefURL.searchParams.get('groupJSON');
+            Library.getGroupFromJSON(groupJSON)
+                   .then( (group) =>
+                      resolve({library: Library.add(group), groupIndex: Library.findIndex(group)}) )
+                   .catch( (error) => reject(error) );
          } else {
             const groupURL = hrefURL.searchParams.get('groupURL');
             Library.getGroupFromURL(groupURL)
@@ -1362,6 +1375,20 @@ class Library {
                   }
          })
       } );
+   }
+
+   static getGroupFromJSON(groupJSON) {
+      return new Promise( (resolve, reject) => {
+         $.ajax({ url: groupJSON,
+                  success: (json) => {
+                     const group = XMLGroup.parseJSON(json);
+                     resolve(group);
+                  },
+                  error: (_jqXHR, _status, err) => {
+                     reject(`Error loading ${groupJSON}: ${err}`);
+                  }
+         })
+      } )
    }
 
    static getGroupFromURL(groupURL) {
@@ -1437,7 +1464,7 @@ class Library {
 
       // compute URL
       let url = Library._appendOptions(`./${pageURL}?group=${blobURL}`, opts);
-      
+
       window.open(url);
    }
 

@@ -8,8 +8,10 @@ class BasicGroup {
       if (multtable === undefined) return;
 
       this.multtable = multtable;
+      this.setDerivedProperties();
+   }
 
-      // derived properties
+   setDerivedProperties() {
       this.order = this.multtable.length;
       this.elements = this.multtable[0];
       this.inverses = this.elements.map(el => this.multtable[el].indexOf(0));
@@ -31,16 +33,9 @@ class BasicGroup {
    static parseJSON(jsonObject, _group) {
       const group = (_group === undefined) ? Object.assign(new BasicGroup, jsonObject) : _group;
 
-      group.elementPowers = jsonObject.elementPowers.map(
-         (el, inx) => Object.assign(new BitSet, jsonObject.elementPowers[inx]));
-      group.elementPrimePowers = jsonObject.elementPrimePowers.map(
-         (el, inx) => Object.assign(new BitSet, jsonObject.elementPrimePowers[inx]));
-      group.conjugacyClasses = jsonObject.conjugacyClasses.map(
-         (el, inx) => Object.assign(new BitSet, jsonObject.conjugacyClasses[inx]));
-      group.orderClasses = group.orderClasses.reduce(
-         (acc, el, inx) => { if (el != null) {
-            acc[inx] = Object.assign(new BitSet, el);
-         }; return acc; }, [] );
+      group.multtable = jsonObject.multtable;
+      group.setDerivedProperties();
+
       if (group._subgroups !== undefined) {
          group._subgroups = jsonObject._subgroups.map(
             (el, inx) => {

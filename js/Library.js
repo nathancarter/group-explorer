@@ -23,6 +23,12 @@ class Library {
                    .then( (group) =>
                       resolve({library: Library.add(group), groupIndex: Library.findIndex(group)}))
                    .catch( (error) => reject(error) );
+         } else if (hrefURL.searchParams.get('groupJSON') !== null) {
+            const groupJSON = hrefURL.searchParams.get('groupJSON');
+            Library.getGroupFromJSON(groupJSON)
+                   .then( (group) =>
+                      resolve({library: Library.add(group), groupIndex: Library.findIndex(group)}) )
+                   .catch( (error) => reject(error) );
          } else {
             const groupURL = hrefURL.searchParams.get('groupURL');
             Library.getGroupFromURL(groupURL)
@@ -59,6 +65,20 @@ class Library {
                   }
          })
       } );
+   }
+
+   static getGroupFromJSON(groupJSON) {
+      return new Promise( (resolve, reject) => {
+         $.ajax({ url: groupJSON,
+                  success: (json) => {
+                     const group = XMLGroup.parseJSON(json);
+                     resolve(group);
+                  },
+                  error: (_jqXHR, _status, err) => {
+                     reject(`Error loading ${groupJSON}: ${err}`);
+                  }
+         })
+      } )
    }
 
    static getGroupFromURL(groupURL) {
@@ -134,7 +154,7 @@ class Library {
 
       // compute URL
       let url = Library._appendOptions(`./${pageURL}?group=${blobURL}`, opts);
-      
+
       window.open(url);
    }
 

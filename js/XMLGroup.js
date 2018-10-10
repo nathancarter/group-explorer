@@ -50,7 +50,19 @@ class XMLGroup extends BasicGroup {
    }
 
    static parseJSON(jsonObject) {
-      return BasicGroup.parseJSON(jsonObject, Object.assign(new XMLGroup, jsonObject));
+      const defaultValues = [
+         {name: 'author', value: ''},
+         {name: 'notes', value: ''},
+         {name: 'phrase', value: ''},
+         {name: 'representationIndex', value: 0},
+         {name: 'cayleyDiagrams', value: []},
+         {name: 'symmetryObjects', value: []},
+      ];
+      const group = BasicGroup.parseJSON(jsonObject, Object.assign(new XMLGroup, jsonObject));
+      for (const {name, value} of defaultValues) {
+         group[name] = (group[name] === undefined) ? value : group[name];
+      }
+      return group;
    }
 
    get representation() {
