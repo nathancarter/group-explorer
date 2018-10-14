@@ -32,6 +32,25 @@ class Diagram3D {
       return this;
    }
 
+   // add a line from each element to arrow*element; set arrow in userData
+   addLines(arrow) {
+      Group.elements.forEach( (el) => {
+         const product = Group.mult(el, arrow);
+         if (el == Group.mult(product, arrow)) {  // no arrows if bi-directional
+            if (el < arrow) {  // don't add 2nd line if bi-directional
+               this.lines.push(new Diagram3D.Line([this.nodes[el], this.nodes[product]], {userData: arrow, arrow: false}))
+            }
+         } else {
+            this.lines.push(new Diagram3D.Line([this.nodes[el], this.nodes[product]], {userData: arrow, arrow: true}))
+         }
+      } )
+   }
+            
+   // remove all lines with userData = arrow
+   removeLines(arrow) {
+      this.lines = this.lines.filter( (line) => line.userData != arrow );
+   }
+
    setLineColors() {
       const generators = Array.from(new Set(this.lines.map( (line) => line.userData )));
       this.lines.forEach( (line) => line.color = ColorPool.colors[generators.findIndex( (el) => el == line.userData )] );
