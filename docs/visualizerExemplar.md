@@ -1,8 +1,7 @@
 
 # Visualizer exemplar
 
-
-This is the pattern used to write the visualizers like CayleyDiagram and Multtable. The entire code of example is shown below, with comments
+This is the pattern used to write the visualizers like CayleyDiagram and Multtable. The entire code of example is contained below, with comments
 interspersed.
 
 ## Visualizer invocation

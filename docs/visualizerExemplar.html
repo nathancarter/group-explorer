@@ -1,9 +1,8 @@
 
-<!--
+<!--Markdown
 # Visualizer exemplar
 
-
-This is the pattern used to write the visualizers like CayleyDiagram and Multtable. The entire code of example is shown below, with comments
+This is the pattern used to write the visualizers like CayleyDiagram and Multtable. The entire code of example is contained below, with comments
 interspersed.
 
 ## Visualizer invocation
@@ -39,7 +38,7 @@ The visualizer exemplar displays
 Other visualizers extend the exemplar with different displays in the graphic element and specialized control panels that interact with the display.
 
 ```html
--->
+Markdown-->
 <html>
    <head>
       <meta charset="utf-8" />
@@ -71,10 +70,10 @@ Other visualizers extend the exemplar with different displays in the graphic ele
       <script src="https://cdn.jsdelivr.net/npm/jquery-resizable-dom@0.32.0/dist/jquery-resizable.js"></script>
       <script src="./build/allGroupExplorer.js"></script>
       <script src="./build/allVisualizer.js"></script>
-<!--
+<!--Markdown
 ```
 ```javascript
--->
+Markdown-->
       <script>
        /* Global variables */
        var group;  // group about which information will be displayed
@@ -202,13 +201,13 @@ Uses [VC.restore()](./visualizerFramework_js.md#vs-restore-) to recover visualiz
        }
       </script>
    </head>
-<!--
+<!--Markdown
 ```
 ## Visualizer-specific HTML
 
 The body contains the visualizer-specific HTML to lay out the controls for this visualizer.  This HTML will be wrapped in the visualizer framework by [VC.load()](./visualizerFramework_js.md#vc-load-), called during [initialization](#visualizer-framework-loading).
 ```html
--->
+Markdown-->
    <body class="vert">
       <div id="control-options" class="horiz">
          <button id="subset-button">Subsets</button>
@@ -236,6 +235,6 @@ The body contains the visualizer-specific HTML to lay out the controls for this 
       </div>
    </body>
 </html>
-<!--
+<!--Markdown
 ```
--->
+Markdown-->
