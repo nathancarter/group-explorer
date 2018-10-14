@@ -10,9 +10,38 @@
       <link rel="stylesheet" href="./subsetDisplay/subsets.css" type="text/css"></link>
 
       <style>
+       /* make room for display-control graphic when re-sizing */
+       #vert-container {
+          min-width: 400px;
+       }
+
        #view-control, #display-control {
           display: none;
           background: #E2E2E2;
+       }
+
+       /* Style select pull-downs (generation-control, chunk-control) */
+       #display-control .select {
+          background-image: linear-gradient(#F6F6F6, #C0C0C0);
+          border: 1px solid #7E7E7E;
+       }
+
+       /* Style colored line in arrow-control display */
+       #arrow-control hr {
+          display: inline-block;
+          width: 25px;
+          margin-block-start: 5px;
+          margin-block-end: 5px;
+          margin-inline-start: 5px;
+          margin-inline-end: 5px;
+       }
+
+       /* Style arrow-control Add, Remove buttons */
+       #arrow-control button {
+          font-size: 16px;
+          margin: auto 0 0 0;
+          background-image: linear-gradient(#F6F6F6, #C0C0C0);
+          border: 1px solid #7E7E7E;
        }
       </style>
 
@@ -37,11 +66,12 @@
 
       <script>
        /* Global variables */
-       var group,		// group about which information will be displayed
-           diagramName,		// name of Cayley diagram, or undefined if generated
-           graphicData,		// data being displayed in large diagram
-           graphicContext;	// graphic context for large diagram
-       const panelNames = ['#subset-control', '#view-control', '#display-control'];
+       var Group,		// group about which information will be displayed
+           group,		// global value used by other packages (until code style is implemented)
+           Diagram_name,	// name of Cayley diagram, or undefined if generated
+           Cayley_diagram,	// data being displayed in large diagram
+           Graphic_context;	// graphic context for large diagram
+       const PANEL_NAMES = ['#subset-control', '#view-control', '#display-control'];
 
        /* Initial entry to javascript, called once after document load */
        $(window).one('load', load);
@@ -53,46 +83,48 @@
           $('#display-button').off('click', () => show('#display-control') ).on('click', () => show('#display-control') );
           $('#help').off('click', help).on('click', help);
           $('#reset').off('click', reset).on('click', reset);
-          $('#zoom-level').off('input', set_zoom_level).on('input', set_zoom_level);
-          $('#line-thickness').off('input', set_line_thickness).on('input', set_line_thickness);
-          $('#node-radius').off('input', set_node_radius).on('input', set_node_radius);
-          $('#fog-level').off('input', set_fog_level).on('input', set_fog_level);
-          $('#use-fog').off('input', set_fog_level).on('input', set_fog_level);
-          $('#label-size').off('input', set_label_size).on('input', set_label_size);
-          $('#show-labels').off('input', set_label_size).on('input', set_label_size);
-          $('#arrowhead-placement').off('input', set_arrowhead_placement).on('input', set_arrowhead_placement);
+          $('#zoom-level').off('input', setZoomLevel).on('input', setZoomLevel);
+          $('#line-thickness').off('input', setLineThicknesss).on('input', setLineThicknesss);
+          $('#node-radius').off('input', setNodeRadius).on('input', setNodeRadius);
+          $('#fog-level').off('input', setFogLevel).on('input', setFogLevel);
+          $('#use-fog').off('input', setFogLevel).on('input', setFogLevel);
+          $('#label-size').off('input', setLabelSize).on('input', setLabelSize);
+          $('#show-labels').off('input', setLabelSize).on('input', setLabelSize);
+          $('#arrowhead-placement').off('input', setArrowheadPlacement).on('input', setArrowheadPlacement);
+          $('#diagram-select').off('click', selectDiagram).on('click', selectDiagram);
+          $('#arrow-control').off('click', arrowClickHandler).on('click', arrowClickHandler);
           $(window).off('resize', resizeBody).on('resize', resizeBody);
        }
 
        /* Load the static components of the page */
        function load() {
           // Promise to load group from invocation URL
-          const groupLoad = Library
+          const group_load = Library
              .loadFromInvocation()
-             .then( ({library, groupIndex}) => {
-                group = library[groupIndex];
+             .then( ({library, groupIndex: group_index}) => {
+                Group = group = library[group_index];
                 setDiagramName();
              } )
              .catch( (error) => alert(error) );
 
           // Promise to load visualizer framework around visualizer-specific code in this file
-          const bodyLoad = VC.load();
+          const body_load = VC.load();
 
           // When group and framework are loaded, insert subset_page and complete rest of setup
-          Promise.all([groupLoad, bodyLoad])
+          Promise.all([group_load, body_load])
                  .then( () => SSD.load($('#subset-control')).then(completeSetup) )
                  .catch( (error) => alert(error) );
        }
 
-       /* Set diagramName from URL (undefined => use generated Cayley diagram) */
+       /* Set Diagram_name from URL (undefined => use generated Cayley diagram) */
        function setDiagramName() {
-          diagramName = new URL(window.location.href).searchParams.get('diagram');
-          if (diagramName == null) {
-             diagramName = undefined;
-          } else if (!group.cayleyDiagrams.some( (cayleyDiagram) => cayleyDiagram.name == diagramName )) {
-             alert(`The group ${mathml2text(group.name)} has no Cayley diagram named ${diagramName}. ` +
+          Diagram_name = new URL(window.location.href).searchParams.get('diagram');
+          if (Diagram_name == null) {
+             Diagram_name = undefined;
+          } else if (!Group.cayleyDiagrams.some( (diagram) => diagram.name == Diagram_name )) {
+             alert(`The group ${mathml2text(Group.name)} has no Cayley diagram named ${Diagram_name}. ` +
                    `Using generated Cayley diagram instead.`);
-             diagramName = undefined;
+             Diagram_name = undefined;
           }
        }
 
@@ -102,15 +134,17 @@
           registerCallbacks();
 
           // Create header from group name and queue MathJax to typeset it
-          $('#header').html('Cayley Diagram for&nbsp;' + math(group.name));
+          $('#header').html('Cayley Diagram for&nbsp;' + math(Group.name));
           MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'header']);
 
-          // Draw Cayley diagram in graphic
-          graphicData = CayleyDiagram.generate(group, diagramName)
-                                     .setNodeLabels(group.representation);
-          graphicData.lineWidth = 10;
-          graphicContext = new DisplayDiagram({container: $('#graphic'), trackballControlled: true});
-          graphicContext.showGraphic(graphicData);
+          // Populate diagram select
+          Group.cayleyDiagrams.forEach( (diagram) => {
+             $('#diagram-select').append(eval(Template.HTML('diagram-choice-template')));
+          } );
+
+          // Create graphic context
+          Graphic_context = new DisplayDiagram({container: $('#graphic'), trackballControlled: true});
+          displayGraphic(Diagram_name);
 
           // Register the splitter with jquery-resizable
           $('#vert-container').resizable({
@@ -122,6 +156,18 @@
 
           show('#subset-control');
           resizeBody();
+       }
+
+       // Draw Cayley diagram in graphic
+       function displayGraphic() {
+          Cayley_diagram = CayleyDiagram.generate(Group, Diagram_name)
+                                        .setNodeLabels(Group.representation);
+          clearArrowList();
+          const generators = Array.from(new Set(Cayley_diagram.lines.map( (line) => line.userData )));
+          const colors = generators.map( (gen) => addArrowListItem(gen) );
+          Cayley_diagram.lines.forEach( (line) => line.color = colors[generators.findIndex( (el) => el == line.userData )] );
+          Cayley_diagram.lineWidth = 10;
+          Graphic_context.showGraphic(Cayley_diagram);
        }
 
        /* Resize the body, including the graphic */
@@ -138,18 +184,18 @@
         *    change camera parameters and renderer size, and then re-attach it)
         */
        function resizeGraphic() {
-          if (graphicContext.camera !== undefined) {
+          if (Graphic_context.camera !== undefined) {
              $('#graphic > canvas').remove();
-             graphicContext.camera.aspect = $('#graphic').width() / $('#graphic').height();
-             graphicContext.camera.updateProjectionMatrix();
-             graphicContext.renderer.setSize($('#graphic').width(), $('#graphic').height());
-             $('#graphic').append(graphicContext.renderer.domElement);
+             Graphic_context.camera.aspect = $('#graphic').width() / $('#graphic').height();
+             Graphic_context.camera.updateProjectionMatrix();
+             Graphic_context.renderer.setSize($('#graphic').width(), $('#graphic').height());
+             $('#graphic').append(Graphic_context.renderer.domElement);
           }
        }
 
        /* Switch panels by showing desired panel, hiding the rest */
        function show(panel_name) {
-          for (const name of panelNames) {
+          for (const name of PANEL_NAMES) {
              if (name == panel_name) {
                 $(name).show();
              } else {
@@ -159,57 +205,152 @@
        }
 
        /* Slider handlers */
-       function set_zoom_level() {
-          graphicData.zoomLevel = Math.exp( $('#zoom-level')[0].valueAsNumber/10 );
-          graphicContext.updateZoomLevel(graphicData);
+       function setZoomLevel() {
+          Cayley_diagram.zoomLevel = Math.exp( $('#zoom-level')[0].valueAsNumber/10 );
+          Graphic_context.updateZoomLevel(Cayley_diagram);
        }
 
-       function set_line_thickness() {
-          graphicData.lineWidth = $('#line-thickness')[0].valueAsNumber;
-          graphicContext.updateLineWidth(graphicData);
+       function setLineThicknesss() {
+          Cayley_diagram.lineWidth = $('#line-thickness')[0].valueAsNumber;
+          Graphic_context.updateLineWidth(Cayley_diagram);
        }
 
-       function set_node_radius() {
-          graphicData.nodeScale = Math.exp( $('#node-radius')[0].valueAsNumber/10 );
-          graphicContext.updateNodeRadius(graphicData);
+       function setNodeRadius() {
+          Cayley_diagram.nodeScale = Math.exp( $('#node-radius')[0].valueAsNumber/10 );
+          Graphic_context.updateNodeRadius(Cayley_diagram);
        }
 
-       function set_fog_level() {
-          graphicData.fogLevel = $('#use-fog')[0].checked ? $('#fog-level')[0].valueAsNumber/10 : 0;
-          graphicContext.updateFogLevel(graphicData);
+       function setFogLevel() {
+          Cayley_diagram.fogLevel = $('#use-fog')[0].checked ? $('#fog-level')[0].valueAsNumber/10 : 0;
+          Graphic_context.updateFogLevel(Cayley_diagram);
        }
 
-       function set_label_size() {
-          graphicData.labelSize = $('#show-labels')[0].checked ?
-                                  Math.exp( $('#label-size')[0].valueAsNumber/10 ) : 0;
-          graphicContext.updateLabelSize(graphicData);
+       function setLabelSize() {
+          Cayley_diagram.labelSize = $('#show-labels')[0].checked ?
+                                     Math.exp( $('#label-size')[0].valueAsNumber/10 ) : 0;
+          Graphic_context.updateLabelSize(Cayley_diagram);
        }
 
-       function set_arrowhead_placement() {
-          graphicData.arrowheadPlacement = $('#arrowhead-placement')[0].valueAsNumber/20;
-          graphicContext.updateArrowheadPlacement(graphicData);
+       function setArrowheadPlacement() {
+          Cayley_diagram.arrowheadPlacement = $('#arrowhead-placement')[0].valueAsNumber/20;
+          Graphic_context.updateArrowheadPlacement(Cayley_diagram);
        }
 
 
        /* Highlighting routines */
        function highlightByNodeColor(elements) {
-          graphicData.highlightByNodeColor(elements);
-          graphicContext.updateHighlights(graphicData);
+          Cayley_diagram.highlightByNodeColor(elements);
+          Graphic_context.updateHighlights(Cayley_diagram);
        }
 
        function highlightByRingAroundNode(elements) {
-          graphicData.highlightByRingAroundNode(elements);
-          graphicContext.updateHighlights(graphicData);
+          Cayley_diagram.highlightByRingAroundNode(elements);
+          Graphic_context.updateHighlights(Cayley_diagram);
        }
 
        function highlightBySquareAroundNode(elements) {
-          graphicData.highlightBySquareAroundNode(elements);
-          graphicContext.updateHighlights(graphicData);
+          Cayley_diagram.highlightBySquareAroundNode(elements);
+          Graphic_context.updateHighlights(Cayley_diagram);
        }
 
        function clearHighlights() {
-          graphicData.clearHighlights();
-          graphicContext.updateHighlights(graphicData);
+          Cayley_diagram.clearHighlights();
+          Graphic_context.updateHighlights(Cayley_diagram);
+       }
+
+
+       /* Display control routines */
+
+       function selectDiagram(event) {
+          Diagram_name = $('#diagram-select')[0].value;
+          Diagram_name = (Diagram_name == "") ? undefined : Diagram_name;
+          displayGraphic();
+       }
+
+       // actions:  show menu; select from menu; select from list; remove
+       // utility function add_arrow_list_item(element) to add arrow to list (called from initialization, select from menu)
+       // utility function clearArrowList() to remove all arrows from list (called during reset)
+
+       // arrow-control click handler
+       //   find closest element with action and execute action
+       function arrowClickHandler(event) {
+          eval($(event.target.closest('[action]')).attr('action'));
+       }
+
+       // Row selected in arrow-list:
+       //   clear all highlights
+       //   highlight row (find arrow-list item w/ arrow = ${element})
+       //   enable remove button
+       function selectArrow(element) {
+          $('#arrow-list li').removeClass('highlighted');
+          $(`#arrow-list li[arrow=${element}]`).addClass('highlighted');
+          $('#remove-arrow-button').attr('action', `remove_arrow(${element})`);
+          $('#remove-arrow-button').prop('disabled', false);
+       }
+
+       // Add button clicked:
+       //   Clear (hidden) menu
+       //   Populate menu (for each element not in arrow-list)
+       //   Position, expose menu
+       function showAddableArrowsMenu() {
+          $('#addable-arrows-menu').children().remove();
+          Group.elements.forEach( (element) => {
+             if (element != 0 && $(`#arrow-list li[arrow=${element}]`).length == 0) {
+                $('#addable-arrows-menu').append(eval(Template.HTML('addable-arrows-menu-item-template')));
+             }
+          } );
+          $('#addable-arrows-menu').show();
+          MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'arrow-control']);
+       }
+
+       // Add button menu element clicked:
+       //   Hide menu
+       //   add_arrow_list_item(element)
+       //   Add to lines in Cayley_diagram, set color
+       //   Update lines, arrowheads in graphic
+       function selectAddableArrow(element) {
+          $('#addable-arrows-menu').children().hide();
+          const color = new THREE.Color(addArrowListItem(element)).getHex();
+          Cayley_diagram.addLines(element);
+          Cayley_diagram.lines.forEach( (line) => { if (line.userData == element) { line.color = color } } );
+          Graphic_context.updateLines(Cayley_diagram);
+          Graphic_context.updateArrowheads(Cayley_diagram);
+       }
+
+       // addArrowListItem(element) utility function:
+       //   Get next color from ColorPool
+       //   Create entry in arrow-list from template
+       function addArrowListItem(element) {
+          const color = ColorPool.popCSS();
+          $('#arrow-list').append(eval(Template.HTML('arrow-list-item-template')));
+          MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'arrow-control']);
+          return color;
+       }
+
+       // removeArrowListItem utility function
+       //   remove list element from DOM
+       //   return color to color pool
+       function removeArrowListItem($element) {
+          ColorPool.pushCSS($element.attr('color'));
+          $element.remove();
+       }
+
+       // clears arrow-list on, e.g., reset
+       function clearArrowList() {
+          $('#arrow-list').children().each( (_, el) => removeArrowListItem($(el)) );
+       }
+
+       // Remove button clicked
+       //   Remove highlighted row from arrow-list
+       //   Disable remove button
+       //   Remove line from Cayley_diagram
+       //   Update lines in graphic
+       function remove_arrow(element) {
+          removeArrowListItem($('#arrow-list .highlighted'));
+          $('#remove-arrow-button').prop('disabled', true);
+          Cayley_diagram.removeLines(element);
+          Graphic_context.updateLines(Cayley_diagram);
+          Graphic_context.updateArrowheads(Cayley_diagram);
        }
 
 
@@ -220,6 +361,7 @@
 
        function reset() {
           VC.reset();
+          clearArrowList();
           load();
        }
       </script>
@@ -235,30 +377,108 @@
          <!-- This is filled in by subsetDisplay/subsets.html -->
       </div>
 
-      <div id="view-control" class="fill-vert">
-         Zoom level:
+      <div id="view-control" class="vert fill-vert">
+         <p>Zoom level:</p>
          <input id="zoom-level" type="range" min="-10" max="10" value="0">
 
-         Line thickness:
+         <p>Line thickness:</p>
          <input id="line-thickness" type="range" min="1" max="20" value="10">
 
-         Node radius:
+         <p>Node radius:</p>
          <input id="node-radius" type="range" min="-10" max="10" value="0">
 
-         <input id="use-fog" type="checkbox">
-         Use this much fog:
+         <p><input id="use-fog" type="checkbox">Use this much fog:</p>
          <input id="fog-level" type="range" min="1" max="10" value="5">
 
-         <input id="show-labels" type="checkbox" checked>
-         Show labels of this size:
+         <p><input id="show-labels" type="checkbox" checked>Show labels of this size:</p>
          <input id="label-size" type="range" min="-10" max="10" value="0">
 
-         Arrowhead placement:
+         <p>Arrowhead placement:</p>
          <input id="arrowhead-placement" type="range" min="0" max="20" value="20">
       </div>
 
-      <div id="display-control" class="fill-vert">
-         <!-- Insert display control here -- as soon as it's developed -->
+      <div id="display-control" class="fill-vert" style="padding: 8">
+         <div id="diagram-control">
+            <select id="diagram-select" class="select" style="width: 100%; margin: 0">
+               <option value="">Generate diagram</option>
+            </select>
+            <template id="diagram-choice-template">
+               <option value="${diagram.name}">${diagram.name}</option>
+            </template>
+         </div>
+
+         <div id="generation-control">
+            <p>Generate diagram this way:</p>
+            <div id="generation-style">
+               <table style="width: 100%; backgroud-color: white">
+                  <thead>
+                     <tr style="background-color: #D4D4D4">
+                        <th></th>
+                        <th>Generator</th>
+                        <th>Axis</th>
+                        <th>Order</th>
+                     </tr>
+                  </thead>
+                  <tbody style="background-color: white">
+                     <tr>
+                        <td style="background-color: #D4D4D4">1</td>
+                        <td><1,0,0,e></td>
+                        <td><img src="./images/axis-x.png"></td>
+                        <td>innermost</td>
+                     </tr>
+                  </tbody>
+               </table>
+               <template id="generation_template">
+                  <tr>
+                     <td style="background-color: #D4D4D4"></td>
+                     <td></td>
+                     <td></td>
+                     <td></td>
+                  </tr>
+               </template>
+            </div>
+         </div>
+
+         <div id="arrow-control">
+            <p>Show these arrows:</p>
+            <div class="horiz" style="min-height: 80">
+               <div style="background-color: white; width: 75%">
+                  <ul id="arrow-list" style="margin-block-start: 0; margin-block-end: 0; padding-inline-start: 0"></ul>
+                  <template id="arrow-list-item-template">
+                     <li arrow="${element}" color="${color}" style="width: 100%" action="selectArrow(${element})"><hr style="border: 2px solid ${color}">
+                        ${math(Group.representation[element])}</li>
+                  </template>
+               </div>
+               <div class="vert" style="width: 25%; align-content: space-between">
+                  <button id="add-arrow-button" action="showAddableArrowsMenu()">Add</button>
+                  <ul id="addable-arrows-menu" class="menu hidden">
+                  </ul>
+                  <button id="remove-arrow-button" action="remove_arrow()" disabled>Remove</button>
+               </div>
+               <template id="addable-arrows-menu-item-template">
+                  <li action="selectAddableArrow(${element})">${math(Group.representation[element])}</li>
+               </template>
+            </div>
+         </div>
+
+         <div id="mult-control" class="horiz" style="margin-block-start: 1em">
+            <span style="width: 50%; margin: auto 0 auto 0">Arrows mean:</span>
+            <select id="multiplication-select" class="select" style="width: 50%; float: right; margin: 0">
+               <option value="right" selected>right multiplication</option>
+               <option value="left">left multiplication</option>
+            </select>
+         </div>
+
+         <div id="chunk-control" style="display: block">
+            <p>Chunk this subgroup:</p>
+            <select id="chunk-select" class="select" style="width: 100%; margin: 0">
+               <option value="0">(no chunking)</option>
+               <option value="${Group.order}">The whole group</option>
+            </select>
+            <template id="chunk-select-template">
+               <option value="${inx}">H<sub>${inx}</sub>, generated by { ${Group.subgroups[${inx}].generators.toString()} }</option>
+            </template>
+         </div>
       </div>
 
       <!-- Templates for highlighting control menus in subsetDisplay -->
