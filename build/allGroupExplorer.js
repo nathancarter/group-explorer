@@ -2429,7 +2429,7 @@ class Diagram3D {
    constructor(nodes = [], lines = [], options) {
       this.nodes = nodes;
       this.lines = lines;
-      this.background = 0xDDDDDD;
+      this.background = undefined;
       this.zoomLevel = 1;
       this.lineWidth = 1;
       this.nodeScale = 1;
@@ -2454,14 +2454,12 @@ class Diagram3D {
       return this;
    }
 
-   // for each element add a line from it to arrow*it; set arrow in userData
-   //   if el*arrow != arrow*el, add an arrowhead
-   //   if el*arrow == arrow*el and arrow < el, skip
+   // add a line from each element to arrow*element; set arrow in userData
    addLines(arrow) {
       Group.elements.forEach( (el) => {
          const product = Group.mult(el, arrow);
-         if (el == Group.mult(product, arrow)) {
-            if (el < arrow) {
+         if (el == Group.mult(product, arrow)) {  // no arrows if bi-directional
+            if (el < arrow) {  // don't add 2nd line if bi-directional
                this.lines.push(new Diagram3D.Line([this.nodes[el], this.nodes[product]], {userData: arrow, arrow: false}))
             }
          } else {
@@ -2470,7 +2468,7 @@ class Diagram3D {
       } )
    }
             
-   // remove all line with userData = arrow
+   // remove all lines with userData = arrow
    removeLines(arrow) {
       this.lines = this.lines.filter( (line) => line.userData != arrow );
    }
@@ -2838,7 +2836,8 @@ class DisplayMulttable {
    //
    // Separation slider maps [0,1] => [0,boxSize]
    showLargeGraphic(multtable) {
-      const font = DisplayMulttable.DEFAULT_FONT;
+      this.context = this.canvas.getContext('2d');
+      this.context.font = DisplayMulttable.DEFAULT_FONT;
       const fontHeight = DisplayMulttable.DEFAULT_FONT_HEIGHT;
 
       const labels = multtable.group.elements.map( (el) => mathml2text(multtable.group.representation[el]) );
@@ -2859,7 +2858,7 @@ class DisplayMulttable {
       this.context.fillStyle = DisplayMulttable.BACKGROUND;
       this.context.fillRect(0, 0, canvasSize, canvasSize);
 
-      this.context.font = font;
+      this.context.font = DisplayMulttable.DEFAULT_FONT;
       this.context.textAlign = 'left';       // fillText x coordinate is left-most end of string
       this.context.textBaseline = 'middle';  // fillText y coordinate is center of upper-case letter
 
@@ -2929,20 +2928,20 @@ class DisplayMulttable {
          const cycles = label.match(/[(][^)]*[)]/g);
          let last = 0;
          for (const cycle of cycles) {
-            if (this._measuredWidth(rows[last]) + this._measuredWidth(cycle) < 0.75*boxSize) {
+            if (this._measuredWidth(rows[last]) + this._measuredWidth(cycle) < 0.75*width) {
                rows[last] = (rows[last] === undefined) ? cycle : rows[last].concat(cycle);
             } else {
                if (rows[last] !== undefined) {
                   last++;
                }
-               if (this._measuredWidth(cycle) < 0.75*boxSize) {
+               if (this._measuredWidth(cycle) < 0.75*width) {
                   rows[last] = cycle;
                } else {
                   // cut cycle up into row-sized pieces
                   const widthPerCharacter = this._measuredWidth(cycle) / cycle.length;
-                  const charactersPerRow = Math.ceil(0.75*boxSize / widthPerCharacter);
+                  const charactersPerRow = Math.ceil(0.75*width / widthPerCharacter);
                   for (let c = cycle;;) {
-                     if (this._measuredWidth(c) < 0.75*boxSize) {
+                     if (this._measuredWidth(c) < 0.75*width) {
                         rows[last++] = c;
                         break;
                      } else {
