@@ -5,9 +5,9 @@ class SSD {
    }
 
    static clearMenus() {
-      $('.highlighted').removeClass('highlighted');
-      $('.menu:visible').remove();
-      $('.elements').remove();
+      $('#subset_page .highlighted').removeClass('highlighted');
+      $('#subset_page .menu:visible').remove();
+      $('#subset_page .elements').remove();
    }
 
    /* Load, initialize subset display */
