@@ -654,6 +654,8 @@ class XMLGroup extends BasicGroup {
 
    static parseJSON(jsonObject) {
       const defaultValues = [
+         {name: 'name', value: '<mrow><mtext>Untitled Group</mtext></mrow>'},
+         {name: 'shortName', value: 'Untitled Group'},
          {name: 'author', value: ''},
          {name: 'notes', value: ''},
          {name: 'phrase', value: ''},
@@ -664,6 +666,11 @@ class XMLGroup extends BasicGroup {
       const group = BasicGroup.parseJSON(jsonObject, Object.assign(new XMLGroup, jsonObject));
       for (const {name, value} of defaultValues) {
          group[name] = (group[name] === undefined) ? value : group[name];
+      }
+      if ( group.representations === undefined ) {
+         group.representations = [ [ ] ];
+         for ( var i = 0 ; i < group.multtable.length ; i++ )
+            group.representations[0].push( `<mn>${i}</mn>` );
       }
       return group;
    }
