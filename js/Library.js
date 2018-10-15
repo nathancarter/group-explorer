@@ -23,8 +23,20 @@ class Library {
                    .then( (group) =>
                       resolve({library: Library.add(group), groupIndex: Library.findIndex(group)}))
                    .catch( (error) => reject(error) );
+         } else if (hrefURL.searchParams.get('groupJSONURL') !== null) {
+            const groupJSONURL = hrefURL.searchParams.get('groupJSONURL');
+            Library.getGroupFromJSONURL(groupJSONURL)
+                   .then( (group) =>
+                      resolve({library: Library.add(group), groupIndex: Library.findIndex(group)}) )
+                   .catch( (error) => reject(error) );
          } else if (hrefURL.searchParams.get('groupJSON') !== null) {
-            const groupJSON = hrefURL.searchParams.get('groupJSON');
+            const groupJSONText = hrefURL.searchParams.get('groupJSON');
+            var groupJSON;
+            try {
+               groupJSON = JSON.parse( groupJSONText );
+            } catch ( error ) {
+               reject( error );
+            }
             Library.getGroupFromJSON(groupJSON)
                    .then( (group) =>
                       resolve({library: Library.add(group), groupIndex: Library.findIndex(group)}) )
@@ -69,7 +81,17 @@ class Library {
 
    static getGroupFromJSON(groupJSON) {
       return new Promise( (resolve, reject) => {
-         $.ajax({ url: groupJSON,
+         try {
+            resolve( XMLGroup.parseJSON( groupJSON ) );
+         } catch ( error ) {
+            reject( error );
+         }
+      } )
+   }
+
+   static getGroupFromJSONURL(groupJSONURL) {
+      return new Promise( (resolve, reject) => {
+         $.ajax({ url: groupJSONURL,
                   success: (json) => {
                      const group = XMLGroup.parseJSON(json);
                      resolve(group);
