@@ -23,7 +23,9 @@ class Diagram3D {
    }
 
    setNodeColor(color) {
-      this._setNodeField('color', group.elements, color);
+      var elements = [ ];
+      this.nodes.forEach( (nd) => elements.push( nd.element ) );
+      this._setNodeField('color', elements, color);
       return this;
    }
 
@@ -66,7 +68,7 @@ class Diagram3D {
    _setNodeField(field, nodes, value) {
       nodes.forEach( (node) => this.nodes[node][field] = value );
    }
-   
+
    highlightByNodeColor(elements) {
       this._setNodeField('colorHighlight', group.elements, undefined);
       elements.forEach( (els, colorIndex) => {
