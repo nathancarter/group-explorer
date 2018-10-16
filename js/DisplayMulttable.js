@@ -121,7 +121,7 @@ class DisplayMulttable {
                this._drawCorner(x, y, boxSize, boxSize, multtable.corners[product]);
             }
 
-            this._drawLabel(x, y, boxSize, boxSize, labels[product], fontHeight);
+            this._drawLabel(x, y, boxSize, boxSize, labels[product], fontHeight, boxSize);
          }
       }
    }
@@ -156,7 +156,7 @@ class DisplayMulttable {
       this.context.fill();
    }
 
-   _drawLabel(x, y, width, height, label, fontHeight) {
+   _drawLabel(x, y, width, height, label, fontHeight, boxSize) {
       this.context.fillStyle = 'black';
       const rows = [];
       if (this._isPermutation(label)) {

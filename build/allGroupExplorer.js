@@ -654,6 +654,8 @@ class XMLGroup extends BasicGroup {
 
    static parseJSON(jsonObject) {
       const defaultValues = [
+         {name: 'name', value: '<mrow><mtext>Untitled Group</mtext></mrow>'},
+         {name: 'shortName', value: 'Untitled Group'},
          {name: 'author', value: ''},
          {name: 'notes', value: ''},
          {name: 'phrase', value: ''},
@@ -664,6 +666,11 @@ class XMLGroup extends BasicGroup {
       const group = BasicGroup.parseJSON(jsonObject, Object.assign(new XMLGroup, jsonObject));
       for (const {name, value} of defaultValues) {
          group[name] = (group[name] === undefined) ? value : group[name];
+      }
+      if ( group.representations === undefined ) {
+         group.representations = [ [ ] ];
+         for ( var i = 0 ; i < group.multtable.length ; i++ )
+            group.representations[0].push( `<mn>${i}</mn>` );
       }
       return group;
    }
@@ -1333,8 +1340,20 @@ class Library {
                    .then( (group) =>
                       resolve({library: Library.add(group), groupIndex: Library.findIndex(group)}))
                    .catch( (error) => reject(error) );
+         } else if (hrefURL.searchParams.get('groupJSONURL') !== null) {
+            const groupJSONURL = hrefURL.searchParams.get('groupJSONURL');
+            Library.getGroupFromJSONURL(groupJSONURL)
+                   .then( (group) =>
+                      resolve({library: Library.add(group), groupIndex: Library.findIndex(group)}) )
+                   .catch( (error) => reject(error) );
          } else if (hrefURL.searchParams.get('groupJSON') !== null) {
-            const groupJSON = hrefURL.searchParams.get('groupJSON');
+            const groupJSONText = hrefURL.searchParams.get('groupJSON');
+            var groupJSON;
+            try {
+               groupJSON = JSON.parse( groupJSONText );
+            } catch ( error ) {
+               reject( error );
+            }
             Library.getGroupFromJSON(groupJSON)
                    .then( (group) =>
                       resolve({library: Library.add(group), groupIndex: Library.findIndex(group)}) )
@@ -1379,7 +1398,17 @@ class Library {
 
    static getGroupFromJSON(groupJSON) {
       return new Promise( (resolve, reject) => {
-         $.ajax({ url: groupJSON,
+         try {
+            resolve( XMLGroup.parseJSON( groupJSON ) );
+         } catch ( error ) {
+            reject( error );
+         }
+      } )
+   }
+
+   static getGroupFromJSONURL(groupJSONURL) {
+      return new Promise( (resolve, reject) => {
+         $.ajax({ url: groupJSONURL,
                   success: (json) => {
                      const group = XMLGroup.parseJSON(json);
                      resolve(group);
@@ -2503,7 +2532,7 @@ class Diagram3D {
    _setNodeField(field, nodes, value) {
       nodes.forEach( (node) => this.nodes[node][field] = value );
    }
-   
+
    highlightByNodeColor(elements) {
       this._setNodeField('colorHighlight', group.elements, undefined);
       elements.forEach( (els, colorIndex) => {
@@ -2884,7 +2913,7 @@ class DisplayMulttable {
                this._drawCorner(x, y, boxSize, boxSize, multtable.corners[product]);
             }
 
-            this._drawLabel(x, y, boxSize, boxSize, labels[product], fontHeight);
+            this._drawLabel(x, y, boxSize, boxSize, labels[product], fontHeight, boxSize);
          }
       }
    }
@@ -2919,7 +2948,7 @@ class DisplayMulttable {
       this.context.fill();
    }
 
-   _drawLabel(x, y, width, height, label, fontHeight) {
+   _drawLabel(x, y, width, height, label, fontHeight, boxSize) {
       this.context.fillStyle = 'black';
       const rows = [];
       if (this._isPermutation(label)) {
