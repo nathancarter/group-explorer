@@ -2913,7 +2913,7 @@ class DisplayMulttable {
                this._drawCorner(x, y, boxSize, boxSize, multtable.corners[product]);
             }
 
-            this._drawLabel(x, y, boxSize, boxSize, labels[product], fontHeight, boxSize);
+            this._drawLabel(x, y, boxSize, boxSize, labels[product], fontHeight);
          }
       }
    }
@@ -2948,7 +2948,7 @@ class DisplayMulttable {
       this.context.fill();
    }
 
-   _drawLabel(x, y, width, height, label, fontHeight, boxSize) {
+   _drawLabel(x, y, width, height, label, fontHeight) {
       this.context.fillStyle = 'black';
       const rows = [];
       if (this._isPermutation(label)) {
