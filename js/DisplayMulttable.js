@@ -73,7 +73,8 @@ class DisplayMulttable {
    //
    // Separation slider maps [0,1] => [0,boxSize]
    showLargeGraphic(multtable) {
-      const font = DisplayMulttable.DEFAULT_FONT;
+      this.context = this.canvas.getContext('2d');
+      this.context.font = DisplayMulttable.DEFAULT_FONT;
       const fontHeight = DisplayMulttable.DEFAULT_FONT_HEIGHT;
 
       const labels = multtable.group.elements.map( (el) => mathml2text(multtable.group.representation[el]) );
@@ -94,7 +95,7 @@ class DisplayMulttable {
       this.context.fillStyle = DisplayMulttable.BACKGROUND;
       this.context.fillRect(0, 0, canvasSize, canvasSize);
 
-      this.context.font = font;
+      this.context.font = DisplayMulttable.DEFAULT_FONT;
       this.context.textAlign = 'left';       // fillText x coordinate is left-most end of string
       this.context.textBaseline = 'middle';  // fillText y coordinate is center of upper-case letter
 
@@ -120,7 +121,7 @@ class DisplayMulttable {
                this._drawCorner(x, y, boxSize, boxSize, multtable.corners[product]);
             }
 
-            this._drawLabel(x, y, boxSize, boxSize, labels[product], fontHeight, boxSize);
+            this._drawLabel(x, y, boxSize, boxSize, labels[product], fontHeight);
          }
       }
    }
@@ -155,7 +156,7 @@ class DisplayMulttable {
       this.context.fill();
    }
 
-   _drawLabel(x, y, width, height, label, fontHeight, boxSize) {
+   _drawLabel(x, y, width, height, label, fontHeight) {
       this.context.fillStyle = 'black';
       const rows = [];
       if (this._isPermutation(label)) {
@@ -164,20 +165,20 @@ class DisplayMulttable {
          const cycles = label.match(/[(][^)]*[)]/g);
          let last = 0;
          for (const cycle of cycles) {
-            if (this._measuredWidth(rows[last]) + this._measuredWidth(cycle) < 0.75*boxSize) {
+            if (this._measuredWidth(rows[last]) + this._measuredWidth(cycle) < 0.75*width) {
                rows[last] = (rows[last] === undefined) ? cycle : rows[last].concat(cycle);
             } else {
                if (rows[last] !== undefined) {
                   last++;
                }
-               if (this._measuredWidth(cycle) < 0.75*boxSize) {
+               if (this._measuredWidth(cycle) < 0.75*width) {
                   rows[last] = cycle;
                } else {
                   // cut cycle up into row-sized pieces
                   const widthPerCharacter = this._measuredWidth(cycle) / cycle.length;
-                  const charactersPerRow = Math.ceil(0.75*boxSize / widthPerCharacter);
+                  const charactersPerRow = Math.ceil(0.75*width / widthPerCharacter);
                   for (let c = cycle;;) {
-                     if (this._measuredWidth(c) < 0.75*boxSize) {
+                     if (this._measuredWidth(c) < 0.75*width) {
                         rows[last++] = c;
                         break;
                      } else {

@@ -3,7 +3,7 @@ JS_FILES = js/init.js             js/Log.js            js/BitSet.js        js/Ma
            js/BasicGroup.js       js/XMLGroup.js       js/Subgroup.js      js/SubgroupFinder.js  \
            js/IsomorphicGroups.js js/Template.js       js/Library.js       js/CayleyDiagram.js   \
            js/DisplayDiagram.js   js/mathmlUtils.js    js/Diagram3D.js     js/SymmetryObject.js  \
-           js/Multtable.js        js/DisplayMulttable.js
+           js/Multtable.js        js/ColorPool.js      js/DisplayMulttable.js
 
 SUB_FILES = subsetDisplay/subsets.js           subsetDisplay/BasicSubset.js     \
             subsetDisplay/Subgroup.js          subsetDisplay/Subset.js		\
@@ -54,10 +54,10 @@ docs : ${DOCS}
 docs/Template.md : js/Template.js
 	echo '' | cat js/Template.js - > docs/Template.md
 
-# make markdown files from html by removing lines starting with <!-- and -->, which comment out markdown
-# (you can still use comments, just don't put the delimiters at the start of a line)
+# make markdown files from html by removing lines starting with <!--Markdown and Markdown-->, which comment out markdown
+# (you can still use <!-- --> comment delimiters, just not the special <!--Markdown and Markdown--> at the start of a line)
 docs/visualizerExemplar.md : docs/visualizerExemplar.html
-	sed -e '/^<!--/d' -e '/^-->/d' < docs/visualizerExemplar.html > docs/visualizerExemplar.md
+	sed -e '/^<!--Markdown/d' -e '/^Markdown-->/d' < docs/visualizerExemplar.html > docs/visualizerExemplar.md
 
 docs/visualizerFramework_css.md : visualizerFramework/visualizer.css
 	echo '' | cat visualizerFramework/visualizer.css - > docs/visualizerFramework_css.md
@@ -66,4 +66,4 @@ docs/visualizerFramework_js.md : visualizerFramework/visualizer.js
 	echo '' | cat visualizerFramework/visualizer.js - > docs/visualizerFramework_js.md
 
 docs/visualizerFramework_html.md : visualizerFramework/visualizer.html
-	sed -e '/^<!--/d' -e '/^-->/d' < visualizerFramework/visualizer.html > docs/visualizerFramework_html.md
+	sed -e '/^<!--Markdown/d' -e '/^Markdown-->/d' < visualizerFramework/visualizer.html > docs/visualizerFramework_html.md

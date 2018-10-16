@@ -1541,7 +1541,6 @@ class CayleyDiagram {
    static _init() {
       CayleyDiagram.BACKGROUND_COLOR = 0xE8C8C8;
       CayleyDiagram.NODE_COLOR = 0x8c8c8c;
-      CayleyDiagram.LINE_COLORS = [0x680000, 0x006800, 0x000068, 0x340068, 0x506800, 0x680068];
    }
 
    static generate(group, diagramName) {
@@ -1571,7 +1570,7 @@ class CayleyDiagram {
       const diagram = new Diagram3D(nodes, [...linesByEndpoints.values()]);
       diagram.background = CayleyDiagram.BACKGROUND_COLOR;
       diagram.setNodeColor(CayleyDiagram.NODE_COLOR)
-             .setLineColorByUserData(CayleyDiagram.LINE_COLORS);
+             .setLineColors();
 
       return diagram;
    }
@@ -2475,7 +2474,7 @@ class Diagram3D {
    constructor(nodes = [], lines = [], options) {
       this.nodes = nodes;
       this.lines = lines;
-      this.background = 0xDDDDDD;
+      this.background = undefined;
       this.zoomLevel = 1;
       this.lineWidth = 1;
       this.nodeScale = 1;
@@ -2491,9 +2490,7 @@ class Diagram3D {
    }
 
    setNodeColor(color) {
-      var elements = [ ];
-      this.nodes.forEach( (nd) => elements.push( nd.element ) );
-      this._setNodeField('color', elements, color);
+      this._setNodeField('color', this.nodes.map( (node) => node.element ), color);
       return this;
    }
 
@@ -2502,13 +2499,28 @@ class Diagram3D {
       return this;
    }
 
-   // assigns line color from colorArray based on userData value
-   //   (i.e., ln1.userData == ln2.userData <=> ln1.color == ln2.color)
-   setLineColorByUserData(colors) {
-      const uniqueUserDataValues = Array.from(new Set(this.lines.map( (line) => line.userData )));
-      uniqueUserDataValues.forEach( (uniqueValue, index) =>
-         this.lines.forEach( (line) => { if (line.userData == uniqueValue) { line.color = colors[index] } } )
-      )
+   // add a line from each element to arrow*element; set arrow in userData
+   addLines(arrow) {
+      Group.elements.forEach( (el) => {
+         const product = Group.mult(el, arrow);
+         if (el == Group.mult(product, arrow)) {  // no arrows if bi-directional
+            if (el < arrow) {  // don't add 2nd line if bi-directional
+               this.lines.push(new Diagram3D.Line([this.nodes[el], this.nodes[product]], {userData: arrow, arrow: false}))
+            }
+         } else {
+            this.lines.push(new Diagram3D.Line([this.nodes[el], this.nodes[product]], {userData: arrow, arrow: true}))
+         }
+      } )
+   }
+            
+   // remove all lines with userData = arrow
+   removeLines(arrow) {
+      this.lines = this.lines.filter( (line) => line.userData != arrow );
+   }
+
+   setLineColors() {
+      const generators = Array.from(new Set(this.lines.map( (line) => line.userData )));
+      this.lines.forEach( (line) => line.color = ColorPool.colors[generators.findIndex( (el) => el == line.userData )] );
       return this;
    }
 
@@ -2606,7 +2618,7 @@ Diagram3D.Node = class Node extends Diagram3D.Point {
 Diagram3D.Line = class Line {
    constructor(vertices, options) {
       this.vertices = vertices;
-      this.color = 0xDDDDDD;
+      this.color = undefined;
       this.arrow = true;
       this.userData = undefined;
       this.normal = undefined;
@@ -2759,6 +2771,41 @@ class Multtable {
 }
 
 Multtable._init();
+ class ColorPool {
+   static init() {
+      /*
+       * Distinct colors that show up well on CayleyDiagram.BACKGROUND_COLOR
+       * from https://sashat.me/2017/01/11/list-of-20-simple-distinct-colors
+       */
+      ColorPool.colors = [
+         '#911eb4',  /* purple */
+         '#469990',  /* teal */
+         '#808000',  /* olive */
+         '#e6194b',  /* red */
+         '#ffffff',  /* white */
+         '#f58231',  /* orange */
+         '#000000',  /* black */
+         '#f032e6',  /* magenta */
+         '#4363d8',  /* blue */
+         '#3cb44b',  /* green */
+         '#800000',  /* maroon */
+      ];
+   }
+
+   static pushCSS(color) {
+      ColorPool.colors.push(color);
+   }
+
+   static popCSS() {
+      return ColorPool.colors.pop();
+   }
+
+   static popHex() {
+      return new THREE.Color(ColorPool.popCSS()).getHex();
+   }
+}
+
+ColorPool.init();
 
 
 class DisplayMulttable {
@@ -2834,7 +2881,8 @@ class DisplayMulttable {
    //
    // Separation slider maps [0,1] => [0,boxSize]
    showLargeGraphic(multtable) {
-      const font = DisplayMulttable.DEFAULT_FONT;
+      this.context = this.canvas.getContext('2d');
+      this.context.font = DisplayMulttable.DEFAULT_FONT;
       const fontHeight = DisplayMulttable.DEFAULT_FONT_HEIGHT;
 
       const labels = multtable.group.elements.map( (el) => mathml2text(multtable.group.representation[el]) );
@@ -2855,7 +2903,7 @@ class DisplayMulttable {
       this.context.fillStyle = DisplayMulttable.BACKGROUND;
       this.context.fillRect(0, 0, canvasSize, canvasSize);
 
-      this.context.font = font;
+      this.context.font = DisplayMulttable.DEFAULT_FONT;
       this.context.textAlign = 'left';       // fillText x coordinate is left-most end of string
       this.context.textBaseline = 'middle';  // fillText y coordinate is center of upper-case letter
 
@@ -2881,7 +2929,7 @@ class DisplayMulttable {
                this._drawCorner(x, y, boxSize, boxSize, multtable.corners[product]);
             }
 
-            this._drawLabel(x, y, boxSize, boxSize, labels[product], fontHeight, boxSize);
+            this._drawLabel(x, y, boxSize, boxSize, labels[product], fontHeight);
          }
       }
    }
@@ -2916,7 +2964,7 @@ class DisplayMulttable {
       this.context.fill();
    }
 
-   _drawLabel(x, y, width, height, label, fontHeight, boxSize) {
+   _drawLabel(x, y, width, height, label, fontHeight) {
       this.context.fillStyle = 'black';
       const rows = [];
       if (this._isPermutation(label)) {
@@ -2925,20 +2973,20 @@ class DisplayMulttable {
          const cycles = label.match(/[(][^)]*[)]/g);
          let last = 0;
          for (const cycle of cycles) {
-            if (this._measuredWidth(rows[last]) + this._measuredWidth(cycle) < 0.75*boxSize) {
+            if (this._measuredWidth(rows[last]) + this._measuredWidth(cycle) < 0.75*width) {
                rows[last] = (rows[last] === undefined) ? cycle : rows[last].concat(cycle);
             } else {
                if (rows[last] !== undefined) {
                   last++;
                }
-               if (this._measuredWidth(cycle) < 0.75*boxSize) {
+               if (this._measuredWidth(cycle) < 0.75*width) {
                   rows[last] = cycle;
                } else {
                   // cut cycle up into row-sized pieces
                   const widthPerCharacter = this._measuredWidth(cycle) / cycle.length;
-                  const charactersPerRow = Math.ceil(0.75*boxSize / widthPerCharacter);
+                  const charactersPerRow = Math.ceil(0.75*width / widthPerCharacter);
                   for (let c = cycle;;) {
-                     if (this._measuredWidth(c) < 0.75*boxSize) {
+                     if (this._measuredWidth(c) < 0.75*width) {
                         rows[last++] = c;
                         break;
                      } else {

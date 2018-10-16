@@ -67,7 +67,7 @@ button:focus {
 
 /* container for arranging visualizer-specific controls and the help/reset buttons in vertical stack */
 #vert-container {
-   flex: 1 1 auto;
+   flex: 0 0 auto;
    width: 400px;
 }
 

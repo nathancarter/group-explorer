@@ -1,15 +1,40 @@
 
-# Visualizer examplar
+# Visualizer exemplar
 
-This is the pattern used to write the visualizers.  It can be run standalone from a local server with a groupURL argument
-  <br>&nbsp;&nbsp;&nbsp;&nbsp;http://localhost:8080/group-explorer/docs/visualizerExample.html?groupURL=/group-explorer/groups/D_4.group<br>
-It displays 
+This is the pattern used to write the visualizers like CayleyDiagram and Multtable. The entire code of example is contained below, with comments
+interspersed.
+
+## Visualizer invocation
+
+The visualizer exemplar may be viewed in the browser by entering a URL like
+  <br>&nbsp;&nbsp;&nbsp;&nbsp;http://localhost:8080/group-explorer/docs/visualizerExemplar.html?groupURL=/group-explorer/groups/D_4.group,
+<br>which passes the visualizer the URL of a group definition in .group file XML, or
+  <br>&nbsp;&nbsp;&nbsp;&nbsp;http://localhost:8080/group-explorer/docs/visualizerExemplar.html?groupJSON=/group-explorer/groups/D_4.json,
+<br>which passes the visualizer the URL of a group definition in JSON format.
+
+In the normal use of GE3 the visualizers are opened from the GroupInfo page by selecting one of the visualizer thumbnails. The GroupInfo
+page opens the visualizer with a URL like
+  <br>&nbsp;&nbsp;&nbsp;&nbsp;http://localhost:8080/group-explorer/Multtable.html?group=blob:http://localhost:8080/b4ecb095-f696-46d4-a065-c00a90f13920,
+<br>passing it a blob containing a single group definition in JSON format. Other parameters may also be passed in the URL.
+For example, this invocation of a Cayley diagram
+  <br>&nbsp;&nbsp;&nbsp;&nbsp;http://localhost:8080/group-explorer/CayleyDiagram.html?group=blob:http://localhost:8080/b4ecb095-f696-46d4-a065-c00a90f13920&diagram=Truncated%20icosahedron
+<br>specifies that the `Truncated icosahedron` diagram is to be displayed initially. These parameters are passed to the visualizer
+the same way, regardless of how the group definition is passed.
+
+Since the visualizer exemplar is only an example, not a functional component of GE3, the GroupInfo page has no link to it and one of
+the first two methods shown must be used.
+
+## Visualizer display
+
+The visualizer exemplar displays 
 - a formatted header with the name of the group passed in the URL
 - a blank graphic element
 - a functional splitter element that can be used to resize the graphic and the controls panel
 - a functional subgroup control panel, common to several of the visualizers
-- a non-functional view control panel, with a select element and a couple of sliders
+- a non-functional view control panel, with examples of a select element and a couple of sliders
 - buttons to choose between viewing the subgroup control panel and the view control panel
+
+Other visualizers extend the exemplar with different displays in the graphic element and specialized control panels that interact with the display.
 
 ```html
 <html>
@@ -43,7 +68,8 @@ It displays
       <script src="https://cdn.jsdelivr.net/npm/jquery-resizable-dom@0.32.0/dist/jquery-resizable.js"></script>
       <script src="./build/allGroupExplorer.js"></script>
       <script src="./build/allVisualizer.js"></script>
-
+```
+```javascript
       <script>
        /* Global variables */
        var group;  // group about which information will be displayed
@@ -73,7 +99,7 @@ Invokes [VC.load()](./visualizerFramework_js.md#vc-load-) to wrap visualizer fra
 ```javascript
        /* Load the static components of the page */
        function load() {
-          // Promise to load group from invocation URL
+          // Create a Promise to load group from invocation URL
           const groupLoad = Library
              .loadFromInvocation()
              .then( ({library, groupIndex}) => {
@@ -81,15 +107,19 @@ Invokes [VC.load()](./visualizerFramework_js.md#vc-load-) to wrap visualizer fra
              } )
              .catch( (error) => alert('Error loading group (groupURL or similar required):\n\n' + error) );
 
-          // Promise to load visualizer framework around visualizer-specific code in this file
+          // Create a Promise to load visualizer framework around visualizer-specific code in this file
           const bodyLoad = VC.load();
 
-          // When group and framework are loaded, insert subset_page and complete rest of setup
+          // When group and framework are loaded, insert subset_page and complete rest of the setup
           Promise.all([groupLoad, bodyLoad])
                  .then( () => SSD.load($('#subset-control')).then(completeSetup) )
                  .catch( (error) => alert(error) );
        }
 
+       /*
+```
+
+```javascript
        /* Now that all the static HTML is loaded, complete the setup */
        function completeSetup() {
           // Document is assembled, register event handlers

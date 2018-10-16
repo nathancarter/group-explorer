@@ -12,7 +12,6 @@ class CayleyDiagram {
    static _init() {
       CayleyDiagram.BACKGROUND_COLOR = 0xE8C8C8;
       CayleyDiagram.NODE_COLOR = 0x8c8c8c;
-      CayleyDiagram.LINE_COLORS = [0x680000, 0x006800, 0x000068, 0x340068, 0x506800, 0x680068];
    }
 
    static generate(group, diagramName) {
@@ -42,7 +41,7 @@ class CayleyDiagram {
       const diagram = new Diagram3D(nodes, [...linesByEndpoints.values()]);
       diagram.background = CayleyDiagram.BACKGROUND_COLOR;
       diagram.setNodeColor(CayleyDiagram.NODE_COLOR)
-             .setLineColorByUserData(CayleyDiagram.LINE_COLORS);
+             .setLineColors();
 
       return diagram;
    }

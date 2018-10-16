@@ -7,7 +7,7 @@ class Diagram3D {
    constructor(nodes = [], lines = [], options) {
       this.nodes = nodes;
       this.lines = lines;
-      this.background = 0xDDDDDD;
+      this.background = undefined;
       this.zoomLevel = 1;
       this.lineWidth = 1;
       this.nodeScale = 1;
@@ -23,9 +23,7 @@ class Diagram3D {
    }
 
    setNodeColor(color) {
-      var elements = [ ];
-      this.nodes.forEach( (nd) => elements.push( nd.element ) );
-      this._setNodeField('color', elements, color);
+      this._setNodeField('color', this.nodes.map( (node) => node.element ), color);
       return this;
    }
 
@@ -34,13 +32,28 @@ class Diagram3D {
       return this;
    }
 
-   // assigns line color from colorArray based on userData value
-   //   (i.e., ln1.userData == ln2.userData <=> ln1.color == ln2.color)
-   setLineColorByUserData(colors) {
-      const uniqueUserDataValues = Array.from(new Set(this.lines.map( (line) => line.userData )));
-      uniqueUserDataValues.forEach( (uniqueValue, index) =>
-         this.lines.forEach( (line) => { if (line.userData == uniqueValue) { line.color = colors[index] } } )
-      )
+   // add a line from each element to arrow*element; set arrow in userData
+   addLines(arrow) {
+      Group.elements.forEach( (el) => {
+         const product = Group.mult(el, arrow);
+         if (el == Group.mult(product, arrow)) {  // no arrows if bi-directional
+            if (el < arrow) {  // don't add 2nd line if bi-directional
+               this.lines.push(new Diagram3D.Line([this.nodes[el], this.nodes[product]], {userData: arrow, arrow: false}))
+            }
+         } else {
+            this.lines.push(new Diagram3D.Line([this.nodes[el], this.nodes[product]], {userData: arrow, arrow: true}))
+         }
+      } )
+   }
+            
+   // remove all lines with userData = arrow
+   removeLines(arrow) {
+      this.lines = this.lines.filter( (line) => line.userData != arrow );
+   }
+
+   setLineColors() {
+      const generators = Array.from(new Set(this.lines.map( (line) => line.userData )));
+      this.lines.forEach( (line) => line.color = ColorPool.colors[generators.findIndex( (el) => el == line.userData )] );
       return this;
    }
 
@@ -138,7 +151,7 @@ Diagram3D.Node = class Node extends Diagram3D.Point {
 Diagram3D.Line = class Line {
    constructor(vertices, options) {
       this.vertices = vertices;
-      this.color = 0xDDDDDD;
+      this.color = undefined;
       this.arrow = true;
       this.userData = undefined;
       this.normal = undefined;
