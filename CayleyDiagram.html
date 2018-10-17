@@ -10,24 +10,64 @@
       <link rel="stylesheet" href="./subsetDisplay/subsets.css" type="text/css"></link>
 
       <style>
-       /* make room for display-control graphic when re-sizing */
        #vert-container {
-          min-width: 400px;
+          min-width: 400px;  /* Ensure room for display-control graphic */
        }
 
        #view-control, #display-control {
-          display: none;
-          background: #E2E2E2;
+          display: none;  /* hidden initially, renders faster */
        }
 
-       /* Style select pull-downs (generation-control, chunk-control) */
-       #display-control .select {
-          background-image: linear-gradient(#F6F6F6, #C0C0C0);
-          border: 1px solid #7E7E7E;
+       #display-control {
+          padding: 8;  /* margin around all elements of display-control */
        }
 
-       /* Style colored line in arrow-control display */
-       #arrow-control hr {
+       #diagram-control > select, #chunk-control > select {
+          width: 100%;  /* select choice full width */
+          margin: 0;
+       }
+
+       /* Generation control */
+       #generation-strategy {
+          border: 1px solid #5C5C5C;
+          padding-right: 2;
+          padding-bottom: 2;
+       }
+       #generation-strategy table {
+          width: 100%;
+          border-spacing: 0;
+       }
+       #generation-strategy th:first-child {
+          background-image: linear-gradient(#E5E5E5 , #E5E5E5);
+          border-right: 1px solid #E2E2E2;
+          border-bottom: 1px solid #F2F2F2;
+       }
+       #generation-strategy th, #generation-strategy td:first-child {
+          background-image: linear-gradient(#F1F1F1, #DFDFDF);
+          border-right: 1px solid #B1B1B1;
+          border-bottom: 1px solid #B1B1B1;
+       }
+       #generation-strategy tbody td {
+          background-color: white;
+          border-right: 1px solid black;
+          border-bottom: 1px solid black;
+       }
+
+       /* Arrow control */
+       #arrow-display {
+          min-height: 80;
+          background-color: white;
+          width: 75%;          
+       }
+       #arrow-list {
+          margin-block-start: 0;
+          margin-block-end: 0;
+          padding-inline-start: 0;
+       }
+       #arrow-list > li {
+          width: 100%;
+       }
+       #arrow-control hr {   /* Colored line in arrow display */
           display: inline-block;
           width: 25px;
           margin-block-start: 5px;
@@ -35,13 +75,26 @@
           margin-inline-start: 5px;
           margin-inline-end: 5px;
        }
+       #arrow-buttons {  /* vert container for buttons */
+          width: 25%;
+       }
+       #arrow-buttons button {  /* Add, Remove buttons */
+          font-size: 16px;      /* matches selects */
+          margin: auto 0 auto 0;
+       }
 
-       /* Style arrow-control Add, Remove buttons */
-       #arrow-control button {
-          font-size: 16px;
-          margin: auto 0 0 0;
-          background-image: linear-gradient(#F6F6F6, #C0C0C0);
-          border: 1px solid #7E7E7E;
+       /* Left-right multiplication select */
+       #multiplication-control {
+          margin-block-start: 1em;
+       }
+       #multiplication-control > span {
+          width: 50%;
+          margin: auto 0 auto 0;
+       }
+       #multiplication-control select {
+          width: 50%;
+          margin: 0;
+          float: right; 
        }
       </style>
 
@@ -154,7 +207,7 @@
              onDrag: resizeGraphic,
           });
 
-          show('#subset-control');
+          show('#display-control');
           resizeBody();
        }
 
@@ -377,7 +430,7 @@
          <!-- This is filled in by subsetDisplay/subsets.html -->
       </div>
 
-      <div id="view-control" class="vert fill-vert">
+      <div id="view-control" class="vert fill-vert control">
          <p>Zoom level:</p>
          <input id="zoom-level" type="range" min="-10" max="10" value="0">
 
@@ -397,9 +450,9 @@
          <input id="arrowhead-placement" type="range" min="0" max="20" value="20">
       </div>
 
-      <div id="display-control" class="fill-vert" style="padding: 8">
+      <div id="display-control" class="fill-vert control">
          <div id="diagram-control">
-            <select id="diagram-select" class="select" style="width: 100%; margin: 0">
+            <select id="diagram-select">
                <option value="">Generate diagram</option>
             </select>
             <template id="diagram-choice-template">
@@ -409,28 +462,28 @@
 
          <div id="generation-control">
             <p>Generate diagram this way:</p>
-            <div id="generation-style">
-               <table style="width: 100%; backgroud-color: white">
+            <div id="generation-strategy">
+               <table>
                   <thead>
-                     <tr style="background-color: #D4D4D4">
+                     <tr>
                         <th></th>
                         <th>Generator</th>
                         <th>Axis</th>
                         <th>Order</th>
                      </tr>
                   </thead>
-                  <tbody style="background-color: white">
+                  <tbody>
                      <tr>
-                        <td style="background-color: #D4D4D4">1</td>
+                        <td>1</td>
                         <td><1,0,0,e></td>
                         <td><img src="./images/axis-x.png"></td>
                         <td>innermost</td>
                      </tr>
                   </tbody>
                </table>
-               <template id="generation_template">
+               <template id="generation-template">
                   <tr>
-                     <td style="background-color: #D4D4D4"></td>
+                     <td></td>
                      <td></td>
                      <td></td>
                      <td></td>
@@ -441,15 +494,15 @@
 
          <div id="arrow-control">
             <p>Show these arrows:</p>
-            <div class="horiz" style="min-height: 80">
-               <div style="background-color: white; width: 75%">
-                  <ul id="arrow-list" style="margin-block-start: 0; margin-block-end: 0; padding-inline-start: 0"></ul>
+            <div class="horiz">
+               <div id="arrow-display">
+                  <ul id="arrow-list"></ul>
                   <template id="arrow-list-item-template">
-                     <li arrow="${element}" color="${color}" style="width: 100%" action="selectArrow(${element})"><hr style="border: 2px solid ${color}">
+                     <li arrow="${element}" color="${color}" action="selectArrow(${element})"><hr style="border: 2px solid ${color}">
                         ${math(Group.representation[element])}</li>
                   </template>
                </div>
-               <div class="vert" style="width: 25%; align-content: space-between">
+               <div id="arrow-buttons" class="vert">
                   <button id="add-arrow-button" action="showAddableArrowsMenu()">Add</button>
                   <ul id="addable-arrows-menu" class="menu hidden">
                   </ul>
@@ -461,17 +514,17 @@
             </div>
          </div>
 
-         <div id="mult-control" class="horiz" style="margin-block-start: 1em">
-            <span style="width: 50%; margin: auto 0 auto 0">Arrows mean:</span>
-            <select id="multiplication-select" class="select" style="width: 50%; float: right; margin: 0">
+         <div id="multiplication-control" class="horiz">
+            <span>Arrows mean:</span>
+            <select id="multiplication-select">
                <option value="right" selected>right multiplication</option>
                <option value="left">left multiplication</option>
             </select>
          </div>
 
-         <div id="chunk-control" style="display: block">
+         <div id="chunk-control">
             <p>Chunk this subgroup:</p>
-            <select id="chunk-select" class="select" style="width: 100%; margin: 0">
+            <select id="chunk-select">
                <option value="0">(no chunking)</option>
                <option value="${Group.order}">The whole group</option>
             </select>
