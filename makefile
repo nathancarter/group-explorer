@@ -51,19 +51,10 @@ build/allVisualizer.js : ${SUB_FILES}
 
 docs : ${DOCS}
 
-docs/Template.md : js/Template.js
-	echo '' | cat js/Template.js - > docs/Template.md
-
 # make markdown files from html by removing lines starting with <!--Markdown and Markdown-->, which comment out markdown
 # (you can still use <!-- --> comment delimiters, just not the special <!--Markdown and Markdown--> at the start of a line)
 docs/visualizerExemplar.md : docs/visualizerExemplar.html
 	sed -e '/^<!--Markdown/d' -e '/^Markdown-->/d' < docs/visualizerExemplar.html > docs/visualizerExemplar.md
-
-docs/visualizerFramework_css.md : visualizerFramework/visualizer.css
-	echo '' | cat visualizerFramework/visualizer.css - > docs/visualizerFramework_css.md
-
-docs/visualizerFramework_js.md : visualizerFramework/visualizer.js
-	echo '' | cat visualizerFramework/visualizer.js - > docs/visualizerFramework_js.md
 
 docs/visualizerFramework_html.md : visualizerFramework/visualizer.html
 	sed -e '/^<!--Markdown/d' -e '/^Markdown-->/d' < visualizerFramework/visualizer.html > docs/visualizerFramework_html.md
