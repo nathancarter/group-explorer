@@ -1,1 +1,126 @@
-../visualizerFramework/visualizer.css
+/*
+   # Visualizer framework stylesheet
+
+   ```css
+ */
+
+/* Commonly used values for various grays */
+:root {
+   --visualizer-header-background:	#D0D0D0;
+   --visualizer-body-background:	#E5E5E5;
+   --visualizer-controls-background:	#F2F2F2;
+   --visualizer-button-gradient:	linear-gradient(#DDDDDD, #C0C0C0);
+   --visualizer-button-border:		#7E7E7E;
+}
+
+/* Make the web page to fill the window */
+body {
+   margin: 0;
+   height: 100%;
+   width: 100%;
+}
+
+/* General element styles in visualizer */
+button {
+   background-image: var(--visualizer-button-gradient);
+   border: 1px solid var(--visualizer-button-border);
+   height: 30px;
+   font-size: 14pt;
+}
+button:focus {
+   outline: 0;
+}
+
+select {
+   background-image: var(--visualizer-button-gradient);
+   border: 1px solid var(--visualizer-button-border);
+   height: 30px;
+   font-size: 16px;
+   padding-left: 10;
+}
+
+/* identifies vertical and horizontal flex containers */
+.vert {
+   display: flex;
+   flex-direction: column;
+}
+.horiz {
+   display: flex;
+   flex-direction: row;
+}
+
+/* header format, like <H1> in a graphical context */
+#header {
+   background-color: var(--visualizer-header-background);
+   justify-content: center;
+   align-items: center;
+   font-size: 40px;
+   height: 60px;
+   flex: 0 1 60px;
+}
+
+/* horizontal container for everything but the header; stretches to fill the height available */
+#horiz-container {
+   flex: 1 1 auto;
+   height: 100%;
+   xtouch-action: none;   /* for splitter */
+}
+
+/* container for main graphic, generally a <canvas>; flexes to fill the width available */
+#graphic {
+   flex: 1 1 auto;
+   background-color: var(--visualizer-body-background);
+   width: 100%;
+}
+
+/* grab here to resize graphic; changes cursor */
+#splitter {
+   flex: 0 0 auto;
+   width: 8px;
+   background: var(--visualizer-body-background);
+   cursor: col-resize;
+}
+
+/* container for arranging visualizer-specific controls and the help/reset buttons in vertical stack */
+#vert-container {
+   flex: 0 0 auto;
+   width: 400px;
+}
+
+/* buttons for choosing control panel (may convert to tabs) */
+#control-options {
+   background-color: var(--visualizer-body-background);
+   justify-content: center;
+   height: 42px;
+}
+#control-options > button {
+   min-width: 15%;
+}
+
+/* element stretches to fill vertical spaces, and adds scroll bar if needed */
+.fill-vert {
+   height: 100%;
+   overflow: auto;
+}
+
+/* background for visualizer-specific controls */
+.control {
+   background-color: var(--visualizer-controls-background);
+}
+
+/* container to hold help and reset buttons */
+#help-reset {
+   background-color: var(--visualizer-body-background);
+   justify-content: space-around;
+   align-items: center;
+   height: 44px;
+}
+
+/* styles help and reset buttons */
+#help-reset > button {
+   width: 48%;
+}
+/*
+   ```
+ */
+

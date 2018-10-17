@@ -58,3 +58,13 @@ docs/visualizerExemplar.md : docs/visualizerExemplar.html
 
 docs/visualizerFramework_html.md : visualizerFramework/visualizer.html
 	sed -e '/^<!--Markdown/d' -e '/^Markdown-->/d' < visualizerFramework/visualizer.html > docs/visualizerFramework_html.md
+
+# copy these to make them viewable on github as markdown files
+docs/Template.md : js/Template.js
+	echo '' | cat js/Template.js - > docs/Template.md
+
+docs/visualizerFramework_css.md : visualizerFramework/visualizer.css
+	echo '' | cat visualizerFramework/visualizer.css - > docs/visualizerFramework_css.md
+
+docs/visualizerFramework_js.md : visualizerFramework/visualizer.js
+	echo '' | cat visualizerFramework/visualizer.js - > docs/visualizerFramework_js.md
