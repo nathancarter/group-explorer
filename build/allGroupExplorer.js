@@ -1358,12 +1358,28 @@ class Library {
                    .then( (group) =>
                       resolve({library: Library.add(group), groupIndex: Library.findIndex(group)}) )
                    .catch( (error) => reject(error) );
-         } else {
+         } else if (hrefURL.searchParams.get('groupURL') !== null) {
             const groupURL = hrefURL.searchParams.get('groupURL');
             Library.getGroupFromURL(groupURL)
                    .then( (group) =>
                       resolve({library: Library.add(group), groupIndex: Library.findIndex(group)}))
                    .catch( (error) => reject(error) );
+         } else {
+            /*
+             * When this page is loaded in an iframe, the parent window can
+             * indicate which group to load by passing the full JSON
+             * definition of the group in a postMessage() call to this
+             * window, with the format { type : 'load group', group : G },
+             * where G is the JSON data in question.
+             */
+            addEventListener( 'message', function ( event ) {
+               if (event.data.type == 'load group') {
+                  Library.getGroupFromJSON(event.data.group)
+                         .then( (group) =>
+                            resolve({library: Library.add(group), groupIndex: Library.findIndex(group)}) )
+                         .catch( (error) => reject(error) );
+               }
+            }, false );
          }
       } )
    }
