@@ -2504,7 +2504,7 @@ class Diagram3D {
       Group.elements.forEach( (el) => {
          const product = Group.mult(el, arrow);
          if (el == Group.mult(product, arrow)) {  // no arrows if bi-directional
-            if (el < arrow) {  // don't add 2nd line if bi-directional
+            if (el < product) {  // don't add 2nd line if bi-directional
                this.lines.push(new Diagram3D.Line([this.nodes[el], this.nodes[product]], {userData: arrow, arrow: false}))
             }
          } else {
