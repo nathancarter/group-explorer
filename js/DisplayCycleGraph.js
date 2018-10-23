@@ -70,14 +70,9 @@ class DisplayCycleGraph {
          this.radius *= this.canvas.width / sideLength;
       }
 
-      // clear the background
+      // clear the background, setup the font
       this.context.fillStyle = '#C8C8E8';
       this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
-      // set the font size and stuff
-      this.context.font = '14pt Arial';
-      this.context.textAlign = 'center';
-      this.context.textBaseline = 'middle';
 
       // draw all the paths first, because they're behind the vertices
       cycleGraph.cyclePaths.forEach( points => {
@@ -97,6 +92,7 @@ class DisplayCycleGraph {
          cycleGraph.group.representationIndex];
 
       // draw all elements as vertices, on top of the paths we just drew
+      this._setupFont();
       cycleGraph.positions.forEach( ( pos, elt ) => {
          // draw the circle
          var x = this._canvasX( pos );
@@ -184,6 +180,13 @@ class DisplayCycleGraph {
                        DisplayCycleGraph.DEFAULT_MIN_CANVAS_HEIGHT );
    }
 
+   // pick sensible font size and style for node labels
+   _setupFont() {
+      this.context.font = '14pt Arial';
+      this.context.textAlign = 'center';
+      this.context.textBaseline = 'middle';
+   }
+
    // Compute the smallest vertex radius that can be used in the graph
    // and still allow us to fit all the group elements' names inside
    // vertices of that radius.
@@ -191,11 +194,12 @@ class DisplayCycleGraph {
       var rep = this.cycleGraph.group.representations[
          this.cycleGraph.group.representationIndex];
       var biggest = 0;
+      this._setupFont();
       this.cycleGraph.group.elements.forEach( g => {
          biggest = Math.max( biggest,
             this.context.measureText( mathml2text( rep[g] ) ).width );
       } );
       return Math.max( DisplayCycleGraph.DEFAULT_MIN_RADIUS,
-                       biggest + 10 );
+                       biggest / 2 + 10 );
    }
 }
