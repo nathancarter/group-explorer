@@ -5,6 +5,13 @@
       <link rel="stylesheet" href="./style/sliders.css" type="text/css"></style>
       <link rel="stylesheet" href="./visualizerFramework/visualizer.css" type="text/css"></style>
 
+      <style>
+       #diagram-select {
+          width: 90%;
+          margin: 0 5% 25px 5%;
+       }
+      </style>
+
       <script type="text/x-mathjax-config">
        MathJax.Hub.Config({
           CommonHTML: {
@@ -192,7 +199,7 @@
       <div class="fill-vert control">
          <br>
          <p>View this symmetry object:</p>
-         <select id="diagram-select" class="select"></select>
+         <select id="diagram-select"></select>
          <template id="diagram-option-template">
             <option value="${symmetryObject.name}">${symmetryObject.name}</option>
          </template>

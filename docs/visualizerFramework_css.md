@@ -1,26 +1,42 @@
 /*
-# Visualizer framework stylesheet
+   # Visualizer framework stylesheet
 
-```css
-*/
+   ```css
+ */
 
-/* causes web page to fill the window */
+/* Commonly used values for various grays */
+:root {
+   --visualizer-header-background:	#D0D0D0;
+   --visualizer-body-background:	#E5E5E5;
+   --visualizer-controls-background:	#F2F2F2;
+   --visualizer-button-gradient:	linear-gradient(#DDDDDD, #C0C0C0);
+   --visualizer-button-border:		#7E7E7E;
+}
+
+/* Make the web page to fill the window */
 body {
    margin: 0;
    height: 100%;
    width: 100%;
 }
 
-/* provides a common button appearance across visualizers */
+/* General element styles in visualizer */
 button {
-   -webkit-appearance: none;
-   background-color: #FFFFFF;
-   border: 1px solid #A4A4A4;
+   background-image: var(--visualizer-button-gradient);
+   border: 1px solid var(--visualizer-button-border);
    height: 30px;
    font-size: 14pt;
 }
 button:focus {
    outline: 0;
+}
+
+select {
+   background-image: var(--visualizer-button-gradient);
+   border: 1px solid var(--visualizer-button-border);
+   height: 30px;
+   font-size: 16px;
+   padding-left: 10;
 }
 
 /* identifies vertical and horizontal flex containers */
@@ -35,7 +51,7 @@ button:focus {
 
 /* header format, like <H1> in a graphical context */
 #header {
-   background-color: #D0D0D0;
+   background-color: var(--visualizer-header-background);
    justify-content: center;
    align-items: center;
    font-size: 40px;
@@ -53,7 +69,7 @@ button:focus {
 /* container for main graphic, generally a <canvas>; flexes to fill the width available */
 #graphic {
    flex: 1 1 auto;
-   background-color: #F0F0F0;
+   background-color: var(--visualizer-body-background);
    width: 100%;
 }
 
@@ -61,7 +77,7 @@ button:focus {
 #splitter {
    flex: 0 0 auto;
    width: 8px;
-   background: #ECECEC;
+   background: var(--visualizer-body-background);
    cursor: col-resize;
 }
 
@@ -71,9 +87,9 @@ button:focus {
    width: 400px;
 }
 
-/* control panel style */
+/* buttons for choosing control panel (may convert to tabs) */
 #control-options {
-   background-color: #ECECEC;
+   background-color: var(--visualizer-body-background);
    justify-content: center;
    height: 42px;
 }
@@ -89,20 +105,12 @@ button:focus {
 
 /* background for visualizer-specific controls */
 .control {
-   background-color: #E2E2E2;
-}
-
-/* style select pull-downs */
-.select {
-   height: 30px;
-   font-size: 16px;
-   width: 90%;
-   margin: 0 5% 25px 5%;
+   background-color: var(--visualizer-controls-background);
 }
 
 /* container to hold help and reset buttons */
 #help-reset {
-   background-color: #ECECEC;
+   background-color: var(--visualizer-body-background);
    justify-content: space-around;
    align-items: center;
    height: 44px;
@@ -111,14 +119,8 @@ button:focus {
 /* styles help and reset buttons */
 #help-reset > button {
    width: 48%;
-   -webkit-appearance: none;
-   background-image: linear-gradient(#F6F6F6, #C0C0C0);
-   border: 1px solid #7E7E7E;
-   height: 30px;
-   font-size: 14pt;
 }
-
 /*
-```
-*/
+   ```
+ */
 
