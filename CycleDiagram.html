@@ -198,12 +198,33 @@
        function help() {
           alert('There is no help for you. (yet)');
        }
+
+
+       /* Highlighting routines */
+       function highlightByBackground(elements) {
+          cyclegraph.highlightByBackground(elements);
+          graphicContext.showLargeGraphic(cyclegraph);
+       }
+
+       function highlightByBorder(elements) {
+          cyclegraph.highlightByBorder(elements);
+          graphicContext.showLargeGraphic(cyclegraph);
+       }
+
+       function highlightByTop(elements) {
+          cyclegraph.highlightByTop(elements);
+          graphicContext.showLargeGraphic(cyclegraph);
+       }
+
+       function clearHighlights() {
+          cyclegraph.clearHighlights();
+          graphicContext.showLargeGraphic(cyclegraph);
+       }
       </script>
    </head>
    <body class="vert">
       <div id="control-options" class="horiz">
          <button id="subset-button">Subsets</button>
-         <button id="table-button">Table</button>
       </div>
 
       <div id="subset-control" class="fill-vert">
@@ -216,7 +237,7 @@
             <ul>
                <li action="highlightByBackground([${this.elementString}])">Background</li>
                <li action="highlightByBorder([${this.elementString}])">Border</li>
-               <li action="highlightByCorner([${this.elementString}])">Corner</li>
+               <li action="highlightByTop([${this.elementString}])">Top</li>
             </ul>
          </li>
       </template>
@@ -225,7 +246,7 @@
             <ul>
                <li action="highlightByBackground(${this.parent.allElementString})">Background</li>
                <li action="highlightByBorder(${this.parent.allElementString})">Border</li>
-               <li action="highlightByCorner(${this.parent.allElementString})">Corner</li>
+               <li action="highlightByTop(${this.parent.allElementString})">Top</li>
             </ul>
          </li>
       </template>

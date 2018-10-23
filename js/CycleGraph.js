@@ -275,6 +275,45 @@ class CycleGraph {
          } );
       } );
    }
+
+   // convenience function used to convert a partition of the group
+   // into color data for highlighting, used by all three highlight
+   // functions, below.
+   _partitionToColorArray( partition, start ) {
+      var result = Array(this.group.order).fill(undefined);
+      if ( typeof( start ) == 'undefined' ) start = 0;
+      partition.forEach( ( part, partIndex ) => {
+         var colorFraction = Math.round(
+            start + 360 * partIndex / partition.length );
+         var color = `hsl(${colorFraction},100%,80%)`;
+         part.forEach( ( element, eltIndex ) => {
+            result[element] = color;
+         } );
+      } );
+      return result;
+   }
+
+   highlightByBackground(partition) {
+      if ( !this.highlights ) this.highlights = { };
+      this.highlights.background =
+         this._partitionToColorArray( partition, 0 );
+   }
+
+   highlightByBorder(partition) {
+      if ( !this.highlights ) this.highlights = { };
+      this.highlights.border =
+         this._partitionToColorArray( partition, 120 );
+   }
+
+   highlightByTop(partition) {
+      if ( !this.highlights ) this.highlights = { };
+      this.highlights.top =
+         this._partitionToColorArray( partition, 240 );
+   }
+
+   clearHighlights() {
+      this.highlights = { };
+   }
 }
 
 CycleGraph._init();

@@ -97,12 +97,40 @@ class DisplayCycleGraph {
          // draw the circle
          var x = this._canvasX( pos );
          var y = this._canvasY( pos );
+         // draw the background, defaulting to white, but using whatever
+         // highlighting information for backgrounds is in the cycleGraph
          this.context.beginPath();
          this.context.arc( x, y, this.radius, 0, 2 * Math.PI );
-         this.context.strokeStyle = '#000';
-         this.context.stroke();
-         this.context.fillStyle = '#fff';
+         if ( cycleGraph.highlights && cycleGraph.highlights.background
+           && cycleGraph.highlights.background[elt] ) {
+            this.context.fillStyle = cycleGraph.highlights.background[elt];
+         } else {
+            this.context.fillStyle = '#fff';
+         }
          this.context.fill();
+         // over the background, only if there is "top"-style highlighting,
+         // draw a little cap on the top of the vertex's circle
+         if ( cycleGraph.highlights && cycleGraph.highlights.top
+           && cycleGraph.highlights.top[elt] ) {
+            this.context.beginPath();
+            this.context.arc( x, y, this.radius, -3*Math.PI/4, -Math.PI/4 );
+            this.context.fillStyle = cycleGraph.highlights.top[elt];
+            this.context.fill();
+         }
+         // draw the border around the node, defaulting to thin black,
+         // but using whatever highlighting information for borders is
+         // in the cycleGraph, and if it's there, making it thick
+         this.context.beginPath();
+         this.context.arc( x, y, this.radius, 0, 2 * Math.PI );
+         if ( cycleGraph.highlights && cycleGraph.highlights.border
+           && cycleGraph.highlights.border[elt] ) {
+            this.context.strokeStyle = cycleGraph.highlights.border[elt];
+            this.context.lineWidth = 5;
+         } else {
+            this.context.strokeStyle = '#000';
+            this.context.lineWidth = 1;
+         }
+         this.context.stroke();
          // write the element name inside it
          var label = hideNames ? ' ' : mathml2text( rep[elt] );
          this.context.fillStyle = '#000';
