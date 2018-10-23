@@ -43,7 +43,7 @@
  * SolvableInfo
  * Z_nm group
  * Ad hoc
- 
+
 ## Group Explorer load performance thoughts (measure/compare?)
  * Load group files
      * Concatenate group files (download entire library at once)
@@ -57,6 +57,4 @@
 # Nathan's List
 
  * Rename Cycle Diagram to Cycle Graph
- * Implement the Cycle Graph visualizer
  * Update main page so that it loads progressively
-
