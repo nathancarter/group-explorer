@@ -3251,7 +3251,7 @@ class CycleGraph {
                var theta = 2 * Math.PI
                          * ( ( idx + t ) / ( cycle.length + 1 ) - 0.25 );
                return CycleGraph.mutate(
-                  R * Math.cos( theta ),
+                  -R * Math.cos( theta ),
                   R * ( 1 + Math.sin( theta ) ),
                   cumsums[partIndex], cumsums[partIndex+1],
                   ringNum / part.length
