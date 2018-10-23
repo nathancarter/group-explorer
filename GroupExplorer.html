@@ -68,6 +68,7 @@
        // Global variables
        var graphicContext;	// hidden scratchpad, re-used to reduce WebGL contexts
        var multtableContext;
+       var cycleGraphContext;
 
        // Constants
        var MULTTABLE_BACKGROUND = 0x000000;
@@ -100,6 +101,7 @@
 
           window.graphicContext = new DisplayDiagram({width: 50, height: 50, fog: false});
           window.multtableContext = new DisplayMulttable({height: 32, width: 32});
+          window.cycleGraphContext = new DisplayCycleGraph({height: 32, width: 32});
        }
 
        // add row to table that displays this name, order, etc. of group
@@ -135,6 +137,11 @@
              img.height = img.width = 32;
              $row.children("td.symmetryObject").html(img);
           }
+
+          // draw Cycle Graph
+          graphicData = new CycleGraph( group );
+          img = cycleGraphContext.getImageURL( graphicData );
+          $row.children( "td.cycleGraph" ).append( img );
        }
 
        // callback to sort table on column value, invoked by clicking on column head

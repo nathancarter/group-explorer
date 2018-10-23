@@ -3,7 +3,8 @@ JS_FILES = js/init.js             js/Log.js            js/BitSet.js        js/Ma
            js/BasicGroup.js       js/XMLGroup.js       js/Subgroup.js      js/SubgroupFinder.js  \
            js/IsomorphicGroups.js js/Template.js       js/Library.js       js/CayleyDiagram.js   \
            js/DisplayDiagram.js   js/mathmlUtils.js    js/Diagram3D.js     js/SymmetryObject.js  \
-           js/Multtable.js        js/ColorPool.js      js/DisplayMulttable.js
+           js/Multtable.js        js/ColorPool.js      js/DisplayMulttable.js 					 \
+		   js/CycleGraph.js       js/DisplayCycleGraph.js
 
 SUB_FILES = subsetDisplay/subsets.js           subsetDisplay/BasicSubset.js     \
             subsetDisplay/Subgroup.js          subsetDisplay/Subset.js		\

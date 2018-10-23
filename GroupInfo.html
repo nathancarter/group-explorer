@@ -110,6 +110,17 @@
              }
 
              if (inx == 0) {
+                const graphicData = new CycleGraph(group);
+                window.cycleGraphContext = new DisplayCycleGraph({height: 100, width: 100});
+                const img = cycleGraphContext.getImageURL(graphicData);
+                $row.children(':nth-child(2)')
+                    .addClass('programLink')
+                    .text('')
+                    .on('click', () => Library.openWithGroup('CycleDiagram.html', group))
+                    .prepend(img);
+             }
+
+             if (inx == 0) {
                 const graphicData = new Multtable(group);
                 window.multtableContext = new DisplayMulttable({height: 100, width: 100});
                 const img = multtableContext.getImageURL(graphicData);

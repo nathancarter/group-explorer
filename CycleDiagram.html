@@ -108,53 +108,69 @@
       <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/95/three.js"></script>
       <script src="https://cdn.jsdelivr.net/npm/jquery-resizable-dom@0.32.0/dist/jquery-resizable.js"></script>
       <script src="./build/allGroupExplorer.js"></script>
-      <script src="./build/allSubsetDisplay.js"></script>
-      <script src="./js/DisplayCycleGraph.js"></script>
+      <script src="./build/allVisualizer.js"></script>
       <script>
        // global variables
        var group,		// group about which information will be displayed
+           cyclegraph,    // data being displayed in large diagram
            graphicContext;	// graphic context for large diagram
 
-       // Static event managers (setup after document is available)
-       $(function() {
+       // Static event managers (called after document is assembled)
+       function registerCallbacks() {
           $('#help').on('click', help);
           $('#reset').on('click', load);
-       });
+       }
        $(window).on('load', load);	// like onload handler in body
        $(window).on('resize', resizeBody);
 
        function load() {
-          Library.loadFromInvocation()
-                 .then( ({library, groupIndex}) => {
-                    const hrefURL = new URL(window.location.href);
-                    window.group = library[groupIndex];
-                    importSubsetDisplay()
-                 } )
+          // Promise to load group from invocation URL
+          const groupLoad = Library
+             .loadFromInvocation()
+             .then( ({library, groupIndex}) => {
+                group = library[groupIndex];
+             } );
+
+          // Promise to load visualizer framework around visualizer-specific code in this file
+          const bodyLoad = VC.load();
+
+          // When group and framework are loaded, insert subset_page and complete rest of setup
+          Promise.all([groupLoad, bodyLoad])
+                 .then( () => SSD.load($('#subset-control')).then(completeSetup) )
                  .catch( (error) => alert(error) );
        }
 
-       // this should be replaced with HTML5 import when it's available
-       function importSubsetDisplay() {
-          const xhr = new XMLHttpRequest();
-          xhr.open('GET', './subsetDisplay/subsets.html', true);
-          xhr.responseType = 'document';
-          xhr.onload = function(e) {
-             const document = $(e.target.response);
-             $('#subset_page').html(document.find('body > *'));
-             SSD.setup_subset_page();
-          };
-          xhr.send();
-          setup();
-       }
 
-       function setup() {
-          $('#header').html(eval(Template.HTML('header')));
-          MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'header']);
+       /* Now that subsetDisplay is loaded, complete the setup */
+       function completeSetup() {
+          // Register event handlers
+          registerCallbacks();
 
+          // Create header from group name and queue MathJax to typeset it
+          $('#header').html('Cycle Graph for&nbsp;' + math(group.name));
+          MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
+
+          // Create list of subgroups for select options, one choice for each proper subgroup
+          //   (Note that counting starts at 1; subgroup 0, the identity group, is already filled in by static HTML)
+          for (let inx = 1; inx < group.subgroups.length - 1; inx++) {
+             // Recursive routine calculates multi-character subscript as Unicode text, since <option> tags cannot contain HTML
+             // (We could also roll our own <select> here)
+             const subscript = (jnx) =>
+                (jnx == 0) ? '' : (subscript(Math.floor(jnx / 10)) + subscripts[jnx % 10]);  // subscripts defined in js/mathmlUtils.js
+             const subgroup = group.subgroups[inx];
+             const option =  eval(Template.HTML('organization-choice-template'));
+             $('#organization-select').append(option);
+          }
+
+          // Draw Cycle Graph
+
+          cyclegraph = new CycleGraph(group);
           graphicContext = new DisplayCycleGraph({container: $('#graphic')});
-          graphicContext.showLargeGraphic('Coming soon...');
+          graphicContext.showLargeGraphic(cyclegraph);
 
-          $('#text').resizable({
+          // Register the splitter with jquery-resizable, so you can resize the graphic horizontally
+          // by grabbing the border between the graphic and the subset control and dragging it
+          $('#vert-container').resizable({
              handleSelector: '#splitter',
              resizeHeight: false,
              resizeWidthFrom: 'left',
@@ -168,25 +184,53 @@
           $('#text').height(window.innerHeight - $('#header').height());
        };
 
+       /* Show the desired panel, hide the rest */
+       function showPanel(panel_name) {
+          for (const name of panelNames) {
+             if (name == panel_name) {
+                $(name).show();
+             } else {
+                $(name).hide();
+             }
+          }
+       }
+
        function help() {
           alert('There is no help for you. (yet)');
        }
       </script>
    </head>
    <body class="vert">
-      <div id="head" class="horiz"><div id="header">Cycle Graph for ${math(group.name)}</div></div>
-      <div id="horiz_layout" class="horiz">
-         <div id="graphic"></div>
-         <div id="splitter"></div>
-         <div id="text" class="vert">
-            <div id="subset_page" class="info">
-               <!-- insert subsetDisplay/subsets.html here -->
-            </div>
-            <div id="help_reset" class="horiz">
-               <button id="help">Help</button>
-               <button id="reset">Reset</button>
-            </div>
-         </div>
+      <div id="control-options" class="horiz">
+         <button id="subset-button">Subsets</button>
+         <button id="table-button">Table</button>
       </div>
+
+      <div id="subset-control" class="fill-vert">
+         <!-- This is filled in by subsetDisplay/subsets.html -->
+      </div>
+
+      <!-- Templates for highlighting control menus in subsetDisplay -->
+      <template class="subgroup-extension subset-extension partition-extension">
+         <li>Highlight item by<span class="menu-arrow"></span>
+            <ul>
+               <li action="highlightByBackground([${this.elementString}])">Background</li>
+               <li action="highlightByBorder([${this.elementString}])">Border</li>
+               <li action="highlightByCorner([${this.elementString}])">Corner</li>
+            </ul>
+         </li>
+      </template>
+      <template class="partition-extension">
+         <li>Highlight partition by<span class="menu-arrow"></span>
+            <ul>
+               <li action="highlightByBackground(${this.parent.allElementString})">Background</li>
+               <li action="highlightByBorder(${this.parent.allElementString})">Border</li>
+               <li action="highlightByCorner(${this.parent.allElementString})">Corner</li>
+            </ul>
+         </li>
+      </template>
+      <template class="subgroup-extension subset-extension partition-extension">
+         <li action="clearHighlights()">Clear all highlighting</li>
+      </template>
    </body>
 </html>
