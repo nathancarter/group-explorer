@@ -1,0 +1,73 @@
+<html>
+   <head>
+      <link rel="stylesheet" href="./style/fonts.css" type="text/css">
+
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
+      <script type="text/x-mathjax-config">
+       MathJax.Hub.Config({
+      	  CommonHTML: {
+             scale: 85,
+          },
+       });
+      </script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=MML_CHTML"></script>
+      <script src="./build/allGroupExplorer.js"></script>
+
+      <script>
+       $(window).on('load', load);	// like onload handler in body
+
+       function load() {
+          Library.loadFromInvocation()
+                 .then( ({library, groupIndex}) => formatGroup(library[groupIndex]) )
+                 .catch( (error) => alert(error) );
+       }
+
+       function formatGroup(group) {
+          $('body').append($('<div id="tmp" style="display: none">').html(mathml2html(group.name)));
+          const group_name = $('#tmp').html()
+          $('#tmp').remove();
+          const $rslt = $(document.createDocumentFragment())
+             .append(eval(Template.HTML('header')));
+
+          const factors = MathUtils.getFactors(group.order);
+          const [m, n, _] =
+             factors.reduce( ([fac1, fac2, prev], el) => {
+                if (el >= prev) {
+                   fac1 *= el;
+                   prev = el;
+                } else {
+                   fac2 *= el;
+                }
+                return [fac1, fac2, prev];
+             }, [1, 1, 0] );
+          if (factors.length == 1) {
+             $rslt.append(eval(Template.HTML('non-Z_mn-group-prime')));
+          } else if (n == 1) {
+             const facs = factors.slice(0,-1).join(', ') + ' and ' + factors.slice(-1);
+             $rslt.append(eval(Template.HTML('non-Z_mn-group')));
+          } else {
+             $rslt.append(eval(Template.HTML('Z_mn-group')));
+          }
+
+          $('body').append($rslt);
+       }
+      </script>
+   </head>
+
+   <body>
+      <template id="header">
+         <h3>Results of "<i>&Zopf;<sub>nm</sub></i> groups" computation for <b>${group_name}</b></h3>
+      </template>
+      <template id="Z_mn-group">
+         <p>A group of the form <i>&Zopf;<sub>mn</sub></i> is isomorphic to the product group <i>&Zopf;<sub>m</sub></i> x <i>&Zopf;<sub>n</sub></i> just when <i>m</i> and <i>n</i> are relatively prime.  In this case, because ${m} and ${n} are relatively prime, <i>&Zopf;<sub>m</sub></i> x <i>&Zopf;<sub>n</sub></i> is isomorphic to <i>&Zopf;<sub>mn</sub></i>.</p>
+         <p><a href="#">Click here</a> to see an illustration of why this is true. <i>(Not implemented yet.)</i></p>
+      </template>
+      <template id="non-Z_mn-group-prime">
+         <p>A group of the form <i>&Zopf;<sub>mn</sub></i> is isomorphic to the product group <i>&Zopf;<sub>m</sub></i> x <i>&Zopf;<sub>n</sub></i> just when <i>m</i> and <i>n</i> are relatively prime.  In this case, <i>mn</i> = ${group.order}, which gives no possibilities for <i>m</i> and <i>n</i>.</p>
+         <p>Thus there is not even a product group <i>&Zopf;<sub>m</sub></i> x <i>&Zopf;<sub>n</sub></i> to speak of being isomorphic to.</p>
+      </template>
+      <template id="non-Z_mn-group">
+         <p>A group of the form <i>&Zopf;<sub>mn</sub></i> is isomorphic to the product group <i>&Zopf;<sub>m</sub></i> x <i>&Zopf;<sub>n</sub></i> just when <i>m</i> and <i>n</i> are relatively prime.  In this case, the factors of <i>mn</i> are ${facs}, which cannot be divided into two non-trivial sets that do not both contain ${factors[0]}.  Thus, there cannot be two relatively prime factors of <i>mn</i> since any non-trivial factors must both be divisible by ${factors[0]}.</p>
+      </template>
+   </body>
+</html>
