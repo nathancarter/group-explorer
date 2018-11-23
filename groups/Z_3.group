@@ -22,8 +22,8 @@
     </representation>
     <representation>
         <element text="()"><mrow><mo>(</mo><mo>)</mo></mrow></element>
-        <element text="(0 1 2)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn><mspace width="1em"/><mn>2</mn></mrow><mo>)</mo></mrow></element>
-        <element text="(0 2 1)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>2</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow></element>
+        <element text="(0 1 2)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="0.3em"/><mn>1</mn><mspace width="0.3em"/><mn>2</mn></mrow><mo>)</mo></mrow></element>
+        <element text="(0 2 1)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="0.3em"/><mn>2</mn><mspace width="0.3em"/><mn>1</mn></mrow><mo>)</mo></mrow></element>
     </representation>
     <symmetryobject name="Propeller with 3 blades: front view">
         <operation element="1" degrees="120.0"><point x="0.0" y="1.0" z="0.0"/></operation>

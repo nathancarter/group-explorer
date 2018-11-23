@@ -56,24 +56,24 @@
     </representation>
     <representation>
         <element text="()"><mrow><mo>(</mo><mo>)</mo></mrow></element>
-        <element text="(1 2 4 3)"><mrow><mo>(</mo><mrow><mn>1</mn><mspace width="1em"/><mn>2</mn><mspace width="1em"/><mn>4</mn><mspace width="1em"/><mn>3</mn></mrow><mo>)</mo></mrow></element>
-        <element text="(1 4)(2 3)"><mrow><mo>(</mo><mrow><mn>1</mn><mspace width="1em"/><mn>4</mn></mrow><mo>)</mo><mo>(</mo><mrow><mn>2</mn><mspace width="1em"/><mn>3</mn></mrow><mo>)</mo></mrow></element>
-        <element text="(1 3 4 2)"><mrow><mo>(</mo><mrow><mn>1</mn><mspace width="1em"/><mn>3</mn><mspace width="1em"/><mn>4</mn><mspace width="1em"/><mn>2</mn></mrow><mo>)</mo></mrow></element>
-        <element text="(0 1 2 3 4)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn><mspace width="1em"/><mn>2</mn><mspace width="1em"/><mn>3</mn><mspace width="1em"/><mn>4</mn></mrow><mo>)</mo></mrow></element>
-        <element text="(0 1 3 2)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn><mspace width="1em"/><mn>3</mn><mspace width="1em"/><mn>2</mn></mrow><mo>)</mo></mrow></element>
-        <element text="(0 1)(2 4)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo><mo>(</mo><mrow><mn>2</mn><mspace width="1em"/><mn>4</mn></mrow><mo>)</mo></mrow></element>
-        <element text="(0 1 4 3)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn><mspace width="1em"/><mn>4</mn><mspace width="1em"/><mn>3</mn></mrow><mo>)</mo></mrow></element>
-        <element text="(0 2 4 1 3)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>2</mn><mspace width="1em"/><mn>4</mn><mspace width="1em"/><mn>1</mn><mspace width="1em"/><mn>3</mn></mrow><mo>)</mo></mrow></element>
-        <element text="(0 2 1 4)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>2</mn><mspace width="1em"/><mn>1</mn><mspace width="1em"/><mn>4</mn></mrow><mo>)</mo></mrow></element>
-        <element text="(0 2)(3 4)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>2</mn></mrow><mo>)</mo><mo>(</mo><mrow><mn>3</mn><mspace width="1em"/><mn>4</mn></mrow><mo>)</mo></mrow></element>
-        <element text="(0 2 3 1)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>2</mn><mspace width="1em"/><mn>3</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow></element>
-        <element text="(0 3 1 4 2)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>3</mn><mspace width="1em"/><mn>1</mn><mspace width="1em"/><mn>4</mn><mspace width="1em"/><mn>2</mn></mrow><mo>)</mo></mrow></element>
-        <element text="(0 3 4 1)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>3</mn><mspace width="1em"/><mn>4</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow></element>
-        <element text="(0 3)(1 2)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>3</mn></mrow><mo>)</mo><mo>(</mo><mrow><mn>1</mn><mspace width="1em"/><mn>2</mn></mrow><mo>)</mo></mrow></element>
-        <element text="(0 3 2 4)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>3</mn><mspace width="1em"/><mn>2</mn><mspace width="1em"/><mn>4</mn></mrow><mo>)</mo></mrow></element>
-        <element text="(0 4 3 2 1)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>4</mn><mspace width="1em"/><mn>3</mn><mspace width="1em"/><mn>2</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow></element>
-        <element text="(0 4 2 3)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>4</mn><mspace width="1em"/><mn>2</mn><mspace width="1em"/><mn>3</mn></mrow><mo>)</mo></mrow></element>
-        <element text="(0 4)(1 3)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>4</mn></mrow><mo>)</mo><mo>(</mo><mrow><mn>1</mn><mspace width="1em"/><mn>3</mn></mrow><mo>)</mo></mrow></element>
-        <element text="(0 4 1 2)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>4</mn><mspace width="1em"/><mn>1</mn><mspace width="1em"/><mn>2</mn></mrow><mo>)</mo></mrow></element>
+        <element text="(1 2 4 3)"><mrow><mo>(</mo><mrow><mn>1</mn><mspace width="0.3em"/><mn>2</mn><mspace width="0.3em"/><mn>4</mn><mspace width="0.3em"/><mn>3</mn></mrow><mo>)</mo></mrow></element>
+        <element text="(1 4)(2 3)"><mrow><mo>(</mo><mrow><mn>1</mn><mspace width="0.3em"/><mn>4</mn></mrow><mo>)</mo><mo>(</mo><mrow><mn>2</mn><mspace width="0.3em"/><mn>3</mn></mrow><mo>)</mo></mrow></element>
+        <element text="(1 3 4 2)"><mrow><mo>(</mo><mrow><mn>1</mn><mspace width="0.3em"/><mn>3</mn><mspace width="0.3em"/><mn>4</mn><mspace width="0.3em"/><mn>2</mn></mrow><mo>)</mo></mrow></element>
+        <element text="(0 1 2 3 4)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="0.3em"/><mn>1</mn><mspace width="0.3em"/><mn>2</mn><mspace width="0.3em"/><mn>3</mn><mspace width="0.3em"/><mn>4</mn></mrow><mo>)</mo></mrow></element>
+        <element text="(0 1 3 2)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="0.3em"/><mn>1</mn><mspace width="0.3em"/><mn>3</mn><mspace width="0.3em"/><mn>2</mn></mrow><mo>)</mo></mrow></element>
+        <element text="(0 1)(2 4)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="0.3em"/><mn>1</mn></mrow><mo>)</mo><mo>(</mo><mrow><mn>2</mn><mspace width="0.3em"/><mn>4</mn></mrow><mo>)</mo></mrow></element>
+        <element text="(0 1 4 3)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="0.3em"/><mn>1</mn><mspace width="0.3em"/><mn>4</mn><mspace width="0.3em"/><mn>3</mn></mrow><mo>)</mo></mrow></element>
+        <element text="(0 2 4 1 3)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="0.3em"/><mn>2</mn><mspace width="0.3em"/><mn>4</mn><mspace width="0.3em"/><mn>1</mn><mspace width="0.3em"/><mn>3</mn></mrow><mo>)</mo></mrow></element>
+        <element text="(0 2 1 4)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="0.3em"/><mn>2</mn><mspace width="0.3em"/><mn>1</mn><mspace width="0.3em"/><mn>4</mn></mrow><mo>)</mo></mrow></element>
+        <element text="(0 2)(3 4)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="0.3em"/><mn>2</mn></mrow><mo>)</mo><mo>(</mo><mrow><mn>3</mn><mspace width="0.3em"/><mn>4</mn></mrow><mo>)</mo></mrow></element>
+        <element text="(0 2 3 1)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="0.3em"/><mn>2</mn><mspace width="0.3em"/><mn>3</mn><mspace width="0.3em"/><mn>1</mn></mrow><mo>)</mo></mrow></element>
+        <element text="(0 3 1 4 2)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="0.3em"/><mn>3</mn><mspace width="0.3em"/><mn>1</mn><mspace width="0.3em"/><mn>4</mn><mspace width="0.3em"/><mn>2</mn></mrow><mo>)</mo></mrow></element>
+        <element text="(0 3 4 1)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="0.3em"/><mn>3</mn><mspace width="0.3em"/><mn>4</mn><mspace width="0.3em"/><mn>1</mn></mrow><mo>)</mo></mrow></element>
+        <element text="(0 3)(1 2)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="0.3em"/><mn>3</mn></mrow><mo>)</mo><mo>(</mo><mrow><mn>1</mn><mspace width="0.3em"/><mn>2</mn></mrow><mo>)</mo></mrow></element>
+        <element text="(0 3 2 4)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="0.3em"/><mn>3</mn><mspace width="0.3em"/><mn>2</mn><mspace width="0.3em"/><mn>4</mn></mrow><mo>)</mo></mrow></element>
+        <element text="(0 4 3 2 1)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="0.3em"/><mn>4</mn><mspace width="0.3em"/><mn>3</mn><mspace width="0.3em"/><mn>2</mn><mspace width="0.3em"/><mn>1</mn></mrow><mo>)</mo></mrow></element>
+        <element text="(0 4 2 3)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="0.3em"/><mn>4</mn><mspace width="0.3em"/><mn>2</mn><mspace width="0.3em"/><mn>3</mn></mrow><mo>)</mo></mrow></element>
+        <element text="(0 4)(1 3)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="0.3em"/><mn>4</mn></mrow><mo>)</mo><mo>(</mo><mrow><mn>1</mn><mspace width="0.3em"/><mn>3</mn></mrow><mo>)</mo></mrow></element>
+        <element text="(0 4 1 2)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="0.3em"/><mn>4</mn><mspace width="0.3em"/><mn>1</mn><mspace width="0.3em"/><mn>2</mn></mrow><mo>)</mo></mrow></element>
     </representation>
 </group>

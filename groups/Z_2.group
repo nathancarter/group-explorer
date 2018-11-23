@@ -20,7 +20,7 @@
     </representation>
     <representation>
         <element text="()"><mrow><mo>(</mo><mo>)</mo></mrow></element>
-        <element text="(0 1)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="1em"/><mn>1</mn></mrow><mo>)</mo></mrow></element>
+        <element text="(0 1)"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="0.3em"/><mn>1</mn></mrow><mo>)</mo></mrow></element>
     </representation>
     <symmetryobject name="Propeller with 2 blades: front view">
         <operation element="1" degrees="180.0"><point x="0.0" y="1.0" z="0.0"/></operation>
