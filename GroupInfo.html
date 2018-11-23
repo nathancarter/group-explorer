@@ -99,7 +99,7 @@
                 const diagramName = (inx == group.cayleyDiagrams.length)
                                   ? undefined
                                   : group.cayleyDiagrams[inx].name;
-                const graphicData = CayleyDiagram.generate(group, diagramName);
+                const graphicData = new CayleyDiagram(group, diagramName);
                 const img = graphicContext.getImageURL(graphicData);
                 $row.children(':nth-child(1)')
                     .addClass('programLink')
@@ -148,7 +148,21 @@
           $('#Description + p').html(eval(Template.HTML('description_template')));
 
           // Computed properties:
-          $('#Computed_properties + p').html(eval(Template.HTML('computedProperties_template')));
+          $('#Computed_properties + p').prepend(eval(Template.HTML('computedProperties_template')));
+          if (group.isCyclic) {
+             const [m, n, _] = MathUtils.getFactors(group.order)
+                                        .reduce( ([fac1, fac2, prev], el) => {
+                                           if (el >= prev) {
+                                              fac1 *= el;
+                                              prev = el;
+                                           } else {
+                                              fac2 *= el;
+                                           }
+                                           return [fac1, fac2, prev];
+                                        }, [1, 1, 0] );
+             const template_name = (n == 1) ? 'not-Z_mn-row-template' : 'Z_mn-row-template';
+             $('#Computed_properties + p tbody').append(eval(Template.HTML(template_name)));
+          }
 
           // File data
           $('#File_data + p').html(eval(Template.HTML('fileData_template')));
@@ -347,6 +361,20 @@
                   <td page="SolvableInfo.html" class="programLink">Tell me more</td>
                </tr>
             </table>
+         </template>
+         <template id="Z_mn-row-template">
+            <tr>
+               <th align="right">&Zopf;<sub>nm</sub> group</th>
+               <td>= &Zopf;<sub>${m}</sub> x &Zopf;<sub>${n}</sub></td>
+               <td page="ZmnInfo.html" class="programLink">Tell me more</td>
+            </tr>
+         </template>
+         <template id="not-Z_mn-row-template">
+            <tr>
+               <th align="right">&Zopf;<sub>nm</sub> group</th>
+               <td>= no &Zopf;<sub>m</sub> x &Zopf;<sub>n</sub></td>
+               <td page="ZmnInfo.html" class="programLink">Tell me more</td>
+            </tr>
          </template>
       </p>
 
