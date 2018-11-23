@@ -52,6 +52,13 @@ class Subgroup {
       return this.group.order/this.order;
    }
 
+   get isNormal() {
+      if (this._isNormal === undefined) {
+         this._isNormal = this.group.isNormal(this);
+      }
+      return this._isNormal;
+   }            
+
    clone() {
       const other = new Subgroup();
       other.group = this.group;
