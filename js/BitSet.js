@@ -5,7 +5,7 @@
 class BitSet {
    constructor (length, init) {
       this.len = length;
-      this.arr = new Array(((length - 1) >>> 5) + 1);
+      this.arr = new Array(length == 0 ? 0 : (((length - 1) >>> 5) + 1));
       this.arr.fill(0);
       if (init !== undefined) {
 	 for (let i = 0; i < init.length; i++) {
@@ -15,27 +15,43 @@ class BitSet {
    }
 
    static intersection(a, b) {
-      const intersect = new BitSet(a.len);
-      for (let i = 0; i < a.arr.length; i++) {
-         intersect.arr[i] = a.arr[i] & b.arr[i];
+      return (a.clone()).intersection(b);
+   }
+
+   intersection(other) {
+      for (let i = 0; i < this.arr.length; i++) {
+         this.arr[i] = this.arr[i] & other.arr[i];
       }
-      return intersect;
+      return this;
    }
 
    static union(a, b) {
-      const union = new BitSet(a.len);
-      for (let i = 0; i < a.arr.length; i++) {
-         union.arr[i] = a.arr[i] | b.arr[i];
+      return (a.clone()).union(b);
+   }
+
+   union(other) {
+      for (let i = 0; i < this.arr.length; i++) {
+         this.arr[i] = this.arr[i] | other.arr[i];
       }
-      return union;
+      return this;
    }
 
    static difference(a, b) {
-      const diff = new BitSet(a.len);
-      for (let i = 0; i < a.arr.length; i++) {
-         diff.arr[i] = a.arr[i] & (~ b.arr[i]);
+      return (a.clone()).difference(b);
+   }
+
+   difference(other) {
+      for (let i = 0; i < this.arr.length; i++) {
+         this.arr[i] = this.arr[i] & (~ other.arr[i]);
       }
-      return diff;
+      return this;
+   }
+
+   complement() {
+      for (let i = 0; i < this.arr.length; i++) {
+         this.arr[i] = ~ this.arr[i];
+      }
+      return this;
    }
 
    clone() {
@@ -61,6 +77,7 @@ class BitSet {
       return (this.arr[pos >>> 5] & (1 << (pos & 0x1F))) >>> (pos & 0x1F);
    }
 
+   // accept an array too?
    set(pos) {
       this.arr[pos >>> 5] = (this.arr[pos >>> 5] | (1 << (pos & 0x1F))) >>> 0;
       return this;
@@ -107,6 +124,9 @@ class BitSet {
    }
 
    equals(other) {
+      if (this.len != other.len) {
+         return false;
+      }
       for (let i = 0; i < this.arr.length; i++) {
          if (this.arr[i] != other.arr[i]) {
             return false;
