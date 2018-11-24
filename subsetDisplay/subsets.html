@@ -1,18 +1,18 @@
 
 <!-- subset_page layout -->
 <div id="subset_page">
-<p class="subset_page_header">Subgroups</p>
-<ul id="subgroups" class="subset_page_content"></ul>
+   <p class="subset_page_header">Subgroups</p>
+   <ul id="subgroups" class="subset_page_content"></ul>
 
-<p class="subset_page_header">User-defined subsets</p>
-<p id="subsets_placeholder" class="placeholder">
-   <i>(None)</i></p>
-<ul id="subsets" class="subset_page_content"></ul>
+   <p class="subset_page_header">User-defined subsets</p>
+   <p id="subsets_placeholder" class="placeholder">
+      <i>(None)</i></p>
+   <ul id="subsets" class="subset_page_content"></ul>
 
-<p class="subset_page_header">Partitions</p>
-<p id="partitions_placeholder" class="placeholder">
-   <i>(None)</i></p>
-<ul id="partitions" class="subset_page_content"></ul>
+   <p class="subset_page_header">Partitions</p>
+   <p id="partitions_placeholder" class="placeholder">
+      <i>(None)</i></p>
+   <ul id="partitions" class="subset_page_content"></ul>
 </div>
 
 <!-- Templates -->
@@ -210,26 +210,26 @@
 
 <template id="subsetEditor_template">
    <div id="subset_editor">
-   <div id="ssedit_content" class="vert">
-      <div id="ssedit_title">Edit subset</div>
-      <div>Customize the elements of <span class="ssedit_setName"></span>
-         by dragging elements into or out of it below.</div>
-      <div class="horiz ssedit_body">
-         <div id="ssedit_elementsIn_container" class="vert ssedit_panel_container">
-            <span>Elements in <span class="ssedit_setName"></span></span>
-            <div class="ssedit_panel">
-               <ul id="elementsIn" class="ssedit_list"></ul>
+      <div id="ssedit_content" class="vert">
+         <div id="ssedit_title">Edit subset</div>
+         <div>Customize the elements of <span class="ssedit_setName"></span>
+            by dragging elements into or out of it below.</div>
+         <div class="horiz ssedit_body">
+            <div id="ssedit_elementsIn_container" class="vert ssedit_panel_container">
+               <span>Elements in <span class="ssedit_setName"></span></span>
+               <div class="ssedit_panel">
+                  <ul id="elementsIn" class="ssedit_list"></ul>
+               </div>
+               <button id="ssedit_cancel_button" class="ssedit_button">Cancel</button>
             </div>
-            <button id="ssedit_cancel_button" class="ssedit_button">Cancel</button>
-         </div>
-         <div id="ssedit_elementsNotIn_container" class="vert ssedit_panel_container">
-            <span>Elements not in <span class="ssedit_setName"></span></span>
-            <div class="ssedit_panel">
-               <ul id="elementsNotIn" class="ssedit_list"></ul>
+            <div id="ssedit_elementsNotIn_container" class="vert ssedit_panel_container">
+               <span>Elements not in <span class="ssedit_setName"></span></span>
+               <div class="ssedit_panel">
+                  <ul id="elementsNotIn" class="ssedit_list"></ul>
+               </div>
+               <button id="ssedit_ok_button" class="ssedit_button">OK</button>
             </div>
-            <button id="ssedit_ok_button" class="ssedit_button">OK</button>
          </div>
       </div>
-   </div>
    </div>
 </template>

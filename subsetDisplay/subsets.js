@@ -70,7 +70,7 @@ class SSD {
             .join(', ');
          const $menu = $(eval(Template.HTML('subsetElements_template')));
          $curr.addClass('highlighted').append($menu);
-         SSD.setMenuLocations(event, $menu);
+         Menu.setMenuLocations(event, $menu);
          event.stopPropagation();
          MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
       }
@@ -105,71 +105,9 @@ class SSD {
                       SSD.displayList[$curr.attr('id')].menu;
          $menu.on('click', SSD.menuClickHandler);
          $curr.addClass('highlighted').append($menu);
-         SSD.setMenuLocations(event, $menu);
+         Menu.setMenuLocations(event, $menu);
          event.stopPropagation();
       }
-   }
-
-   static setMenuLocations(event, $menu) {
-      // set left edge location so menu doesn't disappear to the right
-      const left = event.clientX + $menu.outerWidth() > $(window).innerWidth() ?
-                   $(window).innerWidth() - $menu.outerWidth() :
-                   event.clientX;
-      $menu.css({left: left});
-
-      // set top edge to menu doesn't disappear off the bottom
-      const top = event.clientY + $menu.outerHeight() > $(window).innerHeight() ?
-                  $(window).innerHeight() - $menu.outerHeight() :
-                  event.clientY;
-      $menu.css({top: top});
-
-      // do the same for subMenus
-      $menu.children('li:has(span.menu-arrow)')
-           .children('ul')
-           .each( (_, subMenu) => SSD.setSubMenuLocation($menu, $(subMenu)) );
-   }
-
-   static setSubMenuLocation($menu, $subMenu) {
-      const bottomRoom = $(window).innerHeight() - ($subMenu.offset().top + $subMenu.outerHeight());
-      if (bottomRoom < 0) {
-         if ($subMenu.outerHeight() < $(window).innerHeight()) {
-            $subMenu.css({top: bottomRoom});
-         } else {
-            $subMenu.css({top: -$subMenu.offset().top, height: $(window).innerHeight()})
-         }
-      }
-
-      const rightRoom = $(window).innerWidth() -
-                        ($menu.offset().left + $menu.outerWidth() + $subMenu.outerWidth());
-      const leftRoom = $menu.offset().left - $subMenu.outerWidth();
-      const widthMargin = ($subMenu.outerWidth() - $subMenu.width())/2;
-      if (rightRoom > 0) {
-         $subMenu.css({left: '100%'});
-      } else if (leftRoom > 0) {
-         $subMenu.css({right: '100%'});
-      } else if (rightRoom > leftRoom) {
-         $subMenu.css({left: $menu.outerWidth() + rightRoom - widthMargin});
-      } else {
-         $subMenu.css({right: $menu.outerWidth() + leftRoom - widthMargin});
-      }
-
-      $subMenu.children('li:has(span.menu-arrow)')
-              .children('ul')
-              .each( (_, subMenu) => SSD.setSubMenuLocation($subMenu, $(subMenu)) );
-   }
-
-   static setCascadeDirections($menu) {
-      $menu.children('li:has(span.menu-arrow)')
-           .children('ul')
-           .each( (_, child_menu) => {
-              const $child_menu = $(child_menu);
-              let direction = 'left';
-              if ($menu.offset().left + $menu.width() + $(child_menu).width() > $(window).width()) {
-                 direction = 'right';
-              }
-              $(child_menu).css(direction, '100%');
-              setCascadeDirections( $(child_menu) );
-           });
    }
 }
 

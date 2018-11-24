@@ -45,57 +45,6 @@ ul.subset_page_content {
    z-index: 1;
 }
 
-ul.menu,
-ul.menu ul {
-   background-color: #EEEEEE;		/* very light gray (~gainsboro)*/
-   border: 1px solid #CFCFCF;		/* ~silver */
-   box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);	/* gray mist */
-   color: #000000;			/* black */
-   font-size: medium;
-   font-style: normal;
-   font-weight: normal;
-   margin: 0;
-   padding: 4px 8px;
-   position: absolute;
-   z-index: 1;
-   white-space: nowrap;
-}
-ul.menu a {
-   color: #000000;			/* black */
-   text-decoration: none;
-}
-ul.menu ul {
-   position: absolute;
-   top: 0;
-   visibility: hidden;
-}
-ul.menu li {
-   position: relative;
-}
-ul.menu li:hover,
-ul.menu li:hover > a {
-   color: #FFFFFF;			/* white */
-   background-color: #FFB886;		/* orange-tan (~light salmon)*/
-}
-ul.menu li:hover > ul {
-   visibility: visible;
-}
-
-ul.menu .menu-arrow:after {
-   border-bottom: 8px solid rgba(0,0,0,0);	/* transparent*/
-   border-left: 16px solid #A0A0A0;		/* ~dark gray */
-   border-top: 8px solid rgba(0,0,0,0);	/* transparent */
-   content: '';
-   float: right;
-   height: 0;
-   width: 0;
-   position: relative;
-}
-
-ul.menu ul ul {
-   overflow-y: auto;
-}
-
 /* Subset editor styling */
 #subset_editor {
    font-size: 10pt;
