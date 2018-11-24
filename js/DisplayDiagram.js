@@ -73,11 +73,25 @@ class DisplayDiagram {
       ];
    }
 
-   // Small graphics don't need high resolution features:
-   //   Many-faceted spheres, labels, thick lines, arrows?
+   // Small graphics don't need high resolution features such as many-faceted spheres, labels, thick lines
+   // Removing labels is particularly beneficial, since each label (384 in Tesseract) requires a canvas element
+   //   and a context, which often causes loading failure due to resource limitations
    getImageURL(diagram3D) {
       const img = new Image();
-      this.showGraphic(diagram3D);
+      // this.showGraphic(diagram3D);
+
+      diagram3D.normalize();
+
+      this.setCamera(diagram3D);
+      this.setBackground(diagram3D);
+      this.updateLights(diagram3D);
+      this.updateNodes(diagram3D, 5);  // 5 facets instead of 20
+      // this.updateHighlights(diagram3D);
+      // this.updateLabels(diagram3D);
+      this.updateLines(diagram3D, true);  // use webgl native line width
+      this.updateArrowheads(diagram3D);
+      this.render();
+
       img.src = this.renderer.domElement.toDataURL();
       return img;
    }
@@ -103,22 +117,33 @@ class DisplayDiagram {
       return this.scene.children.find( (el) => el.name == name );
    }
 
-   // Position and point the camera to the center of the scene
+   /*
+    * Position the camera and point it at the center of the scene
+    *
+    * Camera positioned to match point of view in GE2:
+    *   If diagram lies entirely in y-z plane (all x == 0)
+    *     place camera on z-axis, x-axis to the right, y-axis down
+    *   If diagram lies entirely in the x-z plane
+    *     place camera on negative y-axis, x-axis to the right, z-axis up
+    *   If diagram lies entirely in the x-y plane
+    *     place camera on negative z-axis, x-axis to the right, y-axis down
+    *   Otherwise place camera on (1,-1,-1) vector with y-axis down
+    */
    setCamera(diagram3D) {
       Log.log('setCamera');
 
       if (diagram3D.nodes.every( (node) => node.point.x == 0.0 )) {
          this.camera.position.set(3, 0, 0);
-         this.camera.up.set(0, 0, 1);
+         this.camera.up.set(0, -1, 0);
       } else if (diagram3D.nodes.every( (node) => node.point.y == 0.0 )) {
-         this.camera.position.set(0, 3, 0);
+         this.camera.position.set(0, -3, 0);
          this.camera.up.set(0, 0, 1);
       } else if (diagram3D.nodes.every( (node) => node.point.z == 0.0 )) {
-         this.camera.position.set(0, 0, 3);
-         this.camera.up.set(0, 1, 0);
+         this.camera.position.set(0, 0, -3);
+         this.camera.up.set(0, -1, 0);
       } else {
-         this.camera.position.set(2, 2, 2);
-         this.camera.up.set(0, 1, 0);
+         this.camera.position.set(2, -2, -2);
+         this.camera.up.set(0, -1, 0);
       }
       this.camera.lookAt(new THREE.Vector3(0, 0, 0));
    }
@@ -145,7 +170,7 @@ class DisplayDiagram {
    }
 
    // Create a sphere for each node, add to scene as THREE.Group named "spheres"
-   updateNodes(diagram3D) {
+   updateNodes(diagram3D, sphere_facets = 20) {
       Log.log('updateNodes');
 
       const defaultNodeRadius = 0.3 / Math.sqrt(diagram3D.nodes.length);
@@ -158,7 +183,7 @@ class DisplayDiagram {
                nodeRadius = (node.radius === undefined) ? defaultNodeRadius : node.radius,
                scaledNodeRadius = diagram3D.nodeScale * nodeRadius,
                sphereMaterial = new THREE.MeshPhongMaterial({color: nodeColor}),
-               sphereGeometry = new THREE.SphereGeometry(scaledNodeRadius, 20, 20),
+               sphereGeometry = new THREE.SphereGeometry(scaledNodeRadius, sphere_facets, sphere_facets),
                sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
          sphere.userData = {node: node};
          sphere.position.set(node.point.x, node.point.y, node.point.z);
@@ -268,6 +293,26 @@ class DisplayDiagram {
       labels.remove(...labels.children);
 
       const spheres = this.getGroup('spheres').children;
+      const nominal_radius = spheres.find( (el) => el !== undefined ).geometry.parameters.radius;
+      const scale = 12 * nominal_radius * diagram3D.labelSize;
+      let canvas_width, canvas_height, label_font, label_offset;
+      const big_node_limit = 0.1, small_node_limit = 0.05;
+      if (nominal_radius >= big_node_limit) {
+         canvas_width = 2048
+         canvas_height = 256;
+         label_font = '120pt Arial';
+         label_offset = 160 * Math.sqrt(diagram3D.nodeScale);  // don't know why, it just looks better
+      } else if (nominal_radius <= small_node_limit) {
+         canvas_width = 512;
+         canvas_height = 64;
+         label_font = '32pt Arial';
+         label_offset = 40 * Math.sqrt(diagram3D.nodeScale);
+      } else {
+         canvas_width = 1024;
+         canvas_height = 128;
+         label_font = '64pt Arial';
+         label_offset = 80 * Math.sqrt(diagram3D.nodeScale);
+      }
 
       spheres.forEach( (sphere) => {
          const node = sphere.userData.node;
@@ -275,31 +320,25 @@ class DisplayDiagram {
             return;
          };
 
-         // make canvas big enough for any label and offset it to clear the node while being close
+         // make canvas big enough for any label and offset it to clear the node while still being close
          const canvas = document.createElement('canvas');
          canvas.id = `label_${node.element}`;
          const context = canvas.getContext('2d');
 
-         const radius = sphere.geometry.parameters.radius;
-         const scale = 12 * radius * diagram3D.labelSize;
          const textLabel = mathml2text(node.label);
-         canvas.width = 2048;
-         canvas.height = 256;
+         canvas.width =  canvas_width;
+         canvas.height = canvas_height;
+         context.font = label_font;
          context.fillStyle = 'rgba(0, 0, 0, 1.0)';
-         context.font = '120pt Arial';
-         const xoff = 600 * Math.sqrt(radius) / diagram3D.labelSize;
-         context.fillText(textLabel, xoff, 0.7*canvas.height);
+         context.fillText(textLabel, label_offset, 0.7*canvas.height);
 
          const texture = new THREE.Texture(canvas)
          texture.needsUpdate = true;
-
          const labelMaterial = new THREE.SpriteMaterial({ map: texture });
-
          const label = new THREE.Sprite( labelMaterial );
          label.scale.set(scale, scale*canvas.height/canvas.width, 1.0);
-
          label.center = new THREE.Vector2(0.0, 0.0);
-         label.position.set(node.point.x, node.point.y, node.point.z);
+         label.position.set(...node.point.toArray())
 
          labels.add(label);
       } )
@@ -307,16 +346,15 @@ class DisplayDiagram {
 
    /*
     * Draw lines between nodes
-    *   An arc is drawn in the plane specified by the normal vector if one is given
+    *   An arc is drawn in the plane specified by the two ends and the center, if one is given, or [0,0,0]
     */
-   updateLines(diagram3D) {
+   updateLines(diagram3D, use_webgl_native_lines) {
       Log.log('updateLines');
 
       const lines = diagram3D.lines;
       const spheres = this.getGroup('spheres').children;
       const lineGroup = this.getGroup('lines');
       lineGroup.remove(...lineGroup.children);
-
       const userAgent = window.navigator.userAgent;
       const isIOS = !!userAgent.match(/iPad/i) || !!userAgent.match(/iPhone/i);
       // This generally works, but Chrome/Linux can't display its max (!?) -- punt for the moment
@@ -328,7 +366,7 @@ class DisplayDiagram {
          const vertices = line.vertices,
                lineColor = (line.color === undefined) ?
                            DisplayDiagram.DEFAULT_LINE_COLOR : line.color,
-               lineWidth = isIOS ? DisplayDiagram.IOS_LINE_WIDTH : diagram3D.lineWidth,
+               lineWidth = use_webgl_native_lines ? 1 : (isIOS ? DisplayDiagram.IOS_LINE_WIDTH : diagram3D.lineWidth),
                lineMaterial =
                   lineWidth <= maxLineWidth ?
                   new THREE.LineBasicMaterial({color: lineColor, linewidth: lineWidth}) :
@@ -338,25 +376,10 @@ class DisplayDiagram {
                      sizeAttenuation: false,
                      side: THREE.DoubleSide,
                      resolution: new THREE.Vector2(window.innerWidth, window.innerHeight),
-                  });
+                  }),
+               geometry = new THREE.Geometry();
 
-         var geometry = new THREE.Geometry();
-         if (line.normal === undefined) {
-            geometry.vertices = vertices.map( (vertex) => vertex.point );
-         } else {
-            // Put bow in arc so that (start, middle, end) is clockwise when viewed from normal
-            const normal = line.normal,
-                  start = vertices[0].point,
-                  end = vertices[vertices.length - 1].point,
-                  offset = (line.arcOffset === undefined) ?
-                           DisplayDiagram.DEFAULT_ARC_OFFSET : line.arcOffset,
-                  // (start + end)/2 - (end - start) X normal
-                  middle = start.clone().add(end).multiplyScalar(0.5).sub(
-                     end.clone().sub(start).cross(normal).multiplyScalar(offset)),
-                  curve = new THREE.QuadraticBezierCurve3(start, middle, end),
-                  points = curve.getPoints(10);
-            geometry.vertices = points;
-         }
+         geometry.vertices = this._getLineVertices(line)
 
          let newLine;
          if (lineWidth == 1) {
@@ -371,6 +394,77 @@ class DisplayDiagram {
       } )
    }
 
+   _getLineVertices(line) {
+      const spheres = this.getGroup('spheres').children,
+            vertices = line.vertices;
+
+      if (vertices.length > 2) {
+         return vertices.map( (vertex) => vertex.point );
+      }
+
+      // offset center of arc 40% of the distance between the two nodes, in the plane of origin/start/end
+      if (line.style == Diagram3D.CURVED) {
+         const points = this._curvePoints(line, 0.4 * (line.length - 2*spheres[0].geometry.parameters.radius));
+         return points;
+      }
+
+      // arc around intervening points
+      const radius = spheres.find( (sphere) => sphere.geometry.parameters.radius !== undefined ).geometry.parameters.radius,
+            start = vertices[0].point,
+            end = vertices[1].point,
+            start2end = end.clone().sub(start),
+            start2end_sq = start.distanceToSquared(end),
+            start2end_len = Math.sqrt(start2end_sq),
+            min_squared_distance = 1.5 * radius * radius;
+      for (const sphere of spheres) {
+         const start2sphere = sphere.position.clone().sub(start),
+               start2sphere_sq = start.distanceToSquared(sphere.position),
+               end2sphere_sq = end.distanceToSquared(sphere.position),
+               start2end_sq = start.distanceToSquared(end),
+               x = (start2end_sq - end2sphere_sq + start2sphere_sq)/(2 * start2end_len),
+               normal = start2sphere.clone().sub(start2end.clone().multiplyScalar(x/start2end_len));
+         if (   start2sphere_sq != 0
+             && end2sphere_sq != 0
+             && x > 0
+             && x < start2end_len
+             && normal.lengthSq() < min_squared_distance )
+            {
+               const points = this._curvePoints(line, 3*radius - normal.length());
+               return points;
+            }
+      }
+
+      return vertices.map( (vertex) => vertex.point );
+   }
+
+   
+   _curvePoints(line, offset, center = new THREE.Vector3(0, 0, 0)) {
+      let middle;
+      const start_point = line.vertices[0].point,
+            end_point = line.vertices[1].point,
+            start = start_point.clone().sub(center),
+            end = end_point.clone().sub(center);
+
+      // center lies on line -- choose a direction normal to the camera direction
+      if (new THREE.Vector3().crossVectors(start, end).length() < 1e-3) {
+         const normal = new THREE.Vector3().crossVectors(this.camera.position, start),
+               scaled_normal = normal.multiplyScalar(offset/normal.length());
+         middle = start.add(end).multiplyScalar(0.5).add(scaled_normal);
+      } else {
+         const halfway = start.clone().add(end).multiplyScalar(0.5),  // (start + end)/2
+               start2end = end.clone().sub(start),
+               x = -start.dot(start2end)/end.dot(start2end),  // a + xb is normal to b-a
+               normal = (end.dot(start2end) == 0) ? end : start.clone().add(end.clone().multiplyScalar(x)),
+               scaled_normal = normal.clone().multiplyScalar(offset/normal.length());
+         middle = halfway.add(scaled_normal);
+      }
+
+      const curve = new THREE.QuadraticBezierCurve3(start_point, middle, end_point),
+            points = curve.getPoints(10);
+
+      return points;
+   }
+
    updateArrowheads(diagram3D) {
       Log.log('updateArrowheads');
 
@@ -379,7 +473,7 @@ class DisplayDiagram {
       const arrowheads = this.getGroup('arrowheads');
       arrowheads.remove(...arrowheads.children);
 
-      lines.filter( (line) => line.userData.line.arrow )
+      lines.filter( (line) => line.userData.line.arrowhead )
            .forEach( (line) => {
               const lineData = line.userData.line,
                     vertices = line.userData.vertices,
