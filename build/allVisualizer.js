@@ -1,4 +1,58 @@
 
+class Menu {
+   static setMenuLocations(event, $menu) {
+      // set top edge so menu grows down until it sits on the bottom, up until it reaches the top
+      if ($menu.outerHeight() > $(window).innerHeight()) {
+         $menu.css({top: 0, height: $(window).innerHeight()});    // too tall for window
+      } else if (event.clientY + $menu.outerHeight() > $(window).innerHeight()) {
+         $menu.css({top: $(window).innerHeight() - $menu.outerHeight()});    // won't fit below click
+      } else {
+         $menu.css({top: event.clientY});  // fits below click
+      }
+
+      // set left edge location so menu doesn't disappear to the right
+      if (event.clientX + $menu.outerWidth() > $(window).innerWidth()) {
+         $menu.css({left: $(window).innerWidth() - $menu.outerWidth()});
+      } else {
+         $menu.css({left: event.clientX});
+      }
+
+      // similarly for submenus (but they also have to avoid covering the main menu)
+      $menu.children('li:has(span.menu-arrow)')
+           .children('ul')
+           .each( (_, subMenu) => Menu.setSubMenuLocation($menu, $(subMenu)) );
+   }
+
+   static setSubMenuLocation($menu, $subMenu) {
+      const bottomRoom = $(window).innerHeight() - ($subMenu.offset().top + $subMenu.outerHeight());
+      if (bottomRoom < 0) {
+         if ($subMenu.outerHeight() < $(window).innerHeight()) {
+            $subMenu.css({top: bottomRoom});
+         } else {
+            $subMenu.css({top: -$subMenu.offset().top, height: $(window).innerHeight()})
+         }
+      }
+
+      const rightRoom = $(window).innerWidth() -
+                        ($menu.offset().left + $menu.outerWidth() + $subMenu.outerWidth());
+      const leftRoom = $menu.offset().left - $subMenu.outerWidth();
+      const widthMargin = ($subMenu.outerWidth() - $subMenu.width())/2;
+      if (rightRoom > 0) {
+         $subMenu.css({left: '100%'});
+      } else if (leftRoom > 0) {
+         $subMenu.css({right: '100%'});
+      } else if (rightRoom > leftRoom) {
+         $subMenu.css({left: $menu.outerWidth() + rightRoom - widthMargin});
+      } else {
+         $subMenu.css({right: $menu.outerWidth() + leftRoom - widthMargin});
+      }
+
+      $subMenu.children('li:has(span.menu-arrow)')
+              .children('ul')
+              .each( (_, subMenu) => Menu.setSubMenuLocation($subMenu, $(subMenu)) );
+   }
+}
+
 class SSD {
    static _init() {
       SSD.subsetsURL = './subsetDisplay/subsets.html';
@@ -70,7 +124,7 @@ class SSD {
             .join(', ');
          const $menu = $(eval(Template.HTML('subsetElements_template')));
          $curr.addClass('highlighted').append($menu);
-         SSD.setMenuLocations(event, $menu);
+         Menu.setMenuLocations(event, $menu);
          event.stopPropagation();
          MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
       }
@@ -105,71 +159,9 @@ class SSD {
                       SSD.displayList[$curr.attr('id')].menu;
          $menu.on('click', SSD.menuClickHandler);
          $curr.addClass('highlighted').append($menu);
-         SSD.setMenuLocations(event, $menu);
+         Menu.setMenuLocations(event, $menu);
          event.stopPropagation();
       }
-   }
-
-   static setMenuLocations(event, $menu) {
-      // set left edge location so menu doesn't disappear to the right
-      const left = event.clientX + $menu.outerWidth() > $(window).innerWidth() ?
-                   $(window).innerWidth() - $menu.outerWidth() :
-                   event.clientX;
-      $menu.css({left: left});
-
-      // set top edge to menu doesn't disappear off the bottom
-      const top = event.clientY + $menu.outerHeight() > $(window).innerHeight() ?
-                  $(window).innerHeight() - $menu.outerHeight() :
-                  event.clientY;
-      $menu.css({top: top});
-
-      // do the same for subMenus
-      $menu.children('li:has(span.menu-arrow)')
-           .children('ul')
-           .each( (_, subMenu) => SSD.setSubMenuLocation($menu, $(subMenu)) );
-   }
-
-   static setSubMenuLocation($menu, $subMenu) {
-      const bottomRoom = $(window).innerHeight() - ($subMenu.offset().top + $subMenu.outerHeight());
-      if (bottomRoom < 0) {
-         if ($subMenu.outerHeight() < $(window).innerHeight()) {
-            $subMenu.css({top: bottomRoom});
-         } else {
-            $subMenu.css({top: -$subMenu.offset().top, height: $(window).innerHeight()})
-         }
-      }
-
-      const rightRoom = $(window).innerWidth() -
-                        ($menu.offset().left + $menu.outerWidth() + $subMenu.outerWidth());
-      const leftRoom = $menu.offset().left - $subMenu.outerWidth();
-      const widthMargin = ($subMenu.outerWidth() - $subMenu.width())/2;
-      if (rightRoom > 0) {
-         $subMenu.css({left: '100%'});
-      } else if (leftRoom > 0) {
-         $subMenu.css({right: '100%'});
-      } else if (rightRoom > leftRoom) {
-         $subMenu.css({left: $menu.outerWidth() + rightRoom - widthMargin});
-      } else {
-         $subMenu.css({right: $menu.outerWidth() + leftRoom - widthMargin});
-      }
-
-      $subMenu.children('li:has(span.menu-arrow)')
-              .children('ul')
-              .each( (_, subMenu) => SSD.setSubMenuLocation($subMenu, $(subMenu)) );
-   }
-
-   static setCascadeDirections($menu) {
-      $menu.children('li:has(span.menu-arrow)')
-           .children('ul')
-           .each( (_, child_menu) => {
-              const $child_menu = $(child_menu);
-              let direction = 'left';
-              if ($menu.offset().left + $menu.width() + $(child_menu).width() > $(window).width()) {
-                 direction = 'right';
-              }
-              $(child_menu).css(direction, '100%');
-              setCascadeDirections( $(child_menu) );
-           });
    }
 }
 
@@ -468,6 +460,30 @@ SSD.PartitionSubset = class PartitionSubset extends SSD.BasicSubset {
       return eval(Template.HTML(this.partitionClass + '_template'));
    }
 }
+SSD.OrderClasses = class OrderClasses extends SSD.Partition {
+   constructor() {
+      super();
+
+      this.subsets = window
+         .group
+         .orderClasses
+         .filter( (orderClass) => orderClass != undefined )
+         .map( (orderClass, inx) => 
+            new SSD.PartitionSubset(this, inx, orderClass, `<i>OC<sub>${inx}</sub></i>`, 'orderClass')
+         );
+
+      $('#partitions_placeholder').hide();
+      $('#partitions').append(
+         this.subsets.reduce( ($frag, subset) => $frag.append(subset.displayLine),
+                              $(document.createDocumentFragment()) ))
+                      .show();
+   }
+
+   destroy($curr) {
+      $('#partitions li.orderClass').remove();
+      super.destroy();
+   }
+}
 
 SSD.ConjugacyClasses = class ConjugacyClasses extends SSD.Partition {
    constructor() {
@@ -517,30 +533,525 @@ SSD.Cosets = class Cosets extends SSD.Partition {
       super.destroy();
    }
 }
-SSD.OrderClasses = class OrderClasses extends SSD.Partition {
-   constructor() {
-      super();
 
-      this.subsets = window
-         .group
-         .orderClasses
-         .filter( (orderClass) => orderClass != undefined )
-         .map( (orderClass, inx) => 
-            new SSD.PartitionSubset(this, inx, orderClass, `<i>OC<sub>${inx}</sub></i>`, 'orderClass')
-         );
-
-      $('#partitions_placeholder').hide();
-      $('#partitions').append(
-         this.subsets.reduce( ($frag, subset) => $frag.append(subset.displayLine),
-                              $(document.createDocumentFragment()) ))
-                      .show();
+class DC {
+   static clearMenus() {
+      $('#diagram-page .highlighted').removeClass('highlighted');
+      $('#diagram-page .menu:visible').remove();
+      $('#remove-arrow-button').prop('disabled', true);
    }
 
-   destroy($curr) {
-      $('#partitions li.orderClass').remove();
-      super.destroy();
+   /* Load, initialize diagram control */
+   static load($diagramWrapper) {
+      return new Promise( (resolve, reject) => {
+         $.ajax( { url: DC.DIAGRAM_PANEL_URL,
+                   success: (data) => {
+                      $diagramWrapper.html(data);
+                      DC.setupDiagramPage();
+                      resolve();
+                   },
+                   error: (_jqXHR, _status, err) => {
+                      reject(`Error loading ${DC.DIAGRAM_PANEL_URL}: ${err}`);
+                   }
+         } )
+      } )
+   }
+
+   static setupDiagramPage() {
+      $(window).off('click', DC.clearMenus).on('click', DC.clearMenus)
+               .off('contextmenu', DC.clearMenus).on('contextmenu', DC.clearMenus);
+
+      DC.DiagramChoice.setupDiagramSelect();
+      $('#diagram-select').off('click', DC.DiagramChoice.selectDiagram).on('click', DC.DiagramChoice.selectDiagram);
+
+      $('#arrow-control').off('click', DC.Arrow.clickHandler).on('click', DC.Arrow.clickHandler);
+
+      $('#generation-control').off('click', DC.Generator.clickHandler).on('click', DC.Generator.clickHandler);
+      $('#generation-control').off('contextmenu', DC.Generator.clickHandler).on('contextmenu', DC.Generator.clickHandler);
+
+      $('#chunk-control').off('click', DC.Chunking.clickHandler).on('click', DC.Chunking.clickHandler);
+   }
+
+   static update() {
+      DC.Generator.draw();
+      DC.Arrow.updateArrows();
    }
 }
+
+DC.DIAGRAM_PANEL_URL = 'diagramController/diagram.html';
+
+DC.Generator = class {
+   static clickHandler(event) {
+      event.preventDefault();
+
+      // check if disabled
+      if (DC.Generator.isDisabled()) {
+         return;
+      }
+      eval($(event.target.closest('[action]')).attr('action'));
+      event.stopPropagation();
+   }
+
+   static draw() {
+      if (DC.Generator.isDisabled()) {
+         return;
+      }
+
+      // clear table
+      const $generation_table = $('#generation-table');
+      $generation_table.children().remove();
+
+      // add a row for each strategy in Cayley diagram
+      const num_strategies = Cayley_diagram.strategies.length;
+      Cayley_diagram.strategies.forEach( (strategy, inx) =>
+         $generation_table.append($(eval(Template.HTML('generation-template')))) );
+
+      MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'generation-table']);
+   }
+
+   static showGeneratorMenu(event, strategy_index) {
+      DC.clearMenus();
+      const $generator_menu = DC.Generator.getGenericMenu();
+
+      // show only elements not generated by previously applied strategies
+      const eligible = ( (strategy_index == 0) ?
+                         new BitSet(Group.order, [0]) :
+                         Cayley_diagram.strategies[strategy_index-1].bitset.clone() )
+         .complement().toArray();
+
+      $generator_menu.prepend(
+         ...eligible.map( (generator) =>
+            $(eval(Template.HTML('generator-menu-item-template')))
+               .html(mathml2html(group.representation[generator])) )
+      );
+
+      $('#generation-table').append($generator_menu);
+      Menu.setMenuLocations(event, $generator_menu);
+   }
+
+   static showAxisMenu(event, strategy_index) {
+      DC.clearMenus();
+
+      // previously generated subgroup must have > 2 cosets in this subgroup
+      //   in order to show it in a curved (circular or rotated) layout
+      const curvable =
+         (Cayley_diagram.strategies[strategy_index].bitset.popcount()
+            /  ((strategy_index == 0) ? 1 : Cayley_diagram.strategies[strategy_index - 1].bitset.popcount()))
+      > 2;
+
+      const $layout_menu = DC.Generator.getGenericMenu()
+                             .prepend($(eval(Template.HTML('axis-menu-template'))));
+
+      $('#generation-table').append($layout_menu);
+      Menu.setMenuLocations(event, $layout_menu);
+   }
+
+   static showOrderMenu(event, strategy_index) {
+      DC.clearMenus();
+      const $order_menu = DC.Generator.getGenericMenu();
+
+      const num_strategies = Cayley_diagram.strategies.length;
+      $order_menu.prepend(
+         ...Array.from({length: Cayley_diagram.strategies.length},
+                       (_,order) => $(eval(Template.HTML('order-menu-item-template')))));
+
+      $('#generation-table').append($order_menu);
+      Menu.setMenuLocations(event, $order_menu);
+   }
+
+   static getGenericMenu() {
+      const $menu = $(eval(Template.HTML('generation-menu-template')));
+
+      const $organize_by_menu = $menu.find('#generation-organize-menu');
+
+      // for each non-trivial subgroup
+      Group.subgroups
+           .forEach( (subgroup, inx) => {
+              if (subgroup.order != 1 && subgroup.order != Group.order) {
+                 $organize_by_menu.append($(eval(Template.HTML('organize-menu-item-template'))));
+              }
+           } )
+
+      return $menu;
+   }
+
+   static organizeBy(subgroup_index) {
+      // get subgroup generators
+      // add generators to start of strategies
+
+      // resets arrows
+   }
+
+   /*
+    * change generator as spec'd
+    *
+    * delete newly redundant later generators
+    * add generator to make strategy set generate entire group
+    */
+   static updateGenerator(strategy_index, generator) {
+      DC.Generator.updateStrategies( (strategies) => {
+         strategies[strategy_index][0] = generator;
+
+         const generators_used = new BitSet(Group.order);
+         let elements_generated = new BitSet(Group.order, [0]);
+         Cayley_diagram.strategies.forEach( (strategy, inx) => {
+            if (inx < strategy_index) {
+               generators_used.set(strategy.generator);
+               elements_generated = strategy.bitset;
+            } else if (elements_generated.isSet(strategy.generator)) {
+               // delete strategy, collapse nesting
+               const deleted_strategy = strategies.splice(inx,1)[0];
+               for (let i = inx; i < strategies.length; i++) {
+                  if (strategies[i][3] > deleted_strategy[3]) {
+                     strategies[i][3] -= 1;
+                  }
+               }
+            } else {
+               generators_used.set(strategies[inx][0]);
+
+               // check whether we can still use a curved display
+               if (strategies[inx][1] != 0 && Group.closure(generators_used).popcount()/elements_generated.popcount() < 3) {
+                  strategies[inx][1] = 0;
+               }
+
+               elements_generated = Group.closure(generators_used);
+            }
+         } )
+
+         // add elements to generate entire group; append to nesting
+         if (elements_generated.popcount() != Group.order) {
+            // look for new element
+            const new_generator = elements_generated
+               .complement()
+               .toArray()
+               .find( (el) => Group.closure(generators_used.clone().set(el)).popcount() == Group.order );
+            // among linear layouts, try to find a direction that hasn't been used yet
+            const new_direction =
+               strategies.reduce( (used_directions, [_, layout, direction, __]) => {
+                  if (layout == 0) {
+                     used_directions[direction] = true;
+                  }
+                  return used_directions;
+               }, new Array(3).fill(false) )
+                         .findIndex( (used) => !used );
+            strategies.push([new_generator, 0, (new_direction == -1) ? 0 : new_direction, strategies.length]);
+         }
+
+         return strategies;
+      } )
+   }
+
+   static updateAxes(strategy_index, layout, direction) {
+      DC.Generator.updateStrategies( (strategies) => {
+         strategies[strategy_index][1] = layout;
+         strategies[strategy_index][2] = direction;
+         return strategies;
+      } );
+   }
+
+   static updateOrder(strategy_index, order) {
+      DC.Generator.updateStrategies( (strategies) => {
+         const other_strategy = strategies.findIndex( (strategy) => strategy[3] == order );
+         strategies[other_strategy][3] = strategies[strategy_index][3];
+         strategies[strategy_index][3] = order;
+         return strategies;
+      } );
+   }
+
+   static updateStrategies(strategyUpdater) {
+      const strategies = strategyUpdater(Cayley_diagram.getStrategies());
+      Cayley_diagram.setStrategies(strategies);
+      Cayley_diagram.removeLines();
+      DC.Arrow.getAllArrows().forEach( (arrow) => Cayley_diagram.addLines(arrow) );
+      Cayley_diagram.setLineColors();
+      Graphic_context.showGraphic(Cayley_diagram);
+      DC.Generator.draw();
+   }
+
+   static enable() {
+      $('#generation-fog').hide();
+   }
+
+   static disable() {
+      const $generation_fog = $('#generation-fog');
+      $generation_fog.css('height', $generation_fog.parent().css('height'));
+      $generation_fog.css('width', $generation_fog.parent().css('width'));
+      $('#generation-fog').show();
+   }
+
+   static isDisabled() {
+      return $('#generation-fog').css('display') != 'none';  // fog is hidden
+   }
+}
+
+// layout (linear/circular/rotated), direction (X/Y/Z)
+DC.Generator.axis_label = [
+   ['Linear in x', 'Linear in y', 'Linear in z'],
+   ['Circular in y,z', 'Circular in x,z', 'Circular in x,y'],
+   ['Rotated in y,z', 'Rotated in x,z', 'Rotated in x,y'],
+];
+
+DC.Generator.axis_image = [
+   ['axis-x.png', 'axis-y.png', 'axis-z.png'],
+   ['axis-yz.png', 'axis-xz.png', 'axis-xy.png'],
+   ['axis-ryz.png', 'axis-rxz.png', 'axis-rxy.png']
+];
+
+// wording for nesting order
+DC.Generator.orders = [
+   [],
+   ['N/A'],
+   ['inside', 'outside'],
+   ['innermost', 'middle', 'outermost'],
+   ['innermost', 'third innermost', 'second outermost', 'outermost'],
+   ['innermost', 'third innermost', 'middle', 'second outermost', 'outermost']
+];
+
+DC.DiagramChoice = class {
+   
+   /* Populate diagram select element, show selected diagram */
+   static setupDiagramSelect() {
+      Group.cayleyDiagrams.forEach( (diagram) => {
+         $('#diagram-select').append(eval(Template.HTML('diagram-choice-template')));
+      } );
+      $(`#diagram-select option[value='${(Diagram_name === undefined) ? '' : Diagram_name}']`).attr('selected', 'selected')
+   }
+
+   /* Display control routines */
+   static selectDiagram(event) {
+      Diagram_name = $('#diagram-select')[0].value;
+      if (Diagram_name == "") {
+         Diagram_name = undefined;
+         DC.Generator.enable();
+         DC.Chunking.enable();
+      } else {
+         DC.Generator.disable();
+         DC.Chunking.disable();
+      }
+      
+      displayGraphic();
+   }
+}
+/* This class brings together the functions used in managing the "Show these arrows:" arrow-list display and its side effects
+
+   The central actions here are to add and remove arrows from the arrow-list display and the Cayley diagram
+
+   Adding an arrow is done by left-clicking the 'Add' button, which display a menu of addable arrows (those not already in the diagram)
+   and then left-clicking an arrow to add from the menu. Left-clicking anywhere else in the window will remove the menu.
+
+   Removing an arrow is done by left-clicking one of the lines in the arrow-list display to highlight it,
+   and then left-clicking the 'Remove' button to remove it.
+
+   All of these events are fielded by a single event handler, Arrow.clickHandler(), which
+ */
+DC.Arrow = class {
+   // actions:  show menu; select from menu; select from list; remove
+   // utility function add_arrow_list_item(element) to add arrow to list (called from initialization, select from menu)
+   // utility function clearArrowList() to remove all arrows from list (called during reset)
+
+   // arrow-control click handler
+   //   find closest element with action and execute action
+   static clickHandler(event) {
+      event.stopPropagation();
+      eval($(event.target.closest('[action]')).attr('action'));
+   }
+
+   // Row selected in arrow-list:
+   //   clear all highlights
+   //   highlight row (find arrow-list item w/ arrow = ${element})
+   //   enable remove button
+   static selectArrow(element) {
+      $('#arrow-list li').removeClass('highlighted');
+      $(`#arrow-list li[arrow=${element}]`).addClass('highlighted');
+      $('#remove-arrow-button').attr('action', `DC.Arrow.removeArrow(${element})`);
+      $('#remove-arrow-button').prop('disabled', false);
+   }
+
+   // returns all arrows displayed in arrow-list as an array
+   static getAllArrows() {
+      return $('#arrow-list li').toArray().map( (list_item) => list_item.getAttribute('arrow') );
+   }
+
+   // Add button clicked:
+   //   Clear (hidden) menu
+   //   Populate menu (for each element not in arrow-list)
+   //   Position, expose menu
+   static showArrowMenu(event) {
+      DC.clearMenus();
+      const $menu = $(eval(Template.HTML('arrow-menu-template')));
+      Group.elements.forEach( (element) => {
+         if (element != 0 && $(`#arrow-list li[arrow=${element}]`).length == 0) {
+            $menu.append(
+               $(eval(Template.HTML('arrow-menu-item-template')))
+                  .html(mathml2html(group.representation[element])));
+         }
+      } );
+      // $('#add-arrow-button').append($menu);
+      $(event.target).closest('button').append($menu);
+      Menu.setMenuLocations(event, $menu);
+   }
+
+   // Add button menu element clicked:
+   //   Hide menu
+   //   Add to lines to Cayley_diagram
+   //   Update lines, arrowheads in graphic, arrow-list
+   static addArrow(element) {
+      DC.clearMenus();
+      Cayley_diagram.addLines(element);
+      DC.Arrow.updateArrows();
+   }
+
+   // Remove button clicked
+   //   Remove highlighted row from arrow-list
+   //   Disable remove button
+   //   Remove line from Cayley_diagram
+   //   Update lines in graphic, arrow-list
+   static removeArrow(element) {
+      $('#remove-arrow-button').prop('disabled', true);
+      Cayley_diagram.removeLines(element);
+      DC.Arrow.updateArrows()
+   }
+
+   // clear arrows
+   // set line colors in Cayley_diagram
+   // update lines, arrowheads in CD
+   // add rows to arrow list from line colors
+   static updateArrows() {
+      $('#arrow-list').children().remove();
+      Cayley_diagram.setLineColors();
+      Graphic_context.updateLines(Cayley_diagram);
+      Graphic_context.updateArrowheads(Cayley_diagram);
+      // ES6 introduces a Set, but does not provide any way to change the notion of equality among set members
+      // Here we work around that by joining a generator value from the line.arrow attribute ("27") and a color ("#99FFC1")
+      //   into a unique string ("27#99FFC1") in the Set, then partitioning the string back into an element and a color part
+      const arrow_hashes = new Set(Cayley_diagram.lines.map( (line) => line.arrow + line.color ));
+      arrow_hashes.forEach( (hash) => {
+         const element = hash.slice(0,-7);
+         const color = hash.slice(-7);
+         $('#arrow-list').append(eval(Template.HTML('arrow-list-item-template')));  // make entry in arrow-list
+      } );
+      if (arrow_hashes.size == Group.order - 1) {  // can't make an arrow out of the identity
+         DC.Arrow.disable()
+      } else {
+         DC.Arrow.enable()
+      }
+      MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'arrow-control']);
+   }
+
+   // disable Add button
+   static enable() {
+      $('#add-arrow-button').prop('disabled', false);
+   }
+
+   // enable Add button
+   static disable() {
+      $('#add-arrow-button').prop('disabled', true);
+   }
+}
+
+DC.Chunking = class {
+   static clickHandler(event) {
+      event.preventDefault();
+
+      // check if disabled
+      if (DC.Chunking.isDisabled()) {
+         return;
+      }
+
+      eval($(event.target.closest('[action]')).attr('action'));
+      event.stopPropagation();
+   }
+
+   static setupChunkingSelect() {
+   }
+
+   static selectChunk(event) {
+      if (DC.Chunking.isDisabled()) {
+         return;
+      }
+   }
+   
+   static enable() {
+      $('#chunking-fog').hide();
+      $('#chunk-select').prop('disabled', false);
+   }
+
+   static disable() {
+      const $chunking_fog = $('#chunking-fog');
+      $chunking_fog.css('height', $chunking_fog.parent().css('height'));
+      $chunking_fog.css('width', $chunking_fog.parent().css('width'));
+      $chunking_fog.show();
+
+      $('#chunk-select').prop('disabled', true);
+   }
+
+   static isDisabled() {
+      return $('#chunk-select').prop('disabled');
+   }
+}
+  
+class CVC {
+   static load($viewWrapper) {
+      return new Promise( (resolve, reject) => {
+         $.ajax( { url: CVC.VIEW_PANEL_URL,
+                   success: (data) => {
+                      $viewWrapper.html(data);
+                      CVC.setupViewPage();
+                      resolve();
+                   },
+                   error: (_jqXHR, _status, err) => {
+                      reject(`Error loading ${CVC.VIEW_PANEL_URL}: ${err}`);
+                   }
+         } )
+      } )
+   }
+
+   static setupViewPage() {
+      $('#zoom-level').off('input', CVC.setZoomLevel).on('input', CVC.setZoomLevel);
+      $('#line-thickness').off('input', CVC.setLineThicknesss).on('input', CVC.setLineThicknesss);
+      $('#node-radius').off('input', CVC.setNodeRadius).on('input', CVC.setNodeRadius);
+      $('#fog-level').off('input', CVC.setFogLevel).on('input', CVC.setFogLevel);
+      $('#use-fog').off('input', CVC.setFogLevel).on('input', CVC.setFogLevel);
+      $('#label-size').off('input', CVC.setLabelSize).on('input', CVC.setLabelSize);
+      $('#show-labels').off('input', CVC.setLabelSize).on('input', CVC.setLabelSize);
+      $('#arrowhead-placement').off('input', CVC.setArrowheadPlacement).on('input', CVC.setArrowheadPlacement);
+   }
+
+   /* Slider handlers */
+   static setZoomLevel() {
+      Cayley_diagram.zoomLevel = Math.exp( $('#zoom-level')[0].valueAsNumber/10 );
+      Graphic_context.updateZoomLevel(Cayley_diagram);
+   }
+
+   static setLineThicknesss() {
+      Cayley_diagram.lineWidth = $('#line-thickness')[0].valueAsNumber;
+      Graphic_context.updateLineWidth(Cayley_diagram);
+   }
+
+   static setNodeRadius() {
+      Cayley_diagram.nodeScale = Math.exp( $('#node-radius')[0].valueAsNumber/10 );
+      Graphic_context.updateNodeRadius(Cayley_diagram);
+      Graphic_context.updateLabels(Cayley_diagram);
+   }
+
+   static setFogLevel() {
+      Cayley_diagram.fogLevel = $('#use-fog')[0].checked ? $('#fog-level')[0].valueAsNumber/10 : 0;
+      Graphic_context.updateFogLevel(Cayley_diagram);
+   }
+
+   static setLabelSize() {
+      Cayley_diagram.labelSize = $('#show-labels')[0].checked ?
+                                 Math.exp( $('#label-size')[0].valueAsNumber/10 ) : 0;
+      Graphic_context.updateLabelSize(Cayley_diagram);
+   }
+
+   static setArrowheadPlacement() {
+      Cayley_diagram.arrowheadPlacement = $('#arrowhead-placement')[0].valueAsNumber/20;
+      Graphic_context.updateArrowheadPlacement(Cayley_diagram);
+   }
+}
+
+CVC.VIEW_PANEL_URL = 'cayleyViewController/view.html';
 
 /*
 # Visualizer framework

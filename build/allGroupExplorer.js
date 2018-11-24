@@ -1,11 +1,30 @@
-// not sure if adding this method to Array is an altogether good idea, but it's awfully useful
+// not sure if adding these Array is an altogether good idea, but it's awfully useful
+// at least make the new functions noticable by preceding them with an underscore
 //   Alternatives:  move it?  delete it? turn it into a free-standing function somewhere?
 
-if (Array.prototype.equals === undefined) {
-   Array.prototype.equals = function (other) {
+// shallow comparison of one array to another
+if (Array.prototype._equals === undefined) {
+   Array.prototype._equals = function (other) {
       return Array.isArray(other) &&
              (this.length == other.length) &&
              this.every( (el,inx) => el == other[inx] );
+   }
+}
+
+// recursive flatten of arrays-within-arrays structure
+if (Array.prototype._flatten === undefined) {
+   Array.prototype._flatten = function () {
+      return this.reduce( (flattened, el) => {
+         Array.isArray(el) ? flattened.push(...el._flatten()) : flattened.push(el);
+         return flattened;
+      }, [])
+   }
+}
+
+// get last element of an array
+if (Array.prototype._last === undefined) {
+   Array.prototype._last = function () {
+      return this[this.length - 1];
    }
 }
 
@@ -32,7 +51,7 @@ Log.init();
 class BitSet {
    constructor (length, init) {
       this.len = length;
-      this.arr = new Array(((length - 1) >>> 5) + 1);
+      this.arr = new Array(length == 0 ? 0 : (((length - 1) >>> 5) + 1));
       this.arr.fill(0);
       if (init !== undefined) {
 	 for (let i = 0; i < init.length; i++) {
@@ -42,27 +61,43 @@ class BitSet {
    }
 
    static intersection(a, b) {
-      const intersect = new BitSet(a.len);
-      for (let i = 0; i < a.arr.length; i++) {
-         intersect.arr[i] = a.arr[i] & b.arr[i];
+      return (a.clone()).intersection(b);
+   }
+
+   intersection(other) {
+      for (let i = 0; i < this.arr.length; i++) {
+         this.arr[i] = this.arr[i] & other.arr[i];
       }
-      return intersect;
+      return this;
    }
 
    static union(a, b) {
-      const union = new BitSet(a.len);
-      for (let i = 0; i < a.arr.length; i++) {
-         union.arr[i] = a.arr[i] | b.arr[i];
+      return (a.clone()).union(b);
+   }
+
+   union(other) {
+      for (let i = 0; i < this.arr.length; i++) {
+         this.arr[i] = this.arr[i] | other.arr[i];
       }
-      return union;
+      return this;
    }
 
    static difference(a, b) {
-      const diff = new BitSet(a.len);
-      for (let i = 0; i < a.arr.length; i++) {
-         diff.arr[i] = a.arr[i] & (~ b.arr[i]);
+      return (a.clone()).difference(b);
+   }
+
+   difference(other) {
+      for (let i = 0; i < this.arr.length; i++) {
+         this.arr[i] = this.arr[i] & (~ other.arr[i]);
       }
-      return diff;
+      return this;
+   }
+
+   complement() {
+      for (let i = 0; i < this.arr.length; i++) {
+         this.arr[i] = ~ this.arr[i];
+      }
+      return this;
    }
 
    clone() {
@@ -88,6 +123,7 @@ class BitSet {
       return (this.arr[pos >>> 5] & (1 << (pos & 0x1F))) >>> (pos & 0x1F);
    }
 
+   // accept an array too?
    set(pos) {
       this.arr[pos >>> 5] = (this.arr[pos >>> 5] | (1 << (pos & 0x1F))) >>> 0;
       return this;
@@ -134,6 +170,9 @@ class BitSet {
    }
 
    equals(other) {
+      if (this.len != other.len) {
+         return false;
+      }
       for (let i = 0; i < this.arr.length; i++) {
          if (this.arr[i] != other.arr[i]) {
             return false;
@@ -282,7 +321,9 @@ MathUtils.init();
 /*
  * Class holds group defined only by a multiplication table
  */
-
+/*
+```js
+*/
 class BasicGroup {
    constructor (multtable) {
       if (multtable === undefined) return;
@@ -307,7 +348,6 @@ class BasicGroup {
       this._isSolvable = undefined;
       this._subgroups = undefined;
       this._isSimple = undefined;
-      this._generators = undefined;
    }
 
    static parseJSON(jsonObject, _group) {
@@ -364,31 +404,7 @@ class BasicGroup {
    }
 
    get generators() {
-      if (this._generators === undefined) {
-         const generatorIndexes = function* (curr, max, lev, _sel) {
-            const sel = _sel === undefined ? [] : _sel;
-            if (lev == 0) {
-               yield sel;
-            } else if (curr < max) {
-               for (let inx = curr; inx < max; inx++) {
-                  const newSel = sel.slice();
-                  newSel.push(inx);
-                  yield *generatorIndexes(inx + 1, max, lev - 1, newSel);
-               }
-            }
-         }
-
-         this._generators = [this.subgroups[this.subgroups.length-1].generators.toArray()];
-         const maxLevels = Math.min(5, this._generators[0].length);
-         for (let levels = 2; levels < maxLevels; levels++) {
-            for (const generators of generatorIndexes(1, this.order, levels)) {
-               if (this.closure(generators).popcount() == this.order) {
-                  this._generators = [generators];
-               }
-            }
-         }
-      }
-      return this._generators;
+      return [this.subgroups[this.subgroups.length-1].generators.toArray()];
    }
 
    get orderClassSizes() {
@@ -541,9 +557,8 @@ class BasicGroup {
       return result.sort((a,b) => a.popcount() - b.popcount());
    }
 
-   getCosets(subgroupBitset, isLeft) {
-      const mult = (isLeft || true) ?
-                   (a,b) => this.multtable[a][b] : (a,b) => this.multtable[b][a];
+   getCosets(subgroupBitset, isLeft = true) {
+      const mult = isLeft ? (a,b) => this.multtable[a][b] : (a,b) => this.multtable[b][a];
       const cosets = [subgroupBitset];
       const todo = new BitSet(this.order).setAll().subtract(subgroupBitset);
       const subgroupArray = subgroupBitset.toArray();
@@ -601,6 +616,9 @@ class BasicGroup {
       return this.multtable[a][b];
    }
 }
+/*
+```
+*/
 
 /*
  * Class holds group info parsed from xml definition
@@ -644,8 +662,7 @@ class XMLGroup extends BasicGroup {
       this.phrase = $xml.find('phrase').text();
       this.notes = $xml.find('notes').text();
       this.author = $xml.find('author').text();
-      this._generators = (this._generators = XMLGroup._generators_from_xml($xml),
-                          this._generators.length == 0 ? undefined : this._generators);
+      this._XML_generators = XMLGroup._generators_from_xml($xml);
       this.representations = XMLGroup._representations_from_xml($xml);
       this.representationIndex = 0;
       this.cayleyDiagrams = XMLGroup._cayley_diagrams_from_xml($xml);
@@ -677,6 +694,12 @@ class XMLGroup extends BasicGroup {
 
    get representation() {
       return this.representations[this.representationIndex];
+   }
+
+   get generators() {
+      return (this._XML_generators === undefined) ?
+             super.generators :
+             this._XML_generators;
    }
 
    // returns short representations as array of arrays of strings (just debugging)
@@ -721,15 +744,16 @@ class XMLGroup extends BasicGroup {
                  .toArray();
    }
 
-   // returns generators spec'd in XML, not those derived in subgroup computation
+   // returns generators specified in XML, not those derived in subgroup computation
    static _generators_from_xml($xml) {
-      return $xml.find('generators')
-                 .map(function () {
-                    return [
-                       this.attributes[0].value.split(' ')
-                           .map(function (el) { return parseInt(el) }) ]
-                 })
-                 .toArray();
+      const result = $xml.find('generators')
+                         .map(function () {
+                            return [
+                               this.attributes[0].value.split(' ')
+                                   .map(function (el) { return parseInt(el) }) ]
+                         })
+                         .toArray();
+      return result.length == 0 ? undefined : result;
    }
 
    // {name, arrows, points}
@@ -855,6 +879,13 @@ class Subgroup {
       return this.group.order/this.order;
    }
 
+   get isNormal() {
+      if (this._isNormal === undefined) {
+         this._isNormal = this.group.isNormal(this);
+      }
+      return this._isNormal;
+   }            
+
    clone() {
       const other = new Subgroup();
       other.group = this.group;
@@ -899,12 +930,20 @@ class SubgroupFinder {
       }
 
       allSubgroups.sort((a,b) => a.members.popcount() - b.members.popcount());
-      if (allSubgroups[allSubgroups.length - 1].members.popcount() != group.order) {
+      const last_subgroup_found = allSubgroups[allSubgroups.length - 1];
+      if (last_subgroup_found.members.popcount() != group.order) {
          isSolvable = false;
-         if (group._generators !== undefined && group._generators.length != 0) {
-            allSubgroups.push(
-               new Subgroup(group, group.generators[0]).setAllMembers());
-         }
+         // use generators from XML, if they're available
+         // if not, take generators from the next-smallest subgroup, add an element not in that group, and minimize generators
+         let new_subgroup;
+         if (group._XML_generators === undefined) {
+            new_subgroup = new Subgroup(group, last_subgroup_found.generators.toArray()).setAllMembers();
+            const new_element = BitSet.difference(new_subgroup.members, last_subgroup_found.members).first();
+            subGroupFinder.minimizeGenerators(new_subgroup, new_element);
+         } else {
+            new_subgroup = new Subgroup(group, group.generators[0]).setAllMembers();
+         }            
+         allSubgroups.push(new_subgroup);
       }
 
       SubgroupFinder.addSubgroupLattice(allSubgroups);
@@ -994,6 +1033,7 @@ class SubgroupFinder {
                         .isEmpty()) {
                let nextSubgroup = currSubgroup.clone();
                this.extendSubgroup(nextSubgroup, g);
+               this.minimizeGenerators(nextSubgroup, g);
                nextLayer.push(nextSubgroup);
                todo.subtract(nextSubgroup.members);
             }
@@ -1055,9 +1095,6 @@ class SubgroupFinder {
    }
 
    extendSubgroup(subgroup, normalizer) {
-      // remove old generators if they're also generated by the new element
-      subgroup.generators.subtract(this.group.elementPowers[normalizer]);
-      subgroup.generators.set(normalizer);
       const todo = this.group.elementPowers[normalizer];
       for (let i = 0; i < subgroup.members.len; i++) {
          if (subgroup.members.isSet(i)) {
@@ -1068,6 +1105,42 @@ class SubgroupFinder {
             }
          }
       }
+   }
+
+   minimizeGenerators(subgroup, extension) {
+      // 1) find an element that will generate what extension and an existing generator do now
+      const generators = subgroup.generators.toArray();
+      for (let i = 0; i < generators.length; i++) {
+         const closure = this.group.closure([extension, generators[i]]);
+         const order_classes = this.group.orderClasses[closure.popcount()];
+         if (order_classes !== undefined) {
+            const cyclic_generator =
+               order_classes.toArray().find( (element) => this.group.elementPowers[element].equals(closure) );
+            if (cyclic_generator !== undefined) {
+               subgroup.generators
+                       .clear(generators[i])
+                       .set(cyclic_generator);
+               return;
+            }
+         }
+      }
+
+      // 2) see if we can't remove one of the existing generators and still get the entire subgroup
+      generators.push(extension);
+      for (let i = 0; i < generators.length - 1; i++) {
+         const gens = generators.slice();
+         gens.splice(i,1);
+         const closure = this.group.closure(gens);
+         if (closure.equals(subgroup.members)) {
+            subgroup.generators
+                    .clear(generators[i])
+                    .set(extension);
+            return;
+         }
+      }
+
+      subgroup.generators.set(extension);
+      return;
    }
 }
 
@@ -1108,9 +1181,9 @@ class IsomorphicGroups {
       // filter by candidate group properties, isomorphism
       return IsomorphicGroups.map
                              .get(G.order)
-                             .filter( H => G.orderClassSizes.equals(H.orderClassSizes) )
-                             // .filter( H => G.subgroupOrders.equals(H.subgroupOrders) )
-                             // .filter( H => G.conjClassSizes.equals(H.conjClassSizes) )
+                             .filter( H => G.orderClassSizes._equals(H.orderClassSizes) )
+                             // .filter( H => G.subgroupOrders._equals(H.subgroupOrders) )
+                             // .filter( H => G.conjClassSizes._equals(H.conjClassSizes) )
                              .find( H => IsomorphicGroups.isomorphism(H, G) !== undefined );
    }
 
@@ -1204,7 +1277,7 @@ class IsomorphicGroups {
          }
 
          // check that g2h is a mapping
-         if (!g2h.slice().sort( (a,b) => a - b ).equals(G.elements)) {
+         if (!g2h.slice().sort( (a,b) => a - b )._equals(G.elements)) {
             continue bigLoop;
          }
 
@@ -1527,374 +1600,662 @@ class Library {
 }
 
 Library._init();
+
+/*
+ * Structure used to describe Cayley diagram, symmetry object to DrawDiagram
+ */
+
+class Diagram3D {
+   constructor(group, nodes = [], lines = [], options) {
+      this.group = group;
+      this.nodes = nodes;
+      this.lines = lines;
+      this.node_labels = group.representation;
+      this.background = undefined;
+      this.zoomLevel = 1;
+      this.lineWidth = 10;
+      this.nodeScale = 1;
+      this.fogLevel = 0;
+      this.labelSize = 1;
+      this.arrowheadPlacement = 1;
+
+      if (options !== undefined) {
+         for (const opt in options) {
+            this[opt] = options[opt];
+         }
+      }
+   }
+
+   setNodeColor(color) {
+      this._setNodeField('color', this.nodes.map( (node) => node.element ), color);
+      return this;
+   }
+
+   setNodeLabels(labels = this.node_labels) {
+      this.node_labels = labels;
+      if (this.node_labels !== undefined) {
+         this.nodes.forEach( (nd) => nd.label = this.node_labels[nd.element] );
+      }
+      return this;
+   }
+
+   // add a line from each element to arrow*element; set arrow in line
+   addLines(arrow) {
+      this.group.elements.forEach( (el) => {
+         const product = this.group.mult(el, arrow);
+         if (el == this.group.mult(product, arrow)) {  // no arrows if bi-directional
+            if (el < product) {  // don't add 2nd line if bi-directional
+               this.lines.push(new Diagram3D.Line([this.nodes[el], this.nodes[product]],
+                                                  {arrow: arrow, arrowhead: false, style: this.nodes[arrow].lineStyle}))
+            }
+         } else {
+            this.lines.push(new Diagram3D.Line([this.nodes[el], this.nodes[product]],
+                                               {arrow: arrow, arrowhead: true, style: this.nodes[arrow].lineStyle}))
+         }
+      } )
+      return this;
+   }
+   
+   // remove all lines with arrow = arrow
+   // if arrow is undefined, remove all lines
+   removeLines(arrow) {
+      if (arrow === undefined) {
+         while (this.lines.length != 0) {
+            this.removeLines(this.lines[0].arrow);
+         }
+      } else {
+         this.lines = this.lines.filter( (line) => line.arrow != arrow );
+      }
+
+      return this;
+   }
+
+   setLineColors() {
+      const arrows = Object.values(
+         this.lines.reduce( (arrow_set, line) => (arrow_set[line.arrow] = line.arrow, arrow_set),
+                            new Array(this.lines.length) ));
+      const colors = Array.from({length: arrows.length},
+                                (_, inx) => '#' + new THREE.Color(`hsl(${360*inx/arrows.length}, 100%, 20%)`).getHexString());
+      this.lines.forEach( (line) => { line.color = colors[arrows.findIndex( (arrow) => arrow == line.arrow )] } );
+      return this;
+   }
+
+   deDupAndSetArrows() {
+      const hash = (point) => (((10 + point.x)*10 + point.y)*10 + point.z)*10;
+      const linesByEndpoints = new Map();
+      this.lines.forEach( (line) => {
+         const start = hash(line.vertices[0].point);
+         const end = hash(line.vertices[1].point);
+         const forwardHash = 100000*start + end;
+         const reverseHash = 100000*end + start;
+         if (linesByEndpoints.has(reverseHash)) {
+            linesByEndpoints.get(reverseHash).arrowhead = false;
+         } else {
+            line.arrowhead = true;
+            linesByEndpoints.set(forwardHash, line);
+         }
+      } );
+      this.lines = Array.from(linesByEndpoints.values());
+   }
+
+   // Normalize scene: translate to centroid, radius = 1
+   normalize() {
+      const centroid = this.nodes
+                           .reduce( (cent, nd) => cent.add(nd.point), new THREE.Vector3(0,0,0) )
+                           .multiplyScalar(1/this.nodes.length);
+      const squaredRadius = this.nodes
+                                .reduce( (sqrad,nd) => Math.max(sqrad, nd.point.distanceToSquared(centroid)), 0 );
+      const scale = (squaredRadius == 0) ? 1 : 1/Math.sqrt(squaredRadius);  // in case there's only one element
+      const translation_transform = (new THREE.Matrix4()).makeTranslation(...centroid.multiplyScalar(-1).toArray());
+      const xForm = (new THREE.Matrix4()).makeScale(scale, scale, scale).multiply(translation_transform);
+
+      this.nodes.forEach( (node) => node.point.applyMatrix4(xForm) );
+      this.lines.forEach( (line) => line.vertices
+                                        .forEach( (vertex) => {
+                                           if (vertex.element === undefined) {
+                                              vertex.point.applyMatrix4(xForm)
+                                           }
+                                        } ) );
+   }
+
+   _setNodeField(field, nodes, value) {
+      nodes.forEach( (node) => this.nodes[node][field] = value );
+   }
+
+   highlightByNodeColor(elements) {
+      this._setNodeField('colorHighlight', group.elements, undefined);
+      elements.forEach( (els, colorIndex) => {
+         const hue = 360 * colorIndex / elements.length;
+         const color = `hsl(${hue}, 53%, 30%)`;
+         this._setNodeField('colorHighlight', els, color);
+      } );
+   }
+
+   highlightByRingAroundNode(elements) {
+      this._setNodeField('ringHighlight', group.elements, undefined);
+      if (elements.length == 1) {
+         this._setNodeField('ringHighlight', elements[0], 'hsl(120, 53%, 30%)');
+      } else {
+         elements.forEach( (els, colorIndex) => {
+            const hue = 360 * colorIndex / elements.length;
+            const color = `hsl(${hue}, 53%, 30%)`;
+            this._setNodeField('ringHighlight', els, color);
+         } );
+      }
+   }
+
+   highlightBySquareAroundNode(elements) {
+      this._setNodeField('squareHighlight', group.elements, undefined);
+      if (elements.length == 1) {
+         this._setNodeField('squareHighlight', elements[0], 'hsl(240, 53%, 30%)');
+      } else {
+         elements.forEach( (els, colorIndex) => {
+            const hue = 360 * colorIndex / elements.length;
+            const color = `hsl(${hue}, 53%, 30%)`;
+            this._setNodeField('squareHighlight', els, color);
+         } );
+      }
+   }
+
+   clearHighlights() {
+      this._setNodeField('colorHighlight', group.elements, undefined);
+      this._setNodeField('ringHighlight', group.elements, undefined);
+      this._setNodeField('squareHighlight', group.elements, undefined);
+   }
+}
+
+
+Diagram3D.STRAIGHT = 0;
+Diagram3D.CURVED = 1;
+
+Diagram3D.Point = class Point {
+   constructor(point) {
+      if (point === undefined) {
+         this.point = new THREE.Vector3(0, 0, 0);
+      } else if (Array.isArray(point)) {
+         this.point = new THREE.Vector3(...point);
+      } else {
+         this.point = point;
+      }
+   }
+}
+
+Diagram3D.Node = class Node extends Diagram3D.Point {
+   constructor(element, point, options) {
+      super(point);
+      this.element = element;
+      this.color = 0xDDDDDD;
+      this.label = '';
+      this.radius = undefined;
+      this.lineStyle = Diagram3D.STRAIGHT;
+      this.colorHighlight = undefined;
+      this.ringHighlight = undefined;
+      this.squareHighlight = undefined;
+      if (options !== undefined) {
+         for (const opt in options) {
+            this[opt] = options[opt];
+         }
+      }
+   }
+}
+
+Diagram3D.Line = class Line {
+   constructor(vertices, options) {
+      this.vertices = vertices;
+      this.color = undefined;
+      this.arrowhead = true;
+      this.arrow = undefined;
+      this.style = Diagram3D.STRAIGHT;
+      if (options !== undefined) {
+         for (const opt in options) {
+            this[opt] = options[opt];
+         }
+      }
+   }
+
+   get length() {
+      const [length, _] = this.vertices.reduce( ([length, prev], vertex) => {
+         if (prev === undefined) {
+            return [length, vertex];
+         } else {
+            return [length + prev.point.distanceTo(vertex.point), vertex];
+         }
+      }, [0, undefined] );
+      return length;
+   }
+}
 /*
  * generate {nodes, lines} from $xml data
  *
  * caller adds node color, label; line color, width
  */
 
-class CayleyDiagram {
-   constructor(group) {
-      this.group = group;
+class CayleyDiagram extends Diagram3D {
+   constructor(group, diagram_name) {
+      super(group);
+      this.background = CayleyDiagram.BACKGROUND_COLOR;
+      this.strategies = [];
+
+      this.diagram_name = diagram_name;
+      this._update();
    }
 
-   static _init() {
-      CayleyDiagram.BACKGROUND_COLOR = 0xE8C8C8;
-      CayleyDiagram.NODE_COLOR = 0x8c8c8c;
+   getStrategies() {
+      return this.strategies.map( (strategy) => [strategy.generator, strategy.layout, strategy.direction, strategy.nesting_level] );
    }
 
-   static generate(group, diagramName) {
-      // const [nodes, lines] = (diagramName === undefined) ? gen._generate() : gen._fromGroup(diagramName);
-      let nodes, lines;
-      if (diagramName === undefined) {
-         [nodes, lines] = new CayleyDiagram(group)._generate();
-         lines.forEach( (line) => { line.vertices = line.vertices.map( (vertex) => nodes[vertex] ) } );
-      } else {
-         [nodes, lines] = new CayleyDiagram(group)._fromGroup(diagramName);
-      }
+   setStrategies(strategy_parameter_array) {
+      const param_array = strategy_parameter_array
+         .map( (params) => { return {generator: params[0], layout: params[1], direction: params[2], nesting_level: params[3]} } );
 
-      const hashPoint = (point) => (((10 + point.x)*10 + point.y)*10 + point.z)*10;
-      const linesByEndpoints = new Map();
-      lines.forEach( (line) => {
-         const start = hashPoint(line.vertices[0].point);
-         const end = hashPoint(line.vertices[1].point);
-         const forwardHash = 100000*start + end;
-         const reverseHash = 100000*end + start;
-         if (linesByEndpoints.has(reverseHash)) {
-            linesByEndpoints.get(reverseHash).arrow = false;
+      // check:  generators, layouts, directions are in range
+      if (param_array.find( (params) => params.generator < 1 || params.generator >= this.group.order ) !== undefined)
+         console.error('strategy generator out of range');
+      if (param_array.find( (params) => params.layout < CayleyDiagram.LINEAR_LAYOUT || params.layout > CayleyDiagram.ROTATED_LAYOUT ) !== undefined)
+         console.error('strategy layout out of range');
+      if (param_array.find( (params) => params.direction < CayleyDiagram.X_DIRECTION || params.direction > CayleyDiagram.Z_DIRECTION ) !== undefined)
+         console.error('strategy direction out of range');
+
+      // check:  generate all the elements in the group
+      if (this.group.closure(param_array.map( (params) => params.generator )).popcount() != this.group.order)
+         console.error('strategy generators do not generate the entire group');
+
+      // check:  nesting_levels are in range, complete, unique
+      if (!Array.from({length: param_array.length}, (_,inx) => inx )
+                ._equals(param_array.map( (params) => params.nesting_level ).sort( (a,b) => a - b )))
+         console.error('strategy nesting levels are incomplete or redundant');
+
+      // check:  can't use circular or rotary for subgroup of order 2
+      if (param_array.find( (params) => this.group.elementOrders[params.generator] == 2 && params.layout != CayleyDiagram.LINEAR_LAYOUT) !== undefined)
+         console.error('generator must have order > 2 when using circular or rotated layout');
+
+      // check:  no empty nesting levels (should this really be needed?)
+
+
+      this.strategies = strategy_parameter_array
+         .map( (parameters) => CayleyDiagram.LayoutStrategy._createStrategy(...parameters) );
+
+      this._update();
+   }
+
+   _update() {
+      this.nodes = [];
+      this.lines = [];
+      if (this.diagram_name === undefined) {
+         if (this.strategies.length == 0) {
+            this._generateStrategy();
          } else {
-            linesByEndpoints.set(forwardHash, line);
-         }
-      } );
-
-      const diagram = new Diagram3D(nodes, [...linesByEndpoints.values()]);
-      diagram.background = CayleyDiagram.BACKGROUND_COLOR;
-      diagram.setNodeColor(CayleyDiagram.NODE_COLOR)
-             .setLineColors();
-
-      return diagram;
-   }
-
-   _fromGroup(diagramName) {
-      const cayleyDiagram = this.group.cayleyDiagrams.find( (cd) => cd.name == diagramName );
-      const nodes = cayleyDiagram.points.map( (point, element) => new Diagram3D.Node(element, point) );
-      const lines =
-         cayleyDiagram.arrows.reduce(
-            (lines, arrow) =>
-               this.group.elements.reduce(
-                  (lines, element) => {
-                     const start = nodes[element];
-                     const end = nodes[this.group.mult(element, arrow)];
-                     lines.push(new Diagram3D.Line([start, end], {userData: arrow}));
-                     return lines;
-                  },
-                  lines ),
-            []);
-      return [nodes, lines];
-   }
-
-   _generate() {
-      let nodes, lines, cosets;
-      if (this.group.order == 1) {
-         return this._genNull(0);
-      }
-      let generators = this.group.generators[0];
-
-      const genOrders = generators.map(el => this.group.elementOrders[el]);
-      const orderedGenerators = generators
-         .slice()
-         .sort((el1, el2) => this.group.elementOrders[el1] - this.group.elementOrders[el2])
-      if (generators.length == 1) {
-         cosets = this._getCosets(generators);
-         [nodes, lines] = this._genCircle('xy', generators[0], cosets[0], this._genNull)(0)
-      } else if (generators.length == 2) {
-         if (   genOrders[0] * genOrders[1] == this.group.order
-             && (   (genOrders[0] == 2 && genOrders[1] > 2)
-                 || (genOrders[1] == 2 && genOrders[0] > 2) ) )
-            {
-               cosets = this._getCosets(orderedGenerators);
-               [nodes, lines] =
-                  this._genRotation('xy', orderedGenerators[1], cosets[1],
-                                    this._genLine('x', orderedGenerators[0], cosets[0], this._genNull))(0);
-            } else {
-               if (genOrders[0] * genOrders[1] < this.group.order) {
-                  orderedGenerators.reverse();
-               }
-               cosets = this._getCosets(orderedGenerators);
-               [nodes, lines] =
-                  this._genLine('x', orderedGenerators[1], cosets[1],
-                                this._genLine('y', orderedGenerators[0], cosets[0], this._genNull))(0);
-            }
-
-         // these are flat, so set all normals to 'z' axis
-         for (let i = 0; i < lines.length; i++) {
-            const zAxis = new THREE.Vector3(0,0,1);
-            if (lines[i].normal !== undefined) {
-               lines[i].normal = zAxis;
-            }
+            this._generateFromStrategy();
          }
       } else {
-         cosets = this._getCosets(orderedGenerators);
-         let fn = this._genNull,
-             directions = ['z', 'y', 'x'];
-         for (let i = 0; i < generators.length; i++) {
-            fn = this._genLine(directions[i % 3], orderedGenerators[i], cosets[i], fn);
-         }
-         [nodes, lines] = fn(0);
+         this._generateFromGroup();
       }
 
-      nodes.sort((el1,el2) => el1.element - el2.element);
-      return [nodes, lines];
+      this.setNodeColor(CayleyDiagram.NODE_COLOR)
+          .setNodeLabels()
+          .setLineColors();
    }
 
-   _getCosets(gens) {
-      const subGroups = [],
-            cosets = [];
+   _generateFromGroup() {
+      const cayleyDiagram = this.group.cayleyDiagrams.find( (cd) => cd.name == this.diagram_name );
+      this.nodes = cayleyDiagram.points.map(
+         (point, element) => new Diagram3D.Node(element, point, {lineStyle: Diagram3D.STRAIGHT}));
+      cayleyDiagram.arrows.forEach( (arrow) => this.addLines(arrow) );
+   }
 
-      // get subgroups
-      for (let i = 0, curr = new BitSet(this.group.order); i < gens.length - 1; i++) {
-         curr.set(gens[i]);
-         for (let j = 0; j < this.group.subgroups.length; j++) {
-            if (this.group.subgroups[j].members.contains(curr)) {
-               curr = this.group.subgroups[j].members.clone();
-               subGroups.push(curr);
-               break;
-            }
-         }
-      }
-      subGroups.push(new BitSet(this.group.order).setAll());
+   _generateFromStrategy() {
+      const node_list = this._generateNodes(this.strategies);
+      const ordered_nodes = this._transposeNodes(node_list);
 
-      // get coset partitioning
-      cosets.push(this.group.elementPowers[gens[0]].toArray());
-      for (let i = 1; i < subGroups.length; i++) {
-         const todo = subGroups[i].clone(),
-               prev = subGroups[i-1],
-               coset = [];
-         cosets.push(coset);
-         while (! todo.isEmpty()) {
-            for (let j = 0; j < todo.len; j++) {
-               // get first element of todo and put it in partition
-               if (todo.isSet(j)) {
-                  coset.push(j);
-                  // for each product in element*prev clear setting in todo
-                  for (let k = 0; k < prev.len; k++) {
-                     if (prev.isSet(k)) {
-                        todo.clear(this.group.multtable[j][k])
-                     }
-                  }
-                  break;
-               }
-            }
+      this.nodes = this._layout(ordered_nodes)
+                       .sort( (a,b) => a.element - b.element );
+
+      // makes lines for generators
+      this.strategies.forEach( (strategy) => this.addLines(strategy.generator) );
+   }
+
+   _generateNodes(strategies) {
+      const generators = this.strategies.map( (strategy) => strategy.generator );
+
+      return strategies.reduce( (nodes, strategy, inx) => {
+         [nodes, strategies[inx].bitset] = this._extendSubgroup(nodes, generators.slice(0, inx+1));
+         return (inx == 0) ? nodes._flatten() : nodes;
+      }, [0]);
+   }
+
+   _extendSubgroup(H_prev, generators) {
+      const deepMultiply = (g, arr) => {
+         if (Array.isArray(arr)) {
+            return arr.map( (el) => deepMultiply(g, el) );
+         } else {
+            const prod = this.group.mult(g, arr);
+            result_bitset.set(prod);
+            return prod;
          }
       }
 
-      return cosets;
-   }
+      const new_generator = generators[generators.length - 1];
+      const result = [H_prev];
+      const result_bitset = new BitSet(this.group.order, H_prev._flatten());
+      Array.from({length: this.group.elementOrders[new_generator]})
+           .reduce( (cycle) => (cycle.push(this.group.mult(cycle._last(), new_generator)), cycle), [0])
+           .forEach( (el) => {
+              if (!result_bitset.isSet(el)) {
+                 result.push(deepMultiply(el, H_prev))
+              }
+           } );
 
-   // just returns element at (0,0,0) so containing step can move to where it wants
-   _genNull(startElement) {
-      return [ [new Diagram3D.Node(startElement, new THREE.Vector3(0,0,0))], [] ];
-   }
-
-   // distributes elements along the line [-1,1]
-   _genLine(_direction, _generator, _coset, _innerLoop) {
-      return function(group, direction, generator, coset, innerLoop) {
-         return function(startElement) {
-            Log.log('genLine');
-            const directionVectors = {x: [1,0,0], y: [0,1,0], z: [0,0,1]},
-                  normalVectors = {x: [0,1,0], y: [1,0,0], z: [1,0,0]},
-                  directionVector = new THREE.Vector3(...directionVectors[direction]),
-                  normalVector = new THREE.Vector3(...normalVectors[direction]),
-                  numNodes = coset.length,
-                  scale = 2/(3*numNodes - 1),
-                  xScale = (new THREE.Matrix4()).makeScale(
-                     ...(new THREE.Vector3(1,1,1)).add(
-                        directionVector.clone().multiplyScalar(scale-1)).toArray()),
-                  generatedElements = coset.map(el => group.multtable[startElement][el]),
-                  nodeGroups = [],
-                  lines = [],
-                  nodes = [];
-
-            // get inner loop nodes and lines
-            for (let i = 0; i < numNodes; i++) {
-               const element = generatedElements[i],
-                     trans = 2*i/numNodes - 3*(numNodes - 1)/(3*numNodes - 1),
-                     xLate = (new THREE.Matrix4()).makeTranslation(
-                        ...directionVector.clone().multiplyScalar(trans).toArray()),
-                     xForm = xLate.multiply(xScale);
-
-               let childNodes, childLines;
-               [childNodes, childLines] = innerLoop(element);
-               for (let j = 0; j < childNodes.length; j++) {
-                  childNodes[j].point = childNodes[j].point.applyMatrix4(xForm);
-               }
-               nodeGroups.push(childNodes);
-               lines.push(...childLines);
+      for (let inx = 1; inx < result.length; inx++) {
+         let rep;
+         const stmt = `rep = result[${inx}]` + Array(generators.length - 1).fill('[0]').join('');
+         eval(stmt);
+         for (const generator of generators) {
+            const prod = this.group.mult(generator, rep);
+            if (!result_bitset.isSet(prod)) {
+               const coset = deepMultiply(prod, H_prev);
+               result.push(coset);
             }
-
-            // make outer loop lines
-            const nodeGroupLength = nodeGroups[0].length;
-            for (let i = 0; i < numNodes; i++) {             // for each group
-               for (let j = 0; j < nodeGroupLength; j++) {  // for each element in a group
-                  let currNode = nodeGroups[i][j].element,
-                      nextNode = group.multtable[currNode][generator];
-                  if (   numNodes > 2
-                      && i == numNodes - 1
-                      && nextNode == nodeGroups[0][j].element)
-                     {
-                        lines.push(new Diagram3D.Line([currNode, nextNode],
-                                                      {userData: generator, normal: new THREE.Vector3(1,0,0)}));
-                     } else {
-                        lines.push(new Diagram3D.Line([currNode, nextNode], {userData: generator}));
-                     }
-               }
-            }
-
-            // flatten nodeGroups
-            for (let i = 0; i < numNodes; i++) {
-               nodes.push(...nodeGroups[i]);
-            }
-
-            // sort nodes
-            return [nodes.sort((el1, el2) => el1.element - el2.element), lines];
          }
-      } (this.group, _direction, _generator, _coset, _innerLoop);
+      }
+
+      return [result, result_bitset];
    }
 
-   // distributes elements around a circle of radius 1 centered at [0,0]
-   _genCircle(_direction, _generator, _coset, _innerLoop) {
-      return function(group, direction,  generator, coset, innerLoop) {
-         return function (startElement) {
-            Log.log('genCircle');
-            const normalVectors = {xy: [0,0,1], yz: [1,0,0], xz: [0,1,0]},
-                  normalVectorCoordinates = normalVectors[direction],
-                  axis = normalVectorCoordinates[0] == 1 ? [0, 1, 0] :
-                         (normalVectorCoordinates[1] == 1 ? [0, 0, 1] : [1, 0, 0]),
-                  numNodes = coset.length,
-                  normalVector = new THREE.Vector3(...normalVectorCoordinates),
-                  plane = (new THREE.Vector3(1,1,1)).sub(normalVector),
-                  scale = Math.sqrt(1 - Math.cos(2*Math.PI/numNodes))/2,
-                  xScale = (new THREE.Matrix4()).scale(
-                     plane.clone().multiplyScalar(scale/(scale+1)).add(normalVector.clone())),
-                  generatedElements = coset.map(el => group.multtable[startElement][el]),
-                  nodeGroups = [],
-                  lines = [],
-                  nodes = [];
+   _transposeNodes(node_list) {
+      const copyPush = (arr, el) => {
+         const result = arr.slice();
+         result.push(el);
+         return result;
+      };
 
-            // get inner loop nodes and lines
-            for (let i = 0; i < numNodes; i++) {
-               const element = generatedElements[i],
-                     trans = 2*Math.PI*(1/4 - i/numNodes),
-                     xLate = (new THREE.Matrix4()).makeTranslation(
-                        ...(new THREE.Vector3(...axis))
-                        .applyAxisAngle(normalVector, trans)
-                        .multiplyScalar(1/(scale+1))
-                        .toArray()),
-                     xForm = xLate.multiply(xScale);
+      // index transformation
+      const gen2nest = this.strategies.map( (_, index) => this.strategies.findIndex( (s) => s.nesting_level == index) );
 
-               let childNodes, childLines;
-               [childNodes, childLines] = innerLoop(element);
-               for (let j = 0; j < childNodes.length; j++) {
-                  childNodes[j].point = childNodes[j].point.applyMatrix4(xForm);
-               }
-               nodeGroups.push(childNodes);
-               lines.push(...childLines);
-            }
+      // allocate transpose according to space used in node_list
+      const transpose_allocations = this.strategies
+                                        .map( (_,inx) => eval('node_list' + Array(inx).fill('[0]').join('') + '.length') )
+                                        .map( (_,inx,arr) => arr[gen2nest[inx]] );
+      const makeEmpty =
+         (transpose_index = 0) => (transpose_index == transpose_allocations.length - 1) ? [] :
+                                Array(transpose_allocations[transpose_index]).fill().map( (_) => makeEmpty(transpose_index + 1) );
 
-            // make outer loop arcs
-            const nodeGroupLength = nodeGroups[0].length;
-            for (let i = 0; i < numNodes; i++) {          // for each group
-               for (let j = 0; j < nodeGroupLength; j++) {   // for each element in a group
-                  const currNode = nodeGroups[i][j].element,
-                        nextNode = group.multtable[currNode][generator];
-                  if (group.elementOrders[generator] > 2) {
-                     lines.push(new Diagram3D.Line([currNode, nextNode],
-                                                   {userData: generator, normal: normalVector}));
-                  } else {
-                     lines.push(new Diagram3D.Line([currNode, nextNode], {userData: generator}));
-                  }
-               }
-            }
-
-            // flatten nodeGroups
-            for (let i = 0; i < numNodes; i++) {
-               nodes.push(...nodeGroups[i]);
-            }
-
-            // sort nodes
-            return [nodes.sort((el1, el2) => el1.element - el2.element), lines];
+      // traverse node_list, inserting new Diagram3D.Node into transpose
+      const traverse = (nodes, indices = []) => {
+         if (indices.length == this.strategies.length) {
+            const line_style = indices.every(
+               (index, strategy_index) => index == 0 || this.strategies[this.strategies.length - strategy_index - 1].layout == CayleyDiagram.LINEAR_LAYOUT
+            ) ? Diagram3D.STRAIGHT : Diagram3D.CURVED;
+            const stmt = 'result' +
+                         indices.map( (_,inx) => `[${indices[gen2nest[inx]]}]` ).join('') +
+                         ` = new Diagram3D.Node(${nodes}, undefined, {lineStyle: ${line_style}})`;
+            eval(stmt);
+         } else {
+            nodes.forEach( (el,inx) => { traverse(el, copyPush(indices, inx)) } );
          }
-      } (this.group, _direction, _generator, _coset, _innerLoop);
+      }
+
+      // now actually do the work
+      const result = makeEmpty();
+      traverse(node_list);
+
+      return result;
    }
 
-   // distributes elements around a circle of radius 1 centered at [0,0]
-   //   and rotates innerLoop product around center
-   _genRotation(_direction, _generator, _coset, _innerLoop) {
-      return function(group, direction, generator, coset, innerLoop) {
-         return function (startElement) {
-            Log.log('genRotation');
-            const normalVectors = {xy: [0,0,1], yz: [1,0,0], xz: [0,1,0]},
-                  normalVectorCoordinates = normalVectors[direction],
-                  axis = normalVectorCoordinates[0] == 1 ? [0, 1, 0] :
-                         (normalVectorCoordinates[1] == 1 ? [0, 0, 1] : [1, 0, 0]),
-                  numNodes = coset.length,
-                  normalVector = new THREE.Vector3(...normalVectorCoordinates),
-                  scale = Math.sqrt(1 - Math.cos(2*Math.PI/numNodes))/2,
-                  xLate = (new THREE.Matrix4()).makeTranslation(
-                     ...(new THREE.Vector3(...axis)).multiplyScalar(-1/(scale+1)).toArray()),
-                  xScale = (new THREE.Matrix4()).makeScale(
-                     ...(new THREE.Vector3(1, 1, 1)).multiplyScalar(scale/(scale+1))
-                     .sub(normalVector.clone().multiplyScalar(-1/(scale+1))).toArray()),
-                  generatedElements = coset.map(el => group.multtable[startElement][el]),
-                  nodeGroups = [],
-                  nodes = [],
-                  lines = [];
+   _layout(nested_nodes,
+           nested_strategies = this.strategies.slice().sort( (a,b) => a.nesting_level - b.nesting_level )) {
 
-            // get inner loop nodes and lines
-            for (let i = 0; i < numNodes; i++) {
-               const element = generatedElements[i],
-                     trans = 2*Math.PI*(-1/4 - i/numNodes),
-                     xRot = (new THREE.Matrix4()).makeRotationAxis(normalVector, trans),
-                     xForm = xRot.multiply(xLate).multiply(xScale);
+      if (nested_strategies.length == 0) {
+         return [nested_nodes];
+      } else {
+         const strategy = nested_strategies.pop();
+         const child_results = [...nested_nodes.map( (children) => this._layout(children, nested_strategies) )]
+         nested_strategies.push(strategy);
+         const layout_results = strategy._layout(child_results);
+         return layout_results._flatten();
+      }
+   }
 
-               let childNodes, childLines;
-               [childNodes, childLines] = innerLoop(element);
-               for (let j = 0; j < childNodes.length; j++) {
-                  childNodes[j].point = childNodes[j].point.applyMatrix4(xForm);
+   /* routine to generate default strategy
+    *   Special cases:
+    *      group is order = 1 => draw a single node
+    *      group is order = 2 => linear (just two nodes)
+    *
+    *   General strategy:
+    *      if group is cyclic => circular
+    *      if group has two generators, look for a cyclic subgroup that is order |G|/2 and draw this as two connected circles
+    *        if |G| = |gen1| * |gen2|, draw this with gen1 rotated in XY plane, gen2 linear in X (e.g., S_3)
+    *        if not, draw this with gen1 circular in XY plane, gen2 linear in Z (e.g., Q_4)
+    *      if group has two generators but no such cyclic subgroup draw a 2D grid
+    *      if group has three generators map each of them to an axis in a 3D grid
+    *      if group has four generators, pick the two smallest to display on same axis and map others to the remaining axes
+    */
+   _generateStrategy() {
+      if (this.group.order == 1) {
+         this.nodes.push(new Diagram3D.Node(0));  // just draw a single node
+         return;
+      }
+      if (this.group.order == 2) {
+         this.setStrategies([[1, 0, 1, 0]]);
+         return;
+      }
+
+      const element_orders = this.group.elementOrders;
+      const generators = this.group.generators[0];
+      const ordered_gens = generators.slice().sort( (a,b) => element_orders[b] - element_orders[a] );
+      switch (generators.length) {
+         case 1:
+            this.setStrategies([[generators[0], 1, 2, 0]]);  // cyclic group
+            break;
+         case 2:
+            // does the first ordered_gen (generator with largest element order) have order |G|/2?
+            // make sure group is big enough -- can't do a circle with only 2 elements
+            if (element_orders[ordered_gens[0]] == this.group.order/2 && this.group.order > 4) {
+               if (element_orders[ordered_gens[1]] == 2) {
+                  this.setStrategies([[ordered_gens[1], 0, 0, 0],
+                                      [ordered_gens[0], 2, 2, 1]]);     // see D_4
+               } else {
+                  this.setStrategies([[ordered_gens[1], 1, 2, 0],
+                                      [ordered_gens[0], 0, 2, 1]]);     // see Q_4
                }
-               nodeGroups.push(childNodes);
-               lines.push(...childLines);
+            } else {
+               // put greatest # elements in X direction (remember that the 2nd generator will generate
+               //   all the elements in the group the first one doesn't)
+               const first_gen_order = element_orders[ordered_gens[0]];
+               const first_gen_dir = (first_gen_order >= this.group.order/first_gen_order) ? 0 : 1;
+               this.setStrategies([[ordered_gens[0], 0, first_gen_dir,   0],
+                                   [ordered_gens[1], 0, 1-first_gen_dir, 1]]);       // see S_4
             }
-
-            // make outer loop arcs
-            const nodeGroupLength = nodeGroups[0].length;
-            for (let i = 0; i < numNodes; i++) {          // for each group
-               for (let j = 0; j < nodeGroupLength; j++) {   // for each element in a group
-                  const currNode = nodeGroups[i][j].element,
-                        nextNode = group.multtable[currNode][generator];
-                  if (group.elementOrders[generator] > 2) {
-                     lines.push(new Diagram3D.Line([currNode, nextNode],
-                                                   {userData: generator, normal: normalVector}));
-                  } else {
-                     lines.push(new Diagram3D.Line([currNode, nextNode], {userData: generator}));
-                  }
-               }
-            }
-
-            // flatten nodeGroups
-            for (let i = 0; i < numNodes; i++) {
-               nodes.push(...nodeGroups[i]);
-            }
-
-            // sort nodes
-            return [nodes.sort((el1, el2) => el1.element - el2.element), lines];
-         }
-      } (this.group, _direction, _generator, _coset, _innerLoop);
+            break;
+         case 3:
+            this.setStrategies([[generators[0], 0, 0, 0],
+                                [generators[1], 0, 1, 1],
+                                [generators[2], 0, 2, 2]]);
+            break;
+         case 4:
+            this.setStrategies([[ordered_gens[0], 0, 0, 0],
+                                [ordered_gens[1], 0, 0, 1],
+                                [ordered_gens[2], 0, 1, 2],
+                                [ordered_gens[3], 0, 2, 3]]);
+            break;
+      }
+      return;
    }
 }
 
-// initialize static variables
-CayleyDiagram._init();
+
+/* Initialize CayleyDiagram static variables */
+
+CayleyDiagram.BACKGROUND_COLOR = 0xE8C8C8;
+CayleyDiagram.NODE_COLOR = 0x8c8c8c;
+
+CayleyDiagram.LINEAR_LAYOUT = 0;
+CayleyDiagram.CIRCULAR_LAYOUT = 1;
+CayleyDiagram.ROTATED_LAYOUT = 2;
+
+CayleyDiagram.X_DIRECTION = 0;
+CayleyDiagram.Y_DIRECTION = 1;
+CayleyDiagram.Z_DIRECTION = 2;
+
+CayleyDiagram.YZ_DIRECTION = 0;
+CayleyDiagram.XZ_DIRECTION = 1;
+CayleyDiagram.XY_DIRECTION = 2;
+
+CayleyDiagram.LayoutStrategy = class {
+   constructor(generator, direction, nesting_level) {
+      this.generator = generator;          // element# (not 0)
+      this.direction = direction;          // 0/1/2 => X/Y/Z for linear, YZ/XZ/XY for curved
+      this.nesting_level = nesting_level;  // 0 for innermost, increasing to outermost
+      this.elements = undefined;
+   }
+
+   static _createStrategy(generator, layout, direction, nesting_level) {
+      if (CayleyDiagram.LayoutStrategy.class_by_layout === undefined) {
+         CayleyDiagram.LayoutStrategy.class_by_layout = [
+            CayleyDiagram.LinearLayout,
+            CayleyDiagram.CircularLayout,
+            CayleyDiagram.RotatedLayout,
+         ];
+      }
+      return new CayleyDiagram.LayoutStrategy
+                              .class_by_layout[layout](generator, direction, nesting_level);
+   }
+
+   _getWidth(nodes, direction) {
+      return nodes.reduce(
+         (max, node) => Math.max(Math.abs(node.point.getComponent(direction)), max),
+         0 );
+   }
+}
+
+// Scale and translate children to distribute them from 0 to 1 along the <direction> line
+CayleyDiagram.LinearLayout = class extends CayleyDiagram.LayoutStrategy {
+   constructor(generator, direction, nesting_level) {
+      super(generator, direction, nesting_level);
+   }
+
+   get layout() {
+      return CayleyDiagram.LINEAR_LAYOUT;j
+   }
+
+   _layout(children) {
+      const direction_vector = new THREE.Vector3(
+         ...Array.from({length: 3}, (_, inx) => (this.direction == inx) ? 1 : 0));
+
+      // number of children
+      const num_children = children.length;
+
+      // find a child diameter in <direction>, scale so all fit in [0,1] box
+      const target_width = 1.4/(3*num_children - 1);  // heuristic
+      const child_width = this._getWidth(children._flatten(), this.direction);
+      const scale = child_width < target_width ? 1 : target_width / child_width;
+
+      // create scale transform
+      let transform = (new THREE.Matrix4()).makeScale(
+         ...Array.from({length: 3}, (_, inx) => (this.direction == inx) ? scale : 1));
+
+      const scaled_width = scale*child_width;
+      const step = (1 - scaled_width) / (num_children - 1);
+      let translation = 0;  // initial value
+      for (const child of children) {
+         transform = transform.setPosition(direction_vector.clone().multiplyScalar(translation));
+         child.forEach( (node) => node.point = node.point.applyMatrix4(transform) );
+         translation += step;
+      }
+
+      return children;
+   }
+}
+
+CayleyDiagram.CurvedLayout = class extends CayleyDiagram.LayoutStrategy {
+   constructor(generator, direction, nesting_level) {
+      super(generator, direction, nesting_level);
+
+      // calculate position transform as a function of angle theta for every direction
+      const positions = [
+         (r, theta) => new THREE.Vector3(0,                        0.5 - r*Math.cos(theta),  0.5 - r*Math.sin(theta)),  // YZ
+         (r, theta) => new THREE.Vector3(0.5 + r*Math.sin(theta),  0,                        0.5 - r*Math.cos(theta)),  // XZ
+         (r, theta) => new THREE.Vector3(0.5 + r*Math.sin(theta),  0.5 - r*Math.cos(theta),  0),                        // XY
+      ];
+      this.position = (r, theta) => positions[direction](r, theta);
+   }
+}
+
+// Scale children to fit and translate them so they're distributed
+//   around the 0.5*e^i*[0,2*PI] circle centered at [.5,.5]
+CayleyDiagram.CircularLayout = class extends CayleyDiagram.CurvedLayout {
+   constructor(generator, direction, nesting_level) {
+      super(generator, direction, nesting_level);
+   }
+
+   get layout() {
+      return CayleyDiagram.CIRCULAR_LAYOUT;
+   }
+
+   _layout(children) {
+      // make circle radius to fit in [0,1] box
+      const r = 0.5;
+
+      // scale two directions, not the third?
+      // scale differently in 2 directions (esp rotated -- make old x < 0.25)
+      const scale = 0.4;  // heuristic
+      const transform = (new THREE.Matrix4()).makeScale(
+         ...new THREE.Vector3(...Array.from({length: 3}, (_,inx) => (this.direction == inx) ? 1 : scale)).toArray()
+      )
+
+      // translate children to [0.5, 0.5] + [r*sin(th), -r*cos(th)]
+      children.forEach( (child, inx) => {
+         transform.setPosition(this.position(r, 2*inx*Math.PI/children.length));
+         child.forEach( (node) => node.point = node.point.applyMatrix4(transform) );
+      } );
+
+      return children;
+   }
+}
+
+// Scale children to fit, rotate them PI/2 + 2*inx*PI/n, and translate them
+//   so they're distributed around the 0.5*e^i*[0,2*PI] circle centered at [.5,.5]
+CayleyDiagram.RotatedLayout = class extends CayleyDiagram.CurvedLayout {
+   constructor(generator, direction, nesting_level) {
+      super(generator, direction, nesting_level);
+
+      // calculate rotation transform as a function of angle theta for every direction
+      const rotations = [
+         (theta) => new THREE.Matrix4().makeRotationX(theta + Math.PI/2),   // YZ
+         (theta) => new THREE.Matrix4().makeRotationY(theta + Math.PI/2),   // XZ
+         (theta) => new THREE.Matrix4().makeRotationZ(theta + Math.PI/2),   // XY
+      ];
+      this.rotation = (theta) => rotations[direction](theta);
+   }
+
+   get layout() {
+      return CayleyDiagram.ROTATED_LAYOUT;
+   }
+
+   _layout(children) {
+      // make circle radius to fit in [0,1] box
+      const r = 0.5;
+
+      // scale two directions, not the third?
+      // scale differently in 2 directions (esp rotated -- make old x < 0.25)
+
+      // make size of transformed child about half the distance between nodes
+      const scale = Math.min(0.25, Math.max(0.1, Math.PI/2/children.length));	// heuristic
+      const scale_transform = (new THREE.Matrix4()).makeScale(
+         ...new THREE.Vector3(...Array.from({length: 3}, (_,inx) => (this.direction == inx) ? 1 : scale)).toArray()
+      )
+
+      // scale, rotation, and translate each child
+      children.forEach( (child, inx) => {
+         const theta = 2*inx*Math.PI/children.length;
+         const transform = scale_transform.clone()
+                                          .multiply(this.rotation(theta))
+                                          .setPosition(this.position(r, theta));
+         child.forEach( (node) => node.point = node.point.applyMatrix4(transform) );
+      } );
+
+      return children;
+   }
+}
 /*
  * Routines to draw 3D ball-and-stick diagrams using three.js
  */
@@ -1970,11 +2331,25 @@ class DisplayDiagram {
       ];
    }
 
-   // Small graphics don't need high resolution features:
-   //   Many-faceted spheres, labels, thick lines, arrows?
+   // Small graphics don't need high resolution features such as many-faceted spheres, labels, thick lines
+   // Removing labels is particularly beneficial, since each label (384 in Tesseract) requires a canvas element
+   //   and a context, which often causes loading failure due to resource limitations
    getImageURL(diagram3D) {
       const img = new Image();
-      this.showGraphic(diagram3D);
+      // this.showGraphic(diagram3D);
+
+      diagram3D.normalize();
+
+      this.setCamera(diagram3D);
+      this.setBackground(diagram3D);
+      this.updateLights(diagram3D);
+      this.updateNodes(diagram3D, 5);  // 5 facets instead of 20
+      // this.updateHighlights(diagram3D);
+      // this.updateLabels(diagram3D);
+      this.updateLines(diagram3D, true);  // use webgl native line width
+      this.updateArrowheads(diagram3D);
+      this.render();
+
       img.src = this.renderer.domElement.toDataURL();
       return img;
    }
@@ -2000,22 +2375,33 @@ class DisplayDiagram {
       return this.scene.children.find( (el) => el.name == name );
    }
 
-   // Position and point the camera to the center of the scene
+   /*
+    * Position the camera and point it at the center of the scene
+    *
+    * Camera positioned to match point of view in GE2:
+    *   If diagram lies entirely in y-z plane (all x == 0)
+    *     place camera on z-axis, x-axis to the right, y-axis down
+    *   If diagram lies entirely in the x-z plane
+    *     place camera on negative y-axis, x-axis to the right, z-axis up
+    *   If diagram lies entirely in the x-y plane
+    *     place camera on negative z-axis, x-axis to the right, y-axis down
+    *   Otherwise place camera on (1,-1,-1) vector with y-axis down
+    */
    setCamera(diagram3D) {
       Log.log('setCamera');
 
       if (diagram3D.nodes.every( (node) => node.point.x == 0.0 )) {
          this.camera.position.set(3, 0, 0);
-         this.camera.up.set(0, 0, 1);
+         this.camera.up.set(0, -1, 0);
       } else if (diagram3D.nodes.every( (node) => node.point.y == 0.0 )) {
-         this.camera.position.set(0, 3, 0);
+         this.camera.position.set(0, -3, 0);
          this.camera.up.set(0, 0, 1);
       } else if (diagram3D.nodes.every( (node) => node.point.z == 0.0 )) {
-         this.camera.position.set(0, 0, 3);
-         this.camera.up.set(0, 1, 0);
+         this.camera.position.set(0, 0, -3);
+         this.camera.up.set(0, -1, 0);
       } else {
-         this.camera.position.set(2, 2, 2);
-         this.camera.up.set(0, 1, 0);
+         this.camera.position.set(2, -2, -2);
+         this.camera.up.set(0, -1, 0);
       }
       this.camera.lookAt(new THREE.Vector3(0, 0, 0));
    }
@@ -2042,7 +2428,7 @@ class DisplayDiagram {
    }
 
    // Create a sphere for each node, add to scene as THREE.Group named "spheres"
-   updateNodes(diagram3D) {
+   updateNodes(diagram3D, sphere_facets = 20) {
       Log.log('updateNodes');
 
       const defaultNodeRadius = 0.3 / Math.sqrt(diagram3D.nodes.length);
@@ -2055,7 +2441,7 @@ class DisplayDiagram {
                nodeRadius = (node.radius === undefined) ? defaultNodeRadius : node.radius,
                scaledNodeRadius = diagram3D.nodeScale * nodeRadius,
                sphereMaterial = new THREE.MeshPhongMaterial({color: nodeColor}),
-               sphereGeometry = new THREE.SphereGeometry(scaledNodeRadius, 20, 20),
+               sphereGeometry = new THREE.SphereGeometry(scaledNodeRadius, sphere_facets, sphere_facets),
                sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
          sphere.userData = {node: node};
          sphere.position.set(node.point.x, node.point.y, node.point.z);
@@ -2165,6 +2551,26 @@ class DisplayDiagram {
       labels.remove(...labels.children);
 
       const spheres = this.getGroup('spheres').children;
+      const nominal_radius = spheres.find( (el) => el !== undefined ).geometry.parameters.radius;
+      const scale = 12 * nominal_radius * diagram3D.labelSize;
+      let canvas_width, canvas_height, label_font, label_offset;
+      const big_node_limit = 0.1, small_node_limit = 0.05;
+      if (nominal_radius >= big_node_limit) {
+         canvas_width = 2048
+         canvas_height = 256;
+         label_font = '120pt Arial';
+         label_offset = 160 * Math.sqrt(diagram3D.nodeScale);  // don't know why, it just looks better
+      } else if (nominal_radius <= small_node_limit) {
+         canvas_width = 512;
+         canvas_height = 64;
+         label_font = '32pt Arial';
+         label_offset = 40 * Math.sqrt(diagram3D.nodeScale);
+      } else {
+         canvas_width = 1024;
+         canvas_height = 128;
+         label_font = '64pt Arial';
+         label_offset = 80 * Math.sqrt(diagram3D.nodeScale);
+      }
 
       spheres.forEach( (sphere) => {
          const node = sphere.userData.node;
@@ -2172,31 +2578,25 @@ class DisplayDiagram {
             return;
          };
 
-         // make canvas big enough for any label and offset it to clear the node while being close
+         // make canvas big enough for any label and offset it to clear the node while still being close
          const canvas = document.createElement('canvas');
          canvas.id = `label_${node.element}`;
          const context = canvas.getContext('2d');
 
-         const radius = sphere.geometry.parameters.radius;
-         const scale = 12 * radius * diagram3D.labelSize;
          const textLabel = mathml2text(node.label);
-         canvas.width = 2048;
-         canvas.height = 256;
+         canvas.width =  canvas_width;
+         canvas.height = canvas_height;
+         context.font = label_font;
          context.fillStyle = 'rgba(0, 0, 0, 1.0)';
-         context.font = '120pt Arial';
-         const xoff = 600 * Math.sqrt(radius) / diagram3D.labelSize;
-         context.fillText(textLabel, xoff, 0.7*canvas.height);
+         context.fillText(textLabel, label_offset, 0.7*canvas.height);
 
          const texture = new THREE.Texture(canvas)
          texture.needsUpdate = true;
-
          const labelMaterial = new THREE.SpriteMaterial({ map: texture });
-
          const label = new THREE.Sprite( labelMaterial );
          label.scale.set(scale, scale*canvas.height/canvas.width, 1.0);
-
          label.center = new THREE.Vector2(0.0, 0.0);
-         label.position.set(node.point.x, node.point.y, node.point.z);
+         label.position.set(...node.point.toArray())
 
          labels.add(label);
       } )
@@ -2204,16 +2604,15 @@ class DisplayDiagram {
 
    /*
     * Draw lines between nodes
-    *   An arc is drawn in the plane specified by the normal vector if one is given
+    *   An arc is drawn in the plane specified by the two ends and the center, if one is given, or [0,0,0]
     */
-   updateLines(diagram3D) {
+   updateLines(diagram3D, use_webgl_native_lines) {
       Log.log('updateLines');
 
       const lines = diagram3D.lines;
       const spheres = this.getGroup('spheres').children;
       const lineGroup = this.getGroup('lines');
       lineGroup.remove(...lineGroup.children);
-
       const userAgent = window.navigator.userAgent;
       const isIOS = !!userAgent.match(/iPad/i) || !!userAgent.match(/iPhone/i);
       // This generally works, but Chrome/Linux can't display its max (!?) -- punt for the moment
@@ -2225,7 +2624,7 @@ class DisplayDiagram {
          const vertices = line.vertices,
                lineColor = (line.color === undefined) ?
                            DisplayDiagram.DEFAULT_LINE_COLOR : line.color,
-               lineWidth = isIOS ? DisplayDiagram.IOS_LINE_WIDTH : diagram3D.lineWidth,
+               lineWidth = use_webgl_native_lines ? 1 : (isIOS ? DisplayDiagram.IOS_LINE_WIDTH : diagram3D.lineWidth),
                lineMaterial =
                   lineWidth <= maxLineWidth ?
                   new THREE.LineBasicMaterial({color: lineColor, linewidth: lineWidth}) :
@@ -2235,25 +2634,10 @@ class DisplayDiagram {
                      sizeAttenuation: false,
                      side: THREE.DoubleSide,
                      resolution: new THREE.Vector2(window.innerWidth, window.innerHeight),
-                  });
+                  }),
+               geometry = new THREE.Geometry();
 
-         var geometry = new THREE.Geometry();
-         if (line.normal === undefined) {
-            geometry.vertices = vertices.map( (vertex) => vertex.point );
-         } else {
-            // Put bow in arc so that (start, middle, end) is clockwise when viewed from normal
-            const normal = line.normal,
-                  start = vertices[0].point,
-                  end = vertices[vertices.length - 1].point,
-                  offset = (line.arcOffset === undefined) ?
-                           DisplayDiagram.DEFAULT_ARC_OFFSET : line.arcOffset,
-                  // (start + end)/2 - (end - start) X normal
-                  middle = start.clone().add(end).multiplyScalar(0.5).sub(
-                     end.clone().sub(start).cross(normal).multiplyScalar(offset)),
-                  curve = new THREE.QuadraticBezierCurve3(start, middle, end),
-                  points = curve.getPoints(10);
-            geometry.vertices = points;
-         }
+         geometry.vertices = this._getLineVertices(line)
 
          let newLine;
          if (lineWidth == 1) {
@@ -2268,6 +2652,77 @@ class DisplayDiagram {
       } )
    }
 
+   _getLineVertices(line) {
+      const spheres = this.getGroup('spheres').children,
+            vertices = line.vertices;
+
+      if (vertices.length > 2) {
+         return vertices.map( (vertex) => vertex.point );
+      }
+
+      // offset center of arc 40% of the distance between the two nodes, in the plane of origin/start/end
+      if (line.style == Diagram3D.CURVED) {
+         const points = this._curvePoints(line, 0.4 * (line.length - 2*spheres[0].geometry.parameters.radius));
+         return points;
+      }
+
+      // arc around intervening points
+      const radius = spheres.find( (sphere) => sphere.geometry.parameters.radius !== undefined ).geometry.parameters.radius,
+            start = vertices[0].point,
+            end = vertices[1].point,
+            start2end = end.clone().sub(start),
+            start2end_sq = start.distanceToSquared(end),
+            start2end_len = Math.sqrt(start2end_sq),
+            min_squared_distance = 1.5 * radius * radius;
+      for (const sphere of spheres) {
+         const start2sphere = sphere.position.clone().sub(start),
+               start2sphere_sq = start.distanceToSquared(sphere.position),
+               end2sphere_sq = end.distanceToSquared(sphere.position),
+               start2end_sq = start.distanceToSquared(end),
+               x = (start2end_sq - end2sphere_sq + start2sphere_sq)/(2 * start2end_len),
+               normal = start2sphere.clone().sub(start2end.clone().multiplyScalar(x/start2end_len));
+         if (   start2sphere_sq != 0
+             && end2sphere_sq != 0
+             && x > 0
+             && x < start2end_len
+             && normal.lengthSq() < min_squared_distance )
+            {
+               const points = this._curvePoints(line, 3*radius - normal.length());
+               return points;
+            }
+      }
+
+      return vertices.map( (vertex) => vertex.point );
+   }
+
+   
+   _curvePoints(line, offset, center = new THREE.Vector3(0, 0, 0)) {
+      let middle;
+      const start_point = line.vertices[0].point,
+            end_point = line.vertices[1].point,
+            start = start_point.clone().sub(center),
+            end = end_point.clone().sub(center);
+
+      // center lies on line -- choose a direction normal to the camera direction
+      if (new THREE.Vector3().crossVectors(start, end).length() < 1e-3) {
+         const normal = new THREE.Vector3().crossVectors(this.camera.position, start),
+               scaled_normal = normal.multiplyScalar(offset/normal.length());
+         middle = start.add(end).multiplyScalar(0.5).add(scaled_normal);
+      } else {
+         const halfway = start.clone().add(end).multiplyScalar(0.5),  // (start + end)/2
+               start2end = end.clone().sub(start),
+               x = -start.dot(start2end)/end.dot(start2end),  // a + xb is normal to b-a
+               normal = (end.dot(start2end) == 0) ? end : start.clone().add(end.clone().multiplyScalar(x)),
+               scaled_normal = normal.clone().multiplyScalar(offset/normal.length());
+         middle = halfway.add(scaled_normal);
+      }
+
+      const curve = new THREE.QuadraticBezierCurve3(start_point, middle, end_point),
+            points = curve.getPoints(10);
+
+      return points;
+   }
+
    updateArrowheads(diagram3D) {
       Log.log('updateArrowheads');
 
@@ -2276,7 +2731,7 @@ class DisplayDiagram {
       const arrowheads = this.getGroup('arrowheads');
       arrowheads.remove(...arrowheads.children);
 
-      lines.filter( (line) => line.userData.line.arrow )
+      lines.filter( (line) => line.userData.line.arrowhead )
            .forEach( (line) => {
               const lineData = line.userData.line,
                     vertices = line.userData.vertices,
@@ -2465,171 +2920,6 @@ const MATHML_2_HTML =
 
 </xsl:stylesheet>
    `;
-
-/*
- * Structure used to describe Cayley diagram, symmetry object to DrawDiagram
- */
-
-class Diagram3D {
-   constructor(nodes = [], lines = [], options) {
-      this.nodes = nodes;
-      this.lines = lines;
-      this.background = undefined;
-      this.zoomLevel = 1;
-      this.lineWidth = 1;
-      this.nodeScale = 1;
-      this.fogLevel = 0;
-      this.labelSize = 1;
-      this.arrowheadPlacement = 1;
-
-      if (options !== undefined) {
-         for (const opt in options) {
-            this[opt] = options[opt];
-         }
-      }
-   }
-
-   setNodeColor(color) {
-      this._setNodeField('color', this.nodes.map( (node) => node.element ), color);
-      return this;
-   }
-
-   setNodeLabels(labels) {
-      this.nodes.forEach( (nd) => nd.label = labels[nd.element] );
-      return this;
-   }
-
-   // add a line from each element to arrow*element; set arrow in userData
-   addLines(arrow) {
-      Group.elements.forEach( (el) => {
-         const product = Group.mult(el, arrow);
-         if (el == Group.mult(product, arrow)) {  // no arrows if bi-directional
-            if (el < product) {  // don't add 2nd line if bi-directional
-               this.lines.push(new Diagram3D.Line([this.nodes[el], this.nodes[product]], {userData: arrow, arrow: false}))
-            }
-         } else {
-            this.lines.push(new Diagram3D.Line([this.nodes[el], this.nodes[product]], {userData: arrow, arrow: true}))
-         }
-      } )
-   }
-            
-   // remove all lines with userData = arrow
-   removeLines(arrow) {
-      this.lines = this.lines.filter( (line) => line.userData != arrow );
-   }
-
-   setLineColors() {
-      const generators = Array.from(new Set(this.lines.map( (line) => line.userData )));
-      this.lines.forEach( (line) => line.color = ColorPool.colors[generators.findIndex( (el) => el == line.userData )] );
-      return this;
-   }
-
-   // Normalize scene: translate to centroid, radius = 1
-   normalize() {
-      const centroid = this.nodes
-                           .reduce( (cent, nd) => cent.add(nd.point), new THREE.Vector3(0,0,0) )
-                           .multiplyScalar(1/this.nodes.length);
-      const squaredRadius = this.nodes
-                                .reduce( (sqrad,nd) => Math.max(sqrad, nd.point.distanceToSquared(centroid)), 0 );
-      const radius = (squaredRadius == 0) ? 1 : 1/Math.sqrt(squaredRadius);  // in case there's only one element
-      const xForm = (new THREE.Matrix4()).set(radius, 0,      0,      -centroid.x,
-                                              0,      radius, 0,      -centroid.y,
-                                              0,      0,      radius, -centroid.z,
-                                              0,      0,      0,      1);
-      this.nodes.forEach( (node) => node.point.applyMatrix4(xForm) );
-      this.lines.forEach( (line) => line.vertices
-                                        .forEach( (vertex) => {
-                                           if (vertex.element === undefined) {
-                                              vertex.point.applyMatrix4(xForm)
-                                           }
-                                        } ) );
-   }
-
-   _setNodeField(field, nodes, value) {
-      nodes.forEach( (node) => this.nodes[node][field] = value );
-   }
-
-   highlightByNodeColor(elements) {
-      this._setNodeField('colorHighlight', group.elements, undefined);
-      elements.forEach( (els, colorIndex) => {
-         const hue = 360 * colorIndex / elements.length;
-         const color = `hsl(${hue}, 53%, 30%)`;
-         this._setNodeField('colorHighlight', els, color);
-      } );
-   }
-
-   highlightByRingAroundNode(elements) {
-      this._setNodeField('ringHighlight', group.elements, undefined);
-      if (elements.length == 1) {
-         this._setNodeField('ringHighlight', elements[0], 'hsl(120, 53%, 30%)');
-      } else {
-         elements.forEach( (els, colorIndex) => {
-            const hue = 360 * colorIndex / elements.length;
-            const color = `hsl(${hue}, 53%, 30%)`;
-            this._setNodeField('ringHighlight', els, color);
-         } );
-      }
-   }
-
-   highlightBySquareAroundNode(elements) {
-      this._setNodeField('squareHighlight', group.elements, undefined);
-      if (elements.length == 1) {
-         this._setNodeField('squareHighlight', elements[0], 'hsl(240, 53%, 30%)');
-      } else {
-         elements.forEach( (els, colorIndex) => {
-            const hue = 360 * colorIndex / elements.length;
-            const color = `hsl(${hue}, 53%, 30%)`;
-            this._setNodeField('squareHighlight', els, color);
-         } );
-      }
-   }
-
-   clearHighlights() {
-      this._setNodeField('colorHighlight', group.elements, undefined);
-      this._setNodeField('ringHighlight', group.elements, undefined);
-      this._setNodeField('squareHighlight', group.elements, undefined);
-   }
-}
-
-Diagram3D.Point = class Point {
-   constructor(point) {
-      this.point = (Array.isArray(point)) ? new THREE.Vector3(...point) : point;
-   }
-}
-
-Diagram3D.Node = class Node extends Diagram3D.Point {
-   constructor(element, point, options) {
-      super(point);
-      this.element = element;
-      this.color = 0xDDDDDD;
-      this.label = '';
-      this.radius = undefined;
-      this.colorHighlight = undefined;
-      this.ringHighlight = undefined;
-      this.squareHighlight = undefined;
-      if (options !== undefined) {
-         for (const opt in options) {
-            this[opt] = options[opt];
-         }
-      }
-   }
-}
-
-Diagram3D.Line = class Line {
-   constructor(vertices, options) {
-      this.vertices = vertices;
-      this.color = undefined;
-      this.arrow = true;
-      this.userData = undefined;
-      this.normal = undefined;
-      this.arcOffset = undefined;
-      if (options !== undefined) {
-         for (const opt in options) {
-            this[opt] = options[opt];
-         }
-      }
-   }
-}
 /*
  * generate {nodes, lines} from $xml data
  *
@@ -2648,10 +2938,10 @@ class SymmetryObject {
 
       const lines = symmetryObject.paths.map( (path) => {
          const vertices = path.points.map( (point) => new Diagram3D.Point(point) );
-         return new Diagram3D.Line(vertices, {color: path.color, arrow: false});
+         return new Diagram3D.Line(vertices, {color: path.color, arrowhead: false});
       } );
 
-      return new Diagram3D(nodes, lines, {background: SymmetryObject.BACKGROUND_COLOR});
+      return new Diagram3D(group, nodes, lines, {background: SymmetryObject.BACKGROUND_COLOR});
    }
 }
 
@@ -2771,41 +3061,6 @@ class Multtable {
 }
 
 Multtable._init();
- class ColorPool {
-   static init() {
-      /*
-       * Distinct colors that show up well on CayleyDiagram.BACKGROUND_COLOR
-       * from https://sashat.me/2017/01/11/list-of-20-simple-distinct-colors
-       */
-      ColorPool.colors = [
-         '#911eb4',  /* purple */
-         '#469990',  /* teal */
-         '#808000',  /* olive */
-         '#e6194b',  /* red */
-         '#ffffff',  /* white */
-         '#f58231',  /* orange */
-         '#000000',  /* black */
-         '#f032e6',  /* magenta */
-         '#4363d8',  /* blue */
-         '#3cb44b',  /* green */
-         '#800000',  /* maroon */
-      ];
-   }
-
-   static pushCSS(color) {
-      ColorPool.colors.push(color);
-   }
-
-   static popCSS() {
-      return ColorPool.colors.pop();
-   }
-
-   static popHex() {
-      return new THREE.Color(ColorPool.popCSS()).getHex();
-   }
-}
-
-ColorPool.init();
 
 
 class DisplayMulttable {
