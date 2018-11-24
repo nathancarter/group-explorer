@@ -1,23 +1,35 @@
 
 JS_FILES = js/init.js             js/Log.js            js/BitSet.js        js/MathUtils.js       \
            js/BasicGroup.js       js/XMLGroup.js       js/Subgroup.js      js/SubgroupFinder.js  \
-           js/IsomorphicGroups.js js/Template.js       js/Library.js       js/CayleyDiagram.js   \
-           js/DisplayDiagram.js   js/mathmlUtils.js    js/Diagram3D.js     js/SymmetryObject.js  \
-           js/Multtable.js        js/ColorPool.js      js/DisplayMulttable.js 					 \
-		   js/CycleGraph.js       js/DisplayCycleGraph.js
+           js/IsomorphicGroups.js js/Template.js       js/Library.js       js/Diagram3D.js       \
+           js/CayleyDiagram.js    js/DisplayDiagram.js js/mathmlUtils.js   js/SymmetryObject.js  \
+           js/Multtable.js        js/DisplayMulttable.js                                         \
+           js/CycleGraph.js       js/DisplayCycleGraph.js
 
-SUB_FILES = subsetDisplay/subsets.js           subsetDisplay/BasicSubset.js     \
-            subsetDisplay/Subgroup.js          subsetDisplay/Subset.js		\
-            subsetDisplay/SubsetEditor.js      subsetDisplay/Partition.js	\
-	    subsetDisplay/PartitionSubset.js					\
-            subsetDisplay/ConjugacyClasses.js  subsetDisplay/Cosets.js		\
-            subsetDisplay/OrderClasses.js      visualizerFramework/visualizer.js
+SUB_FILES = js/Menu.js                                                          \
+										\
+            subsetDisplay/subsets.js           subsetDisplay/BasicSubset.js     \
+            subsetDisplay/Subgroup.js          subsetDisplay/Subset.js          \
+            subsetDisplay/SubsetEditor.js      subsetDisplay/Partition.js       \
+            subsetDisplay/PartitionSubset.js   subsetDisplay/OrderClasses.js    \
+            subsetDisplay/ConjugacyClasses.js  subsetDisplay/Cosets.js          \
+										\
+            diagramController/diagram.js       diagramController/Generator.js   \
+            diagramController/DiagramChoice.js diagramController/Arrow.js       \
+            diagramController/Chunking.js                                       \
+										\
+            cayleyViewController/view.js                                        \
+										\
+            visualizerFramework/visualizer.js
 
 # PRODUCTS = build/allGroupExplorer.js build/allGroupExplorer.min.js build/allVisualizer.js
 PRODUCTS = build/allGroupExplorer.js build/allVisualizer.js
 
-DOCS =  docs/Template.md	docs/visualizerExemplar.md	\
-	docs/visualizerFramework_css.md	docs/visualizerFramework_js.md	docs/visualizerFramework_html.md
+DOCS =  docs/Template.md                        \
+        docs/visualizerExemplar.md              \
+        docs/visualizerFramework_css.md         \
+        docs/visualizerFramework_js.md          \
+        docs/visualizerFramework_html.md
 
 #COMBINE = uglifyjs
 #COMBINE_OPTS = --compress
@@ -64,6 +76,7 @@ docs/visualizerFramework_html.md : visualizerFramework/visualizer.html
 docs/Template.md : js/Template.js
 	echo '' | cat js/Template.js - > docs/Template.md
 
+# add newline to these files so git doesn't decide we're just moving the old file to a new place...
 docs/visualizerFramework_css.md : visualizerFramework/visualizer.css
 	echo '' | cat visualizerFramework/visualizer.css - > docs/visualizerFramework_css.md
 
