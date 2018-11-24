@@ -118,7 +118,8 @@
           let graphicTitle = (group.cayleyDiagrams.length != 0) ?
                              group.cayleyDiagrams[0].name :
                              undefined;
-          let graphicData = CayleyDiagram.generate(group, graphicTitle);
+          let graphicData = new CayleyDiagram(group, graphicTitle);
+
           let img = graphicContext.getImageURL(graphicData);
           group.imageSource = img.src;
           img.height = img.width = 32;
