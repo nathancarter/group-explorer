@@ -1,0 +1,126 @@
+
+<!-- Diagram-page layout -->
+<div id="diagram-page">
+   <div id="diagram-choice">
+      <select id="diagram-select">
+         <option value="">Generate diagram</option>
+      </select>
+      <template id="diagram-choice-template">
+         <option value="${diagram.name}">Use ${diagram.name}</option>
+      </template>
+   </div>
+
+   <div id="generation-control">
+      <p>Generate diagram this way:</p>
+      <div id="generation-strategy" style="position: relative">
+         <table>
+            <thead>
+               <tr>
+                  <th></th>
+                  <th>Generator</th>
+                  <th>Axis</th>
+                  <th>Order</th>
+               </tr>
+            </thead>
+            <tbody id="generation-table">
+            </tbody>
+         </table>
+
+         <div id="generation-fog" class="fog hidden"></div>
+
+         <!-- Templates for generation-strategy table -->
+         <template id="generation-template">
+            <tr>
+               <td>${inx+1}</td>
+               <td action="DC.Generator.showGeneratorMenu(event, ${inx})">
+                  ${math(group.representation[strategy.generator])}
+               </td>
+               <td action="DC.Generator.showAxisMenu(event, ${inx})">
+                  <img src="./images/${DC.Generator.axis_image[strategy.layout][strategy.direction]}">
+                  ${DC.Generator.axis_label[strategy.layout][strategy.direction]}
+               </td>
+               <td action="DC.Generator.showOrderMenu(event, ${inx})">
+                  ${DC.Generator.orders[num_strategies][strategy.nesting_level]}
+               </td>
+            </tr>
+         </template>
+         <template id="generation-menu-template">
+            <ul id="generation-list" class="menu" style="padding-left: 25px">
+               <hr>
+               <li>Organize by&nbsp;&nbsp;<span class="menu-arrow"></span>
+                  <ul id="generation-organize-menu"></ul>
+               </li>
+            </ul>
+         </template>
+         <template id="generator-menu-item-template">
+            <li action="DC.Generator.updateGenerator(${strategy_index}, ${generator})"></li>
+         </template>
+         <template id="organize-menu-item-template">
+            <li action="DC.Generator.organizeBy(${inx})">
+               <i>H<sub>${inx}</sub></i>, a subgroup of order ${subgroup.order}</li>
+         </template>
+         <template id="axis-menu-template">
+            <li action="DC.Generator.updateAxes(${strategy_index}, 0, 0)">Linear in x</li>
+            <li action="DC.Generator.updateAxes(${strategy_index}, 0, 1)">Linear in y</li>
+            <li action="DC.Generator.updateAxes(${strategy_index}, 0, 2)">Linear in z</li>
+            <div class="${curvable ? '' : 'hidden'}">
+               <li action="DC.Generator.updateAxes(${strategy_index}, 1, 2)">Circular in x,y</li>
+               <li action="DC.Generator.updateAxes(${strategy_index}, 1, 1)">Circular in x,z</li>
+               <li action="DC.Generator.updateAxes(${strategy_index}, 1, 0)">Circular in y,z</li>
+               <li action="DC.Generator.updateAxes(${strategy_index}, 2, 2)">Rotated in x,y</li>
+               <li action="DC.Generator.updateAxes(${strategy_index}, 2, 1)">Rotated in x,z</li>
+               <li action="DC.Generator.updateAxes(${strategy_index}, 2, 0)">Rotated in y,z</li>
+            </div>
+         </template>
+         <template id="order-menu-item-template">
+            <li action="DC.Generator.updateOrder(${strategy_index}, ${order})">
+               ${DC.Generator.orders[num_strategies][order]}</li>
+         </template>
+      </div>
+   </div>
+
+   <div id="arrow-control">
+      <p>Show these arrows:</p>
+      <div class="horiz">
+         <div id="arrow-display">
+            <ul id="arrow-list"></ul>
+            <template id="arrow-list-item-template">
+               <li arrow="${element}" color="${color}" action="DC.Arrow.selectArrow(${element})"><hr style="border: 2px solid ${color}">
+                  ${math(Group.representation[element])}</li>
+            </template>
+         </div>
+         <div id="arrow-buttons" class="vert">
+            <button id="add-arrow-button" action="DC.Arrow.showArrowMenu(event)">Add</button>
+            <button id="remove-arrow-button" action="DC.Arrow.removeArrow()" disabled>Remove</button>
+         </div>
+         <template id="arrow-menu-template">
+            <ul id="arrow-menu" class="menu" style="min-width: 80px"></ul>
+         </template>
+         <template id="arrow-menu-item-template">
+            <li action="DC.Arrow.addArrow(${element})"></li>
+         </template>
+      </div>
+   </div>
+
+   <div id="multiplication-control" class="horiz">
+      <span>Arrows mean:</span>
+      <select id="multiplication-select">
+         <option value="right" selected>right multiplication</option>
+         <option value="left">left multiplication</option>
+      </select>
+   </div>
+
+   <div id="chunk-control" style="position: relative">
+      <p>Chunk this subgroup:</p>
+      <select id="chunk-select" disable="false">
+         <option value="0">(no chunking)</option>
+         <option value="${Group.order}">The whole group</option>
+      </select>
+
+      <div id="chunking-fog" class="fog hidden"></div>
+      
+      <template id="chunk-select-template">
+         <option value="${inx}">H<sub>${inx}</sub>, generated by { ${Group.subgroups[${inx}].generators.toString()} }</option>
+      </template>
+   </div>
+</div>
