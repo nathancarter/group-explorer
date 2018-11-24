@@ -41,8 +41,7 @@ class XMLGroup extends BasicGroup {
       this.phrase = $xml.find('phrase').text();
       this.notes = $xml.find('notes').text();
       this.author = $xml.find('author').text();
-      this._generators = (this._generators = XMLGroup._generators_from_xml($xml),
-                          this._generators.length == 0 ? undefined : this._generators);
+      this._XML_generators = XMLGroup._generators_from_xml($xml);
       this.representations = XMLGroup._representations_from_xml($xml);
       this.representationIndex = 0;
       this.cayleyDiagrams = XMLGroup._cayley_diagrams_from_xml($xml);
@@ -74,6 +73,12 @@ class XMLGroup extends BasicGroup {
 
    get representation() {
       return this.representations[this.representationIndex];
+   }
+
+   get generators() {
+      return (this._XML_generators === undefined) ?
+             super.generators :
+             this._XML_generators;
    }
 
    // returns short representations as array of arrays of strings (just debugging)
@@ -118,15 +123,16 @@ class XMLGroup extends BasicGroup {
                  .toArray();
    }
 
-   // returns generators spec'd in XML, not those derived in subgroup computation
+   // returns generators specified in XML, not those derived in subgroup computation
    static _generators_from_xml($xml) {
-      return $xml.find('generators')
-                 .map(function () {
-                    return [
-                       this.attributes[0].value.split(' ')
-                           .map(function (el) { return parseInt(el) }) ]
-                 })
-                 .toArray();
+      const result = $xml.find('generators')
+                         .map(function () {
+                            return [
+                               this.attributes[0].value.split(' ')
+                                   .map(function (el) { return parseInt(el) }) ]
+                         })
+                         .toArray();
+      return result.length == 0 ? undefined : result;
    }
 
    // {name, arrows, points}

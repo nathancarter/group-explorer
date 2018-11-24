@@ -2,7 +2,9 @@
 /*
  * Class holds group defined only by a multiplication table
  */
-
+/*
+```js
+*/
 class BasicGroup {
    constructor (multtable) {
       if (multtable === undefined) return;
@@ -27,7 +29,6 @@ class BasicGroup {
       this._isSolvable = undefined;
       this._subgroups = undefined;
       this._isSimple = undefined;
-      this._generators = undefined;
    }
 
    static parseJSON(jsonObject, _group) {
@@ -84,31 +85,7 @@ class BasicGroup {
    }
 
    get generators() {
-      if (this._generators === undefined) {
-         const generatorIndexes = function* (curr, max, lev, _sel) {
-            const sel = _sel === undefined ? [] : _sel;
-            if (lev == 0) {
-               yield sel;
-            } else if (curr < max) {
-               for (let inx = curr; inx < max; inx++) {
-                  const newSel = sel.slice();
-                  newSel.push(inx);
-                  yield *generatorIndexes(inx + 1, max, lev - 1, newSel);
-               }
-            }
-         }
-
-         this._generators = [this.subgroups[this.subgroups.length-1].generators.toArray()];
-         const maxLevels = Math.min(5, this._generators[0].length);
-         for (let levels = 2; levels < maxLevels; levels++) {
-            for (const generators of generatorIndexes(1, this.order, levels)) {
-               if (this.closure(generators).popcount() == this.order) {
-                  this._generators = [generators];
-               }
-            }
-         }
-      }
-      return this._generators;
+      return [this.subgroups[this.subgroups.length-1].generators.toArray()];
    }
 
    get orderClassSizes() {
@@ -261,9 +238,8 @@ class BasicGroup {
       return result.sort((a,b) => a.popcount() - b.popcount());
    }
 
-   getCosets(subgroupBitset, isLeft) {
-      const mult = (isLeft || true) ?
-                   (a,b) => this.multtable[a][b] : (a,b) => this.multtable[b][a];
+   getCosets(subgroupBitset, isLeft = true) {
+      const mult = isLeft ? (a,b) => this.multtable[a][b] : (a,b) => this.multtable[b][a];
       const cosets = [subgroupBitset];
       const todo = new BitSet(this.order).setAll().subtract(subgroupBitset);
       const subgroupArray = subgroupBitset.toArray();
@@ -321,3 +297,6 @@ class BasicGroup {
       return this.multtable[a][b];
    }
 }
+/*
+```
+*/
