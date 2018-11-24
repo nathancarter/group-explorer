@@ -36,9 +36,9 @@ class IsomorphicGroups {
       // filter by candidate group properties, isomorphism
       return IsomorphicGroups.map
                              .get(G.order)
-                             .filter( H => G.orderClassSizes.equals(H.orderClassSizes) )
-                             // .filter( H => G.subgroupOrders.equals(H.subgroupOrders) )
-                             // .filter( H => G.conjClassSizes.equals(H.conjClassSizes) )
+                             .filter( H => G.orderClassSizes._equals(H.orderClassSizes) )
+                             // .filter( H => G.subgroupOrders._equals(H.subgroupOrders) )
+                             // .filter( H => G.conjClassSizes._equals(H.conjClassSizes) )
                              .find( H => IsomorphicGroups.isomorphism(H, G) !== undefined );
    }
 
@@ -132,7 +132,7 @@ class IsomorphicGroups {
          }
 
          // check that g2h is a mapping
-         if (!g2h.slice().sort( (a,b) => a - b ).equals(G.elements)) {
+         if (!g2h.slice().sort( (a,b) => a - b )._equals(G.elements)) {
             continue bigLoop;
          }
 
