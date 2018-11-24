@@ -5,96 +5,19 @@
    <head>
       <link rel="icon" type="image/png" href="./images/favicon.png"></link>
       <link rel="stylesheet" href="./style/fonts.css" type="text/css"></link>
+      <link rel="stylesheet" href="./style/menu.css" type="text/css"></style>
       <link rel="stylesheet" href="./style/sliders.css" type="text/css"></style>
       <link rel="stylesheet" href="./visualizerFramework/visualizer.css" type="text/css"></style>
       <link rel="stylesheet" href="./subsetDisplay/subsets.css" type="text/css"></link>
+      <link rel="stylesheet" href="./diagramController/diagram.css" type="text/css"></link>
 
       <style>
        #vert-container {
-          min-width: 400px;  /* Ensure room for display-control graphic */
+          min-width: 400px;  /* Ensure room for diagram-control graphic */
        }
 
-       #view-control, #display-control {
+       #view-control, #diagram-control {
           display: none;  /* hidden initially, renders faster */
-       }
-
-       #display-control {
-          padding: 8;  /* margin around all elements of display-control */
-       }
-
-       #diagram-control > select, #chunk-control > select {
-          width: 100%;  /* select choice full width */
-          margin: 0;
-       }
-
-       /* Generation control */
-       #generation-strategy {
-          border: 1px solid #5C5C5C;
-          padding-right: 2;
-          padding-bottom: 2;
-       }
-       #generation-strategy table {
-          width: 100%;
-          border-spacing: 0;
-       }
-       #generation-strategy th:first-child {
-          background-image: linear-gradient(#E5E5E5 , #E5E5E5);
-          border-right: 1px solid #E2E2E2;
-          border-bottom: 1px solid #F2F2F2;
-       }
-       #generation-strategy th, #generation-strategy td:first-child {
-          background-image: linear-gradient(#F1F1F1, #DFDFDF);
-          border-right: 1px solid #B1B1B1;
-          border-bottom: 1px solid #B1B1B1;
-       }
-       #generation-strategy tbody td {
-          background-color: white;
-          border-right: 1px solid black;
-          border-bottom: 1px solid black;
-       }
-
-       /* Arrow control */
-       #arrow-display {
-          min-height: 80;
-          background-color: white;
-          width: 75%;          
-       }
-       #arrow-list {
-          margin-block-start: 0;
-          margin-block-end: 0;
-          padding-inline-start: 0;
-       }
-       #arrow-list > li {
-          width: 100%;
-       }
-       #arrow-control hr {   /* Colored line in arrow display */
-          display: inline-block;
-          width: 25px;
-          margin-block-start: 5px;
-          margin-block-end: 5px;
-          margin-inline-start: 5px;
-          margin-inline-end: 5px;
-       }
-       #arrow-buttons {  /* vert container for buttons */
-          width: 25%;
-       }
-       #arrow-buttons button {  /* Add, Remove buttons */
-          font-size: 16px;      /* matches selects */
-          margin: auto 0 auto 0;
-       }
-
-       /* Left-right multiplication select */
-       #multiplication-control {
-          margin-block-start: 1em;
-       }
-       #multiplication-control > span {
-          width: 50%;
-          margin: auto 0 auto 0;
-       }
-       #multiplication-control select {
-          width: 50%;
-          margin: 0;
-          float: right; 
        }
       </style>
 
@@ -124,7 +47,7 @@
            Diagram_name,	// name of Cayley diagram, or undefined if generated
            Cayley_diagram,	// data being displayed in large diagram
            Graphic_context;	// graphic context for large diagram
-       const PANEL_NAMES = ['#subset-control', '#view-control', '#display-control'];
+       const PANEL_NAMES = ['#subset-control', '#view-control', '#diagram-control'];
 
        /* Initial entry to javascript, called once after document load */
        $(window).one('load', load);
@@ -133,19 +56,9 @@
        function registerCallbacks() {
           $('#subset-button').off('click', () => show('#subset-control') ).on('click', () => show('#subset-control') );
           $('#view-button').off('click', () => show('#view-control') ).on('click', () => show('#view-control') );
-          $('#display-button').off('click', () => show('#display-control') ).on('click', () => show('#display-control') );
+          $('#diagram-button').off('click', () => show('#diagram-control') ).on('click', () => show('#diagram-control') );
           $('#help').off('click', help).on('click', help);
           $('#reset').off('click', reset).on('click', reset);
-          $('#zoom-level').off('input', setZoomLevel).on('input', setZoomLevel);
-          $('#line-thickness').off('input', setLineThicknesss).on('input', setLineThicknesss);
-          $('#node-radius').off('input', setNodeRadius).on('input', setNodeRadius);
-          $('#fog-level').off('input', setFogLevel).on('input', setFogLevel);
-          $('#use-fog').off('input', setFogLevel).on('input', setFogLevel);
-          $('#label-size').off('input', setLabelSize).on('input', setLabelSize);
-          $('#show-labels').off('input', setLabelSize).on('input', setLabelSize);
-          $('#arrowhead-placement').off('input', setArrowheadPlacement).on('input', setArrowheadPlacement);
-          $('#diagram-select').off('click', selectDiagram).on('click', selectDiagram);
-          $('#arrow-control').off('click', arrowClickHandler).on('click', arrowClickHandler);
           $(window).off('resize', resizeBody).on('resize', resizeBody);
        }
 
@@ -163,9 +76,18 @@
           // Promise to load visualizer framework around visualizer-specific code in this file
           const body_load = VC.load();
 
-          // When group and framework are loaded, insert subset_page and complete rest of setup
+          // When group and framework are loaded, load panels and complete setup
           Promise.all([group_load, body_load])
-                 .then( () => SSD.load($('#subset-control')).then(completeSetup) )
+                 .then(loadPanels)
+                 .catch( (error) => alert(error) );
+       }
+
+       function loadPanels() {
+          const subset_display_load = SSD.load($('#subset-control'));
+          const view_controller_load = CVC.load($('#view-control'));
+          const diagram_controller_load = DC.load($('#diagram-control'));
+          Promise.all([subset_display_load, view_controller_load, diagram_controller_load])
+                 .then(completeSetup)
                  .catch( (error) => alert(error) );
        }
 
@@ -190,14 +112,9 @@
           $('#header').html('Cayley Diagram for&nbsp;' + math(Group.name));
           MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'header']);
 
-          // Populate diagram select
-          Group.cayleyDiagrams.forEach( (diagram) => {
-             $('#diagram-select').append(eval(Template.HTML('diagram-choice-template')));
-          } );
-
           // Create graphic context
           Graphic_context = new DisplayDiagram({container: $('#graphic'), trackballControlled: true});
-          displayGraphic(Diagram_name);
+          displayGraphic();
 
           // Register the splitter with jquery-resizable
           $('#vert-container').resizable({
@@ -207,20 +124,15 @@
              onDrag: resizeGraphic,
           });
 
-          show('#display-control');
+          show('#subset-control');
           resizeBody();
        }
 
        // Draw Cayley diagram in graphic
        function displayGraphic() {
-          Cayley_diagram = CayleyDiagram.generate(Group, Diagram_name)
-                                        .setNodeLabels(Group.representation);
-          clearArrowList();
-          const generators = Array.from(new Set(Cayley_diagram.lines.map( (line) => line.userData )));
-          const colors = generators.map( (gen) => addArrowListItem(gen) );
-          Cayley_diagram.lines.forEach( (line) => line.color = colors[generators.findIndex( (el) => el == line.userData )] );
-          Cayley_diagram.lineWidth = 10;
+          Cayley_diagram = new CayleyDiagram(Group, Diagram_name);
           Graphic_context.showGraphic(Cayley_diagram);
+          DC.update();
        }
 
        /* Resize the body, including the graphic */
@@ -242,6 +154,7 @@
              Graphic_context.camera.aspect = $('#graphic').width() / $('#graphic').height();
              Graphic_context.camera.updateProjectionMatrix();
              Graphic_context.renderer.setSize($('#graphic').width(), $('#graphic').height());
+             Graphic_context.updateLineWidth(Cayley_diagram);  // not sure why -- seems to be needed in Chrome
              $('#graphic').append(Graphic_context.renderer.domElement);
           }
        }
@@ -256,39 +169,6 @@
              }
           }
        }
-
-       /* Slider handlers */
-       function setZoomLevel() {
-          Cayley_diagram.zoomLevel = Math.exp( $('#zoom-level')[0].valueAsNumber/10 );
-          Graphic_context.updateZoomLevel(Cayley_diagram);
-       }
-
-       function setLineThicknesss() {
-          Cayley_diagram.lineWidth = $('#line-thickness')[0].valueAsNumber;
-          Graphic_context.updateLineWidth(Cayley_diagram);
-       }
-
-       function setNodeRadius() {
-          Cayley_diagram.nodeScale = Math.exp( $('#node-radius')[0].valueAsNumber/10 );
-          Graphic_context.updateNodeRadius(Cayley_diagram);
-       }
-
-       function setFogLevel() {
-          Cayley_diagram.fogLevel = $('#use-fog')[0].checked ? $('#fog-level')[0].valueAsNumber/10 : 0;
-          Graphic_context.updateFogLevel(Cayley_diagram);
-       }
-
-       function setLabelSize() {
-          Cayley_diagram.labelSize = $('#show-labels')[0].checked ?
-                                     Math.exp( $('#label-size')[0].valueAsNumber/10 ) : 0;
-          Graphic_context.updateLabelSize(Cayley_diagram);
-       }
-
-       function setArrowheadPlacement() {
-          Cayley_diagram.arrowheadPlacement = $('#arrowhead-placement')[0].valueAsNumber/20;
-          Graphic_context.updateArrowheadPlacement(Cayley_diagram);
-       }
-
 
        /* Highlighting routines */
        function highlightByNodeColor(elements) {
@@ -311,102 +191,6 @@
           Graphic_context.updateHighlights(Cayley_diagram);
        }
 
-
-       /* Display control routines */
-
-       function selectDiagram(event) {
-          Diagram_name = $('#diagram-select')[0].value;
-          Diagram_name = (Diagram_name == "") ? undefined : Diagram_name;
-          displayGraphic();
-       }
-
-       // actions:  show menu; select from menu; select from list; remove
-       // utility function add_arrow_list_item(element) to add arrow to list (called from initialization, select from menu)
-       // utility function clearArrowList() to remove all arrows from list (called during reset)
-
-       // arrow-control click handler
-       //   find closest element with action and execute action
-       function arrowClickHandler(event) {
-          eval($(event.target.closest('[action]')).attr('action'));
-       }
-
-       // Row selected in arrow-list:
-       //   clear all highlights
-       //   highlight row (find arrow-list item w/ arrow = ${element})
-       //   enable remove button
-       function selectArrow(element) {
-          $('#arrow-list li').removeClass('highlighted');
-          $(`#arrow-list li[arrow=${element}]`).addClass('highlighted');
-          $('#remove-arrow-button').attr('action', `remove_arrow(${element})`);
-          $('#remove-arrow-button').prop('disabled', false);
-       }
-
-       // Add button clicked:
-       //   Clear (hidden) menu
-       //   Populate menu (for each element not in arrow-list)
-       //   Position, expose menu
-       function showAddableArrowsMenu() {
-          $('#addable-arrows-menu').children().remove();
-          Group.elements.forEach( (element) => {
-             if (element != 0 && $(`#arrow-list li[arrow=${element}]`).length == 0) {
-                $('#addable-arrows-menu').append(eval(Template.HTML('addable-arrows-menu-item-template')));
-             }
-          } );
-          $('#addable-arrows-menu').show();
-          MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'arrow-control']);
-       }
-
-       // Add button menu element clicked:
-       //   Hide menu
-       //   add_arrow_list_item(element)
-       //   Add to lines in Cayley_diagram, set color
-       //   Update lines, arrowheads in graphic
-       function selectAddableArrow(element) {
-          $('#addable-arrows-menu').children().hide();
-          const color = new THREE.Color(addArrowListItem(element)).getHex();
-          Cayley_diagram.addLines(element);
-          Cayley_diagram.lines.forEach( (line) => { if (line.userData == element) { line.color = color } } );
-          Graphic_context.updateLines(Cayley_diagram);
-          Graphic_context.updateArrowheads(Cayley_diagram);
-       }
-
-       // addArrowListItem(element) utility function:
-       //   Get next color from ColorPool
-       //   Create entry in arrow-list from template
-       function addArrowListItem(element) {
-          const color = ColorPool.popCSS();
-          $('#arrow-list').append(eval(Template.HTML('arrow-list-item-template')));
-          MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'arrow-control']);
-          return color;
-       }
-
-       // removeArrowListItem utility function
-       //   remove list element from DOM
-       //   return color to color pool
-       function removeArrowListItem($element) {
-          ColorPool.pushCSS($element.attr('color'));
-          $element.remove();
-       }
-
-       // clears arrow-list on, e.g., reset
-       function clearArrowList() {
-          $('#arrow-list').children().each( (_, el) => removeArrowListItem($(el)) );
-       }
-
-       // Remove button clicked
-       //   Remove highlighted row from arrow-list
-       //   Disable remove button
-       //   Remove line from Cayley_diagram
-       //   Update lines in graphic
-       function remove_arrow(element) {
-          removeArrowListItem($('#arrow-list .highlighted'));
-          $('#remove-arrow-button').prop('disabled', true);
-          Cayley_diagram.removeLines(element);
-          Graphic_context.updateLines(Cayley_diagram);
-          Graphic_context.updateArrowheads(Cayley_diagram);
-       }
-
-
        /* Help, Reset routines */
        function help() {
           alert('There is no help for you -- yet :-)');
@@ -414,7 +198,6 @@
 
        function reset() {
           VC.reset();
-          clearArrowList();
           load();
        }
       </script>
@@ -423,7 +206,7 @@
       <div id="control-options" class="horiz">
          <button id="subset-button">Subsets</button>
          <button id="view-button">View</button>
-         <button id="display-button">Display</button>
+         <button id="diagram-button">Diagram</button>
       </div>
 
       <div id="subset-control" class="fill-vert">
@@ -431,142 +214,48 @@
       </div>
 
       <div id="view-control" class="vert fill-vert control">
-         <p>Zoom level:</p>
-         <input id="zoom-level" type="range" min="-10" max="10" value="0">
-
-         <p>Line thickness:</p>
-         <input id="line-thickness" type="range" min="1" max="20" value="10">
-
-         <p>Node radius:</p>
-         <input id="node-radius" type="range" min="-10" max="10" value="0">
-
-         <p><input id="use-fog" type="checkbox">Use this much fog:</p>
-         <input id="fog-level" type="range" min="1" max="10" value="5">
-
-         <p><input id="show-labels" type="checkbox" checked>Show labels of this size:</p>
-         <input id="label-size" type="range" min="-10" max="10" value="0">
-
-         <p>Arrowhead placement:</p>
-         <input id="arrowhead-placement" type="range" min="0" max="20" value="20">
+         <!-- This is filled in by cayleyViewController/view.html -->
       </div>
 
-      <div id="display-control" class="fill-vert control">
-         <div id="diagram-control">
-            <select id="diagram-select">
-               <option value="">Generate diagram</option>
-            </select>
-            <template id="diagram-choice-template">
-               <option value="${diagram.name}">${diagram.name}</option>
-            </template>
-         </div>
-
-         <div id="generation-control">
-            <p>Generate diagram this way:</p>
-            <div id="generation-strategy">
-               <table>
-                  <thead>
-                     <tr>
-                        <th></th>
-                        <th>Generator</th>
-                        <th>Axis</th>
-                        <th>Order</th>
-                     </tr>
-                  </thead>
-                  <tbody>
-                     <tr>
-                        <td>1</td>
-                        <td><1,0,0,e></td>
-                        <td><img src="./images/axis-x.png"></td>
-                        <td>innermost</td>
-                     </tr>
-                  </tbody>
-               </table>
-               <template id="generation-template">
-                  <tr>
-                     <td></td>
-                     <td></td>
-                     <td></td>
-                     <td></td>
-                  </tr>
-               </template>
-            </div>
-         </div>
-
-         <div id="arrow-control">
-            <p>Show these arrows:</p>
-            <div class="horiz">
-               <div id="arrow-display">
-                  <ul id="arrow-list"></ul>
-                  <template id="arrow-list-item-template">
-                     <li arrow="${element}" color="${color}" action="selectArrow(${element})"><hr style="border: 2px solid ${color}">
-                        ${math(Group.representation[element])}</li>
-                  </template>
-               </div>
-               <div id="arrow-buttons" class="vert">
-                  <button id="add-arrow-button" action="showAddableArrowsMenu()">Add</button>
-                  <ul id="addable-arrows-menu" class="menu hidden">
-                  </ul>
-                  <button id="remove-arrow-button" action="remove_arrow()" disabled>Remove</button>
-               </div>
-               <template id="addable-arrows-menu-item-template">
-                  <li action="selectAddableArrow(${element})">${math(Group.representation[element])}</li>
-               </template>
-            </div>
-         </div>
-
-         <div id="multiplication-control" class="horiz">
-            <span>Arrows mean:</span>
-            <select id="multiplication-select">
-               <option value="right" selected>right multiplication</option>
-               <option value="left">left multiplication</option>
-            </select>
-         </div>
-
-         <div id="chunk-control">
-            <p>Chunk this subgroup:</p>
-            <select id="chunk-select">
-               <option value="0">(no chunking)</option>
-               <option value="${Group.order}">The whole group</option>
-            </select>
-            <template id="chunk-select-template">
-               <option value="${inx}">H<sub>${inx}</sub>, generated by { ${Group.subgroups[${inx}].generators.toString()} }</option>
-            </template>
-         </div>
+      <div id="diagram-control" class="fill-vert control">
+         <!-- This is filled in by diagramController/diagram.html -->
       </div>
-
-      <!-- Templates for highlighting control menus in subsetDisplay -->
-      <template class="subgroup-extension subset-extension partition-extension">
-         <li>Highlight item by<span class="menu-arrow"></span>
-            <ul>
-               <li action="highlightByNodeColor([${this.elementString}])">
-                  <img src="./images/hightype-sphere-node.jpg">&nbsp;Node color
-               </li>
-               <li action="highlightByRingAroundNode([${this.elementString}])">
-                  <img src="./images/hightype-sphere-ring.jpg">&nbsp;Ring around node
-               </li>
-               <li action="highlightBySquareAroundNode([${this.elementString}])">
-                  <img src="./images/hightype-sphere-square.jpg">&nbsp;Square around node
-               </li>
-            </ul>
-         </li>
-      </template>
-      <template class="partition-extension">
-         <li>Highlight partition by<span class="menu-arrow"></span>
-            <ul>
-               <li action="highlightByNodeColor(${this.parent.allElementString})">
-                  <img src="./images/hightype-sphere-node.jpg">&nbsp;Node color
-               </li>
-               <li action="highlightByRingAroundNode(${this.parent.allElementString})">
-                  <img src="./images/hightype-sphere-ring.jpg">&nbsp;Ring around node
-               </li>
-               <li action="highlightBySquareAroundNode(${this.parent.allElementString})">
-                  <img src="./images/hightype-sphere-square.jpg">&nbsp;Square around node
-               </li>
-            </ul>
-         </li>
-      </template>
-      <template class="subgroup-extension subset-extension partition-extension">
-         <li action="clearHighlights()">Clear all highlighting</li>
-      </template>
    </body>
+
+   <!-- Extension templates for highlighting control menus in subsetDisplay -->
+   <template class="subgroup-extension subset-extension partition-extension">
+      <li>Highlight item by<span class="menu-arrow"></span>
+         <ul>
+            <li action="highlightByNodeColor([${this.elementString}])">
+               <img src="./images/hightype-sphere-node.jpg">&nbsp;Node color
+            </li>
+            <li action="highlightByRingAroundNode([${this.elementString}])">
+               <img src="./images/hightype-sphere-ring.jpg">&nbsp;Ring around node
+            </li>
+            <li action="highlightBySquareAroundNode([${this.elementString}])">
+               <img src="./images/hightype-sphere-square.jpg">&nbsp;Square around node
+            </li>
+         </ul>
+      </li>
+   </template>
+
+   <template class="partition-extension">
+      <li>Highlight partition by<span class="menu-arrow"></span>
+         <ul>
+            <li action="highlightByNodeColor(${this.parent.allElementString})">
+               <img src="./images/hightype-sphere-node.jpg">&nbsp;Node color
+            </li>
+            <li action="highlightByRingAroundNode(${this.parent.allElementString})">
+               <img src="./images/hightype-sphere-ring.jpg">&nbsp;Ring around node
+            </li>
+            <li action="highlightBySquareAroundNode(${this.parent.allElementString})">
+               <img src="./images/hightype-sphere-square.jpg">&nbsp;Square around node
+            </li>
+         </ul>
+      </li>
+   </template>
+
+   <template class="subgroup-extension subset-extension partition-extension">
+      <li action="clearHighlights()">Clear all highlighting</li>
+   </template>
 </html>
