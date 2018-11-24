@@ -16,10 +16,10 @@ class SymmetryObject {
 
       const lines = symmetryObject.paths.map( (path) => {
          const vertices = path.points.map( (point) => new Diagram3D.Point(point) );
-         return new Diagram3D.Line(vertices, {color: path.color, arrow: false});
+         return new Diagram3D.Line(vertices, {color: path.color, arrowhead: false});
       } );
 
-      return new Diagram3D(nodes, lines, {background: SymmetryObject.BACKGROUND_COLOR});
+      return new Diagram3D(group, nodes, lines, {background: SymmetryObject.BACKGROUND_COLOR});
    }
 }
 
