@@ -4,12 +4,14 @@
  */
 
 class Diagram3D {
-   constructor(nodes = [], lines = [], options) {
+   constructor(group, nodes = [], lines = [], options) {
+      this.group = group;
       this.nodes = nodes;
       this.lines = lines;
+      this.node_labels = group.representation;
       this.background = undefined;
       this.zoomLevel = 1;
-      this.lineWidth = 1;
+      this.lineWidth = 10;
       this.nodeScale = 1;
       this.fogLevel = 0;
       this.labelSize = 1;
@@ -27,34 +29,71 @@ class Diagram3D {
       return this;
    }
 
-   setNodeLabels(labels) {
-      this.nodes.forEach( (nd) => nd.label = labels[nd.element] );
+   setNodeLabels(labels = this.node_labels) {
+      this.node_labels = labels;
+      if (this.node_labels !== undefined) {
+         this.nodes.forEach( (nd) => nd.label = this.node_labels[nd.element] );
+      }
       return this;
    }
 
-   // add a line from each element to arrow*element; set arrow in userData
+   // add a line from each element to arrow*element; set arrow in line
    addLines(arrow) {
-      Group.elements.forEach( (el) => {
-         const product = Group.mult(el, arrow);
-         if (el == Group.mult(product, arrow)) {  // no arrows if bi-directional
+      this.group.elements.forEach( (el) => {
+         const product = this.group.mult(el, arrow);
+         if (el == this.group.mult(product, arrow)) {  // no arrows if bi-directional
             if (el < product) {  // don't add 2nd line if bi-directional
-               this.lines.push(new Diagram3D.Line([this.nodes[el], this.nodes[product]], {userData: arrow, arrow: false}))
+               this.lines.push(new Diagram3D.Line([this.nodes[el], this.nodes[product]],
+                                                  {arrow: arrow, arrowhead: false, style: this.nodes[arrow].lineStyle}))
             }
          } else {
-            this.lines.push(new Diagram3D.Line([this.nodes[el], this.nodes[product]], {userData: arrow, arrow: true}))
+            this.lines.push(new Diagram3D.Line([this.nodes[el], this.nodes[product]],
+                                               {arrow: arrow, arrowhead: true, style: this.nodes[arrow].lineStyle}))
          }
       } )
+      return this;
    }
-            
-   // remove all lines with userData = arrow
+   
+   // remove all lines with arrow = arrow
+   // if arrow is undefined, remove all lines
    removeLines(arrow) {
-      this.lines = this.lines.filter( (line) => line.userData != arrow );
+      if (arrow === undefined) {
+         while (this.lines.length != 0) {
+            this.removeLines(this.lines[0].arrow);
+         }
+      } else {
+         this.lines = this.lines.filter( (line) => line.arrow != arrow );
+      }
+
+      return this;
    }
 
    setLineColors() {
-      const generators = Array.from(new Set(this.lines.map( (line) => line.userData )));
-      this.lines.forEach( (line) => line.color = ColorPool.colors[generators.findIndex( (el) => el == line.userData )] );
+      const arrows = Object.values(
+         this.lines.reduce( (arrow_set, line) => (arrow_set[line.arrow] = line.arrow, arrow_set),
+                            new Array(this.lines.length) ));
+      const colors = Array.from({length: arrows.length},
+                                (_, inx) => '#' + new THREE.Color(`hsl(${360*inx/arrows.length}, 100%, 20%)`).getHexString());
+      this.lines.forEach( (line) => { line.color = colors[arrows.findIndex( (arrow) => arrow == line.arrow )] } );
       return this;
+   }
+
+   deDupAndSetArrows() {
+      const hash = (point) => (((10 + point.x)*10 + point.y)*10 + point.z)*10;
+      const linesByEndpoints = new Map();
+      this.lines.forEach( (line) => {
+         const start = hash(line.vertices[0].point);
+         const end = hash(line.vertices[1].point);
+         const forwardHash = 100000*start + end;
+         const reverseHash = 100000*end + start;
+         if (linesByEndpoints.has(reverseHash)) {
+            linesByEndpoints.get(reverseHash).arrowhead = false;
+         } else {
+            line.arrowhead = true;
+            linesByEndpoints.set(forwardHash, line);
+         }
+      } );
+      this.lines = Array.from(linesByEndpoints.values());
    }
 
    // Normalize scene: translate to centroid, radius = 1
@@ -64,11 +103,10 @@ class Diagram3D {
                            .multiplyScalar(1/this.nodes.length);
       const squaredRadius = this.nodes
                                 .reduce( (sqrad,nd) => Math.max(sqrad, nd.point.distanceToSquared(centroid)), 0 );
-      const radius = (squaredRadius == 0) ? 1 : 1/Math.sqrt(squaredRadius);  // in case there's only one element
-      const xForm = (new THREE.Matrix4()).set(radius, 0,      0,      -centroid.x,
-                                              0,      radius, 0,      -centroid.y,
-                                              0,      0,      radius, -centroid.z,
-                                              0,      0,      0,      1);
+      const scale = (squaredRadius == 0) ? 1 : 1/Math.sqrt(squaredRadius);  // in case there's only one element
+      const translation_transform = (new THREE.Matrix4()).makeTranslation(...centroid.multiplyScalar(-1).toArray());
+      const xForm = (new THREE.Matrix4()).makeScale(scale, scale, scale).multiply(translation_transform);
+
       this.nodes.forEach( (node) => node.point.applyMatrix4(xForm) );
       this.lines.forEach( (line) => line.vertices
                                         .forEach( (vertex) => {
@@ -124,9 +162,19 @@ class Diagram3D {
    }
 }
 
+
+Diagram3D.STRAIGHT = 0;
+Diagram3D.CURVED = 1;
+
 Diagram3D.Point = class Point {
    constructor(point) {
-      this.point = (Array.isArray(point)) ? new THREE.Vector3(...point) : point;
+      if (point === undefined) {
+         this.point = new THREE.Vector3(0, 0, 0);
+      } else if (Array.isArray(point)) {
+         this.point = new THREE.Vector3(...point);
+      } else {
+         this.point = point;
+      }
    }
 }
 
@@ -137,6 +185,7 @@ Diagram3D.Node = class Node extends Diagram3D.Point {
       this.color = 0xDDDDDD;
       this.label = '';
       this.radius = undefined;
+      this.lineStyle = Diagram3D.STRAIGHT;
       this.colorHighlight = undefined;
       this.ringHighlight = undefined;
       this.squareHighlight = undefined;
@@ -152,14 +201,24 @@ Diagram3D.Line = class Line {
    constructor(vertices, options) {
       this.vertices = vertices;
       this.color = undefined;
-      this.arrow = true;
-      this.userData = undefined;
-      this.normal = undefined;
-      this.arcOffset = undefined;
+      this.arrowhead = true;
+      this.arrow = undefined;
+      this.style = Diagram3D.STRAIGHT;
       if (options !== undefined) {
          for (const opt in options) {
             this[opt] = options[opt];
          }
       }
+   }
+
+   get length() {
+      const [length, _] = this.vertices.reduce( ([length, prev], vertex) => {
+         if (prev === undefined) {
+            return [length, vertex];
+         } else {
+            return [length + prev.point.distanceTo(vertex.point), vertex];
+         }
+      }, [0, undefined] );
+      return length;
    }
 }
