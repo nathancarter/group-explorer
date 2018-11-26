@@ -53,4 +53,26 @@
 # Nathan's List
 
  * Rename Cycle Diagram to Cycle Graph
- * Update main page so that it loads progressively
+ * Fix Cycle Graph for Z_1 to be centered
+ * Add an object of symmetry for Z_1: something with no symmetry
+
+# Anyone's List (as yet unclaimed)
+
+## Features
+
+ * Get the following stuff into the heading on the main page:
+    * Simple logo, w/version number
+    * Contributors' names
+    * Link to help files (or to help stub if they're not yet done)
+    * [GitHub icon](https://github.com/logos) linking to this
+      source code repository
+
+## Bug fixes
+
+ * Large groups won't render multiplication tables because they
+   compute that they need a canvas larger than 2^14 on a side,
+   which Chrome does not allow.  Also, big canvases slow Chrome
+   down.  Perhaps cap it at 5000 and to fit big groups in,
+   decrease the font size instead.  If it gets too small, omit
+   element labels entirely.
+
