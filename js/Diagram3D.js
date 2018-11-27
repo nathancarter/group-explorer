@@ -8,6 +8,7 @@ class Diagram3D {
       this.group = group;
       this.nodes = nodes;
       this.lines = lines;
+      this._right_multiplication = true;
       this.node_labels = group.representation;
       this.background = undefined;
       this.zoomLevel = 1;
@@ -37,11 +38,30 @@ class Diagram3D {
       return this;
    }
 
+   arrowMult(a,b) {
+      return this._right_multiplication ? this.group.mult(a,b) : this.group.mult(b,a);
+   }
+
+   // set multiplication direction; change lines when changing direction
+   set right_multiplication(right_multiplication) {
+      if (this._right_multiplication != right_multiplication) {
+         this._right_multiplication = right_multiplication;
+         this.lines.forEach( (line) => {
+            if (line.vertices.length == 2) {
+               const product =   this.arrowMult(line.vertices[0].element, line.arrow);
+               line.vertices[1] = this.nodes[product];
+            }
+         } );
+      }
+      return this;
+   }
+
    // add a line from each element to arrow*element; set arrow in line
+   // if arrow is Array, add all lines
    addLines(arrow) {
       this.group.elements.forEach( (el) => {
-         const product = this.group.mult(el, arrow);
-         if (el == this.group.mult(product, arrow)) {  // no arrows if bi-directional
+         const product = this.arrowMult(el, arrow);
+         if (el == this.arrowMult(product, arrow)) {  // no arrows if bi-directional
             if (el < product) {  // don't add 2nd line if bi-directional
                this.lines.push(new Diagram3D.Line([this.nodes[el], this.nodes[product]],
                                                   {arrow: arrow, arrowhead: false, style: this.nodes[arrow].lineStyle}))
@@ -53,18 +73,10 @@ class Diagram3D {
       } )
       return this;
    }
-   
-   // remove all lines with arrow = arrow
-   // if arrow is undefined, remove all lines
-   removeLines(arrow) {
-      if (arrow === undefined) {
-         while (this.lines.length != 0) {
-            this.removeLines(this.lines[0].arrow);
-         }
-      } else {
-         this.lines = this.lines.filter( (line) => line.arrow != arrow );
-      }
 
+   // remove all lines with indicated arrow; if arrow is undefined, remove all lines
+   removeLines(arrow) {
+      this.lines = (arrow === undefined) ? [] : this.lines.filter( (line) => line.arrow != arrow );
       return this;
    }
 

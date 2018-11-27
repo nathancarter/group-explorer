@@ -34,6 +34,8 @@ class DC {
       $('#generation-control').off('click', DC.Generator.clickHandler).on('click', DC.Generator.clickHandler);
       $('#generation-control').off('contextmenu', DC.Generator.clickHandler).on('contextmenu', DC.Generator.clickHandler);
 
+      $('#multiplication-control').off('click', DC.ArrowMult.clickHandler).on('click', DC.ArrowMult.clickHandler);
+
       $('#chunk-control').off('click', DC.Chunking.clickHandler).on('click', DC.Chunking.clickHandler);
    }
 

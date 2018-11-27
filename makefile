@@ -16,7 +16,7 @@ SUB_FILES = js/Menu.js                                                          
 										\
             diagramController/diagram.js       diagramController/Generator.js   \
             diagramController/DiagramChoice.js diagramController/Arrow.js       \
-            diagramController/Chunking.js                                       \
+            diagramController/ArrowMult.js     diagramController/Chunking.js    \
 										\
             cayleyViewController/view.js                                        \
 										\
