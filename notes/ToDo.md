@@ -10,15 +10,13 @@
 
 ## CayleyDiagram diagram panel
 
- * Implement Organize by option for generator pulldowns
  * Drag-and-drop to change generator order
- * Arrow left/right multiplication choice
  * Chunking
  * Hover help in big Cayley diagram
  * Drag-and-drop to re-shape curves in big Cayley diagram
  * Use dummy 'center' node to orient curved arrows (see Q_4, strategy [[1,2,2,0],[4,0,2,1]]; or A_4, [[1,1,2,0],[3,0,0,1]])
  * Keep labels from disappearing behind nodes with changing node/label sizes
- * Drag-and-drop to move nodes in big Cayley diagram
+ * Drag-and-drop to move nodes in big Cayley diagram (?)
  * Label representations (?)
  * Display raw element numbers (?)
 
@@ -75,4 +73,5 @@
    down.  Perhaps cap it at 5000 and to fit big groups in,
    decrease the font size instead.  If it gets too small, omit
    element labels entirely.
-
+     * Display labels that are no longer visible with hover help?
+     * Zoom to make labels readable?
