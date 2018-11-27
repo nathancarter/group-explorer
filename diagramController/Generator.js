@@ -96,9 +96,12 @@ DC.Generator = class {
 
    static organizeBy(subgroup_index) {
       // get subgroup generators
-      // add generators to start of strategies
+      const subgroup_generators = Group.subgroups[subgroup_index].generators.toArray();
 
-      // resets arrows
+      // add subgroup generator(s) to start of strategies
+      for (let g = 0; g < subgroup_generators.length; g++) {
+         DC.Generator.updateGenerator(g, subgroup_generators[g]);
+      }
    }
 
    /*
@@ -118,24 +121,29 @@ DC.Generator = class {
                generators_used.set(strategy.generator);
                elements_generated = strategy.bitset;
             } else if (elements_generated.isSet(strategy.generator)) {
-               // delete strategy, collapse nesting
-               const deleted_strategy = strategies.splice(inx,1)[0];
-               for (let i = inx; i < strategies.length; i++) {
-                  if (strategies[i][3] > deleted_strategy[3]) {
-                     strategies[i][3] -= 1;
+               // mark strategy for deletion by setting generator to 'undefined'
+               strategy.generator = undefined;
+               // collapse nesting values
+               if (strategy.generator === undefined) {
+                  for (let i = inx; i < strategies.length; i++) {
+                     if (strategies[i][3] > strategy[3]) {
+                        strategies[i][3] -= 1;
+                     }
                   }
                }
             } else {
                generators_used.set(strategies[inx][0]);
+               elements_generated = Group.closure(generators_used);
 
                // check whether we can still use a curved display
                if (strategies[inx][1] != 0 && Group.closure(generators_used).popcount()/elements_generated.popcount() < 3) {
                   strategies[inx][1] = 0;
                }
-
-               elements_generated = Group.closure(generators_used);
             }
          } )
+
+         // delete marked strategies
+         Cayley_diagram.strategies = Cayley_diagram.strategies.filter( (strategy) => strategy.generator !== undefined );
 
          // add elements to generate entire group; append to nesting
          if (elements_generated.popcount() != Group.order) {
