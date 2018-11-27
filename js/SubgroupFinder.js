@@ -34,16 +34,10 @@ class SubgroupFinder {
       const last_subgroup_found = allSubgroups[allSubgroups.length - 1];
       if (last_subgroup_found.members.popcount() != group.order) {
          isSolvable = false;
-         // use generators from XML, if they're available
-         // if not, take generators from the next-smallest subgroup, add an element not in that group, and minimize generators
-         let new_subgroup;
-         if (group._XML_generators === undefined) {
-            new_subgroup = new Subgroup(group, last_subgroup_found.generators.toArray()).setAllMembers();
-            const new_element = BitSet.difference(new_subgroup.members, last_subgroup_found.members).first();
-            subGroupFinder.minimizeGenerators(new_subgroup, new_element);
-         } else {
-            new_subgroup = new Subgroup(group, group.generators[0]).setAllMembers();
-         }            
+         // take generators from the next-smallest subgroup, add an element not in that group, and minimize generators
+         const new_subgroup = new Subgroup(group, last_subgroup_found.generators.toArray()).setAllMembers();
+         const new_element = BitSet.difference(new_subgroup.members, last_subgroup_found.members).first();
+         subGroupFinder.minimizeGenerators(new_subgroup, new_element);
          allSubgroups.push(new_subgroup);
       }
 
