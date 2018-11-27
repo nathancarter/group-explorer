@@ -76,11 +76,17 @@ class XMLGroup extends BasicGroup {
    }
 
    get generators() {
-      return (this._XML_generators === undefined) ?
-             super.generators :
-             this._XML_generators;
+      const calculatedGenerators = super.generators;
+      if (this._XML_generators === undefined) {
+         return calculatedGenerators;
+      } else if (calculatedGenerators[0].length < this._XML_generators[0].length) {
+         calculatedGenerators.push(...this._XML_generators);
+         return calculatedGenerators;
+      } else {
+         return this._XML_generators;
+      }
    }
-
+   
    // returns short representations as array of arrays of strings (just debugging)
    static _reps_from_xml($xml) {
       return $xml.find('representation')
