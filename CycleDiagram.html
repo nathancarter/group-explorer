@@ -9,7 +9,7 @@
 
       <style>
        #graphic {
-          overflow-x: auto;
+          overflow: hidden;
           background-color: #C8C8F0;
        }
       </style>
@@ -38,6 +38,15 @@
        function registerCallbacks() {
           $('#help').on('click', help);
           $('#reset').on('click', load);
+
+          // mouse events in large graphic
+          $('#graphic').on('wheel', graphicEventHandler);
+          $('#graphic').on('contextmenu', graphicEventHandler);
+          $('#graphic').on('mouseenter', graphicEventHandler);
+          $('#graphic').on('mousemove', graphicEventHandler);
+          $('#graphic').on('moveleave', graphicEventHandler);
+          $('#graphic').on('mousedown', graphicEventHandler);
+          $('#graphic').on('mouseup', graphicEventHandler);
        }
        $(window).on('load', load);	// like onload handler in body
        $(window).on('resize', resizeBody);
@@ -81,11 +90,9 @@
              $('#organization-select').append(option);
           }
 
-          // Draw Cycle Graph
-
+          // Create Cycle Graph, graphic context (it will be displayed in resizeBody below)
           cyclegraph = new CycleGraph(group);
           graphicContext = new DisplayCycleGraph({container: $('#graphic')});
-          graphicContext.showLargeGraphic(cyclegraph);
 
           // Register the splitter with jquery-resizable, so you can resize the graphic horizontally
           // by grabbing the border between the graphic and the subset control and dragging it
@@ -93,15 +100,105 @@
              handleSelector: '#splitter',
              resizeHeight: false,
              resizeWidthFrom: 'left',
+             onDrag: resizeGraphic,
           });
 
           resizeBody();
        }
 
        function resizeBody() {
-          $('#graphic').height(window.innerHeight - $('#header').height());
-          $('#text').height(window.innerHeight - $('#header').height());
+          $('body').height(window.innerHeight - 8);
+          $('body').width(window.innerWidth - 8);
+
+          resizeGraphic();
        };
+
+       function resizeGraphic() {
+          graphicContext.showLargeGraphic(cyclegraph);
+       }
+
+
+       /*
+        * Large graphic events
+        *
+        * Mouse wheel -- zoom in/out
+        * Right click -- zoom to fit
+        * Mouse enter -- start handling mouse move
+        * Mouse move -- cancel existing timer, start new hover help timer
+        * Mouse leave -- cancel existing timer, quit handling mouse move
+        * Mouse down -- save location
+        * Mouse up -- process changed location
+        */
+
+       const Handlers = new Map()
+          .set('wheel', zoom)
+          .set('contextmenu', zoom2fit)
+          .set('mouseenter', startHoverSense)
+          .set('mousemove', startHover)
+          .set('moveleave', leaveGraphic)
+          .set('mousedown', startDrag)
+          .set('mouseup', stopDrag);
+
+       function graphicEventHandler(event) {
+          const handler = Handlers.get(event.type);
+          if (handler !== undefined) {
+             event.preventDefault();
+             handler.call(window, event);
+             event.stopPropagation();
+             resizeGraphic();
+          }
+       }
+
+       function zoom(event) {
+          graphicContext.zoom += 0.1 * (event.originalEvent.deltaY < 0 ? 1 : -1);
+       }
+
+       function zoom2fit(event) {
+          graphicContext.zoom = 1;
+          graphicContext.translation = [0,0];
+       }
+
+       let Hover_timer = undefined;
+       function startHoverSense(event) {
+          const hoverTimer = function () {
+             // don't display hover help in the middle of a drag-and-drop operation
+             if (Drag_start === undefined) {
+                // create new canvas, child of graphic
+                // place at event
+                // get context, paint text
+                // console.log(`location: ${event.originalEvent.clientX} x ${event.originalEvent.clientY}`);
+             }
+          };
+          Hover_timer = setTimeout(hoverTimer, 400);
+       }
+
+       function startHover(event) {
+          stopHoverSense(event);
+          startHoverSense(event);
+       }
+
+       function stopHoverSense(event) {
+          Hover_timer = clearTimeout(Hover_timer);
+       }
+
+       function leaveGraphic(event) {
+          stopHoverSense(event);
+          Drag_start = undefined;
+       }
+
+       let Drag_start = undefined;
+       function startDrag(event) {
+          Drag_start = [event.originalEvent.clientX, event.originalEvent.clientY];
+       }
+
+       function stopDrag(event) {
+          graphicContext.translation = [
+             graphicContext.translation[0] + (event.originalEvent.clientX - Drag_start[0]),
+             graphicContext.translation[1] + (event.originalEvent.clientY - Drag_start[1])
+          ];
+          Drag_start = undefined;
+       }
+
 
        /* Show the desired panel, hide the rest */
        function showPanel(panel_name) {

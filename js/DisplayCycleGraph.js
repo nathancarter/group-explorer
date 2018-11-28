@@ -24,6 +24,8 @@ class DisplayCycleGraph {
       if ( options.container !== undefined) {
          options.container.append(this.canvas);
       }
+      this.zoom = 1;
+      this.translation = [0,0];
    }
 
    static _setDefaults() {
@@ -69,6 +71,13 @@ class DisplayCycleGraph {
       } else {
          this.radius *= this.canvas.width / sideLength;
       }
+
+      // set up the scaled, translated canvas
+      const scale = Math.min($(this.canvas).parent().height()/this.canvas.height,
+                             $(this.canvas).parent().width()/this.canvas.width,
+                             1.0) * (this.zoom || 1);
+      this.context.scale(scale, scale);
+      this.context.translate(this.translation[0], this.translation[1]);
 
       // clear the background, setup the font
       this.context.fillStyle = '#C8C8E8';
