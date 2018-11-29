@@ -40,6 +40,7 @@
           $('#reset').on('click', load);
 
           // mouse events in large graphic
+          $('#graphic').on('click', graphicEventHandler);
           $('#graphic').on('wheel', graphicEventHandler);
           $('#graphic').on('contextmenu', graphicEventHandler);
           $('#graphic').on('mouseenter', graphicEventHandler);
@@ -123,67 +124,48 @@
         *
         * Mouse wheel -- zoom in/out
         * Right click -- zoom to fit
-        * Mouse enter -- start handling mouse move
-        * Mouse move -- cancel existing timer, start new hover help timer
-        * Mouse leave -- cancel existing timer, quit handling mouse move
-        * Mouse down -- save location
-        * Mouse up -- process changed location
+        * Left click -- display label
+        * Ctrl-mouse down -- start drag
+        * Ctrl-mouse move -- drag
+        * Ctrl-mouse up -- end drag
+        *
+        * Key-value map of event handlers
+        *   key = event type
+        *   value = [handler, ctrlKey]
         */
-
        const Handlers = new Map()
-          .set('wheel', zoom)
-          .set('contextmenu', zoom2fit)
-          .set('mouseenter', startHoverSense)
-          .set('mousemove', startHover)
-          .set('moveleave', leaveGraphic)
-          .set('mousedown', startDrag)
-          .set('mouseup', stopDrag);
+          .set('wheel', [zoom, false])
+          .set('contextmenu', [zoom2fit, false])
+          .set('click', [displayLabel, false])
+          .set('mousedown', [startDrag, true])
+          .set('mousemove', [drag, true])
+          .set('mouseup', [stopDrag, true]);
 
        function graphicEventHandler(event) {
           const handler = Handlers.get(event.type);
-          if (handler !== undefined) {
+          console.log(`${event.type} -- ${event.ctrlKey}`);
+          if (handler !== undefined && event.ctrlKey == handler[1]) {
              event.preventDefault();
-             handler.call(window, event);
+             if (handler[0].call(window, event)) {
+                resizeGraphic();
+                Last_display_time = performance.now();
+             }
              event.stopPropagation();
-             resizeGraphic();
           }
        }
 
        function zoom(event) {
-          graphicContext.zoom += 0.1 * (event.originalEvent.deltaY < 0 ? 1 : -1);
+          (event.originalEvent.deltaY < 0) ? graphicContext.zoomIn() : graphicContext.zoomOut();
+          return true
        }
 
        function zoom2fit(event) {
-          graphicContext.zoom = 1;
-          graphicContext.translation = [0,0];
+          graphicContext.reset();
+          return true;
        }
 
-       let Hover_timer = undefined;
-       function startHoverSense(event) {
-          const hoverTimer = function () {
-             // don't display hover help in the middle of a drag-and-drop operation
-             if (Drag_start === undefined) {
-                // create new canvas, child of graphic
-                // place at event
-                // get context, paint text
-                // console.log(`location: ${event.originalEvent.clientX} x ${event.originalEvent.clientY}`);
-             }
-          };
-          Hover_timer = setTimeout(hoverTimer, 400);
-       }
-
-       function startHover(event) {
-          stopHoverSense(event);
-          startHoverSense(event);
-       }
-
-       function stopHoverSense(event) {
-          Hover_timer = clearTimeout(Hover_timer);
-       }
-
-       function leaveGraphic(event) {
-          stopHoverSense(event);
-          Drag_start = undefined;
+       function displayLabel(event) {
+          console.log('displayLabel -- not implemented');
        }
 
        let Drag_start = undefined;
@@ -191,12 +173,24 @@
           Drag_start = [event.originalEvent.clientX, event.originalEvent.clientY];
        }
 
+       let Last_display_time = 0;
+       function drag(event) {
+          move(event);
+          startDrag(event);
+          return (performance.now() - Last_display_time) > 100;  // only re-draw after 100ms
+       }
+
+       function move(event) {
+          if (Drag_start !== undefined) {
+             graphicContext.move(event.originalEvent.clientX - Drag_start[0],
+                                 event.originalEvent.clientY - Drag_start[1] );
+          }
+       }
+
        function stopDrag(event) {
-          graphicContext.translation = [
-             graphicContext.translation[0] + (event.originalEvent.clientX - Drag_start[0]),
-             graphicContext.translation[1] + (event.originalEvent.clientY - Drag_start[1])
-          ];
+          move(event);
           Drag_start = undefined;
+          return true;
        }
 
 

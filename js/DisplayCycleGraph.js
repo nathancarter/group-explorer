@@ -239,4 +239,21 @@ class DisplayCycleGraph {
       return Math.max( DisplayCycleGraph.DEFAULT_MIN_RADIUS,
                        biggest / 2 + 10 );
    }
+
+   reset() {
+      this.zoom = 1;
+      this.translation = [0, 0];
+   }
+
+   zoomIn() {
+      this.zoom += 0.1;
+   }
+
+   zoomOut() {
+      this.zoom -= 0.1;
+   }
+
+   move(deltaX, deltaY) {
+      this.translation = [this.translation[0] + deltaX, this.translation[1] + deltaY];
+   }
 }
