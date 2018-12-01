@@ -143,7 +143,7 @@
 
        function graphicEventHandler(event) {
           const handler = Handlers.get(event.type);
-          console.log(`${event.type} -- ${event.ctrlKey}`);
+          // console.log(`${event.type} -- ${event.ctrlKey}`);
           if (handler !== undefined && event.ctrlKey == handler[1]) {
              event.preventDefault();
              if (handler[0].call(window, event)) {
@@ -175,9 +175,12 @@
 
        let Last_display_time = 0;
        function drag(event) {
-          move(event);
-          startDrag(event);
-          return (performance.now() - Last_display_time) > 100;  // only re-draw after 100ms
+          if (Drag_start !== undefined) {
+             move(event);
+             startDrag(event);
+             return (performance.now() - Last_display_time) > 100;  // only re-draw after 100ms
+          }
+          return false;
        }
 
        function move(event) {
