@@ -64,20 +64,20 @@ class DisplayCycleGraph {
       // compute ideal diagram size
       this.radius = this._minimumRadiusForNames();
       if ( hideNames ) this.radius = 6;
-      var sideLength = this._bestCanvasSideLength( this.radius );
+      this.sideLength = this._bestCanvasSideLength( this.radius );
       if ( !this.options.width && !this.options.height ) {
-         this.canvas.height = sideLength;
-         this.canvas.width = sideLength;
-      } else {
-         this.radius *= this.canvas.width / sideLength;
-      }
+         this.canvas.height = $(this.canvas).parent().height();
+         this.canvas.width = $(this.canvas).parent().width();
 
-      // set up the scaled, translated canvas
-      const scale = Math.min($(this.canvas).parent().height()/this.canvas.height,
-                             $(this.canvas).parent().width()/this.canvas.width,
-                             1.0) * (this.zoom || 1);
-      this.context.scale(scale, scale);
-      this.context.translate(this.translation[0], this.translation[1]);
+         // set up the scaled, translated canvas
+         this.context.translate(this.translation[0], this.translation[1]);
+         const scale = Math.min(this.canvas.height/this.sideLength,
+                                this.canvas.width/this.sideLength,
+                                1.0) * this.zoom;
+         this.context.scale(scale, scale);
+      } else {
+         this.radius *= this.canvas.width / this.sideLength;
+      }
 
       // clear the background, setup the font
       this.context.fillStyle = '#C8C8E8';
@@ -175,10 +175,20 @@ class DisplayCycleGraph {
    // dimensions, applying the margin given by _margin(), also
    // documented above.
    _canvasX( pos ) {
+      if ( !this.options.width && !this.options.height ) {
+         return this._margin() + this._normalized( pos ).x *
+            ( this.sideLength - 2 * this._margin() );
+      }
+
       return this._margin() + this._normalized( pos ).x *
          ( this.canvas.width - 2 * this._margin() );
    }
    _canvasY( pos ) {
+      if ( !this.options.width && !this.options.height ) {
+         return this._margin() + ( 1 - this._normalized( pos ).y ) *
+            ( this.sideLength - 2 * this._margin() );
+      }
+
       return this._margin() + ( 1 - this._normalized( pos ).y ) *
          ( this.canvas.height - 2 * this._margin() );
    }
@@ -246,14 +256,25 @@ class DisplayCycleGraph {
    }
 
    zoomIn() {
-      this.zoom += 0.1;
+      this.zoom = this.zoom * (1 + 0.1);
+      this._adjustCenter(1.1);
    }
 
    zoomOut() {
-      this.zoom -= 0.1;
+      this.zoom = this.zoom / (1 + 0.1);
+      this._adjustCenter(1/1.1);
    }
 
+   // Adjusts for display drift because scaling is from (0,0), not the center of the display
+   _adjustCenter(zoomFactor) {
+      const center = Math.min(this.canvas.height/2, this.canvas.width/2);
+      const adjustment = -center * (zoomFactor - 1)/zoomFactor;
+      this.move(adjustment, adjustment);
+   }
+
+   // deltaX, deltaY are in screen coordinates
    move(deltaX, deltaY) {
-      this.translation = [this.translation[0] + deltaX, this.translation[1] + deltaY];
+      console.log(`${this.zoom} -- ${deltaX/this.zoom}, ${deltaY/this.zoom}`);
+      this.translation = [this.translation[0] + deltaX/this.zoom, this.translation[1] + deltaY/this.zoom];
    }
 }
