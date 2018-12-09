@@ -293,6 +293,22 @@ class CycleGraph {
       return result;
    }
 
+   // Shortest distance between two vertices in the diagram
+   get closestTwoPositions() {
+      var dist = Infinity;
+      this.group.elements.forEach( ( g, i ) => {
+         var pos1 = this.positions[g];
+         this.group.elements.forEach( ( h, j ) => {
+            if ( g == h ) return;
+            var pos2 = this.positions[h];
+            dist = Math.min( dist, Math.sqrt(
+               ( pos1.x - pos2.x ) * ( pos1.x - pos2.x )
+               + ( pos1.y - pos2.y ) * ( pos1.y - pos2.y ) ) );
+         } );
+      } );
+      return dist;
+   }
+
    highlightByBackground(partition) {
       if ( !this.highlights ) this.highlights = { };
       this.highlights.background =
