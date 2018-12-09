@@ -9,8 +9,22 @@
 
       <style>
        #graphic {
-          overflow-x: auto;
+          overflow: hidden;
           background-color: #C8C8F0;
+       }
+
+       #nodeLabel {
+          background-color: #FFFFD6;
+          border: 1px solid #000000;
+          box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);	/* gray mist */
+          color: #000000;
+          font-size: medium;
+          font-style: normal;
+          font-weight: normal;
+          margin: 0;
+          padding: 16px;
+          position: absolute;
+          z-index: 1;
        }
       </style>
 
@@ -38,6 +52,11 @@
        function registerCallbacks() {
           $('#help').on('click', help);
           $('#reset').on('click', load);
+
+          // mouse events in large graphic
+          $('#graphic').on('click', graphicEventHandler);
+          $('#graphic').on('wheel', graphicEventHandler);
+          $('#graphic').on('contextmenu', graphicEventHandler);
        }
        $(window).on('load', load);	// like onload handler in body
        $(window).on('resize', resizeBody);
@@ -81,11 +100,9 @@
              $('#organization-select').append(option);
           }
 
-          // Draw Cycle Graph
-
+          // Create Cycle Graph, graphic context (it will be displayed in resizeBody below)
           cyclegraph = new CycleGraph(group);
           graphicContext = new DisplayCycleGraph({container: $('#graphic')});
-          graphicContext.showLargeGraphic(cyclegraph);
 
           // Register the splitter with jquery-resizable, so you can resize the graphic horizontally
           // by grabbing the border between the graphic and the subset control and dragging it
@@ -93,15 +110,120 @@
              handleSelector: '#splitter',
              resizeHeight: false,
              resizeWidthFrom: 'left',
+             onDrag: resizeGraphic,
           });
 
+          setupDragAndDrop();
           resizeBody();
        }
 
        function resizeBody() {
-          $('#graphic').height(window.innerHeight - $('#header').height());
-          $('#text').height(window.innerHeight - $('#header').height());
+          $('body').height(window.innerHeight - 8);
+          $('body').width(window.innerWidth - 8);
+
+          resizeGraphic();
        };
+
+       function resizeGraphic() {
+          graphicContext.canvas.width = $('#graphic').width();
+          graphicContext.canvas.height = $('#graphic').height();
+          graphicContext.showLargeGraphic(cyclegraph);
+       }
+
+
+       /*
+        * Large graphic events
+        *   Mouse wheel -- zoom in/out
+        *   Right click -- zoom to fit
+        *   Left click -- display label
+        */
+       const Handlers = new Map()
+          .set('wheel', zoom)
+          .set('contextmenu', zoom2fit)
+          .set('click', displayLabel);
+
+       let Last_display_time = performance.now();
+       function graphicEventHandler(event) {
+          const handler = Handlers.get(event.type);
+          if (handler !== undefined) {
+             event.preventDefault();
+             if (handler.call(window, event)) {
+                resizeGraphic();
+                Last_display_time = performance.now();
+             }
+             event.stopPropagation();
+          }
+       }
+
+       function zoom(event) {
+          (event.originalEvent.deltaY < 0) ? graphicContext.zoomIn() : graphicContext.zoomOut();
+          return performance.now() - Last_display_time > 100;
+       }
+
+       function zoom2fit(event) {
+          graphicContext.reset();
+          return true;
+       }
+
+       function displayLabel(event) {
+          const canvas = graphicContext.canvas;
+          const context = graphicContext.context;
+          const bounding_rectangle = $('#graphic')[0].getBoundingClientRect();
+          const click = {x: event.clientX - bounding_rectangle.x, y: event.clientY - bounding_rectangle.y};
+          const element = graphicContext.select(click.x, click.y);
+          $('#nodeLabel').remove();
+          if (element !== undefined) {
+             const $label = $('<div id="nodeLabel">').html(math(group.representation[element]));
+             $('#graphic').append($label);
+             Menu.setMenuLocations(event, $label);
+             MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'nodeLabel']);
+          }
+       }
+
+       /*
+        * Drag-and-drop CycleGraph in large diagram
+        */
+       function setupDragAndDrop() {
+          $('#graphic > canvas').attr('draggable', 'true');
+          $('#graphic > canvas').off('dragstart', dragstart).on('dragstart', dragstart);
+          $('#graphic > canvas').off('drop', drop).on('drop', drop);
+          $('#graphic > canvas').off('dragover', dragover).on('dragover', dragover);
+       }
+
+       let Drag_start = undefined;
+       function dragstart(event) {
+          // Built-in dnd image drag doesn't work too well on Chrome/Linux
+          //   Workaround is to explicitly make img from screen image and drag that
+          if (navigator.appVersion.indexOf('Chrome') != -1 && navigator.appVersion.indexOf('Linux') != -1) {
+             const canvas = graphicContext.canvas;
+             const drag_width = canvas.width/3;
+             const drag_height = canvas.height/3;
+             // note that top value is negative -- Chrome will still drag it even though it's not visible
+             const image = $(`<img id="hidden-image" src="${graphicContext.canvas.toDataURL()}"
+                style="position: absolute; top: -${drag_height}; width: ${drag_width};">`
+             )[0];
+             $('#graphic').append(image);
+             event.originalEvent.dataTransfer.setDragImage(image, drag_width/2, drag_height/2);
+          }
+          event.originalEvent.dataTransfer.setData('text/plain', 'anything');  // needed for Firefox (!?)
+          Drag_start = [event.originalEvent.clientX, event.originalEvent.clientY];
+       }
+
+       function drop(event) {
+          event.preventDefault();
+          if (Drag_start !== undefined) {
+             graphicContext.move(event.originalEvent.clientX - Drag_start[0],
+                                 event.originalEvent.clientY - Drag_start[1] );
+             Drag_start = undefined;
+          }
+          $('#hidden-image').remove();
+          resizeGraphic();
+       }
+
+       function dragover(event) {
+          event.preventDefault();
+       }
+
 
        /* Show the desired panel, hide the rest */
        function showPanel(panel_name) {
