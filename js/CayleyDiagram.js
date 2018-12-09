@@ -308,7 +308,7 @@ CayleyDiagram.LinearLayout = class extends CayleyDiagram.LayoutStrategy {
    }
 
    get layout() {
-      return CayleyDiagram.LINEAR_LAYOUT;j
+      return CayleyDiagram.LINEAR_LAYOUT;
    }
 
    _layout(children) {
