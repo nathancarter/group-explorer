@@ -109,7 +109,9 @@
              handleSelector: '#splitter',
              resizeHeight: false,
              resizeWidthFrom: 'left',
+             onDrag: function () { graphicContext.showLargeGraphic( multtable ); }
           });
+          $('#graphic').scroll(function() { graphicContext.showLargeGraphic( multtable ); });
 
           setupDragAndDrop();
 
@@ -175,7 +177,7 @@
        /* These are needed to work around Chrome limitation that dragover handler cannot read the event dataTransfer object */
        var DnD_startElements,       // {row:, column:} of start of drag
            DnD_elementCoordinates;  // array of top/left cell pixel coordinates relative to canvas
-       
+
        /* Start drag */
        function dragstart(ev) {
           // Set dragImage to a single blank pixel (the default is to drag an image of the whole canvas)
@@ -186,7 +188,7 @@
           const cellSize = $('#graphic > canvas').height()/(group.order + multtable.separation*(group.order/multtable.stride - 1));
           window.DnD_elementCoordinates =
              group.elements.map( (inx) => cellSize*(inx + multtable.separation*(Math.floor(inx/multtable.stride))) );
-          
+
           // Calculate which cell we're starting in -- has to be in first row or column (but not 0x0 cell)
           const {row, column} = getElements(ev);
           if ( (row != 0 && column != 0) || (row == 0 && column == 0) ) {

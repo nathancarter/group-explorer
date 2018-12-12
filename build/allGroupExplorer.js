@@ -3085,6 +3085,7 @@ class DisplayMulttable {
       if (options === undefined) {
          options = {};
       }
+      this.options = options;
 
       // take canvas dimensions from container (if specified), option, or default
       let width, height;
@@ -3166,6 +3167,19 @@ class DisplayMulttable {
       this.canvas.height = canvasSize;
       this.canvas.width = canvasSize;
 
+      // figure out the area that's actually visible, so we draw only that part
+      var minX, maxX, minY, maxY;
+      if ( this.options.container ) {
+         minX = this.options.container[0].scrollLeft;
+         maxX = minX + this.options.container.width();
+         minY = this.options.container[0].scrollTop;
+         maxY = minY + this.options.container.height();
+      } else {
+         minX = minY = 0;
+         maxX = this.canvas.width;
+         maxY = this.canvas.height;
+      }
+
       // note that background shows through in separations between cosets
       this.context.fillStyle = DisplayMulttable.BACKGROUND;
       this.context.fillRect(0, 0, canvasSize, canvasSize);
@@ -3175,10 +3189,19 @@ class DisplayMulttable {
       this.context.textBaseline = 'middle';  // fillText y coordinate is center of upper-case letter
 
       for (let inx = 0; inx < group.order; inx++) {
+
+         // be sure to skip the separation between cosets as needed
+         const x = boxSize*inx + separation*Math.floor(inx/stride);
+
+         // skip entire rows that we don't need to draw
+         if ( x > maxX || x+boxSize < minX ) continue;
+
          for (let jnx = 0; jnx < group.order; jnx++) {
             // be sure to skip the separation between cosets as needed
-            const x = boxSize*inx + separation*Math.floor(inx/stride);
             const y = boxSize*jnx + separation*Math.floor(jnx/stride);
+
+            // skip any cells within the row that we don't need to draw
+            if ( y > maxY || y+boxSize < minY ) continue;
 
             const product = multtable.group.mult(multtable.elements[inx], multtable.elements[jnx]);
 
@@ -3649,8 +3672,6 @@ class DisplayCycleGraph {
       this.zoom = 1;  // user-supplied scale factor multiplier
       this.translate = {dx: 0, dy: 0};  // user-supplied translation, in screen coordinates
       this.transform = new THREE.Matrix3();  // current cycleGraph -> screen transformation
-
-      var graphic = document.getElementById( 'graphic' );
    }
 
    static _setDefaults() {
