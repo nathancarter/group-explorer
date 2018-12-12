@@ -247,7 +247,7 @@ class DisplayCycleGraph {
       // compute cycleGraph coordinates from screen coordinates by inverting this.transform
       const cg_coords = new THREE.Vector2(screenX, screenY).applyMatrix3(new THREE.Matrix3().getInverse(this.transform));
       const index = this.cycleGraph.positions.findIndex( (pos) =>
-         Math.abs(pos.x - cg_coords.x) < this.radius && Math.abs(pos.y - cg_coords.y) < this.radius
+         Math.sqrt( Math.pow( pos.x - cg_coords.x, 2 ) + Math.pow( pos.y - cg_coords.y, 2 ) ) < this.radius
       );
       return (index == -1) ? undefined : index;
    }
