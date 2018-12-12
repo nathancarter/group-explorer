@@ -36,7 +36,7 @@
  * SolvableInfo
  * Z_nm group
  * Ad hoc
- 
+
 ## Group Explorer load performance thoughts (measure/compare?)
  * Establish performance target
  * Load group files
@@ -47,11 +47,10 @@
      * Concatenate png files and shred them on client?
      * Download to web workers, pass back as data to main thread?
  * Initially display MathML as HTML, then replace with MathJax output as it's rendered
- 
+
 # Nathan's List
 
  * Rename Cycle Diagram to Cycle Graph
- * Fix Cycle Graph for Z_1 to be centered
  * Add an object of symmetry for Z_1: something with no symmetry
 
 # Anyone's List (as yet unclaimed)
@@ -64,6 +63,8 @@
     * Link to help files (or to help stub if they're not yet done)
     * [GitHub icon](https://github.com/logos) linking to this
       source code repository
+ * Improve the Subgroups view so that instead of using HTML with MathJax
+   inside, the entire "H_{index} = < element names >" portion is MathJax.
 
 ## Bug fixes
 
