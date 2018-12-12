@@ -52,6 +52,27 @@
 
  * Rename Cycle Diagram to Cycle Graph
  * Add an object of symmetry for Z_1: something with no symmetry
+ * Design how permalinks to GE resources should work and add a plan for
+   implementation.  Goal: As many things as possible should be linkable
+   directly so that students, instructors, etc. can just copy the URL as if
+   it were Google maps and paste it into an email, and anyone can jump right
+   to the visualization the first user was seeing.
+ * Consider how to improve the default style of the three visualizations:
+    * Remove colored background from all three?
+    * Investigate drawing Cycle Graphs with SVGs; let the browser do the
+      rendering optimizations and get free vector graphics as a result.
+    * Investigate how to get Cayley Diagrams to look more like VGT and less
+      like GE2.0.
+    * Consider how to create an exporter for 3D Cayley Diagrams to SVGs,
+      for users to download for use in contexts where they want vector graphics.
+       * [Recall your 3D SVG library](https://github.com/nathancarter/svg3d)
+    * Consider letting them also download PDF versions.  Note that PDFKit can
+      do this if you have SVGs first; or you can skip SVGs and go stright to
+      PDFs instead.  Either way, here are some useful links:
+       * [Demo PDF made by PDFKit](https://github.com/foliojs/pdfkit/blob/master/demo/out.pdf)
+         (See last page on which a tiger SVG is embedded.)
+       * [The source code that created the tiger page](https://github.com/foliojs/pdfkit/blob/83f5f7243172a017adcf6a7faa5547c55982c57b/demo/test.js#L48)
+       * [The tiger data in JSON-like format](https://raw.githubusercontent.com/foliojs/pdfkit/master/demo/tiger.js)
 
 # Anyone's List (as yet unclaimed)
 
