@@ -3,6 +3,7 @@ class CycleGraph {
    constructor(group) {
       this.group = group;
       this.layOutElementsAndPaths();
+      this.findClosestTwoPositions();
       this.reset();
    }
 
@@ -294,19 +295,18 @@ class CycleGraph {
    }
 
    // Shortest distance between two vertices in the diagram
-   get closestTwoPositions() {
-      var dist = Infinity;
-      this.group.elements.forEach( ( g, i ) => {
-         var pos1 = this.positions[g];
-         this.group.elements.forEach( ( h, j ) => {
-            if ( g == h ) return;
-            var pos2 = this.positions[h];
-            dist = Math.min( dist, Math.sqrt(
+   findClosestTwoPositions() {
+      this.closestTwoPositions = Infinity;
+      const order = this.group.order;
+      for (let i = 0; i < order-1; i++) {
+         const pos1 = this.positions[i];
+         for (let j = i+1; j < order; j++) {
+            const pos2 = this.positions[j];
+            this.closestTwoPositions = Math.min( this.closestTwoPositions, Math.sqrt(
                ( pos1.x - pos2.x ) * ( pos1.x - pos2.x )
                + ( pos1.y - pos2.y ) * ( pos1.y - pos2.y ) ) );
-         } );
-      } );
-      return dist;
+         }
+      }
    }
 
    highlightByBackground(partition) {
