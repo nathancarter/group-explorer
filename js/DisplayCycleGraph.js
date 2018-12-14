@@ -61,7 +61,10 @@ class DisplayCycleGraph {
    // == a smaller graphic in the end, useful for thumbnails.)
    showLargeGraphic(cycleGraph, hideNames = false) {
       // save the cycle graph for use by other members of this object
-      this.cycleGraph = cycleGraph;
+      if (cycleGraph != this.cycleGraph) {
+         this.cycleGraph = cycleGraph;
+         this.longest_label_length = undefined;
+      }
       const bbox = cycleGraph.bbox;
 
       // paint the background
@@ -198,17 +201,18 @@ class DisplayCycleGraph {
       // (this is done in screen coordinates because scaling text from cycleGraph coordinates had too many gotchas -- rwe)
       this.context.setTransform(1,0,0,1,0,0);
       this.context.font = '14pt Arial';
-      const longest_label_length = cycleGraph.group.representation.reduce(
-         (longest, rep) => Math.max(longest, this.context.measureText(mathml2text(rep)).width),
-         0 );
+      if (this.longest_label_length === undefined) {
+         this.longest_label_length = cycleGraph.group.representation.reduce(
+            (longest, rep) => Math.max(longest, this.context.measureText(mathml2text(rep)).width),
+            0 );
+      }
 
       // "1" is to make short, tall names (like g^2) fit heightwise
       // "22" is a magic number that combines diameter/radius, effect of curved edges, point/pixel ratio, etc.
       //   -- but don't make font bigger than 50pt in any case
-      const fontScale = Math.min(50, scale * this.radius * Math.min(1, 22 / longest_label_length));
+      const fontScale = Math.min(50, scale * this.radius * Math.min(1, 22 / this.longest_label_length));
 
       // skip out if this font would be too small to see anyhow
-      //   (this cuts the rendering time for a large group substantially -- ~30-40% for Tesseract)
       if (fontScale < 1.5) {
          return;
       }
@@ -222,8 +226,6 @@ class DisplayCycleGraph {
       const pos_vector = new THREE.Vector2();
       cycleGraph.positions.forEach( ( pos, elt ) => {
          // skip nodes that are off the screen
-         //   up to half the rendering time for a large group can be spent drawing labels
-         //   so skipping nodes not in view can be a substantial savings
          if (   pos.x < pre_image.minX || pos.x > pre_image.maxX
              || pos.y < pre_image.minY || pos.y > pre_image.maxY) {
             return;
