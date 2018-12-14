@@ -48,18 +48,30 @@
            cyclegraph,    // data being displayed in large diagram
            graphicContext;	// graphic context for large diagram
 
+       /* Initial entry to javascript, called once after document load */
+       $(window).on('load', load);
+
        // Static event managers (called after document is assembled)
        function registerCallbacks() {
-          $('#help').on('click', help);
-          $('#reset').on('click', load);
+          $(window).off('resize', resizeBody).on('resize', resizeBody);
+          $(window).off('click', clearLabels).on('click', clearLabels);
+          $(window).off('wheel', clearLabels).on('wheel', clearLabels);
+          $(window).off('contextMenu', clearLabels).on('contextMenu', clearLabels);
+
+          $('#help').off('click', help).on('click', help);
+          $('#reset').off('click', load).on('click', load);
 
           // mouse events in large graphic
-          $('#graphic').on('click', graphicEventHandler);
-          $('#graphic').on('wheel', graphicEventHandler);
-          $('#graphic').on('contextmenu', graphicEventHandler);
+          $('#graphic > canvas').off('click', displayLabel).on('click', displayLabel);
+          $('#graphic > canvas').off('wheel', zoom).on('wheel', zoom);
+          $('#graphic > canvas').off('contextmenu', zoom2fit).on('contextmenu', zoom2fit);
+
+          // drag-and-drop in large graphic
+          $('#graphic > canvas').attr('draggable', 'true');
+          $('#graphic > canvas').off('dragstart', dragstart).on('dragstart', dragstart);
+          $('#graphic > canvas').off('drop', drop).on('drop', drop);
+          $('#graphic > canvas').off('dragover', dragover).on('dragover', dragover);
        }
-       $(window).on('load', load);	// like onload handler in body
-       $(window).on('resize', resizeBody);
 
        function load() {
           // Promise to load group from invocation URL
@@ -81,28 +93,16 @@
 
        /* Now that subsetDisplay is loaded, complete the setup */
        function completeSetup() {
-          // Register event handlers
-          registerCallbacks();
-
           // Create header from group name and queue MathJax to typeset it
           $('#header').html('Cycle Graph for&nbsp;' + math(group.name));
           MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
 
-          // Create list of subgroups for select options, one choice for each proper subgroup
-          //   (Note that counting starts at 1; subgroup 0, the identity group, is already filled in by static HTML)
-          for (let inx = 1; inx < group.subgroups.length - 1; inx++) {
-             // Recursive routine calculates multi-character subscript as Unicode text, since <option> tags cannot contain HTML
-             // (We could also roll our own <select> here)
-             const subscript = (jnx) =>
-                (jnx == 0) ? '' : (subscript(Math.floor(jnx / 10)) + subscripts[jnx % 10]);  // subscripts defined in js/mathmlUtils.js
-             const subgroup = group.subgroups[inx];
-             const option =  eval(Template.HTML('organization-choice-template'));
-             $('#organization-select').append(option);
-          }
-
           // Create Cycle Graph, graphic context (it will be displayed in resizeBody below)
           cyclegraph = new CycleGraph(group);
           graphicContext = new DisplayCycleGraph({container: $('#graphic')});
+
+          // Register event handlers
+          registerCallbacks();
 
           // Register the splitter with jquery-resizable, so you can resize the graphic horizontally
           // by grabbing the border between the graphic and the subset control and dragging it
@@ -113,7 +113,6 @@
              onDrag: resizeGraphic,
           });
 
-          setupDragAndDrop();
           resizeBody();
        }
 
@@ -132,64 +131,49 @@
 
 
        /*
-        * Large graphic events
+        * Large graphic mouse events
         *   Mouse wheel -- zoom in/out
         *   Right click -- zoom to fit
         *   Left click -- display label
+        *   Drag-and-drop -- move cycle graph
         */
-       const Handlers = new Map()
-          .set('wheel', zoom)
-          .set('contextmenu', zoom2fit)
-          .set('click', displayLabel);
-
        let Last_display_time = performance.now();
-       function graphicEventHandler(event) {
-          const handler = Handlers.get(event.type);
-          if (handler !== undefined) {
-             event.preventDefault();
-             if (handler.call(window, event)) {
-                resizeGraphic();
-                Last_display_time = performance.now();
-             }
-             event.stopPropagation();
+       function zoom(event) {
+          event.preventDefault();
+          (event.originalEvent.deltaY < 0) ? graphicContext.zoomIn() : graphicContext.zoomOut();
+          if (performance.now() - Last_display_time > 100) {
+             resizeGraphic();
+             Last_display_time = performance.now();
           }
        }
 
-       function zoom(event) {
-          (event.originalEvent.deltaY < 0) ? graphicContext.zoomIn() : graphicContext.zoomOut();
-          return performance.now() - Last_display_time > 100;
-       }
-
        function zoom2fit(event) {
+          event.preventDefault();
           graphicContext.reset();
-          return true;
+          resizeGraphic();
        }
 
        function displayLabel(event) {
-          const canvas = graphicContext.canvas;
-          const context = graphicContext.context;
+          event.preventDefault();
+          clearLabels(event);
           const bounding_rectangle = $('#graphic')[0].getBoundingClientRect();
-          const click = {x: event.clientX - bounding_rectangle.x, y: event.clientY - bounding_rectangle.y};
-          const element = graphicContext.select(click.x, click.y);
-          $('#nodeLabel').remove();
+          const clickX = event.clientX - bounding_rectangle.x;
+          const clickY = event.clientY - bounding_rectangle.y;
+          const element = graphicContext.select(clickX, clickY);
           if (element !== undefined) {
              const $label = $('<div id="nodeLabel">').html(math(group.representation[element]));
              $('#graphic').append($label);
              Menu.setMenuLocations(event, $label);
              MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'nodeLabel']);
+             event.stopPropagation();
           }
        }
 
-       /*
-        * Drag-and-drop CycleGraph in large diagram
-        */
-       function setupDragAndDrop() {
-          $('#graphic > canvas').attr('draggable', 'true');
-          $('#graphic > canvas').off('dragstart', dragstart).on('dragstart', dragstart);
-          $('#graphic > canvas').off('drop', drop).on('drop', drop);
-          $('#graphic > canvas').off('dragover', dragover).on('dragover', dragover);
+       function clearLabels(event) {
+          $('#nodeLabel').remove();
        }
 
+       // Start drag-and-drop CycleGraph in large diagram
        let Drag_start = undefined;
        function dragstart(event) {
           // Built-in dnd image drag doesn't work too well on Chrome/Linux
@@ -200,8 +184,7 @@
              const drag_height = canvas.height/3;
              // note that top value is negative -- Chrome will still drag it even though it's not visible
              const image = $(`<img id="hidden-image" src="${graphicContext.canvas.toDataURL()}"
-                style="position: absolute; top: -${drag_height}; width: ${drag_width};">`
-             )[0];
+                             style="position: absolute; top: -${drag_height}; width: ${drag_width};">`)[0];
              $('#graphic').append(image);
              event.originalEvent.dataTransfer.setDragImage(image, drag_width/2, drag_height/2);
           }
@@ -222,18 +205,6 @@
 
        function dragover(event) {
           event.preventDefault();
-       }
-
-
-       /* Show the desired panel, hide the rest */
-       function showPanel(panel_name) {
-          for (const name of panelNames) {
-             if (name == panel_name) {
-                $(name).show();
-             } else {
-                $(name).hide();
-             }
-          }
        }
 
        function help() {
@@ -264,10 +235,6 @@
       </script>
    </head>
    <body class="vert">
-      <div id="control-options" class="horiz">
-         <button id="subset-button">Subsets</button>
-      </div>
-
       <div id="subset-control" class="fill-vert">
          <!-- This is filled in by subsetDisplay/subsets.html -->
       </div>
