@@ -88,12 +88,3 @@
    inside, the entire "H_{index} = < element names >" portion is MathJax.
 
 ## Bug fixes
-
- * Large groups won't render multiplication tables because they
-   compute that they need a canvas larger than 2^14 on a side,
-   which Chrome does not allow.  Also, big canvases slow Chrome
-   down.  Perhaps cap it at 5000 and to fit big groups in,
-   decrease the font size instead.  If it gets too small, omit
-   element labels entirely.
-     * Display labels that are no longer visible with hover help?
-     * Zoom to make labels readable?
