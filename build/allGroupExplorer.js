@@ -2963,6 +2963,8 @@ SymmetryObject._init();
 class Multtable {
    constructor(group) {
       this.group = group;
+      this.labels = group.representation.map( (rep) => mathml2text(rep) );
+      this.longestLabel = this.labels.reduce( (longest, label) => (label.length > longest.length) ? label : longest, '' );
       this.reset();
    }
 
@@ -2976,7 +2978,7 @@ class Multtable {
       this.elements = this.group.elements.slice();
       this.separation = 0;
       this.colors = Multtable.COLORATION_RAINBOW;
-      this._stride = this.group.order;
+      this.stride = this.group.order;
       this.clearHighlights();
    }
 
@@ -2984,20 +2986,12 @@ class Multtable {
       this.elements = [];
       const cosets = this.group.getCosets(subgroup.members);
       cosets.forEach( (coset) => this.elements.push(...coset.toArray()) );
-      this._stride = subgroup.order;
+      this.stride = subgroup.order;
       return this;
    }
 
    get colors() {
-      return (this._backgrounds === undefined) ? this._colors : this._backgrounds;
-   }
-
-   get borders() {
-      return this._borders;
-   }
-
-   get corners() {
-      return this._corners;
+      return this.backgrounds || this._colors;
    }
 
    set colors(coloration) {
@@ -3020,60 +3014,68 @@ class Multtable {
       this._colors = this.group.elements.map( (_, inx) => fn(inx) );
    }
 
+   get size() {
+      return this.group.order + this.separation * ((this.group.order/this.stride) - 1);
+   }
+
+   position(index) {
+      return (index < 0 || index > this.group.order) ? undefined : index + this.separation * Math.floor(index/this.stride);
+   }
+
+   index(position) {
+      const inx = Math.floor(position - this.separation * Math.floor(position / (this.stride + this.separation)));
+      return (inx < 0 || inx > this.group.order - 1) ? undefined : inx;
+   }
+
    /*
     * Highlight routines
     *   if only one color is needed (a common case) make each highlight color different
     *   if n colors are needed just start with hsl(0,100%,80%) and move 360/n for each new color
     */
    highlightByBackground(elements) {
-      this._backgrounds = new Array(this.group.order).fill(DisplayMulttable.BACKGROUND);
+      this.backgrounds = new Array(this.group.order).fill(DisplayMulttable.BACKGROUND);
       elements.forEach( (els, colorIndex) => {
          const colorFraction = Math.round(360 * colorIndex / elements.length);
          const color = `hsl(${colorFraction}, 100%, 80%)`;
-         els.forEach( (el) => this._backgrounds[el] = color );
+         els.forEach( (el) => this.backgrounds[el] = color );
       } );
    }
 
    highlightByBorder(elements) {
-      this._borders = new Array(this.group.order).fill(undefined);
+      this.borders = new Array(this.group.order).fill(undefined);
       if (elements.length == 1) {
-         elements[0].forEach( (el) => this._borders[el] = 'hsl(120, 100%, 80%)' );
+         elements[0].forEach( (el) => this.borders[el] = 'hsl(120, 100%, 80%)' );
       } else {
          elements.forEach( (els, colorIndex) => {
             const colorFraction = Math.round(360 * colorIndex / elements.length);
             const color = `hsl(${colorFraction}, 100%, 80%)`;
-            els.forEach( (el) => this._borders[el] = color );
+            els.forEach( (el) => this.borders[el] = color );
          } );
       }
    }
 
    highlightByCorner(elements) {
-      this._corners = new Array(this.group.order).fill(undefined);
+      this.corners = new Array(this.group.order).fill(undefined);
       if (elements.length == 1) {
-         elements[0].forEach( (el) => this._corners[el] = 'hsl(240, 100%, 80%)' );
+         elements[0].forEach( (el) => this.corners[el] = 'hsl(240, 100%, 80%)' );
       } else {
-         this._corners = new Array(this.group.order).fill(undefined);
+         this.corners = new Array(this.group.order).fill(undefined);
          elements.forEach( (els, colorIndex) => {
             const colorFraction = Math.round(360 * colorIndex / elements.length);
             const color = `hsl(${colorFraction}, 100%, 80%)`;
-            els.forEach( (el) => this._corners[el] = color );
+            els.forEach( (el) => this.corners[el] = color );
          } );
       }
    }
 
    clearHighlights() {
-      this._backgrounds = undefined;
-      this._borders = undefined;
-      this._corners = undefined;
-   }
-
-   get stride() {
-      return this._stride;
+      this.backgrounds = undefined;
+      this.borders = undefined;
+      this.corners = undefined;
    }
 }
 
 Multtable._init();
-
 
 class DisplayMulttable {
    // height & width, or container
@@ -3103,14 +3105,17 @@ class DisplayMulttable {
       if (options.container !== undefined) {
          options.container.append(this.canvas);
       }
+      this.zoom = 1;  // user-supplied scale factor multiplier
+      this.translate = {dx: 0, dy: 0};  // user-supplied translation, in screen coordinates
+      this.transform = new THREE.Matrix3();  // current multtable -> screen transformation
    }
 
    static _setDefaults() {
       DisplayMulttable.DEFAULT_CANVAS_HEIGHT = 100;
       DisplayMulttable.DEFAULT_CANVAS_WIDTH = 100;
+      DisplayMulttable.ZOOM_STEP = 0.1;
+      DisplayMulttable.MINIMUM_FONT = 2;
       DisplayMulttable.BACKGROUND = '#F0F0F0';
-      DisplayMulttable.DEFAULT_FONT = '14pt Arial';
-      DisplayMulttable.DEFAULT_FONT_HEIGHT = 19;
    }
 
    getImageURL(multtable) {
@@ -3147,165 +3152,208 @@ class DisplayMulttable {
    //     Color according to row/column product
    //     Write label in center, breaking permutation cycle text if necessary
    //
-   // Separation slider maps [0,1] => [0,boxSize]
+   // Separation slider maps [0,full scale] => [0, multtable.size]
    showLargeGraphic(multtable) {
-      this.context = this.canvas.getContext('2d');
-      this.context.font = DisplayMulttable.DEFAULT_FONT;
-      const fontHeight = DisplayMulttable.DEFAULT_FONT_HEIGHT;
-
-      const labels = multtable.group.elements.map( (el) => mathml2text(multtable.group.representation[el]) );
-      const longestLabel = labels.reduce( (longest, label) => (label.length > longest.length) ? label : longest, '' );
-      const longestLabelWidth =  this._measuredWidth(longestLabel);
-      const rowEstimate = this._isPermutation(longestLabel) ? Math.ceil(Math.sqrt(longestLabelWidth/fontHeight)/2) : 1;
-      const boxSize = Math.floor(Math.max(3*fontHeight*rowEstimate, 1.25*longestLabelWidth/rowEstimate));
-
-      const order = multtable.group.order;
-      const stride = multtable.stride;
-
-      const separation = multtable.separation*boxSize;
-      const canvasSize = order*boxSize + (order/stride - 1)*separation;
-      this.canvas.height = canvasSize;
-      this.canvas.width = canvasSize;
-
-      // figure out the area that's actually visible, so we draw only that part
-      var minX, maxX, minY, maxY;
-      if ( this.options.container ) {
-         minX = this.options.container[0].scrollLeft;
-         maxX = minX + this.options.container.width();
-         minY = this.options.container[0].scrollTop;
-         maxY = minY + this.options.container.height();
-      } else {
-         minX = minY = 0;
-         maxX = this.canvas.width;
-         maxY = this.canvas.height;
+      if (multtable != this.multtable) {
+         this.multtable = multtable;
+         this.permutationLabels = (multtable.longestLabel[0] == '(') ? Array(multtable.group.order) : undefined;
       }
 
       // note that background shows through in separations between cosets
+      this.context.setTransform([1, 0, 0, 1, 0, 0]);
       this.context.fillStyle = DisplayMulttable.BACKGROUND;
-      this.context.fillRect(0, 0, canvasSize, canvasSize);
+      this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-      this.context.font = DisplayMulttable.DEFAULT_FONT;
-      this.context.textAlign = 'left';       // fillText x coordinate is left-most end of string
-      this.context.textBaseline = 'middle';  // fillText y coordinate is center of upper-case letter
+      // set up scaling, translation from multtable units to screen pixels
+      const scale = this.zoom * Math.min(this.canvas.width / multtable.size, this.canvas.height / multtable.size, 200);
 
-      for (let inx = 0; inx < group.order; inx++) {
+      // translate center of scaled multtable to center of canvas
+      let x_translate = (this.canvas.width - scale*multtable.size)/2;
+      let y_translate = (this.canvas.height - scale*multtable.size)/2;
+      this.context.setTransform(scale, 0, 0, scale, x_translate + this.translate.dx, y_translate + this.translate.dy);
 
-         // be sure to skip the separation between cosets as needed
-         const x = boxSize*inx + separation*Math.floor(inx/stride);
+      // find pre-image of screen so we don't iterate over elements that aren't displayed
+      this.transform.set(scale, 0,     x_translate + this.translate.dx,
+                         0,     scale, y_translate + this.translate.dy,
+                         0,     0,     1);
+      const UL = new THREE.Vector2(0, 0).applyMatrix3(new THREE.Matrix3().getInverse(this.transform));
+      const LR = new THREE.Vector2(this.canvas.width, this.canvas.height).applyMatrix3(new THREE.Matrix3().getInverse(this.transform));
+      const minX = multtable.index(UL.x) || 0;
+      const minY = multtable.index(UL.y) || 0;
+      const maxX = (multtable.index(LR.x) + 1) || multtable.group.order;
+      const maxY = (multtable.index(LR.y) + 1) || multtable.group.order;
 
-         // skip entire rows that we don't need to draw
-         if ( x > maxX || x+boxSize < minX ) continue;
-
-         for (let jnx = 0; jnx < group.order; jnx++) {
-            // be sure to skip the separation between cosets as needed
-            const y = boxSize*jnx + separation*Math.floor(jnx/stride);
-
-            // skip any cells within the row that we don't need to draw
-            if ( y > maxY || y+boxSize < minY ) continue;
+      for (let inx = minX; inx < maxX; inx++) {
+         for (let jnx = minY; jnx < maxY; jnx++) {
+            const x = multtable.position(inx);
+            const y = multtable.position(jnx);
 
             const product = multtable.group.mult(multtable.elements[inx], multtable.elements[jnx]);
 
             // color box according to product
             this.context.fillStyle = multtable.colors[product];
-            this.context.fillRect(x, y, boxSize, boxSize);
+            this.context.fillRect(x, y, 1, 1);
 
             // draw borders if cell has border highlighting
             if (multtable.borders !== undefined && multtable.borders[product] !== undefined) {
-               this._drawBorder(x, y, boxSize, boxSize, multtable.borders[product]);
+               this._drawBorder(x, y, scale, multtable.borders[product]);
             }
 
             // draw corner if cell has corner highlighting
             if (multtable.corners !== undefined && multtable.corners[product] !== undefined) {
-               this._drawCorner(x, y, boxSize, boxSize, multtable.corners[product]);
+               this._drawCorner(x, y, scale, multtable.corners[product]);
             }
+         }
+      }
 
-            this._drawLabel(x, y, boxSize, boxSize, labels[product], fontHeight);
+      // calculate font size to fit longest label 
+      this.context.setTransform(1, 0, 0, 1, 0, 0);
+      this.context.font = '14pt Arial';
+      const longestLabelWidth =  this.context.measureText(multtable.longestLabel).width;
+      const labelBoxWidth = (this.permutationLabels === undefined) ? longestLabelWidth : Math.sqrt(50*longestLabelWidth);
+      const fontScale = Math.min(50, 11 * scale/labelBoxWidth, scale / 3);
+
+      // don't render labels if font is too small
+      if (fontScale < DisplayMulttable.MINIMUM_FONT) {
+         return;
+      }
+
+      this.context.font = `${fontScale.toFixed(6)}pt Arial`;
+      this.context.textAlign = (this.permutationLabels === undefined) ? 'center' : 'left';
+      this.context.fillStyle = 'black';
+      this.context.textBaseline = 'middle';  // fillText y coordinate is center of upper-case letter
+
+      for (let inx = minX; inx < maxX; inx++) {
+         for (let jnx = minY; jnx < maxY; jnx++) {
+            const x = multtable.position(inx);
+            const y = multtable.position(jnx);
+            const product = multtable.group.mult(multtable.elements[inx], multtable.elements[jnx]);
+            this._drawLabel(x, y, product, scale, fontScale);
          }
       }
    }
 
-   _drawBorder(x, y, width, height, color) {
+   _drawBorder(x, y, scale, color) {
       this.context.beginPath();
       this.context.strokeStyle = color;
-      this.context.lineWidth = 2;
-      this.context.moveTo(x, y+height-1);
+      this.context.lineWidth = 2 / scale;
+      this.context.moveTo(x, y+1-1/scale);
       this.context.lineTo(x, y);
-      this.context.lineTo(x+width-1, y);
+      this.context.lineTo(x+1-1/scale, y);
       this.context.stroke();
 
       this.context.beginPath();
       this.context.strokeStyle = 'black';
-      this.context.lineWidth = 1;
-      this.context.moveTo(x+2.5, y+height-2.5);
-      this.context.lineTo(x+2.5, y+2.5);
-      this.context.lineTo(x+width-2.5, y+2.5);
-      this.context.lineTo(x+width-2.5, y+height-2.5);
+      this.context.lineWidth = 1 / scale;
+      this.context.moveTo(x+2.5/scale, y+1-2.5/scale);
+      this.context.lineTo(x+2.5/scale, y+2.5/scale);
+      this.context.lineTo(x+1-2.5/scale, y+2.5/scale);
+      this.context.lineTo(x+1-2.5/scale, y+1-2./scale);
       this.context.closePath();
       this.context.stroke();
    }
 
-   _drawCorner(x, y, width, height, color) {
+   _drawCorner(x, y, scale, color) {
       this.context.fillStyle = color;
       this.context.beginPath();
       this.context.strokeStyle = 'black';
       this.context.moveTo(x, y);
-      this.context.lineTo(x+0.2*width, y);
-      this.context.lineTo(x, y+0.2*height);
+      this.context.lineTo(x+0.2, y);
+      this.context.lineTo(x, y+0.2);
       this.context.fill();
    }
 
-   _drawLabel(x, y, width, height, label, fontHeight) {
-      this.context.fillStyle = 'black';
-      const rows = [];
-      if (this._isPermutation(label)) {
-         // this looks like a permutation --
-         //    they can be long, so split it into multiple lines if needed
-         const cycles = label.match(/[(][^)]*[)]/g);
-         let last = 0;
-         for (const cycle of cycles) {
-            if (this._measuredWidth(rows[last]) + this._measuredWidth(cycle) < 0.75*width) {
-               rows[last] = (rows[last] === undefined) ? cycle : rows[last].concat(cycle);
-            } else {
-               if (rows[last] !== undefined) {
-                  last++;
-               }
-               if (this._measuredWidth(cycle) < 0.75*width) {
-                  rows[last] = cycle;
+   _drawLabel(x, y, element, scale, fontScale) {
+      const width = (text) => (text === undefined) ? 0 : this.context.measureText(text).width;
+
+      const label = this.multtable.labels[element];
+      if (this.permutationLabels === undefined) {
+         const labelLocation = new THREE.Vector2(x+1/2, y+1/2).applyMatrix3(this.transform);
+         this.context.fillText(label, labelLocation.x, labelLocation.y);
+      } else {    // break permutations into multiple lines
+         if (this.permutationLabels[element] === undefined) {   // seen this label before?
+            const lines = [];
+
+            // split whole label into multiple lines if needed
+            const cycles = label.match(/[(][^)]*[)]/g);
+            let last = 0;
+            for (const cycle of cycles) {
+               if (width(lines[last]) + width(cycle) < 0.8 * scale) {
+                  lines[last] = (lines[last] === undefined) ? cycle : lines[last].concat(cycle);
                } else {
-                  // cut cycle up into row-sized pieces
-                  const widthPerCharacter = this._measuredWidth(cycle) / cycle.length;
-                  const charactersPerRow = Math.ceil(0.75*width / widthPerCharacter);
-                  for (let c = cycle;;) {
-                     if (this._measuredWidth(c) < 0.75*width) {
-                        rows[last++] = c;
-                        break;
-                     } else {
-                        rows[last++] = c.slice(0, c.lastIndexOf(' ', charactersPerRow));
-                        c = c.slice(c.lastIndexOf(' ', charactersPerRow)).trim();
+                  if (lines[last] !== undefined) {
+                     last++;
+                  }
+                  if (width(cycle) < 0.8 * scale) {
+                     lines[last] = cycle;
+                  } else {
+                     // cut cycle up into row-sized pieces
+                     const widthPerCharacter = width(cycle) / cycle.length;
+                     const charactersPerLine = Math.ceil(0.8 * scale / widthPerCharacter);
+                     for (let c = cycle;;) {
+                        if (width(c) < 0.8 * scale) {
+                           lines[last++] = c;
+                           break;
+                        } else {
+                           lines[last++] = c.slice(0, c.lastIndexOf(' ', charactersPerLine));
+                           c = c.slice(c.lastIndexOf(' ', charactersPerLine)).trim();
+                        }
                      }
                   }
                }
             }
+            // store multi-line permutation label so it doesn't have to be calculated again
+            this.permutationLabels[element] = lines;
          }
-      } else {
-         rows[0] = label;
-      }
 
-      const maxRowWidth = rows.reduce( (max, row) => (max > this._measuredWidth(row)) ? max : this._measuredWidth(row), 0 );
-      let xStart = x + width/2 - maxRowWidth/2;
-      let yStart = y + height/2 - fontHeight*(rows.length - 1)/2;
-      for (const row of rows) {
-         this.context.fillText(row, xStart, yStart);
-         yStart += fontHeight;
+         const fontHeight = fontScale * 19 / 14;
+         const labelLocation = new THREE.Vector2(x+1/2, y+1/2).applyMatrix3(this.transform);
+         const permutationLabel = this.permutationLabels[element];
+         const maxLineWidth = permutationLabel.reduce( (max, line) => Math.max(max, width(line)), 0 );
+         let xStart = labelLocation.x - maxLineWidth/2;
+         let yStart = labelLocation.y - fontHeight*(permutationLabel.length - 1)/2;
+         for (const line of permutationLabel) {
+            this.context.fillText(line, xStart, yStart);
+            yStart += fontHeight;
+         }
       }
    }
 
-   _measuredWidth(str) {
-      return (str === undefined) ? 0 : this.context.measureText(str).width;
+   // interface for zoom-to-fit GUI command
+   reset() {
+      this.zoom = 1;
+      this.translate = {dx: 0, dy: 0};
    }
 
-   _isPermutation(str) {
-      return str[0] == '(';
+   // increase magnification proportional to its current value,
+   zoomIn() {
+      this._centeredZoom((1 + DisplayMulttable.ZOOM_STEP) - 1);
+   }
+
+   // decrease magnification in a way that allows you to zoom in and out and return to its original value
+   zoomOut() {
+      this._centeredZoom(1/(1 + DisplayMulttable.ZOOM_STEP) - 1);
+   }
+
+   // changing the translation keeps the center of the model centered in the canvas
+   _centeredZoom(dZoom) {
+      this.zoom = this.zoom * (1 + dZoom);
+      this.move(this.translate.dx * dZoom, this.translate.dy * dZoom);
+   }
+
+   // deltaX, deltaY are in screen coordinates
+   move(deltaX, deltaY) {
+      this.translate.dx += deltaX;
+      this.translate.dy += deltaY;
+   }
+
+   // given screen coordinates, returns element associated with box, or 'undefined'
+   select(screenX, screenY) {
+      // compute cycleGraph coordinates from screen coordinates by inverting this.transform
+      const mult = new THREE.Vector2(screenX, screenY).applyMatrix3(new THREE.Matrix3().getInverse(this.transform));
+      const x = this.multtable.index(mult.x);
+      const y = this.multtable.index(mult.y);
+      return (x === undefined || y === undefined) ? undefined : {x: x, y: y};
    }
 }
 
