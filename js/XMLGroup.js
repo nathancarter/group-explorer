@@ -75,6 +75,26 @@ class XMLGroup extends BasicGroup {
       return this.representations[this.representationIndex];
    }
 
+   get labels() {
+      if (this._labels === undefined) {
+         this._labels = Array(this.representations.length)
+      }
+      if (this._labels[this.representationIndex] === undefined) {
+         this._labels[this.representationIndex] = this.representation.map( (rep) => mathml2text(rep) );
+      }
+      return this._labels[this.representationIndex];
+   }
+
+   get longestLabel() {
+      if (this._longestLabels === undefined) {
+         this._longestLabels = Array(this.representations.length)
+      }
+      if (this._longestLabels[this.representationIndex] === undefined) {
+         this._longestLabels[this.representationIndex] = this.labels.reduce( (longest, label) => (label.length > longest.length) ? label : longest, '' );
+      }
+      return this._longestLabels[this.representationIndex];
+   }
+
    get generators() {
       const calculatedGenerators = super.generators;
       if (this._XML_generators === undefined) {

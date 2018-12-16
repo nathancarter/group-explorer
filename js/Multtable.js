@@ -2,8 +2,6 @@
 class Multtable {
    constructor(group) {
       this.group = group;
-      this.labels = group.representation.map( (rep) => mathml2text(rep) );
-      this.longestLabel = this.labels.reduce( (longest, label) => (label.length > longest.length) ? label : longest, '' );
       this.reset();
    }
 

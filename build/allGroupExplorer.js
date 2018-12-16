@@ -696,6 +696,26 @@ class XMLGroup extends BasicGroup {
       return this.representations[this.representationIndex];
    }
 
+   get labels() {
+      if (this._labels === undefined) {
+         this._labels = Array(this.representations.length)
+      }
+      if (this._labels[this.representationIndex] === undefined) {
+         this._labels[this.representationIndex] = this.representation.map( (rep) => mathml2text(rep) );
+      }
+      return this._labels[this.representationIndex];
+   }
+
+   get longestLabel() {
+      if (this._longestLabels === undefined) {
+         this._longestLabels = Array(this.representations.length)
+      }
+      if (this._longestLabels[this.representationIndex] === undefined) {
+         this._longestLabels[this.representationIndex] = this.labels.reduce( (longest, label) => (label.length > longest.length) ? label : longest, '' );
+      }
+      return this._longestLabels[this.representationIndex];
+   }
+
    get generators() {
       const calculatedGenerators = super.generators;
       if (this._XML_generators === undefined) {
@@ -2963,8 +2983,6 @@ SymmetryObject._init();
 class Multtable {
    constructor(group) {
       this.group = group;
-      this.labels = group.representation.map( (rep) => mathml2text(rep) );
-      this.longestLabel = this.labels.reduce( (longest, label) => (label.length > longest.length) ? label : longest, '' );
       this.reset();
    }
 
@@ -3156,7 +3174,7 @@ class DisplayMulttable {
    showLargeGraphic(multtable) {
       if (multtable != this.multtable) {
          this.multtable = multtable;
-         this.permutationLabels = (multtable.longestLabel[0] == '(') ? Array(multtable.group.order) : undefined;
+         this.permutationLabels = (multtable.group.longestLabel[0] == '(') ? Array(multtable.group.order) : undefined;
       }
 
       // note that background shows through in separations between cosets
@@ -3209,7 +3227,7 @@ class DisplayMulttable {
       // calculate font size to fit longest label 
       this.context.setTransform(1, 0, 0, 1, 0, 0);
       this.context.font = '14pt Arial';
-      const longestLabelWidth =  this.context.measureText(multtable.longestLabel).width;
+      const longestLabelWidth =  this.context.measureText(multtable.group.longestLabel).width;
       const labelBoxWidth = (this.permutationLabels === undefined) ? longestLabelWidth : Math.sqrt(50*longestLabelWidth);
       const fontScale = Math.min(50, 11 * scale/labelBoxWidth, scale / 3);
 
@@ -3266,7 +3284,7 @@ class DisplayMulttable {
    _drawLabel(x, y, element, scale, fontScale) {
       const width = (text) => (text === undefined) ? 0 : this.context.measureText(text).width;
 
-      const label = this.multtable.labels[element];
+      const label = this.multtable.group.labels[element];
       if (this.permutationLabels === undefined) {
          const labelLocation = new THREE.Vector2(x+1/2, y+1/2).applyMatrix3(this.transform);
          this.context.fillText(label, labelLocation.x, labelLocation.y);
@@ -3754,10 +3772,8 @@ class DisplayCycleGraph {
    // == a smaller graphic in the end, useful for thumbnails.)
    showLargeGraphic(cycleGraph, hideNames = false) {
       // save the cycle graph for use by other members of this object
-      if (cycleGraph != this.cycleGraph) {
-         this.cycleGraph = cycleGraph;
-         this.longest_label_length = undefined;
-      }
+      this.cycleGraph = cycleGraph;
+
       const bbox = cycleGraph.bbox;
 
       // paint the background
@@ -3894,16 +3910,12 @@ class DisplayCycleGraph {
       // (this is done in screen coordinates because scaling text from cycleGraph coordinates had too many gotchas -- rwe)
       this.context.setTransform(1,0,0,1,0,0);
       this.context.font = '14pt Arial';
-      if (this.longest_label_length === undefined) {
-         this.longest_label_length = cycleGraph.group.representation.reduce(
-            (longest, rep) => Math.max(longest, this.context.measureText(mathml2text(rep)).width),
-            0 );
-      }
+      const longest_label_length = this.context.measureText(cycleGraph.group.longestLabel).width;
 
       // "1" is to make short, tall names (like g^2) fit heightwise
       // "22" is a magic number that combines diameter/radius, effect of curved edges, point/pixel ratio, etc.
       //   -- but don't make font bigger than 50pt in any case
-      const fontScale = Math.min(50, scale * this.radius * Math.min(1, 22 / this.longest_label_length));
+      const fontScale = Math.min(50, scale * this.radius * Math.min(1, 22 / longest_label_length));
 
       // skip out if this font would be too small to see anyhow
       if (fontScale < 1.5) {
@@ -3925,9 +3937,8 @@ class DisplayCycleGraph {
          }
 
          // write the element name inside it
-         var label = hideNames ? ' ' : mathml2text( cycleGraph.group.representation[elt] );
          const loc = pos_vector.set(pos.x, pos.y).applyMatrix3(this.transform);
-         this.context.fillText( label, loc.x, loc.y );
+         this.context.fillText( cycleGraph.group.labels[elt], loc.x, loc.y );
       } );
    }
 

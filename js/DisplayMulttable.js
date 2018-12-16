@@ -78,7 +78,7 @@ class DisplayMulttable {
    showLargeGraphic(multtable) {
       if (multtable != this.multtable) {
          this.multtable = multtable;
-         this.permutationLabels = (multtable.longestLabel[0] == '(') ? Array(multtable.group.order) : undefined;
+         this.permutationLabels = (multtable.group.longestLabel[0] == '(') ? Array(multtable.group.order) : undefined;
       }
 
       // note that background shows through in separations between cosets
@@ -131,7 +131,7 @@ class DisplayMulttable {
       // calculate font size to fit longest label 
       this.context.setTransform(1, 0, 0, 1, 0, 0);
       this.context.font = '14pt Arial';
-      const longestLabelWidth =  this.context.measureText(multtable.longestLabel).width;
+      const longestLabelWidth =  this.context.measureText(multtable.group.longestLabel).width;
       const labelBoxWidth = (this.permutationLabels === undefined) ? longestLabelWidth : Math.sqrt(50*longestLabelWidth);
       const fontScale = Math.min(50, 11 * scale/labelBoxWidth, scale / 3);
 
@@ -188,7 +188,7 @@ class DisplayMulttable {
    _drawLabel(x, y, element, scale, fontScale) {
       const width = (text) => (text === undefined) ? 0 : this.context.measureText(text).width;
 
-      const label = this.multtable.labels[element];
+      const label = this.multtable.group.labels[element];
       if (this.permutationLabels === undefined) {
          const labelLocation = new THREE.Vector2(x+1/2, y+1/2).applyMatrix3(this.transform);
          this.context.fillText(label, labelLocation.x, labelLocation.y);
