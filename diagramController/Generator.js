@@ -104,95 +104,100 @@ DC.Generator = class {
       }
    }
 
-   /*
-    * change generator as spec'd
-    *
-    * delete newly redundant later generators
-    * add generator to make strategy set generate entire group
-    */
    static updateGenerator(strategy_index, generator) {
-      DC.Generator.updateStrategies( (strategies) => {
-         strategies[strategy_index][0] = generator;
-
-         const generators_used = new BitSet(Group.order);
-         let elements_generated = new BitSet(Group.order, [0]);
-         Cayley_diagram.strategies.forEach( (strategy, inx) => {
-            if (inx < strategy_index) {
-               generators_used.set(strategy.generator);
-               elements_generated = strategy.bitset;
-            } else if (elements_generated.isSet(strategy.generator)) {
-               // mark strategy for deletion by setting generator to 'undefined'
-               strategy.generator = undefined;
-               // collapse nesting values
-               if (strategy.generator === undefined) {
-                  for (let i = inx; i < strategies.length; i++) {
-                     if (strategies[i][3] > strategy[3]) {
-                        strategies[i][3] -= 1;
-                     }
-                  }
-               }
-            } else {
-               generators_used.set(strategies[inx][0]);
-               elements_generated = Group.closure(generators_used);
-
-               // check whether we can still use a curved display
-               if (strategies[inx][1] != 0 && Group.closure(generators_used).popcount()/elements_generated.popcount() < 3) {
-                  strategies[inx][1] = 0;
-               }
-            }
-         } )
-
-         // delete marked strategies
-         Cayley_diagram.strategies = Cayley_diagram.strategies.filter( (strategy) => strategy.generator !== undefined );
-
-         // add elements to generate entire group; append to nesting
-         if (elements_generated.popcount() != Group.order) {
-            // look for new element
-            const new_generator = elements_generated
-               .complement()
-               .toArray()
-               .find( (el) => Group.closure(generators_used.clone().set(el)).popcount() == Group.order );
-            // among linear layouts, try to find a direction that hasn't been used yet
-            const new_direction =
-               strategies.reduce( (used_directions, [_, layout, direction, __]) => {
-                  if (layout == 0) {
-                     used_directions[direction] = true;
-                  }
-                  return used_directions;
-               }, new Array(3).fill(false) )
-                         .findIndex( (used) => !used );
-            strategies.push([new_generator, 0, (new_direction == -1) ? 0 : new_direction, strategies.length]);
-         }
-
-         return strategies;
-      } )
+      const strategies = Cayley_diagram.getStrategies();
+      strategies[strategy_index][0] = generator;
+      DC.Generator.updateStrategies(strategies);
    }
 
    static updateAxes(strategy_index, layout, direction) {
-      DC.Generator.updateStrategies( (strategies) => {
-         strategies[strategy_index][1] = layout;
-         strategies[strategy_index][2] = direction;
-         return strategies;
-      } );
+      const strategies = Cayley_diagram.getStrategies();
+      strategies[strategy_index][1] = layout;
+      strategies[strategy_index][2] = direction;
+      DC.Generator.updateStrategies(strategies);
    }
 
    static updateOrder(strategy_index, order) {
-      DC.Generator.updateStrategies( (strategies) => {
-         const other_strategy = strategies.findIndex( (strategy) => strategy[3] == order );
-         strategies[other_strategy][3] = strategies[strategy_index][3];
-         strategies[strategy_index][3] = order;
-         return strategies;
-      } );
+      const strategies = Cayley_diagram.getStrategies();
+      const other_strategy = strategies.findIndex( (strategy) => strategy[3] == order );
+      strategies[other_strategy][3] = strategies[strategy_index][3];
+      strategies[strategy_index][3] = order;
+      DC.Generator.updateStrategies(strategies);
    }
 
-   static updateStrategies(strategyUpdater) {
-      const strategies = strategyUpdater(Cayley_diagram.getStrategies());
+   // Removes redundant generators, adds generators required to generate entire group
+   static refineStrategies(strategies) {
+      const generators_used = new BitSet(Group.order);
+      let elements_generated = new BitSet(Group.order, [0]);
+      strategies.forEach( (strategy, inx) => {
+         if (elements_generated.isSet(strategy[0])) {
+            // mark strategy for deletion by setting generator to 'undefined'
+            strategy[0] = undefined;
+         } else {
+            const old_size = elements_generated.popcount();
+            generators_used.set(strategies[inx][0]);
+            elements_generated = Group.closure(generators_used);
+            const new_size = elements_generated.popcount();
+
+            // check whether we can still use a curved display
+            if (strategies[inx][1] != 0 && new_size / old_size < 3) {
+               strategies[inx][1] = 0;
+            }
+         }
+      } )
+
+      // delete marked strategies, fix nesting order
+      strategies = strategies.filter( (strategy) => strategy[0] !== undefined );
+      strategies.slice().sort( (a,b) => a[3] - b[3] ).map( (el,inx) => (el[3] = inx, el) );
+
+      // add elements to generate entire group; append to nesting
+      if (elements_generated.popcount() != Group.order) {
+         // look for new element
+         const new_generator = elements_generated
+            .complement()
+            .toArray()
+            .find( (el) => Group.closure(generators_used.clone().set(el)).popcount() == Group.order );
+         // among linear layouts, try to find a direction that hasn't been used yet
+         const new_direction =
+            strategies.reduce( (used_directions, [_, layout, direction, __]) => {
+               if (layout == 0) {
+                  used_directions[direction] = true;
+               }
+               return used_directions;
+            }, new Array(3).fill(false) )
+                      .findIndex( (used) => !used );
+         strategies.push([new_generator, 0, (new_direction == -1) ? 0 : new_direction, strategies.length]);
+      }
+
+      return strategies;
+   }
+
+   static updateStrategies(new_strategies) {
+      const strategies = DC.Generator.refineStrategies(new_strategies);
       Cayley_diagram.setStrategies(strategies);
       Cayley_diagram.removeLines();
       DC.Arrow.getAllArrows().forEach( (arrow) => Cayley_diagram.addLines(arrow) );
       Cayley_diagram.setLineColors();
       Graphic_context.showGraphic(Cayley_diagram);
       DC.Generator.draw();
+   }
+
+   // Drag-and-drop generation-table rows to re-order generators
+   static dragStart(event) {
+      event.originalEvent.dataTransfer.setData('text/plain', event.target.textContent);
+   }
+
+   static drop(event) {
+      event.preventDefault();
+      const dest = event.target.textContent;
+      const src = event.originalEvent.dataTransfer.getData('text/plain');
+      const strategies = Cayley_diagram.getStrategies()
+      strategies.splice(dest-1, 0, strategies.splice(src-1, 1)[0]);
+      DC.Generator.updateStrategies(strategies);
+   }
+
+   static dragOver(event) {
+      event.preventDefault();
    }
 
    static enable() {

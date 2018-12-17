@@ -33,6 +33,9 @@ class DC {
 
       $('#generation-control').off('click', DC.Generator.clickHandler).on('click', DC.Generator.clickHandler);
       $('#generation-control').off('contextmenu', DC.Generator.clickHandler).on('contextmenu', DC.Generator.clickHandler);
+      $('#generation-table').off('dragstart', DC.Generator.dragStart).on('dragstart', DC.Generator.dragStart);
+      $('#generation-table').off('drop', DC.Generator.drop).on('drop', DC.Generator.drop);
+      $('#generation-table').off('dragover', DC.Generator.dragOver).on('dragover', DC.Generator.dragOver);
 
       $('#multiplication-control').off('click', DC.ArrowMult.clickHandler).on('click', DC.ArrowMult.clickHandler);
 

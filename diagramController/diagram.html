@@ -31,7 +31,7 @@
          <!-- Templates for generation-strategy table -->
          <template id="generation-template">
             <tr>
-               <td>${inx+1}</td>
+               <td draggable="true">${inx+1}</td>
                <td action="DC.Generator.showGeneratorMenu(event, ${inx})">
                   ${math(group.representation[strategy.generator])}
                </td>
