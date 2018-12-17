@@ -206,7 +206,7 @@
         *   Right click -- zoom to fit
         *   Left click -- display/clear label
         *   Drag-and-drop -- move cycle graph
-        *   Ctrl drag-and-drop -- move row/column
+        *   Shift drag-and-drop -- move row/column
         */
        let Last_display_time = performance.now();
        function zoom(event) {
@@ -258,16 +258,16 @@
           constructor() { this._position = undefined; }
           get isIdle() { return typeof(this._position) != 'object'; }
           get isDragging() { return !this.isIdle && Array.isArray(this._position); }
-          get isCtrlDragging() { return !this.isIdle && !this.isDragging; }
+          get isShiftDragging() { return !this.isIdle && !this.isDragging; }
           get position() { return  this._position; }
           set position(position) { this._position = position; }
        }
        const Drag_state = new DragState();
        function dragStart(event) {
           clearLabels(event);
-          if (event.ctrlKey) {
+          if (event.shiftKey) {
              Drag_state.position = event2columns(event);
-             if (!Drag_state.isCtrlDragging) {
+             if (!Drag_state.isShiftDragging) {
                 event.preventDefault();
                 return;
              }
@@ -298,9 +298,9 @@
        }
 
        function dragOver(event) {
-          if (Drag_state.isDragging && !event.ctrlKey) {
+          if (Drag_state.isDragging && !event.shiftKey) {
              event.preventDefault();
-          } else if (Drag_state.isCtrlDragging && event.ctrlKey) {
+          } else if (Drag_state.isShiftDragging && event.shiftKey) {
              const location = event2columns(event);
              if (location === undefined) {
                 Drag_state.position = undefined;
@@ -319,10 +319,10 @@
 
        function drop(event) {
           event.preventDefault();
-          if (Drag_state.isDragging && !event.ctrlKey) {
+          if (Drag_state.isDragging && !event.shiftKey) {
              graphicContext.move(event.originalEvent.clientX - Drag_state.position[0],
                                  event.originalEvent.clientY - Drag_state.position[1]);
-          } else if (Drag_state.isCtrlDragging && event.ctrlKey) {
+          } else if (Drag_state.isShiftDragging && event.shiftKey) {
              const location = event2columns(event);
              if (location !== undefined) {
                 // swap two multtable elements
