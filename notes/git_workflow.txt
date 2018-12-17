@@ -1,0 +1,18 @@
+
+create new branch
+add changes to it and commit
+then merge with master
+
+
+
+git checkout -b tmp-ellis
+...
+git add ...
+git commit -m "..."
+
+git checkout master
+git merge tmp-ellis
+
+git branch -d tmp-ellis
+
+git push origin master
