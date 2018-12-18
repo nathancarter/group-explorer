@@ -40,9 +40,6 @@
 
  * Sheets
     * Organization
-       * Create a `.js` file for the jQuery extension for sheet elements.
-       * Ensure current experiments still work after that refactoring.
-       * Commit that file to the repository independently of the rest of the experiments.
        * Copy `docs/visualizerExemplar.html` for use as the sheet template, so that you can re-use its
          header div and right sidebar.
        * Move the "add rectangle" button to the right sidebar.
