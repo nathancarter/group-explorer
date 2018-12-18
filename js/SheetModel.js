@@ -26,7 +26,7 @@ class SheetModel {
             throw new Error( 'SheetModel.addElement accepts only SheetElements' );
         // get current max z-index so we can use it below
         const maxIndex = Math.max( ...this.elements.map(
-            ( e ) => $( e.htmlElement() ).css( 'z-index' ) ) );
+            ( e ) => $( e.htmlViewElement() ).css( 'z-index' ) ) );
         // add element to internal array of elements
         this.elements.push( element );
         // ensure the new element has the highest z-index of all elements in the model
@@ -39,24 +39,24 @@ class SheetModel {
     // or undefined if there is none.
     selected () {
         return this.elements.find( ( sheetElt ) =>
-            $( sheetElt.htmlElement().parentNode ).hasClass( selectedForDraggingClass ) );
+            $( sheetElt.htmlViewElement().parentNode ).hasClass( selectedForDraggingClass ) );
     }
 
     // Ensure that the children of the view are precisely the set of DIVs placed there
-    // by wrapping each SheetElement's htmlElement() in a DIV.
+    // by wrapping each SheetElement's htmlViewElement() in a DIV.
     sync () {
         var that = this;
         // Delete any elements that don't belong
         Array.from( this.view.childNodes ).map( function ( htmlElt ) {
-            if ( !that.elements.find( ( sheetElt ) => htmlElt.childNodes[0] == sheetElt.htmlElement() ) ) {
+            if ( !that.elements.find( ( sheetElt ) => htmlElt.childNodes[0] == sheetElt.htmlViewElement() ) ) {
                 htmlElt.parentNode.removeChild( htmlElt );
             }
         } );
         // Ensure all Sheet Elements have their HTML element in the view
         this.elements.map( function ( sheetElt ) {
-            var htmlElt = sheetElt.htmlElement();
+            var htmlElt = sheetElt.htmlViewElement();
             if ( !htmlElt.parentNode || htmlElt.parentNode.parentNode != that.view ) {
-                var wrapper = that.view.ownerDocument.createElement( 'div' );
+                var wrapper = $( '<div></div>' )[0];
                 wrapper.appendChild( htmlElt );
                 $( wrapper ).draggableAndSizable();
                 $( wrapper ).css( { position : 'absolute', padding : `${defaultResizingMargin}px` } );
@@ -87,30 +87,91 @@ class SheetElement {
     }
 
     // This object can create (and later return) an HTML element representing itself.
-    // This function does that, delegating the creation work to a createHtmlElement()
+    // This function does that, delegating the creation work to a createHtmlViewElement()
     // function that subclasses can override without having to reimplement the
     // caching behavior implemented here.
-    htmlElement () {
-        if ( !this.hasOwnProperty( 'viewElement' ) )
-            this.viewElement = this.createHtmlElement();
+    htmlViewElement () {
+        if ( !this.hasOwnProperty( 'viewElement' ) ) {
+            this.viewElement = this.createHtmlViewElement();
+            this.viewElement.setAttribute( 'title', 'Double-click to edit' );
+            var that = this;
+            $( this.viewElement ).on( 'dblclick', function () {
+                window.getSelection().empty()
+                that.edit();
+                return false;
+            } );
+        }
         return this.viewElement;
     }
 
     // See above for explanation of this function.
-    // It should be called only by htmlElement(), never by the client.
+    // It should be called only by htmlViewElement(), never by the client.
     // Thus it is called but once per SheetElement instance.
-    createHtmlElement () {
+    createHtmlViewElement () {
         // This is a stub implementation that subclasses should override.
-        return this.model.view.ownerDocument.createElement( 'div' );
+        return $( '<div></div>' )[0];
+    }
+
+    // Parallel structure to htmlViewElement(), but now for the editing controls of the
+    // element rather than its standard view.
+    htmlEditElement () {
+        if ( !this.hasOwnProperty( 'editElement' ) )
+            this.editElement = this.createHtmlEditElement();
+        return this.editElement;
+    }
+
+    // Parallel structure to createHtmlViewElement(), but now for the editing controls of the
+    // element rather than its standard view.
+    createHtmlEditElement () {
+        // This is a stub implementation that subclasses should override.
+        return $( '<div></div>' )[0];
     }
 
     // Removes this element from the model and its HTML element from the model's view
     remove () {
         var index = this.model.elements.indexOf( this );
         this.model.elements.splice( index, 1 );
-        var wrapper = this.htmlElement().parentNode;
+        var wrapper = this.htmlViewElement().parentNode;
         wrapper.parentNode.removeChild( wrapper );
     }
+
+    // Enter edit mode by swapping the view and the edit controls in the wrapper.
+    edit () {
+        var viewer = this.htmlViewElement();
+        var editor = this.htmlEditElement();
+        if ( editor.parentNode != viewer.parentNode )
+            viewer.parentNode.appendChild( editor );
+        if ( !this.buttons ) {
+            $( editor ).append(
+                this.buttons = $(
+                    '<p><button class="ok-button">OK</button>'
+                  + '<button class="cancel-button">Cancel</button></p>'
+                )
+            );
+            var that = this;
+            $( editor ).find( '.ok-button' ).click( function () {
+                that.saveEdits();
+                that.showViewControls();
+            } );
+            $( editor ).find( '.cancel-button' ).click( () => that.showViewControls() );
+        }
+        this.showEditControls();
+    }
+
+    // Hide view controls and show edit controls
+    showEditControls () {
+        $( this.htmlViewElement() ).hide();
+        $( this.htmlEditElement() ).show();
+    }
+    // Reverse of the previous
+    showViewControls () {
+        $( this.htmlViewElement() ).show();
+        $( this.htmlEditElement() ).hide();
+    }
+
+    // This function should read from its edit controls and save their meaning into
+    // our internal state.  Because this is the abstract base class, it is a stub.
+    saveEdits () { }
 }
 
 /*
@@ -120,12 +181,12 @@ class RectangleElement extends SheetElement {
     // only defining feature: background color
     constructor ( model ) {
         super( model );
-        this.color = '#ddd';
+        this.color = '#dddddd';
         this.update();
     }
     // just represented by a div that fills its container and starts at size 100x100
-    createHtmlElement () {
-        var result = this.model.view.ownerDocument.createElement( 'div' );
+    createHtmlViewElement () {
+        var result = $( '<div></div>' )[0];
         $( result ).css( {
             height: '100%',
             width : '100%',
@@ -134,8 +195,26 @@ class RectangleElement extends SheetElement {
         } );
         return result;
     }
+    // when editing, use a color-type input
+    createHtmlEditElement () {
+        var result = $( '<div>'
+                      + 'Background color: '
+                      + `<input type="color" class="color-picker" value="${this.color}"/>`
+                      + '</div>' )[0];
+        $( result ).css( {
+            minWidth : '100px',
+            minHeight : '100px'
+        } );
+        return result;
+    }
     // update appearance with this function
     update () {
-        $( this.htmlElement() ).css( { backgroundColor : this.color } );
+        $( this.htmlViewElement() ).css( { backgroundColor : this.color } );
+        $( this.htmlEditElement() ).css( { backgroundColor : this.color } );
+    }
+    // implement abstract method saveEdits()
+    saveEdits () {
+        this.color = $( this.htmlEditElement() ).find( '.color-picker' )[0].value;
+        this.update();
     }
 }

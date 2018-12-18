@@ -39,19 +39,6 @@
 # Nathan's List
 
  * Sheets
-    * Editing
-       * To the `SheetElement` class, add an `editDiv()` method parallel to `viewDiv()`, but for editing.
-         Use this for the rectangle to let users pick a color.
-         `<input type="color" id="foo" name="bar" value="#aabbcc"/>`
-       * Implement tooltips encouraging you to double-click an item to edit it.
-       * Respond to double-click events by calling `edit()` in the double-clicked element.  If it is not
-         already beingedited, this will swap view/edit modes.  At first, there won't be any way to cancel
-         edit mode.
-       * Place "OK" and "Cancel" buttons beneath the edit div, which swap back (doing nothing else yet).
-       * Add a `SheetElement` method called `saveEdits()` that updates its own state by reading from
-         the values of the input elements in its latest `editDiv()` result, then projects that state
-         by updating its `viewDiv()`'s contents as well.
-       * When swapping view/edit modes, call `saveEdits()` only if the OK button was used.
     * Text elements
        * Create a `TextElement` subclass of `SheetElement`.
        * Give it fields for `text`, `fontSize`, and `fontColor` and assign sensible defaults.

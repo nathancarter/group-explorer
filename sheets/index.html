@@ -16,6 +16,9 @@
          .selected-for-moving-and-sizing {
             border: 2px dotted #aaf;
          }
+         .button-row {
+            margin: 5px;
+         }
       </style>
 
       <script type="text/x-mathjax-config">
@@ -125,8 +128,8 @@
       -->
 
       <div id="sheet-control" class="fill-vert">
-         <button id="addRectangleButton" onclick="addRectangle();">Add rectangle</button>
-         <button id="deleteButton" onclick="deleteSelected();">Delete</button>
+         <p class="button-row"><button id="addRectangleButton" onclick="addRectangle();">Add rectangle</button></p>
+         <p class="button-row"><button id="deleteButton" onclick="deleteSelected();">Delete selected item</button></p>
       </div>
    </body>
 </html>
