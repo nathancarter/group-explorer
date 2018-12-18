@@ -4,8 +4,7 @@ JS_FILES = js/init.js             js/Log.js            js/BitSet.js        js/Ma
            js/IsomorphicGroups.js js/Template.js       js/Library.js       js/Diagram3D.js       \
            js/CayleyDiagram.js    js/DisplayDiagram.js js/mathmlUtils.js   js/SymmetryObject.js  \
            js/Multtable.js        js/DisplayMulttable.js                                         \
-           js/CycleGraph.js       js/DisplayCycleGraph.js										 \
-		   js/DragResizeExtension.js
+           js/CycleGraph.js       js/DisplayCycleGraph.js
 
 SUB_FILES = js/Menu.js                                                          \
 										\
@@ -23,8 +22,10 @@ SUB_FILES = js/Menu.js                                                          
 										\
             visualizerFramework/visualizer.js
 
+SHEET_FILES = js/DragResizeExtension.js		js/SheetModel.js
+
 # PRODUCTS = build/allGroupExplorer.js build/allGroupExplorer.min.js build/allVisualizer.js
-PRODUCTS = build/allGroupExplorer.js build/allVisualizer.js
+PRODUCTS = build/allGroupExplorer.js build/allVisualizer.js build/allSheets.js
 
 DOCS =  docs/Template.md                        \
         docs/visualizerExemplar.md              \
@@ -60,6 +61,9 @@ build/allGroupExplorer.min.js : ${JS_FILES}
 
 build/allVisualizer.js : ${SUB_FILES}
 	${COMBINE} ${SUB_FILES} ${COMBINE_OPTS} > build/allVisualizer.js
+
+build/allSheets.js : ${SHEET_FILES}
+	${COMBINE} ${SHEET_FILES} ${COMBINE_OPTS} > build/allSheets.js
 
 #################
 
