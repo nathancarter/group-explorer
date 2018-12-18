@@ -1,0 +1,130 @@
+<html>
+   <head>
+      <meta charset="utf-8" />
+      <base href=".."></base>
+
+      <link rel="icon" type="image/png" href="../images/favicon.png"></link>
+      <link rel="stylesheet" href="../style/fonts.css" type="text/css"></link>
+      <link rel="stylesheet" href="../style/sliders.css" type="text/css"></link>
+      <link rel="stylesheet" href="../visualizerFramework/visualizer.css" type="text/css"></link>
+      <link rel="stylesheet" href="../subsetDisplay/subsets.css" type="text/css"></link>
+
+      <style>
+         #view-control {
+            background: #E2E2E2;
+            display: none;
+         }
+         .selected-for-moving-and-sizing {
+            border: 2px dotted #aaf;
+         }
+      </style>
+
+      <script type="text/x-mathjax-config">
+       MathJax.Hub.Config({
+          CommonHTML: {
+             scale: 95,   /* scale MathJax to match the HTML around it */
+          },
+          showMathMenu: false,   /* disable MathJax context menu (it interferes with subsetDisplay context menu) */
+       });
+      </script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=MML_CHTML"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/jquery-resizable-dom@0.32.0/dist/jquery-resizable.js"></script>
+      <script src="../build/allGroupExplorer.js"></script>
+      <script src="../build/allVisualizer.js"></script>
+      <script>
+         /* Global variables */
+         const panelNames = ['#sheet-control'];
+         var $sheet;
+
+         /* Initial entry to javascript -- called once after document load */
+         $(window).one('load', load);
+
+         /*
+          * Register static event managers -- called after document is assembled
+          *    (The .off(--).on(--) sequence is used to avoid accumulating event handlers after a reset.)
+          */
+         function registerEventHandlers() {
+            $('#sheet-button').on('click', () => show('#sheet-control') );
+            $('#help').off('click', help).on('click', help);
+            $(window).off('resize', resizeBody).on('resize', resizeBody);
+         }
+         /* Load the static components of the page */
+         function load() {
+            VC.load()
+              .then(completeSetup)
+              .catch((error) => alert(error));
+         }
+         /* Now that all the static HTML is loaded, complete the setup */
+         function completeSetup() {
+            // Document is assembled, register event handlers
+            registerEventHandlers();
+            $sheet = $('#graphic');
+
+            // Create header from group name and queue MathJax to typeset it
+            $('#header').html('Sheets (experimental - not yet ready for use)');
+            MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'header']);
+            // Register the splitter with jquery-resizable, so you can resize the graphic horizontally
+            // by grabbing the border between the graphic and the subset control and dragging it
+            $('#vert-container').resizable({
+               handleSelector: '#splitter',
+               resizeHeight: false,
+               resizeWidthFrom: 'left',
+               onDrag: function () {
+                  // Code to resize the graphic goes here, if needed
+               }
+            });
+
+            $('#graphic').css({backgroundColor:'#f8f8f8'});
+            show('#sheet-control');
+            resizeBody();
+         }
+
+         /*
+          * Resize the body, accounting for the body margins
+          *    (Note that this routine would have to resize the graphic, too, if needed.)
+          */
+         function resizeBody() {
+            $('body').height(window.innerHeight);
+            $('body').width(window.innerWidth);
+         }
+
+         /* Show the desired panel, hide the rest */
+         function show(panel_name) {
+            for (const name of panelNames) {
+               if (name == panel_name) {
+                  $(name).show();
+               } else {
+                  $(name).hide();
+               }
+            }
+         }
+
+         /* Routines for Help, Reset buttons at bottom of control panel */
+         function help() {
+            alert('This is a simple example to show how visualizers are built.');
+         }
+
+         function addRectangle () {
+            var rect = document.createElement( 'div' );
+            rect.style.width = "100px";
+            rect.style.height = "100px";
+            rect.style.background = "#eee";
+            $( rect ).draggableAndSizable();
+            $sheet.append( rect );
+         }
+      </script>
+   </head>
+
+   <body class="vert">
+      <!--
+      <div id="control-options" class="horiz">
+         <button id="sheet-button">Sheets</button>
+      </div>
+      -->
+
+      <div id="sheet-control" class="fill-vert">
+         <button id="addRectangleButton" onclick="addRectangle();">Add rectangle</button>
+      </div>
+   </body>
+</html>

@@ -39,12 +39,6 @@
 # Nathan's List
 
  * Sheets
-    * Organization
-       * Copy `docs/visualizerExemplar.html` for use as the sheet template, so that you can re-use its
-         header div and right sidebar.
-       * Move the "add rectangle" button to the right sidebar.
-       * Add disclaimer text explaining that the file is pre-alpha.
-       * Commit to the repository and push.
     * The Model
        * Create a `.js` file for the `SheetModel` class, whose constructor takes a view to sync to.
        * Create a class for `SheetElement`, whose constructor requires a model.  Ensure the constructor
