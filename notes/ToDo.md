@@ -43,8 +43,8 @@
        * Create a `.js` file for the jQuery extension for sheet elements.
        * Ensure current experiments still work after that refactoring.
        * Commit that file to the repository independently of the rest of the experiments.
-       * Copy one of the existing visualization `.html` files for use as the sheet template,
-         so that you can re-use its header div and right sidebar.
+       * Copy `docs/visualizerExemplar.html` for use as the sheet template, so that you can re-use its
+         header div and right sidebar.
        * Move the "add rectangle" button to the right sidebar.
        * Add disclaimer text explaining that the file is pre-alpha.
        * Commit to the repository and push.
@@ -273,3 +273,5 @@
 ## Bug fixes
 
  * Table on main page does not show which column is sorted at first (until you click one).
+ * Throughout the app, we use less than and greater than signs rather than the more appropriate
+   LaTeX `\langle` and `\rangle`.
