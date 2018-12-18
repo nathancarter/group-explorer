@@ -135,8 +135,8 @@ $.fn.draggableAndSizable = function () {
             dbottom -= Math.sign( dbottom );
         }
         $element.offset( { left : left, top : top } );
-        $element.width( right - left );
-        $element.height( bottom - top );
+        $element.innerWidth( right - left );
+        $element.innerHeight( bottom - top );
     }
 
     // Responds to a mouse drag event by either moving or resizing the element,
