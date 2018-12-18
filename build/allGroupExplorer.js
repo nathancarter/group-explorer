@@ -4049,7 +4049,6 @@ $.fn.draggableAndSizable = function () {
     // When the mouse moves anywhere on a selected element, set the element's cursor
     // to indicate which kind of move or resize would happen if the usre clicked.
     $element.on( "mousemove", function ( event ) {
-        console.log( 'mousemove', $element.hasClass( selectedForDraggingClass ) );
         if ( !$element.hasClass( selectedForDraggingClass ) ) {
             $element.css( { cursor : 'default' } );
             return;
