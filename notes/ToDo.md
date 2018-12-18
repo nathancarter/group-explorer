@@ -148,11 +148,11 @@
          internally in that class whenever you want to set the canvas size.
        * The `MTElement` class should create, at construction time, a `DisplayMulttable` instance
          and call its `setSize()`, then also create a `Multtable` instance for the given group.
-       * Extend `DisplayMulttable`'s `getImageURL()` function with a parameter saying whether you want
+       * Extend `DisplayMulttable`'s `getImage()` function with a parameter saying whether you want
          it small or large (default to small if argument not given).  If large, use `showLargeGraphic()`
          instead of `showSmallGraphic()`.
        * Fill the `viewDiv()` with a multiplication table IMG using code like this:
-         `myImgElement = myDisplayMultTable.getImageURL( myMulttable, true );` and then put that IMG
+         `myImgElement = myDisplayMultTable.getImage( myMulttable, true );` and then put that IMG
          element in the `viewDiv()`.
        * Override the `SheetElement`'s `edit()` method to pop up an alert saying that the feature is
          not yet implemented.
@@ -175,11 +175,11 @@
          internally in that class whenever you want to set the canvas size.
        * The `CGElement` class should create, at construction time, a `DisplayCycleGraph` instance
          and call its `setSize()`, then also create a `CycleGraph` instance for the given group.
-       * Extend `DisplayCycleGraph`'s `getImageURL()` function with a parameter saying whether you want
+       * Extend `DisplayCycleGraph`'s `getImage()` function with a parameter saying whether you want
          it small or large (default to small if argument not given).  If large, use `showLargeGraphic()`
          instead of `showSmallGraphic()`.
        * Fill the `viewDiv()` with a cycle graph by updating the MT code to look like this:
-         `myImgElement = myDisplayCycleGraph.getImageURL( myCycleGraph, true );`.
+         `myImgElement = myDisplayCycleGraph.getImage( myCycleGraph, true );`.
        * Extend `CycleGraph` with a function `toJSON()` that reports all of its editable features in a
          JSON object.  Create a corresponding `fromJSON()` that restores all those values, the reverse.
        * Extend `CycleGraph` with a function that calls `window.postMessage()` whenever any of its
@@ -196,11 +196,11 @@
          and call its `setSize()`, then also create a `CayleyDiagram` instance for the given group.
          It should use `group.cayleyDiagrams[0].name` as the second parameter to the `CayleyDiagram`
          constructor, if such a name exists, or leave that parameter off if it doesn't.
-       * Extend `DisplayDiagram`'s `getImageURL()` function with a parameter saying whether you want
+       * Extend `DisplayDiagram`'s `getImage()` function with a parameter saying whether you want
          it small or large (default to small if argument not given).  If large, use the same levels of
          detail that you do in `showGraphic()`.
        * Fill the `viewDiv()` with a Cayley diagram by updating the MT code to look like this:
-         `myImgElement = myDisplayDiagram.getImageURL( myCayleyDiagram, true );`.
+         `myImgElement = myDisplayDiagram.getImage( myCayleyDiagram, true );`.
        * Extend `CayleyDiagram` with a function `toJSON()` that reports all of its editable features in a
          JSON object.  Create a corresponding `fromJSON()` that restores all those values, the reverse.
          (Later we will need to see how to extend this to remember the camera position as well, but ignore
@@ -273,4 +273,3 @@
 ## Bug fixes
 
  * Table on main page does not show which column is sorted at first (until you click one).
- * Rename `getImageURL()`, which returns an image, not an URL.

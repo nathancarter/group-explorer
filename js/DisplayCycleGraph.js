@@ -36,7 +36,7 @@ class DisplayCycleGraph {
       DisplayCycleGraph.DEFAULT_ZOOM_STEP = 0.1;  // zoom in/zoom out step
    }
 
-   getImageURL(cycleGraph) {
+   getImage(cycleGraph) {
       this.showSmallGraphic(cycleGraph);
       const img = new Image();
       img.src = this.canvas.toDataURL();

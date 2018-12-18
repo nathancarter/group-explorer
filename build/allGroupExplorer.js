@@ -2366,7 +2366,7 @@ class DisplayDiagram {
    // Small graphics don't need high resolution features such as many-faceted spheres, labels, thick lines
    // Removing labels is particularly beneficial, since each label (384 in Tesseract) requires a canvas element
    //   and a context, which often causes loading failure due to resource limitations
-   getImageURL(diagram3D) {
+   getImage(diagram3D) {
       const img = new Image();
       // this.showGraphic(diagram3D);
 
@@ -3136,7 +3136,7 @@ class DisplayMulttable {
       DisplayMulttable.BACKGROUND = '#F0F0F0';
    }
 
-   getImageURL(multtable) {
+   getImage(multtable) {
       this.showSmallGraphic(multtable);
       const img = new Image();
       img.src = this.canvas.toDataURL();
@@ -3747,7 +3747,7 @@ class DisplayCycleGraph {
       DisplayCycleGraph.DEFAULT_ZOOM_STEP = 0.1;  // zoom in/zoom out step
    }
 
-   getImageURL(cycleGraph) {
+   getImage(cycleGraph) {
       this.showSmallGraphic(cycleGraph);
       const img = new Image();
       img.src = this.canvas.toDataURL();

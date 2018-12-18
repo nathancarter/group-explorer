@@ -40,7 +40,7 @@ class DisplayMulttable {
       DisplayMulttable.BACKGROUND = '#F0F0F0';
    }
 
-   getImageURL(multtable) {
+   getImage(multtable) {
       this.showSmallGraphic(multtable);
       const img = new Image();
       img.src = this.canvas.toDataURL();

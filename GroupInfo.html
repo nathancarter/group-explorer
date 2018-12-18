@@ -100,7 +100,7 @@
                                   ? undefined
                                   : group.cayleyDiagrams[inx].name;
                 const graphicData = new CayleyDiagram(group, diagramName);
-                const img = graphicContext.getImageURL(graphicData);
+                const img = graphicContext.getImage(graphicData);
                 $row.children(':nth-child(1)')
                     .addClass('programLink')
                     .text(diagramName)
@@ -112,7 +112,7 @@
              if (inx == 0) {
                 const graphicData = new CycleGraph(group);
                 window.cycleGraphContext = new DisplayCycleGraph({height: 100, width: 100});
-                const img = cycleGraphContext.getImageURL(graphicData);
+                const img = cycleGraphContext.getImage(graphicData);
                 $row.children(':nth-child(2)')
                     .addClass('programLink')
                     .text('')
@@ -123,7 +123,7 @@
              if (inx == 0) {
                 const graphicData = new Multtable(group);
                 window.multtableContext = new DisplayMulttable({height: 100, width: 100});
-                const img = multtableContext.getImageURL(graphicData);
+                const img = multtableContext.getImage(graphicData);
                 $row.children(':nth-child(3)')
                     .addClass('programLink')
                     .text('')
@@ -134,7 +134,7 @@
              if (inx < group.symmetryObjects.length) {
                 const objectName = group.symmetryObjects[inx].name;
                 const graphicData = SymmetryObject.generate(group, objectName);
-                const img = graphicContext.getImageURL(graphicData);
+                const img = graphicContext.getImage(graphicData);
                 $row.children(':nth-child(4)')
                     .addClass('programLink')
                     .text(objectName)

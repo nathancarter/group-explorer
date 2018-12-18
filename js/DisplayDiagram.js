@@ -76,7 +76,7 @@ class DisplayDiagram {
    // Small graphics don't need high resolution features such as many-faceted spheres, labels, thick lines
    // Removing labels is particularly beneficial, since each label (384 in Tesseract) requires a canvas element
    //   and a context, which often causes loading failure due to resource limitations
-   getImageURL(diagram3D) {
+   getImage(diagram3D) {
       const img = new Image();
       // this.showGraphic(diagram3D);
 

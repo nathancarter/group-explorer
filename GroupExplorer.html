@@ -120,28 +120,28 @@
                              undefined;
           let graphicData = new CayleyDiagram(group, graphicTitle);
 
-          let img = graphicContext.getImageURL(graphicData);
+          let img = graphicContext.getImage(graphicData);
           group.imageSource = img.src;
           img.height = img.width = 32;
           $row.children("td.cayleyDiagram").append(img);
 
           // draw Multtable
           graphicData = new Multtable(group);
-          img = multtableContext.getImageURL(graphicData);
+          img = multtableContext.getImage(graphicData);
           $row.children("td.multiplicationTable").append(img);
 
           // draw Symmetry Object
           if (group.symmetryObjects.length != 0) {
              graphicTitle = group.symmetryObjects[0].name;
              graphicData = SymmetryObject.generate(group, graphicTitle);
-             img = graphicContext.getImageURL(graphicData);
+             img = graphicContext.getImage(graphicData);
              img.height = img.width = 32;
              $row.children("td.symmetryObject").html(img);
           }
 
           // draw Cycle Graph
           graphicData = new CycleGraph( group );
-          img = cycleGraphContext.getImageURL( graphicData );
+          img = cycleGraphContext.getImage( graphicData );
           $row.children( "td.cycleGraph" ).append( img );
        }
 
