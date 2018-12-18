@@ -26,7 +26,7 @@ the first two methods shown must be used.
 
 ## Visualizer display
 
-The visualizer exemplar displays 
+The visualizer exemplar displays
 - a formatted header with the name of the group passed in the URL
 - a blank graphic element
 - a functional splitter element that can be used to resize the graphic and the controls panel
@@ -45,7 +45,7 @@ Other visualizers extend the exemplar with different displays in the graphic ele
       <link rel="icon" type="image/png" href="./images/favicon.png"></link>
       <link rel="stylesheet" href="./style/fonts.css" type="text/css"></link>
       <link rel="stylesheet" href="./style/sliders.css" type="text/css"></link>
-      <link rel="stylesheet" href="./visualizerFramework/visualizer.css" type="text/css"></style>
+      <link rel="stylesheet" href="./visualizerFramework/visualizer.css" type="text/css"></link>
       <link rel="stylesheet" href="./subsetDisplay/subsets.css" type="text/css"></link>
 
       <style>
