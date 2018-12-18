@@ -23,13 +23,18 @@ const defaultResizingMargin = 10;
 // element has been selected, such as "border: 2px dotted #aaf;".
 const selectedForDraggingClass = 'selected-for-moving-and-sizing';
 
+// For temporarily pausing this feature.
+const pausedDragSelectClass = 'move-and-size-on-pause';
+
 // An internal convenience function that takes any mouse event and computes which
 // region of the element's 9-patch it falls in (0=NW corner, 1=N strip, 2=NE corner,
 // 3=W strip, 4=center block, etc.).
-function eventToCellNumber ( event ) {
+function eventToCellNumber ( event, relativeToThisAncestor ) {
+    var container = relativeToThisAncestor || event.target;
     var min = { x : 0, y : 0 },
-        max = { x : $( event.target ).width(), y : $( event.target ).height() },
-        point = { x : event.offsetX, y : event.offsetY },
+        max = { x : $( container ).outerWidth(), y : $( container ).outerHeight() },
+        point = { x : event.pageX - container.offsetLeft,
+                  y : event.pageY - container.offsetTop },
         col = ( point.x < min.x + defaultResizingMargin ) ? 0
             : ( point.x > max.x - defaultResizingMargin ) ? 2 : 1,
         row = ( point.y < min.y + defaultResizingMargin ) ? 0
@@ -52,16 +57,13 @@ $.fn.draggableAndSizable = function () {
     // Do this only if the click was not the end of a drag, by checking for motion.
     // We also trigger a mousemove event to update the cursor.
     $element.on( "click", function ( event ) {
+        if ( $element.hasClass( pausedDragSelectClass ) ) return;
         if ( $element[0].dragData.firstX == $element[0].dragData.lastX
           && $element[0].dragData.firstY == $element[0].dragData.lastY ) {
             if ( $element.hasClass( selectedForDraggingClass ) ) {
-                $element.removeClass( selectedForDraggingClass );
+                $element.removeDragAndSizeSelection();
             } else {
-                $( '.'+selectedForDraggingClass ).each( function ( idx, elt ) {
-                    elt.dragData = { };
-                    $( elt ).removeClass( selectedForDraggingClass );
-                } );
-                $element.addClass( selectedForDraggingClass );
+                $element.addDragAndSizeSelection();
             }
             setTimeout( function () {
                 var mouseMoveEvent = $.Event( 'mousemove' );
@@ -75,11 +77,12 @@ $.fn.draggableAndSizable = function () {
     // When the mouse moves anywhere on a selected element, set the element's cursor
     // to indicate which kind of move or resize would happen if the usre clicked.
     $element.on( "mousemove", function ( event ) {
+        if ( $element.hasClass( pausedDragSelectClass ) ) return;
         if ( !$element.hasClass( selectedForDraggingClass ) ) {
             $element.css( { cursor : 'default' } );
             return;
         }
-        switch ( eventToCellNumber( event ) ) {
+        switch ( eventToCellNumber( event, $element[0] ) ) {
             case 0 : case 8 : $element.css( { cursor : 'nwse-resize' } ); break;
             case 1 : case 7 : $element.css( { cursor : 'ns-resize' } ); break;
             case 2 : case 6 : $element.css( { cursor : 'nesw-resize' } ); break;
@@ -94,8 +97,9 @@ $.fn.draggableAndSizable = function () {
     // data we will need to remember so that we can do relative positioning correctly later.
     // We also install in the parent element mouse handlers for continuing/ending the drag.
     $element.on( "mousedown", function ( event ) {
+        if ( $element.hasClass( pausedDragSelectClass ) ) return;
         if ( !$element.hasClass( selectedForDraggingClass ) ) return;
-        $element[0].dragData.type = eventToCellNumber( event );
+        $element[0].dragData.type = eventToCellNumber( event, $element[0] );
         $element[0].dragData.firstX = event.pageX;
         $element[0].dragData.firstY = event.pageY;
         $element[0].dragData.lastX = event.pageX;
@@ -173,3 +177,22 @@ $.fn.draggableAndSizable = function () {
         $element.parents().off( "mouseup", endDrag );
     }
 };
+
+// How we add/remove dragging selections
+$.fn.removeDragAndSizeSelection = function () {
+    if ( this.hasClass( pausedDragSelectClass ) ) return;
+    if ( this[0] ) this[0].dragData = { };
+    this.removeClass( selectedForDraggingClass );
+}
+$.fn.addDragAndSizeSelection = function () {
+    $( '.'+selectedForDraggingClass ).removeDragAndSizeSelection();
+    this.addClass( selectedForDraggingClass );
+}
+
+// You can pause and unpause this feature
+$.fn.pauseDragAndResize = function () {
+    this.addClass( pausedDragSelectClass );
+}
+$.fn.unpauseDragAndResize = function () {
+    this.removeClass( pausedDragSelectClass );
+}
