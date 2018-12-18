@@ -39,21 +39,6 @@
 # Nathan's List
 
  * Sheets
-    * The Model
-       * Create a `.js` file for the `SheetModel` class, whose constructor takes a view to sync to.
-       * Create a class for `SheetElement`, whose constructor requires a model.  Ensure the constructor
-         gives the new element a z value that places it in front of all existing elements.
-       * Give `SheetElement` a `viewDiv()` method that returns (creating it the first time if needed)
-         a div that displays the element.
-       * Add a `syncToView()` method to the model.  It ensures all its elements have divs in the view
-         that *contain* their `viewDiv()` results.  It also deletes any child of the view that doesn't
-         correspond to any of its `SheetElement`s.
-       * Add a `removeFromModel()` method to `SheetElement`s.
-       * Ensure that constructing or removing sheet elements calls `syncToView()` in the model.
-    * First element class
-       * Implement a simple `RectangleElement` class that creates a div with a background color.
-       * Change the "Add Rectangle" event handler to put a new `RectangleElement` into the model.
-       * Add a "Delete" button that can remove any element from the model.
     * Editing
        * To the `SheetElement` class, add an `editDiv()` method parallel to `viewDiv()`, but for editing.
          Use this for the rectangle to let users pick a color.

@@ -7,7 +7,6 @@
       <link rel="stylesheet" href="../style/fonts.css" type="text/css"></link>
       <link rel="stylesheet" href="../style/sliders.css" type="text/css"></link>
       <link rel="stylesheet" href="../visualizerFramework/visualizer.css" type="text/css"></link>
-      <link rel="stylesheet" href="../subsetDisplay/subsets.css" type="text/css"></link>
 
       <style>
          #view-control {
@@ -32,10 +31,12 @@
       <script src="https://cdn.jsdelivr.net/npm/jquery-resizable-dom@0.32.0/dist/jquery-resizable.js"></script>
       <script src="../build/allGroupExplorer.js"></script>
       <script src="../build/allVisualizer.js"></script>
+      <script src="../build/allSheets.js"></script>
       <script>
          /* Global variables */
          const panelNames = ['#sheet-control'];
          var $sheet;
+         var Model;
 
          /* Initial entry to javascript -- called once after document load */
          $(window).one('load', load);
@@ -60,6 +61,7 @@
             // Document is assembled, register event handlers
             registerEventHandlers();
             $sheet = $('#graphic');
+            Model = new SheetModel( $sheet[0] );
 
             // Create header from group name and queue MathJax to typeset it
             $('#header').html('Sheets (experimental - not yet ready for use)');
@@ -106,12 +108,11 @@
          }
 
          function addRectangle () {
-            var rect = document.createElement( 'div' );
-            rect.style.width = "100px";
-            rect.style.height = "100px";
-            rect.style.background = "#eee";
-            $( rect ).draggableAndSizable();
-            $sheet.append( rect );
+             new RectangleElement( Model );
+         }
+         function deleteSelected () {
+             var selected = Model.selected();
+             if ( selected ) selected.remove();
          }
       </script>
    </head>
@@ -125,6 +126,7 @@
 
       <div id="sheet-control" class="fill-vert">
          <button id="addRectangleButton" onclick="addRectangle();">Add rectangle</button>
+         <button id="deleteButton" onclick="deleteSelected();">Delete</button>
       </div>
    </body>
 </html>
