@@ -45,15 +45,24 @@ $.fn.draggableAndSizable = function () {
 
     // Remember the element for use in all the closures below.
     // Store in that element an empty object we will fill with data during a drag/resize.
-    var $element = this,
-        dragData = $element[0].dragData = { };
+    var $element = this;
+    $element[0].dragData = { };
 
     // Respond to clicks by toggling whether the element is selected.
     // Do this only if the click was not the end of a drag, by checking for motion.
     // We also trigger a mousemove event to update the cursor.
     $element.on( "click", function ( event ) {
-        if ( dragData.firstX == dragData.lastX && dragData.firstY == dragData.lastY ) {
-            $element.toggleClass( selectedForDraggingClass );
+        if ( $element[0].dragData.firstX == $element[0].dragData.lastX
+          && $element[0].dragData.firstY == $element[0].dragData.lastY ) {
+            if ( $element.hasClass( selectedForDraggingClass ) ) {
+                $element.removeClass( selectedForDraggingClass );
+            } else {
+                $( '.'+selectedForDraggingClass ).each( function ( idx, elt ) {
+                    elt.dragData = { };
+                    $( elt ).removeClass( selectedForDraggingClass );
+                } );
+                $element.addClass( selectedForDraggingClass );
+            }
             setTimeout( function () {
                 var mouseMoveEvent = $.Event( 'mousemove' );
                 mouseMoveEvent.pageX = event.pageX;
@@ -86,11 +95,11 @@ $.fn.draggableAndSizable = function () {
     // We also install in the parent element mouse handlers for continuing/ending the drag.
     $element.on( "mousedown", function ( event ) {
         if ( !$element.hasClass( selectedForDraggingClass ) ) return;
-        dragData.type = eventToCellNumber( event );
-        dragData.firstX = event.pageX;
-        dragData.firstY = event.pageY;
-        dragData.lastX = event.pageX;
-        dragData.lastY = event.pageY;
+        $element[0].dragData.type = eventToCellNumber( event );
+        $element[0].dragData.firstX = event.pageX;
+        $element[0].dragData.firstY = event.pageY;
+        $element[0].dragData.lastX = event.pageX;
+        $element[0].dragData.lastY = event.pageY;
         $element.parents().on( "mousemove", handleDrag );
         $element.parents().on( "mouseup", endDrag );
     } );
@@ -144,18 +153,18 @@ $.fn.draggableAndSizable = function () {
     // We compute relative change since last drag by storing the last drag point
     // in the element's dragData object.
     function handleDrag ( event ) {
-        var dx = event.pageX - dragData.lastX,
-            dy = event.pageY - dragData.lastY,
+        var dx = event.pageX - $element[0].dragData.lastX,
+            dy = event.pageY - $element[0].dragData.lastY,
             dleft = dx, dtop = dy, dright = dx, dbottom = dy;
-        if ( dragData.type != 4 ) {
-            if ( dragData.type > 2 ) dtop = 0;
-            if ( dragData.type < 6 ) dbottom = 0;
-            if ( dragData.type % 3 > 0 ) dleft = 0;
-            if ( dragData.type % 3 < 2 ) dright = 0;
+        if ( $element[0].dragData.type != 4 ) {
+            if ( $element[0].dragData.type > 2 ) dtop = 0;
+            if ( $element[0].dragData.type < 6 ) dbottom = 0;
+            if ( $element[0].dragData.type % 3 > 0 ) dleft = 0;
+            if ( $element[0].dragData.type % 3 < 2 ) dright = 0;
         }
         reposition( dleft, dtop, dright, dbottom );
-        dragData.lastX = event.pageX;
-        dragData.lastY = event.pageY;
+        $element[0].dragData.lastX = event.pageX;
+        $element[0].dragData.lastY = event.pageY;
     }
 
     // When a drag ends, we uninstall the handlers we had to add to its parent.
