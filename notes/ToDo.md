@@ -39,11 +39,6 @@
 # Nathan's List
 
  * Sheets
-    * Text elements
-       * Create a `TextElement` subclass of `SheetElement`.
-       * Give it fields for `text`, `fontSize`, and `fontColor` and assign sensible defaults.
-       * Use those fields when creating or updating the `viewDiv()`.
-       * Create editing tools for all three fields in `editDiv()` and respect them in `saveEdits()`.
     * Saving and loading sheets
        * Extend `SheetElement` with a `toJSON()` method that saves its state along with its class name.
          Include in that JSON data the element's x,y,z,w,h.

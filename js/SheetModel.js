@@ -59,7 +59,10 @@ class SheetModel {
                 var wrapper = $( '<div></div>' )[0];
                 wrapper.appendChild( htmlElt );
                 $( wrapper ).draggableAndSizable();
-                $( wrapper ).css( { position : 'absolute', padding : `${defaultResizingMargin}px` } );
+                $( wrapper ).css( {
+                    position : 'absolute',
+                    padding : `${defaultResizingMargin}px`,
+                } );
                 that.view.appendChild( wrapper );
             }
         } );
@@ -96,7 +99,7 @@ class SheetElement {
             this.viewElement.setAttribute( 'title', 'Double-click to edit' );
             var that = this;
             $( this.viewElement ).on( 'dblclick', function () {
-                window.getSelection().empty()
+                window.getSelection().empty();
                 that.edit();
                 return false;
             } );
@@ -155,6 +158,7 @@ class SheetElement {
             } );
             $( editor ).find( '.cancel-button' ).click( () => that.showViewControls() );
         }
+        this.loadEdits();
         this.showEditControls();
     }
 
@@ -162,16 +166,30 @@ class SheetElement {
     showEditControls () {
         $( this.htmlViewElement() ).hide();
         $( this.htmlEditElement() ).show();
+        $( this.htmlEditElement().parentNode ).removeDragAndSizeSelection();
+        $( this.htmlEditElement().parentNode ).pauseDragAndResize();
     }
     // Reverse of the previous
     showViewControls () {
         $( this.htmlViewElement() ).show();
         $( this.htmlEditElement() ).hide();
+        $( this.htmlEditElement().parentNode ).unpauseDragAndResize();
     }
 
     // This function should read from its edit controls and save their meaning into
     // our internal state.  Because this is the abstract base class, it is a stub.
     saveEdits () { }
+    // This function is the reverse of the previous; it puts the internal state into
+    // the edit controls.  Because this is the abstract base class, it is a stub.
+    loadEdits () { }
+
+    // Handy utility for subclasses: Ensures the wrapper node is just the right
+    // size for the stuff you've put in the view.
+    fitWrapperToView () {
+        var view = $( this.htmlViewElement() );
+        if ( !view[0].parentNode ) return;
+        $( view[0].parentNode ).width( view.width() ).height( view.height() );
+    }
 }
 
 /*
@@ -199,7 +217,7 @@ class RectangleElement extends SheetElement {
     createHtmlEditElement () {
         var result = $( '<div>'
                       + 'Background color: '
-                      + `<input type="color" class="color-picker" value="${this.color}"/>`
+                      + `<input type="color" class="color-input" value="${this.color}"/>`
                       + '</div>' )[0];
         $( result ).css( {
             minWidth : '100px',
@@ -211,10 +229,77 @@ class RectangleElement extends SheetElement {
     update () {
         $( this.htmlViewElement() ).css( { backgroundColor : this.color } );
         $( this.htmlEditElement() ).css( { backgroundColor : this.color } );
+        this.fitWrapperToView();
     }
-    // implement abstract method saveEdits()
+    // implement abstract methods save/loadEdits()
     saveEdits () {
-        this.color = $( this.htmlEditElement() ).find( '.color-picker' )[0].value;
+        this.color = $( this.htmlEditElement() ).find( '.color-input' )[0].value;
         this.update();
+    }
+    loadEdits () {
+        $( this.htmlEditElement() ).find( '.color-input' )[0].value = this.color;
+    }
+}
+
+/*
+ * SheetElement subclass for showing text
+ */
+class TextElement extends SheetElement {
+    // three defining features: text, font size, font color
+    constructor ( model ) {
+        super( model );
+        this.text = 'Text';
+        this.fontSize = '12pt';
+        this.fontColor = '#000000';
+        this.update();
+    }
+    // helper function to produce inner HTML from the above defining attributes
+    innerHTML () {
+        var simplified = this.text || '';
+        const style = 'style="margin: 0;"';
+        simplified = `<p ${style}>` + simplified.replace( RegExp( '\n', 'g' ), `</p><p ${style}>` ) + '</p>';
+        return `<div style="font-size: ${this.fontSize}; color: ${this.fontColor};">`
+             + simplified + '</div>';
+    }
+    // represented by a span with the given font styles and text content
+    createHtmlViewElement () {
+        var result = $( this.innerHTML() )[0];
+        $( result ).css( {
+            "-webkit-touch-callout" : "none",
+            "-khtml-user-select": "none",
+            "-moz-user-select": "none",
+            "-ms-user-select": "none",
+            "user-select": "none"
+        } );
+        return result;
+    }
+    // when editing, use one input for each defining feature
+    createHtmlEditElement () {
+        return $(
+            '<div style="min-width: 200px; border: 1px solid black;">'
+          + '<p>Text content:</p>'
+          + `<textarea class="text-input" width="100%">${this.text}</textarea>`
+          + '<p>Text size: '
+          + `<input type="range" min="8" max="100" class="size-input" value="${this.fontSize}"/></p>`
+          + '<p>Text color: '
+          + `<input type="color" class="color-input" value="${this.fontColor}"/></p>`
+          + '</div>' )[0];
+    }
+    // update appearance with this function
+    update () {
+        $( this.htmlViewElement() ).html( this.innerHTML() );
+        this.fitWrapperToView();
+    }
+    // implement abstract methods save/loadEdits()
+    saveEdits () {
+        this.text = $( this.htmlEditElement() ).find( '.text-input' )[0].value;
+        this.fontSize = $( this.htmlEditElement() ).find( '.size-input' )[0].value + 'pt';
+        this.fontColor = $( this.htmlEditElement() ).find( '.color-input' )[0].value;
+        this.update();
+    }
+    loadEdits () {
+        $( this.htmlEditElement() ).find( '.text-input' )[0].value = this.text;
+        $( this.htmlEditElement() ).find( '.size-input' )[0].value = parseInt( this.fontSize );
+        $( this.htmlEditElement() ).find( '.color-input' )[0].value = this.fontColor;
     }
 }

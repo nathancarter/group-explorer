@@ -113,6 +113,9 @@
          function addRectangle () {
              new RectangleElement( Model );
          }
+         function addText () {
+             new TextElement( Model );
+         }
          function deleteSelected () {
              var selected = Model.selected();
              if ( selected ) selected.remove();
@@ -129,6 +132,7 @@
 
       <div id="sheet-control" class="fill-vert">
          <p class="button-row"><button id="addRectangleButton" onclick="addRectangle();">Add rectangle</button></p>
+         <p class="button-row"><button id="addTextButton" onclick="addText();">Add text box</button></p>
          <p class="button-row"><button id="deleteButton" onclick="deleteSelected();">Delete selected item</button></p>
       </div>
    </body>

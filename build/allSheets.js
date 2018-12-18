@@ -23,13 +23,18 @@ const defaultResizingMargin = 10;
 // element has been selected, such as "border: 2px dotted #aaf;".
 const selectedForDraggingClass = 'selected-for-moving-and-sizing';
 
+// For temporarily pausing this feature.
+const pausedDragSelectClass = 'move-and-size-on-pause';
+
 // An internal convenience function that takes any mouse event and computes which
 // region of the element's 9-patch it falls in (0=NW corner, 1=N strip, 2=NE corner,
 // 3=W strip, 4=center block, etc.).
-function eventToCellNumber ( event ) {
+function eventToCellNumber ( event, relativeToThisAncestor ) {
+    var container = relativeToThisAncestor || event.target;
     var min = { x : 0, y : 0 },
-        max = { x : $( event.target ).width(), y : $( event.target ).height() },
-        point = { x : event.offsetX, y : event.offsetY },
+        max = { x : $( container ).outerWidth(), y : $( container ).outerHeight() },
+        point = { x : event.pageX - container.offsetLeft,
+                  y : event.pageY - container.offsetTop },
         col = ( point.x < min.x + defaultResizingMargin ) ? 0
             : ( point.x > max.x - defaultResizingMargin ) ? 2 : 1,
         row = ( point.y < min.y + defaultResizingMargin ) ? 0
@@ -52,16 +57,13 @@ $.fn.draggableAndSizable = function () {
     // Do this only if the click was not the end of a drag, by checking for motion.
     // We also trigger a mousemove event to update the cursor.
     $element.on( "click", function ( event ) {
+        if ( $element.hasClass( pausedDragSelectClass ) ) return;
         if ( $element[0].dragData.firstX == $element[0].dragData.lastX
           && $element[0].dragData.firstY == $element[0].dragData.lastY ) {
             if ( $element.hasClass( selectedForDraggingClass ) ) {
-                $element.removeClass( selectedForDraggingClass );
+                $element.removeDragAndSizeSelection();
             } else {
-                $( '.'+selectedForDraggingClass ).each( function ( idx, elt ) {
-                    elt.dragData = { };
-                    $( elt ).removeClass( selectedForDraggingClass );
-                } );
-                $element.addClass( selectedForDraggingClass );
+                $element.addDragAndSizeSelection();
             }
             setTimeout( function () {
                 var mouseMoveEvent = $.Event( 'mousemove' );
@@ -75,11 +77,12 @@ $.fn.draggableAndSizable = function () {
     // When the mouse moves anywhere on a selected element, set the element's cursor
     // to indicate which kind of move or resize would happen if the usre clicked.
     $element.on( "mousemove", function ( event ) {
+        if ( $element.hasClass( pausedDragSelectClass ) ) return;
         if ( !$element.hasClass( selectedForDraggingClass ) ) {
             $element.css( { cursor : 'default' } );
             return;
         }
-        switch ( eventToCellNumber( event ) ) {
+        switch ( eventToCellNumber( event, $element[0] ) ) {
             case 0 : case 8 : $element.css( { cursor : 'nwse-resize' } ); break;
             case 1 : case 7 : $element.css( { cursor : 'ns-resize' } ); break;
             case 2 : case 6 : $element.css( { cursor : 'nesw-resize' } ); break;
@@ -94,8 +97,9 @@ $.fn.draggableAndSizable = function () {
     // data we will need to remember so that we can do relative positioning correctly later.
     // We also install in the parent element mouse handlers for continuing/ending the drag.
     $element.on( "mousedown", function ( event ) {
+        if ( $element.hasClass( pausedDragSelectClass ) ) return;
         if ( !$element.hasClass( selectedForDraggingClass ) ) return;
-        $element[0].dragData.type = eventToCellNumber( event );
+        $element[0].dragData.type = eventToCellNumber( event, $element[0] );
         $element[0].dragData.firstX = event.pageX;
         $element[0].dragData.firstY = event.pageY;
         $element[0].dragData.lastX = event.pageX;
@@ -174,6 +178,25 @@ $.fn.draggableAndSizable = function () {
     }
 };
 
+// How we add/remove dragging selections
+$.fn.removeDragAndSizeSelection = function () {
+    if ( this.hasClass( pausedDragSelectClass ) ) return;
+    if ( this[0] ) this[0].dragData = { };
+    this.removeClass( selectedForDraggingClass );
+}
+$.fn.addDragAndSizeSelection = function () {
+    $( '.'+selectedForDraggingClass ).removeDragAndSizeSelection();
+    this.addClass( selectedForDraggingClass );
+}
+
+// You can pause and unpause this feature
+$.fn.pauseDragAndResize = function () {
+    this.addClass( pausedDragSelectClass );
+}
+$.fn.unpauseDragAndResize = function () {
+    this.removeClass( pausedDragSelectClass );
+}
+
 /*
  * A Sheet Model is a data structure somewhat in the sense of the model-view paradigm,
  * in that it stores all the data for a sheet, but does not own the on-screen HTML
@@ -234,7 +257,10 @@ class SheetModel {
                 var wrapper = $( '<div></div>' )[0];
                 wrapper.appendChild( htmlElt );
                 $( wrapper ).draggableAndSizable();
-                $( wrapper ).css( { position : 'absolute', padding : `${defaultResizingMargin}px` } );
+                $( wrapper ).css( {
+                    position : 'absolute',
+                    padding : `${defaultResizingMargin}px`,
+                } );
                 that.view.appendChild( wrapper );
             }
         } );
@@ -271,7 +297,7 @@ class SheetElement {
             this.viewElement.setAttribute( 'title', 'Double-click to edit' );
             var that = this;
             $( this.viewElement ).on( 'dblclick', function () {
-                window.getSelection().empty()
+                window.getSelection().empty();
                 that.edit();
                 return false;
             } );
@@ -330,6 +356,7 @@ class SheetElement {
             } );
             $( editor ).find( '.cancel-button' ).click( () => that.showViewControls() );
         }
+        this.loadEdits();
         this.showEditControls();
     }
 
@@ -337,16 +364,30 @@ class SheetElement {
     showEditControls () {
         $( this.htmlViewElement() ).hide();
         $( this.htmlEditElement() ).show();
+        $( this.htmlEditElement().parentNode ).removeDragAndSizeSelection();
+        $( this.htmlEditElement().parentNode ).pauseDragAndResize();
     }
     // Reverse of the previous
     showViewControls () {
         $( this.htmlViewElement() ).show();
         $( this.htmlEditElement() ).hide();
+        $( this.htmlEditElement().parentNode ).unpauseDragAndResize();
     }
 
     // This function should read from its edit controls and save their meaning into
     // our internal state.  Because this is the abstract base class, it is a stub.
     saveEdits () { }
+    // This function is the reverse of the previous; it puts the internal state into
+    // the edit controls.  Because this is the abstract base class, it is a stub.
+    loadEdits () { }
+
+    // Handy utility for subclasses: Ensures the wrapper node is just the right
+    // size for the stuff you've put in the view.
+    fitWrapperToView () {
+        var view = $( this.htmlViewElement() );
+        if ( !view[0].parentNode ) return;
+        $( view[0].parentNode ).width( view.width() ).height( view.height() );
+    }
 }
 
 /*
@@ -374,7 +415,7 @@ class RectangleElement extends SheetElement {
     createHtmlEditElement () {
         var result = $( '<div>'
                       + 'Background color: '
-                      + `<input type="color" class="color-picker" value="${this.color}"/>`
+                      + `<input type="color" class="color-input" value="${this.color}"/>`
                       + '</div>' )[0];
         $( result ).css( {
             minWidth : '100px',
@@ -386,10 +427,77 @@ class RectangleElement extends SheetElement {
     update () {
         $( this.htmlViewElement() ).css( { backgroundColor : this.color } );
         $( this.htmlEditElement() ).css( { backgroundColor : this.color } );
+        this.fitWrapperToView();
     }
-    // implement abstract method saveEdits()
+    // implement abstract methods save/loadEdits()
     saveEdits () {
-        this.color = $( this.htmlEditElement() ).find( '.color-picker' )[0].value;
+        this.color = $( this.htmlEditElement() ).find( '.color-input' )[0].value;
         this.update();
+    }
+    loadEdits () {
+        $( this.htmlEditElement() ).find( '.color-input' )[0].value = this.color;
+    }
+}
+
+/*
+ * SheetElement subclass for showing text
+ */
+class TextElement extends SheetElement {
+    // three defining features: text, font size, font color
+    constructor ( model ) {
+        super( model );
+        this.text = 'Text';
+        this.fontSize = '12pt';
+        this.fontColor = '#000000';
+        this.update();
+    }
+    // helper function to produce inner HTML from the above defining attributes
+    innerHTML () {
+        var simplified = this.text || '';
+        const style = 'style="margin: 0;"';
+        simplified = `<p ${style}>` + simplified.replace( RegExp( '\n', 'g' ), `</p><p ${style}>` ) + '</p>';
+        return `<div style="font-size: ${this.fontSize}; color: ${this.fontColor};">`
+             + simplified + '</div>';
+    }
+    // represented by a span with the given font styles and text content
+    createHtmlViewElement () {
+        var result = $( this.innerHTML() )[0];
+        $( result ).css( {
+            "-webkit-touch-callout" : "none",
+            "-khtml-user-select": "none",
+            "-moz-user-select": "none",
+            "-ms-user-select": "none",
+            "user-select": "none"
+        } );
+        return result;
+    }
+    // when editing, use one input for each defining feature
+    createHtmlEditElement () {
+        return $(
+            '<div style="min-width: 200px; border: 1px solid black;">'
+          + '<p>Text content:</p>'
+          + `<textarea class="text-input" width="100%">${this.text}</textarea>`
+          + '<p>Text size: '
+          + `<input type="range" min="8" max="100" class="size-input" value="${this.fontSize}"/></p>`
+          + '<p>Text color: '
+          + `<input type="color" class="color-input" value="${this.fontColor}"/></p>`
+          + '</div>' )[0];
+    }
+    // update appearance with this function
+    update () {
+        $( this.htmlViewElement() ).html( this.innerHTML() );
+        this.fitWrapperToView();
+    }
+    // implement abstract methods save/loadEdits()
+    saveEdits () {
+        this.text = $( this.htmlEditElement() ).find( '.text-input' )[0].value;
+        this.fontSize = $( this.htmlEditElement() ).find( '.size-input' )[0].value + 'pt';
+        this.fontColor = $( this.htmlEditElement() ).find( '.color-input' )[0].value;
+        this.update();
+    }
+    loadEdits () {
+        $( this.htmlEditElement() ).find( '.text-input' )[0].value = this.text;
+        $( this.htmlEditElement() ).find( '.size-input' )[0].value = parseInt( this.fontSize );
+        $( this.htmlEditElement() ).find( '.color-input' )[0].value = this.fontColor;
     }
 }
