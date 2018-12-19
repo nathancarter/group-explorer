@@ -32,9 +32,11 @@
       <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=MML_CHTML"></script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
       <script src="https://cdn.jsdelivr.net/npm/jquery-resizable-dom@0.32.0/dist/jquery-resizable.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/95/three.js"></script>
       <script src="./build/allGroupExplorer.js"></script>
       <script src="./build/allVisualizer.js"></script>
       <script src="./build/allSheets.js"></script>
+      <script src="./groupURLs.js"></script>
       <script>
          /* Global variables */
          const panelNames = ['#sheet-control'];
@@ -109,6 +111,18 @@
             }
             $sheet[0].addEventListener( 'synced', updateUndoRedoButtons );
             updateUndoRedoButtons();
+
+            urls.map( function ( url ) {
+                var name = url;
+                if ( /\.group$/.test( name ) ) name = name.substring( 0, name.length - 6 );
+                var lastSlash = name.lastIndexOf( '/' );
+                if ( lastSlash > -1 ) name = name.substring( lastSlash + 1, name.length );
+                $( groupList ).append( $(
+                    `<option value="${url}">${name}</option>`
+                ) );
+            } );
+
+            $( reset ).hide();
          }
 
          function updateLoadList () {
@@ -152,7 +166,6 @@
             }
          }
 
-         /* Routines for Help, Reset buttons at bottom of control panel */
          function help() {
             alert('This is a simple example to show how visualizers are built.');
          }
@@ -222,34 +235,46 @@
          }
          function undo () { Model.undo(); }
          function redo () { Model.redo(); }
+         function addVisualizer () {
+            var vizType = visualizerList.value;
+            var groupURL = groupList.value;
+            if ( visualizerList.value == 'MT' ) {
+                new MTElement( Model, groupURL );
+            } else if ( visualizerList.value == 'CD' ) {
+                // not yet implemented
+            } else if ( visualizerList.value == 'CG' ) {
+                // not yet implemented
+            }
+         }
       </script>
    </head>
 
    <body class="vert">
+      <div id="control-options" class="horiz">
+         <button>Sheet Controls</button>
+      </div>
       <div id="sheet-control" class="fill-vert">
          <p class="button-row">
             <button id="addRectangleButton" onclick="addRectangle();">Add rectangle</button>
+            <button id="addTextButton" onclick="addText();">Add text box</button>
          </p>
          <p class="button-row">
-            <button id="addTextButton" onclick="addText();">Add text box</button>
+            <button id="addVisualizerButton" onclick="addVisualizer();">Add this visualizer:</button>
+         </p>
+         <p>
+            &nbsp; &nbsp;
+            <select id="visualizerList">
+               <option value="MT">multiplication table</option>
+               <option value="CD">Cayley diagram</option>
+               <option value="CG">cycle graph</option>
+            </select>
+            <select id="groupList"></select>
          </p>
          <p class="button-row">
             <button id="deleteButton" onclick="deleteSelected();"
                     class="for-selected-element">Delete selected item</button>
          </p>
-         <p class="button-row">
-            <button id="saveButton" onclick="saveAs();">Save as:</button>
-            <input type="text" id="filenameInput" value="My Sheet"/>
-         </p>
-         <p class="button-row">
-            <button id="loadButton" onclick="loadChosen();">Load sheet:</button>
-            <select id="savedSheetsList"></select>
-         </p>
-         <p class="button-row">
-            <button id="copyButton" onclick="copySelected();"
-                    class="for-selected-element">Copy selected item</button>
-            <button id="pasteButton" onclick="pasteItem();">Paste</button>
-         </p>
+         <hr/>
          <p class="button-row">
             <button id="moveUpButton" onclick="moveSelectedUp();"
                     class="for-selected-element">Move forward</button>
@@ -262,9 +287,24 @@
             <button id="moveToBottomButton" onclick="moveSelectedToBottom();"
                     class="for-selected-element">Move to back</button>
          </p>
+         <hr/>
+         <p class="button-row">
+            <button id="copyButton" onclick="copySelected();"
+                    class="for-selected-element">Copy selected item</button>
+            <button id="pasteButton" onclick="pasteItem();">Paste</button>
+         </p>
          <p class="button-row">
             <button id="undoButton" onclick="undo();">Undo</button>
             <button id="redoButton" onclick="redo();">Redo</button>
+         </p>
+         <hr/>
+         <p class="button-row">
+            <button id="saveButton" onclick="saveAs();">Save as:</button>
+            <input type="text" id="filenameInput" value="My Sheet"/>
+         </p>
+         <p class="button-row">
+            <button id="loadButton" onclick="loadChosen();">Load sheet:</button>
+            <select id="savedSheetsList"></select>
          </p>
       </div>
    </body>

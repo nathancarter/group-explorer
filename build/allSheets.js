@@ -238,8 +238,9 @@ class SheetModel {
         this.elements.push( element );
         // ensure the new element has the highest z-index of all elements in the model
         element.zIndex = maxIndex + 1;
-        // update view
-        this.sync();
+        // update view very soon
+        var that = this;
+        setTimeout( function () { that.sync(); }, 1 );
     }
 
     // Find the currently selected element and return it as a SheetElement instance,
@@ -281,6 +282,7 @@ class SheetModel {
                 var last = that.history[that.historyIndex];
                 var next = JSON.stringify( that.toJSON() );
                 if ( next != last ) {
+                    // do the work of updating the history array
                     that.history = that.history.slice( 0, that.historyIndex + 1 );
                     that.history.push( next );
                     that.historyIndex++;
@@ -288,6 +290,9 @@ class SheetModel {
                         that.history.shift();
                         that.historyIndex--;
                     }
+                    // also, tell all my new elements that they may have been resized,
+                    // and they should check and maybe re-render themselves.
+                    that.elements.map( ( elt ) => { if ( elt.resize ) elt.resize(); } );
                 }
             }, 1 );
         }
@@ -690,6 +695,64 @@ class TextElement extends SheetElement {
         this.text = json.text;
         this.fontSize = json.fontSize;
         this.fontColor = json.fontColor;
+        this.update();
+    }
+}
+
+/*
+ * SheetElement subclass for showing the multiplication table of a group
+ */
+class MTElement extends SheetElement {
+    // three defining features: text, font size, font color
+    constructor ( model, groupURL ) {
+        super( model );
+        this.groupURL = groupURL;
+        this.DMT = new DisplayMulttable( { width : 100, height : 100 } );
+        var that = this;
+        Library.getGroupFromURL( groupURL )
+               .then( ( group ) => {
+                   that.MT = new Multtable( that.group = group );
+                   that.rerender();
+               } )
+               .catch( function ( error ) { console.log( error ); } );
+    }
+    // how to create an image of the visualizer
+    render () {
+        var result = this.MT ? this.DMT.getImage( this.MT, true ) : $( '<img/>' )[0];
+        $( result ).css( { "pointer-events" : "none" } );
+        return result;
+    }
+    // how to force updating with the latest image
+    rerender () {
+        var $wrapper = $( this.htmlViewElement().parentNode );
+        $wrapper[0].removeChild( this.htmlViewElement() );
+        $wrapper.append( this.viewElement = this.render() );
+    }
+    // represented by a span with the given font styles and text content
+    createHtmlViewElement () { return this.render(); }
+    // override the default behavior for editing, because visualizers are special
+    edit () {
+        alert( 'That feature is not yet implemented.' );
+    }
+    // when a resize happens, build a new image, but only if a resize actually happened
+    resize () {
+        var $wrapper = $( this.htmlViewElement().parentNode );
+        var lastSize = this.DMT.getSize();
+        if ( ( lastSize.w != $wrapper.width() )
+          || ( lastSize.h != $wrapper.height() ) ) {
+            this.DMT.setSize( $wrapper.width(), $wrapper.height() );
+            this.rerender();
+        }
+    }
+    // serialization just needs to take into account text, size, and color
+    toJSON () {
+        var result = super.toJSON();
+        result.group = this.group;
+        return result;
+    }
+    fromJSON ( json ) {
+        super.fromJSON( json );
+        this.group = json.group;
         this.update();
     }
 }

@@ -39,26 +39,6 @@
 # Nathan's List
 
  * Sheets
-    * Multiplication tables
-       * Create a `MTElement` subclass of `SheetElement`.
-       * Give it a field for which group it should display, and require this in the constructor.
-       * Create a row of controls in the sidebar beneath "Add Rectangle": And "Add visualizer:" button
-         followed by a pick-list of 3 visualizers (MT, CD, CG) followed by a pick-list of all groups.
-         For now, the control does nothing if you pick CD/CG.  Just implement the MT action.
-       * Extend `DisplayMulttable` with a `setSize()` method that sets the canvas size.  Call this
-         internally in that class whenever you want to set the canvas size.
-       * The `MTElement` class should create, at construction time, a `DisplayMulttable` instance
-         and call its `setSize()`, then also create a `Multtable` instance for the given group.
-       * Extend `DisplayMulttable`'s `getImage()` function with a parameter saying whether you want
-         it small or large (default to small if argument not given).  If large, use `showLargeGraphic()`
-         instead of `showSmallGraphic()`.
-       * Fill the `viewDiv()` with a multiplication table IMG using code like this:
-         `myImgElement = myDisplayMultTable.getImage( myMulttable, true );` and then put that IMG
-         element in the `viewDiv()`.
-       * Override the `SheetElement`'s `edit()` method to pop up an alert saying that the feature is
-         not yet implemented.
-       * Respond to `MTElement` resize events by calling that new `setSize()` method and then
-         re-rendering to get the updated size.
      * Editing Multiplication tables
        * Extend `Multtable` with a function `toJSON()` that reports all of its editable features in a
          JSON object.  Create a corresponding `fromJSON()` that restores all those values, the reverse.

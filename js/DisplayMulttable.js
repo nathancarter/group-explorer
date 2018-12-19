@@ -21,7 +21,8 @@ class DisplayMulttable {
          height = (options.height === undefined) ? DisplayDiagram.DEFAULT_CANVAS_HEIGHT : options.height;
       }
 
-      this.canvas = $(`<canvas width="${width}" height="${height}">`)[0];
+      this.canvas = $(`<canvas/>`)[0];
+      this.setSize( width, height );
       this.context = this.canvas.getContext('2d');
 
       if (options.container !== undefined) {
@@ -32,6 +33,14 @@ class DisplayMulttable {
       this.transform = new THREE.Matrix3();  // current multtable -> screen transformation
    }
 
+   setSize ( w, h ) {
+      this.canvas.width = w;
+      this.canvas.height = h;
+   }
+   getSize () {
+      return { w : this.canvas.width, h : this.canvas.height };
+   }
+
    static _setDefaults() {
       DisplayMulttable.DEFAULT_CANVAS_HEIGHT = 100;
       DisplayMulttable.DEFAULT_CANVAS_WIDTH = 100;
@@ -40,8 +49,11 @@ class DisplayMulttable {
       DisplayMulttable.BACKGROUND = '#F0F0F0';
    }
 
-   getImage(multtable) {
-      this.showSmallGraphic(multtable);
+   getImage(multtable,large) { // second parameter optional, defaults to small
+      if ( large )
+         this.showLargeGraphic(multtable);
+      else
+         this.showSmallGraphic(multtable);
       const img = new Image();
       img.src = this.canvas.toDataURL();
       return img;
@@ -128,7 +140,7 @@ class DisplayMulttable {
          }
       }
 
-      // calculate font size to fit longest label 
+      // calculate font size to fit longest label
       this.context.setTransform(1, 0, 0, 1, 0, 0);
       this.context.font = '14pt Arial';
       const longestLabelWidth =  this.context.measureText(multtable.group.longestLabel).width;
