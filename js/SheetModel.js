@@ -25,12 +25,12 @@ class SheetModel {
         if ( !( element instanceof SheetElement ) )
             throw new Error( 'SheetModel.addElement accepts only SheetElements' );
         // get current max z-index so we can use it below
-        const maxIndex = Math.max( ...this.elements.map(
-            ( e ) => $( e.htmlViewElement() ).css( 'z-index' ) ) );
+        const maxIndex = this.elements.length > 0 ?
+            Math.max( ...this.elements.map( ( e ) => e.zIndex ) ) : 0;
         // add element to internal array of elements
         this.elements.push( element );
         // ensure the new element has the highest z-index of all elements in the model
-        $( element ).css( 'z-index', maxIndex + 1 );
+        element.zIndex = maxIndex + 1;
         // update view
         this.sync();
     }
@@ -62,6 +62,7 @@ class SheetModel {
                 $( wrapper ).css( {
                     position : 'absolute',
                     padding : `${defaultResizingMargin}px`,
+                    "z-index" : sheetElt.zIndex
                 } );
                 that.view.appendChild( wrapper );
             }
@@ -91,6 +92,70 @@ class SheetModel {
         var result = new ctor( this );
         result.fromJSON( json );
         return result;
+    }
+
+    // Do the rectangles of these two sheet elements intersect?
+    intersect ( elt1, elt2 ) {
+        var $elt1 = $( elt1.htmlViewElement().parentNode ),
+            $elt2 = $( elt2.htmlViewElement().parentNode ),
+            rect1 = { left : $elt1.offset().left, top : $elt1.offset().top,
+                      right : $elt1.offset().left + $elt1.width(),
+                      bottom : $elt1.offset().top + $elt1.height () },
+            rect2 = { left : $elt2.offset().left, top : $elt2.offset().top,
+                      right : $elt2.offset().left + $elt2.width(),
+                      bottom : $elt2.offset().top + $elt2.height () };
+        return !(
+            ( rect1.right < rect2.left ) ||
+            ( rect1.left > rect2.right ) ||
+            ( rect1.bottom < rect2.top ) ||
+            ( rect1.top > rect2.bottom )
+        );
+    }
+
+    // This function takes two sheet elements and moves the first ("from") to have the
+    // z-index of the second ("to"), and shifts all the z-indices between those two
+    // values by one step in the direction of "from"'s original z-index, to preserve
+    // uniqueness.
+    adjustZ ( from, to ) {
+        var min = Math.min( from.zIndex, to.zIndex ),
+            max = Math.max( from.zIndex, to.zIndex ),
+            adj = ( from.zIndex > to.zIndex ) ? 1 : -1;
+        function moveOne ( element, newz ) {
+            $( element.htmlViewElement().parentNode )
+                .css( { "z-index" : element.zIndex = newz } );
+        }
+        moveOne( from, to.zIndex );
+        this.elements.map( function ( element ) {
+            if ( ( element != from )
+              && ( element.zIndex >= min ) && ( element.zIndex <= max ) )
+                moveOne( element, element.zIndex + adj );
+        } );
+    }
+    // This function finds the nearest element below the given one and calls adjustZ()
+    // to move the top one below the bottom one.  Only cares about elements with which
+    // the given one actually interesct()s on screen.
+    adjustZDown ( element ) {
+        var highestBelow = null;
+        var that = this;
+        this.elements.map( function ( other ) {
+            if ( that.intersect( element, other )
+              && ( other.zIndex < element.zIndex )
+              && ( ( highestBelow == null ) || ( other.zIndex > highestBelow.zIndex ) ) )
+                highestBelow = other;
+        } );
+        if ( highestBelow ) this.adjustZ( element, highestBelow );
+    }
+    // Same as previous, but upwards instead.
+    adjustZUp ( element ) {
+        var lowestAbove = null;
+        var that = this;
+        this.elements.map( function ( other ) {
+            if ( that.intersect( element, other )
+              && ( other.zIndex > element.zIndex )
+              && ( ( lowestAbove == null ) || ( other.zIndex < lowestAbove.zIndex ) ) )
+                lowestAbove = other;
+        } );
+        if ( lowestAbove ) this.adjustZ( element, lowestAbove );
     }
 }
 

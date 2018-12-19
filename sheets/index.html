@@ -185,6 +185,30 @@
                $( wrapper ).addDragAndSizeSelection();
             }
          }
+         function moveSelectedUp () {
+            var selected = Model.selected();
+            if ( selected ) Model.adjustZUp( selected );
+         }
+         function moveSelectedDown () {
+            var selected = Model.selected();
+            if ( selected ) Model.adjustZDown( selected );
+         }
+         function moveSelectedToTop () {
+            var selected = Model.selected();
+            if ( selected ) {
+                var highestZ = Math.max( ...Model.elements.map( ( e ) => e.zIndex ) );
+                var thatElt = Model.elements.find( ( e ) => e.zIndex == highestZ );
+                Model.adjustZ( selected, thatElt );
+            }
+         }
+         function moveSelectedToBottom () {
+            var selected = Model.selected();
+            if ( selected ) {
+                var lowestZ = Math.min( ...Model.elements.map( ( e ) => e.zIndex ) );
+                var thatElt = Model.elements.find( ( e ) => e.zIndex == lowestZ );
+                Model.adjustZ( selected, thatElt );
+            }
+         }
       </script>
    </head>
 
@@ -212,6 +236,18 @@
             <button id="copyButton" onclick="copySelected();"
                     class="for-selected-element">Copy selected item</button>
             <button id="pasteButton" onclick="pasteItem();">Paste</button>
+         </p>
+         <p class="button-row">
+            <button id="moveUpButton" onclick="moveSelectedUp();"
+                    class="for-selected-element">Move forward</button>
+            <button id="moveDownButton" onclick="moveSelectedDown();"
+                    class="for-selected-element">Move backward</button>
+         </p>
+         <p class="button-row">
+            <button id="moveToTopButton" onclick="moveSelectedToTop();"
+                    class="for-selected-element">Move to front</button>
+            <button id="moveToBottomButton" onclick="moveSelectedToBottom();"
+                    class="for-selected-element">Move to back</button>
          </p>
       </div>
    </body>

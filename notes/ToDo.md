@@ -39,20 +39,6 @@
 # Nathan's List
 
  * Sheets
-    * Z ordering
-       * Add a `adjustZ(from,to)` method to `SheetModel` that adjusts the z values of sheet elements so
-         that `from` takes on the value of `to` and everything in between (including `to`) gets bumped
-         in the direction that `from` was formerly.
-       * Add a `intersect(elt1,elt2)` method to `SheetModel` that says whether the two elements'
-         rectangles intersect.
-       * Add a `adjustZDown(elt)` method to `SheetModel` that finds the element with highest z index
-         below that of `elt` and that intersects rectangles with `elt`, then calls `adjustZ(elt,that)`.
-       * Add a `adjustZUp(elt)` method to `SheetModel` that finds the element with lowest z index
-         above that of `elt` and that intersects rectangles with `elt`, then calls `adjustZ(elt,that)`.
-       * Add a row of two buttons to the sidebar: Move forward/backward.  These just call `adjustZDown()`
-         or `adjustZUp()`.
-       * Add a row of two buttons to the sidebar: Move to front/back.  These just find the element with
-         the max or min z index, then call `adjustZ(selected,maxOrMinElt)`.
     * Undo and redo
        * Add a field to `SheetModel` called `history`.  When the model is created, set `history` to be
          an array of one item, the initial value of `JSON.stringify(model.toJSON())`.
