@@ -183,10 +183,12 @@ $.fn.removeDragAndSizeSelection = function () {
     if ( this.hasClass( pausedDragSelectClass ) ) return;
     if ( this[0] ) this[0].dragData = { };
     this.removeClass( selectedForDraggingClass );
+    if ( this[0] ) this[0].dispatchEvent( new CustomEvent( 'deselected', { bubbles : true } ) );
 }
 $.fn.addDragAndSizeSelection = function () {
     $( '.'+selectedForDraggingClass ).removeDragAndSizeSelection();
     this.addClass( selectedForDraggingClass );
+    if ( this[0] ) this[0].dispatchEvent( new CustomEvent( 'selected', { bubbles : true } ) );
 }
 
 // You can pause and unpause this feature
