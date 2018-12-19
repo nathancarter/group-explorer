@@ -175,6 +175,9 @@ $.fn.draggableAndSizable = function () {
     function endDrag () {
         $element.parents().off( "mousemove", handleDrag );
         $element.parents().off( "mouseup", endDrag );
+        $element[0].dispatchEvent( new CustomEvent(
+            ( $element[0].dragType == 4 ) ? 'moved' : 'resized',
+            { bubbles : true } ) );
     }
 };
 
