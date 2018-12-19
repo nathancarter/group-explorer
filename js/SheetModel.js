@@ -79,14 +79,18 @@ class SheetModel {
     fromJSON ( json ) {
         var that = this;
         this.elements = json.map( function ( eltJson ) {
-            if ( !/^[a-zA-Z_][a-zA-Z_0-9]*$/.test( eltJson.className ) )
-                throw new Error( `Invalid class name: ${eltJson.className}` );
-            var ctor = eval( eltJson.className );
-            var obj = new ctor( that );
-            obj.fromJSON( eltJson );
-            return obj;
+            return that.sheetElementFromJSON( eltJson );
         } );
         this.sync();
+    }
+    // Helper function to the one above:
+    sheetElementFromJSON ( json ) {
+        if ( !/^[a-zA-Z_][a-zA-Z_0-9]*$/.test( json.className ) )
+            throw new Error( `Invalid class name: ${json.className}` );
+        var ctor = eval( json.className );
+        var result = new ctor( this );
+        result.fromJSON( json );
+        return result;
     }
 }
 

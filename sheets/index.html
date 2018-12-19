@@ -90,6 +90,14 @@
             var i = 1;
             while ( sheets.hasOwnProperty( `My Sheet ${i}` ) ) i++;
             $( filenameInput ).val( `My Sheet ${i}` );
+            $( pasteButton ).prop( 'disabled', true );
+
+            function handleSelectionChanged () {
+               $( '.for-selected-element' ).prop( 'disabled', !Model.selected() );
+            }
+            $sheet[0].addEventListener( 'selected', handleSelectionChanged );
+            $sheet[0].addEventListener( 'deselected', handleSelectionChanged );
+            handleSelectionChanged();
          }
 
          function updateLoadList () {
@@ -162,6 +170,21 @@
                 alert( `Loaded sheet named "${savedSheetsList.value}"` );
             }, 0 );
          }
+         var copiedItem = null;
+         function copySelected () {
+            var selected = Model.selected();
+            if ( selected ) {
+               copiedItem = selected.toJSON();
+               $( pasteButton ).prop( 'disabled', false );
+            }
+         }
+         function pasteItem () {
+            if ( copiedItem ) {
+               var element = Model.sheetElementFromJSON( copiedItem );
+               var wrapper = element.htmlViewElement().parentNode;
+               $( wrapper ).addDragAndSizeSelection();
+            }
+         }
       </script>
    </head>
 
@@ -173,13 +196,29 @@
       -->
 
       <div id="sheet-control" class="fill-vert">
-         <p class="button-row"><button id="addRectangleButton" onclick="addRectangle();">Add rectangle</button></p>
-         <p class="button-row"><button id="addTextButton" onclick="addText();">Add text box</button></p>
-         <p class="button-row"><button id="deleteButton" onclick="deleteSelected();">Delete selected item</button></p>
-         <p class="button-row"><button id="saveButton" onclick="saveAs();">Save as:</button>
-            <input type="text" id="filenameInput" value="My Sheet"/></p>
-         <p class="button-row"><button id="loadButton" onclick="loadChosen();">Load sheet:</button>
-            <select id="savedSheetsList"></select></p>
+         <p class="button-row">
+            <button id="addRectangleButton" onclick="addRectangle();">Add rectangle</button>
+         </p>
+         <p class="button-row">
+            <button id="addTextButton" onclick="addText();">Add text box</button>
+         </p>
+         <p class="button-row">
+            <button id="deleteButton" onclick="deleteSelected();"
+                    class="for-selected-element">Delete selected item</button>
+         </p>
+         <p class="button-row">
+            <button id="saveButton" onclick="saveAs();">Save as:</button>
+            <input type="text" id="filenameInput" value="My Sheet"/>
+         </p>
+         <p class="button-row">
+            <button id="loadButton" onclick="loadChosen();">Load sheet:</button>
+            <select id="savedSheetsList"></select>
+         </p>
+         <p class="button-row">
+            <button id="copyButton" onclick="copySelected();"
+                    class="for-selected-element">Copy selected item</button>
+            <button id="pasteButton" onclick="pasteItem();">Paste</button>
+         </p>
       </div>
    </body>
 </html>

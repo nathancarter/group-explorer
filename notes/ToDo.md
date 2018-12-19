@@ -39,16 +39,6 @@
 # Nathan's List
 
  * Sheets
-    * Copy and paste
-       * Add a Copy button to the right sidebar.  It just places into a global clipboard variable the
-         `toJSON()` of the selected `SheetElement`.
-       * Add a Paste button to the right sidebar.  It just constructs a new `SheetElement` from the JSON
-         data in the global clipboard variable, then moves it a little bit down and to the right
-         (if possible).
-       * Disable the paste button when the page loads.  Enable it when the copy button is clicked.
-       * Give the CSS class "for-selected-element" to all buttons that can be used only when a
-         `SheetElement` is selected.
-       * When the selection changes, enable/disable all buttons with that class.
     * Z ordering
        * Add a `adjustZ(from,to)` method to `SheetModel` that adjusts the z values of sheet elements so
          that `from` takes on the value of `to` and everything in between (including `to`) gets bumped

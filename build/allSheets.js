@@ -183,10 +183,12 @@ $.fn.removeDragAndSizeSelection = function () {
     if ( this.hasClass( pausedDragSelectClass ) ) return;
     if ( this[0] ) this[0].dragData = { };
     this.removeClass( selectedForDraggingClass );
+    if ( this[0] ) this[0].dispatchEvent( new CustomEvent( 'deselected', { bubbles : true } ) );
 }
 $.fn.addDragAndSizeSelection = function () {
     $( '.'+selectedForDraggingClass ).removeDragAndSizeSelection();
     this.addClass( selectedForDraggingClass );
+    if ( this[0] ) this[0].dispatchEvent( new CustomEvent( 'selected', { bubbles : true } ) );
 }
 
 // You can pause and unpause this feature
@@ -277,14 +279,18 @@ class SheetModel {
     fromJSON ( json ) {
         var that = this;
         this.elements = json.map( function ( eltJson ) {
-            if ( !/^[a-zA-Z_][a-zA-Z_0-9]*$/.test( eltJson.className ) )
-                throw new Error( `Invalid class name: ${eltJson.className}` );
-            var ctor = eval( eltJson.className );
-            var obj = new ctor( that );
-            obj.fromJSON( eltJson );
-            return obj;
+            return that.sheetElementFromJSON( eltJson );
         } );
         this.sync();
+    }
+    // Helper function to the one above:
+    sheetElementFromJSON ( json ) {
+        if ( !/^[a-zA-Z_][a-zA-Z_0-9]*$/.test( json.className ) )
+            throw new Error( `Invalid class name: ${json.className}` );
+        var ctor = eval( json.className );
+        var result = new ctor( this );
+        result.fromJSON( json );
+        return result;
     }
 }
 
