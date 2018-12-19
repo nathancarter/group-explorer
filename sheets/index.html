@@ -83,6 +83,34 @@
             $('#graphic').css({backgroundColor:'#f8f8f8'});
             show('#sheet-control');
             resizeBody();
+
+            if ( !localStorage.getItem( 'sheets' ) ) localStorage.setItem( 'sheets', '{}' );
+            updateLoadList();
+            var sheets = JSON.parse( localStorage.getItem( 'sheets' ) );
+            var i = 1;
+            while ( sheets.hasOwnProperty( `My Sheet ${i}` ) ) i++;
+            $( filenameInput ).val( `My Sheet ${i}` );
+         }
+
+         function updateLoadList () {
+            var key, sheets = JSON.parse( localStorage.getItem( 'sheets' ) );
+            while ( savedSheetsList.childNodes[0] )
+               savedSheetsList.removeChild( savedSheetsList.childNodes[0] );
+            for ( key in sheets ) {
+               if ( sheets.hasOwnProperty( key ) ) {
+                  var loadOption = $( `<option>${key}</option>` );
+                  loadOption[0].setAttribute( 'value', key );
+                  $( savedSheetsList ).append( loadOption );
+               }
+            }
+            if ( savedSheetsList.childNodes.length == 0 ) {
+               $( loadButton ).prop( 'disabled', true );
+               $( savedSheetsList ).append( $( '<option>(no saved sheets yet)</option>' ) );
+               $( savedSheetsList ).prop( 'disabled', true );
+           } else {
+               $( loadButton ).prop( 'disabled', false );
+               $( savedSheetsList ).prop( 'disabled', false );
+           }
          }
 
          /*
@@ -111,14 +139,28 @@
          }
 
          function addRectangle () {
-             new RectangleElement( Model );
+            new RectangleElement( Model );
          }
          function addText () {
-             new TextElement( Model );
+            new TextElement( Model );
          }
          function deleteSelected () {
-             var selected = Model.selected();
-             if ( selected ) selected.remove();
+            var selected = Model.selected();
+            if ( selected ) selected.remove();
+         }
+         function saveAs () {
+            var sheets = JSON.parse( localStorage.getItem( 'sheets' ) );
+            sheets[filenameInput.value] = Model.toJSON();
+            localStorage.setItem( 'sheets', JSON.stringify( sheets ) );
+            updateLoadList();
+            alert( `Saved sheet as "${filenameInput.value}"` );
+         }
+         function loadChosen () {
+            var sheets = JSON.parse( localStorage.getItem( 'sheets' ) );
+            Model.fromJSON( sheets[savedSheetsList.value] );
+            setTimeout( function () {
+                alert( `Loaded sheet named "${savedSheetsList.value}"` );
+            }, 0 );
          }
       </script>
    </head>
@@ -134,6 +176,10 @@
          <p class="button-row"><button id="addRectangleButton" onclick="addRectangle();">Add rectangle</button></p>
          <p class="button-row"><button id="addTextButton" onclick="addText();">Add text box</button></p>
          <p class="button-row"><button id="deleteButton" onclick="deleteSelected();">Delete selected item</button></p>
+         <p class="button-row"><button id="saveButton" onclick="saveAs();">Save as:</button>
+            <input type="text" id="filenameInput" value="My Sheet"/></p>
+         <p class="button-row"><button id="loadButton" onclick="loadChosen();">Load sheet:</button>
+            <select id="savedSheetsList"></select></p>
       </div>
    </body>
 </html>

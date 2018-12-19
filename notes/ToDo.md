@@ -39,19 +39,6 @@
 # Nathan's List
 
  * Sheets
-    * Saving and loading sheets
-       * Extend `SheetElement` with a `toJSON()` method that saves its state along with its class name.
-         Include in that JSON data the element's x,y,z,w,h.
-       * Extend `SheetElement` with a `fromJSON()` method that updates its state from the given JSON,
-         assuming the classes match.
-       * Extend `SheetModel` with a `toJSON()` method that just builds an array of the JSON of the elements.
-       * Extend `SheetModel` with a `fromJSON()` method that destroys all old content, then forms new
-         content by creating instances of the appropriate subclasses of `SheetElement` and then calling
-         `fromJSON()` in each.  Restore the x,y,z,w,h as well.  End with a call to `syncToView()`.
-       * Add controls in the right sidebar for "Save as:" (a button) followed by a sheet name text box.
-         Just write the JSON into `localStorage.GESheets[sheetName]` then pop up an alert saying it saved.
-       * Add controls in the right sidebar for "Load from:" (a button) followed by a saved sheet picker.
-         Fill the picker with the keys of `localStorage.GESheets` and read from there into `fromJSON()`.
     * Copy and paste
        * Add a Copy button to the right sidebar.  It just places into a global clipboard variable the
          `toJSON()` of the selected `SheetElement`.

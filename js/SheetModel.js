@@ -67,6 +67,27 @@ class SheetModel {
             }
         } );
     }
+
+    // Save the state of this entire sheet by creating an array of the JSON states of the
+    // elements in the model.
+    toJSON () {
+        return this.elements.map( ( elt ) => elt.toJSON() );
+    }
+    // Restore the state from a previous save by destroying all existing content first,
+    // then filling it anew with newly created instances based on the given data.  End
+    // with a sync call.  Requires JSON in the format produced by toJSON(), above.
+    fromJSON ( json ) {
+        var that = this;
+        this.elements = json.map( function ( eltJson ) {
+            if ( !/^[a-zA-Z_][a-zA-Z_0-9]*$/.test( eltJson.className ) )
+                throw new Error( `Invalid class name: ${eltJson.className}` );
+            var ctor = eval( eltJson.className );
+            var obj = new ctor( that );
+            obj.fromJSON( eltJson );
+            return obj;
+        } );
+        this.sync();
+    }
 }
 
 /*
@@ -190,6 +211,31 @@ class SheetElement {
         if ( !view[0].parentNode ) return;
         $( view[0].parentNode ).width( view.width() ).height( view.height() );
     }
+
+    // Subclasses should override this to create an actual object representing the
+    // instance.  Always include the class name.  Feel free to start with this object
+    // and then alter/extend.
+    toJSON () {
+        var $wrapper = $( this.htmlViewElement().parentNode );
+        return {
+            className : 'SheetElement',
+            x : $wrapper.offset().left,
+            y : $wrapper.offset().top,
+            w : $wrapper.width(),
+            h : $wrapper.height(),
+            z : $wrapper.css( 'z-index' )
+        };
+    }
+    // The reverse of the above method is this one.  It presumes that the class of
+    // this instance is equal to json.className, and then extracts all relevant data
+    // from the parameter to re-establish the saved state.  Again, subclasses should
+    // override and can feel free to call this method as part of their work.
+    fromJSON ( json ) {
+        var $wrapper = $( this.htmlViewElement().parentNode );
+        $wrapper.offset( { left : json.x, top : json.y } )
+                .width( json.w ).height( json.h )
+                .css( { "z-index" : json.z } );
+    }
 }
 
 /*
@@ -238,6 +284,18 @@ class RectangleElement extends SheetElement {
     }
     loadEdits () {
         $( this.htmlEditElement() ).find( '.color-input' )[0].value = this.color;
+    }
+    // serialization just needs to take color into account
+    toJSON () {
+        var result = super.toJSON();
+        result.className = 'RectangleElement';
+        result.color = this.color;
+        return result;
+    }
+    fromJSON ( json ) {
+        super.fromJSON( json );
+        this.color = json.color;
+        this.update();
     }
 }
 
@@ -301,5 +359,21 @@ class TextElement extends SheetElement {
         $( this.htmlEditElement() ).find( '.text-input' )[0].value = this.text;
         $( this.htmlEditElement() ).find( '.size-input' )[0].value = parseInt( this.fontSize );
         $( this.htmlEditElement() ).find( '.color-input' )[0].value = this.fontColor;
+    }
+    // serialization just needs to take into account text, size, and color
+    toJSON () {
+        var result = super.toJSON();
+        result.className = 'TextElement';
+        result.text = this.text;
+        result.fontSize = this.fontSize;
+        result.fontColor = this.fontColor;
+        return result;
+    }
+    fromJSON ( json ) {
+        super.fromJSON( json );
+        this.text = json.text;
+        this.fontSize = json.fontSize;
+        this.fontColor = json.fontColor;
+        this.update();
     }
 }
