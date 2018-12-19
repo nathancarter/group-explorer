@@ -39,26 +39,6 @@
 # Nathan's List
 
  * Sheets
-    * Undo and redo
-       * Add a field to `SheetModel` called `history`.  When the model is created, set `history` to be
-         an array of one item, the initial value of `JSON.stringify(model.toJSON())`.
-       * Extend `fromJSON()` to update `history` to contain just that one state and `historyIndex` to 0.
-       * Add a method called `storeChange()` that computes `JSON.stringify(model.toJSON())` and pushes it
-         to the history array if and only if it's different from the most recent item there.
-       * Add a method called `historyIndex` that starts at 0 and is incremented by each `storeChange()`.
-       * Ensure that `storeChange()` is called after every `saveEdits()` and after every move/resize of
-         a `SheetElement`.
-       * Extend `storeChange()` to begin by deleting all elements of `history` after `historyIndex`.
-       * Add a method `undo()` to the model that calls `model.fromJSON(history[--historyIndex])` if and
-         only if `historyIndex > 0`.
-       * Add a method `redo()` to the model that calls `model.fromJSON(history[++historyIndex])` if and
-         only if `historyIndex < history.length - 1`.
-       * Add a row of two buttons to the sidebar: Undo/redo.  These just call their respective functions
-         in the model, but both start out disabled.  Set them to be enabled/disabled, as appropriate,
-         after any call to `undo()`, `redo()`, `storeChange()`, or `fromJSON()`.
-       * Add a field to `SheetModel` called `maxHistorySize`, and pick some number, like 50.
-       * Edit `storeChange()` so that if it created an array of more than `maxHistorySize`, it shifts
-         the first element off of it.
     * Multiplication tables
        * Create a `MTElement` subclass of `SheetElement`.
        * Give it a field for which group it should display, and require this in the constructor.

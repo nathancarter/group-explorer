@@ -175,6 +175,9 @@ $.fn.draggableAndSizable = function () {
     function endDrag () {
         $element.parents().off( "mousemove", handleDrag );
         $element.parents().off( "mouseup", endDrag );
+        $element[0].dispatchEvent( new CustomEvent(
+            ( $element[0].dragType == 4 ) ? 'moved' : 'resized',
+            { bubbles : true } ) );
     }
 };
 
@@ -217,6 +220,10 @@ class SheetModel {
             throw new Error( 'SheetModel requires an HTMLElement at construction' );
         this.view = element;
         this.elements = [ ];
+        this.history = [ JSON.stringify( this.toJSON() ) ];
+        this.historyIndex = 0;
+        this.undoRedoActive = true;
+        this.maxHistorySize = 250;
     }
 
     // Add a Sheet Element to the model.
@@ -267,6 +274,35 @@ class SheetModel {
                 that.view.appendChild( wrapper );
             }
         } );
+        // While we're here, if anything changed since the last time we were here,
+        // record it on the undo/redo stack.
+        if ( this.undoRedoActive ) {
+            setTimeout( function () { // ensure layout happens
+                var last = that.history[that.historyIndex];
+                var next = JSON.stringify( that.toJSON() );
+                if ( next != last ) {
+                    that.history = that.history.slice( 0, that.historyIndex + 1 );
+                    that.history.push( next );
+                    that.historyIndex++;
+                    if ( that.history.length > that.maxHistorySize ) {
+                        that.history.shift();
+                        that.historyIndex--;
+                    }
+                }
+            }, 1 );
+        }
+        this.view.dispatchEvent( new CustomEvent( 'synced', { bubbles : true } ) );
+    }
+    // Since sync() tracks the undo/redo stack, we can implement undo/redo methods.
+    canUndo () { return this.historyIndex > 0; }
+    canRedo () { return this.historyIndex < this.history.length - 1; }
+    undo () {
+        if ( this.canUndo() )
+            this.fromJSON( JSON.parse( this.history[--this.historyIndex] ), true );
+    }
+    redo () {
+        if ( this.canRedo() )
+            this.fromJSON( JSON.parse( this.history[++this.historyIndex] ), true );
     }
 
     // Save the state of this entire sheet by creating an array of the JSON states of the
@@ -277,12 +313,20 @@ class SheetModel {
     // Restore the state from a previous save by destroying all existing content first,
     // then filling it anew with newly created instances based on the given data.  End
     // with a sync call.  Requires JSON in the format produced by toJSON(), above.
-    fromJSON ( json ) {
+    // The optional second argument is for internal use, and lets us navigate the
+    // undo/redo stack without corrupting it.
+    fromJSON ( json, isPartOfUndoOrRedo ) {
         var that = this;
+        this.undoRedoActive = false;
         this.elements = json.map( function ( eltJson ) {
             return that.sheetElementFromJSON( eltJson );
         } );
+        if ( !isPartOfUndoOrRedo ) {
+            this.history = [ JSON.stringify( json ) ];
+            this.historyIndex = 0;
+        }
         this.sync();
+        this.undoRedoActive = true;
     }
     // Helper function to the one above:
     sheetElementFromJSON ( json ) {
@@ -426,6 +470,7 @@ class SheetElement {
         this.model.elements.splice( index, 1 );
         var wrapper = this.htmlViewElement().parentNode;
         wrapper.parentNode.removeChild( wrapper );
+        this.model.sync();
     }
 
     // Enter edit mode by swapping the view and the edit controls in the wrapper.
@@ -550,6 +595,7 @@ class RectangleElement extends SheetElement {
     saveEdits () {
         this.color = $( this.htmlEditElement() ).find( '.color-input' )[0].value;
         this.update();
+        this.model.sync();
     }
     loadEdits () {
         $( this.htmlEditElement() ).find( '.color-input' )[0].value = this.color;
@@ -623,6 +669,7 @@ class TextElement extends SheetElement {
         this.fontSize = $( this.htmlEditElement() ).find( '.size-input' )[0].value + 'pt';
         this.fontColor = $( this.htmlEditElement() ).find( '.color-input' )[0].value;
         this.update();
+        this.model.sync();
     }
     loadEdits () {
         $( this.htmlEditElement() ).find( '.text-input' )[0].value = this.text;

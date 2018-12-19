@@ -98,6 +98,17 @@
             $sheet[0].addEventListener( 'selected', handleSelectionChanged );
             $sheet[0].addEventListener( 'deselected', handleSelectionChanged );
             handleSelectionChanged();
+
+            function handleMoveAndResize () { Model.sync(); }
+            $sheet[0].addEventListener( 'moved', handleMoveAndResize );
+            $sheet[0].addEventListener( 'resized', handleMoveAndResize );
+
+            function updateUndoRedoButtons () {
+               $( undoButton ).prop( 'disabled', !Model.canUndo() );
+               $( redoButton ).prop( 'disabled', !Model.canRedo() );
+            }
+            $sheet[0].addEventListener( 'synced', updateUndoRedoButtons );
+            updateUndoRedoButtons();
          }
 
          function updateLoadList () {
@@ -115,10 +126,10 @@
                $( loadButton ).prop( 'disabled', true );
                $( savedSheetsList ).append( $( '<option>(no saved sheets yet)</option>' ) );
                $( savedSheetsList ).prop( 'disabled', true );
-           } else {
+            } else {
                $( loadButton ).prop( 'disabled', false );
                $( savedSheetsList ).prop( 'disabled', false );
-           }
+            }
          }
 
          /*
@@ -209,6 +220,8 @@
                 Model.adjustZ( selected, thatElt );
             }
          }
+         function undo () { Model.undo(); }
+         function redo () { Model.redo(); }
       </script>
    </head>
 
@@ -248,6 +261,10 @@
                     class="for-selected-element">Move to front</button>
             <button id="moveToBottomButton" onclick="moveSelectedToBottom();"
                     class="for-selected-element">Move to back</button>
+         </p>
+         <p class="button-row">
+            <button id="undoButton" onclick="undo();">Undo</button>
+            <button id="redoButton" onclick="redo();">Redo</button>
          </p>
       </div>
    </body>
