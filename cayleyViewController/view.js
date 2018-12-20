@@ -16,7 +16,7 @@ class CVC {
 
    static setupViewPage() {
       $('#zoom-level').off('input', CVC.setZoomLevel).on('input', CVC.setZoomLevel);
-      $('#line-thickness').off('input', CVC.setLineThicknesss).on('input', CVC.setLineThicknesss);
+      $('#line-thickness').off('input', CVC.setLineThickness).on('input', CVC.setLineThickness);
       $('#node-radius').off('input', CVC.setNodeRadius).on('input', CVC.setNodeRadius);
       $('#fog-level').off('input', CVC.setFogLevel).on('input', CVC.setFogLevel);
       $('#use-fog').off('input', CVC.setFogLevel).on('input', CVC.setFogLevel);
@@ -31,7 +31,7 @@ class CVC {
       Graphic_context.updateZoomLevel(Cayley_diagram);
    }
 
-   static setLineThicknesss() {
+   static setLineThickness() {
       Cayley_diagram.lineWidth = $('#line-thickness')[0].valueAsNumber;
       Graphic_context.updateLineWidth(Cayley_diagram);
    }
