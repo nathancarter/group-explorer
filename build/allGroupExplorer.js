@@ -3532,6 +3532,7 @@ class CycleGraph {
    reset() {
       this.elements = this.group.elements.slice();
       this.SOME_SETTING_NAME = CycleGraph.SOME_SETTING_NAME;
+      this.emitStateChange();
    }
 
    layOutElementsAndPaths() {
@@ -3746,22 +3747,50 @@ class CycleGraph {
       if ( !this.highlights ) this.highlights = { };
       this.highlights.background =
          this._partitionToColorArray( partition, 0 );
+      this.emitStateChange();
    }
 
    highlightByBorder(partition) {
       if ( !this.highlights ) this.highlights = { };
       this.highlights.border =
          this._partitionToColorArray( partition, 120 );
+      this.emitStateChange();
    }
 
    highlightByTop(partition) {
       if ( !this.highlights ) this.highlights = { };
       this.highlights.top =
          this._partitionToColorArray( partition, 240 );
+      this.emitStateChange();
    }
 
    clearHighlights() {
       this.highlights = { };
+      this.emitStateChange();
+   }
+
+   emitStateChange () {
+      const myURL = window.location.href;
+      const thirdSlash = myURL.indexOf( '/', 8 );
+      const myDomain = myURL.substring( 0, thirdSlash > -1 ? thirdSlash : myURL.length );
+      window.postMessage( this.toJSON(), myDomain );
+   }
+
+   toJSON () {
+      return {
+         groupURL : this.group.URL,
+         highlights : this.highlights,
+         elements : this.elements
+      };
+   }
+
+   fromJSON ( json ) {
+      this.separation = json.separation;
+      this.highlights = json.highlights;
+      this.elements = json.elements;
+      var that = this;
+      Library.getGroupFromURL( json.groupURL )
+             .then( ( group ) => { that.group = group; } );
    }
 }
 
@@ -3786,7 +3815,8 @@ class DisplayCycleGraph {
          width = options.container.width();
          height = options.container.height();
       }
-      this.canvas = $(`<canvas width="${width}" height="${height}">`)[0];
+      this.canvas = $(`<canvas/>`)[0];
+      this.setSize( width, height );
       this.context = this.canvas.getContext('2d');
       this.options = options;
       if ( options.container !== undefined) {
@@ -3797,6 +3827,14 @@ class DisplayCycleGraph {
       this.transform = new THREE.Matrix3();  // current cycleGraph -> screen transformation
    }
 
+   setSize ( w, h ) {
+      this.canvas.width = w;
+      this.canvas.height = h;
+   }
+   getSize () {
+      return { w : this.canvas.width, h : this.canvas.height };
+   }
+
    static _setDefaults() {
       DisplayCycleGraph.DEFAULT_MIN_CANVAS_HEIGHT = 200;
       DisplayCycleGraph.DEFAULT_MIN_CANVAS_WIDTH = 200;
@@ -3804,8 +3842,11 @@ class DisplayCycleGraph {
       DisplayCycleGraph.DEFAULT_ZOOM_STEP = 0.1;  // zoom in/zoom out step
    }
 
-   getImage(cycleGraph) {
-      this.showSmallGraphic(cycleGraph);
+   getImage(cycleGraph,large) { // second parameter optional, defaults to small
+      if ( large )
+         this.showLargeGraphic(cycleGraph);
+      else
+         this.showSmallGraphic(cycleGraph);
       const img = new Image();
       img.src = this.canvas.toDataURL();
       return img;

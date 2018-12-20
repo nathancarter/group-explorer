@@ -39,25 +39,6 @@
 # Nathan's List
 
  * Sheets
-    * Cycle graphs
-       * Copy the `MTElement` class to a `CGElement` class and modify it as follows.
-       * Update the "Add visualizer" controls so that they will create instances of this new class.
-       * Extend `DisplayCycleGraph` with a `setSize()` method that sets the canvas size.  Call this
-         internally in that class whenever you want to set the canvas size.
-       * The `CGElement` class should create, at construction time, a `DisplayCycleGraph` instance
-         and call its `setSize()`, then also create a `CycleGraph` instance for the given group.
-       * Extend `DisplayCycleGraph`'s `getImage()` function with a parameter saying whether you want
-         it small or large (default to small if argument not given).  If large, use `showLargeGraphic()`
-         instead of `showSmallGraphic()`.
-       * Fill the `viewDiv()` with a cycle graph by updating the MT code to look like this:
-         `myImgElement = myDisplayCycleGraph.getImage( myCycleGraph, true );`.
-       * Extend `CycleGraph` with a function `toJSON()` that reports all of its editable features in a
-         JSON object.  Create a corresponding `fromJSON()` that restores all those values, the reverse.
-       * Extend `CycleGraph` with a function that calls `window.postMessage()` whenever any of its
-         attributes changes, sending the most recent `toJSON()`.
-       * Update the `edit()` method in `CGElement` to use CG visualizer.
-       * Ensure the messages posted by that tab update the internal `CycleGraph`.
-       * Ensure the `toJSON()` and `fromJSON()` methods of `CGElement` reference the `CycleGraph`.
     * Cayley diagrams
        * Copy the `MTElement` class to a `CDElement` class and modify it as follows.
        * Update the "Add visualizer" controls so that they will create instances of this new class.

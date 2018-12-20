@@ -18,7 +18,8 @@ class DisplayCycleGraph {
          width = options.container.width();
          height = options.container.height();
       }
-      this.canvas = $(`<canvas width="${width}" height="${height}">`)[0];
+      this.canvas = $(`<canvas/>`)[0];
+      this.setSize( width, height );
       this.context = this.canvas.getContext('2d');
       this.options = options;
       if ( options.container !== undefined) {
@@ -29,6 +30,14 @@ class DisplayCycleGraph {
       this.transform = new THREE.Matrix3();  // current cycleGraph -> screen transformation
    }
 
+   setSize ( w, h ) {
+      this.canvas.width = w;
+      this.canvas.height = h;
+   }
+   getSize () {
+      return { w : this.canvas.width, h : this.canvas.height };
+   }
+
    static _setDefaults() {
       DisplayCycleGraph.DEFAULT_MIN_CANVAS_HEIGHT = 200;
       DisplayCycleGraph.DEFAULT_MIN_CANVAS_WIDTH = 200;
@@ -36,8 +45,11 @@ class DisplayCycleGraph {
       DisplayCycleGraph.DEFAULT_ZOOM_STEP = 0.1;  // zoom in/zoom out step
    }
 
-   getImage(cycleGraph) {
-      this.showSmallGraphic(cycleGraph);
+   getImage(cycleGraph,large) { // second parameter optional, defaults to small
+      if ( large )
+         this.showLargeGraphic(cycleGraph);
+      else
+         this.showSmallGraphic(cycleGraph);
       const img = new Image();
       img.src = this.canvas.toDataURL();
       return img;
