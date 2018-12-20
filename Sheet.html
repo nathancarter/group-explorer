@@ -40,6 +40,7 @@
       <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
       <script src="https://cdn.jsdelivr.net/npm/jquery-resizable-dom@0.32.0/dist/jquery-resizable.js"></script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/95/three.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/three.meshline@1.1.0/src/THREE.MeshLine.js"></script>
       <script src="./build/allGroupExplorer.js"></script>
       <script src="./build/allVisualizer.js"></script>
       <script src="./build/allSheets.js"></script>
@@ -248,7 +249,7 @@
             if ( visualizerList.value == 'MT' ) {
                 new MTElement( Model, groupURL );
             } else if ( visualizerList.value == 'CD' ) {
-                // not yet implemented
+                new CDElement( Model, groupURL );
             } else if ( visualizerList.value == 'CG' ) {
                 new CGElement( Model, groupURL );
             }
@@ -271,8 +272,8 @@
          <p>
             &nbsp; &nbsp;
             <select id="visualizerList">
-               <option value="MT">multiplication table</option>
                <option value="CD">Cayley diagram</option>
+               <option value="MT">multiplication table</option>
                <option value="CG">cycle graph</option>
             </select>
             <select id="groupList"></select>

@@ -615,3 +615,17 @@ class CGElement extends VisualizerElement {
     getEditPage () { return './CycleDiagram.html'; }
     getClassName () { return 'CGElement'; }
 }
+
+/*
+ * SheetElement subclass for showing the Cayley diagram of a group
+ */
+class CDElement extends VisualizerElement {
+    makeVisualizerObject ( group ) {
+        return group.cayleyDiagrams.length > 0 ?
+               new CayleyDiagram( group, group.cayleyDiagrams[0].name ) :
+               new CayleyDiagram( group );
+    }
+    makeVisualizerDisplay ( options ) { return new DisplayDiagram( options ); }
+    getEditPage () { return './CayleyDiagram.html'; }
+    getClassName () { return 'CDElement'; }
+}

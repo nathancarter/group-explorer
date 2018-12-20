@@ -27,6 +27,7 @@ class Diagram3D {
 
    setNodeColor(color) {
       this._setNodeField('color', this.nodes.map( (node) => node.element ), color);
+      if ( this.emitStateChange ) this.emitStateChange();
       return this;
    }
 
@@ -35,6 +36,7 @@ class Diagram3D {
       if (this.node_labels !== undefined) {
          this.nodes.forEach( (nd) => nd.label = this.node_labels[nd.element] );
       }
+      if ( this.emitStateChange ) this.emitStateChange();
       return this;
    }
 
@@ -53,6 +55,7 @@ class Diagram3D {
             }
          } );
       }
+      if ( this.emitStateChange ) this.emitStateChange();
       return this;
    }
 
@@ -71,12 +74,14 @@ class Diagram3D {
                                                {arrow: arrow, arrowhead: true, style: this.nodes[arrow].lineStyle}))
          }
       } )
+      if ( this.emitStateChange ) this.emitStateChange();
       return this;
    }
 
    // remove all lines with indicated arrow; if arrow is undefined, remove all lines
    removeLines(arrow) {
       this.lines = (arrow === undefined) ? [] : this.lines.filter( (line) => line.arrow != arrow );
+      if ( this.emitStateChange ) this.emitStateChange();
       return this;
    }
 
@@ -87,6 +92,7 @@ class Diagram3D {
       const colors = Array.from({length: arrows.length},
                                 (_, inx) => '#' + new THREE.Color(`hsl(${360*inx/arrows.length}, 100%, 20%)`).getHexString());
       this.lines.forEach( (line) => { line.color = colors[arrows.findIndex( (arrow) => arrow == line.arrow )] } );
+      if ( this.emitStateChange ) this.emitStateChange();
       return this;
    }
 
@@ -106,6 +112,7 @@ class Diagram3D {
          }
       } );
       this.lines = Array.from(linesByEndpoints.values());
+      if ( this.emitStateChange ) this.emitStateChange();
    }
 
    // Normalize scene: translate to centroid, radius = 1
@@ -126,6 +133,7 @@ class Diagram3D {
                                               vertex.point.applyMatrix4(xForm)
                                            }
                                         } ) );
+      if ( this.emitStateChange ) this.emitStateChange();
    }
 
    _setNodeField(field, nodes, value) {
@@ -139,6 +147,7 @@ class Diagram3D {
          const color = `hsl(${hue}, 53%, 30%)`;
          this._setNodeField('colorHighlight', els, color);
       } );
+      if ( this.emitStateChange ) this.emitStateChange();
    }
 
    highlightByRingAroundNode(elements) {
@@ -152,6 +161,7 @@ class Diagram3D {
             this._setNodeField('ringHighlight', els, color);
          } );
       }
+      if ( this.emitStateChange ) this.emitStateChange();
    }
 
    highlightBySquareAroundNode(elements) {
@@ -165,12 +175,14 @@ class Diagram3D {
             this._setNodeField('squareHighlight', els, color);
          } );
       }
+      if ( this.emitStateChange ) this.emitStateChange();
    }
 
    clearHighlights() {
       this._setNodeField('colorHighlight', group.elements, undefined);
       this._setNodeField('ringHighlight', group.elements, undefined);
       this._setNodeField('squareHighlight', group.elements, undefined);
+      if ( this.emitStateChange ) this.emitStateChange();
    }
 }
 

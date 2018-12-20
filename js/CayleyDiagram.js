@@ -68,6 +68,7 @@ class CayleyDiagram extends Diagram3D {
       this.setNodeColor(CayleyDiagram.NODE_COLOR)
           .setNodeLabels()
           .setLineColors();
+      this.emitStateChange();
    }
 
    _generateFromGroup() {
@@ -75,6 +76,7 @@ class CayleyDiagram extends Diagram3D {
       this.nodes = cayleyDiagram.points.map(
          (point, element) => new Diagram3D.Node(element, point, {lineStyle: Diagram3D.STRAIGHT}));
       cayleyDiagram.arrows.forEach( (arrow) => this.addLines(arrow) );
+      this.emitStateChange();
    }
 
    _generateFromStrategy() {
@@ -86,6 +88,7 @@ class CayleyDiagram extends Diagram3D {
 
       // makes lines for generators
       this.strategies.forEach( (strategy) => this.addLines(strategy.generator) );
+      this.emitStateChange();
    }
 
    _generateNodes(strategies) {
@@ -95,6 +98,7 @@ class CayleyDiagram extends Diagram3D {
          [nodes, strategies[inx].bitset] = this._extendSubgroup(nodes, generators.slice(0, inx+1));
          return (inx == 0) ? nodes._flatten() : nodes;
       }, [0]);
+      this.emitStateChange();
    }
 
    _extendSubgroup(H_prev, generators) {
@@ -252,7 +256,30 @@ class CayleyDiagram extends Diagram3D {
                                 [ordered_gens[3], 0, 2, 3]]);
             break;
       }
-      return;
+      this.emitStateChange();
+   }
+
+   emitStateChange () {
+      const myURL = window.location.href;
+      const thirdSlash = myURL.indexOf( '/', 8 );
+      const myDomain = myURL.substring( 0, thirdSlash > -1 ? thirdSlash : myURL.length );
+      window.postMessage( this.toJSON(), myDomain );
+   }
+
+   toJSON () {
+      return {
+         groupURL : this.group.URL,
+         diagram_name : this.diagram_name,
+         arrowheadPlacement : this.arrowheadPlacement
+      };
+   }
+
+   fromJSON ( json ) {
+      this.diagram_name = json.diagram_name;
+      this.arrowheadPlacement = json.arrowheadPlacement;
+      var that = this;
+      Library.getGroupFromURL( json.groupURL )
+             .then( ( group ) => { that.group = group; } );
    }
 }
 

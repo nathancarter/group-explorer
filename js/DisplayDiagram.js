@@ -44,7 +44,7 @@ class DisplayDiagram {
       this.camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 2000);
 
       this.renderer = new THREE.WebGLRenderer({preserveDrawingBuffer: true, antialias: true});
-      this.renderer.setSize(width, height);
+      this.setSize(width, height);
 
       if (options.container !== undefined) {
          options.container.append(this.renderer.domElement);
@@ -54,6 +54,9 @@ class DisplayDiagram {
          this.camControls = new THREE.TrackballControls(this.camera, options.container[0]);
       }
    }
+
+   setSize ( w, h ) { this.renderer.setSize( w, h ); }
+   getSize () { return { w : this.renderer.width, h : this.renderer.height }; }
 
    static setDefaults() {
       DisplayDiagram.groupNames = ['lights', 'spheres', 'labels', 'lines', 'arrowheads', 'nodeHighlights']
@@ -76,7 +79,7 @@ class DisplayDiagram {
    // Small graphics don't need high resolution features such as many-faceted spheres, labels, thick lines
    // Removing labels is particularly beneficial, since each label (384 in Tesseract) requires a canvas element
    //   and a context, which often causes loading failure due to resource limitations
-   getImage(diagram3D) {
+   getImage(diagram3D,large) { // second parameter optional, defaults to small
       const img = new Image();
       // this.showGraphic(diagram3D);
 
@@ -85,10 +88,10 @@ class DisplayDiagram {
       this.setCamera(diagram3D);
       this.setBackground(diagram3D);
       this.updateLights(diagram3D);
-      this.updateNodes(diagram3D, 5);  // 5 facets instead of 20
+      this.updateNodes(diagram3D, large ? 20 : 5);  // 5 facets instead of 20
       // this.updateHighlights(diagram3D);
       // this.updateLabels(diagram3D);
-      this.updateLines(diagram3D, true);  // use webgl native line width
+      this.updateLines(diagram3D, large ? false : true);  // use webgl native line width
       this.updateArrowheads(diagram3D);
       this.render();
 
@@ -437,7 +440,7 @@ class DisplayDiagram {
       return vertices.map( (vertex) => vertex.point );
    }
 
-   
+
    _curvePoints(line, offset, center = new THREE.Vector3(0, 0, 0)) {
       let middle;
       const start_point = line.vertices[0].point,

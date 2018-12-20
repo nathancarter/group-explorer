@@ -39,29 +39,6 @@
 # Nathan's List
 
  * Sheets
-    * Cayley diagrams
-       * Copy the `MTElement` class to a `CDElement` class and modify it as follows.
-       * Update the "Add visualizer" controls so that they will create instances of this new class.
-       * Extend `DisplayDiagram` with a `setSize()` method that exposes the renderer size to clients.
-         (Replace internal calls to `this.renderer.setSize()` with this new routine, for consistency.)
-       * The `CDElement` class should create, at construction time, a `DisplayDiagram` instance
-         and call its `setSize()`, then also create a `CayleyDiagram` instance for the given group.
-         It should use `group.cayleyDiagrams[0].name` as the second parameter to the `CayleyDiagram`
-         constructor, if such a name exists, or leave that parameter off if it doesn't.
-       * Extend `DisplayDiagram`'s `getImage()` function with a parameter saying whether you want
-         it small or large (default to small if argument not given).  If large, use the same levels of
-         detail that you do in `showGraphic()`.
-       * Fill the `viewDiv()` with a Cayley diagram by updating the MT code to look like this:
-         `myImgElement = myDisplayDiagram.getImage( myCayleyDiagram, true );`.
-       * Extend `CayleyDiagram` with a function `toJSON()` that reports all of its editable features in a
-         JSON object.  Create a corresponding `fromJSON()` that restores all those values, the reverse.
-         (Later we will need to see how to extend this to remember the camera position as well, but ignore
-         that for now.)
-       * Extend `CayleyDiagram` with a function that calls `window.postMessage()` whenever any of its
-         attributes changes, sending the most recent `toJSON()`.
-       * Update the `edit()` method in `CDElement` to use CD visualizer.
-       * Ensure the messages posted by that tab update the internal `CayleyDiagram`.
-       * Ensure the `toJSON()` and `fromJSON()` methods of `CDElement` reference the `CayleyDiagram`.
     * Connecting lines
        * Make `SheetElement` inherit from `EventEmitter`.
        * Whenever the element experiences move/resize/fromJSON, emit a `changeDimensions` event.
