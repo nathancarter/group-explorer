@@ -37,7 +37,7 @@ class SheetModel {
         element.zIndex = maxIndex + 1;
         // update view very soon
         var that = this;
-        setTimeout( function () { that.sync(); }, 1 );
+        setTimeout( function () { that.sync(); }, 0 );
     }
 
     // Find the currently selected element and return it as a SheetElement instance,
@@ -75,7 +75,11 @@ class SheetModel {
         // While we're here, if anything changed since the last time we were here,
         // record it on the undo/redo stack.
         if ( this.undoRedoActive ) {
-            setTimeout( function () { // ensure layout happens
+            function updateUndoRedoStack () {
+                // ensure elements are fully initialized before recording their state
+                if ( !that.elements.every( ( elt ) => elt.isReady() ) )
+                    return setTimeout( updateUndoRedoStack, 25 );
+                // ok all elements are ready; we can proceed
                 var last = that.history[that.historyIndex];
                 var next = JSON.stringify( that.toJSON() );
                 if ( next != last ) {
@@ -91,7 +95,8 @@ class SheetModel {
                     // and they should check and maybe re-render themselves.
                     that.elements.map( ( elt ) => { if ( elt.resize ) elt.resize(); } );
                 }
-            }, 1 );
+            }
+            updateUndoRedoStack();
         }
         this.view.dispatchEvent( new CustomEvent( 'synced', { bubbles : true } ) );
     }
@@ -224,6 +229,10 @@ class SheetElement {
         this.model = model;
         model.addElement( this );
     }
+
+    // By default, a sheet element is always ready to have its JSON recorded.
+    // But subclasses that have asynchronous initialization to do can override this.
+    isReady () { return true; }
 
     // This object can create (and later return) an HTML element representing itself.
     // This function does that, delegating the creation work to a createHtmlViewElement()
@@ -505,31 +514,44 @@ class MTElement extends SheetElement {
         super( model );
         this.groupURL = groupURL;
         this.DMT = new DisplayMulttable( { width : 100, height : 100 } );
-        var that = this;
-        Library.getGroupFromURL( groupURL )
-               .then( ( group ) => {
-                   that.MT = new Multtable( that.group = group );
-                   that.rerender();
-               } )
-               .catch( function ( error ) { console.log( error ); } );
+        if ( groupURL ) { // may be absent if they will fill it using fromJSON()
+            var that = this;
+            Library.getGroupFromURL( groupURL )
+                   .then( ( group ) => {
+                       that.MT = new Multtable( that.group = group );
+                       that.rerender();
+                   } )
+                   .catch( function ( error ) { console.log( error ); } );
+        }
     }
+    // not ready unless teh group has been loaded
+    isReady () { return !!this.MT; }
     // how to create an image of the visualizer
     render () {
         var result = this.MT ? this.DMT.getImage( this.MT, true ) : $( '<img/>' )[0];
         $( result ).css( { "pointer-events" : "none" } );
-        return result;
+        var $wrapper = $( '<div></div>' );
+        $wrapper.append( result );
+        return $wrapper[0];
     }
     // how to force updating with the latest image
     rerender () {
         var $wrapper = $( this.htmlViewElement().parentNode );
+        if ( !$wrapper[0] ) return;
         $wrapper[0].removeChild( this.htmlViewElement() );
-        $wrapper.append( this.viewElement = this.render() );
+        delete this.viewElement; // forces recreation in next line
+        $wrapper.append( this.htmlViewElement() );
     }
     // represented by a span with the given font styles and text content
     createHtmlViewElement () { return this.render(); }
     // override the default behavior for editing, because visualizers are special
     edit () {
-        alert( 'That feature is not yet implemented.' );
+        var that = this;
+        this.editWindow =
+            window.open( './Multtable.html?groupURL=' + encodeURIComponent( this.groupURL ) );
+        this.editWindow.addEventListener( 'message', function ( event ) {
+            that.fromJSON( event.data );
+        }, false );
     }
     // when a resize happens, build a new image, but only if a resize actually happened
     resize () {
@@ -544,12 +566,23 @@ class MTElement extends SheetElement {
     // serialization just needs to take into account text, size, and color
     toJSON () {
         var result = super.toJSON();
-        result.group = this.group;
+        result.className = 'MTElement';
+        if ( this.MT ) {
+            var key, inner = this.MT.toJSON();
+            for ( key in inner )
+                if ( inner.hasOwnProperty( key ) ) result[key] = inner[key];
+        }
         return result;
     }
     fromJSON ( json ) {
         super.fromJSON( json );
-        this.group = json.group;
-        this.update();
+        var that = this;
+        Library.getGroupFromURL( json.groupURL )
+               .then( ( group ) => {
+                   that.MT = new Multtable( that.group = group );
+                   that.MT.fromJSON( json );
+                   that.rerender();
+               } )
+               .catch( function ( error ) { console.log( error ); } );
     }
 }

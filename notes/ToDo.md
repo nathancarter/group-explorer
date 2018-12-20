@@ -39,16 +39,6 @@
 # Nathan's List
 
  * Sheets
-     * Editing Multiplication tables
-       * Extend `Multtable` with a function `toJSON()` that reports all of its editable features in a
-         JSON object.  Create a corresponding `fromJSON()` that restores all those values, the reverse.
-       * Extend `Multtable` with a function that calls `window.postMessage()` whenever any of its
-         attributes changes, sending the most recent `toJSON()`.
-       * Replace the `edit()` method in `MTElement` with one that opens the MT visualizer in a new tab.
-       * Listen for messages posted by that tab and get their JSON content, using it to update your own
-         `Multtable` instance by calling its `fromJSON()` on the data, and then re-rendering the element.
-       * Update the `toJSON()` method of `MTElement` to use the `toJSON()` method of the internal
-         `Multtable` as well.  Similarly, `MTElement`'s `fromJSON()` should call `Multtable`'s.
     * Cycle graphs
        * Copy the `MTElement` class to a `CGElement` class and modify it as follows.
        * Update the "Add visualizer" controls so that they will create instances of this new class.

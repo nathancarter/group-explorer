@@ -164,7 +164,7 @@
 
        /* Set separation between cosets in multtable display, and re-draw graphic */
        function separation() {
-          multtable.separation = $('#separation-slider')[0].valueAsNumber/100;
+          multtable.setSeparation( $('#separation-slider')[0].valueAsNumber/100 );
           graphicContext.showLargeGraphic(multtable);
        }
 
