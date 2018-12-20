@@ -44,7 +44,7 @@ class SheetModel {
     // or undefined if there is none.
     selected () {
         return this.elements.find( ( sheetElt ) =>
-            $( sheetElt.htmlViewElement().parentNode ).hasClass( selectedForDraggingClass ) );
+            $( sheetElt.htmlViewElement().parentElement ).hasClass( selectedForDraggingClass ) );
     }
 
     // Ensure that the children of the view are precisely the set of DIVs placed there
@@ -54,24 +54,11 @@ class SheetModel {
         // Delete any elements that don't belong
         Array.from( this.view.childNodes ).map( function ( htmlElt ) {
             if ( !that.elements.find( ( sheetElt ) => htmlElt.childNodes[0] == sheetElt.htmlViewElement() ) ) {
-                htmlElt.parentNode.removeChild( htmlElt );
+                htmlElt.parentElement.removeChild( htmlElt );
             }
         } );
         // Ensure all Sheet Elements have their HTML element in the view
-        this.elements.map( function ( sheetElt ) {
-            var htmlElt = sheetElt.htmlViewElement();
-            if ( !htmlElt.parentNode || htmlElt.parentNode.parentNode != that.view ) {
-                var wrapper = $( '<div></div>' )[0];
-                wrapper.appendChild( htmlElt );
-                $( wrapper ).draggableAndSizable();
-                $( wrapper ).css( {
-                    position : 'absolute',
-                    padding : `${defaultResizingMargin}px`,
-                    "z-index" : sheetElt.zIndex
-                } );
-                that.view.appendChild( wrapper );
-            }
-        } );
+        this.elements.map( function ( sheetElt ) { that.buildWrapperFor( sheetElt ); } );
         // While we're here, if anything changed since the last time we were here,
         // record it on the undo/redo stack.
         if ( this.undoRedoActive ) {
@@ -99,6 +86,21 @@ class SheetModel {
             updateUndoRedoStack();
         }
         this.view.dispatchEvent( new CustomEvent( 'synced', { bubbles : true } ) );
+    }
+    // Helper function used by sync() to create wrapper DIVs
+    buildWrapperFor ( sheetElt ) {
+        var htmlElt = sheetElt.htmlViewElement();
+        if ( !htmlElt.parentElement || htmlElt.parentElement.parentElement != this.view ) {
+            var wrapper = $( '<div></div>' )[0];
+            wrapper.appendChild( htmlElt );
+            $( wrapper ).draggableAndSizable();
+            $( wrapper ).css( {
+                position : 'absolute',
+                padding : `${defaultResizingMargin}px`,
+                "z-index" : sheetElt.zIndex
+            } );
+            this.view.appendChild( wrapper );
+        }
     }
     // Since sync() tracks the undo/redo stack, we can implement undo/redo methods.
     canUndo () { return this.historyIndex > 0; }
@@ -141,14 +143,15 @@ class SheetModel {
             throw new Error( `Invalid class name: ${json.className}` );
         var ctor = eval( json.className );
         var result = new ctor( this );
+        this.buildWrapperFor( result );
         result.fromJSON( json );
         return result;
     }
 
     // Do the rectangles of these two sheet elements intersect?
     intersect ( elt1, elt2 ) {
-        var $elt1 = $( elt1.htmlViewElement().parentNode ),
-            $elt2 = $( elt2.htmlViewElement().parentNode ),
+        var $elt1 = $( elt1.htmlViewElement().parentElement ),
+            $elt2 = $( elt2.htmlViewElement().parentElement ),
             rect1 = { left : $elt1.offset().left, top : $elt1.offset().top,
                       right : $elt1.offset().left + $elt1.width(),
                       bottom : $elt1.offset().top + $elt1.height () },
@@ -172,7 +175,7 @@ class SheetModel {
             max = Math.max( from.zIndex, to.zIndex ),
             adj = ( from.zIndex > to.zIndex ) ? 1 : -1;
         function moveOne ( element, newz ) {
-            $( element.htmlViewElement().parentNode )
+            $( element.htmlViewElement().parentElement )
                 .css( { "z-index" : element.zIndex = newz } );
         }
         moveOne( from, to.zIndex );
@@ -279,8 +282,8 @@ class SheetElement {
     remove () {
         var index = this.model.elements.indexOf( this );
         this.model.elements.splice( index, 1 );
-        var wrapper = this.htmlViewElement().parentNode;
-        wrapper.parentNode.removeChild( wrapper );
+        var wrapper = this.htmlViewElement().parentElement;
+        wrapper.parentElement.removeChild( wrapper );
         this.model.sync();
     }
 
@@ -288,8 +291,8 @@ class SheetElement {
     edit () {
         var viewer = this.htmlViewElement();
         var editor = this.htmlEditElement();
-        if ( editor.parentNode != viewer.parentNode )
-            viewer.parentNode.appendChild( editor );
+        if ( editor.parentElement != viewer.parentElement )
+            viewer.parentElement.appendChild( editor );
         if ( !this.buttons ) {
             $( editor ).append(
                 this.buttons = $(
@@ -312,14 +315,14 @@ class SheetElement {
     showEditControls () {
         $( this.htmlViewElement() ).hide();
         $( this.htmlEditElement() ).show();
-        $( this.htmlEditElement().parentNode ).removeDragAndSizeSelection();
-        $( this.htmlEditElement().parentNode ).pauseDragAndResize();
+        $( this.htmlEditElement().parentElement ).removeDragAndSizeSelection();
+        $( this.htmlEditElement().parentElement ).pauseDragAndResize();
     }
     // Reverse of the previous
     showViewControls () {
         $( this.htmlViewElement() ).show();
         $( this.htmlEditElement() ).hide();
-        $( this.htmlEditElement().parentNode ).unpauseDragAndResize();
+        $( this.htmlEditElement().parentElement ).unpauseDragAndResize();
     }
 
     // This function should read from its edit controls and save their meaning into
@@ -333,15 +336,15 @@ class SheetElement {
     // size for the stuff you've put in the view.
     fitWrapperToView () {
         var view = $( this.htmlViewElement() );
-        if ( !view[0].parentNode ) return;
-        $( view[0].parentNode ).width( view.width() ).height( view.height() );
+        if ( !view[0].parentElement ) return;
+        $( view[0].parentElement ).width( view.width() ).height( view.height() );
     }
 
     // Subclasses should override this to create an actual object representing the
     // instance.  Always include the class name.  Feel free to start with this object
     // and then alter/extend.
     toJSON () {
-        var $wrapper = $( this.htmlViewElement().parentNode );
+        var $wrapper = $( this.htmlViewElement().parentElement );
         return {
             className : 'SheetElement',
             x : $wrapper.offset().left,
@@ -356,10 +359,11 @@ class SheetElement {
     // from the parameter to re-establish the saved state.  Again, subclasses should
     // override and can feel free to call this method as part of their work.
     fromJSON ( json ) {
-        var $wrapper = $( this.htmlViewElement().parentNode );
+        var $wrapper = $( this.htmlViewElement().parentElement );
         $wrapper.offset( { left : json.x, top : json.y } )
                 .width( json.w ).height( json.h )
                 .css( { "z-index" : json.z } );
+        if ( this.resize ) this.resize();
     }
 }
 
@@ -536,7 +540,7 @@ class MTElement extends SheetElement {
     }
     // how to force updating with the latest image
     rerender () {
-        var $wrapper = $( this.htmlViewElement().parentNode );
+        var $wrapper = $( this.htmlViewElement().parentElement );
         if ( !$wrapper[0] ) return;
         $wrapper[0].removeChild( this.htmlViewElement() );
         delete this.viewElement; // forces recreation in next line
@@ -555,7 +559,7 @@ class MTElement extends SheetElement {
     }
     // when a resize happens, build a new image, but only if a resize actually happened
     resize () {
-        var $wrapper = $( this.htmlViewElement().parentNode );
+        var $wrapper = $( this.htmlViewElement().parentElement );
         var lastSize = this.DMT.getSize();
         if ( ( lastSize.w != $wrapper.width() )
           || ( lastSize.h != $wrapper.height() ) ) {
