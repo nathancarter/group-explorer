@@ -510,28 +510,34 @@ class TextElement extends SheetElement {
 }
 
 /*
- * SheetElement subclass for showing the multiplication table of a group
+ * SheetElement subclass for showing a visualizer for a group
  */
-class MTElement extends SheetElement {
+class VisualizerElement extends SheetElement {
+    // abstract functions that must be overridden in subclasses:
+    makeVisualizerObject ( group ) { }
+    makeVisualizerDisplay ( options ) { }
+    getEditPage () { }
+    getClassName () { }
+    // constructor
     constructor ( model, groupURL ) {
         super( model );
         this.groupURL = groupURL;
-        this.DMT = new DisplayMulttable( { width : 100, height : 100 } );
+        this.vizdisplay = this.makeVisualizerDisplay( { width : 100, height : 100 } );
         if ( groupURL ) { // may be absent if they will fill it using fromJSON()
             var that = this;
             Library.getGroupFromURL( groupURL )
                    .then( ( group ) => {
-                       that.MT = new Multtable( that.group = group );
+                       that.vizobj = that.makeVisualizerObject( that.group = group );
                        that.rerender();
                    } )
                    .catch( function ( error ) { console.log( error ); } );
         }
     }
     // not ready unless teh group has been loaded
-    isReady () { return !!this.MT; }
+    isReady () { return !!this.vizobj; }
     // how to create an image of the visualizer
     render () {
-        var result = this.MT ? this.DMT.getImage( this.MT, true ) : $( '<img/>' )[0];
+        var result = this.vizobj ? this.vizdisplay.getImage( this.vizobj, true ) : $( '<img/>' )[0];
         $( result ).css( { "pointer-events" : "none" } );
         var $wrapper = $( '<div></div>' );
         $wrapper.append( result );
@@ -551,7 +557,7 @@ class MTElement extends SheetElement {
     edit () {
         var that = this;
         this.editWindow =
-            window.open( './Multtable.html?groupURL=' + encodeURIComponent( this.groupURL ) );
+            window.open( this.getEditPage() + '?groupURL=' + encodeURIComponent( this.groupURL ) );
         this.editWindow.addEventListener( 'message', function ( event ) {
             that.fromJSON( event.data );
         }, false );
@@ -559,19 +565,19 @@ class MTElement extends SheetElement {
     // when a resize happens, build a new image, but only if a resize actually happened
     resize () {
         var $wrapper = $( this.htmlViewElement().parentElement );
-        var lastSize = this.DMT.getSize();
+        var lastSize = this.vizdisplay.getSize();
         if ( ( lastSize.w != $wrapper.width() )
           || ( lastSize.h != $wrapper.height() ) ) {
-            this.DMT.setSize( $wrapper.width(), $wrapper.height() );
+            this.vizdisplay.setSize( $wrapper.width(), $wrapper.height() );
             this.rerender();
         }
     }
     // serialization just needs to take into account text, size, and color
     toJSON () {
         var result = super.toJSON();
-        result.className = 'MTElement';
-        if ( this.MT ) {
-            var key, inner = this.MT.toJSON();
+        result.className = this.getClassName();
+        if ( this.vizobj ) {
+            var key, inner = this.vizobj.toJSON();
             for ( key in inner )
                 if ( inner.hasOwnProperty( key ) ) result[key] = inner[key];
         }
@@ -582,8 +588,8 @@ class MTElement extends SheetElement {
         var that = this;
         Library.getGroupFromURL( json.groupURL )
                .then( ( group ) => {
-                   that.MT = new Multtable( that.group = group );
-                   that.MT.fromJSON( json );
+                   that.vizobj = that.makeVisualizerObject( that.group = group );
+                   that.vizobj.fromJSON( json );
                    that.rerender();
                } )
                .catch( function ( error ) { console.log( error ); } );
@@ -591,82 +597,21 @@ class MTElement extends SheetElement {
 }
 
 /*
+ * SheetElement subclass for showing the multiplication table of a group
+ */
+class MTElement extends VisualizerElement {
+    makeVisualizerObject ( group ) { return new Multtable( group ); }
+    makeVisualizerDisplay ( options ) { return new DisplayMulttable( options ); }
+    getEditPage () { return './Multtable.html'; }
+    getClassName () { return 'MTElement'; }
+}
+
+/*
  * SheetElement subclass for showing the cycle graph of a group
  */
-class CGElement extends SheetElement {
-    constructor ( model, groupURL ) {
-        super( model );
-        this.groupURL = groupURL;
-        this.DCG = new DisplayCycleGraph( { width : 100, height : 100 } );
-        if ( groupURL ) { // may be absent if they will fill it using fromJSON()
-            var that = this;
-            Library.getGroupFromURL( groupURL )
-                   .then( ( group ) => {
-                       that.CG = new CycleGraph( that.group = group );
-                       that.rerender();
-                   } )
-                   .catch( function ( error ) { console.log( error ); } );
-        }
-    }
-    // not ready unless teh group has been loaded
-    isReady () { return !!this.CG; }
-    // how to create an image of the visualizer
-    render () {
-        var result = this.CG ? this.DCG.getImage( this.CG, true ) : $( '<img/>' )[0];
-        $( result ).css( { "pointer-events" : "none" } );
-        var $wrapper = $( '<div></div>' );
-        $wrapper.append( result );
-        return $wrapper[0];
-    }
-    // how to force updating with the latest image
-    rerender () {
-        var $wrapper = $( this.htmlViewElement().parentElement );
-        if ( !$wrapper[0] ) return;
-        $wrapper[0].removeChild( this.htmlViewElement() );
-        delete this.viewElement; // forces recreation in next line
-        $wrapper.append( this.htmlViewElement() );
-    }
-    // represented by a span with the given font styles and text content
-    createHtmlViewElement () { return this.render(); }
-    // override the default behavior for editing, because visualizers are special
-    edit () {
-        var that = this;
-        this.editWindow =
-            window.open( './CycleGraph.html?groupURL=' + encodeURIComponent( this.groupURL ) );
-        this.editWindow.addEventListener( 'message', function ( event ) {
-            that.fromJSON( event.data );
-        }, false );
-    }
-    // when a resize happens, build a new image, but only if a resize actually happened
-    resize () {
-        var $wrapper = $( this.htmlViewElement().parentElement );
-        var lastSize = this.DCG.getSize();
-        if ( ( lastSize.w != $wrapper.width() )
-          || ( lastSize.h != $wrapper.height() ) ) {
-            this.DCG.setSize( $wrapper.width(), $wrapper.height() );
-            this.rerender();
-        }
-    }
-    // serialization just needs to take into account text, size, and color
-    toJSON () {
-        var result = super.toJSON();
-        result.className = 'CGElement';
-        if ( this.CG ) {
-            var key, inner = this.CG.toJSON();
-            for ( key in inner )
-                if ( inner.hasOwnProperty( key ) ) result[key] = inner[key];
-        }
-        return result;
-    }
-    fromJSON ( json ) {
-        super.fromJSON( json );
-        var that = this;
-        Library.getGroupFromURL( json.groupURL )
-               .then( ( group ) => {
-                   that.CG = new CycleGraph( that.group = group );
-                   that.CG.fromJSON( json );
-                   that.rerender();
-               } )
-               .catch( function ( error ) { console.log( error ); } );
-    }
+class CGElement extends VisualizerElement {
+    makeVisualizerObject ( group ) { return new CycleGraph( group ); }
+    makeVisualizerDisplay ( options ) { return new DisplayCycleGraph( options ); }
+    getEditPage () { return './CycleDiagram.html'; }
+    getClassName () { return 'CGElement'; }
 }
