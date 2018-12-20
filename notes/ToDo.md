@@ -39,6 +39,28 @@
 # Nathan's List
 
  * Sheets
+    * Refactoring to fix bugs with synchronizing sheets and visualizer editors
+       * Move the toJSON/fromJSON functions from Multtable.js to DisplayMulttable.js,
+         from CycleGraph.js to DisplayCycleGraph.js, and from CayleyDiagram.js to DisplayDiagram.js.
+       * In SheetModel.js, replace each call to this.vizobj.to/fromJSON() with a call to
+         this.vizdisplay.to/fromJSON() instead.
+       * Ensure these changes work.
+       * Move the addEventListener() and postMessage() calls from Multtable.js to Multtable.html,
+         now using the toJSON() and fromJSON() implemented in the graphicContext instead of the
+         multtable.
+       * Expand the fromJSON() handler so that it also updates the UI controls in the Subset/Table
+         sidebars.
+       * Ensure these changes work.
+       * Move emitStateChange() from Multtable.js to Multtable.html, and call it whenever that page
+         makes an alteration in the multtable object.
+       * Create analogous addEventListener() and postMessage() calls in CycleDiagram.html, modeled
+         after the ones in Multtable.html.
+       * Also move emitStateChange from CycleGraph.js to CycleGraph.html the same way.
+       * Create analogous addEventListener() and postMessage() calls in CayleyDiagram.html, modeled
+         after the ones in Multtable.html.
+       * Also move emitStateChange from CayleyDiagram.js to CayleyDiagram.html the same way.  This
+         should make it so that you can remove all such calls from cayleyViewController/view.js.
+       * Extend the toJSON() and fromJSON() in CayleyDiagram.html to also respect the camera position.
     * Connecting lines
        * Make `SheetElement` inherit from `EventEmitter`.
        * Whenever the element experiences move/resize/fromJSON, emit a `changeDimensions` event.

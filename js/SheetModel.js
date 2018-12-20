@@ -545,22 +545,47 @@ class VisualizerElement extends SheetElement {
     }
     // how to force updating with the latest image
     rerender () {
-        var $wrapper = $( this.htmlViewElement().parentElement );
-        if ( !$wrapper[0] ) return;
-        $wrapper[0].removeChild( this.htmlViewElement() );
-        delete this.viewElement; // forces recreation in next line
-        $wrapper.append( this.htmlViewElement() );
+        var that = this;
+        setTimeout( function () {
+            var $wrapper = $( that.htmlViewElement().parentElement );
+            if ( !$wrapper[0] ) return;
+            $wrapper[0].removeChild( that.htmlViewElement() );
+            delete that.viewElement; // forces recreation in next line
+            $wrapper.append( that.htmlViewElement() );
+        }, 0 );
     }
     // represented by a span with the given font styles and text content
     createHtmlViewElement () { return this.render(); }
     // override the default behavior for editing, because visualizers are special
     edit () {
         var that = this;
-        this.editWindow =
-            window.open( this.getEditPage() + '?groupURL=' + encodeURIComponent( this.groupURL ) );
-        this.editWindow.addEventListener( 'message', function ( event ) {
-            that.fromJSON( event.data );
-        }, false );
+        setTimeout( function () {
+            var otherWin = that.editWindow =
+                window.open( that.getEditPage() + '?groupURL=' + encodeURIComponent( that.groupURL ) );
+            var otherWinState = 'starting';
+            otherWin.addEventListener( 'message', function ( event ) {
+                if ( otherWinState == 'starting' && event.data == 'listener ready' ) {
+                    // initially set up the editor to be just like us
+                    const myURL = window.location.href;
+                    const thirdSlash = myURL.indexOf( '/', 8 );
+                    const myDomain = myURL.substring( 0, thirdSlash > -1 ? thirdSlash : myURL.length );
+                    otherWin.postMessage( {
+                        source : 'sheet',
+                        json : that.toJSON()
+                    }, myDomain );
+                    otherWinState = 'loading my state';
+                    return;
+                }
+                if ( otherWinState == 'loading my state' && event.data == 'state loaded' ) {
+                    otherWinState = 'ready';
+                    return;
+                }
+                if ( otherWinState == 'ready' ) {
+                    // but when the editor changes, update us to be just like it
+                    if ( event.data.source == 'table' ) that.fromJSON( event.data.json );
+                }
+            }, false );
+        }, 10 );
     }
     // when a resize happens, build a new image, but only if a resize actually happened
     resize () {
@@ -586,13 +611,20 @@ class VisualizerElement extends SheetElement {
     fromJSON ( json ) {
         super.fromJSON( json );
         var that = this;
-        Library.getGroupFromURL( json.groupURL )
-               .then( ( group ) => {
-                   that.vizobj = that.makeVisualizerObject( that.group = group );
-                   that.vizobj.fromJSON( json );
-                   that.rerender();
-               } )
-               .catch( function ( error ) { console.log( error ); } );
+        if ( json.groupURL ) {
+            if ( json.groupURL != this.groupURL ) {
+                Library.getGroupFromURL( json.groupURL )
+                       .then( ( group ) => {
+                           that.vizobj = that.makeVisualizerObject( that.group = group );
+                           that.vizobj.fromJSON( json );
+                           that.rerender();
+                       } )
+                       .catch( function ( error ) { console.log( error ); } );
+            } else {
+                this.vizobj.fromJSON( json );
+                this.rerender();
+            }
+        }
     }
 }
 

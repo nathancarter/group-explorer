@@ -1649,6 +1649,7 @@ class Diagram3D {
 
    setNodeColor(color) {
       this._setNodeField('color', this.nodes.map( (node) => node.element ), color);
+      if ( this.emitStateChange ) this.emitStateChange();
       return this;
    }
 
@@ -1657,6 +1658,7 @@ class Diagram3D {
       if (this.node_labels !== undefined) {
          this.nodes.forEach( (nd) => nd.label = this.node_labels[nd.element] );
       }
+      if ( this.emitStateChange ) this.emitStateChange();
       return this;
    }
 
@@ -1675,6 +1677,7 @@ class Diagram3D {
             }
          } );
       }
+      if ( this.emitStateChange ) this.emitStateChange();
       return this;
    }
 
@@ -1693,12 +1696,14 @@ class Diagram3D {
                                                {arrow: arrow, arrowhead: true, style: this.nodes[arrow].lineStyle}))
          }
       } )
+      if ( this.emitStateChange ) this.emitStateChange();
       return this;
    }
 
    // remove all lines with indicated arrow; if arrow is undefined, remove all lines
    removeLines(arrow) {
       this.lines = (arrow === undefined) ? [] : this.lines.filter( (line) => line.arrow != arrow );
+      if ( this.emitStateChange ) this.emitStateChange();
       return this;
    }
 
@@ -1709,6 +1714,7 @@ class Diagram3D {
       const colors = Array.from({length: arrows.length},
                                 (_, inx) => '#' + new THREE.Color(`hsl(${360*inx/arrows.length}, 100%, 20%)`).getHexString());
       this.lines.forEach( (line) => { line.color = colors[arrows.findIndex( (arrow) => arrow == line.arrow )] } );
+      if ( this.emitStateChange ) this.emitStateChange();
       return this;
    }
 
@@ -1728,6 +1734,7 @@ class Diagram3D {
          }
       } );
       this.lines = Array.from(linesByEndpoints.values());
+      if ( this.emitStateChange ) this.emitStateChange();
    }
 
    // Normalize scene: translate to centroid, radius = 1
@@ -1748,6 +1755,7 @@ class Diagram3D {
                                               vertex.point.applyMatrix4(xForm)
                                            }
                                         } ) );
+      if ( this.emitStateChange ) this.emitStateChange();
    }
 
    _setNodeField(field, nodes, value) {
@@ -1761,6 +1769,7 @@ class Diagram3D {
          const color = `hsl(${hue}, 53%, 30%)`;
          this._setNodeField('colorHighlight', els, color);
       } );
+      if ( this.emitStateChange ) this.emitStateChange();
    }
 
    highlightByRingAroundNode(elements) {
@@ -1774,6 +1783,7 @@ class Diagram3D {
             this._setNodeField('ringHighlight', els, color);
          } );
       }
+      if ( this.emitStateChange ) this.emitStateChange();
    }
 
    highlightBySquareAroundNode(elements) {
@@ -1787,12 +1797,14 @@ class Diagram3D {
             this._setNodeField('squareHighlight', els, color);
          } );
       }
+      if ( this.emitStateChange ) this.emitStateChange();
    }
 
    clearHighlights() {
       this._setNodeField('colorHighlight', group.elements, undefined);
       this._setNodeField('ringHighlight', group.elements, undefined);
       this._setNodeField('squareHighlight', group.elements, undefined);
+      if ( this.emitStateChange ) this.emitStateChange();
    }
 }
 
@@ -1926,6 +1938,7 @@ class CayleyDiagram extends Diagram3D {
       this.setNodeColor(CayleyDiagram.NODE_COLOR)
           .setNodeLabels()
           .setLineColors();
+      this.emitStateChange();
    }
 
    _generateFromGroup() {
@@ -1933,6 +1946,7 @@ class CayleyDiagram extends Diagram3D {
       this.nodes = cayleyDiagram.points.map(
          (point, element) => new Diagram3D.Node(element, point, {lineStyle: Diagram3D.STRAIGHT}));
       cayleyDiagram.arrows.forEach( (arrow) => this.addLines(arrow) );
+      this.emitStateChange();
    }
 
    _generateFromStrategy() {
@@ -1944,6 +1958,7 @@ class CayleyDiagram extends Diagram3D {
 
       // makes lines for generators
       this.strategies.forEach( (strategy) => this.addLines(strategy.generator) );
+      this.emitStateChange();
    }
 
    _generateNodes(strategies) {
@@ -1953,6 +1968,7 @@ class CayleyDiagram extends Diagram3D {
          [nodes, strategies[inx].bitset] = this._extendSubgroup(nodes, generators.slice(0, inx+1));
          return (inx == 0) ? nodes._flatten() : nodes;
       }, [0]);
+      this.emitStateChange();
    }
 
    _extendSubgroup(H_prev, generators) {
@@ -2110,7 +2126,30 @@ class CayleyDiagram extends Diagram3D {
                                 [ordered_gens[3], 0, 2, 3]]);
             break;
       }
-      return;
+      this.emitStateChange();
+   }
+
+   emitStateChange () {
+      const myURL = window.location.href;
+      const thirdSlash = myURL.indexOf( '/', 8 );
+      const myDomain = myURL.substring( 0, thirdSlash > -1 ? thirdSlash : myURL.length );
+      window.postMessage( this.toJSON(), myDomain );
+   }
+
+   toJSON () {
+      return {
+         groupURL : this.group.URL,
+         diagram_name : this.diagram_name,
+         arrowheadPlacement : this.arrowheadPlacement
+      };
+   }
+
+   fromJSON ( json ) {
+      this.diagram_name = json.diagram_name;
+      this.arrowheadPlacement = json.arrowheadPlacement;
+      var that = this;
+      Library.getGroupFromURL( json.groupURL )
+             .then( ( group ) => { that.group = group; } );
    }
 }
 
@@ -2334,7 +2373,7 @@ class DisplayDiagram {
       this.camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 2000);
 
       this.renderer = new THREE.WebGLRenderer({preserveDrawingBuffer: true, antialias: true});
-      this.renderer.setSize(width, height);
+      this.setSize(width, height);
 
       if (options.container !== undefined) {
          options.container.append(this.renderer.domElement);
@@ -2344,6 +2383,9 @@ class DisplayDiagram {
          this.camControls = new THREE.TrackballControls(this.camera, options.container[0]);
       }
    }
+
+   setSize ( w, h ) { this.renderer.setSize( w, h ); }
+   getSize () { return { w : this.renderer.width, h : this.renderer.height }; }
 
    static setDefaults() {
       DisplayDiagram.groupNames = ['lights', 'spheres', 'labels', 'lines', 'arrowheads', 'nodeHighlights']
@@ -2366,7 +2408,7 @@ class DisplayDiagram {
    // Small graphics don't need high resolution features such as many-faceted spheres, labels, thick lines
    // Removing labels is particularly beneficial, since each label (384 in Tesseract) requires a canvas element
    //   and a context, which often causes loading failure due to resource limitations
-   getImage(diagram3D) {
+   getImage(diagram3D,large) { // second parameter optional, defaults to small
       const img = new Image();
       // this.showGraphic(diagram3D);
 
@@ -2375,10 +2417,10 @@ class DisplayDiagram {
       this.setCamera(diagram3D);
       this.setBackground(diagram3D);
       this.updateLights(diagram3D);
-      this.updateNodes(diagram3D, 5);  // 5 facets instead of 20
+      this.updateNodes(diagram3D, large ? 20 : 5);  // 5 facets instead of 20
       // this.updateHighlights(diagram3D);
       // this.updateLabels(diagram3D);
-      this.updateLines(diagram3D, true);  // use webgl native line width
+      this.updateLines(diagram3D, large ? false : true);  // use webgl native line width
       this.updateArrowheads(diagram3D);
       this.render();
 
@@ -2727,7 +2769,7 @@ class DisplayDiagram {
       return vertices.map( (vertex) => vertex.point );
    }
 
-   
+
    _curvePoints(line, offset, center = new THREE.Vector3(0, 0, 0)) {
       let middle;
       const start_point = line.vertices[0].point,
@@ -2980,10 +3022,24 @@ class SymmetryObject {
 // initialize static variables
 SymmetryObject._init();
 
+const myURL = window.location.href;
+const thirdSlash = myURL.indexOf( '/', 8 );
+const myDomain = myURL.substring( 0, thirdSlash > -1 ? thirdSlash : myURL.length );
+
 class Multtable {
    constructor(group) {
       this.group = group;
       this.reset();
+      var that = this;
+      window.addEventListener( 'message', function ( event ) {
+         console.log( 'ignoring this:', JSON.stringify( event.data ).substring( 0, 100 ) );
+         if ( event.data.source == 'sheet' ) {
+             console.log( 'setting my state to this:', JSON.stringify( event.data.json ).substring( 0, 100 ) );
+             that.fromJSON( event.data.json );
+             window.postMessage( 'state loaded', myDomain );
+         }
+      }, false );
+      window.postMessage( 'listener ready', myDomain );
    }
 
    static _init() {
@@ -3105,10 +3161,8 @@ class Multtable {
    }
 
    emitStateChange () {
-      const myURL = window.location.href;
-      const thirdSlash = myURL.indexOf( '/', 8 );
-      const myDomain = myURL.substring( 0, thirdSlash > -1 ? thirdSlash : myURL.length );
-      window.postMessage( this.toJSON(), myDomain );
+      console.log( 'table emitted:', { source : 'table', json : this.toJSON() } );
+      window.postMessage( { source : 'table', json : this.toJSON() }, myDomain );
    }
 
    toJSON () {
@@ -3125,6 +3179,7 @@ class Multtable {
    }
 
    fromJSON ( json ) {
+      console.log( 'loading my state from this json:', json );
       this.separation = json.separation;
       this._colors = json.colors;
       this.stride = json.stride;
@@ -3438,6 +3493,11 @@ class CycleGraph {
       this.layOutElementsAndPaths();
       this.findClosestTwoPositions();
       this.reset();
+      var that = this;
+      window.addEventListener( 'message', function ( event ) {
+          if ( event.data.type == 'fromJSON' )
+              that.fromJSON( event.data.json );
+      } );
    }
 
    static _init() {

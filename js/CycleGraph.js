@@ -5,6 +5,11 @@ class CycleGraph {
       this.layOutElementsAndPaths();
       this.findClosestTwoPositions();
       this.reset();
+      var that = this;
+      window.addEventListener( 'message', function ( event ) {
+          if ( event.data.type == 'fromJSON' )
+              that.fromJSON( event.data.json );
+      } );
    }
 
    static _init() {

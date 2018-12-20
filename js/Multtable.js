@@ -1,8 +1,20 @@
 
+const myURL = window.location.href;
+const thirdSlash = myURL.indexOf( '/', 8 );
+const myDomain = myURL.substring( 0, thirdSlash > -1 ? thirdSlash : myURL.length );
+
 class Multtable {
    constructor(group) {
       this.group = group;
       this.reset();
+      var that = this;
+      window.addEventListener( 'message', function ( event ) {
+         if ( event.data.source == 'sheet' ) {
+             that.fromJSON( event.data.json );
+             window.postMessage( 'state loaded', myDomain );
+         }
+      }, false );
+      window.postMessage( 'listener ready', myDomain );
    }
 
    static _init() {
@@ -124,10 +136,7 @@ class Multtable {
    }
 
    emitStateChange () {
-      const myURL = window.location.href;
-      const thirdSlash = myURL.indexOf( '/', 8 );
-      const myDomain = myURL.substring( 0, thirdSlash > -1 ? thirdSlash : myURL.length );
-      window.postMessage( this.toJSON(), myDomain );
+      window.postMessage( { source : 'table', json : this.toJSON() }, myDomain );
    }
 
    toJSON () {

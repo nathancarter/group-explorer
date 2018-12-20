@@ -146,6 +146,11 @@
           resizeBody();
        }
 
+       window.addEventListener( 'message', function ( event ) {
+          if ( graphicContext && multtable && event.data == 'state loaded' )
+             graphicContext.showLargeGraphic(multtable);
+       }, false );
+
        /* Find subgroup index (the "value" attribute of the option selected) and display multtable accordingly */
        function selectSubgroup(ev) {
           ev.stopPropagation();
