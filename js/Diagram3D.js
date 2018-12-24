@@ -227,6 +227,7 @@ Diagram3D.Line = class Line {
       this.color = undefined;
       this.arrowhead = true;
       this.arrow = undefined;
+      this.offset = undefined;
       this.style = Diagram3D.STRAIGHT;
       if (options !== undefined) {
          for (const opt in options) {
