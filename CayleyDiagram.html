@@ -150,7 +150,7 @@
         */
        function resizeGraphic() {
           if (Graphic_context.camera !== undefined) {
-             $('#graphic > canvas').remove();
+             $('#graphic > canvas').detach();
              Graphic_context.camera.aspect = $('#graphic').width() / $('#graphic').height();
              Graphic_context.camera.updateProjectionMatrix();
              Graphic_context.renderer.setSize($('#graphic').width(), $('#graphic').height());
