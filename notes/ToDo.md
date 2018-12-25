@@ -10,14 +10,13 @@
 
 ## CayleyDiagram diagram panel
 
+ * Use dummy 'center' node to orient curved arrows (see Q_4, strategy [[1,2,2,0],[4,0,2,1]]; or A_4, [[1,1,2,0],[3,0,0,1]])
  * Chunking
  * Hover help in big Cayley diagram
- * Drag-and-drop to re-shape curves in big Cayley diagram
- * Use dummy 'center' node to orient curved arrows (see Q_4, strategy [[1,2,2,0],[4,0,2,1]]; or A_4, [[1,1,2,0],[3,0,0,1]])
  * Keep labels from disappearing behind nodes with changing node/label sizes
- * Drag-and-drop to move nodes in big Cayley diagram (?)
- * Label representations (?)
- * Display raw element numbers (?)
+ * Change label representations in visualizers?
+ * Display raw element numbers for debugging?
+ * Follow up approach in https://stackoverflow.com/questions/15558418/how-do-you-save-an-image-from-a-three-js-canvas for saving buffer
 
 ## Local files
 
