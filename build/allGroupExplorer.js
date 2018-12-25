@@ -1849,6 +1849,7 @@ Diagram3D.Line = class Line {
       this.color = undefined;
       this.arrowhead = true;
       this.arrow = undefined;
+      this.offset = undefined;
       this.style = Diagram3D.STRAIGHT;
       if (options !== undefined) {
          for (const opt in options) {
@@ -2381,6 +2382,7 @@ class DisplayDiagram {
 
       if (options.trackballControlled) {
          this.camControls = new THREE.TrackballControls(this.camera, options.container[0]);
+         this.lineDnD = new DisplayDiagram.LineDnD(this);
       }
    }
 
@@ -2410,7 +2412,11 @@ class DisplayDiagram {
    //   and a context, which often causes loading failure due to resource limitations
    getImage(diagram3D,large) { // second parameter optional, defaults to small
       const img = new Image();
-      // this.showGraphic(diagram3D);
+
+      // save diagram for use by LineDnD -- not used for thumbnails
+      if (this.lineDnD !== undefined) {
+         this.scene.userData = diagram3D;
+      }
 
       diagram3D.normalize();
 
@@ -2431,6 +2437,11 @@ class DisplayDiagram {
    // Display diagram
    showGraphic(diagram3D) {
       Log.log('showGraphic');
+
+      // save diagram for use by LineDnD
+      if (this.lineDnD !== undefined) {
+         this.scene.userData = diagram3D;
+      }
 
       diagram3D.normalize();
 
@@ -2624,6 +2635,10 @@ class DisplayDiagram {
       const labels = this.getGroup('labels');
       labels.remove(...labels.children);
 
+      if (diagram3D.labelSize == 0) {
+         return;
+      }
+
       const spheres = this.getGroup('spheres').children;
       const nominal_radius = spheres.find( (el) => el !== undefined ).geometry.parameters.radius;
       const scale = 12 * nominal_radius * diagram3D.labelSize;
@@ -2734,9 +2749,10 @@ class DisplayDiagram {
          return vertices.map( (vertex) => vertex.point );
       }
 
-      // offset center of arc 40% of the distance between the two nodes, in the plane of origin/start/end
+      // offset center of arc 20% of the distance between the two nodes, in the plane of center/start/end
       if (line.style == Diagram3D.CURVED) {
-         const points = this._curvePoints(line, 0.4 * (line.length - 2*spheres[0].geometry.parameters.radius));
+         line.offset = (line.offset === undefined) ? 0.2 : line.offset;
+         const points = this._curvePoints(line);
          return points;
       }
 
@@ -2761,7 +2777,8 @@ class DisplayDiagram {
              && x < start2end_len
              && normal.lengthSq() < min_squared_distance )
             {
-               const points = this._curvePoints(line, 3*radius - normal.length());
+               line.offset = (line.offset === undefined) ? 1.7*radius/Math.sqrt(start2end_sq) : line.offset;
+               const points = this._curvePoints(line);
                return points;
             }
       }
@@ -2769,32 +2786,50 @@ class DisplayDiagram {
       return vertices.map( (vertex) => vertex.point );
    }
 
-
-   _curvePoints(line, offset, center = new THREE.Vector3(0, 0, 0)) {
-      let middle;
+   _curvePoints(line) {
       const start_point = line.vertices[0].point,
             end_point = line.vertices[1].point,
+            center = this._getCenter(line),
             start = start_point.clone().sub(center),
-            end = end_point.clone().sub(center);
+            end = end_point.clone().sub(center),
+            offset_distance = line.offset * start_point.distanceTo(end_point),
+            halfway = new THREE.Vector3().addVectors(start, end).multiplyScalar(0.5),  // (start + end)/2
+            start2end = end.clone().sub(start),
+            x = -start.dot(start2end)/end.dot(start2end),  // start + x*end is normal to start - end
+            normal = ((end.dot(start2end) == 0) ? end.clone() : start.clone().add(end.clone().multiplyScalar(x))).normalize(),
+            offset = normal.clone().multiplyScalar(2*offset_distance),
+            middle = center.clone().add(halfway).add(offset),
+            curve = new THREE.QuadraticBezierCurve3(start_point, middle, end_point),
+            points = curve.getPoints(10);
+      line.middle = middle;
+      return points;
+   }
 
-      // center lies on line -- choose a direction normal to the camera direction
-      if (new THREE.Vector3().crossVectors(start, end).length() < 1e-3) {
-         const normal = new THREE.Vector3().crossVectors(this.camera.position, start),
-               scaled_normal = normal.multiplyScalar(offset/normal.length());
-         middle = start.add(end).multiplyScalar(0.5).add(scaled_normal);
-      } else {
-         const halfway = start.clone().add(end).multiplyScalar(0.5),  // (start + end)/2
-               start2end = end.clone().sub(start),
-               x = -start.dot(start2end)/end.dot(start2end),  // a + xb is normal to b-a
-               normal = (end.dot(start2end) == 0) ? end : start.clone().add(end.clone().multiplyScalar(x)),
-               scaled_normal = normal.clone().multiplyScalar(offset/normal.length());
-         middle = halfway.add(scaled_normal);
+   _getCenter(line) {
+      const centerOK = (point) => new THREE.Vector3().crossVectors(start.clone().sub(point), end.clone().sub(point)).lengthSq() > 1.e-4;
+      const start = line.vertices[0].point;
+      const end = line.vertices[1].point;
+      // if center is spec'd, check it and if OK, return that
+      if (line.center !== undefined) {
+         if (centerOK(line.center)) {
+            return line.center;
+         }
+      }
+      // if center not spec'd, or not OK, try (0,0,0); if that's OK, return that
+      line.center = new THREE.Vector3(0, 0, 0);
+      if (centerOK(line.center)) {
+         return line.center;
+      }
+      // if (0,0,0)'s not OK, form (camera, start, end) plane, get unit normal
+      line.center = new THREE.Vector3().crossVectors(this.camera.position.clone().sub(start), end.clone().sub(start)).normalize()
+                             .add(start.clone().add(end).multiplyScalar(0.5));
+      if (centerOK(line.center)) {
+         return line.center;
       }
 
-      const curve = new THREE.QuadraticBezierCurve3(start_point, middle, end_point),
-            points = curve.getPoints(10);
-
-      return points;
+      console.log("can't find center for line curve!");  // debug
+      line.center = undefined;
+      return line.center;
    }
 
    updateArrowheads(diagram3D) {
@@ -2805,38 +2840,44 @@ class DisplayDiagram {
       const arrowheads = this.getGroup('arrowheads');
       arrowheads.remove(...arrowheads.children);
 
-      lines.filter( (line) => line.userData.line.arrowhead )
-           .forEach( (line) => {
-              const lineData = line.userData.line,
-                    vertices = line.userData.vertices,
-                    numNodes = vertices.length,
-                    numSegments = numNodes - 1,
-                    startNode = vertices[0],
-                    endNode = vertices[numNodes - 1],
-                    nodeRadius = spheres[lineData.vertices[lineData.vertices.length - 1].element].geometry.parameters.radius,
-                    center2center = endNode.clone().sub(startNode).length(),
-                    dLength = center2center / numSegments;
-              if (center2center <= 2*nodeRadius) {
-                 return;
-              }
-              const headLength = Math.min(nodeRadius, (center2center - 2*nodeRadius)/2),
-                    headWidth = 0.6 * headLength,
-                    start2tip = nodeRadius + headLength +
-                                diagram3D.arrowheadPlacement*(center2center - 2*nodeRadius - headLength),
-                    tipSegment = Math.floor(start2tip/dLength),
-                    tip = vertices[tipSegment].clone().add(
-                       vertices[tipSegment+1].clone().sub(vertices[tipSegment]).multiplyScalar(
-                          start2tip/dLength - tipSegment)),
-                    start2base = start2tip - headLength,
-                    baseSegment = Math.floor(start2base/dLength),
-                    base = vertices[baseSegment].clone().add(
-                       vertices[baseSegment+1].clone().sub(vertices[baseSegment]).multiplyScalar(
-                          start2base/dLength - baseSegment)),
-                    arrowDir = tip.clone().sub(base).normalize(),
-                    color = line.userData.color,
-                    arrowhead = new THREE.ArrowHelper(arrowDir, base, 1.1*headLength, color, headLength, headWidth);
-              arrowheads.add(arrowhead);
-           } )
+      const arrowheadPlacement = diagram3D.arrowheadPlacement;
+
+      lines.forEach( (line) => {
+         if (! line.userData.line.arrowhead) {
+            return;
+         }
+         const lineData = line.userData.line,
+               startNode = lineData.vertices[0],
+               startPoint = startNode.point,
+               endNode = lineData.vertices[1],
+               endPoint = endNode.point,
+               nodeRadius = spheres[endNode.element].geometry.parameters.radius,
+               center2center = startPoint.distanceTo(endPoint),
+               headLength = Math.min(nodeRadius, (center2center - 2*nodeRadius)/2),
+               headWidth = 0.6 * headLength,
+               arrowLength = 1.1 * headLength,
+               color = lineData.color;
+         if (center2center <= 2*nodeRadius) {
+            return;
+         }
+         // 0.001 offset to make arrowhead stop at node surface
+         let arrowStart, arrowDir;
+         if (lineData.offset === undefined) {
+            const length = center2center,
+                  arrowPlace = 0.001 + (nodeRadius - 0.1*headLength + (length - 2*nodeRadius - headLength) * arrowheadPlacement) / length;
+            arrowDir = endPoint.clone().sub(startPoint).normalize();
+            arrowStart = new THREE.Vector3().addVectors(startPoint.clone().multiplyScalar(1-arrowPlace), endPoint.clone().multiplyScalar(arrowPlace));
+         } else {
+            const bezier = new THREE.QuadraticBezierCurve3(startPoint, lineData.middle, endPoint),
+                  length = bezier.getLength(),
+                  arrowPlace = 0.001 + (nodeRadius - 0.1*headLength + (length - 2*nodeRadius - headLength) * arrowheadPlacement)/length,
+                  arrowTip = bezier.getPointAt(arrowPlace + headLength/length);
+            arrowStart = bezier.getPointAt(arrowPlace);
+            arrowDir = arrowTip.clone().sub(arrowStart).normalize();
+         }
+         const arrowhead = new THREE.ArrowHelper(arrowDir, arrowStart, arrowLength, color, headLength, headWidth);
+         arrowheads.add(arrowhead);
+      } )
    }
 
    // Render graphics, recursing to animate if a TrackballControl is present
@@ -2874,6 +2915,137 @@ class DisplayDiagram {
 
    updateArrowheadPlacement(diagram3D) {
       this.updateArrowheads(diagram3D);
+   }
+}
+
+DisplayDiagram.LineDnD = class {
+   constructor(displayDiagram) {
+      this.displayDiagram = displayDiagram;
+      this.canvas = displayDiagram.renderer.domElement;
+      this.mouse = new THREE.Vector2();
+      this.raycaster = new THREE.Raycaster();
+      this.raycaster.linePrecision = 0.01;
+      this.event_handler = (event) => this.eventHandler(event);
+      this.repaint_poller = undefined;
+      this.repaint_request = undefined;
+
+      $(displayDiagram.renderer.domElement).on('mousedown', this.event_handler);
+   }
+
+   eventHandler(event) {
+      if (!event.shiftKey) {
+         return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      const bounding_box = this.canvas.getBoundingClientRect();
+      this.mouse.x = ( (event.clientX - bounding_box.x) / this.canvas.width) * 2 - 1;
+      this.mouse.y = -( (event.clientY - bounding_box.y) / this.canvas.height) * 2 + 1;
+
+      switch (event.type) {
+         case 'mousedown':  this.dragStart(event);  break;
+         case 'mousemove':  this.dragOver(event);   break;
+         case 'mouseup':    this.drop(event);       break;
+      }
+   }
+
+   // start drag-and-drop; see if we've found a line
+   dragStart(event) {
+      // update the picking ray with the camera and mouse position
+      this.raycaster.setFromCamera(this.mouse, this.displayDiagram.camera);
+
+      // temporarily change the width of the lines to 1 for raycasting -- doesn't seem to work with meshLines (sigh)
+      // (this change is never rendered, so user never sees it)
+      const saved_width = this.displayDiagram.scene.userData.lineWidth;
+      this.displayDiagram.scene.userData.lineWidth = 1;
+      this.displayDiagram.updateLines(this.displayDiagram.scene.userData);
+
+      // calculate objects intersecting the picking ray
+      const intersects = this.raycaster.intersectObjects( this.displayDiagram.getGroup("lines").children, false ) ;
+
+      // now change the line width back
+      this.displayDiagram.scene.userData.lineWidth = saved_width;
+      this.displayDiagram.updateLines(this.displayDiagram.scene.userData);
+
+      // if ambiguous or empty intersect just return
+      if (!(   intersects.length == 1
+            || intersects.length == 2 && intersects[0].object == intersects[1].object)) {
+         console.log(intersects.length);
+         return;
+      }
+
+      // found a line, squirrel it away and wait for further dnd events
+      this.line = intersects[0].object;
+      $(this.canvas).off('mousemove', this.event_handler).on('mousemove', this.event_handler);
+      $(this.canvas).off('mouseup', this.event_handler).on('mouseup', this.event_handler);
+
+      // change cursor to grab
+      this.canvas.style.cursor = 'move';
+
+      this.repaint_poller = window.setInterval(() => this.repaintPoller(), 100);
+   }
+
+   dragOver(event) {
+      this.repaint_request = (this.repaint_request === undefined) ? performance.now() : this.repaint_request;
+   }
+
+   drop(event) {
+      this.repaintLine();
+      this.endDrag(event);
+   }
+
+   endDrag(event) {
+      $(this.canvas).off('mousemove', this.event_handler);
+      $(this.canvas).off('mouseup', this.event_handler);
+      this.canvas.style.cursor = '';
+      window.clearInterval(this.repainter);
+      this.repainter = undefined;
+      this.line = undefined;
+   }
+
+   repaintPoller() {
+      if (performance.now() - this.repaint_request > 100) {
+         this.repaintLine();
+      }
+   }
+
+   // update line to run through current mouse position
+   repaintLine() {
+      // get ray through mouse
+      this.raycaster.setFromCamera(this.mouse, this.displayDiagram.camera);
+
+      // get intersection of ray with plane of line (through start, end, center)
+      const start = this.line.userData.line.vertices[0].point;
+      const end = this.line.userData.line.vertices[1].point;
+      const center = this.displayDiagram._getCenter(this.line.userData.line);
+      const center2start = start.clone().sub(center);
+      const center2end = end.clone().sub(center);
+
+      // find 'intersection', the point the raycaster ray intersects the plane defined by start, end and center
+      const m = new THREE.Matrix3().set(...center2start.toArray(),
+                                        ...center2end.toArray(),
+                                        ...this.raycaster.ray.direction.toArray())
+                         .transpose();
+      const s = this.raycaster.ray.origin.clone().applyMatrix3(new THREE.Matrix3().getInverse(m));
+      const intersection = this.raycaster.ray.origin.clone().add(this.raycaster.ray.direction.clone().multiplyScalar(-s.z));
+
+      // get offset length
+      const start2intxn = intersection.clone().sub(start);
+      const start2end = end.clone().sub(start);
+      const plane_normal = new THREE.Vector3().crossVectors(center2start, center2end).normalize();
+      const line_length = start2end.length();
+      const offset = new THREE.Vector3().crossVectors(start2intxn, start2end).dot(plane_normal)/(line_length * line_length);
+
+      // set line offset in diagram, and re-paint lines, arrowheads
+      this.line.userData.line.style = Diagram3D.CURVED;
+      this.line.userData.line.offset = offset;
+      this.displayDiagram.updateLines(this.displayDiagram.scene.userData);
+      this.displayDiagram.updateArrowheads(this.displayDiagram.scene.userData);
+
+      // clear repaint request
+      this.repaint_request = undefined;
    }
 }
 
@@ -3032,9 +3204,7 @@ class Multtable {
       this.reset();
       var that = this;
       window.addEventListener( 'message', function ( event ) {
-         console.log( 'ignoring this:', JSON.stringify( event.data ).substring( 0, 100 ) );
          if ( event.data.source == 'sheet' ) {
-             console.log( 'setting my state to this:', JSON.stringify( event.data.json ).substring( 0, 100 ) );
              that.fromJSON( event.data.json );
              window.postMessage( 'state loaded', myDomain );
          }
@@ -3161,7 +3331,6 @@ class Multtable {
    }
 
    emitStateChange () {
-      console.log( 'table emitted:', { source : 'table', json : this.toJSON() } );
       window.postMessage( { source : 'table', json : this.toJSON() }, myDomain );
    }
 
@@ -3179,7 +3348,6 @@ class Multtable {
    }
 
    fromJSON ( json ) {
-      console.log( 'loading my state from this json:', json );
       this.separation = json.separation;
       this._colors = json.colors;
       this.stride = json.stride;

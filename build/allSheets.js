@@ -765,16 +765,13 @@ class VisualizerElement extends SheetElement {
         setTimeout( function () {
             var otherWin = that.editWindow =
                 window.open( that.getEditPage() + '?groupURL=' + encodeURIComponent( that.groupURL ) );
-            console.log( 'going to load the other tab...' );
             var otherWinState = 'starting';
             otherWin.addEventListener( 'message', function ( event ) {
                 if ( otherWinState == 'starting' && event.data == 'listener ready' ) {
-                    console.log( 'other tab said it is listening!' );
                     // initially set up the editor to be just like us
                     const myURL = window.location.href;
                     const thirdSlash = myURL.indexOf( '/', 8 );
                     const myDomain = myURL.substring( 0, thirdSlash > -1 ? thirdSlash : myURL.length );
-                    console.log( 'sending my state to other tab...' );
                     otherWin.postMessage( {
                         source : 'sheet',
                         json : that.toJSON()
@@ -783,13 +780,11 @@ class VisualizerElement extends SheetElement {
                     return;
                 }
                 if ( otherWinState == 'loading my state' && event.data == 'state loaded' ) {
-                    console.log( 'other tab said it got my initialization!' );
                     otherWinState = 'ready';
                     return;
                 }
                 if ( otherWinState == 'ready' ) {
                     // but when the editor changes, update us to be just like it
-                    console.log( 'sheet heard:', JSON.stringify( event.data ).substring( 0, 100 ) );
                     if ( event.data.source == 'table' ) that.fromJSON( event.data.json );
                 }
             }, false );
@@ -823,14 +818,12 @@ class VisualizerElement extends SheetElement {
             if ( json.groupURL != this.groupURL ) {
                 Library.getGroupFromURL( json.groupURL )
                        .then( ( group ) => {
-                           console.log( 'would make new vizobj for', group, 'then restore it from', json );
                            that.vizobj = that.makeVisualizerObject( that.group = group );
                            that.vizobj.fromJSON( json );
                            that.rerender();
                        } )
                        .catch( function ( error ) { console.log( error ); } );
             } else {
-                console.log( 'would restore current vizobj with', json );
                 this.vizobj.fromJSON( json );
                 this.rerender();
             }
