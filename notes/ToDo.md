@@ -10,7 +10,6 @@
 
 ## CayleyDiagram diagram panel
 
- * Use dummy 'center' node to orient curved arrows (see Q_4, strategy [[1,2,2,0],[4,0,2,1]]; or A_4, [[1,1,2,0],[3,0,0,1]])
  * Chunking
  * Hover help in big Cayley diagram
  * Keep labels from disappearing behind nodes with changing node/label sizes
