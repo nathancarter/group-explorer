@@ -476,23 +476,39 @@ class DisplayDiagram {
    }
 
    _getCenter(line) {
-      const centerOK = (point) => new THREE.Vector3().crossVectors(start.clone().sub(point), end.clone().sub(point)).lengthSq() > 1.e-4;
-      const start = line.vertices[0].point;
-      const end = line.vertices[1].point;
+      const centerOK = (point) => new THREE.Vector3().crossVectors(startPoint.clone().sub(point), endPoint.clone().sub(point)).lengthSq() > 1.e-4;
+      const startNode = line.vertices[0],
+            endNode = line.vertices[1],
+            startPoint = startNode.point,
+            endPoint = endNode.point;
+
       // if center is spec'd, check it and if OK, return that
       if (line.center !== undefined) {
          if (centerOK(line.center)) {
             return line.center;
          }
       }
+
+      // if nodes are in the same curved group, find avg of nodes and use that as the center
+      if (startNode.curvedGroup !== undefined && startNode.curvedGroup == endNode.curvedGroup) {
+         line.center = startNode.curvedGroup
+                                .reduce( (center, node) => center.add(node.point), new THREE.Vector3() )
+                                .multiplyScalar(1/startNode.curvedGroup.length);
+         if (centerOK(line.center)) {
+            return line.center;
+         }
+      }
+
       // if center not spec'd, or not OK, try (0,0,0); if that's OK, return that
       line.center = new THREE.Vector3(0, 0, 0);
       if (centerOK(line.center)) {
          return line.center;
       }
+
       // if (0,0,0)'s not OK, form (camera, start, end) plane, get unit normal
-      line.center = new THREE.Vector3().crossVectors(this.camera.position.clone().sub(start), end.clone().sub(start)).normalize()
-                             .add(start.clone().add(end).multiplyScalar(0.5));
+      line.center = new THREE.Vector3().crossVectors(this.camera.position.clone().sub(startPoint),
+                                                     endPoint.clone().sub(startPoint)).normalize()
+                             .add(startPoint.clone().add(endPoint).multiplyScalar(0.5));
       if (centerOK(line.center)) {
          return line.center;
       }

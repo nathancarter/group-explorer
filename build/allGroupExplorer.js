@@ -2274,10 +2274,18 @@ CayleyDiagram.CircularLayout = class extends CayleyDiagram.CurvedLayout {
          ...new THREE.Vector3(...Array.from({length: 3}, (_,inx) => (this.direction == inx) ? 1 : scale)).toArray()
       )
 
+      const curvedGroup = [];
+
       // translate children to [0.5, 0.5] + [r*sin(th), -r*cos(th)]
       children.forEach( (child, inx) => {
          transform.setPosition(this.position(r, 2*inx*Math.PI/children.length));
-         child.forEach( (node) => node.point = node.point.applyMatrix4(transform) );
+         child.forEach( (node) => {
+            node.point = node.point.applyMatrix4(transform);
+            if (node.curvedGroup === undefined) {
+               node.curvedGroup = curvedGroup;
+               curvedGroup.push(node);
+            }
+         } );
       } );
 
       return children;
@@ -2316,13 +2324,21 @@ CayleyDiagram.RotatedLayout = class extends CayleyDiagram.CurvedLayout {
          ...new THREE.Vector3(...Array.from({length: 3}, (_,inx) => (this.direction == inx) ? 1 : scale)).toArray()
       )
 
+      const curvedGroup = [];
+      
       // scale, rotation, and translate each child
       children.forEach( (child, inx) => {
          const theta = 2*inx*Math.PI/children.length;
          const transform = scale_transform.clone()
                                           .multiply(this.rotation(theta))
                                           .setPosition(this.position(r, theta));
-         child.forEach( (node) => node.point = node.point.applyMatrix4(transform) );
+         child.forEach( (node) => {
+            node.point = node.point.applyMatrix4(transform);
+            if (node.curvedGroup === undefined) {
+               node.curvedGroup = curvedGroup;
+               curvedGroup.push(node);
+            }
+         } );
       } );
 
       return children;
@@ -2806,23 +2822,39 @@ class DisplayDiagram {
    }
 
    _getCenter(line) {
-      const centerOK = (point) => new THREE.Vector3().crossVectors(start.clone().sub(point), end.clone().sub(point)).lengthSq() > 1.e-4;
-      const start = line.vertices[0].point;
-      const end = line.vertices[1].point;
+      const centerOK = (point) => new THREE.Vector3().crossVectors(startPoint.clone().sub(point), endPoint.clone().sub(point)).lengthSq() > 1.e-4;
+      const startNode = line.vertices[0],
+            endNode = line.vertices[1],
+            startPoint = startNode.point,
+            endPoint = endNode.point;
+
       // if center is spec'd, check it and if OK, return that
       if (line.center !== undefined) {
          if (centerOK(line.center)) {
             return line.center;
          }
       }
+
+      // if nodes are in the same curved group, find avg of nodes and use that as the center
+      if (startNode.curvedGroup !== undefined && startNode.curvedGroup == endNode.curvedGroup) {
+         line.center = startNode.curvedGroup
+                                .reduce( (center, node) => center.add(node.point), new THREE.Vector3() )
+                                .multiplyScalar(1/startNode.curvedGroup.length);
+         if (centerOK(line.center)) {
+            return line.center;
+         }
+      }
+
       // if center not spec'd, or not OK, try (0,0,0); if that's OK, return that
       line.center = new THREE.Vector3(0, 0, 0);
       if (centerOK(line.center)) {
          return line.center;
       }
+
       // if (0,0,0)'s not OK, form (camera, start, end) plane, get unit normal
-      line.center = new THREE.Vector3().crossVectors(this.camera.position.clone().sub(start), end.clone().sub(start)).normalize()
-                             .add(start.clone().add(end).multiplyScalar(0.5));
+      line.center = new THREE.Vector3().crossVectors(this.camera.position.clone().sub(startPoint),
+                                                     endPoint.clone().sub(startPoint)).normalize()
+                             .add(startPoint.clone().add(endPoint).multiplyScalar(0.5));
       if (centerOK(line.center)) {
          return line.center;
       }
