@@ -3209,7 +3209,7 @@ const MATHML_2_HTML =
 </xsl:template>
 
 <xsl:template match="mfenced">
-  <xsl:value-of select="@open"/><xsl:text> </xsl:text>
+  <xsl:value-of select="@open"/>
   <xsl:for-each select="./*">
     <xsl:apply-templates select="."/>
     <xsl:if test="position() != last()">
@@ -3221,10 +3221,9 @@ const MATHML_2_HTML =
           <xsl:text>,</xsl:text>
         </xsl:otherwise>
       </xsl:choose>
-      <xsl:text> </xsl:text>
     </xsl:if>
   </xsl:for-each>
-  <xsl:text> </xsl:text><xsl:value-of select="@close"/>
+  <xsl:value-of select="@close"/>
 </xsl:template>
 
 <xsl:template match="msup">
