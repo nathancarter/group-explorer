@@ -10,12 +10,12 @@
 
 ## CayleyDiagram diagram panel
 
- * Chunking
- * Hover help in big Cayley diagram
+ * Hover help in big Cayley diagram (including chunking)
  * Keep labels from disappearing behind nodes with changing node/label sizes
  * Change label representations in visualizers?
  * Display raw element numbers for debugging?
  * Follow up approach in https://stackoverflow.com/questions/15558418/how-do-you-save-an-image-from-a-three-js-canvas for saving buffer
+ * Add indication to Subgroups panel that subgroup is normal?
 
 ## Local files
 
@@ -123,4 +123,6 @@
 
  * Table on main page does not show which column is sorted at first (until you click one).
  * Throughout the app, we use less than and greater than signs rather than the more appropriate
-   LaTeX `\langle` and `\rangle`.
+   LaTeX `\langle` and `\rangle`.  (Note: HTML entity numbers for these characters are: \langle (&#x27e8;)
+   -- &amp;#x27e8; and \rangle (&#x27e9;): &amp;#x27e9;. These can be substituted into text strings
+   in place of '<' or &amp;lt; and '>' or &amp;gt;.)
