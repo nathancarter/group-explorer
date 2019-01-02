@@ -8,6 +8,7 @@ class Diagram3D {
       this.group = group;
       this.nodes = nodes;
       this.lines = lines;
+      this.chunk = undefined;   // subgroup index for chunking
       this._right_multiplication = true;
       this.node_labels = group.representation;
       this.background = undefined;

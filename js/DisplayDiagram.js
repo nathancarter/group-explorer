@@ -60,7 +60,7 @@ class DisplayDiagram {
    getSize () { return { w : this.renderer.width, h : this.renderer.height }; }
 
    static setDefaults() {
-      DisplayDiagram.groupNames = ['lights', 'spheres', 'labels', 'lines', 'arrowheads', 'nodeHighlights']
+      DisplayDiagram.groupNames = ['lights', 'spheres', 'labels', 'lines', 'arrowheads', 'nodeHighlights', 'chunks']
       DisplayDiagram.DEFAULT_CANVAS_HEIGHT = 50;
       DisplayDiagram.DEFAULT_CANVAS_WIDTH = 50;
       DisplayDiagram.DEFAULT_BACKGROUND = 0xE8C8C8;  // Cayley diagram background
@@ -94,8 +94,6 @@ class DisplayDiagram {
       this.setBackground(diagram3D);
       this.updateLights(diagram3D);
       this.updateNodes(diagram3D, large ? 20 : 5);  // 5 facets instead of 20
-      // this.updateHighlights(diagram3D);
-      // this.updateLabels(diagram3D);
       this.updateLines(diagram3D, large ? false : true);  // use webgl native line width
       this.updateArrowheads(diagram3D);
       this.render();
@@ -123,6 +121,7 @@ class DisplayDiagram {
       this.updateLabels(diagram3D);
       this.updateLines(diagram3D);
       this.updateArrowheads(diagram3D);
+      this.updateChunking(diagram3D);
       this.render();
    }
 
@@ -345,8 +344,11 @@ class DisplayDiagram {
          const textLabel = mathml2text(node.label);
          canvas.width =  canvas_width;
          canvas.height = canvas_height;
+         // debug -- paint label background
+         // context.fillStyle = 'rgba(0, 0, 100, 0.5)';
+         // context.fillRect(0, 0, canvas.width, canvas.height);
          context.font = label_font;
-         context.fillStyle = 'rgba(0, 0, 0, 1.0)';
+         context.fillStyle = 'rgba(0, 0, 0, 1)';
          context.fillText(textLabel, label_offset, 0.7*canvas.height);
 
          const texture = new THREE.Texture(canvas)
@@ -564,6 +566,66 @@ class DisplayDiagram {
          const arrowhead = new THREE.ArrowHelper(arrowDir, arrowStart, arrowLength, color, headLength, headWidth);
          arrowheads.add(arrowhead);
       } )
+   }
+
+   updateChunking(diagram3D) {
+      Log.log('updateChunking');
+
+      // remove old chunks
+      const chunks = this.getGroup('chunks');
+      chunks.remove(...chunks.children);
+
+      // find new chunk
+      const chunk_index = diagram3D.chunk;
+      if (chunk_index === undefined) {
+         return;
+      }
+
+      // get points of subgroup
+      const chunk_members = diagram3D.group.subgroups[chunk_index].members;
+      const chunk_points = chunk_members.toArray().map( (el) => diagram3D.nodes[el].point );
+      const chunk_size = chunk_points.length;
+      
+      // find (x,y,z) extrema of subgroup nodes
+      const [X_min, X_max, Y_min, Y_max, Z_min, Z_max] = chunk_points.reduce(
+         ([Xm,XM,Ym,YM,Zm,ZM], p) => [Math.min(Xm,p.x),Math.max(XM,p.x),Math.min(Ym,p.y),Math.max(YM,p.y),Math.min(Zm,p.z),Math.max(ZM,p.z)],
+         [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY]);
+
+      // set clearance to 1/3 of distance from subgroup to closest node
+      const clearance = (chunk_size == diagram3D.group.order) ? undefined : Math.sqrt(diagram3D.group.elements.reduce( (min, el) => {
+         if (chunk_members.isSet(el)) {
+            return min;
+         };
+         return chunk_points.reduce( (min, ch) => Math.min(min, ch.distanceToSquared(diagram3D.nodes[el].point)), min);
+      }, Number.POSITIVE_INFINITY ) ) / 3;
+      
+
+      // make box
+      const box_diameter = Math.max(X_max - X_min, Y_max - Y_min, Z_max - Z_min);
+      const sideLength = (max, min) => max - min + ((clearance !== undefined) ? 2*clearance : ((max != min) ? 0.4*(max - min) : 0.4*box_diameter));
+      const box_geometry = new THREE.BoxGeometry(sideLength(X_max, X_min), sideLength(Y_max, Y_min), sideLength(Z_max, Z_min));
+
+      const box_material = new THREE.MeshBasicMaterial( {
+         color: 0x303030,
+         opacity: 0.2,
+         transparent: true,
+         side: THREE.DoubleSide,
+         depthWrite: false,  // needed to keep from obscuring labels
+         depthTest: false,
+      } );
+
+      diagram3D.group.getCosets(chunk_members).forEach( (coset) => {
+         const chunk_mesh = new THREE.Mesh(box_geometry, box_material);
+
+         // center chunk_mesh at centroid of coset
+         const coset_centroid = coset.toArray()
+                                     .map( (el) => diagram3D.nodes[el].point )
+                                     .reduce( (sum, point) => sum.add(point), new THREE.Vector3())
+                                     .multiplyScalar(1/chunk_size);
+         chunk_mesh.position.set(...coset_centroid.toArray());
+
+         chunks.add(chunk_mesh);
+      } );
    }
 
    // Render graphics, recursing to animate if a TrackballControl is present
