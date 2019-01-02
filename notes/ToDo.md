@@ -118,11 +118,15 @@
       source code repository
  * Improve the Subgroups view so that instead of using HTML with MathJax
    inside, the entire "H_{index} = < element names >" portion is MathJax.
+ * Change &lt;select&gt; elements that use formatted math strings to use hand-rolled menus
+   with mathml instead of text (similar to menus in Subgroups view)
+ * Improve main GroupExplorer page so that clicking can lead you directly to visualizers.
+    * Give user an indication of a link (cursor change? highlight?)
+    * Offer a tooltip showing where link leads
+ * Improve main GroupExplorer page to center images in table
 
 ## Bug fixes
-
- * Table on main page does not show which column is sorted at first (until you click one).
- * Throughout the app, we use less than and greater than signs rather than the more appropriate
-   LaTeX `\langle` and `\rangle`.  (Note: HTML entity numbers for these characters are: \langle (&#x27e8;)
-   -- &amp;#x27e8; and \rangle (&#x27e9;): &amp;#x27e9;. These can be substituted into text strings
-   in place of '<' or &amp;lt; and '>' or &amp;gt;.)
+ * Render multiple-character element names in same font as single-character names. (By default, MathJax renders
+   single-character elements in italic, multiple-character in normal font, so you get odd-looking element
+   names like &#x27E8;<i>e</i>,fr&#x27E9; in D<sub>4</sub> x &Zopf;<sub>2</sub>.)
+ * Eliminate juxtapositions of dissimilar fonts in, e.g., visualizer titles (perhaps make entire title mathml?)
