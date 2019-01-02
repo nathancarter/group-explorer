@@ -90,11 +90,15 @@
           let baseURL = new URL(window.location.href);			// get this window URL
           baseURL = (baseURL.origin + baseURL.pathname);		// trim off search string
           baseURL = baseURL.slice(0, baseURL.lastIndexOf('/') + 1);	// trim off html page
+          let numLoaded = 0;
           for (let inx = 0; inx < numRows; inx++) {
              Library.getGroupFromURL(baseURL + urls[inx])
                     .then( (group) => {
                        Library.add(group);
                        displayGroup(group);
+                       if (++numLoaded == numRows) {
+                          columnSort(1);  // sort rows by column 1 (group order) after all groups have been loaded
+                       }
                     } )
                     .catch( (error) => alert(error) );
           }
