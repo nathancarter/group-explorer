@@ -2,7 +2,7 @@
 <group>
     <name text="Z_5"><mrow><msub><mi>&Zopf;</mi><mn>5</mn></msub></mrow></name>
     <definition text="&amp;lt; &lt;i&gt;a&lt;/i&gt; | &lt;i&gt;a&lt;/i&gt;&lt;sup&gt;5&lt;/sup&gt;=1 &amp;gt;">
-        <mfenced open="&lt;" close="&gt;" separators=":">
+        <mfenced open="&#x27E8;" close="&#x27E9;" separators=":">
             <mrow><mi>a</mi></mrow>
             <mrow><msup><mi>a</mi><mn>5</mn></msup><mo>=</mo><mn>1</mn></mrow>
         </mfenced>

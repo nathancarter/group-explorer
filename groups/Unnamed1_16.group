@@ -2,7 +2,7 @@
 <group>
     <name text="Unnamed-16, #1"><mtext>Unnamed-16, #1</mtext></name>
     <definition text="&amp;lt; &lt;i&gt;a&lt;/i&gt;, &lt;i&gt;b&lt;/i&gt; | &lt;i&gt;a&lt;/i&gt;&lt;sup&gt;4&lt;/sup&gt;=&lt;i&gt;b&lt;/i&gt;&lt;sup&gt;4&lt;/sup&gt;=1, &lt;i&gt;ab&lt;/i&gt;=&lt;i&gt;ba&lt;/i&gt;&lt;sup&gt;3&lt;/sup&gt; &amp;gt;">
-        <mfenced open="&lt;" close="&gt;" separators=":">
+        <mfenced open="&#x27E8;" close="&#x27E9;" separators=":">
             <mrow><mi>a</mi><mo>,</mo><mi>b</mi></mrow>
             <mrow><msup><mi>a</mi><mn>4</mn></msup><mo>=</mo><msup><mi>b</mi><mn>4</mn></msup><mo>=</mo><mn>1</mn><mo>,</mo><mi>a</mi><mi>b</mi><mo>=</mo><mi>b</mi><msup><mi>a</mi><mn>3</mn></msup></mrow>
         </mfenced>
