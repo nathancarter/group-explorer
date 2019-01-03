@@ -185,18 +185,28 @@ class DisplayDiagram {
    updateNodes(diagram3D, sphere_facets = 20) {
       Log.log('updateNodes');
 
-      const defaultNodeRadius = 0.3 / Math.sqrt(diagram3D.nodes.length);
-
       const spheres = this.getGroup('spheres');
       spheres.remove(...spheres.children);
 
+      const materialsByColor = new Map(),
+            geometriesByRadius = new Map();
+
+      const default_color = DisplayDiagram.DEFAULT_NODE_COLOR;
+      const default_radius = 0.3 / Math.sqrt(diagram3D.nodes.length);
       diagram3D.nodes.forEach( (node) => {
-         const nodeColor = (node.color === undefined) ? DisplayDiagram.DEFAULT_NODE_COLOR : node.color,
-               nodeRadius = (node.radius === undefined) ? defaultNodeRadius : node.radius,
-               scaledNodeRadius = diagram3D.nodeScale * nodeRadius,
-               sphereMaterial = new THREE.MeshPhongMaterial({color: nodeColor}),
-               sphereGeometry = new THREE.SphereGeometry(scaledNodeRadius, sphere_facets, sphere_facets),
-               sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+         const color = (node.color === undefined) ? default_color : node.color;
+         if (!materialsByColor.has(color)) {
+            materialsByColor.set(color, new THREE.MeshPhongMaterial({color: node.color}));
+         }
+         const material = materialsByColor.get(color);
+
+         const radius = (node.radius === undefined) ? default_radius : node.radius;
+         if (!geometriesByRadius.has(radius)) {
+            geometriesByRadius.set(radius, new THREE.SphereGeometry(radius * diagram3D.nodeScale, sphere_facets, sphere_facets));
+         }
+         const geometry = geometriesByRadius.get(radius);
+
+         const sphere = new THREE.Mesh(geometry, material);
          sphere.userData = {node: node};
          sphere.position.set(node.point.x, node.point.y, node.point.z);
          spheres.add(sphere);
@@ -206,6 +216,13 @@ class DisplayDiagram {
    updateHighlights(diagram3D) {
       const highlights = this.getGroup('nodeHighlights');
       highlights.remove(...highlights.children);
+
+      const materialsByColor = this.getGroup('spheres').children.reduce( (materials, sphere) => {
+         if (!materials.has(sphere.material.color)) {
+            materials.set(sphere.material.color, sphere.material);
+         }
+         return materials;
+      }, new Map());
 
       this.getGroup('spheres').children.forEach( (sphere) => {
          const node = diagram3D.nodes[sphere.userData.node.element];
@@ -217,7 +234,12 @@ class DisplayDiagram {
              DisplayDiagram.DEFAULT_NODE_COLOR) );
          // If sphere is not desired color set material color to desired color
          if (!sphere.material.color.equals(desiredColor)) {
-            sphere.material.color = new THREE.Color(desiredColor);
+            if (!materialsByColor.has(desiredColor)) {
+               materialsByColor.set(desiredColor, new THREE.MeshPhongMaterial({color: desiredColor}));
+            }
+            sphere.material = materialsByColor.get(desiredColor);
+            sphere.geometry.uvsNeedUpdate = true;
+            sphere.needsUpdate = true;
          }
 
          // if node has ring, draw it
@@ -585,7 +607,7 @@ class DisplayDiagram {
       const chunk_members = diagram3D.group.subgroups[chunk_index].members;
       const chunk_points = chunk_members.toArray().map( (el) => diagram3D.nodes[el].point );
       const chunk_size = chunk_points.length;
-      
+
       // find (x,y,z) extrema of subgroup nodes
       const [X_min, X_max, Y_min, Y_max, Z_min, Z_max] = chunk_points.reduce(
          ([Xm,XM,Ym,YM,Zm,ZM], p) => [Math.min(Xm,p.x),Math.max(XM,p.x),Math.min(Ym,p.y),Math.max(YM,p.y),Math.min(Zm,p.z),Math.max(ZM,p.z)],
@@ -598,7 +620,7 @@ class DisplayDiagram {
          };
          return chunk_points.reduce( (min, ch) => Math.min(min, ch.distanceToSquared(diagram3D.nodes[el].point)), min);
       }, Number.POSITIVE_INFINITY ) ) / 3;
-      
+
 
       // make box
       const box_diameter = Math.max(X_max - X_min, Y_max - Y_min, Z_max - Z_min);
