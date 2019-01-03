@@ -120,13 +120,11 @@
    inside, the entire "H_{index} = < element names >" portion is MathJax.
  * Change &lt;select&gt; elements that use formatted math strings to use hand-rolled menus
    with mathml instead of text (similar to menus in Subgroups view)
- * Improve main GroupExplorer page so that clicking can lead you directly to visualizers.
-    * Give user an indication of a link (cursor change? highlight?)
-    * Offer a tooltip showing where link leads
- * Improve main GroupExplorer page to center images in table
 
 ## Bug fixes
  * Render multiple-character element names in same font as single-character names. (By default, MathJax renders
    single-character elements in italic, multiple-character in normal font, so you get odd-looking element
    names like &#x27E8;<i>e</i>,fr&#x27E9; in D<sub>4</sub> x &Zopf;<sub>2</sub>.)
  * Eliminate juxtapositions of dissimilar fonts in, e.g., visualizer titles (perhaps make entire title mathml?)
+ * Chunking doesn't work properly for rotated generation (e.g., S_3 w/ default strategies)
+ 
