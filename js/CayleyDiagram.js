@@ -81,9 +81,9 @@ class CayleyDiagram extends Diagram3D {
 
    _generateFromStrategy() {
       const node_list = this._generateNodes(this.strategies);
-      const ordered_nodes = this._transposeNodes(node_list);
+      this.ordered_nodes = this._transposeNodes(node_list);
 
-      this.nodes = this._layout(ordered_nodes)
+      this.nodes = this._layout(this.ordered_nodes)
                        .sort( (a,b) => a.element - b.element );
 
       // makes lines for generators

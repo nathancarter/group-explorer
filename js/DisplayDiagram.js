@@ -598,56 +598,92 @@ class DisplayDiagram {
       chunks.remove(...chunks.children);
 
       // find new chunk
-      const chunk_index = diagram3D.chunk;
-      if (chunk_index === undefined) {
+      if (diagram3D.chunk === undefined) {
          return;
       }
 
-      // get points of subgroup
-      const chunk_members = diagram3D.group.subgroups[chunk_index].members;
-      const chunk_points = chunk_members.toArray().map( (el) => diagram3D.nodes[el].point );
-      const chunk_size = chunk_points.length;
+      // utility functions
+      const centroid = (points) => points.reduce( (sum, point) => sum.add(point), new THREE.Vector3() ).multiplyScalar(1/points.length);
 
-      // find (x,y,z) extrema of subgroup nodes
-      const [X_min, X_max, Y_min, Y_max, Z_min, Z_max] = chunk_points.reduce(
-         ([Xm,XM,Ym,YM,Zm,ZM], p) => [Math.min(Xm,p.x),Math.max(XM,p.x),Math.min(Ym,p.y),Math.max(YM,p.y),Math.min(Zm,p.z),Math.max(ZM,p.z)],
-         [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY]);
+      const getGeometry = () => {
+         // get points of subgroup
+         const strategy_index = diagram3D.chunk;
+         const chunk_members = diagram3D.strategies[strategy_index].bitset;
+         const chunk_points = chunk_members.toArray().map( (el) => diagram3D.nodes[el].point );
+         const chunk_size = chunk_points.length;
 
-      // set clearance to 1/3 of distance from subgroup to closest node
-      const clearance = (chunk_size == diagram3D.group.order) ? undefined : Math.sqrt(diagram3D.group.elements.reduce( (min, el) => {
-         if (chunk_members.isSet(el)) {
-            return min;
-         };
-         return chunk_points.reduce( (min, ch) => Math.min(min, ch.distanceToSquared(diagram3D.nodes[el].point)), min);
-      }, Number.POSITIVE_INFINITY ) ) / 3;
+         // find (x,y,z) extrema of subgroup nodes
+         const [X_min, X_max, Y_min, Y_max, Z_min, Z_max] = chunk_points.reduce(
+            ([Xm,XM,Ym,YM,Zm,ZM], p) => [Math.min(Xm,p.x),Math.max(XM,p.x),Math.min(Ym,p.y),Math.max(YM,p.y),Math.min(Zm,p.z),Math.max(ZM,p.z)],
+            [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY]);
 
+         let padding;
+         if (chunk_size == diagram3D.group.order) {
+            padding = 0.2 * Math.max(X_max - X_min, Y_max - Y_min, Z_max - Z_min);
+         } else {
+            const coset_membership = diagram3D.group
+                                              .getCosets(chunk_members)
+                                              .reduce( (mem, coset, inx) => {
+                                                 coset.toArray().forEach( (el) => mem[el] = inx );
+                                                 return mem;
+                                              }, Array.from({length: chunk_size}) );
+            padding = Math.sqrt(diagram3D.group.elements.reduce( (minsq, i) => {
+               return diagram3D.group.elements.reduce( (minsq, j) => {
+                  if (coset_membership[i] == coset_membership[j]) {
+                     return minsq;
+                  }
+                  return Math.min(minsq, diagram3D.nodes[i].point.distanceToSquared(diagram3D.nodes[j].point));
+               }, minsq)
+            }, Number.POSITIVE_INFINITY ) ) / 3;  // set clearance to 1/3 of minimum distance from any node to any other node not in its coset
+         }
 
-      // make box
-      const box_diameter = Math.max(X_max - X_min, Y_max - Y_min, Z_max - Z_min);
-      const sideLength = (max, min) => max - min + ((clearance !== undefined) ? 2*clearance : ((max != min) ? 0.4*(max - min) : 0.4*box_diameter));
-      const box_geometry = new THREE.BoxGeometry(sideLength(X_max, X_min), sideLength(Y_max, Y_min), sideLength(Z_max, Z_min));
+         // make box
+         const box_centroid = centroid(chunk_points);
+         const sideLength = (max, min, center) => 2*(Math.max(Math.abs(max - center), Math.abs(min - center)) + padding);
+         return new THREE.BoxGeometry(sideLength(X_max, X_min, box_centroid.x), sideLength(Y_max, Y_min, box_centroid.y), sideLength(Z_max, Z_min, box_centroid.z));
+      }
+      const box_geometry = getGeometry();
 
       const box_material = new THREE.MeshBasicMaterial( {
          color: 0x303030,
          opacity: 0.2,
          transparent: true,
          side: THREE.DoubleSide,
-         depthWrite: false,  // needed to keep from obscuring labels
+         depthWrite: false,  // needed to keep from obscuring labels underneath
          depthTest: false,
       } );
+      
+      const createChunks = (arr, desired, current = diagram3D.strategies.length - 1) => {
+         if (current == desired) {
+            const points = arr._flatten().map( (node) => node.point );
+            const box = new THREE.Mesh(box_geometry, box_material);
+            box.position.set(...centroid(points).toArray());
+            return [box];
+         } else {
+            const boxes = arr.map( (el) => createChunks(el, desired, current-1) );
+            const all_boxes = boxes._flatten();
+            const strategy = diagram3D.strategies[current];
+            if (strategy.layout == CayleyDiagram.ROTATED_LAYOUT) {
+               // find centroid of all boxes
+               const center = centroid(all_boxes.map( (box) => box.position ));
+               // calculate normalized vector from centroid of all boxes to centroid of boxes[0]
+               const ref = centroid(boxes[0].map( (box) => box.position )).sub(center).normalize();
+               // calculate normal
+               const normal = centroid(boxes[1].map( (box) => box.position )).sub(center).normalize().cross(ref).normalize();
+               boxes.forEach( (bxs) => {
+                  // find angle between centroid of first box and centroid(bxs)
+                  const curr = centroid(bxs.map( (box) => box.position )).sub(center).normalize();
+                  if (Math.abs(1 - curr.dot(ref)) > 1e-6) {
+                     const theta = Math.acos(ref.dot(curr))*Math.sign(normal.dot(new THREE.Vector3().crossVectors(ref,curr)));
+                     bxs.forEach( (box) => box.rotateOnAxis(normal, theta) );
+                  }
+               } );
+            }
+            return all_boxes;
+         }
+      }
 
-      diagram3D.group.getCosets(chunk_members).forEach( (coset) => {
-         const chunk_mesh = new THREE.Mesh(box_geometry, box_material);
-
-         // center chunk_mesh at centroid of coset
-         const coset_centroid = coset.toArray()
-                                     .map( (el) => diagram3D.nodes[el].point )
-                                     .reduce( (sum, point) => sum.add(point), new THREE.Vector3())
-                                     .multiplyScalar(1/chunk_size);
-         chunk_mesh.position.set(...coset_centroid.toArray());
-
-         chunks.add(chunk_mesh);
-      } );
+      chunks.add(...createChunks(diagram3D.ordered_nodes, diagram3D.chunk));
    }
 
    // Render graphics, recursing to animate if a TrackballControl is present

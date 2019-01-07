@@ -16,7 +16,7 @@ DC.Chunking = class {
          (jnx == 0) ? '' : (subscript(Math.floor(jnx / 10)) + subscripts[jnx % 10]);  // subscripts defined in js/mathmlUtils.js
       const generators = [];
       // generate option for each strategy in Cayley diagram
-      Cayley_diagram.strategies.forEach( (strategy) => {
+      Cayley_diagram.strategies.forEach( (strategy, strategy_index) => {
          if (strategy == Cayley_diagram.strategies._last()) {
             return;
          }
