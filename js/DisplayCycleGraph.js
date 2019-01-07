@@ -281,4 +281,19 @@ class DisplayCycleGraph {
       );
       return (index == -1) ? undefined : index;
    }
+
+   // two serialization functions
+   toJSON ( cycleGraph ) {
+      return {
+         groupURL : cycleGraph.group.URL,
+         highlights : cycleGraph.highlights,
+         elements : cycleGraph.elements
+      };
+   }
+   fromJSON ( json, cycleGraph ) {
+      cycleGraph.highlights = json.highlights;
+      cycleGraph.elements = json.elements;
+      Library.getGroupFromURL( json.groupURL )
+             .then( ( group ) => { cycleGraph.group = group; } );
+   }
 }

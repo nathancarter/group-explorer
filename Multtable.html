@@ -53,8 +53,13 @@
        /* Global variables */
        var group,		// group about which information will be displayed
            multtable,		// data being displayed in large diagram
-           graphicContext;	// graphic context for large diagram
+           graphicContext,	// graphic context for large diagram
+           canEmit = true;  // flag: whether to notify parent window of table changes
        const panelNames = ['#subset-control', '#table-control'];
+
+       const myURL = window.location.href;
+       const thirdSlash = myURL.indexOf( '/', 8 );
+       const myDomain = myURL.substring( 0, thirdSlash > -1 ? thirdSlash : myURL.length );
 
        /* Initial entry to javascript, called once after document load */
        $(window).one('load', load);
@@ -144,12 +149,35 @@
           showPanel('#subset-control');
 
           resizeBody();
+
+          window.addEventListener( 'message', function ( event ) {
+             if ( event.data.source == 'sheet' ) {
+                canEmit = false; // don't spam notifications of changes about to happen
+                graphicContext.fromJSON( event.data.json, multtable );
+                graphicContext.showLargeGraphic( multtable );
+                if ( event.data.json.hasOwnProperty( 'separation' ) )
+                   $( '#separation-slider' ).val( event.data.json.separation * 100 );
+                if ( event.data.json.hasOwnProperty( '_color_choice' ) )
+                   $( '#' + event.data.json._color_choice ).prop( 'checked', true );
+                if ( event.data.json.hasOwnProperty( '_subgroup_choice' ) )
+                   $( '#organization-select' ).val( event.data.json._subgroup_choice );
+                canEmit = true; // restore default behavior
+                window.postMessage( 'state loaded', myDomain );
+             }
+          }, false );
+          window.postMessage( 'listener ready', myDomain );
        }
 
-       window.addEventListener( 'message', function ( event ) {
-          if ( graphicContext && multtable && event.data == 'state loaded' )
-             graphicContext.showLargeGraphic(multtable);
-       }, false );
+       function emitStateChange () {
+          if ( !canEmit ) return;
+          var json = graphicContext.toJSON( multtable );
+          json._color_choice = $( 'input[name="coloration"]:checked' ).prop( 'id' );
+          json._subgroup_choice = $( '#organization-select' ).val();
+          window.postMessage( {
+             source : 'editor',
+             json : json
+          }, myDomain );
+       }
 
        /* Find subgroup index (the "value" attribute of the option selected) and display multtable accordingly */
        function selectSubgroup(ev) {
@@ -165,17 +193,20 @@
           } else {
              multtable.organizeBySubgroup(group.subgroups[inx]);
           }
+          emitStateChange();
        }
 
        /* Set separation between cosets in multtable display, and re-draw graphic */
        function separation() {
           multtable.setSeparation( $('#separation-slider')[0].valueAsNumber/100 );
+          emitStateChange();
           graphicContext.showLargeGraphic(multtable);
        }
 
        /* Set coloration option in multtable, and re-draw graphic */
        function color(coloration) {
           multtable.colors = coloration;
+          emitStateChange();
           graphicContext.showLargeGraphic(multtable);
        }
 
@@ -203,7 +234,6 @@
              }
           }
        }
-
 
        /*
         * Large graphic mouse events
@@ -341,6 +371,7 @@
                 } else if (location.y == 0 && Drag_state.position.y == 0 && location.x != 0) {
                    swap(Drag_state.position.x, location.x);
                 }
+                emitStateChange();
              }
           }
           Drag_state.position = undefined;
@@ -363,21 +394,25 @@
        /* Highlighting routines */
        function highlightByBackground(elements) {
           multtable.highlightByBackground(elements);
+          emitStateChange();
           graphicContext.showLargeGraphic(multtable);
        }
 
        function highlightByBorder(elements) {
           multtable.highlightByBorder(elements);
+          emitStateChange();
           graphicContext.showLargeGraphic(multtable);
        }
 
        function highlightByCorner(elements) {
           multtable.highlightByCorner(elements);
+          emitStateChange();
           graphicContext.showLargeGraphic(multtable);
        }
 
        function clearHighlights() {
           multtable.clearHighlights();
+          emitStateChange();
           graphicContext.showLargeGraphic(multtable);
        }
       </script>

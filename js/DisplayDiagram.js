@@ -79,19 +79,25 @@ class DisplayDiagram {
    // Small graphics don't need high resolution features such as many-faceted spheres, labels, thick lines
    // Removing labels is particularly beneficial, since each label (384 in Tesseract) requires a canvas element
    //   and a context, which often causes loading failure due to resource limitations
-   getImage(diagram3D,large) { // second parameter optional, defaults to small
+   getImage(diagram3D,options) {
+      // Options parameter:
+      // size: "small" or "large", default is "small"
+      // resetCamera : true or false, default is true
       const img = new Image();
       // this.showGraphic(diagram3D);
 
       diagram3D.normalize();
 
-      this.setCamera(diagram3D);
+      console.log( 'getting image, options:', JSON.stringify( options ) );
+      if ( options.resetCamera ) this.setCamera(diagram3D);
       this.setBackground(diagram3D);
       this.updateLights(diagram3D);
-      this.updateNodes(diagram3D, large ? 20 : 5);  // 5 facets instead of 20
-      // this.updateHighlights(diagram3D);
-      // this.updateLabels(diagram3D);
-      this.updateLines(diagram3D, large ? false : true);  // use webgl native line width
+      this.updateNodes(diagram3D, options.size == "large" ? 20 : 5);
+      if ( options.size == "large" ) {
+          this.updateHighlights(diagram3D);
+          this.updateLabels(diagram3D);
+      }
+      this.updateLines(diagram3D, options.size == "small");
       this.updateArrowheads(diagram3D);
       this.render();
 
@@ -545,5 +551,42 @@ class DisplayDiagram {
 
    updateArrowheadPlacement(diagram3D) {
       this.updateArrowheads(diagram3D);
+   }
+
+   // two serialization functions
+   toJSON ( cayleyDiagram ) {
+      return {
+         groupURL : cayleyDiagram.group.URL,
+         highlights : cayleyDiagram.highlights,
+         elements : cayleyDiagram.elements,
+         zoomLevel : cayleyDiagram.zoomLevel,
+         lineWidth : cayleyDiagram.lineWidth,
+         nodeScale : cayleyDiagram.nodeScale,
+         fogLevel : cayleyDiagram.fogLevel,
+         labelSize : cayleyDiagram.labelSize,
+         arrowheadPlacement : cayleyDiagram.arrowheadPlacement,
+         _camera : this.camera.matrix.toArray()
+      };
+   }
+   fromJSON ( json, cayleyDiagram ) {
+      cayleyDiagram.highlights = json.highlights;
+      cayleyDiagram.elements = json.elements;
+      cayleyDiagram.zoomLevel = json.zoomLevel;
+      cayleyDiagram.lineWidth = json.lineWidth;
+      cayleyDiagram.nodeScale = json.nodeScale;
+      cayleyDiagram.fogLevel = json.fogLevel;
+      cayleyDiagram.labelSize = json.labelSize;
+      cayleyDiagram.arrowheadPlacement = json.arrowheadPlacement;
+      if ( json.hasOwnProperty( '_camera' ) ) {
+         this.camera.matrix.fromArray( json._camera );
+         this.camera.matrix.decompose(
+            this.camera.position,
+            this.camera.quaternion,
+            this.camera.scale
+         );
+         console.log( this.camera.matrix.toArray() );
+      }
+      Library.getGroupFromURL( json.groupURL )
+             .then( ( group ) => { cayleyDiagram.group = group; } );
    }
 }

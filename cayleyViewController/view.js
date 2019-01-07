@@ -29,39 +29,39 @@ class CVC {
    static setZoomLevel() {
       Cayley_diagram.zoomLevel = Math.exp( $('#zoom-level')[0].valueAsNumber/10 );
       Graphic_context.updateZoomLevel(Cayley_diagram);
-      Cayley_diagram.emitStateChange();
+      emitStateChange();
    }
 
    static setLineThickness() {
       Cayley_diagram.lineWidth = $('#line-thickness')[0].valueAsNumber;
       Graphic_context.updateLineWidth(Cayley_diagram);
-      Cayley_diagram.emitStateChange();
+      emitStateChange();
    }
 
    static setNodeRadius() {
       Cayley_diagram.nodeScale = Math.exp( $('#node-radius')[0].valueAsNumber/10 );
       Graphic_context.updateNodeRadius(Cayley_diagram);
       Graphic_context.updateLabels(Cayley_diagram);
-      Cayley_diagram.emitStateChange();
+      emitStateChange();
    }
 
    static setFogLevel() {
       Cayley_diagram.fogLevel = $('#use-fog')[0].checked ? $('#fog-level')[0].valueAsNumber/10 : 0;
       Graphic_context.updateFogLevel(Cayley_diagram);
-      Cayley_diagram.emitStateChange();
+      emitStateChange();
    }
 
    static setLabelSize() {
       Cayley_diagram.labelSize = $('#show-labels')[0].checked ?
                                  Math.exp( $('#label-size')[0].valueAsNumber/10 ) : 0;
       Graphic_context.updateLabelSize(Cayley_diagram);
-      Cayley_diagram.emitStateChange();
+      emitStateChange();
    }
 
    static setArrowheadPlacement() {
       Cayley_diagram.arrowheadPlacement = $('#arrowhead-placement')[0].valueAsNumber/20;
       Graphic_context.updateArrowheadPlacement(Cayley_diagram);
-      Cayley_diagram.emitStateChange();
+      emitStateChange();
    }
 }
 

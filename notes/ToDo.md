@@ -39,28 +39,6 @@
 # Nathan's List
 
  * Sheets
-    * Refactoring to fix bugs with synchronizing sheets and visualizer editors
-       * Move the toJSON/fromJSON functions from Multtable.js to DisplayMulttable.js,
-         from CycleGraph.js to DisplayCycleGraph.js, and from CayleyDiagram.js to DisplayDiagram.js.
-       * In SheetModel.js, replace each call to this.vizobj.to/fromJSON() with a call to
-         this.vizdisplay.to/fromJSON() instead.
-       * Ensure these changes work.
-       * Move the addEventListener() and postMessage() calls from Multtable.js to Multtable.html,
-         now using the toJSON() and fromJSON() implemented in the graphicContext instead of the
-         multtable.
-       * Expand the fromJSON() handler so that it also updates the UI controls in the Subset/Table
-         sidebars.
-       * Ensure these changes work.
-       * Move emitStateChange() from Multtable.js to Multtable.html, and call it whenever that page
-         makes an alteration in the multtable object.
-       * Create analogous addEventListener() and postMessage() calls in CycleDiagram.html, modeled
-         after the ones in Multtable.html.
-       * Also move emitStateChange from CycleGraph.js to CycleGraph.html the same way.
-       * Create analogous addEventListener() and postMessage() calls in CayleyDiagram.html, modeled
-         after the ones in Multtable.html.
-       * Also move emitStateChange from CayleyDiagram.js to CayleyDiagram.html the same way.  This
-         should make it so that you can remove all such calls from cayleyViewController/view.js.
-       * Extend the toJSON() and fromJSON() in CayleyDiagram.html to also respect the camera position.
     * Connecting lines
        * Make `SheetElement` inherit from `EventEmitter`.
        * Whenever the element experiences move/resize/fromJSON, emit a `changeDimensions` event.
@@ -84,6 +62,19 @@
     * Morphisms
        * Make `MorphismElement` inherit from `ConnectingElement`.
        * I'll have to come back here later and finish the plan for this.
+    * Extend the toJSON() and fromJSON() in CayleyDiagram.html to also respect:
+       * node colors: `Cayley_diagram.nodes[i].nodeColor` then same update routine or `updateHighlights()`
+         (Is this the same as node highlights?)
+       * diagram name: global var in HTML page, `Diagram_name`, plus the
+         drop-down selector with id `'#diagram-select'` (then `displayGraphic()`)
+       * all the rest of the Diagram panel needs to wait until I talk to Ray
+       * background color:
+         `Graphic_context.renderer.getClearColor().toArray()` and
+         `new THREE.Color( that_array[0], that_array[1], that_array[2] )`
+       * node positions: `Cayley_diagram.nodes[i].point.x` (y, z), then update diagram with `updateNodes()`
+       * node radii: `Cayley_diagram.nodes[i].radius` then same (original) update routine
+       * arc curvature: once it's implemented later
+       * chunking: once it's implemented later
  * Rename Cycle Diagram HTML page to Cycle Graph instead
  * Add an object of symmetry for Z_1: something with no symmetry
  * Design how permalinks to GE resources should work and add a plan for
@@ -126,3 +117,4 @@
  * Table on main page does not show which column is sorted at first (until you click one).
  * Throughout the app, we use less than and greater than signs rather than the more appropriate
    LaTeX `\langle` and `\rangle`.
+ * Setting line thickness to minimum does not work; it gets reset to a thicker value.

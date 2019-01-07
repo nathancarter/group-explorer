@@ -46,7 +46,12 @@
        // global variables
        var group,		// group about which information will be displayed
            cyclegraph,    // data being displayed in large diagram
-           graphicContext;	// graphic context for large diagram
+           graphicContext,	// graphic context for large diagram
+           canEmit = true;  // flag: whether to notify parent window of table changes
+
+       const myURL = window.location.href;
+       const thirdSlash = myURL.indexOf( '/', 8 );
+       const myDomain = myURL.substring( 0, thirdSlash > -1 ? thirdSlash : myURL.length );
 
        /* Initial entry to javascript, called once after document load */
        $(window).on('load', load);
@@ -114,6 +119,26 @@
           });
 
           resizeBody();
+
+          window.addEventListener( 'message', function ( event ) {
+             if ( event.data.source == 'sheet' ) {
+                canEmit = false; // don't spam notifications of changes about to happen
+                graphicContext.fromJSON( event.data.json, cyclegraph );
+                graphicContext.showLargeGraphic( cyclegraph );
+                canEmit = true; // restore default behavior
+                window.postMessage( 'state loaded', myDomain );
+             }
+          }, false );
+          window.postMessage( 'listener ready', myDomain );
+       }
+
+       function emitStateChange () {
+          if ( !canEmit ) return;
+          var json = graphicContext.toJSON( cyclegraph );
+          window.postMessage( {
+             source : 'editor',
+             json : json
+          }, myDomain );
        }
 
        function resizeBody() {
@@ -215,21 +240,25 @@
        /* Highlighting routines */
        function highlightByBackground(elements) {
           cyclegraph.highlightByBackground(elements);
+          emitStateChange();
           graphicContext.showLargeGraphic(cyclegraph);
        }
 
        function highlightByBorder(elements) {
           cyclegraph.highlightByBorder(elements);
+          emitStateChange();
           graphicContext.showLargeGraphic(cyclegraph);
        }
 
        function highlightByTop(elements) {
           cyclegraph.highlightByTop(elements);
+          emitStateChange();
           graphicContext.showLargeGraphic(cyclegraph);
        }
 
        function clearHighlights() {
           cyclegraph.clearHighlights();
+          emitStateChange();
           graphicContext.showLargeGraphic(cyclegraph);
        }
       </script>

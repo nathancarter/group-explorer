@@ -5,11 +5,6 @@ class CycleGraph {
       this.layOutElementsAndPaths();
       this.findClosestTwoPositions();
       this.reset();
-      var that = this;
-      window.addEventListener( 'message', function ( event ) {
-          if ( event.data.type == 'fromJSON' )
-              that.fromJSON( event.data.json );
-      } );
    }
 
    static _init() {
@@ -104,7 +99,6 @@ class CycleGraph {
    reset() {
       this.elements = this.group.elements.slice();
       this.SOME_SETTING_NAME = CycleGraph.SOME_SETTING_NAME;
-      this.emitStateChange();
    }
 
    layOutElementsAndPaths() {
@@ -319,50 +313,22 @@ class CycleGraph {
       if ( !this.highlights ) this.highlights = { };
       this.highlights.background =
          this._partitionToColorArray( partition, 0 );
-      this.emitStateChange();
    }
 
    highlightByBorder(partition) {
       if ( !this.highlights ) this.highlights = { };
       this.highlights.border =
          this._partitionToColorArray( partition, 120 );
-      this.emitStateChange();
    }
 
    highlightByTop(partition) {
       if ( !this.highlights ) this.highlights = { };
       this.highlights.top =
          this._partitionToColorArray( partition, 240 );
-      this.emitStateChange();
    }
 
    clearHighlights() {
       this.highlights = { };
-      this.emitStateChange();
-   }
-
-   emitStateChange () {
-      const myURL = window.location.href;
-      const thirdSlash = myURL.indexOf( '/', 8 );
-      const myDomain = myURL.substring( 0, thirdSlash > -1 ? thirdSlash : myURL.length );
-      window.postMessage( this.toJSON(), myDomain );
-   }
-
-   toJSON () {
-      return {
-         groupURL : this.group.URL,
-         highlights : this.highlights,
-         elements : this.elements
-      };
-   }
-
-   fromJSON ( json ) {
-      this.separation = json.separation;
-      this.highlights = json.highlights;
-      this.elements = json.elements;
-      var that = this;
-      Library.getGroupFromURL( json.groupURL )
-             .then( ( group ) => { that.group = group; } );
    }
 }
 

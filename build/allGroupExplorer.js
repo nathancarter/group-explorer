@@ -2408,19 +2408,25 @@ class DisplayDiagram {
    // Small graphics don't need high resolution features such as many-faceted spheres, labels, thick lines
    // Removing labels is particularly beneficial, since each label (384 in Tesseract) requires a canvas element
    //   and a context, which often causes loading failure due to resource limitations
-   getImage(diagram3D,large) { // second parameter optional, defaults to small
+   getImage(diagram3D,options) {
+      // Options parameter:
+      // size: "small" or "large", default is "small"
+      // resetCamera : true or false, default is true
       const img = new Image();
       // this.showGraphic(diagram3D);
 
       diagram3D.normalize();
 
-      this.setCamera(diagram3D);
+      console.log( 'getting image, options:', JSON.stringify( options ) );
+      if ( options.resetCamera ) this.setCamera(diagram3D);
       this.setBackground(diagram3D);
       this.updateLights(diagram3D);
-      this.updateNodes(diagram3D, large ? 20 : 5);  // 5 facets instead of 20
-      // this.updateHighlights(diagram3D);
-      // this.updateLabels(diagram3D);
-      this.updateLines(diagram3D, large ? false : true);  // use webgl native line width
+      this.updateNodes(diagram3D, options.size == "large" ? 20 : 5);
+      if ( options.size == "large" ) {
+          this.updateHighlights(diagram3D);
+          this.updateLabels(diagram3D);
+      }
+      this.updateLines(diagram3D, options.size == "small");
       this.updateArrowheads(diagram3D);
       this.render();
 
@@ -2875,6 +2881,43 @@ class DisplayDiagram {
    updateArrowheadPlacement(diagram3D) {
       this.updateArrowheads(diagram3D);
    }
+
+   // two serialization functions
+   toJSON ( cayleyDiagram ) {
+      return {
+         groupURL : cayleyDiagram.group.URL,
+         highlights : cayleyDiagram.highlights,
+         elements : cayleyDiagram.elements,
+         zoomLevel : cayleyDiagram.zoomLevel,
+         lineWidth : cayleyDiagram.lineWidth,
+         nodeScale : cayleyDiagram.nodeScale,
+         fogLevel : cayleyDiagram.fogLevel,
+         labelSize : cayleyDiagram.labelSize,
+         arrowheadPlacement : cayleyDiagram.arrowheadPlacement,
+         _camera : this.camera.matrix.toArray()
+      };
+   }
+   fromJSON ( json, cayleyDiagram ) {
+      cayleyDiagram.highlights = json.highlights;
+      cayleyDiagram.elements = json.elements;
+      cayleyDiagram.zoomLevel = json.zoomLevel;
+      cayleyDiagram.lineWidth = json.lineWidth;
+      cayleyDiagram.nodeScale = json.nodeScale;
+      cayleyDiagram.fogLevel = json.fogLevel;
+      cayleyDiagram.labelSize = json.labelSize;
+      cayleyDiagram.arrowheadPlacement = json.arrowheadPlacement;
+      if ( json.hasOwnProperty( '_camera' ) ) {
+         this.camera.matrix.fromArray( json._camera );
+         this.camera.matrix.decompose(
+            this.camera.position,
+            this.camera.quaternion,
+            this.camera.scale
+         );
+         console.log( this.camera.matrix.toArray() );
+      }
+      Library.getGroupFromURL( json.groupURL )
+             .then( ( group ) => { cayleyDiagram.group = group; } );
+   }
 }
 
 // MathML Utilities
@@ -3022,24 +3065,10 @@ class SymmetryObject {
 // initialize static variables
 SymmetryObject._init();
 
-const myURL = window.location.href;
-const thirdSlash = myURL.indexOf( '/', 8 );
-const myDomain = myURL.substring( 0, thirdSlash > -1 ? thirdSlash : myURL.length );
-
 class Multtable {
    constructor(group) {
       this.group = group;
       this.reset();
-      var that = this;
-      window.addEventListener( 'message', function ( event ) {
-         console.log( 'ignoring this:', JSON.stringify( event.data ).substring( 0, 100 ) );
-         if ( event.data.source == 'sheet' ) {
-             console.log( 'setting my state to this:', JSON.stringify( event.data.json ).substring( 0, 100 ) );
-             that.fromJSON( event.data.json );
-             window.postMessage( 'state loaded', myDomain );
-         }
-      }, false );
-      window.postMessage( 'listener ready', myDomain );
    }
 
    static _init() {
@@ -3054,7 +3083,6 @@ class Multtable {
       this.colors = Multtable.COLORATION_RAINBOW;
       this.stride = this.group.order;
       this.clearHighlights();
-      this.emitStateChange();
    }
 
    organizeBySubgroup(subgroup) {
@@ -3062,13 +3090,11 @@ class Multtable {
       const cosets = this.group.getCosets(subgroup.members);
       cosets.forEach( (coset) => this.elements.push(...coset.toArray()) );
       this.stride = subgroup.order;
-      this.emitStateChange();
       return this;
    }
 
    setSeparation ( sep ) {
        this.separation = sep;
-       this.emitStateChange();
    }
 
    get colors() {
@@ -3093,7 +3119,6 @@ class Multtable {
             break;
       }
       this._colors = this.group.elements.map( (_, inx) => fn(inx) );
-      this.emitStateChange();
    }
 
    get size() {
@@ -3121,7 +3146,6 @@ class Multtable {
          const color = `hsl(${colorFraction}, 100%, 80%)`;
          els.forEach( (el) => this.backgrounds[el] = color );
       } );
-      this.emitStateChange();
    }
 
    highlightByBorder(elements) {
@@ -3135,7 +3159,6 @@ class Multtable {
             els.forEach( (el) => this.borders[el] = color );
          } );
       }
-      this.emitStateChange();
    }
 
    highlightByCorner(elements) {
@@ -3150,46 +3173,12 @@ class Multtable {
             els.forEach( (el) => this.corners[el] = color );
          } );
       }
-      this.emitStateChange();
    }
 
    clearHighlights() {
       this.backgrounds = undefined;
       this.borders = undefined;
       this.corners = undefined;
-      this.emitStateChange();
-   }
-
-   emitStateChange () {
-      console.log( 'table emitted:', { source : 'table', json : this.toJSON() } );
-      window.postMessage( { source : 'table', json : this.toJSON() }, myDomain );
-   }
-
-   toJSON () {
-      return {
-         groupURL : this.group.URL,
-         separation : this.separation,
-         colors : this._colors,
-         stride : this.stride,
-         elements : this.elements,
-         backgrounds : this.backgrounds,
-         borders : this.borders,
-         corners : this.corners
-      };
-   }
-
-   fromJSON ( json ) {
-      console.log( 'loading my state from this json:', json );
-      this.separation = json.separation;
-      this._colors = json.colors;
-      this.stride = json.stride;
-      this.elements = json.elements;
-      this.backgrounds = json.backgrounds;
-      this.borders = json.borders;
-      this.corners = json.corners;
-      var that = this;
-      Library.getGroupFromURL( json.groupURL )
-             .then( ( group ) => { that.group = group; } );
    }
 }
 
@@ -3485,6 +3474,31 @@ class DisplayMulttable {
       const y = this.multtable.index(mult.y);
       return (x === undefined || y === undefined) ? undefined : {x: x, y: y};
    }
+
+   // two serialization functions
+   toJSON ( multtable ) {
+      return {
+         groupURL : multtable.group.URL,
+         separation : multtable.separation,
+         colors : multtable._colors,
+         stride : multtable.stride,
+         elements : multtable.elements,
+         backgrounds : multtable.backgrounds,
+         borders : multtable.borders,
+         corners : multtable.corners
+      };
+   }
+   fromJSON ( json, multtable ) {
+      multtable.separation = json.separation;
+      multtable._colors = json.colors;
+      multtable.stride = json.stride;
+      multtable.elements = json.elements;
+      multtable.backgrounds = json.backgrounds;
+      multtable.borders = json.borders;
+      multtable.corners = json.corners;
+      Library.getGroupFromURL( json.groupURL )
+             .then( ( group ) => { multtable.group = group; } );
+   }
 }
 
 class CycleGraph {
@@ -3493,11 +3507,6 @@ class CycleGraph {
       this.layOutElementsAndPaths();
       this.findClosestTwoPositions();
       this.reset();
-      var that = this;
-      window.addEventListener( 'message', function ( event ) {
-          if ( event.data.type == 'fromJSON' )
-              that.fromJSON( event.data.json );
-      } );
    }
 
    static _init() {
@@ -3592,7 +3601,6 @@ class CycleGraph {
    reset() {
       this.elements = this.group.elements.slice();
       this.SOME_SETTING_NAME = CycleGraph.SOME_SETTING_NAME;
-      this.emitStateChange();
    }
 
    layOutElementsAndPaths() {
@@ -3807,50 +3815,22 @@ class CycleGraph {
       if ( !this.highlights ) this.highlights = { };
       this.highlights.background =
          this._partitionToColorArray( partition, 0 );
-      this.emitStateChange();
    }
 
    highlightByBorder(partition) {
       if ( !this.highlights ) this.highlights = { };
       this.highlights.border =
          this._partitionToColorArray( partition, 120 );
-      this.emitStateChange();
    }
 
    highlightByTop(partition) {
       if ( !this.highlights ) this.highlights = { };
       this.highlights.top =
          this._partitionToColorArray( partition, 240 );
-      this.emitStateChange();
    }
 
    clearHighlights() {
       this.highlights = { };
-      this.emitStateChange();
-   }
-
-   emitStateChange () {
-      const myURL = window.location.href;
-      const thirdSlash = myURL.indexOf( '/', 8 );
-      const myDomain = myURL.substring( 0, thirdSlash > -1 ? thirdSlash : myURL.length );
-      window.postMessage( this.toJSON(), myDomain );
-   }
-
-   toJSON () {
-      return {
-         groupURL : this.group.URL,
-         highlights : this.highlights,
-         elements : this.elements
-      };
-   }
-
-   fromJSON ( json ) {
-      this.separation = json.separation;
-      this.highlights = json.highlights;
-      this.elements = json.elements;
-      var that = this;
-      Library.getGroupFromURL( json.groupURL )
-             .then( ( group ) => { that.group = group; } );
    }
 }
 
@@ -4137,5 +4117,20 @@ class DisplayCycleGraph {
          Math.sqrt( Math.pow( pos.x - cg_coords.x, 2 ) + Math.pow( pos.y - cg_coords.y, 2 ) ) < this.radius
       );
       return (index == -1) ? undefined : index;
+   }
+
+   // two serialization functions
+   toJSON ( cycleGraph ) {
+      return {
+         groupURL : cycleGraph.group.URL,
+         highlights : cycleGraph.highlights,
+         elements : cycleGraph.elements
+      };
+   }
+   fromJSON ( json, cycleGraph ) {
+      cycleGraph.highlights = json.highlights;
+      cycleGraph.elements = json.elements;
+      Library.getGroupFromURL( json.groupURL )
+             .then( ( group ) => { cycleGraph.group = group; } );
    }
 }

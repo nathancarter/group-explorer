@@ -289,4 +289,29 @@ class DisplayMulttable {
       const y = this.multtable.index(mult.y);
       return (x === undefined || y === undefined) ? undefined : {x: x, y: y};
    }
+
+   // two serialization functions
+   toJSON ( multtable ) {
+      return {
+         groupURL : multtable.group.URL,
+         separation : multtable.separation,
+         colors : multtable._colors,
+         stride : multtable.stride,
+         elements : multtable.elements,
+         backgrounds : multtable.backgrounds,
+         borders : multtable.borders,
+         corners : multtable.corners
+      };
+   }
+   fromJSON ( json, multtable ) {
+      multtable.separation = json.separation;
+      multtable._colors = json.colors;
+      multtable.stride = json.stride;
+      multtable.elements = json.elements;
+      multtable.backgrounds = json.backgrounds;
+      multtable.borders = json.borders;
+      multtable.corners = json.corners;
+      Library.getGroupFromURL( json.groupURL )
+             .then( ( group ) => { multtable.group = group; } );
+   }
 }

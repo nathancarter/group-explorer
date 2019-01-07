@@ -46,8 +46,13 @@
            group,		// global value used by other packages (until code style is implemented)
            Diagram_name,	// name of Cayley diagram, or undefined if generated
            Cayley_diagram,	// data being displayed in large diagram
-           Graphic_context;	// graphic context for large diagram
+           Graphic_context,	// graphic context for large diagram
+           canEmit = true;  // flag: whether to notify parent window of table changes
        const PANEL_NAMES = ['#subset-control', '#view-control', '#diagram-control'];
+
+       const myURL = window.location.href;
+       const thirdSlash = myURL.indexOf( '/', 8 );
+       const myDomain = myURL.substring( 0, thirdSlash > -1 ? thirdSlash : myURL.length );
 
        /* Initial entry to javascript, called once after document load */
        $(window).one('load', load);
@@ -126,6 +131,57 @@
 
           show('#subset-control');
           resizeBody();
+
+          window.addEventListener( 'message', function ( event ) {
+             if ( event.data.source == 'sheet' ) {
+                canEmit = false; // don't spam notifications of changes about to happen
+                Graphic_context.fromJSON( event.data.json, Cayley_diagram );
+                Diagram_name = event.data.json.hasOwnProperty( '_diagram_name' ) ?
+                               event.data.json._diagram_name :
+                               group.cayleyDiagrams.length > 0 ?
+                               group.cayleyDiagrams[0].name : '';
+                $( '#diagram-select option[value="' + Diagram_name + '"]' )
+                    .prop( 'selected', true );
+                Cayley_diagram = new CayleyDiagram(Group, Diagram_name);
+                if ( event.data.json.hasOwnProperty( '_use_fog' ) )
+                   $( '#use-fog' ).prop( 'checked', event.data.json._use_fog );
+                if ( event.data.json.hasOwnProperty( '_fog_level' ) )
+                   $( '#fog-level' ).val( event.data.json._fog_level );
+                if ( event.data.json.hasOwnProperty( '_show_labels' ) )
+                   $( '#show-labels' ).prop( 'checked', event.data.json._show_labels );
+                if ( event.data.json.hasOwnProperty( '_label_size' ) )
+                   $( '#label-size' ).val( event.data.json._label_size );
+                Graphic_context.fromJSON( event.data.json, Cayley_diagram );
+                $( '#zoom-level' ).val( 10 * Math.log( Cayley_diagram.zoomLevel ) );
+                $( '#line-thickness' ).val( Cayley_diagram.lineWidth );
+                $( '#node-radius' ).val( 10 * Math.log( Cayley_diagram.nodeScale ) );
+                $( '#arrowhead-placement' ).val( 20 * Cayley_diagram.arrowheadPlacement );
+                canEmit = true; // restore default behavior
+                Graphic_context.showGraphic(Cayley_diagram);
+                DC.update();
+                window.postMessage( 'state loaded', myDomain );
+             }
+          }, false );
+          window.postMessage( 'listener ready', myDomain );
+          var lastCamera = null;
+          setInterval( function () {
+              const thisCamera = Graphic_context.camera.matrix.toArray();
+              if ( ''+lastCamera != ''+thisCamera ) emitStateChange();
+              lastCamera = thisCamera;
+          }, 500 );
+       }
+
+       function emitStateChange () {
+          if ( !canEmit ) return;
+          var json = Graphic_context.toJSON( Cayley_diagram );
+          json._use_fog = $( '#use-fog' ).prop( 'checked' );
+          json._fog_level = $( '#fog-level' ).val();
+          json._show_labels = $( '#show-labels' ).prop( 'checked' );
+          json._label_size = $( '#label-size' ).val();
+          window.postMessage( {
+             source : 'editor',
+             json : json
+          }, myDomain );
        }
 
        // Draw Cayley diagram in graphic
@@ -174,21 +230,25 @@
        function highlightByNodeColor(elements) {
           Cayley_diagram.highlightByNodeColor(elements);
           Graphic_context.updateHighlights(Cayley_diagram);
+          emitStateChange();
        }
 
        function highlightByRingAroundNode(elements) {
           Cayley_diagram.highlightByRingAroundNode(elements);
           Graphic_context.updateHighlights(Cayley_diagram);
+          emitStateChange();
        }
 
        function highlightBySquareAroundNode(elements) {
           Cayley_diagram.highlightBySquareAroundNode(elements);
           Graphic_context.updateHighlights(Cayley_diagram);
+          emitStateChange();
        }
 
        function clearHighlights() {
           Cayley_diagram.clearHighlights();
           Graphic_context.updateHighlights(Cayley_diagram);
+          emitStateChange();
        }
 
        /* Help, Reset routines */

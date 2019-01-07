@@ -821,8 +821,8 @@ DC.Generator.orders = [
    ['N/A'],
    ['inside', 'outside'],
    ['innermost', 'middle', 'outermost'],
-   ['innermost', 'third innermost', 'second outermost', 'outermost'],
-   ['innermost', 'third innermost', 'middle', 'second outermost', 'outermost']
+   ['innermost', 'second innermost', 'second outermost', 'outermost'],
+   ['innermost', 'second innermost', 'middle', 'second outermost', 'outermost']
 ];
 
 DC.DiagramChoice = class {
@@ -911,7 +911,7 @@ DC.Arrow = class {
 
    // Add button menu element clicked:
    //   Hide menu
-   //   Add to lines to Cayley_diagram
+   //   Add lines to Cayley_diagram
    //   Update lines, arrowheads in graphic, arrow-list
    static addArrow(element) {
       DC.clearMenus();
@@ -978,7 +978,6 @@ DC.ArrowMult = class {
    }
 
 }
-  
 
 DC.Chunking = class {
    static clickHandler(event) {
@@ -1001,7 +1000,7 @@ DC.Chunking = class {
          return;
       }
    }
-   
+
    static enable() {
       $('#chunking-fog').hide();
       $('#chunk-select').prop('disabled', false);
@@ -1020,7 +1019,6 @@ DC.Chunking = class {
       return $('#chunk-select').prop('disabled');
    }
 }
-  
 class CVC {
    static load($viewWrapper) {
       return new Promise( (resolve, reject) => {
@@ -1052,39 +1050,39 @@ class CVC {
    static setZoomLevel() {
       Cayley_diagram.zoomLevel = Math.exp( $('#zoom-level')[0].valueAsNumber/10 );
       Graphic_context.updateZoomLevel(Cayley_diagram);
-      Cayley_diagram.emitStateChange();
+      emitStateChange();
    }
 
    static setLineThickness() {
       Cayley_diagram.lineWidth = $('#line-thickness')[0].valueAsNumber;
       Graphic_context.updateLineWidth(Cayley_diagram);
-      Cayley_diagram.emitStateChange();
+      emitStateChange();
    }
 
    static setNodeRadius() {
       Cayley_diagram.nodeScale = Math.exp( $('#node-radius')[0].valueAsNumber/10 );
       Graphic_context.updateNodeRadius(Cayley_diagram);
       Graphic_context.updateLabels(Cayley_diagram);
-      Cayley_diagram.emitStateChange();
+      emitStateChange();
    }
 
    static setFogLevel() {
       Cayley_diagram.fogLevel = $('#use-fog')[0].checked ? $('#fog-level')[0].valueAsNumber/10 : 0;
       Graphic_context.updateFogLevel(Cayley_diagram);
-      Cayley_diagram.emitStateChange();
+      emitStateChange();
    }
 
    static setLabelSize() {
       Cayley_diagram.labelSize = $('#show-labels')[0].checked ?
                                  Math.exp( $('#label-size')[0].valueAsNumber/10 ) : 0;
       Graphic_context.updateLabelSize(Cayley_diagram);
-      Cayley_diagram.emitStateChange();
+      emitStateChange();
    }
 
    static setArrowheadPlacement() {
       Cayley_diagram.arrowheadPlacement = $('#arrowhead-placement')[0].valueAsNumber/20;
       Graphic_context.updateArrowheadPlacement(Cayley_diagram);
-      Cayley_diagram.emitStateChange();
+      emitStateChange();
    }
 }
 

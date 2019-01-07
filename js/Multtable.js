@@ -1,20 +1,8 @@
 
-const myURL = window.location.href;
-const thirdSlash = myURL.indexOf( '/', 8 );
-const myDomain = myURL.substring( 0, thirdSlash > -1 ? thirdSlash : myURL.length );
-
 class Multtable {
    constructor(group) {
       this.group = group;
       this.reset();
-      var that = this;
-      window.addEventListener( 'message', function ( event ) {
-         if ( event.data.source == 'sheet' ) {
-             that.fromJSON( event.data.json );
-             window.postMessage( 'state loaded', myDomain );
-         }
-      }, false );
-      window.postMessage( 'listener ready', myDomain );
    }
 
    static _init() {
@@ -29,7 +17,6 @@ class Multtable {
       this.colors = Multtable.COLORATION_RAINBOW;
       this.stride = this.group.order;
       this.clearHighlights();
-      this.emitStateChange();
    }
 
    organizeBySubgroup(subgroup) {
@@ -37,13 +24,11 @@ class Multtable {
       const cosets = this.group.getCosets(subgroup.members);
       cosets.forEach( (coset) => this.elements.push(...coset.toArray()) );
       this.stride = subgroup.order;
-      this.emitStateChange();
       return this;
    }
 
    setSeparation ( sep ) {
        this.separation = sep;
-       this.emitStateChange();
    }
 
    get colors() {
@@ -68,7 +53,6 @@ class Multtable {
             break;
       }
       this._colors = this.group.elements.map( (_, inx) => fn(inx) );
-      this.emitStateChange();
    }
 
    get size() {
@@ -96,7 +80,6 @@ class Multtable {
          const color = `hsl(${colorFraction}, 100%, 80%)`;
          els.forEach( (el) => this.backgrounds[el] = color );
       } );
-      this.emitStateChange();
    }
 
    highlightByBorder(elements) {
@@ -110,7 +93,6 @@ class Multtable {
             els.forEach( (el) => this.borders[el] = color );
          } );
       }
-      this.emitStateChange();
    }
 
    highlightByCorner(elements) {
@@ -125,44 +107,12 @@ class Multtable {
             els.forEach( (el) => this.corners[el] = color );
          } );
       }
-      this.emitStateChange();
    }
 
    clearHighlights() {
       this.backgrounds = undefined;
       this.borders = undefined;
       this.corners = undefined;
-      this.emitStateChange();
-   }
-
-   emitStateChange () {
-      window.postMessage( { source : 'table', json : this.toJSON() }, myDomain );
-   }
-
-   toJSON () {
-      return {
-         groupURL : this.group.URL,
-         separation : this.separation,
-         colors : this._colors,
-         stride : this.stride,
-         elements : this.elements,
-         backgrounds : this.backgrounds,
-         borders : this.borders,
-         corners : this.corners
-      };
-   }
-
-   fromJSON ( json ) {
-      this.separation = json.separation;
-      this._colors = json.colors;
-      this.stride = json.stride;
-      this.elements = json.elements;
-      this.backgrounds = json.backgrounds;
-      this.borders = json.borders;
-      this.corners = json.corners;
-      var that = this;
-      Library.getGroupFromURL( json.groupURL )
-             .then( ( group ) => { that.group = group; } );
    }
 }
 

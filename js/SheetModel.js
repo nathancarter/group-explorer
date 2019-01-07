@@ -341,11 +341,11 @@ class SheetElement {
     }
 
     // Subclasses should override this to create an actual object representing the
-    // instance.  Always include the class name.  Feel free to start with this object
+    // instance.  Always include the class name.  Always start with this object
     // and then alter/extend.
     toJSON () {
         var $wrapper = $( this.htmlViewElement().parentElement );
-        return {
+        var result = {
             className : 'SheetElement',
             x : $wrapper.offset().left,
             y : $wrapper.offset().top,
@@ -353,6 +353,14 @@ class SheetElement {
             h : $wrapper.height(),
             z : $wrapper.css( 'z-index' )
         };
+        // View-based data may be stored in the _extra_json object.
+        // For example, the state of UI components can go there.  It's foreign data,
+        // from the point of view of the model, so we separate it, but respect it.
+        if ( this._extra_json )
+            for ( var key in this._extra_json )
+                if ( this._extra_json.hasOwnProperty( key ) )
+                    result[key] = this._extra_json[key];
+        return result;
     }
     // The reverse of the above method is this one.  It presumes that the class of
     // this instance is equal to json.className, and then extracts all relevant data
@@ -364,6 +372,15 @@ class SheetElement {
                 .width( json.w ).height( json.h )
                 .css( { "z-index" : json.z } );
         if ( this.resize ) this.resize();
+        // Any key that begins with an underscore is UI state data.
+        // That's not relevant to the model, but we have to store it so that we can
+        // save it with the sheet, and send it back later in toJSON().
+        for ( var key in json ) {
+            if ( json.hasOwnProperty( key ) && key[0] == '_' ) {
+                if ( !this._extra_json ) this._extra_json = { };
+                this._extra_json[key] = json[key];
+            }
+        }
     }
 }
 
@@ -537,7 +554,12 @@ class VisualizerElement extends SheetElement {
     isReady () { return !!this.vizobj; }
     // how to create an image of the visualizer
     render () {
-        var result = this.vizobj ? this.vizdisplay.getImage( this.vizobj, true ) : $( '<img/>' )[0];
+        var result = this.vizobj ?
+            this.vizdisplay.getImage( this.vizobj, {
+                size : "large",
+                resetCamera : !this._extra_json || !this._extra_json._camera
+            } ) :
+            $( '<img/>' )[0];
         $( result ).css( { "pointer-events" : "none" } );
         var $wrapper = $( '<div></div>' );
         $wrapper.append( result );
@@ -582,7 +604,7 @@ class VisualizerElement extends SheetElement {
                 }
                 if ( otherWinState == 'ready' ) {
                     // but when the editor changes, update us to be just like it
-                    if ( event.data.source == 'table' ) that.fromJSON( event.data.json );
+                    if ( event.data.source == 'editor' ) that.fromJSON( event.data.json );
                 }
             }, false );
         }, 10 );
@@ -602,7 +624,7 @@ class VisualizerElement extends SheetElement {
         var result = super.toJSON();
         result.className = this.getClassName();
         if ( this.vizobj ) {
-            var key, inner = this.vizobj.toJSON();
+            var key, inner = this.vizdisplay.toJSON( this.vizobj );
             for ( key in inner )
                 if ( inner.hasOwnProperty( key ) ) result[key] = inner[key];
         }
@@ -616,12 +638,12 @@ class VisualizerElement extends SheetElement {
                 Library.getGroupFromURL( json.groupURL )
                        .then( ( group ) => {
                            that.vizobj = that.makeVisualizerObject( that.group = group );
-                           that.vizobj.fromJSON( json );
+                           that.vizdisplay.fromJSON( json, that.vizobj );
                            that.rerender();
                        } )
                        .catch( function ( error ) { console.log( error ); } );
             } else {
-                this.vizobj.fromJSON( json );
+                this.vizdisplay.fromJSON( json, this.vizobj );
                 this.rerender();
             }
         }
