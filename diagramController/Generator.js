@@ -235,6 +235,6 @@ DC.Generator.orders = [
    ['N/A'],
    ['inside', 'outside'],
    ['innermost', 'middle', 'outermost'],
-   ['innermost', 'third innermost', 'second outermost', 'outermost'],
-   ['innermost', 'third innermost', 'middle', 'second outermost', 'outermost']
+   ['innermost', 'second innermost', 'second outermost', 'outermost'],
+   ['innermost', 'second innermost', 'middle', 'second outermost', 'outermost']
 ];
