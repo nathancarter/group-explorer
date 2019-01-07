@@ -8,6 +8,7 @@ class Diagram3D {
       this.group = group;
       this.nodes = nodes;
       this.lines = lines;
+      this.chunk = undefined;   // subgroup index for chunking
       this._right_multiplication = true;
       this.node_labels = group.representation;
       this.background = undefined;
@@ -227,6 +228,7 @@ Diagram3D.Line = class Line {
       this.color = undefined;
       this.arrowhead = true;
       this.arrow = undefined;
+      this.offset = undefined;
       this.style = Diagram3D.STRAIGHT;
       if (options !== undefined) {
          for (const opt in options) {

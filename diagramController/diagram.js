@@ -39,12 +39,13 @@ class DC {
 
       $('#multiplication-control').off('click', DC.ArrowMult.clickHandler).on('click', DC.ArrowMult.clickHandler);
 
-      $('#chunk-control').off('click', DC.Chunking.clickHandler).on('click', DC.Chunking.clickHandler);
+      $('#chunk-select').off('change', DC.Chunking.selectChunk).on('change', DC.Chunking.selectChunk);
    }
 
    static update() {
       DC.Generator.draw();
       DC.Arrow.updateArrows();
+      DC.Chunking.updateChunkingSelect();
    }
 }
 

@@ -23,6 +23,15 @@
        .groupOrder {
           text-align: center;
        }
+       .cayleyDiagram, .multiplicationTable, .symmetryObject, .cycleGraph {
+          text-align: center;
+       }
+       a:link {
+          color: black;
+       }
+       a:hover {
+          color: -webkit-link;
+       }
 
        .sort-up:after,
        .sort-down:after,
@@ -70,10 +79,6 @@
        var multtableContext;
        var cycleGraphContext;
 
-       // Constants
-       var MULTTABLE_BACKGROUND = 0x000000;
-       var CYCLE_BACKGROUND = 0xC8C8E8;
-
        // Static event managers (setup after document is available)
        $(function() {
           $('#GroupTableHeaders th:nth-child(1)').on('click', () => columnSort(0));
@@ -90,11 +95,15 @@
           let baseURL = new URL(window.location.href);			// get this window URL
           baseURL = (baseURL.origin + baseURL.pathname);		// trim off search string
           baseURL = baseURL.slice(0, baseURL.lastIndexOf('/') + 1);	// trim off html page
+          let numLoaded = 0;
           for (let inx = 0; inx < numRows; inx++) {
              Library.getGroupFromURL(baseURL + urls[inx])
                     .then( (group) => {
                        Library.add(group);
                        displayGroup(group);
+                       if (++numLoaded == numRows) {
+                          columnSort(1);  // sort rows by column 1 (group order) after all groups have been loaded
+                       }
                     } )
                     .catch( (error) => alert(error) );
           }
@@ -107,42 +116,47 @@
        // add row to table that displays this name, order, etc. of group
        function displayGroup(group) {
           const index = Library.findIndex(group);
-          const $row = $(eval(Template.HTML('row_template')))
-             .on('click', () => Library.openWithLibrary('GroupInfo.html', index))
-             .appendTo($('#GroupTable tbody'));
+
+          const cayleyTitle = (group.cayleyDiagrams.length == 0) ?
+                              undefined :
+                              group.cayleyDiagrams[0].name;
+          const symmetryTitle = (group.symmetryObjects.length == 0) ?
+                                undefined :
+                                group.symmetryObjects[0].name;
+
+          const $row = $(eval(Template.HTML('row_template')));
 
           // typeset this row
           MathJax.Hub.Queue(['Typeset', MathJax.Hub, $row.attr('id')]);
 
           // draw Cayley diagram
-          let graphicTitle = (group.cayleyDiagrams.length != 0) ?
-                             group.cayleyDiagrams[0].name :
-                             undefined;
-          let graphicData = new CayleyDiagram(group, graphicTitle);
-
+          let graphicData = new CayleyDiagram(group, cayleyTitle);
           let img = graphicContext.getImage(graphicData);
           group.imageSource = img.src;
           img.height = img.width = 32;
-          $row.children("td.cayleyDiagram").append(img);
+          $row.find("td.cayleyDiagram > a").html(img);
 
           // draw Multtable
           graphicData = new Multtable(group);
           img = multtableContext.getImage(graphicData);
-          $row.children("td.multiplicationTable").append(img);
+          $row.find("td.multiplicationTable > a").html(img);
 
           // draw Symmetry Object
           if (group.symmetryObjects.length != 0) {
-             graphicTitle = group.symmetryObjects[0].name;
-             graphicData = SymmetryObject.generate(group, graphicTitle);
+             graphicData = SymmetryObject.generate(group, symmetryTitle);
              img = graphicContext.getImage(graphicData);
              img.height = img.width = 32;
-             $row.children("td.symmetryObject").html(img);
+             $row.find("td.symmetryObject > a").html(img);
+          } else {
+             $row.find("td.symmetryObject").text('none');
           }
 
           // draw Cycle Graph
           graphicData = new CycleGraph( group );
           img = cycleGraphContext.getImage( graphicData );
-          $row.children( "td.cycleGraph" ).append( img );
+          $row.find("td.cycleGraph > a").html(img);
+
+          $row.appendTo($('#GroupTable tbody'));
        }
 
        // callback to sort table on column value, invoked by clicking on column head
@@ -192,14 +206,26 @@
          </tbody>
       </table>
       <template id="row_template">
-         <tr id="g_${index}">
-            <td class="groupName">${ math(group.name) }</td>
+         <tr>
+            <td class="groupName">
+               <a title="Open GroupInfo page" href="javascript:Library.openWithGroup('GroupInfo.html', ${index})">${ math(group.name) }</a>
+            </td>
             <td class="groupOrder">${ group.order }</td>
-            <td class="description">${ math(group.definition) }</td>
-            <td class="cayleyDiagram"></td>
-            <td class="multiplicationTable"></td>
-            <td class="symmetryObject">none</td>
-            <td class="cycleGraph"></td>
+            <td class="description">
+               <a title="Open GroupInfo page" href="javascript:Library.openWithGroup('GroupInfo.html', ${index})">${ math(group.definition) }</a>
+            </td>
+            <td class="cayleyDiagram">
+               <a title="Open Cayley diagram visualizer" href="javascript:Library.openWithGroup('CayleyDiagram.html', ${index}, {diagram: '${cayleyTitle}'})"></a>
+            </td>
+            <td class="multiplicationTable">
+               <a title="Open multiplication table visualizer" href="javascript:Library.openWithGroup('Multtable.html', ${index})"></a>
+            </td>
+            <td class="symmetryObject">
+               <a title="Open object of symmetry visualizer" href="javascript:Library.openWithGroup('SymmetryObject.html', ${index}, {diagram: '${symmetryTitle}'})"></a>
+            </td>
+            <td class="cycleGraph">
+               <a title="Open cycle graph visualizer" href="javascript:Library.openWithGroup('CycleDiagram.html', ${index})"></a>
+            </td>
          </tr>
       </template>
    </body>

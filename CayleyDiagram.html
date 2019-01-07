@@ -99,11 +99,7 @@
        /* Set Diagram_name from URL (undefined => use generated Cayley diagram) */
        function setDiagramName() {
           Diagram_name = new URL(window.location.href).searchParams.get('diagram');
-          if (Diagram_name == null) {
-             Diagram_name = undefined;
-          } else if (!Group.cayleyDiagrams.some( (diagram) => diagram.name == Diagram_name )) {
-             alert(`The group ${mathml2text(Group.name)} has no Cayley diagram named ${Diagram_name}. ` +
-                   `Using generated Cayley diagram instead.`);
+          if (Diagram_name == null || !Group.cayleyDiagrams.some( (diagram) => diagram.name == Diagram_name )) {
              Diagram_name = undefined;
           }
        }
@@ -206,7 +202,7 @@
         */
        function resizeGraphic() {
           if (Graphic_context.camera !== undefined) {
-             $('#graphic > canvas').remove();
+             $('#graphic > canvas').detach();
              Graphic_context.camera.aspect = $('#graphic').width() / $('#graphic').height();
              Graphic_context.camera.updateProjectionMatrix();
              Graphic_context.renderer.setSize($('#graphic').width(), $('#graphic').height());

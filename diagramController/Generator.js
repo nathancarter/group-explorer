@@ -180,6 +180,7 @@ DC.Generator = class {
       Cayley_diagram.setLineColors();
       Graphic_context.showGraphic(Cayley_diagram);
       DC.Generator.draw();
+      DC.Chunking.updateChunkingSelect();
    }
 
    // Drag-and-drop generation-table rows to re-order generators

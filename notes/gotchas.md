@@ -23,3 +23,4 @@ Drag-and-drop was surprisingly consistent. A couple of small-ish exceptions:
 You can see the effect of these in [CycleDiagram](../CycleDiagram.html) in the `dragstart` routine.
 
     
+THREE.js raycasting works with lines, but it doesn't work with meshLines, and you need meshlines to display anything thicker than about a pixel in any browser except Safari. Workaround in [DisplayDiagram](../js/DisplayDiagram.js) is to set `Diagram3D.lineWidth` to 1, run `DisplayDiagram.updateLines(..)`, and then restore previous lineWidth. Since the scene is never rendered with the skinny lines, the user never sees it; and it only happens on the grab.

@@ -81,9 +81,9 @@ class CayleyDiagram extends Diagram3D {
 
    _generateFromStrategy() {
       const node_list = this._generateNodes(this.strategies);
-      const ordered_nodes = this._transposeNodes(node_list);
+      this.ordered_nodes = this._transposeNodes(node_list);
 
-      this.nodes = this._layout(ordered_nodes)
+      this.nodes = this._layout(this.ordered_nodes)
                        .sort( (a,b) => a.element - b.element );
 
       // makes lines for generators
@@ -403,10 +403,18 @@ CayleyDiagram.CircularLayout = class extends CayleyDiagram.CurvedLayout {
          ...new THREE.Vector3(...Array.from({length: 3}, (_,inx) => (this.direction == inx) ? 1 : scale)).toArray()
       )
 
+      const curvedGroup = [];
+
       // translate children to [0.5, 0.5] + [r*sin(th), -r*cos(th)]
       children.forEach( (child, inx) => {
          transform.setPosition(this.position(r, 2*inx*Math.PI/children.length));
-         child.forEach( (node) => node.point = node.point.applyMatrix4(transform) );
+         child.forEach( (node) => {
+            node.point = node.point.applyMatrix4(transform);
+            if (node.curvedGroup === undefined) {
+               node.curvedGroup = curvedGroup;
+               curvedGroup.push(node);
+            }
+         } );
       } );
 
       return children;
@@ -445,13 +453,21 @@ CayleyDiagram.RotatedLayout = class extends CayleyDiagram.CurvedLayout {
          ...new THREE.Vector3(...Array.from({length: 3}, (_,inx) => (this.direction == inx) ? 1 : scale)).toArray()
       )
 
+      const curvedGroup = [];
+      
       // scale, rotation, and translate each child
       children.forEach( (child, inx) => {
          const theta = 2*inx*Math.PI/children.length;
          const transform = scale_transform.clone()
                                           .multiply(this.rotation(theta))
                                           .setPosition(this.position(r, theta));
-         child.forEach( (node) => node.point = node.point.applyMatrix4(transform) );
+         child.forEach( (node) => {
+            node.point = node.point.applyMatrix4(transform);
+            if (node.curvedGroup === undefined) {
+               node.curvedGroup = curvedGroup;
+               curvedGroup.push(node);
+            }
+         } );
       } );
 
       return children;

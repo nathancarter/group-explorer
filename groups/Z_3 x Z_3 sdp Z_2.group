@@ -2,7 +2,7 @@
 <group>
     <name text="(Z_3 x Z_3) sdp Z_2"><mrow><mo>(</mo><msub><mi>&Zopf;</mi><mn>3</mn></msub><mo>&times;</mo><msub><mi>&Zopf;</mi><mn>3</mn></msub><mo>)</mo><mo>&ltimes;</mo><msub><mi>&Zopf;</mi><mn>2</mn></msub></mrow></name>
     <definition text="&amp;lt; &lt;i&gt;a&lt;/i&gt;, &lt;i&gt;b&lt;/i&gt;, &lt;i&gt;c&lt;/i&gt; | &lt;i&gt;a&lt;/i&gt;&lt;sup&gt;2&lt;/sup&gt;=&lt;i&gt;b&lt;/i&gt;&lt;sup&gt;3&lt;/sup&gt;=&lt;i&gt;c&lt;/i&gt;&lt;sup&gt;3&lt;/sup&gt;=1, &lt;i&gt;bab&lt;/i&gt;=&lt;i&gt;a&lt;/i&gt;, &lt;i&gt;cac&lt;/i&gt;=&lt;i&gt;a&lt;/i&gt;, &lt;i&gt;bc&lt;/i&gt;=&lt;i&gt;cb&lt;/i&gt; &amp;gt;">
-        <mfenced open="&lt;" close="&gt;" separators=":">
+        <mfenced open="&#x27E8;" close="&#x27E9;" separators=":">
             <mrow><mi>a</mi><mo>,</mo><mi>b</mi><mo>,</mo><mi>c</mi></mrow>
             <mrow><msup><mi>a</mi><mn>2</mn></msup><mo>=</mo><msup><mi>b</mi><mn>3</mn></msup><mo>=</mo><msup><mi>c</mi><mn>3</mn></msup><mo>=</mo><mn>1</mn><mo>,</mo><mi>b</mi><mi>a</mi><mi>b</mi><mo>=</mo><mi>a</mi><mo>,</mo><mi>c</mi><mi>a</mi><mi>c</mi><mo>=</mo><mi>a</mi><mo>,</mo><mi>b</mi><mi>c</mi><mo>=</mo><mi>c</mi><mi>b</mi></mrow>
         </mfenced>
