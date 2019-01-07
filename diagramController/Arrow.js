@@ -59,7 +59,7 @@ DC.Arrow = class {
 
    // Add button menu element clicked:
    //   Hide menu
-   //   Add to lines to Cayley_diagram
+   //   Add lines to Cayley_diagram
    //   Update lines, arrowheads in graphic, arrow-list
    static addArrow(element) {
       DC.clearMenus();
