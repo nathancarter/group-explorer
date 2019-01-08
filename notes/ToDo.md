@@ -37,26 +37,6 @@
 # Nathan's List
 
  * Sheets
-    * Connecting lines
-       * Make `SheetElement` inherit from `EventEmitter`.
-       * Whenever the element experiences move/resize/fromJSON, emit a `changeDimensions` event.
-       * Whenever the element is deleted, emit a `delete` event.
-       * Create a `ConnectingElement` subclass of `SheetElement` that takes two other elements as
-         parameters to its constructor, a "from" and a "to" element.  (Factor out the process of setting
-         these two key values into a `setEndpoints()` routine, which the constructor will call.)
-       * Make its `toJSON()` function report the indices in the `SheetModel` of the two endpoints.  To
-         ensure that this will work well with `fromJSON()`, extend the `toJSON()` of `SheetModel` to
-         first sort the elements so that all `ConnectingElement`s are at the end, after their endpoints.
-       * Make its `fromJSON()` function call `setEndpoints()` after looking up the appropriate objects
-         by index in the `SheetModel`'s elements list.
-       * Give it a `reposition()` method that sets its x,y,z,w,h to perfectly bridge the space between
-         the from and to elements, having the z level of the higher of the two.  Call it at construction.
-       * When either emits `changeDimensions`, call the connection's `reposition()`.
-       * When either emits `delete`, call the connection's `remove()`.
-       * By default, just make the connection's `viewDiv()` transparent with a diagonal line to show the
-         connection.
-       * Optional editable features: color, thickness, arrowhead yes/no.  Whichever you choose to
-         implement, be sure to support in `toJSON()` and `fromJSON()`.
     * Morphisms
        * Make `MorphismElement` inherit from `ConnectingElement`.
        * I'll have to come back here later and finish the plan for this.

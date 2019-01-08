@@ -80,7 +80,7 @@ class SheetModel {
                     }
                     // also, tell all my new elements that they may have been resized,
                     // and they should check and maybe re-render themselves.
-                    that.elements.map( ( elt ) => { if ( elt.resize ) elt.resize(); } );
+                    that.elements.map( ( elt ) => { if ( elt.emit ) elt.emit( 'resize' ); } );
                 }
             }
             updateUndoRedoStack();
@@ -116,7 +116,15 @@ class SheetModel {
 
     // Save the state of this entire sheet by creating an array of the JSON states of the
     // elements in the model.
+    // First, sort elements so that all ConnectingElements are at the end, so that they
+    // can mention the indices of their endpoints, and deserializing will know what those
+    // indices mean.
     toJSON () {
+        this.elements.sort( function ( a, b ) {
+            return ( a instanceof ConnectingElement ) ?
+                   ( ( b instanceof ConnectingElement ) ? 0 : 1 ) :
+                   ( ( b instanceof ConnectingElement ) ? -1 : 0 );
+        } );
         return this.elements.map( ( elt ) => elt.toJSON() );
     }
     // Restore the state from a previous save by destroying all existing content first,
@@ -127,9 +135,10 @@ class SheetModel {
     fromJSON ( json, isPartOfUndoOrRedo ) {
         var that = this;
         this.undoRedoActive = false;
-        this.elements = json.map( function ( eltJson ) {
-            return that.sheetElementFromJSON( eltJson );
-        } );
+        // each call to sheetElementFromJSON() adds to the elements array,
+        // so that later elements can look up earlier ones.
+        this.elements = [ ];
+        json.map( function ( eltJson ) { that.sheetElementFromJSON( eltJson ); } );
         if ( !isPartOfUndoOrRedo ) {
             this.history = [ JSON.stringify( json ) ];
             this.historyIndex = 0;
@@ -231,6 +240,7 @@ class SheetElement {
             throw new Error( 'SheetElements must be constructed with a SheetModel' );
         this.model = model;
         model.addElement( this );
+        this.events = { }; // see "on" function, below
     }
 
     // By default, a sheet element is always ready to have its JSON recorded.
@@ -251,6 +261,8 @@ class SheetElement {
                 that.edit();
                 return false;
             } );
+            this.viewElement.addEventListener( 'moved', function () { that.emit( 'move' ); } );
+            this.viewElement.addEventListener( 'resized', function () { that.emit( 'resize' ); } );
         }
         return this.viewElement;
     }
@@ -280,6 +292,7 @@ class SheetElement {
 
     // Removes this element from the model and its HTML element from the model's view
     remove () {
+        this.emit( 'delete' ); // right before being deleted
         var index = this.model.elements.indexOf( this );
         this.model.elements.splice( index, 1 );
         var wrapper = this.htmlViewElement().parentElement;
@@ -315,14 +328,29 @@ class SheetElement {
     showEditControls () {
         $( this.htmlViewElement() ).hide();
         $( this.htmlEditElement() ).show();
-        $( this.htmlEditElement().parentElement ).removeDragAndSizeSelection();
-        $( this.htmlEditElement().parentElement ).pauseDragAndResize();
+        var $wrapper = $( this.htmlViewElement().parentElement );
+        $wrapper.removeDragAndSizeSelection();
+        $wrapper.pauseDragAndResize();
+        this.zBeforeEdit = $wrapper.css( 'z-index' );
+        this.bgBeforeEdit = $( this.htmlEditElement() ).css( 'background-color' );
+        $wrapper.css( 'z-index', 1000 );
+        $( this.htmlEditElement() ).css( 'background-color', 'white' );
+        console.log( this.zBeforeEdit, this.bgBeforeEdit );
     }
     // Reverse of the previous
     showViewControls () {
         $( this.htmlViewElement() ).show();
         $( this.htmlEditElement() ).hide();
-        $( this.htmlEditElement().parentElement ).unpauseDragAndResize();
+        var $wrapper = $( this.htmlViewElement().parentElement );
+        $wrapper.unpauseDragAndResize();
+        if ( this.hasOwnProperty( 'zBeforeEdit' ) ) {
+            $wrapper.css( 'z-index', this.zBeforeEdit );
+            delete this.zBeforeEdit;
+        }
+        if ( this.hasOwnProperty( 'bgBeforeEdit' ) ) {
+            $( this.htmlEditElement() ).css( 'background-color', this.bgBeforeEdit );
+            delete this.bgBeforeEdit;
+        }
     }
 
     // This function should read from its edit controls and save their meaning into
@@ -371,7 +399,7 @@ class SheetElement {
         $wrapper.offset( { left : json.x, top : json.y } )
                 .width( json.w ).height( json.h )
                 .css( { "z-index" : json.z } );
-        if ( this.resize ) this.resize();
+        this.emit( 'resize' );
         // Any key that begins with an underscore is UI state data.
         // That's not relevant to the model, but we have to store it so that we can
         // save it with the sheet, and send it back later in toJSON().
@@ -382,6 +410,28 @@ class SheetElement {
             }
         }
     }
+
+    // SheetElements are also event emitters
+    _eventsForName ( eventName ) {
+        if ( !this.events.hasOwnProperty( eventName ) )
+            this.events[eventName] = new Set();
+        return this.events[eventName];
+    }
+    on ( eventName, handler ) {
+        this._eventsForName( eventName ).add( handler );
+    }
+    off ( eventName, handler ) {
+        this._eventsForName( eventName ).delete( handler );
+    }
+    emit ( eventName, ...args ) {
+        var that = this;
+        this._eventsForName( eventName ).forEach( function ( handler ) {
+            handler.apply( that, args );
+        } );
+    }
+
+    // Subclasses should override this to make a human-readable description:
+    toString () { return "A sheet element"; }
 }
 
 /*
@@ -443,6 +493,11 @@ class RectangleElement extends SheetElement {
         super.fromJSON( json );
         this.color = json.color;
         this.update();
+    }
+    // Give vague rectangle description
+    toString () {
+        const $view = $( this.htmlViewElement() );
+        return `Rectangle at (${$view.offset().left},${$view.offset().top})`;
     }
 }
 
@@ -524,6 +579,12 @@ class TextElement extends SheetElement {
         this.fontColor = json.fontColor;
         this.update();
     }
+    // Give description with sample text
+    toString () {
+        var text = this.text;
+        if ( text.length > 20 ) text = text.substring( 0, 20 ) + '...';
+        return `Text box "${text}"`;
+    }
 }
 
 /*
@@ -540,8 +601,8 @@ class VisualizerElement extends SheetElement {
         super( model );
         this.groupURL = groupURL;
         this.vizdisplay = this.makeVisualizerDisplay( { width : 100, height : 100 } );
+        var that = this;
         if ( groupURL ) { // may be absent if they will fill it using fromJSON()
-            var that = this;
             Library.getGroupFromURL( groupURL )
                    .then( ( group ) => {
                        that.vizobj = that.makeVisualizerObject( that.group = group );
@@ -549,6 +610,16 @@ class VisualizerElement extends SheetElement {
                    } )
                    .catch( function ( error ) { console.log( error ); } );
         }
+        // when a resize happens, build a new image, but only if a resize actually happened
+        this.on( 'resize', function () {
+            var $wrapper = $( that.htmlViewElement().parentElement );
+            var lastSize = that.vizdisplay.getSize();
+            if ( ( lastSize.w != $wrapper.width() )
+              || ( lastSize.h != $wrapper.height() ) ) {
+                that.vizdisplay.setSize( $wrapper.width(), $wrapper.height() );
+                that.rerender();
+            }
+        } );
     }
     // not ready unless teh group has been loaded
     isReady () { return !!this.vizobj; }
@@ -609,16 +680,6 @@ class VisualizerElement extends SheetElement {
             }, false );
         }, 10 );
     }
-    // when a resize happens, build a new image, but only if a resize actually happened
-    resize () {
-        var $wrapper = $( this.htmlViewElement().parentElement );
-        var lastSize = this.vizdisplay.getSize();
-        if ( ( lastSize.w != $wrapper.width() )
-          || ( lastSize.h != $wrapper.height() ) ) {
-            this.vizdisplay.setSize( $wrapper.width(), $wrapper.height() );
-            this.rerender();
-        }
-    }
     // serialization just needs to take into account text, size, and color
     toJSON () {
         var result = super.toJSON();
@@ -648,6 +709,11 @@ class VisualizerElement extends SheetElement {
             }
         }
     }
+    // Generic reply that can be adjusted in subclasses
+    toString () {
+        const groupname = this.vizobj ? this.vizobj.group.name : 'a group';
+        return `Visualization for ${groupname}`;
+    }
 }
 
 /*
@@ -658,6 +724,9 @@ class MTElement extends VisualizerElement {
     makeVisualizerDisplay ( options ) { return new DisplayMulttable( options ); }
     getEditPage () { return './Multtable.html'; }
     getClassName () { return 'MTElement'; }
+    toString () {
+        return super.toString().replace( 'Visualization', 'Multiplication table' );
+    }
 }
 
 /*
@@ -668,6 +737,9 @@ class CGElement extends VisualizerElement {
     makeVisualizerDisplay ( options ) { return new DisplayCycleGraph( options ); }
     getEditPage () { return './CycleDiagram.html'; }
     getClassName () { return 'CGElement'; }
+    toString () {
+        return super.toString().replace( 'Visualization', 'Cycle graph' );
+    }
 }
 
 /*
@@ -682,4 +754,183 @@ class CDElement extends VisualizerElement {
     makeVisualizerDisplay ( options ) { return new DisplayDiagram( options ); }
     getEditPage () { return './CayleyDiagram.html'; }
     getClassName () { return 'CDElement'; }
+    toString () {
+        return super.toString().replace( 'Visualization', 'Cayley diagram' );
+    }
+}
+
+/*
+ * SheetElement subclass for connecting two other SheetElements
+ */
+class ConnectingElement extends SheetElement {
+    // Must be constructed with two sheet elements to be connected
+    constructor ( model, from, to ) {
+        super( model );
+        if ( from && to ) this.setEndpoints( from, to );
+        this.color = '#000000';
+        this.thickness = 1;
+        this.useArrowhead = false;
+    }
+    // Function to store both endpoints.
+    setEndpoints ( from, to ) {
+        if ( !( from instanceof SheetElement ) || !( to instanceof SheetElement ) )
+            throw "Both parameters to ConnectingElement constructor must be SheetElements";
+        if ( this.from )
+            this.from.off( '')
+        this.from = from;
+        this.to = to;
+        this.installHandlers();
+        this.reposition();
+    }
+    // Function to install handlers on both endpoints.
+    installHandlers () {
+        var that = this;
+        if ( !this.boundReposition )
+            this.boundReposition = function () { that.reposition(); };
+        if ( !this.boundRemove )
+            this.boundRemove = function () {
+                that.remove();
+                that.uninstallHandlers();
+            };
+        [ this.from, this.to ].map( function ( endpoint ) {
+            if ( endpoint ) {
+                endpoint.on( 'resize', that.boundReposition );
+                endpoint.on( 'move', that.boundReposition );
+                endpoint.on( 'delete', that.boundRemove );
+            }
+        } );
+    }
+    // Inverse of previous.
+    uninstallHandlers () {
+        var that = this;
+        [ this.from, this.to ].map( function ( endpoint ) {
+            if ( endpoint ) {
+                endpoint.off( 'resize', that.boundReposition );
+                endpoint.off( 'move', that.boundReposition );
+                endpoint.off( 'delete', that.boundRemove );
+            }
+        } );
+    }
+    // In toJSON(), report the indices of the endpoints.
+    // This will be supported by the model, which sorts ConnectingElement instances last.
+    toJSON () {
+        var result = super.toJSON();
+        result.className = 'ConnectingElement';
+        result.fromIndex = this.model.elements.indexOf( this.from );
+        result.toIndex = this.model.elements.indexOf( this.to );
+        result.color = this.color;
+        result.thickness = this.thickness;
+        result.useArrowhead = this.useArrowhead;
+        return result;
+    }
+    // In fromJSON(), you're given the indices, and you can look them up in the
+    // model's list of elements, which is built one element at a time, so that later ones
+    // can reference earlier ones.
+    fromJSON ( json ) {
+        super.fromJSON( json );
+        this.color = json.color;
+        this.thickness = json.thickness;
+        this.useArrowhead = json.useArrowhead;
+        this.setEndpoints(
+            this.model.elements[json.fromIndex],
+            this.model.elements[json.toIndex]
+        );
+    }
+    // Reposition myself to pleasantly bridge the space between "from" and "to" on screen.
+    reposition () {
+        // Figure out where we belong on screen.
+        const arrowheadSize = 10,
+              margin = arrowheadSize * this.thickness / 2,
+              $fromWrapper = $( this.from.htmlViewElement().parentElement ),
+              fromCenter = {
+                  x : $fromWrapper.offset().left + $fromWrapper.width()/2,
+                  y : $fromWrapper.offset().top + $fromWrapper.height()/2
+              },
+              $toWrapper = $( this.to.htmlViewElement().parentElement ),
+              toCenter = {
+                  x : $toWrapper.offset().left + $toWrapper.width()/2,
+                  y : $toWrapper.offset().top + $toWrapper.height()/2
+              },
+              min = {
+                  x : Math.min( fromCenter.x, toCenter.x ) - margin,
+                  y : Math.min( fromCenter.y, toCenter.y ) - margin,
+                  z : Math.min( $fromWrapper.css( 'z-index' ), $toWrapper.css( 'z-index' ) )
+              },
+              max = {
+                  x : Math.max( fromCenter.x, toCenter.x ) + margin,
+                  y : Math.max( fromCenter.y, toCenter.y ) + margin,
+                  z : Math.max( $fromWrapper.css( 'z-index' ), $toWrapper.css( 'z-index' ) )
+              };
+        var canvas = this.htmlViewElement();
+        var $wrapper = $( canvas.parentElement );
+        $wrapper.offset( { left : min.x, top : min.y } )
+                .width( max.x - min.x ).height( max.y - min.y )
+                .css( { "z-index" : min.z - 1 } );
+        $( canvas ).width( max.x - min.x ).height( max.y - min.y );
+        canvas.width = max.x - min.x;
+        canvas.height = max.y - min.y;
+        // Now draw a diagonal line across us.
+        var context = canvas.getContext( '2d' );
+        const start = {
+            x : ( fromCenter.x < toCenter.x ) ? margin : canvas.width - margin,
+            y : ( fromCenter.y < toCenter.y ) ? margin : canvas.height - margin
+        },
+        stop = {
+            x : canvas.width - start.x,
+            y : canvas.height - start.y
+        };
+        context.moveTo( start.x, start.y );
+        context.lineTo( stop.x, stop.y );
+        context.strokeStyle = this.color;
+        context.lineWidth = this.thickness;
+        context.stroke();
+        // Draw arrowhead if requested.
+        const len = Math.sqrt( Math.pow( stop.x - start.x, 2 ) + Math.pow( stop.y - start.y, 2 ) );
+        if ( ( len > 0 ) && this.useArrowhead ) {
+            const unit = { x : ( stop.x - start.x ) / len, y : ( stop.y - start.y ) / len };
+            const mid = { x : ( stop.x + start.x ) / 2, y : ( stop.y + start.y ) / 2 };
+            const perp = { x : -unit.y, y : unit.x };
+            context.moveTo( mid.x + margin * unit.x, mid.y + margin * unit.y );
+            context.lineTo( mid.x - margin * unit.x + margin * perp.x,
+                            mid.y - margin * unit.y + margin * perp.y );
+            context.lineTo( mid.x - margin * unit.x - margin * perp.x,
+                            mid.y - margin * unit.y - margin * perp.y );
+            context.lineTo( mid.x + margin * unit.x, mid.y + margin * unit.y );
+            context.fillStyle = this.color;
+            context.fill();
+        }
+        // Emit a resize event.
+        this.emit( 'resize' );
+    }
+    // This is shown as a canvas, which we will draw a diagonal line on whenenver
+    // this element is repositioned/resized.
+    createHtmlViewElement () { return $( '<canvas></canvas>' )[0]; }
+    // when editing, use one input for each defining feature
+    createHtmlEditElement () {
+        return $(
+            '<div style="min-width: 200px; border: 1px solid black;">'
+          + '<p>Line color:</p>'
+          + `<input type="color" class="color-input" value="${this.color}"/>`
+          + '<p>Line thickness: '
+          + `<input type="range" min="1" max="10" class="size-input" value="${this.thickness}"/></p>`
+          + '<p><input type="checkbox" class="arrow-input" '
+          + ( this.useArrowhead ? 'checked' : '' ) + '/> Draw arrowhead</p>'
+          + '</div>' )[0];
+    }
+    // implement abstract methods save/loadEdits()
+    saveEdits () {
+        this.thickness = $( this.htmlEditElement() ).find( '.size-input' )[0].value;
+        this.color = $( this.htmlEditElement() ).find( '.color-input' )[0].value;
+        this.useArrowhead = $( this.htmlEditElement() ).find( '.arrow-input' ).prop( 'checked' );
+        this.reposition();
+        this.model.sync();
+    }
+    loadEdits () {
+        $( this.htmlEditElement() ).find( '.size-input' )[0].value = parseInt( this.thickness );
+        $( this.htmlEditElement() ).find( '.color-input' )[0].value = this.color;
+        $( this.htmlEditElement() ).find( '.arrow-input' ).prop( 'checked', this.useArrowhead );
+    }
+    toString () {
+        return `Connection from ${this.from.toString()} to ${this.to.toString()}`;
+    }
 }

@@ -103,7 +103,21 @@
             $( pasteButton ).prop( 'disabled', true );
 
             function handleSelectionChanged () {
-               $( '.for-selected-element' ).prop( 'disabled', !Model.selected() );
+               const sel = Model.selected();
+               // Enable buttons about the selected element iff there is a selected element.
+               $( '.for-selected-element' ).prop( 'disabled', !sel );
+               // Enable connection button iff there are things to connect it to,
+               // and populate that drop-down list in any case.
+               var $list = $( '#connectToList' );
+               $list.children().remove();
+               if ( sel )
+                  Model.elements.map( function ( element, index ) {
+                     if ( ( element instanceof ConnectingElement ) || ( element == sel ) ) return;
+                     $list.append( $( `<option value="${index}">${element.toString()}</option>`) );
+                  } );
+               const empty = !$list.children().length;
+               $( '#connectButton,#connectToList' ).prop( 'disabled', empty );
+               if ( empty ) $list.append( $( '<option value="-">--</option>' ) );
             }
             $sheet[0].addEventListener( 'selected', handleSelectionChanged );
             $sheet[0].addEventListener( 'deselected', handleSelectionChanged );
@@ -183,6 +197,10 @@
          }
          function addText () {
             new TextElement( Model );
+         }
+         function connectSelected () {
+            new ConnectingElement( Model, Model.selected(),
+               Model.elements[$( '#connectToList' ).val()] );
          }
          function deleteSelected () {
             var selected = Model.selected();
@@ -277,6 +295,12 @@
                <option value="CG">cycle graph</option>
             </select>
             <select id="groupList"></select>
+         </p>
+         <p class="button-row">
+            <button id="connectButton"
+                    onclick="connectSelected();">Connect to:</button>
+            <select id="connectToList">
+            </select>
          </p>
          <p class="button-row">
             <button id="deleteButton" onclick="deleteSelected();"

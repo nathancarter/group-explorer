@@ -727,7 +727,7 @@ class XMLGroup extends BasicGroup {
          return this._XML_generators;
       }
    }
-
+   
    // returns short representations as array of arrays of strings (just debugging)
    static _reps_from_xml($xml) {
       return $xml.find('representation')
@@ -910,7 +910,7 @@ class Subgroup {
          this._isNormal = this.group.isNormal(this);
       }
       return this._isNormal;
-   }
+   }            
 
    clone() {
       const other = new Subgroup();
@@ -1169,7 +1169,7 @@ class IsomorphicGroups {
       if (IsomorphicGroups.map !== undefined) {
          return;
       }
-
+      
       IsomorphicGroups.map = Library.getGroups()
                                     .reduce(
                                        (map, group) => {
@@ -2326,7 +2326,7 @@ CayleyDiagram.RotatedLayout = class extends CayleyDiagram.CurvedLayout {
       )
 
       const curvedGroup = [];
-
+      
       // scale, rotation, and translate each child
       children.forEach( (child, inx) => {
          const theta = 2*inx*Math.PI/children.length;
@@ -2440,7 +2440,6 @@ class DisplayDiagram {
 
       diagram3D.normalize();
 
-      console.log( 'getting image, options:', JSON.stringify( options ) );
       if ( options.resetCamera ) this.setCamera(diagram3D);
       this.setBackground(diagram3D);
       this.updateLights(diagram3D);
@@ -3109,7 +3108,6 @@ class DisplayDiagram {
             this.camera.quaternion,
             this.camera.scale
          );
-         console.log( this.camera.matrix.toArray() );
       }
       Library.getGroupFromURL( json.groupURL )
              .then( ( group ) => { cayleyDiagram.group = group; } );
