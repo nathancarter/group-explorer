@@ -93,7 +93,6 @@ class DisplayDiagram {
 
       diagram3D.normalize();
 
-      console.log( 'getting image, options:', JSON.stringify( options ) );
       if ( options.resetCamera ) this.setCamera(diagram3D);
       this.setBackground(diagram3D);
       this.updateLights(diagram3D);
@@ -762,7 +761,6 @@ class DisplayDiagram {
             this.camera.quaternion,
             this.camera.scale
          );
-         console.log( this.camera.matrix.toArray() );
       }
       Library.getGroupFromURL( json.groupURL )
              .then( ( group ) => { cayleyDiagram.group = group; } );
