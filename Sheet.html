@@ -26,6 +26,12 @@
             -ms-user-select: none;
             user-select: none;
          }
+         #overlay {
+            pointer-events: none;
+            background-color: rgba(0,0,0,0);
+            position: absolute;
+            z-index: 999999;
+         }
       </style>
 
       <script type="text/x-mathjax-config">
@@ -85,12 +91,11 @@
                handleSelector: '#splitter',
                resizeHeight: false,
                resizeWidthFrom: 'left',
-               onDrag: function () {
-                  // Code to resize the graphic goes here, if needed
-               }
+               onDrag: resizeGraphic
             });
 
-            $('#graphic').css({backgroundColor:'#f8f8f8'});
+            $('#graphic').css({backgroundColor:'#f8f8f8'})
+                         .append('<canvas id="overlay"></canvas>');
             show('#sheet-control');
             resizeBody();
 
@@ -108,16 +113,22 @@
                $( '.for-selected-element' ).prop( 'disabled', !sel );
                // Enable connection button iff there are things to connect it to,
                // and populate that drop-down list in any case.
-               var $list = $( '#connectToList' );
-               $list.children().remove();
+               var $clist = $( '#connectToList' ),
+                   $mlist = $( '#morphismToList' );
+               $clist.children().remove();
+               $mlist.children().remove();
                if ( sel )
                   Model.elements.map( function ( element, index ) {
+                     const item = `<option value="${index}">${element.toString()}</option>`;
                      if ( ( element instanceof ConnectingElement ) || ( element == sel ) ) return;
-                     $list.append( $( `<option value="${index}">${element.toString()}</option>`) );
+                     $clist.append( $( item ) );
+                     if ( ( sel instanceof VisualizerElement ) && ( element instanceof VisualizerElement ) )
+                        $mlist.append( $( item ) );
                   } );
-               const empty = !$list.children().length;
-               $( '#connectButton,#connectToList' ).prop( 'disabled', empty );
-               if ( empty ) $list.append( $( '<option value="-">--</option>' ) );
+               $( '#connectButton,#connectToList' ).prop( 'disabled', !$clist.children().length );
+               if ( !$clist.children().length ) $clist.append( $( '<option value="-">--</option>' ) );
+               $( '#morphismButton,#morphismToList' ).prop( 'disabled', !$mlist.children().length );
+               if ( !$mlist.children().length ) $mlist.append( $( '<option value="-">--</option>' ) );
             }
             $sheet[0].addEventListener( 'selected', handleSelectionChanged );
             $sheet[0].addEventListener( 'deselected', handleSelectionChanged );
@@ -175,6 +186,24 @@
          function resizeBody() {
             $('body').height(window.innerHeight);
             $('body').width(window.innerWidth);
+            resizeGraphic();
+         }
+
+         /*
+          * Resize the #graphic pane, which means ensuring that the translucent overlay
+          * is the same size as it.
+          */
+         function resizeGraphic () {
+            const $graphic = $( '#graphic' );
+            $( '#overlay' ).offset( {
+                left : $graphic.offset().left,
+                top : $graphic.offset().top
+            } ).width( $graphic.width() ).height( $graphic.height() );
+            const canvas = $( '#overlay' )[0];
+            canvas.width = $graphic.width();
+            canvas.height = $graphic.height();
+            var context = canvas.getContext( '2d' );
+            Model.drawOverlay();
          }
 
          /* Show the desired panel, hide the rest */
@@ -201,6 +230,10 @@
          function connectSelected () {
             new ConnectingElement( Model, Model.selected(),
                Model.elements[$( '#connectToList' ).val()] );
+         }
+         function morphismSelected () {
+            new MorphismElement( Model, Model.selected(),
+               Model.elements[$( '#morphismToList' ).val()] );
          }
          function deleteSelected () {
             var selected = Model.selected();
@@ -300,6 +333,12 @@
             <button id="connectButton"
                     onclick="connectSelected();">Connect to:</button>
             <select id="connectToList">
+            </select>
+         </p>
+         <p class="button-row">
+            <button id="morphismButton"
+                    onclick="morphismSelected();">Morphism to:</button>
+            <select id="morphismToList">
             </select>
          </p>
          <p class="button-row">

@@ -256,12 +256,15 @@ class SheetModel {
         var that = this;
         // Delete any elements that don't belong
         Array.from( this.view.childNodes ).map( function ( htmlElt ) {
+            if ( htmlElt.id == 'overlay' ) return;
             if ( !that.elements.find( ( sheetElt ) => htmlElt.childNodes[0] == sheetElt.htmlViewElement() ) ) {
                 htmlElt.parentElement.removeChild( htmlElt );
             }
         } );
         // Ensure all Sheet Elements have their HTML element in the view
         this.elements.map( function ( sheetElt ) { that.buildWrapperFor( sheetElt ); } );
+        // Update any overlay drawing that may need to be done.
+        this.drawOverlay();
         // While we're here, if anything changed since the last time we were here,
         // record it on the undo/redo stack.
         if ( this.undoRedoActive ) {
@@ -422,6 +425,18 @@ class SheetModel {
                 lowestAbove = other;
         } );
         if ( lowestAbove ) this.adjustZ( element, lowestAbove );
+    }
+
+    // If any SheetElements want to draw on the overlay, they do so here.
+    drawOverlay () {
+        const $view = $( this.view );
+        const canvas = $view.find( 'canvas' )[0];
+        canvas.width = $view.width();
+        canvas.height = $view.height();
+        const context = canvas.getContext( '2d' );
+        this.elements.map( function ( element ) {
+            if ( element.drawOverlay ) element.drawOverlay( canvas, context );
+        } );
     }
 }
 
@@ -1034,17 +1049,19 @@ class ConnectingElement extends SheetElement {
         this.color = json.color;
         this.thickness = json.thickness;
         this.useArrowhead = json.useArrowhead;
+        this.arrowheadSize = 10;
         this.setEndpoints(
             this.model.elements[json.fromIndex],
             this.model.elements[json.toIndex]
         );
     }
+    // Convenience function for internal use
+    margin () { return this.arrowheadSize * this.thickness / 2; }
     // Reposition myself to pleasantly bridge the space between "from" and "to" on screen.
+    // Then draw the line and optionally arrowhead, respecting all settings.
     reposition () {
         // Figure out where we belong on screen.
-        const arrowheadSize = 10,
-              margin = arrowheadSize * this.thickness / 2,
-              $fromWrapper = $( this.from.htmlViewElement().parentElement ),
+        const $fromWrapper = $( this.from.htmlViewElement().parentElement ),
               fromCenter = {
                   x : $fromWrapper.offset().left + $fromWrapper.width()/2,
                   y : $fromWrapper.offset().top + $fromWrapper.height()/2
@@ -1055,33 +1072,46 @@ class ConnectingElement extends SheetElement {
                   y : $toWrapper.offset().top + $toWrapper.height()/2
               },
               min = {
-                  x : Math.min( fromCenter.x, toCenter.x ) - margin,
-                  y : Math.min( fromCenter.y, toCenter.y ) - margin,
+                  x : Math.min( fromCenter.x, toCenter.x ) - this.margin(),
+                  y : Math.min( fromCenter.y, toCenter.y ) - this.margin(),
                   z : Math.min( $fromWrapper.css( 'z-index' ), $toWrapper.css( 'z-index' ) )
               },
               max = {
-                  x : Math.max( fromCenter.x, toCenter.x ) + margin,
-                  y : Math.max( fromCenter.y, toCenter.y ) + margin,
+                  x : Math.max( fromCenter.x, toCenter.x ) + this.margin(),
+                  y : Math.max( fromCenter.y, toCenter.y ) + this.margin(),
                   z : Math.max( $fromWrapper.css( 'z-index' ), $toWrapper.css( 'z-index' ) )
               };
+        $( this.htmlViewElement().parentElement )
+            .offset( { left : min.x, top : min.y } )
+            .width( max.x - min.x )
+            .height( max.y - min.y )
+            .css( { "z-index" : min.z - 1 } );
+        // Draw the connecting line.
+        this.drawConnectingLine();
+        // Emit a resize event.
+        this.emit( 'resize' );
+    }
+    // How to draw my connecting line.
+    drawConnectingLine () {
         var canvas = this.htmlViewElement();
         var $wrapper = $( canvas.parentElement );
-        $wrapper.offset( { left : min.x, top : min.y } )
-                .width( max.x - min.x ).height( max.y - min.y )
-                .css( { "z-index" : min.z - 1 } );
-        $( canvas ).width( max.x - min.x ).height( max.y - min.y );
-        canvas.width = max.x - min.x;
-        canvas.height = max.y - min.y;
+        $( canvas ).width( $wrapper.width() ).height( $wrapper.height() );
+        canvas.width = $wrapper.width();
+        canvas.height = $wrapper.height();
         // Now draw a diagonal line across us.
-        var context = canvas.getContext( '2d' );
-        const start = {
-            x : ( fromCenter.x < toCenter.x ) ? margin : canvas.width - margin,
-            y : ( fromCenter.y < toCenter.y ) ? margin : canvas.height - margin
-        },
-        stop = {
-            x : canvas.width - start.x,
-            y : canvas.height - start.y
-        };
+        const context = canvas.getContext( '2d' ),
+              $fromWrapper = $( this.from.htmlViewElement().parentElement ),
+              $toWrapper = $( this.to.htmlViewElement().parentElement ),
+              start = {
+                  x : ( $fromWrapper.offset().left < $toWrapper.offset().left ) ?
+                        this.margin() : canvas.width - this.margin(),
+                  y : ( $fromWrapper.offset().top < $toWrapper.offset().top ) ?
+                        this.margin() : canvas.height - this.margin()
+              },
+              stop = {
+                  x : canvas.width - start.x,
+                  y : canvas.height - start.y
+              };
         context.moveTo( start.x, start.y );
         context.lineTo( stop.x, stop.y );
         context.strokeStyle = this.color;
@@ -1102,8 +1132,6 @@ class ConnectingElement extends SheetElement {
             context.fillStyle = this.color;
             context.fill();
         }
-        // Emit a resize event.
-        this.emit( 'resize' );
     }
     // This is shown as a canvas, which we will draw a diagonal line on whenenver
     // this element is repositioned/resized.
@@ -1135,5 +1163,72 @@ class ConnectingElement extends SheetElement {
     }
     toString () {
         return `Connection from ${this.from.toString()} to ${this.to.toString()}`;
+    }
+}
+
+/*
+ * SheetElement representing a homomorphism from one group to another
+ */
+class MorphismElement extends ConnectingElement {
+    // You can only set endpoints on a morphism if they're both pictures of groups.
+    // (You can't connect, say, text to something with a morphism.)
+    setEndpoints ( from, to ) {
+        if ( !( from instanceof VisualizerElement )
+          || !( to instanceof VisualizerElement ) )
+            throw "Both parameters to MorphismElement constructor must be VisualizerElements";
+        super.setEndpoints( from, to );
+    }
+    // Update toJSON() just to handle our class correctly.  We will extend this later.
+    toJSON () {
+        var result = super.toJSON();
+        result.className = 'MorphismElement';
+        return result;
+    }
+    // Override drawConnectingLine to do nothing for morphisms.
+    drawConnectingLine () { }
+    // But we will draw overlays!  This is a temporary test to prove that it works;
+    // it is certainly not the actual visualization for morphisms.
+    drawOverlay ( canvas, context ) {
+        const $fromWrapper = $( this.from.htmlViewElement().parentElement ),
+              fromPadding = parseInt( $fromWrapper.css( 'padding' ) ),
+              $toWrapper = $( this.to.htmlViewElement().parentElement ),
+              toPadding = parseInt( $toWrapper.css( 'padding' ) ),
+              left = $( this.model.view ).offset().left,
+              top = $( this.model.view ).offset().top,
+              f1 = { x : $fromWrapper.offset().left + fromPadding,
+                     y : $fromWrapper.offset().top + fromPadding },
+              f2 = { x : f1.x + $fromWrapper.width(), y : f1.y + $fromWrapper.height() },
+              t1 = { x : $toWrapper.offset().left + toPadding,
+                     y : $toWrapper.offset().top + toPadding },
+              t2 = { x : t1.x + $toWrapper.width(), y : t1.y + $toWrapper.height() };
+        context.save();
+        context.transform( 1, 0, 0, 1, -left, -top );
+        context.strokeStyle = '#000000';
+        context.moveTo( f1.x, f1.y );
+        context.lineTo( t1.x, t1.y );
+        context.moveTo( f1.x, f2.y );
+        context.lineTo( t1.x, t2.y );
+        context.moveTo( f2.x, f1.y );
+        context.lineTo( t2.x, t1.y );
+        context.moveTo( f2.x, f2.y );
+        context.lineTo( t2.x, t2.y );
+        context.stroke();
+        context.restore();
+    }
+    // when editing, use one input for each defining feature
+    createHtmlEditElement () {
+        return $( '<p>Not yet implemented.</p>' );
+    }
+    // implement abstract methods save/loadEdits()
+    saveEdits () {
+        // fill in later
+        this.reposition();
+        this.model.sync();
+    }
+    loadEdits () {
+        // fill in later
+    }
+    toString () {
+        return `Morphism from ${this.from.toString()} to ${this.to.toString()}`;
     }
 }

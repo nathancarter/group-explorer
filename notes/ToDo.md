@@ -38,8 +38,7 @@
 
  * Sheets
     * Morphisms
-       * Make `MorphismElement` inherit from `ConnectingElement`.
-       * I'll have to come back here later and finish the plan for this.
+       * I must insert a plan here.
     * Extend the toJSON() and fromJSON() in CayleyDiagram.html to also respect:
        * node colors: `Cayley_diagram.nodes[i].nodeColor` then same update routine or `updateHighlights()`
          (Is this the same as node highlights?)
