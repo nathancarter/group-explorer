@@ -1186,6 +1186,39 @@ class MorphismElement extends ConnectingElement {
     }
     // Override drawConnectingLine to do nothing for morphisms.
     drawConnectingLine () { }
+    // Auxiliary function for finding the point of exit of a line from start to stop
+    // (each of which is a point with .x and .y fields) from the box with corners
+    // corner1 and corner2 (same data format).  The corners can come in either order.
+    // This assumes that start is inside the box.
+    static pointWhereLineExitsBox ( start, stop, corner1, corner2 ) {
+        // Let v be the vector from start point to stop point.
+        const v = { x : stop.x - start.x, y : stop.y - start.y };
+        // Extend each box side to be a line, not just a line segment, and find
+        // where the line intersects each, using its parametric equations where
+        // t=0 is at start and t=1 is at stop.  Find the smallest positive finite one.
+        const t = Math.min.apply( null, [
+            ( corner1.x - start.x ) / v.x, ( corner2.x - start.x ) / v.x,
+            ( corner1.y - start.y ) / v.y, ( corner2.y - start.y ) / v.y
+        ].filter( function ( t ) {
+            return !isNaN( t ) && isFinite( t ) && ( t > 0 );
+        } ) );
+        // Convert that back into a point and return it.
+        return { x : start.x + t * v.x, y : start.y + t * v.y };
+    }
+    // Auxiliary function for drawing an arrow from A to B with arrowhead of size S.
+    static drawArrow ( A, B, S, context ) {
+        context.moveTo( A.x, A.y );
+        context.lineTo( B.x, B.y );
+        const dir = { x : B.x - A.x, y : B.y - A.y },
+              len = Math.sqrt( Math.pow( dir.x, 2 ) + Math.pow( dir.y, 2 ) );
+        if ( len > 0 ) {
+            const unit = { x : dir.x / len, y : dir.y / len },
+                  perp = { x : -unit.y / 2, y : unit.x / 2 };
+            context.moveTo( B.x - S * unit.x + S * perp.x, B.y - S * unit.y + S * perp.y );
+            context.lineTo( B.x, B.y );
+            context.lineTo( B.x - S * unit.x - S * perp.x, B.y - S * unit.y - S * perp.y );
+        }
+    }
     // But we will draw overlays!  This is a temporary test to prove that it works;
     // it is certainly not the actual visualization for morphisms.
     drawOverlay ( canvas, context ) {
@@ -1200,18 +1233,15 @@ class MorphismElement extends ConnectingElement {
               f2 = { x : f1.x + $fromWrapper.width(), y : f1.y + $fromWrapper.height() },
               t1 = { x : $toWrapper.offset().left + toPadding,
                      y : $toWrapper.offset().top + toPadding },
-              t2 = { x : t1.x + $toWrapper.width(), y : t1.y + $toWrapper.height() };
+              t2 = { x : t1.x + $toWrapper.width(), y : t1.y + $toWrapper.height() },
+              fc = { x : ( f1.x + f2.x ) / 2, y : ( f1.y + f2.y ) / 2 },
+              tc = { x : ( t1.x + t2.x ) / 2, y : ( t1.y + t2.y ) / 2 },
+              exit = MorphismElement.pointWhereLineExitsBox( fc, tc, f1, f2 ),
+              enter = MorphismElement.pointWhereLineExitsBox( tc, fc, t1, t2 );
         context.save();
         context.transform( 1, 0, 0, 1, -left, -top );
         context.strokeStyle = '#000000';
-        context.moveTo( f1.x, f1.y );
-        context.lineTo( t1.x, t1.y );
-        context.moveTo( f1.x, f2.y );
-        context.lineTo( t1.x, t2.y );
-        context.moveTo( f2.x, f1.y );
-        context.lineTo( t2.x, t1.y );
-        context.moveTo( f2.x, f2.y );
-        context.lineTo( t2.x, t2.y );
+        MorphismElement.drawArrow( exit, enter, 20, context );
         context.stroke();
         context.restore();
     }

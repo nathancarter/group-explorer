@@ -38,8 +38,6 @@
 
  * Sheets
     * Morphisms
-       * Write `drawOverlay()` so that it draws a single arrow from the domain to the codomain,
-         with the arrowhead at the latter end.
        * Create a method that produces a new function name (f, g, h, f2, g2, h2, etc.) unique
          to the sheet containing the morphism in which it's run.
        * Use that method to assign a new, unique name to any morphism upon creation.
