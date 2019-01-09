@@ -38,9 +38,6 @@
 
  * Sheets
     * Morphisms
-       * Implement the Preview button to generate HTML for another window, then open the window,
-         then set it as the body's inner HTML.  Include text saying that you can close the
-         window when you're done.
        * Add to the edit pane a checkbox for whether to show, with the morphism name,
          its list of generating pairs (one or more lines of hte form `f(_)=_`, or the
          statement that everything maps to the identity).  Create the serialization and

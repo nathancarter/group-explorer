@@ -1399,7 +1399,18 @@ class MorphismElement extends ConnectingElement {
             that.fillTableWithPairs();
         } );
         $result.find( '#morphismPreview' ).on( 'click', function () {
-            alert( 'Not yet implemented' );
+            var html =
+                `<center><h1>Full Table of Values for Morphism ${that.name}</h1>`
+              + '<p>Feel free to close this window when you\'re done with its content.</p>'
+              + '<table border=1 cellspacing=0>'
+              + '<tr><th>This element</th><th>Maps to this</th></tr>';
+            for ( var i = 0 ; i < that.from.group.order ; i++ )
+                html += `<tr><td>${that.from.group.representation[i]}</td>`
+                      + `<td>${that.to.group.representation[that._map[i]]}</td></tr>`;
+            html += '</table></center>';
+            var newWindow = window.open();
+            newWindow.document.write( html );
+            newWindow.document.close();
         } );
         return $result[0];
     }
