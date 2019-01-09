@@ -1065,8 +1065,8 @@ class MorphismElement extends ConnectingElement {
                 x - lineWidths[index]/2, y - height/2 + approxLineHeight * ( index + 1 ) );
         } );
     }
-    // But we will draw overlays!  This is a temporary test to prove that it works;
-    // it is certainly not the actual visualization for morphisms.
+    // Morphism overlays are the arrow with whatever corresponding txet
+    // the user has asked us to include.
     drawOverlay ( canvas, context ) {
         const $fromWrapper = $( this.from.htmlViewElement().parentElement ),
               fromPadding = parseInt( $fromWrapper.css( 'padding' ) ),
