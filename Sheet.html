@@ -107,29 +107,6 @@
             $( filenameInput ).val( `My Sheet ${i}` );
             $( pasteButton ).prop( 'disabled', true );
 
-            function handleSelectionChanged () {
-               const sel = Model.selected();
-               // Enable buttons about the selected element iff there is a selected element.
-               $( '.for-selected-element' ).prop( 'disabled', !sel );
-               // Enable connection button iff there are things to connect it to,
-               // and populate that drop-down list in any case.
-               var $clist = $( '#connectToList' ),
-                   $mlist = $( '#morphismToList' );
-               $clist.children().remove();
-               $mlist.children().remove();
-               if ( sel )
-                  Model.elements.map( function ( element, index ) {
-                     const item = `<option value="${index}">${element.toString()}</option>`;
-                     if ( ( element instanceof ConnectingElement ) || ( element == sel ) ) return;
-                     $clist.append( $( item ) );
-                     if ( ( sel instanceof VisualizerElement ) && ( element instanceof VisualizerElement ) )
-                        $mlist.append( $( item ) );
-                  } );
-               $( '#connectButton,#connectToList' ).prop( 'disabled', !$clist.children().length );
-               if ( !$clist.children().length ) $clist.append( $( '<option value="-">--</option>' ) );
-               $( '#morphismButton,#morphismToList' ).prop( 'disabled', !$mlist.children().length );
-               if ( !$mlist.children().length ) $mlist.append( $( '<option value="-">--</option>' ) );
-            }
             $sheet[0].addEventListener( 'selected', handleSelectionChanged );
             $sheet[0].addEventListener( 'deselected', handleSelectionChanged );
             handleSelectionChanged();
@@ -156,6 +133,32 @@
             } );
 
             $( reset ).hide();
+         }
+
+         function handleSelectionChanged () {
+            const sel = Model.selected();
+            // Enable buttons about the selected element iff there is a selected element.
+            $( '.for-selected-element' ).prop( 'disabled', !sel );
+            // Enable connection button iff there are things to connect it to,
+            // and populate that drop-down list in any case.
+            var $clist = $( '#connectToList' ),
+                $mlist = $( '#morphismToList' );
+            $clist.children().remove();
+            $mlist.children().remove();
+            if ( sel )
+               Model.elements.map( function ( element, index ) {
+                  const item = `<option value="${index}">${element.toString()}</option>`;
+                  if ( ( element instanceof ConnectingElement ) || ( element == sel ) ) return;
+                  $clist.append( $( item ) );
+                  if ( ( sel instanceof VisualizerElement ) && ( element instanceof VisualizerElement )
+                    && !MorphismElement.existsMorphismBetween( sel, element )
+                    && !MorphismElement.existsMorphismBetween( element, sel ) )
+                     $mlist.append( $( item ) );
+               } );
+            $( '#connectButton,#connectToList' ).prop( 'disabled', !$clist.children().length );
+            if ( !$clist.children().length ) $clist.append( $( '<option value="-">--</option>' ) );
+            $( '#morphismButton,#morphismToList' ).prop( 'disabled', !$mlist.children().length );
+            if ( !$mlist.children().length ) $mlist.append( $( '<option value="-">--</option>' ) );
          }
 
          function updateLoadList () {
@@ -234,6 +237,7 @@
          function morphismSelected () {
             new MorphismElement( Model, Model.selected(),
                Model.elements[$( '#morphismToList' ).val()] );
+            handleSelectionChanged();
          }
          function deleteSelected () {
             var selected = Model.selected();
