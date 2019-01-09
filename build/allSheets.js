@@ -553,7 +553,6 @@ class SheetElement {
         this.bgBeforeEdit = $( this.htmlEditElement() ).css( 'background-color' );
         $wrapper.css( 'z-index', 1000 );
         $( this.htmlEditElement() ).css( 'background-color', 'white' );
-        console.log( this.zBeforeEdit, this.bgBeforeEdit );
     }
     // Reverse of the previous
     showViewControls () {
@@ -988,13 +987,12 @@ class ConnectingElement extends SheetElement {
         this.color = '#000000';
         this.thickness = 1;
         this.useArrowhead = false;
+        this.arrowheadSize = 10;
     }
     // Function to store both endpoints.
     setEndpoints ( from, to ) {
         if ( !( from instanceof SheetElement ) || !( to instanceof SheetElement ) )
             throw "Both parameters to ConnectingElement constructor must be SheetElements";
-        if ( this.from )
-            this.from.off( '')
         this.from = from;
         this.to = to;
         this.installHandlers();
@@ -1049,7 +1047,7 @@ class ConnectingElement extends SheetElement {
         this.color = json.color;
         this.thickness = json.thickness;
         this.useArrowhead = json.useArrowhead;
-        this.arrowheadSize = 10;
+        this.arrowheadSize = json.arrowheadSize;
         this.setEndpoints(
             this.model.elements[json.fromIndex],
             this.model.elements[json.toIndex]
@@ -1112,17 +1110,20 @@ class ConnectingElement extends SheetElement {
                   x : canvas.width - start.x,
                   y : canvas.height - start.y
               };
+        context.beginPath();
         context.moveTo( start.x, start.y );
         context.lineTo( stop.x, stop.y );
         context.strokeStyle = this.color;
         context.lineWidth = this.thickness;
         context.stroke();
+        console.log( 'draw', start, stop, this.color, this.thickness );
         // Draw arrowhead if requested.
         const len = Math.sqrt( Math.pow( stop.x - start.x, 2 ) + Math.pow( stop.y - start.y, 2 ) );
         if ( ( len > 0 ) && this.useArrowhead ) {
             const unit = { x : ( stop.x - start.x ) / len, y : ( stop.y - start.y ) / len };
             const mid = { x : ( stop.x + start.x ) / 2, y : ( stop.y + start.y ) / 2 };
             const perp = { x : -unit.y, y : unit.x };
+            context.beginPath();
             context.moveTo( mid.x + margin * unit.x, mid.y + margin * unit.y );
             context.lineTo( mid.x - margin * unit.x + margin * perp.x,
                             mid.y - margin * unit.y + margin * perp.y );
@@ -1170,6 +1171,25 @@ class ConnectingElement extends SheetElement {
  * SheetElement representing a homomorphism from one group to another
  */
 class MorphismElement extends ConnectingElement {
+    // Constructor just assigns an unused name.
+    constructor ( model, from, to ) {
+        super( model, from, to );
+        this.name = this.getUnusedName();
+    }
+    // Find the simplest mathy name for this morphism that's not yet used on its sheet.
+    getUnusedName () {
+        const names = [ 'f', 'g', 'h' ];
+        for ( var i = 1 ; true ; i++ ) {
+            const suffix = ( i > 1 ) ? `${i}` : '';
+            for ( var j = 0 ; j < names.length ; j++ ) {
+                const maybeThis = names[j] + suffix;
+                if ( this.model.elements.filter( function ( element ) {
+                    return ( element instanceof MorphismElement )
+                        && ( element.name == maybeThis );
+                } ).length == 0 ) return maybeThis;
+            }
+        }
+    }
     // You can only set endpoints on a morphism if they're both pictures of groups.
     // (You can't connect, say, text to something with a morphism.)
     setEndpoints ( from, to ) {
@@ -1182,7 +1202,13 @@ class MorphismElement extends ConnectingElement {
     toJSON () {
         var result = super.toJSON();
         result.className = 'MorphismElement';
+        result.name = this.name;
         return result;
+    }
+    // Corresponding fromJSON()
+    fromJSON ( json ) {
+        super.fromJSON( json );
+        this.name = json.name;
     }
     // Override drawConnectingLine to do nothing for morphisms.
     drawConnectingLine () { }
@@ -1207,6 +1233,7 @@ class MorphismElement extends ConnectingElement {
     }
     // Auxiliary function for drawing an arrow from A to B with arrowhead of size S.
     static drawArrow ( A, B, S, context ) {
+        context.beginPath();
         context.moveTo( A.x, A.y );
         context.lineTo( B.x, B.y );
         const dir = { x : B.x - A.x, y : B.y - A.y },
@@ -1218,6 +1245,29 @@ class MorphismElement extends ConnectingElement {
             context.lineTo( B.x, B.y );
             context.lineTo( B.x - S * unit.x - S * perp.x, B.y - S * unit.y - S * perp.y );
         }
+        context.stroke();
+    }
+    // Auxiliary function for writing text at a certain place.
+    // Takes an array of text lines and draws them with a background box, one per line,
+    // centered in each line, with the box centered at the given coordinates.
+    static drawTextLines ( lines, x, y, context ) {
+        context.font = '12pt Arial';
+        const approxLineHeight = 1.4 * context.measureText( 'M' ).width,
+              margin = approxLineHeight / 2;
+        const lineWidths = lines.map( function ( line ) {
+            return context.measureText( line ).width;
+        } );
+        const width = Math.max.apply( null, lineWidths ) + 2 * margin,
+              height = approxLineHeight * lines.length + 2 * margin;
+        context.fillStyle = '#ffffff';
+        context.fillRect( x - width/2, y - height/2, width, height );
+        context.strokeStyle = '#000000';
+        context.strokeRect( x - width/2, y - height/2, width, height );
+        context.fillStyle = '#000000';
+        lines.map( function ( line, index ) {
+            context.fillText( line,
+                x - lineWidths[index]/2, y - height/2 + approxLineHeight * ( index + 1 ) );
+        } );
     }
     // But we will draw overlays!  This is a temporary test to prove that it works;
     // it is certainly not the actual visualization for morphisms.
@@ -1242,7 +1292,9 @@ class MorphismElement extends ConnectingElement {
         context.transform( 1, 0, 0, 1, -left, -top );
         context.strokeStyle = '#000000';
         MorphismElement.drawArrow( exit, enter, 20, context );
-        context.stroke();
+        MorphismElement.drawTextLines( [
+            this.name
+        ], ( exit.x + enter.x ) / 2, ( exit.y + enter.y ) / 2, context );
         context.restore();
     }
     // when editing, use one input for each defining feature
@@ -1259,6 +1311,16 @@ class MorphismElement extends ConnectingElement {
         // fill in later
     }
     toString () {
-        return `Morphism from ${this.from.toString()} to ${this.to.toString()}`;
+        return `Morphism ${this.name} from ${this.from.toString()} to ${this.to.toString()}`;
+    }
+    // Provide a static method for checking whether two sheet elements are connected,
+    // in one direction.  (To check both directions, call twice.)
+    static existsMorphismBetween ( A, B ) {
+        for ( var i = 0 ; i < A.model.elements.length ; i++ ) {
+            const elt = A.model.elements[i];
+            if ( ( elt instanceof MorphismElement ) && ( elt.from == A ) && ( elt.to == B ) )
+                return true;
+        }
+        return false;
     }
 }
