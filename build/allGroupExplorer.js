@@ -3077,6 +3077,14 @@ class DisplayDiagram {
       this.updateArrowheads(diagram3D);
    }
 
+   // Be able to answer the question of where in the diagram any given element is drawn.
+   // We answer in normalized coordinates, [0,1]x[0,1].
+   unitSquarePosition ( element, cayleyDiagram ) {
+      const point3d = cayleyDiagram.nodes[element].point.clone(),
+            point2d = point3d.project( this.camera );
+      return { x : point2d.x/2 + 1/2, y : -point2d.y/2 + 1/2 };
+   }
+
    // two serialization functions
    toJSON ( cayleyDiagram ) {
       return {
@@ -3799,6 +3807,13 @@ class DisplayMulttable {
       return (x === undefined || y === undefined) ? undefined : {x: x, y: y};
    }
 
+   // Be able to answer the question of where in the diagram any given element is drawn.
+   // We answer in normalized coordinates, [0,1]x[0,1].
+   unitSquarePosition ( element, multtable ) {
+      const max = multtable.position( multtable.group.order - 1 ) + 1;
+      return { x : 0.5 / max, y : ( multtable.position( element ) + 0.5 ) / max };
+   }
+
    // two serialization functions
    toJSON ( multtable ) {
       return {
@@ -4441,6 +4456,22 @@ class DisplayCycleGraph {
          Math.sqrt( Math.pow( pos.x - cg_coords.x, 2 ) + Math.pow( pos.y - cg_coords.y, 2 ) ) < this.radius
       );
       return (index == -1) ? undefined : index;
+   }
+
+   // Be able to answer the question of where in the diagram any given element is drawn.
+   // We answer in normalized coordinates, [0,1]x[0,1].
+   unitSquarePosition ( element, cycleGraph ) {
+      const virtualCoords = new THREE.Vector3( cycleGraph.positions[element].x,
+                                               cycleGraph.positions[element].y, 0 ),
+            // multiplying a transform by a vector does not translate it, unfortunately:
+            untranslatedCanvasCoords = virtualCoords.applyMatrix3( this.transform ),
+            // so we do the translation manually:
+            translatedCanvasCoords = {
+               x : this.transform.elements[6] + untranslatedCanvasCoords.x,
+               y : this.transform.elements[7] + untranslatedCanvasCoords.y
+            };
+      return { x : translatedCanvasCoords.x / this.canvas.width,
+               y : translatedCanvasCoords.y / this.canvas.height };
    }
 
    // two serialization functions

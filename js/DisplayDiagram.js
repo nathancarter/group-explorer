@@ -730,6 +730,14 @@ class DisplayDiagram {
       this.updateArrowheads(diagram3D);
    }
 
+   // Be able to answer the question of where in the diagram any given element is drawn.
+   // We answer in normalized coordinates, [0,1]x[0,1].
+   unitSquarePosition ( element, cayleyDiagram ) {
+      const point3d = cayleyDiagram.nodes[element].point.clone(),
+            point2d = point3d.project( this.camera );
+      return { x : point2d.x/2 + 1/2, y : -point2d.y/2 + 1/2 };
+   }
+
    // two serialization functions
    toJSON ( cayleyDiagram ) {
       return {

@@ -282,6 +282,22 @@ class DisplayCycleGraph {
       return (index == -1) ? undefined : index;
    }
 
+   // Be able to answer the question of where in the diagram any given element is drawn.
+   // We answer in normalized coordinates, [0,1]x[0,1].
+   unitSquarePosition ( element, cycleGraph ) {
+      const virtualCoords = new THREE.Vector3( cycleGraph.positions[element].x,
+                                               cycleGraph.positions[element].y, 0 ),
+            // multiplying a transform by a vector does not translate it, unfortunately:
+            untranslatedCanvasCoords = virtualCoords.applyMatrix3( this.transform ),
+            // so we do the translation manually:
+            translatedCanvasCoords = {
+               x : this.transform.elements[6] + untranslatedCanvasCoords.x,
+               y : this.transform.elements[7] + untranslatedCanvasCoords.y
+            };
+      return { x : translatedCanvasCoords.x / this.canvas.width,
+               y : translatedCanvasCoords.y / this.canvas.height };
+   }
+
    // two serialization functions
    toJSON ( cycleGraph ) {
       return {

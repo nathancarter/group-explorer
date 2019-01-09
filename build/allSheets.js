@@ -553,6 +553,7 @@ class SheetElement {
         this.bgBeforeEdit = $( this.htmlEditElement() ).css( 'background-color' );
         $wrapper.css( 'z-index', 1000 );
         $( this.htmlEditElement() ).css( 'background-color', 'white' );
+        this.model.drawOverlay(); // hide/show morphism arrows
     }
     // Reverse of the previous
     showViewControls () {
@@ -568,6 +569,7 @@ class SheetElement {
             $( this.htmlEditElement() ).css( 'background-color', this.bgBeforeEdit );
             delete this.bgBeforeEdit;
         }
+        this.model.drawOverlay(); // hide/show morphism arrows
     }
 
     // This function should read from its edit controls and save their meaning into
@@ -892,7 +894,10 @@ class VisualizerElement extends SheetElement {
                 }
                 if ( otherWinState == 'ready' ) {
                     // but when the editor changes, update us to be just like it
-                    if ( event.data.source == 'editor' ) that.fromJSON( event.data.json );
+                    if ( event.data.source == 'editor' ) {
+                        that.fromJSON( event.data.json );
+                        that.model.sync();
+                    }
                 }
             }, false );
         }, 10 );
@@ -931,12 +936,34 @@ class VisualizerElement extends SheetElement {
         const groupname = this.vizobj ? this.vizobj.group.name : 'a group';
         return `Visualization for ${groupname}`;
     }
+    // Where in the unit square (normalized coordinates, [0,1]x[0,1]) does this
+    // visualizer place the given group element?  We ask the display visualizer
+    // to answer this question for us.  We permit subclasses to say whether they
+    // stretch to fill their rectangle, or stay square-shaped, leaving unused
+    // regions on sides (or top and bottom) to fill out their aspect ratio.
+    unitSquarePosition ( element ) {
+        var result = this.vizdisplay.unitSquarePosition( element, this.vizobj );
+        if ( this.ignoresAspectRatio ) {
+            const $wrapper = $( this.htmlViewElement().parentElement ),
+                  w = $wrapper.width(),
+                  h = $wrapper.height();
+            if ( w != h )
+                result = ( w > h ) ?
+                         { x : ( 1 - h/w ) / 2 + result.x * h/w, y : result.y } :
+                         { x : result.x, y : ( 1 - w/h ) / 2 + result.y * w/h };
+        }
+        return result;
+    }
 }
 
 /*
  * SheetElement subclass for showing the multiplication table of a group
  */
 class MTElement extends VisualizerElement {
+    constructor ( model, groupURL ) {
+        super( model, groupURL );
+        this.ignoresAspectRatio = true;
+    }
     makeVisualizerObject ( group ) { return new Multtable( group ); }
     makeVisualizerDisplay ( options ) { return new DisplayMulttable( options ); }
     getEditPage () { return './Multtable.html'; }
@@ -950,6 +977,17 @@ class MTElement extends VisualizerElement {
  * SheetElement subclass for showing the cycle graph of a group
  */
 class CGElement extends VisualizerElement {
+    constructor ( model, groupURL ) {
+        super( model, groupURL );
+        // The following hack is because the CG has to realize that its canvas size
+        // has changed before it will give us accurate values for unitSquarePosition().
+        // So drawing overlays with multiple arrows immediately can get some endpoints
+        // incorrect.  Thus we redo the task 1ms later, to fix any errors instantly.
+        var that = this;
+        this.on( 'resize', function () {
+            setTimeout( function () { that.model.drawOverlay() }, 1 );
+        } );
+    }
     makeVisualizerObject ( group ) { return new CycleGraph( group ); }
     makeVisualizerDisplay ( options ) { return new DisplayCycleGraph( options ); }
     getEditPage () { return './CycleDiagram.html'; }
@@ -1294,7 +1332,23 @@ class MorphismElement extends ConnectingElement {
         context.save();
         context.transform( 1, 0, 0, 1, -left, -top );
         context.strokeStyle = '#000000';
-        MorphismElement.drawArrow( exit, enter, 20, context );
+        if ( this.showManyArrows ) {
+            for ( var domelt = 0 ; domelt < this.from.vizobj.group.order ; domelt++ ) {
+                const domeltUnitCoords = this.from.unitSquarePosition( domelt ),
+                      domeltRealCoords = {
+                          x : f1.x + ( f2.x - f1.x ) * domeltUnitCoords.x,
+                          y : f1.y + ( f2.y - f1.y ) * domeltUnitCoords.y
+                      },
+                      codeltUnitCoords = this.to.unitSquarePosition( 0 ), // temporary!!!
+                      codeltRealCoords = {
+                          x : t1.x + ( t2.x - t1.x ) * codeltUnitCoords.x,
+                          y : t1.y + ( t2.y - t1.y ) * codeltUnitCoords.y
+                      };
+                MorphismElement.drawArrow( domeltRealCoords, codeltRealCoords, 20, context );
+            }
+        } else {
+            MorphismElement.drawArrow( exit, enter, 20, context );
+        }
         var title = this.name;
         if ( this.showDomAndCod )
             title += ` : ${this.from.vizobj.group.shortName} -> ${this.to.vizobj.group.shortName}`;
@@ -1311,6 +1365,8 @@ class MorphismElement extends ConnectingElement {
           + `<input type="text" class="name-input" value="${this.name}"/>`
           + '<p><input type="checkbox" class="domcod-input" '
           + ( this.showDomAndCod ? 'checked' : '' ) + '/> Write domain and codomain</p>'
+          + '<p><input type="checkbox" class="arrows-input" '
+          + ( this.showManyArrows ? 'checked' : '' ) + '/> Draw multiple arrows</p>'
           + '</div>' )[0];
     }
     // implement abstract methods save/loadEdits()
@@ -1326,17 +1382,14 @@ class MorphismElement extends ConnectingElement {
         } );
         if ( maybeNewName !== null ) this.name = maybeNewName
         this.showDomAndCod = $( this.htmlEditElement() ).find( '.domcod-input' ).prop( 'checked' );
+        this.showManyArrows = $( this.htmlEditElement() ).find( '.arrows-input' ).prop( 'checked' );
         this.reposition();
         this.model.sync();
-        // after we've hidden the edit pane, redraw the overlay so the morphism arrow comes back
-        setTimeout( function () { that.model.drawOverlay(); }, 1 );
     }
     loadEdits () {
         $( this.htmlEditElement() ).find( '.name-input' )[0].value = this.name;
         $( this.htmlEditElement() ).find( '.domcod-input' ).prop( 'checked', this.showDomAndCod );
-        var that = this;
-        // after we've shown the edit pane, redraw the overlay so the morphism arrow disappears
-        setTimeout( function () { that.model.drawOverlay(); }, 1 );
+        $( this.htmlEditElement() ).find( '.arrows-input' ).prop( 'checked', this.showManyArrows );
     }
     toString () {
         return `Morphism ${this.name} from ${this.from.toString()} to ${this.to.toString()}`;

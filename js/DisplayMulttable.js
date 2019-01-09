@@ -290,6 +290,13 @@ class DisplayMulttable {
       return (x === undefined || y === undefined) ? undefined : {x: x, y: y};
    }
 
+   // Be able to answer the question of where in the diagram any given element is drawn.
+   // We answer in normalized coordinates, [0,1]x[0,1].
+   unitSquarePosition ( element, multtable ) {
+      const max = multtable.position( multtable.group.order - 1 ) + 1;
+      return { x : 0.5 / max, y : ( multtable.position( element ) + 0.5 ) / max };
+   }
+
    // two serialization functions
    toJSON ( multtable ) {
       return {

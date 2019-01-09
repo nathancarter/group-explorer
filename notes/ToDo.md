@@ -38,21 +38,6 @@
 
  * Sheets
     * Morphisms
-       * Add a method to `VisualizerElement` for asking where in [0,1]x[0,1] a given group element sits.
-         For now, just make that method a stub that returns (0,eltIndex/|G|).
-         Call the method `elementToVirtualScreenCoords()`.
-       * Add a checkbox to the edit screen for drawing many arrows or one.  In the former case,
-         loop through all elements of the domain and for now assume the image of each is 0.
-         But use `elementToVirtualScreenCoords()` to get the coordinates, even so.
-       * Let's actually compute where elements sit, in four steps:
-          * Update `VisualizerElement` so that it delegates the task of computing element locations
-            to its `vizdisplay` member.
-          * In DisplayDiagram, implement `elementToVirtualScreenCoords()` using THREE.js, as per here:
-            https://stackoverflow.com/questions/11586527/converting-world-coordinates-to-screen-coordinates-in-three-js-using-projection
-          * In DisplayCycleGraph, implement `elementToVirtualScreenCoords()` using the already-computed coords,
-            which are in `cycleGraph.positions`, indexed by element.
-          * In DisplayMulttable, implement `elementToVirtualScreenCoords()` using the permutation stored in
-            `multtable.position`.
        * Write a function that takes as input a domain group D and a list DE of elements of it,
          plus a codomain group C and a list CE of elements of it, of equal length to DE,
          and it computes the simplest homomorphism extending DE[1]:=CE[1],...,DE[n]:=CE[n],
