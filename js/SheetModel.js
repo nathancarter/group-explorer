@@ -790,8 +790,6 @@ class ConnectingElement extends SheetElement {
     setEndpoints ( from, to ) {
         if ( !( from instanceof SheetElement ) || !( to instanceof SheetElement ) )
             throw "Both parameters to ConnectingElement constructor must be SheetElements";
-        if ( this.from )
-            this.from.off( '')
         this.from = from;
         this.to = to;
         this.installHandlers();
