@@ -350,7 +350,6 @@ class SheetElement {
         this.bgBeforeEdit = $( this.htmlEditElement() ).css( 'background-color' );
         $wrapper.css( 'z-index', 1000 );
         $( this.htmlEditElement() ).css( 'background-color', 'white' );
-        console.log( this.zBeforeEdit, this.bgBeforeEdit );
     }
     // Reverse of the previous
     showViewControls () {
