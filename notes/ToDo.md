@@ -37,11 +37,6 @@
 # Nathan's List
 
  * Sheets
-    * Morphisms
-       * Add to the edit pane a checkbox for whether to show, with the morphism name,
-         an assessment of whether it is 1-1, onto, neither, or both.  Create the serialization
-         and deserialization code for this new option.
-       * Update the morphism drawing code to respect this new option.
     * Extend the toJSON() and fromJSON() in CayleyDiagram.html to also respect:
        * node colors: `Cayley_diagram.nodes[i].nodeColor` then same update routine or `updateHighlights()`
          (Is this the same as node highlights?)

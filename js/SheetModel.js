@@ -1165,6 +1165,10 @@ class MorphismElement extends ConnectingElement {
                       image = that._crep( pair[1] )
                 lines.push( `${that.name}(${elt})=${image}` );
             } );
+        if ( this.showInjSurj ) {
+            lines.push( `${this.name} is ${this.isInjective() ? '' : 'not '}injective` );
+            lines.push( `${this.name} is ${this.isSurjective() ? '' : 'not '}surjective` );
+        }
         MorphismElement.drawTextLines( lines,
             ( exit.x + enter.x ) / 2, ( exit.y + enter.y ) / 2, context );
         context.restore();
@@ -1179,6 +1183,8 @@ class MorphismElement extends ConnectingElement {
           + ( this.showDomAndCod ? 'checked' : '' ) + '/> Show domain and codomain</p>'
           + '<p><input type="checkbox" class="pairs-input" '
           + ( this.showDefiningPairs ? 'checked' : '' ) + '/> Show defining pairs</p>'
+          + '<p><input type="checkbox" class="injsurj-input" '
+          + ( this.showInjSurj ? 'checked' : '' ) + '/> Show injective/surjective</p>'
           + '<p><input type="checkbox" class="arrows-input" '
           + ( this.showManyArrows ? 'checked' : '' ) + '/> Draw multiple arrows</p>'
           + '<hr/>'
@@ -1239,6 +1245,7 @@ class MorphismElement extends ConnectingElement {
         this.showDomAndCod = $edit.find( '.domcod-input' ).prop( 'checked' );
         this.showManyArrows = $edit.find( '.arrows-input' ).prop( 'checked' );
         this.showDefiningPairs = $edit.find( '.pairs-input' ).prop( 'checked' );
+        this.showInjSurj = $edit.find( '.injsurj-input' ).prop( 'checked' );
         this._map = this.getFullMap( this.definingPairs );
         this.reposition();
         this.model.sync();
@@ -1249,6 +1256,7 @@ class MorphismElement extends ConnectingElement {
         $edit.find( '.domcod-input' ).prop( 'checked', this.showDomAndCod );
         $edit.find( '.arrows-input' ).prop( 'checked', this.showManyArrows );
         $edit.find( '.pairs-input' ).prop( 'checked', this.showDefiningPairs );
+        $edit.find( '.injsurj-input' ).prop( 'checked', this.showInjSurj );
         this.fillTableWithPairs();
         $edit[0].definingPairsCopy = this.definingPairs.slice();
     }
@@ -1412,6 +1420,20 @@ class MorphismElement extends ConnectingElement {
                     return null;
         // it's a homomorphism!
         return result;
+    }
+    // Is the morphism in this element injective?
+    // Callers should ensure that this._map is up-to-date before calling.
+    isInjective () {
+        for ( var i = this._map.length - 1 ; i > 0 ; i-- )
+            if ( this._map.indexOf( this._map[i] ) < i ) return false;
+        return true;
+    }
+    // Is the morphism in this element surjective?
+    // Callers should ensure that this._map is up-to-date before calling.
+    isSurjective () {
+        for ( var i = 0 ; i < this.to.group.order ; i++ )
+            if ( this._map.indexOf( i ) == -1 ) return false;
+        return true;
     }
     // Convenience functions for getting the representations of elements in the
     // domain or codomain.
