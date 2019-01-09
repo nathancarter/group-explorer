@@ -105,7 +105,7 @@
                           columnSort(1);  // sort rows by column 1 (group order) after all groups have been loaded
                        }
                     } )
-                    .catch( (error) => alert(error) );
+                    .catch( (error) => console.log(error) );
           }
 
           window.graphicContext = new DisplayDiagram({width: 50, height: 50, fog: false});

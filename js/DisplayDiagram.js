@@ -84,6 +84,7 @@ class DisplayDiagram {
       // Options parameter:
       // size: "small" or "large", default is "small"
       // resetCamera : true or false, default is true
+      if ( !options ) options = { size : 'small', resetCamera : true };
       const img = new Image();
 
       // save diagram for use by LineDnD -- not used for thumbnails
