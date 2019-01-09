@@ -350,6 +350,7 @@ class SheetElement {
         this.bgBeforeEdit = $( this.htmlEditElement() ).css( 'background-color' );
         $wrapper.css( 'z-index', 1000 );
         $( this.htmlEditElement() ).css( 'background-color', 'white' );
+        this.model.drawOverlay(); // hide/show morphism arrows
     }
     // Reverse of the previous
     showViewControls () {
@@ -365,6 +366,7 @@ class SheetElement {
             $( this.htmlEditElement() ).css( 'background-color', this.bgBeforeEdit );
             delete this.bgBeforeEdit;
         }
+        this.model.drawOverlay(); // hide/show morphism arrows
     }
 
     // This function should read from its edit controls and save their meaning into
@@ -1125,15 +1127,10 @@ class MorphismElement extends ConnectingElement {
         this.showDomAndCod = $( this.htmlEditElement() ).find( '.domcod-input' ).prop( 'checked' );
         this.reposition();
         this.model.sync();
-        // after we've hidden the edit pane, redraw the overlay so the morphism arrow comes back
-        setTimeout( function () { that.model.drawOverlay(); }, 1 );
     }
     loadEdits () {
         $( this.htmlEditElement() ).find( '.name-input' )[0].value = this.name;
         $( this.htmlEditElement() ).find( '.domcod-input' ).prop( 'checked', this.showDomAndCod );
-        var that = this;
-        // after we've shown the edit pane, redraw the overlay so the morphism arrow disappears
-        setTimeout( function () { that.model.drawOverlay(); }, 1 );
     }
     toString () {
         return `Morphism ${this.name} from ${this.from.toString()} to ${this.to.toString()}`;
