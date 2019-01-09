@@ -784,6 +784,7 @@ class ConnectingElement extends SheetElement {
         this.color = '#000000';
         this.thickness = 1;
         this.useArrowhead = false;
+        this.arrowheadSize = 10;
     }
     // Function to store both endpoints.
     setEndpoints ( from, to ) {
@@ -845,7 +846,7 @@ class ConnectingElement extends SheetElement {
         this.color = json.color;
         this.thickness = json.thickness;
         this.useArrowhead = json.useArrowhead;
-        this.arrowheadSize = 10;
+        this.arrowheadSize = json.arrowheadSize;
         this.setEndpoints(
             this.model.elements[json.fromIndex],
             this.model.elements[json.toIndex]
