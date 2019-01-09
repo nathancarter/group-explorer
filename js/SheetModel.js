@@ -907,6 +907,7 @@ class ConnectingElement extends SheetElement {
                   x : canvas.width - start.x,
                   y : canvas.height - start.y
               };
+        context.beginPath();
         context.moveTo( start.x, start.y );
         context.lineTo( stop.x, stop.y );
         context.strokeStyle = this.color;
@@ -918,6 +919,7 @@ class ConnectingElement extends SheetElement {
             const unit = { x : ( stop.x - start.x ) / len, y : ( stop.y - start.y ) / len };
             const mid = { x : ( stop.x + start.x ) / 2, y : ( stop.y + start.y ) / 2 };
             const perp = { x : -unit.y, y : unit.x };
+            context.beginPath();
             context.moveTo( mid.x + margin * unit.x, mid.y + margin * unit.y );
             context.lineTo( mid.x - margin * unit.x + margin * perp.x,
                             mid.y - margin * unit.y + margin * perp.y );
@@ -1002,6 +1004,7 @@ class MorphismElement extends ConnectingElement {
     }
     // Auxiliary function for drawing an arrow from A to B with arrowhead of size S.
     static drawArrow ( A, B, S, context ) {
+        context.beginPath();
         context.moveTo( A.x, A.y );
         context.lineTo( B.x, B.y );
         const dir = { x : B.x - A.x, y : B.y - A.y },
@@ -1013,6 +1016,7 @@ class MorphismElement extends ConnectingElement {
             context.lineTo( B.x, B.y );
             context.lineTo( B.x - S * unit.x - S * perp.x, B.y - S * unit.y - S * perp.y );
         }
+        context.stroke();
     }
     // But we will draw overlays!  This is a temporary test to prove that it works;
     // it is certainly not the actual visualization for morphisms.
@@ -1037,7 +1041,6 @@ class MorphismElement extends ConnectingElement {
         context.transform( 1, 0, 0, 1, -left, -top );
         context.strokeStyle = '#000000';
         MorphismElement.drawArrow( exit, enter, 20, context );
-        context.stroke();
         context.restore();
     }
     // when editing, use one input for each defining feature
