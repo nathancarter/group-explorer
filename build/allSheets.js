@@ -1174,6 +1174,7 @@ class MorphismElement extends ConnectingElement {
     constructor ( model, from, to ) {
         super( model, from, to );
         this.name = this.getUnusedName();
+        this.showDomAndCod = false;
     }
     // Find the simplest mathy name for this morphism that's not yet used on its sheet.
     getUnusedName () {
@@ -1202,12 +1203,14 @@ class MorphismElement extends ConnectingElement {
         var result = super.toJSON();
         result.className = 'MorphismElement';
         result.name = this.name;
+        result.showDomAndCod = this.showDomAndCod;
         return result;
     }
     // Corresponding fromJSON()
     fromJSON ( json ) {
         super.fromJSON( json );
         this.name = json.name;
+        this.showDomAndCod = json.showDomAndCod;
     }
     // Override drawConnectingLine to do nothing for morphisms.
     drawConnectingLine () { }
@@ -1292,8 +1295,11 @@ class MorphismElement extends ConnectingElement {
         context.transform( 1, 0, 0, 1, -left, -top );
         context.strokeStyle = '#000000';
         MorphismElement.drawArrow( exit, enter, 20, context );
+        var title = this.name;
+        if ( this.showDomAndCod )
+            title += ` : ${this.from.vizobj.group.shortName} -> ${this.to.vizobj.group.shortName}`;
         MorphismElement.drawTextLines( [
-            this.name
+            title
         ], ( exit.x + enter.x ) / 2, ( exit.y + enter.y ) / 2, context );
         context.restore();
     }
@@ -1303,6 +1309,8 @@ class MorphismElement extends ConnectingElement {
             '<div style="min-width: 200px; border: 1px solid black;">'
           + '<p>Morphism name:</p>'
           + `<input type="text" class="name-input" value="${this.name}"/>`
+          + '<p><input type="checkbox" class="domcod-input" '
+          + ( this.showDomAndCod ? 'checked' : '' ) + '/> Write domain and codomain</p>'
           + '</div>' )[0];
     }
     // implement abstract methods save/loadEdits()
@@ -1317,13 +1325,17 @@ class MorphismElement extends ConnectingElement {
             }
         } );
         if ( maybeNewName !== null ) this.name = maybeNewName
+        this.showDomAndCod = $( this.htmlEditElement() ).find( '.domcod-input' ).prop( 'checked' );
         this.reposition();
         this.model.sync();
+        // after we've hidden the edit pane, redraw the overlay so the morphism arrow comes back
         setTimeout( function () { that.model.drawOverlay(); }, 1 );
     }
     loadEdits () {
         $( this.htmlEditElement() ).find( '.name-input' )[0].value = this.name;
+        $( this.htmlEditElement() ).find( '.domcod-input' ).prop( 'checked', this.showDomAndCod );
         var that = this;
+        // after we've shown the edit pane, redraw the overlay so the morphism arrow disappears
         setTimeout( function () { that.model.drawOverlay(); }, 1 );
     }
     toString () {

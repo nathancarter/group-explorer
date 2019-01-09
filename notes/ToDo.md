@@ -38,8 +38,6 @@
 
  * Sheets
     * Morphisms
-       * Add a checkbox to the edit screen for including the domain and codomain in the
-         morphism name (as in f:G->H).
        * Add a method to `VisualizerElement` for asking where in [0,1]x[0,1] a given group element sits.
          For now, just make that method a stub that returns (0,eltIndex/|G|).
          Call the method `elementToVirtualScreenCoords()`.
