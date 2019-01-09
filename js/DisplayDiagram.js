@@ -217,6 +217,7 @@ class DisplayDiagram {
          const sphere = new THREE.Mesh(geometry, material);
          sphere.userData = {node: node};
          sphere.position.set(node.point.x, node.point.y, node.point.z);
+         sphere.name = diagram3D.group.representation[node.element];
          spheres.add(sphere);
       } )
    }
@@ -661,10 +662,18 @@ class DisplayDiagram {
          depthTest: false,
       } );
 
+      let subgroup_name;  // MathML subgroup name, generated first time through
       const createChunks = (arr, desired, current = diagram3D.strategies.length - 1) => {
          if (current == desired) {
-            const points = arr._flatten().map( (node) => node.point );
+            const nodes = arr._flatten();
+            const elements = new BitSet(diagram3D.group.order, nodes.map( (node) => node.element ));
+            const points = nodes.map( (node) => node.point );
             const box = new THREE.Mesh(box_geometry, box_material);
+            if (subgroup_name === undefined) {
+               const subgroup_index = diagram3D.group.subgroups.findIndex( (subgroup) => subgroup.members.equals(elements) );
+               subgroup_name = `<msub><mi>H</mi><mn>${subgroup_index}</mn></msub>`;
+            }
+            box.name = diagram3D.group.representation[nodes[0].element] + subgroup_name;
             box.position.set(...centroid(points).toArray());
             return [box];
          } else {
@@ -676,12 +685,12 @@ class DisplayDiagram {
                const center = centroid(all_boxes.map( (box) => box.position ));
                // calculate normalized vector from centroid of all boxes to centroid of boxes[0]
                const ref = centroid(boxes[0].map( (box) => box.position )).sub(center).normalize();
-               // calculate normal
+               // calculate normal to plane containing center, first, and second (and presumably all other) centroids
                const normal = centroid(boxes[1].map( (box) => box.position )).sub(center).normalize().cross(ref).normalize();
                boxes.forEach( (bxs) => {
                   // find angle between centroid of first box and centroid(bxs)
                   const curr = centroid(bxs.map( (box) => box.position )).sub(center).normalize();
-                  if (Math.abs(1 - curr.dot(ref)) > 1e-6) {
+                  if (Math.abs(1 - curr.dot(ref)) > 1e-6) {  // check that boxes aren't co-linear
                      const theta = Math.acos(ref.dot(curr))*Math.sign(normal.dot(new THREE.Vector3().crossVectors(ref,curr)));
                      bxs.forEach( (box) => box.rotateOnAxis(normal, theta) );
                   }
@@ -729,6 +738,20 @@ class DisplayDiagram {
 
    updateArrowheadPlacement(diagram3D) {
       this.updateArrowheads(diagram3D);
+   }
+
+   // get objects at point x,y using raycasting
+   getObjectsAtPoint(x, y) {
+      const mouse = new THREE.Vector2(x, y);
+      const raycaster = new THREE.Raycaster();
+      raycaster.setFromCamera(mouse, this.camera);
+
+      let intersects = raycaster.intersectObjects(this.getGroup('spheres').children, false);
+      if (intersects.length == 0) {
+         intersects = raycaster.intersectObjects(this.getGroup('chunks').children, false);
+      }
+
+      return Array.from(new Set(intersects.map( (intersect) => intersect.object )));
    }
 
    // Be able to answer the question of where in the diagram any given element is drawn.
@@ -830,7 +853,6 @@ DisplayDiagram.LineDnD = class {
       // if ambiguous or empty intersect just return
       if (!(   intersects.length == 1
             || intersects.length == 2 && intersects[0].object == intersects[1].object)) {
-         console.log(intersects.length);
          return;
       }
 
@@ -858,8 +880,8 @@ DisplayDiagram.LineDnD = class {
       $(this.canvas).off('mousemove', this.event_handler);
       $(this.canvas).off('mouseup', this.event_handler);
       this.canvas.style.cursor = '';
-      window.clearInterval(this.repainter);
-      this.repainter = undefined;
+      window.clearInterval(this.repaint_poller);
+      this.repaint_poller = undefined;
       this.line = undefined;
    }
 

@@ -10,7 +10,6 @@
 
 ## CayleyDiagram diagram panel
 
- * Hover help in big Cayley diagram (including chunking)
  * Keep labels from disappearing behind nodes with changing node/label sizes
  * Change label representations in visualizers?
  * Display raw element numbers for debugging?

@@ -980,6 +980,7 @@ DC.ArrowMult = class {
    }
 
 }
+  
 
 DC.Chunking = class {
    static updateChunkingSelect() {
@@ -1019,7 +1020,7 @@ DC.Chunking = class {
       Cayley_diagram.chunk = (event.target.value == -1) ? undefined : event.target.value;
       Graphic_context.updateChunking(Cayley_diagram);
    }
-
+   
    static enable() {
       $('#chunking-fog').hide();
       $('#chunk-select').prop('disabled', false);
