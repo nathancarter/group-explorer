@@ -1213,6 +1213,7 @@ class MorphismElement extends ConnectingElement {
         super( model, from, to );
         this.name = this.getUnusedName();
         this.showDomAndCod = false;
+        this.showDefiningPairs = false;
         this.definingPairs = [ ];
         this._map = this.getFullMap( this.definingPairs );
     }
@@ -1244,6 +1245,7 @@ class MorphismElement extends ConnectingElement {
         result.className = 'MorphismElement';
         result.name = this.name;
         result.showDomAndCod = this.showDomAndCod;
+        result.showDefiningPairs = this.showDefiningPairs;
         result.definingPairs = this.definingPairs;
         return result;
     }
@@ -1252,6 +1254,7 @@ class MorphismElement extends ConnectingElement {
         super.fromJSON( json );
         this.name = json.name;
         this.showDomAndCod = json.showDomAndCod;
+        this.showDefiningPairs = json.showDefiningPairs;
         this.definingPairs = json.definingPairs;
         this._map = this.getFullMap( this.definingPairs );
     }
@@ -1354,12 +1357,19 @@ class MorphismElement extends ConnectingElement {
         } else {
             MorphismElement.drawArrow( exit, enter, 20, context );
         }
-        var title = this.name;
+        var lines = [ this.name ];
         if ( this.showDomAndCod )
-            title += ` : ${this.from.group.shortName} -> ${this.to.group.shortName}`;
-        MorphismElement.drawTextLines( [
-            title
-        ], ( exit.x + enter.x ) / 2, ( exit.y + enter.y ) / 2, context );
+            lines[lines.length-1] +=
+                ` : ${this.from.group.shortName} -> ${this.to.group.shortName}`;
+        var that = this;
+        if ( this.showDefiningPairs )
+            this.definingPairs.map( function ( pair ) {
+                const elt = that._drep( pair[0] ),
+                      image = that._crep( pair[1] )
+                lines.push( `${that.name}(${elt})=${image}` );
+            } );
+        MorphismElement.drawTextLines( lines,
+            ( exit.x + enter.x ) / 2, ( exit.y + enter.y ) / 2, context );
         context.restore();
     }
     // when editing, use one input for each defining feature
@@ -1370,6 +1380,8 @@ class MorphismElement extends ConnectingElement {
           + `<input type="text" class="name-input" value="${this.name}"/></p>`
           + '<p><input type="checkbox" class="domcod-input" '
           + ( this.showDomAndCod ? 'checked' : '' ) + '/> Show domain and codomain</p>'
+          + '<p><input type="checkbox" class="pairs-input" '
+          + ( this.showDefiningPairs ? 'checked' : '' ) + '/> Show defining pairs</p>'
           + '<p><input type="checkbox" class="arrows-input" '
           + ( this.showManyArrows ? 'checked' : '' ) + '/> Draw multiple arrows</p>'
           + '<hr/>'
@@ -1405,8 +1417,8 @@ class MorphismElement extends ConnectingElement {
               + '<table border=1 cellspacing=0>'
               + '<tr><th>This element</th><th>Maps to this</th></tr>';
             for ( var i = 0 ; i < that.from.group.order ; i++ )
-                html += `<tr><td>${that.from.group.representation[i]}</td>`
-                      + `<td>${that.to.group.representation[that._map[i]]}</td></tr>`;
+                html += `<tr><td>${that._drep( i )}</td>`
+                      + `<td>${that._crep( that._map[i] )}</td></tr>`;
             html += '</table></center>';
             var newWindow = window.open();
             newWindow.document.write( html );
@@ -1416,7 +1428,8 @@ class MorphismElement extends ConnectingElement {
     }
     // implement abstract methods save/loadEdits()
     saveEdits () {
-        var maybeNewName = $( this.htmlEditElement() ).find( '.name-input' )[0].value;
+        var $edit = $( this.htmlEditElement() );
+        var maybeNewName = $edit.find( '.name-input' )[0].value;
         var that = this;
         this.model.elements.map( function ( element ) {
             if ( ( element != that ) && ( element instanceof MorphismElement )
@@ -1425,9 +1438,10 @@ class MorphismElement extends ConnectingElement {
                 maybeNewName = null;
             }
         } );
-        if ( maybeNewName !== null ) this.name = maybeNewName
-        this.showDomAndCod = $( this.htmlEditElement() ).find( '.domcod-input' ).prop( 'checked' );
-        this.showManyArrows = $( this.htmlEditElement() ).find( '.arrows-input' ).prop( 'checked' );
+        if ( maybeNewName !== null ) this.name = maybeNewName;
+        this.showDomAndCod = $edit.find( '.domcod-input' ).prop( 'checked' );
+        this.showManyArrows = $edit.find( '.arrows-input' ).prop( 'checked' );
+        this.showDefiningPairs = $edit.find( '.pairs-input' ).prop( 'checked' );
         this._map = this.getFullMap( this.definingPairs );
         this.reposition();
         this.model.sync();
@@ -1437,20 +1451,20 @@ class MorphismElement extends ConnectingElement {
         $edit.find( '.name-input' )[0].value = this.name;
         $edit.find( '.domcod-input' ).prop( 'checked', this.showDomAndCod );
         $edit.find( '.arrows-input' ).prop( 'checked', this.showManyArrows );
+        $edit.find( '.pairs-input' ).prop( 'checked', this.showDefiningPairs );
         this.fillTableWithPairs();
         $edit[0].definingPairsCopy = this.definingPairs.slice();
     }
     fillTableWithPairs () {
         var $note = $( this.htmlEditElement() ).find( '#emptyMorphismNote' );
-        const D = this.from.group, C = this.to.group;
         while ( $note.next().length > 0 ) $note.next().remove();
         if ( this.definingPairs.length > 0 ) {
             $note.hide();
             var that = this;
             this.definingPairs.map( function ( pair, index ) {
                 var newButton = $note.parent().append(
-                    `<tr><td>${D.representation[pair[0]]}</td>`
-                  + `<td>${C.representation[pair[1]]}</td>`
+                    `<tr><td>${that._drep( pair[0] )}</td>`
+                  + `<td>${that._crep( pair[1] )}</td>`
                   + `<td><button class="removePairButton" name="${index}">`
                   + `Remove</button></tr>`
                 ).find( `.removePairButton[name="${index}"]` )[0];
@@ -1483,7 +1497,7 @@ class MorphismElement extends ConnectingElement {
         // add one thing for each element NOT in the subgroup just computed
         for ( var i = 1 ; i < D.order ; i++ ) // don't put the identity in, of course
             if ( domSubgroup.indexOf( i ) == -1 )
-                $dropDown.append( `<option value="${i}">${D.representation[i]}</option>` );
+                $dropDown.append( `<option value="${i}">${this._drep( i )}</option>` );
         // if the drop-down is empty, hide its whole row; otherwise show it
         if ( $dropDown.children().length == 0 )
             $dropDown.parent().hide();
@@ -1513,7 +1527,7 @@ class MorphismElement extends ConnectingElement {
             // use getFullMap() to see if there is any hom containing the (domElt,i) pair
             extension[extension.length-1] = [ domElt, i ];
             if ( this.getFullMap( extension ) )
-                $dropDown.append( `<option value="${i}">${C.representation[i]}</option>` );
+                $dropDown.append( `<option value="${i}">${this._crep( i )}</option>` );
         }
         // that list will always have something in it, because the identity is always an option
     }
@@ -1602,4 +1616,8 @@ class MorphismElement extends ConnectingElement {
         // it's a homomorphism!
         return result;
     }
+    // Convenience functions for getting the representations of elements in the
+    // domain or codomain.
+    _drep ( elt ) { return mathml2text( this.from.group.representation[elt] ); }
+    _crep ( elt ) { return mathml2text( this.to.group.representation[elt] ); }
 }

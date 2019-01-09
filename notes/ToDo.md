@@ -39,11 +39,6 @@
  * Sheets
     * Morphisms
        * Add to the edit pane a checkbox for whether to show, with the morphism name,
-         its list of generating pairs (one or more lines of hte form `f(_)=_`, or the
-         statement that everything maps to the identity).  Create the serialization and
-         deserialization code for this new option.
-       * Update the morphism drawing code to respect this new option.
-       * Add to the edit pane a checkbox for whether to show, with the morphism name,
          an assessment of whether it is 1-1, onto, neither, or both.  Create the serialization
          and deserialization code for this new option.
        * Update the morphism drawing code to respect this new option.
