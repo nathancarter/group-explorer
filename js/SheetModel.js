@@ -967,6 +967,25 @@ class ConnectingElement extends SheetElement {
  * SheetElement representing a homomorphism from one group to another
  */
 class MorphismElement extends ConnectingElement {
+    // Constructor just assigns an unused name.
+    constructor ( model, from, to ) {
+        super( model, from, to );
+        this.name = this.getUnusedName();
+    }
+    // Find the simplest mathy name for this morphism that's not yet used on its sheet.
+    getUnusedName () {
+        const names = [ 'f', 'g', 'h' ];
+        for ( var i = 1 ; true ; i++ ) {
+            const suffix = ( i > 1 ) ? `${i}` : '';
+            for ( var j = 0 ; j < names.length ; j++ ) {
+                const maybeThis = names[j] + suffix;
+                if ( this.model.elements.filter( function ( element ) {
+                    return ( element instanceof MorphismElement )
+                        && ( element.name == maybeThis );
+                } ).length == 0 ) return maybeThis;
+            }
+        }
+    }
     // You can only set endpoints on a morphism if they're both pictures of groups.
     // (You can't connect, say, text to something with a morphism.)
     setEndpoints ( from, to ) {
@@ -979,7 +998,13 @@ class MorphismElement extends ConnectingElement {
     toJSON () {
         var result = super.toJSON();
         result.className = 'MorphismElement';
+        result.name = this.name;
         return result;
+    }
+    // Corresponding fromJSON()
+    fromJSON ( json ) {
+        super.fromJSON( json );
+        this.name = json.name;
     }
     // Override drawConnectingLine to do nothing for morphisms.
     drawConnectingLine () { }
@@ -1018,6 +1043,28 @@ class MorphismElement extends ConnectingElement {
         }
         context.stroke();
     }
+    // Auxiliary function for writing text at a certain place.
+    // Takes an array of text lines and draws them with a background box, one per line,
+    // centered in each line, with the box centered at the given coordinates.
+    static drawTextLines ( lines, x, y, context ) {
+        context.font = '12pt Arial';
+        const approxLineHeight = 1.4 * context.measureText( 'M' ).width,
+              margin = approxLineHeight / 2;
+        const lineWidths = lines.map( function ( line ) {
+            return context.measureText( line ).width;
+        } );
+        const width = Math.max.apply( null, lineWidths ) + 2 * margin,
+              height = approxLineHeight * lines.length + 2 * margin;
+        context.fillStyle = '#ffffff';
+        context.fillRect( x - width/2, y - height/2, width, height );
+        context.strokeStyle = '#000000';
+        context.strokeRect( x - width/2, y - height/2, width, height );
+        context.fillStyle = '#000000';
+        lines.map( function ( line, index ) {
+            context.fillText( line,
+                x - lineWidths[index]/2, y - height/2 + approxLineHeight * ( index + 1 ) );
+        } );
+    }
     // But we will draw overlays!  This is a temporary test to prove that it works;
     // it is certainly not the actual visualization for morphisms.
     drawOverlay ( canvas, context ) {
@@ -1041,6 +1088,9 @@ class MorphismElement extends ConnectingElement {
         context.transform( 1, 0, 0, 1, -left, -top );
         context.strokeStyle = '#000000';
         MorphismElement.drawArrow( exit, enter, 20, context );
+        MorphismElement.drawTextLines( [
+            this.name
+        ], ( exit.x + enter.x ) / 2, ( exit.y + enter.y ) / 2, context );
         context.restore();
     }
     // when editing, use one input for each defining feature
@@ -1057,6 +1107,16 @@ class MorphismElement extends ConnectingElement {
         // fill in later
     }
     toString () {
-        return `Morphism from ${this.from.toString()} to ${this.to.toString()}`;
+        return `Morphism ${this.name} from ${this.from.toString()} to ${this.to.toString()}`;
+    }
+    // Provide a static method for checking whether two sheet elements are connected,
+    // in one direction.  (To check both directions, call twice.)
+    static existsMorphismBetween ( A, B ) {
+        for ( var i = 0 ; i < A.model.elements.length ; i++ ) {
+            const elt = A.model.elements[i];
+            if ( ( elt instanceof MorphismElement ) && ( elt.from == A ) && ( elt.to == B ) )
+                return true;
+        }
+        return false;
     }
 }

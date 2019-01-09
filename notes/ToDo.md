@@ -38,12 +38,6 @@
 
  * Sheets
     * Morphisms
-       * Create a method that produces a new function name (f, g, h, f2, g2, h2, etc.) unique
-         to the sheet containing the morphism in which it's run.
-       * Use that method to assign a new, unique name to any morphism upon creation.
-       * Ensure that the name is drawn as part of the morphism; make a text box with an opaque
-         background, covering the midpoint of the morphism arrow.
-       * Ensure that names are saved/loaded as part of serialization, and included in toString().
        * Allow users to change the names of morphisms when editing, but pop up an error dialog
          if they try to use something not unique to the sheet.
        * Add a checkbox to the edit screen for including the domain and codomain in the
