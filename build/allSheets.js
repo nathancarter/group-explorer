@@ -933,7 +933,7 @@ class VisualizerElement extends SheetElement {
     }
     // Generic reply that can be adjusted in subclasses
     toString () {
-        const groupname = this.vizobj ? this.vizobj.group.name : 'a group';
+        const groupname = this.vizobj ? this.group.name : 'a group';
         return `Visualization for ${groupname}`;
     }
     // Where in the unit square (normalized coordinates, [0,1]x[0,1]) does this
@@ -1213,6 +1213,8 @@ class MorphismElement extends ConnectingElement {
         super( model, from, to );
         this.name = this.getUnusedName();
         this.showDomAndCod = false;
+        this.definingPairs = [ ];
+        this._map = this.getFullMap( this.definingPairs );
     }
     // Find the simplest mathy name for this morphism that's not yet used on its sheet.
     getUnusedName () {
@@ -1242,6 +1244,7 @@ class MorphismElement extends ConnectingElement {
         result.className = 'MorphismElement';
         result.name = this.name;
         result.showDomAndCod = this.showDomAndCod;
+        result.definingPairs = this.definingPairs;
         return result;
     }
     // Corresponding fromJSON()
@@ -1249,6 +1252,8 @@ class MorphismElement extends ConnectingElement {
         super.fromJSON( json );
         this.name = json.name;
         this.showDomAndCod = json.showDomAndCod;
+        this.definingPairs = json.definingPairs;
+        this._map = this.getFullMap( this.definingPairs );
     }
     // Override drawConnectingLine to do nothing for morphisms.
     drawConnectingLine () { }
@@ -1333,13 +1338,13 @@ class MorphismElement extends ConnectingElement {
         context.transform( 1, 0, 0, 1, -left, -top );
         context.strokeStyle = '#000000';
         if ( this.showManyArrows ) {
-            for ( var domelt = 0 ; domelt < this.from.vizobj.group.order ; domelt++ ) {
+            for ( var domelt = 0 ; domelt < this.from.group.order ; domelt++ ) {
                 const domeltUnitCoords = this.from.unitSquarePosition( domelt ),
                       domeltRealCoords = {
                           x : f1.x + ( f2.x - f1.x ) * domeltUnitCoords.x,
                           y : f1.y + ( f2.y - f1.y ) * domeltUnitCoords.y
                       },
-                      codeltUnitCoords = this.to.unitSquarePosition( 0 ), // temporary!!!
+                      codeltUnitCoords = this.to.unitSquarePosition( this._map[domelt] ),
                       codeltRealCoords = {
                           x : t1.x + ( t2.x - t1.x ) * codeltUnitCoords.x,
                           y : t1.y + ( t2.y - t1.y ) * codeltUnitCoords.y
@@ -1351,7 +1356,7 @@ class MorphismElement extends ConnectingElement {
         }
         var title = this.name;
         if ( this.showDomAndCod )
-            title += ` : ${this.from.vizobj.group.shortName} -> ${this.to.vizobj.group.shortName}`;
+            title += ` : ${this.from.group.shortName} -> ${this.to.group.shortName}`;
         MorphismElement.drawTextLines( [
             title
         ], ( exit.x + enter.x ) / 2, ( exit.y + enter.y ) / 2, context );
@@ -1359,15 +1364,44 @@ class MorphismElement extends ConnectingElement {
     }
     // when editing, use one input for each defining feature
     createHtmlEditElement () {
-        return $(
-            '<div style="min-width: 200px; border: 1px solid black;">'
-          + '<p>Morphism name:</p>'
-          + `<input type="text" class="name-input" value="${this.name}"/>`
+        var html =
+            '<div style="min-width: 200px; border: 1px solid black; padding: 0.5em;">'
+          + '<p>Morphism name:'
+          + `<input type="text" class="name-input" value="${this.name}"/></p>`
           + '<p><input type="checkbox" class="domcod-input" '
-          + ( this.showDomAndCod ? 'checked' : '' ) + '/> Write domain and codomain</p>'
+          + ( this.showDomAndCod ? 'checked' : '' ) + '/> Show domain and codomain</p>'
           + '<p><input type="checkbox" class="arrows-input" '
           + ( this.showManyArrows ? 'checked' : '' ) + '/> Draw multiple arrows</p>'
-          + '</div>' )[0];
+          + '<hr/>'
+          + '<p>Define the homomorphism here:</p>'
+          + '<center><table border=1 cellspacing=0>'
+          + '<tr><th>This element</th><th>Maps to this</th><th></th></tr>'
+          + '<tr id="emptyMorphismNote"><td colspan=3><center><i>'
+          + 'No pairs added yet.</i></center></td></tr>'
+          + '</table>'
+          + '<p><button id="addPairButton">Add:</button>'
+          + '&nbsp;f(&nbsp;<select id="domainDropDown"></select>&nbsp;)'
+          + '&nbsp;=&nbsp;<select id="codomainDropDown"></select></p></center>'
+          + '<p><font size=-1>Elements not determined by the table above '
+          + 'map to the identity.</font></p>'
+          + '<p><button id="morphismPreview">Preview</button> '
+          + '(Shows full map in a new window.)</p>'
+          + '</div>';
+        var $result = $( html );
+        var that = this;
+        $result.find( '#domainDropDown' ).on( 'change', function () {
+            that.fillCodomainDropDown();
+        } );
+        $result.find( '#addPairButton' ).on( 'click', function () {
+            const domElt = parseInt( $result.find( '#domainDropDown' ).val() ),
+                  codElt = parseInt( $result.find( '#codomainDropDown' ).val() );
+            that.definingPairs.push( [ domElt, codElt ] );
+            that.fillTableWithPairs();
+        } );
+        $result.find( '#morphismPreview' ).on( 'click', function () {
+            alert( 'Not yet implemented' );
+        } );
+        return $result[0];
     }
     // implement abstract methods save/loadEdits()
     saveEdits () {
@@ -1383,13 +1417,94 @@ class MorphismElement extends ConnectingElement {
         if ( maybeNewName !== null ) this.name = maybeNewName
         this.showDomAndCod = $( this.htmlEditElement() ).find( '.domcod-input' ).prop( 'checked' );
         this.showManyArrows = $( this.htmlEditElement() ).find( '.arrows-input' ).prop( 'checked' );
+        this._map = this.getFullMap( this.definingPairs );
         this.reposition();
         this.model.sync();
     }
     loadEdits () {
-        $( this.htmlEditElement() ).find( '.name-input' )[0].value = this.name;
-        $( this.htmlEditElement() ).find( '.domcod-input' ).prop( 'checked', this.showDomAndCod );
-        $( this.htmlEditElement() ).find( '.arrows-input' ).prop( 'checked', this.showManyArrows );
+        var $edit = $( this.htmlEditElement() );
+        $edit.find( '.name-input' )[0].value = this.name;
+        $edit.find( '.domcod-input' ).prop( 'checked', this.showDomAndCod );
+        $edit.find( '.arrows-input' ).prop( 'checked', this.showManyArrows );
+        this.fillTableWithPairs();
+        $edit[0].definingPairsCopy = this.definingPairs.slice();
+    }
+    fillTableWithPairs () {
+        var $note = $( this.htmlEditElement() ).find( '#emptyMorphismNote' );
+        const D = this.from.group, C = this.to.group;
+        while ( $note.next().length > 0 ) $note.next().remove();
+        if ( this.definingPairs.length > 0 ) {
+            $note.hide();
+            var that = this;
+            this.definingPairs.map( function ( pair, index ) {
+                var newButton = $note.parent().append(
+                    `<tr><td>${D.representation[pair[0]]}</td>`
+                  + `<td>${C.representation[pair[1]]}</td>`
+                  + `<td><button class="removePairButton" name="${index}">`
+                  + `Remove</button></tr>`
+                ).find( `.removePairButton[name="${index}"]` )[0];
+                $( newButton ).on( 'click', function ( event ) {
+                    that.definingPairs.splice( index, 1 );
+                    that.fillTableWithPairs();
+                } );
+            } );
+        } else {
+            $note.show();
+        }
+        this.fillDomainDropDown();
+    }
+    // This function populates the domain element drop-down list in the morphism edit dialog.
+    // It is a function of this.definingPairs, as described below.
+    fillDomainDropDown () {
+        // which elements of the domain are in the subgroup generated by the pairs in the table?
+        var domSubgroup = this.definingPairs.map( function ( pair ) { return pair[0]; } );
+        const origLen = domSubgroup.length, D = this.from.group;
+        for ( var i = 0 ; i < domSubgroup.length ; i++ ) {
+            for ( var j = 0 ; j < origLen ; j++ ) {
+                const maybeNewElt = D.mult( domSubgroup[i], domSubgroup[j] );
+                if ( domSubgroup.indexOf( maybeNewElt ) == -1 )
+                    domSubgroup.push( maybeNewElt );
+            }
+        }
+        // clear everything out of the list
+        var $dropDown = $( this.htmlEditElement() ).find( '#domainDropDown' );
+        $dropDown.children().remove();
+        // add one thing for each element NOT in the subgroup just computed
+        for ( var i = 1 ; i < D.order ; i++ ) // don't put the identity in, of course
+            if ( domSubgroup.indexOf( i ) == -1 )
+                $dropDown.append( `<option value="${i}">${D.representation[i]}</option>` );
+        // if the drop-down is empty, hide its whole row; otherwise show it
+        if ( $dropDown.children().length == 0 )
+            $dropDown.parent().hide();
+        else
+            $dropDown.parent().show();
+        this.fillCodomainDropDown();
+    }
+    // This function populates the domain element drop-down list in the morphism edit dialog.
+    // It is a function of the current choice in the domain drop down, as described below.
+    fillCodomainDropDown () {
+        // clear all old items from the list
+        var $dropDown = $( this.htmlEditElement() ).find( '#codomainDropDown' );
+        $dropDown.children().remove();
+        // otherwise, see which element is selected in the domain drop-down
+        const $domDropDown = $( this.htmlEditElement() ).find( '#domainDropDown' );
+        // if there's no element selected in the domain, quit here
+        if ( $domDropDown.children().length == 0 ) return;
+        const domElt = parseInt( $domDropDown.val() );
+        // now we must ask which elements of the codomain could domElt feasibly map to
+        var validMapTargets = [ ];
+        const D = this.from.group, C = this.to.group;
+        var extension = this.definingPairs.slice();
+        extension.push( 'placeholder' );
+        for ( var i = 0 ; i < C.order ; i++ ) {
+            // just for speed:
+            if ( D.elementOrders[domElt] % C.elementOrders[i] != 0 ) continue;
+            // use getFullMap() to see if there is any hom containing the (domElt,i) pair
+            extension[extension.length-1] = [ domElt, i ];
+            if ( this.getFullMap( extension ) )
+                $dropDown.append( `<option value="${i}">${C.representation[i]}</option>` );
+        }
+        // that list will always have something in it, because the identity is always an option
     }
     toString () {
         return `Morphism ${this.name} from ${this.from.toString()} to ${this.to.toString()}`;
@@ -1404,26 +1519,19 @@ class MorphismElement extends ConnectingElement {
         }
         return false;
     }
-    // Function to extend a partial homomorphism to a full one.
-    // Assumes the domain is this.from.vizobj.group and the codomain is this.to.vizobj.group.
-    // The one parameter is an array, a list of (d,c) pairs, with d in domain, c in codomain,
-    // such that the morphism will be a superset of that pairset (if possible).
-    // Returns one of two values:
-    // Null means there is no homomorphism extending this partial one (i.e., it's not really
-    // a partial homomorphism at all)
-    // An array means there is a homomorphism extending this partial one, and we've given you
-    // the simplest such one, by mapping all unspecified things to the identity in the codomain.
-    // The result array is such that result[domainElement] = itsImage,
-    // with result.length == domain order.
-    getFullMap ( partialMap ) {
-        // a way to use the partial map like a function
-        function lookup ( domelt ) {
-            for ( var i = 0 ; i < partialMap.length ; i++ )
-                if ( partialMap[i][0] == domelt ) return partialMap[i][1];
-            return null;
-        }
+    // Functon that takes a set of pairs (d1,c1),...,(dn,cn) with each di in this.from.group
+    // and each ci in this.to.group and creates two arrays, [a1,...,ak],[b1,...,bk]
+    // such that the subgroup of this.from.group generated by d1,...,dn is a1,...,ak
+    // and the subgroup of this.to.group generated by c1,...,cn is b1,...,bk and the mapping
+    // ai->bi is the one generated from the definition of homomorphism applied to the mapping
+    // di->ci.  Note that while a1,...,ak is a set (all unique) b1,...,bk may not be
+    // (repeats are allowed).
+    // The result is return in the form [ [a1,...,ak], [b1,...,bk] ].
+    expandMap ( partialMap ) {
+        // handle base case which would otherwise fail as a corner case below
+        if ( partialMap.length == 0 ) return [ [ 0 ], [ 0 ] ];
         // get domain and codomain groups easily accessible
-        const D = this.from.vizobj.group, C = this.to.vizobj.group;
+        const D = this.from.group, C = this.to.group;
         // generate how the homomorphism behaves on the subgroup of the domain
         // generated by all the left hand sides of the pairs in partialMap
         var domSubgroup = partialMap.map( function ( pair ) { return pair[0]; } );
@@ -1439,30 +1547,48 @@ class MorphismElement extends ConnectingElement {
                 }
             }
         }
+        return [ domSubgroup, codSubgroup ];
+    }
+    // Function to extend a partial homomorphism to a full one.
+    // Assumes the domain is this.from.group and the codomain is this.to.group.
+    // The one parameter is an array, a list of (d,c) pairs, with d in domain, c in codomain,
+    // such that the morphism will be a superset of that pairset (if possible).
+    // Returns one of two values:
+    // Null means there is no homomorphism extending this partial one (i.e., it's not really
+    // a partial homomorphism at all)
+    // An array means there is a homomorphism extending this partial one, and we've given you
+    // the simplest such one, by mapping all unspecified things to the identity in the codomain.
+    // The result array is such that result[domainElement] = itsImage,
+    // with result.length == domain order.
+    getFullMap ( partialMap ) {
+        // get domain and codomain groups easily accessible
+        const D = this.from.group, C = this.to.group;
+        // generate how the homomorphism behaves on the subgroup of the domain
+        // generated by all the left hand sides of the pairs in partialMap
+        var subgroups = this.expandMap( partialMap );
         // extend the domSubgroup[i] -> codSubgroup[j] map to the entire domain
-        // by mapping everything else to the identity
-        for ( var i = 0 ; i < D.order ; i++ ) {
-            if ( domSubgroup.indexOf( i ) == -1 ) {
-                domSubgroup.push( i );
-                codSubgroup.push( 0 );
-            }
+        // by mapping everything else to the identity.
+        const allDomainElts = Array( D.order ).fill( 0 ).map( ( e, i ) => i );
+        var expandedMap = partialMap.slice();
+        while ( subgroups[0].length < D.order ) {
+            const next = allDomainElts.filter(
+                ( e ) => subgroups[0].indexOf( e ) == -1 )[0];
+            expandedMap.push( [ next, 0 ] );
+            subgroups = this.expandMap( expandedMap );
         }
+        // restructure this into the form in which we promised to return it
+        var result = Array( D.order ).fill( 0 );
+        subgroups[0].map( function ( domelt, index ) {
+            result[domelt] = subgroups[1][index];
+        } );
         // verify that the thing we've built is actually a homomorphism,
         // by exhaustively checking that the definition of homomorphism applies.
         // if not, return null immediately.
-        for ( var i = 0 ; i < D.order ; i++ ) {
-            for ( var j = 0 ; j < D.order ; j++ ) {
-                const prodInDomain = D.mult( domSubgroup[i], domSubgroup[j] )
-                      imageOfEltI = codSubgroup[i],
-                      imageOfEltJ = codSubgroup[j];
-                if ( prodInDomain != C.mult( imageOfEltI, imageOfEltJ ) ) return null;
-            }
-        }
-        // it's a homomorphism, so we have only to repackage it in the format
-        // promised in the comments preceding this function.
-        var result = [ ];
         for ( var i = 0 ; i < D.order ; i++ )
-            result.push( codSubgroup[domSubgroup.indexOf( i )] );
+            for ( var j = 0 ; j < D.order ; j++ )
+                if ( result[D.mult( i, j )] != C.mult( result[i], result[j] ) )
+                    return null;
+        // it's a homomorphism!
         return result;
     }
 }
