@@ -38,8 +38,6 @@
 
  * Sheets
     * Morphisms
-       * Allow users to change the names of morphisms when editing, but pop up an error dialog
-         if they try to use something not unique to the sheet.
        * Add a checkbox to the edit screen for including the domain and codomain in the
          morphism name (as in f:G->H).
        * Add a method to `VisualizerElement` for asking where in [0,1]x[0,1] a given group element sits.

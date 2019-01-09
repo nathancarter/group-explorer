@@ -1068,6 +1068,7 @@ class MorphismElement extends ConnectingElement {
     // Morphism overlays are the arrow with whatever corresponding txet
     // the user has asked us to include.
     drawOverlay ( canvas, context ) {
+        if ( $( this.htmlViewElement() ).is( ':hidden' ) ) return;
         const $fromWrapper = $( this.from.htmlViewElement().parentElement ),
               fromPadding = parseInt( $fromWrapper.css( 'padding' ) ),
               $toWrapper = $( this.to.htmlViewElement().parentElement ),
@@ -1095,16 +1096,32 @@ class MorphismElement extends ConnectingElement {
     }
     // when editing, use one input for each defining feature
     createHtmlEditElement () {
-        return $( '<p>Not yet implemented.</p>' );
+        return $(
+            '<div style="min-width: 200px; border: 1px solid black;">'
+          + '<p>Morphism name:</p>'
+          + `<input type="text" class="name-input" value="${this.name}"/>`
+          + '</div>' )[0];
     }
     // implement abstract methods save/loadEdits()
     saveEdits () {
-        // fill in later
+        var maybeNewName = $( this.htmlEditElement() ).find( '.name-input' )[0].value;
+        var that = this;
+        this.model.elements.map( function ( element ) {
+            if ( ( element != that ) && ( element instanceof MorphismElement )
+              && ( element.name == maybeNewName ) ) {
+                alert( `Cannot rename the morphism to ${maybeNewName}.  That name is in use.` );
+                maybeNewName = null;
+            }
+        } );
+        if ( maybeNewName !== null ) this.name = maybeNewName
         this.reposition();
         this.model.sync();
+        setTimeout( function () { that.model.drawOverlay(); }, 1 );
     }
     loadEdits () {
-        // fill in later
+        $( this.htmlEditElement() ).find( '.name-input' )[0].value = this.name;
+        var that = this;
+        setTimeout( function () { that.model.drawOverlay(); }, 1 );
     }
     toString () {
         return `Morphism ${this.name} from ${this.from.toString()} to ${this.to.toString()}`;
