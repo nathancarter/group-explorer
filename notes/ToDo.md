@@ -38,46 +38,6 @@
 
  * Sheets
     * Morphisms
-       * Write a function that takes as input a domain group D and a list DE of elements of it,
-         plus a codomain group C and a list CE of elements of it, of equal length to DE,
-         and it computes the simplest homomorphism extending DE[1]:=CE[1],...,DE[n]:=CE[n],
-         or returns null if there is no such homomorphism.  (Simplest means everything unspecified
-         maps to the identity.)  Call it `getFullMap()`.  Use this algorithm:
-```
-// generate how hom behaves on subgroup of domain defined by DE
-var Dsubgroup = DE.slice();
-var Csubgroup = CE.slice();
-for ( var i = 0 ; i < Dsubgroup.length ; i++ ) {
-    for ( var j = 0 ; j < DE.length ; j++ ) {
-        const maybeNewElt = D.multiply( Dsubgroup[i], DE[j] );
-        if ( Dsubgroup.indexOf( maybeNewElt ) == -1 ) {
-            Dsubgroup.push( maybeNewElt );
-            Csubgroup.push( C.multiply( f( Dsubroup[i] ), f( DE[j] ) ) );
-        }
-    }
-}
-// extend to whole domain by mapping everything else to the identity
-for ( var i = 0 ; i < D.elements.length ; i++ ) {
-    if ( Dsubgroup.indexOf( i ) == -1 ) {
-        Dsubgroup.push( i );
-        Csubgroup.push( 0 );
-    }
-}
-// verify that it's actually a hom now
-for ( var i = 0 ; i < Dsubgroup.length ; i++ ) {
-    for ( var j = 0 ; j < Dsubgroup.length ; j++ ) {
-        const prodInDomain = D.multiply( Dsubgroup[i], Dsubgroup[j] );
-        const image1 = f( Dsubgroup[i] );
-        const image2 = f( Dsubgroup[j] );
-        if ( prodInDomain != C.multiply( image1, image2 ) ) return null;
-    }
-}
-// yup, it's a hom; turn it into one that's easy to use
-var result = [ ];
-for ( var i = 0 ; i < D.elements.length ; i++ )
-    result.push( Csubgroup[Dsubgroup.indexOf( i )] );
-return result;
-```
        * Whenever the morphism element is constructed or deserialized, call this function to
          find out what its current meaning is, and store it in an internal field that is not
          part of the serialization process.  Call that field `_map`.
