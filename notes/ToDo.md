@@ -31,7 +31,15 @@
       of visualizers, so that when creating sheets programmatically, we can highlight a
       subgroup without worrying about determining the type of visualizer first, and then
       choosing a custom storage format based on that.
-    * Do the same for partitions of the elements.
+       * CGElements use a `highlights` member, an object with these fields:
+          * `background` - array mapping elements to HTML color strings,
+            or undefined if not highlighted
+          * `border` - same as previous
+          * `top` - same as previous
+       * MTElements use separate members, `backgrounds`, `borders`, and `corners`;
+         should standardize these into a single `highlights` member, like CGElements
+       * CDElements don't store this yet; update them so that they do, and use the
+         same format given above.
     * In ClassEquationInfo.html:
        * Import allSheets.js.
        * Add a script function that pops up a sheet illustrating the class equation for
@@ -141,18 +149,16 @@
        * Replace the "not implemented" text in the page with links to a sheet showing the solvable
          decomposition for each type of visualizer.
     * Extend the toJSON() and fromJSON() in CayleyDiagram.html to also respect:
-       * node colors: `Cayley_diagram.nodes[i].nodeColor` then same update routine or `updateHighlights()`
-         (Is this the same as node highlights?)
-       * diagram name: global var in HTML page, `Diagram_name`, plus the
-         drop-down selector with id `'#diagram-select'` (then `displayGraphic()`)
        * all the rest of the Diagram panel needs to wait until I talk to Ray
        * background color:
          `Graphic_context.renderer.getClearColor().toArray()` and
          `new THREE.Color( that_array[0], that_array[1], that_array[2] )`
+       * diagram name: global var in HTML page, `Diagram_name`, plus the
+         drop-down selector with id `'#diagram-select'` (then `displayGraphic()`)
        * node positions: `Cayley_diagram.nodes[i].point.x` (y, z), then update diagram with `updateNodes()`
        * node radii: `Cayley_diagram.nodes[i].radius` then same (original) update routine
-       * arc curvature: once it's implemented later
-       * chunking: once it's implemented later
+       * arc curvature: once I talk to Ray
+       * chunking: once I talk to Ray
     * In ZmnInfo.html:
        * Create a function `showZnmIsomorphism(n,m)` that pops up a sheet with the following
          content and a suitable title.  (This works only if n and m are relatively prime.)
