@@ -745,12 +745,13 @@ class TextElement extends SheetElement {
         this.text = 'Text';
         this.fontSize = '12pt';
         this.fontColor = '#000000';
+        this.alignment = 'left';
         this.update();
     }
     // helper function to produce inner HTML from the above defining attributes
     innerHTML () {
         var simplified = this.text || '';
-        const style = 'style="margin: 0;"';
+        const style = `style="margin: 0; text-align: ${this.alignment || 'left'}"`;
         simplified = `<p ${style}>` + simplified.replace( RegExp( '\n', 'g' ), `</p><p ${style}>` ) + '</p>';
         return `<div style="font-size: ${this.fontSize}; color: ${this.fontColor};">`
              + simplified + '</div>';
@@ -769,6 +770,9 @@ class TextElement extends SheetElement {
     }
     // when editing, use one input for each defining feature
     createHtmlEditElement () {
+        function isSelected ( align ) {
+            return this.alignment == align ? ' selected' : '';
+        }
         return $(
             '<div style="min-width: 200px; border: 1px solid black;">'
           + '<p>Text content:</p>'
@@ -777,6 +781,12 @@ class TextElement extends SheetElement {
           + `<input type="range" min="8" max="100" class="size-input" value="${this.fontSize}"/></p>`
           + '<p>Text color: '
           + `<input type="color" class="color-input" value="${this.fontColor}"/></p>`
+          + '<p>Alignment: '
+          + '<select class="align-input">'
+          + `<option value="left" ${isSelected('left')}>Left</option>`
+          + `<option value="center" ${isSelected('center')}>Center</option>`
+          + `<option value="right" ${isSelected('right')}>Right</option>`
+          + '</select>'
           + '</div>' )[0];
     }
     // update appearance with this function
@@ -789,6 +799,7 @@ class TextElement extends SheetElement {
         this.text = $( this.htmlEditElement() ).find( '.text-input' )[0].value;
         this.fontSize = $( this.htmlEditElement() ).find( '.size-input' )[0].value + 'pt';
         this.fontColor = $( this.htmlEditElement() ).find( '.color-input' )[0].value;
+        this.alignment = $( this.htmlEditElement() ).find( '.align-input' ).val();
         this.update();
         this.model.sync();
     }
@@ -796,6 +807,7 @@ class TextElement extends SheetElement {
         $( this.htmlEditElement() ).find( '.text-input' )[0].value = this.text;
         $( this.htmlEditElement() ).find( '.size-input' )[0].value = parseInt( this.fontSize );
         $( this.htmlEditElement() ).find( '.color-input' )[0].value = this.fontColor;
+        $( this.htmlEditElement() ).find( '.align-input' ).val( this.alignment );
     }
     // serialization just needs to take into account text, size, and color
     toJSON () {
@@ -804,13 +816,15 @@ class TextElement extends SheetElement {
         result.text = this.text;
         result.fontSize = this.fontSize;
         result.fontColor = this.fontColor;
+        result.alignment = this.alignment;
         return result;
     }
     fromJSON ( json ) {
         super.fromJSON( json );
         this.text = json.text;
-        this.fontSize = json.fontSize;
-        this.fontColor = json.fontColor;
+        if ( json.fontSize ) this.fontSize = json.fontSize;
+        if ( json.fontColor ) this.fontColor = json.fontColor;
+        if ( json.alignment ) this.alignment = json.alignment;
         this.update();
     }
     // Give description with sample text
