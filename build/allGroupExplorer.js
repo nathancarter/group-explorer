@@ -3125,14 +3125,22 @@ class DisplayDiagram {
       };
    }
    fromJSON ( json, cayleyDiagram ) {
-      cayleyDiagram.highlights = json.highlights;
-      cayleyDiagram.elements = json.elements;
-      cayleyDiagram.zoomLevel = json.zoomLevel;
-      cayleyDiagram.lineWidth = json.lineWidth;
-      cayleyDiagram.nodeScale = json.nodeScale;
-      cayleyDiagram.fogLevel = json.fogLevel;
-      cayleyDiagram.labelSize = json.labelSize;
-      cayleyDiagram.arrowheadPlacement = json.arrowheadPlacement;
+      if ( json.hasOwnProperty( 'highlights' ) )
+         cayleyDiagram.highlights = json.highlights;
+      if ( json.hasOwnProperty( 'elements' ) )
+         cayleyDiagram.elements = json.elements;
+      if ( json.hasOwnProperty( 'zoomLevel' ) )
+         cayleyDiagram.zoomLevel = json.zoomLevel;
+      if ( json.hasOwnProperty( 'lineWidth' ) )
+         cayleyDiagram.lineWidth = json.lineWidth;
+      if ( json.hasOwnProperty( 'nodeScale' ) )
+         cayleyDiagram.nodeScale = json.nodeScale;
+      if ( json.hasOwnProperty( 'fogLevel' ) )
+         cayleyDiagram.fogLevel = json.fogLevel;
+      if ( json.hasOwnProperty( 'labelSize' ) )
+         cayleyDiagram.labelSize = json.labelSize;
+      if ( json.hasOwnProperty( 'arrowheadPlacement' ) )
+         cayleyDiagram.arrowheadPlacement = json.arrowheadPlacement;
       if ( json.hasOwnProperty( '_camera' ) ) {
          this.camera.matrix.fromArray( json._camera );
          this.camera.matrix.decompose(

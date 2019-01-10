@@ -933,6 +933,7 @@ class VisualizerElement extends SheetElement {
         var that = this;
         if ( json.groupURL ) {
             if ( json.groupURL != this.groupURL ) {
+                this.groupURL = json.groupURL;
                 Library.getGroupFromURL( json.groupURL )
                        .then( ( group ) => {
                            that.vizobj = that.makeVisualizerObject( that.group = group );
