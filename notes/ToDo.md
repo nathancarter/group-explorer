@@ -213,6 +213,8 @@
    inside, the entire "H_{index} = < element names >" portion is MathJax.
  * Change &lt;select&gt; elements that use formatted math strings to use hand-rolled menus
    with mathml instead of text (similar to menus in Subgroups view)
+ * Change the default so that navigating into a group's Group Info page doesn't use a
+   blob URL, but the group URL, so that users can share links to such pages the usual way.
 
 ## Bug fixes
  * Setting line thickness to minimum does not work; it gets reset to a thicker value.
