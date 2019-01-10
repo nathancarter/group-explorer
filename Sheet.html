@@ -309,6 +309,15 @@
                 new CGElement( Model, groupURL );
             }
          }
+
+         // The following functions let a parent page that programmatically opened this page
+         // construct sheet content programmatically as well.
+         function loadSheetFromJSON ( json ) {
+             Model.fromJSON( json );
+         }
+         function addSheetElementFromJSON( json ) {
+             Model.sheetElementFromJSON( json );
+         }
       </script>
    </head>
 

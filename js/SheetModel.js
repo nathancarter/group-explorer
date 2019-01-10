@@ -238,6 +238,21 @@ class SheetModel {
 }
 
 /*
+ * We also make a global convenience function for popping up a sheet in a new tab,
+ * and building it from a big bolus of JSON.
+ */
+function CreateNewSheet ( json ) {
+    var sheet = window.open( './Sheet.html' );
+    sheet.addEventListener( 'load', function () {
+        // Sheet.html has loaded, but its own load handlers may still need to fire, so:
+        setTimeout( function () {
+            // The following line relies upon a global function defined in Sheet.html.
+            sheet.loadSheetFromJSON( json );
+        }, 100 );
+    } );
+}
+
+/*
  * A Sheet Element represents the data contained in a single element that will be
  * shown on a Group Explorer sheet (such as a rectangle, some text, a connection,
  * a morphism, a visualization, etc.).
