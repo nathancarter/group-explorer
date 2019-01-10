@@ -309,7 +309,5 @@ class DisplayCycleGraph {
    fromJSON ( json, cycleGraph ) {
       cycleGraph.highlights = json.highlights;
       cycleGraph.elements = json.elements;
-      Library.getGroupFromURL( json.groupURL )
-             .then( ( group ) => { cycleGraph.group = group; } );
    }
 }

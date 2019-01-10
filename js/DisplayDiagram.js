@@ -771,8 +771,6 @@ class DisplayDiagram {
             this.camera.scale
          );
       }
-      Library.getGroupFromURL( json.groupURL )
-             .then( ( group ) => { cayleyDiagram.group = group; } );
    }
 }
 
