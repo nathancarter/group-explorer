@@ -24,22 +24,9 @@
     * notes
  * Preferences
 
-## Sheets
-
- * SubgroupInfo
- * SolvableInfo
- * Z_nm group
- * Ad hoc
-
 # Nathan's List
 
  * Sheets
-    * In GroupInfo.html:
-       * Write a function that pops up a sheet showing the three visualizers of the current
-         group, with isomorphisms between them, id1 and id2.  Place the names of the types
-         of visualizers above them, and add a title for the sheet.
-       * Below the current list of visualizers on the group info page, add a link that will
-         open this sheet, following the phrasing in the original GE desktop app.
     * Standardize the way that subgroup highlighting is stored in the JSON representations
       of visualizers, so that when creating sheets programmatically, we can highlight a
       subgroup without worrying about determining the type of visualizer first, and then

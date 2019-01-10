@@ -52,6 +52,7 @@
       <script>THREE.TrackballControls = module.exports;</script>
       <script src="https://cdn.jsdelivr.net/npm/three.meshline@1.1.0/src/THREE.MeshLine.js"></script>
       <script src="./build/allGroupExplorer.js"></script>
+      <script src="./build/allSheets.js"></script>
 
       <script>
        // Global variables
@@ -70,7 +71,7 @@
                  .then( ({library, groupIndex}) => {
                     window.group = library[groupIndex];
                     displayStatic();
-                    displayDynamic()
+                    displayDynamic();
                  } )
                  .catch( (error) => alert(error) );
        }
@@ -186,6 +187,11 @@
           }
 
           MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
+
+          $( '.show-all-visualizers-sheet' ).on( 'click', function ( event ) {
+             event.preventDefault();
+             showAllVisualizersSheet();
+          } );
        }
 
        function displayClassEquation() {
@@ -247,6 +253,60 @@
        function setRepresentation(index) {
           group.representationIndex = index;
           displayDynamic();
+       }
+
+       function showAllVisualizersSheet () {
+          const iso = group.generators[0].map( g => [ g, g ] );
+          CreateNewSheet( [
+             {
+                className : 'TextElement',
+                x : 50, y : 50, z : 1, w : 800, h : 50,
+                text : `All Visualizers for the Group ${group.shortName}`,
+                fontSize : '20pt'
+             },
+             {
+                className : 'TextElement',
+                x : 50, y : 100, z : 2, w : 200, h : 50,
+                text : `Cayley Diagram`
+             },
+             {
+                className : 'TextElement',
+                x : 350, y : 100, z : 3, w : 200, h : 50,
+                text : `Multiplication Table`
+             },
+             {
+                className : 'TextElement',
+                x : 650, y : 100, z : 4, w : 200, h : 50,
+                text : `Cycle Graph`
+             },
+             {
+                className : `CDElement`,
+                groupURL : group.URL,
+                x : 50, y : 150, z : 5, w : 200, h : 200
+             },
+             {
+                className : `MTElement`,
+                groupURL : group.URL,
+                x : 350, y : 150, z : 6, w : 200, h : 200
+             },
+             {
+                className : `CGElement`,
+                groupURL : group.URL,
+                x : 650, y : 150, z : 7, w : 200, h : 200
+             },
+             {
+                className : `MorphismElement`,
+                fromIndex : 4, toIndex : 5,
+                name : 'id1', showInjSurj : true, showManyArrows : true,
+                definingPairs : iso
+             },
+             {
+                className : `MorphismElement`,
+                fromIndex : 5, toIndex : 6,
+                name : 'id2', showInjSurj : true, showManyArrows : true,
+                definingPairs : iso
+             }
+          ] );
        }
       </script>
    </head>
@@ -317,6 +377,10 @@
                </tr>
             </template>
          </table>
+      </p>
+      <p class="indent1">
+         To see all of these visualizations shown together on a sheet,
+         <a href="" class="show-all-visualizers-sheet">click here</a>.
       </p>
 
       <h3 id="Description">Description</h3>
