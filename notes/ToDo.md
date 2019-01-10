@@ -25,7 +25,6 @@
     * user-defined naming scheme
     * notes
  * Preferences
- * Saved sheets
 
 ## Sheets
 
@@ -37,6 +36,125 @@
 # Nathan's List
 
  * Sheets
+    * In GroupInfo.html:
+       * Write a function that pops up a sheet showing the three visualizers of the current
+         group, with isomorphisms between them, id1 and id2.  Place the names of the types
+         of visualizers above them, and add a title for the sheet.
+       * Below the current list of visualizers on the group info page, add a link that will
+         open this sheet, following the phrasing in the original GE desktop app.
+    * Standardize the way that subgroup highlighting is stored in the JSON representations
+      of visualizers, so that when creating sheets programmatically, we can highlight a
+      subgroup without worrying about determining the type of visualizer first, and then
+      choosing a custom storage format based on that.
+    * Do the same for partitions of the elements.
+    * In ClassEquationInfo.html:
+       * Import allSheets.js.
+       * Add a script function that pops up a sheet illustrating the class equation for
+         the page's group, given a visualizer type as its parameter.  The sheet should
+         contain the class equation ord1+ord2+...+ordN=|G|, a title, and a visualizer
+         underneath each class equation highlighting that class (the final one with all
+         conjugacy classes highlighted in different colors).
+       * Replace the "not implemented" text at the end of the page with links to a sheet
+         showing the class equation using each type of visualizer.
+    * In SubgroupInfo.html:
+       * Import allSheets.js.
+       * Add a script function that pops up a sheet illustrating the subgroup lattice
+         for the page's group, given a visualizer type as its parameter.  Come up with a
+         simple but halfway-decent layout algorithm.  Note that the existing
+         `SubgroupFinder` class already implements `getSubgroups()`, which also creates
+         the whole inclusion relation as well.
+       * Replace the first "not implemented" text in that page with links to a sheet
+         showing the subgroup lattice using each type of visulizer.
+    * In BasicGroup.js:
+       * Extend the existing `getSubgroupAsGroup()` function to retain, in some inner
+         private attribute, the mapping from old element indices to new element indices.
+       * Extend the existing `getQuotientGroup()` function to retain, in some inner
+         private attribute, the mapping from old element indices to coset indices.
+         (This is already called `elementMap` in the code, and just needs to be stored.)
+    * In IsomorphicGroups.js:
+       * Create a function `findEmbedding(G,H)` (with H a subgroup of G) that does this:
+          * Let H be `G.getSubgroupAsGroup()`.
+          * Let H' be `IsomorphicGroups.find(H)`.
+          * Let f be `IsomorphicGroups.isomorphism(H',H)`.
+          * Let f' be f composed with the renaming stored in a private member of H,
+            so that f' now embeds H' in G.
+          * Return the pair [H',f'].
+          * (If any of the above steps fail, return null.)
+       * Create a function `findQuotient(G,N)` (with N a normal subgroup of G) that does this:
+          * Let K be `G.getQuotientGroup(N)`.
+          * Let K' be `IsomorphicGroups.find(K)`.
+          * Let f be `IsomorphicGroups.isomorphism(K,K')`.
+          * Let f' be f composed with the quotient map stored in a private member of K,
+            so that f' now divides G by N to yield K'.
+          * Return the pair [K',f'].
+          * (If any of the above steps fail, return null.)
+    * Back in SubgroupInfo.html:
+       * Add a script function that pops up a sheet illustrating the embedding of any given
+         subgroup of the page's group.  It should be a single row of two visualizers, one of the
+         subgroup on the left and one of G on the right, with one embedding morphism between.
+         Ensure that the morphism has "injective" showing.  Get both the subgroup and the embedding
+         from the new `IsomorphicGroups.findEmbedding(G,H)`.  Highlight the subgroup in both
+         visualizers (the whole left one, and part of the right one).
+       * Replace the first remaining "not implemented" text in that page with links to a sheet
+         showing this embedding visualization using any of the 3 main visualizer types.
+       * Add a script function that pops up a sheet illustrating the short exact sequence for
+         any normal subgroup of the page's group.  It should use `findEmbedding()` and `findQuotient()`
+         to obtain groups N and Q plus morphisms e:N->G (inj) and q:G->Q (surj).  It creates a
+         single row of 5 visualizers, Z_1 -> N -> G -> Q -> Z_1, with morphisms id,e,q,zero,
+         and text below the middle three visualizers, saying: Im(id)=Ker(e), Im(e)=Ker(q),
+         and Im(q)=Ker(z).
+       * Replace the first remaining "not implemented" text in that page with links to a sheet
+         showing this SES visualization using any of the 3 main visualizer types.
+    * In SolvableInfo.html:
+       * Write a function that computes the solvable decomposition, as a list of groups in that
+         decomposition plus the corresponding abelian quotient groups and the quotient maps,
+         plus the necessary embeddings.  Call it `getSolvableDecomposition(G)` and it does this:
+          * If `!G.isSolvable`, return null.
+          * If G is abelian, return this data structure:
+```
+[
+    {
+        group : Z_1 // always the leftmost in the chain
+    },
+    {
+        group : G,
+        embedding : [ 0 ], // from previous
+        quotientGroup : G,
+        quotientMap : [0,...,|G|-1]
+    }
+]
+```
+          * When G is not abelian:  For each normal subgroup N of G:
+             * Let [N',e] be `IsomorphicGroups.findEmbedding(G,N)`.
+               (If that fails, skip to the next loop iteration.)
+             * Let [Q,q] be `IsomorphicGroups.findQuotient(G,N)`.
+               (If that fails, skip to the next loop iteration.)
+             * Let D be `getSolvableDecomposition(N')`.
+               (If that fails, skip to the next loop iteration.)
+             * Return D with one more element appended:
+```
+    {
+        group : G,
+        embedding : e,
+        quotientGroup : Q,
+        quotientMap : q
+    }
+```
+          * If that loop terminates, then G is not solvable, so return null, but dump a warning
+            to the console that this should have been detected earlier.
+       * Write a function that pops up a sheet showing the solvable decomposition.  It contains
+         these items, all of which are provided by `getSolvableDecomposition(G)`:
+          * Title text
+          * Descriptive text: "The top row is the solvable decomposition.  The bottom row are
+            abelian quotient groups."
+          * Top row of visualizers: Z_1 -> H_1 -> ... -> H_n -> G, with each arrow an embedding,
+            e_1, ..., e_{n+1}.  (Use the actual names of the H_i from the group library.)
+          * Names of the subgroups above those subgroups.
+          * Quotient groups below every group except Z_1, Q_1,...,Q_{n+1}, with quotient maps
+            q_1,...,q_{n+1} from H_1,...,H_n,G to the Q_1,...,Q_{n+1}.
+          * Names of the quotient groups below their visualizers.
+       * Replace the "not implemented" text in the page with links to a sheet showing the solvable
+         decomposition for each type of visualizer.
     * Extend the toJSON() and fromJSON() in CayleyDiagram.html to also respect:
        * node colors: `Cayley_diagram.nodes[i].nodeColor` then same update routine or `updateHighlights()`
          (Is this the same as node highlights?)
@@ -50,6 +168,28 @@
        * node radii: `Cayley_diagram.nodes[i].radius` then same (original) update routine
        * arc curvature: once it's implemented later
        * chunking: once it's implemented later
+    * In ZmnInfo.html:
+       * Create a function `showZnmIsomorphism(n,m)` that pops up a sheet with the following
+         content and a suitable title.  (This works only if n and m are relatively prime.)
+          * Left column: A Cayley Diagram of Z_n x Z_m with generators a of order n and b of order m,
+            under which is text stating exactly that.
+          * Center column: The same Cayley Diagram, now with arrows also added for the element ab,
+            under which is text stating exactly that.
+          * Right column: A Cayley Diagram of Z_{nm} with cyclic arrangement of nodes, under which is
+            text stating that if you unroll the ab cycle from the previous diagram and drop the a and b
+            arrows, this is what you get, which is obviously Z_{nm}.
+       * Replace the "not implemented" text in the page with links to a sheet showing this content
+         for each type of visualizer.
+       * Create a function `showNoZnmIsomorphism(n,m)` that pops up a sheet with the following
+         content and a suitable title.  (This works only if n and m are not relatively prime.)
+          * Left and center columns the same as those produced by `showZnmIsomorphism(n,m)`.
+          * Right column: A Cayley Diagram of Z_n x Z_m generated by <ab,b> with the axis for ab being
+            cyclic in x,y and the axis for b being linear in z.  Show the ab arrow, do not show b.
+            Look at it from diagonally above so that we can see multiple rings in perspective.
+            The text below it says that untangling the ab arrows from the second column clearly shows
+            that the result is not a single cycle of length nm.
+       * Add links at the end of the page that offer to show this type of sheet using any type of
+         visualizer.
  * Rename Cycle Diagram HTML page to Cycle Graph instead
  * Add an object of symmetry for Z_1: something with no symmetry
  * Design how permalinks to GE resources should work and add a plan for
