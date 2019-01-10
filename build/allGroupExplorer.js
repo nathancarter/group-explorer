@@ -3118,8 +3118,6 @@ class DisplayDiagram {
             this.camera.scale
          );
       }
-      Library.getGroupFromURL( json.groupURL )
-             .then( ( group ) => { cayleyDiagram.group = group; } );
    }
 }
 
@@ -3567,8 +3565,10 @@ class DisplayMulttable {
       DisplayMulttable.BACKGROUND = '#F0F0F0';
    }
 
-   getImage(multtable,large) { // second parameter optional, defaults to small
-      if ( large )
+   getImage(multtable,options) {
+      // second parameter optional, defaults to { size : 'small' }
+      if ( !options ) options = { size : 'small' };
+      if ( options.size == 'large' )
          this.showLargeGraphic(multtable);
       else
          this.showSmallGraphic(multtable);
@@ -3829,15 +3829,13 @@ class DisplayMulttable {
       };
    }
    fromJSON ( json, multtable ) {
-      multtable.separation = json.separation;
-      multtable._colors = json.colors;
-      multtable.stride = json.stride;
-      multtable.elements = json.elements;
-      multtable.backgrounds = json.backgrounds;
-      multtable.borders = json.borders;
-      multtable.corners = json.corners;
-      Library.getGroupFromURL( json.groupURL )
-             .then( ( group ) => { multtable.group = group; } );
+      if ( json.separation ) multtable.separation = json.separation;
+      if ( json.colors ) multtable._colors = json.colors;
+      if ( json.stride ) multtable.stride = json.stride;
+      if ( json.elements ) multtable.elements = json.elements;
+      if ( json.backgrounds ) multtable.backgrounds = json.backgrounds;
+      if ( json.borders ) multtable.borders = json.borders;
+      if ( json.corners ) multtable.corners = json.corners;
    }
 }
 
@@ -4486,7 +4484,5 @@ class DisplayCycleGraph {
    fromJSON ( json, cycleGraph ) {
       cycleGraph.highlights = json.highlights;
       cycleGraph.elements = json.elements;
-      Library.getGroupFromURL( json.groupURL )
-             .then( ( group ) => { cycleGraph.group = group; } );
    }
 }

@@ -441,6 +441,21 @@ class SheetModel {
 }
 
 /*
+ * We also make a global convenience function for popping up a sheet in a new tab,
+ * and building it from a big bolus of JSON.
+ */
+function CreateNewSheet ( json ) {
+    var sheet = window.open( './Sheet.html' );
+    sheet.addEventListener( 'load', function () {
+        // Sheet.html has loaded, but its own load handlers may still need to fire, so:
+        setTimeout( function () {
+            // The following line relies upon a global function defined in Sheet.html.
+            sheet.loadSheetFromJSON( json );
+        }, 100 );
+    } );
+}
+
+/*
  * A Sheet Element represents the data contained in a single element that will be
  * shown on a Group Explorer sheet (such as a rectangle, some text, a connection,
  * a morphism, a visualization, etc.).
@@ -1082,10 +1097,10 @@ class ConnectingElement extends SheetElement {
     // can reference earlier ones.
     fromJSON ( json ) {
         super.fromJSON( json );
-        this.color = json.color;
-        this.thickness = json.thickness;
-        this.useArrowhead = json.useArrowhead;
-        this.arrowheadSize = json.arrowheadSize;
+        if ( json.color ) this.color = json.color;
+        if ( json.thickness ) this.thickness = json.thickness;
+        if ( json.hasOwnProperty( 'useArrowhead' ) ) this.useArrowhead = json.useArrowhead;
+        if ( json.arrowheadSize ) this.arrowheadSize = json.arrowheadSize;
         this.setEndpoints(
             this.model.elements[json.fromIndex],
             this.model.elements[json.toIndex]
@@ -1215,7 +1230,8 @@ class MorphismElement extends ConnectingElement {
         this.showDomAndCod = false;
         this.showDefiningPairs = false;
         this.definingPairs = [ ];
-        this._map = this.getFullMap( this.definingPairs );
+        if ( from && to && from.group && to.group )
+            this._map = this.getFullMap( this.definingPairs );
     }
     // Find the simplest mathy name for this morphism that's not yet used on its sheet.
     getUnusedName () {
@@ -1244,6 +1260,7 @@ class MorphismElement extends ConnectingElement {
         var result = super.toJSON();
         result.className = 'MorphismElement';
         result.name = this.name;
+        result.showManyArrows = this.showManyArrows;
         result.showDomAndCod = this.showDomAndCod;
         result.showDefiningPairs = this.showDefiningPairs;
         result.definingPairs = this.definingPairs;
@@ -1253,10 +1270,12 @@ class MorphismElement extends ConnectingElement {
     fromJSON ( json ) {
         super.fromJSON( json );
         this.name = json.name;
-        this.showDomAndCod = json.showDomAndCod;
-        this.showDefiningPairs = json.showDefiningPairs;
-        this.definingPairs = json.definingPairs;
-        this._map = this.getFullMap( this.definingPairs );
+        if ( json.hasOwnProperty( 'showManyArrows' ) ) this.showManyArrows = json.showManyArrows;
+        if ( json.hasOwnProperty( 'showDomAndCod' ) ) this.showDomAndCod = json.showDomAndCod;
+        if ( json.hasOwnProperty( 'showDefiningPairs' ) ) this.showDefiningPairs = json.showDefiningPairs;
+        if ( json.hasOwnProperty( 'definingPairs' ) ) this.definingPairs = json.definingPairs;
+        if ( this.from && this.to && this.from.group && this.to.group )
+            this._map = this.getFullMap( this.definingPairs );
     }
     // Override drawConnectingLine to do nothing for morphisms.
     drawConnectingLine () { }
@@ -1317,10 +1336,11 @@ class MorphismElement extends ConnectingElement {
                 x - lineWidths[index]/2, y - height/2 + approxLineHeight * ( index + 1 ) );
         } );
     }
-    // Morphism overlays are the arrow with whatever corresponding txet
+    // Morphism overlays are the arrow with whatever corresponding text
     // the user has asked us to include.
     drawOverlay ( canvas, context ) {
         if ( $( this.htmlViewElement() ).is( ':hidden' ) ) return;
+        if ( !this.from || !this.to ) return; // may still be initializing
         const $fromWrapper = $( this.from.htmlViewElement().parentElement ),
               fromPadding = parseInt( $fromWrapper.css( 'padding' ) ),
               $toWrapper = $( this.to.htmlViewElement().parentElement ),
@@ -1340,7 +1360,8 @@ class MorphismElement extends ConnectingElement {
         context.save();
         context.transform( 1, 0, 0, 1, -left, -top );
         context.strokeStyle = '#000000';
-        if ( this.showManyArrows ) {
+        if ( this.showManyArrows && this.from.group && this.to.group ) {
+            if ( !this._map ) this._map = this.getFullMap( this.definingPairs );
             for ( var domelt = 0 ; domelt < this.from.group.order ; domelt++ ) {
                 const domeltUnitCoords = this.from.unitSquarePosition( domelt ),
                       domeltRealCoords = {
