@@ -313,10 +313,17 @@
          // The following functions let a parent page that programmatically opened this page
          // construct sheet content programmatically as well.
          function loadSheetFromJSON ( json ) {
+             json.map( adjustSheetElementPosition );
              Model.fromJSON( json );
          }
          function addSheetElementFromJSON( json ) {
+             adjustSheetElementPosition( json );
              Model.sheetElementFromJSON( json );
+         }
+         // Adjusts y coordinate to take header into account.
+         function adjustSheetElementPosition ( elementJSON ) {
+             if ( elementJSON.hasOwnProperty( 'y' ) )
+                 elementJSON.y += $('#graphic').offset().top;
          }
       </script>
    </head>
