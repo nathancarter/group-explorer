@@ -340,26 +340,23 @@ class DisplayDiagram {
       }
 
       const spheres = this.getGroup('spheres').children;
-      const nominal_radius = spheres.find( (el) => el !== undefined ).geometry.parameters.radius;
-      const scale = 12 * nominal_radius * diagram3D.labelSize;
-      let canvas_width, canvas_height, label_font, label_offset;
+      const radius = spheres.find( (el) => el !== undefined ).geometry.parameters.radius;
+      let canvas_width, canvas_height, label_font;
       const big_node_limit = 0.1, small_node_limit = 0.05;
-      if (nominal_radius >= big_node_limit) {
+      if (radius >= big_node_limit) {
          canvas_width = 2048
          canvas_height = 256;
          label_font = '120pt Arial';
-         label_offset = 160 * Math.sqrt(diagram3D.nodeScale);  // don't know why, it just looks better
-      } else if (nominal_radius <= small_node_limit) {
+      } else if (radius <= small_node_limit) {
          canvas_width = 512;
          canvas_height = 64;
          label_font = '32pt Arial';
-         label_offset = 40 * Math.sqrt(diagram3D.nodeScale);
       } else {
          canvas_width = 1024;
          canvas_height = 128;
          label_font = '64pt Arial';
-         label_offset = 80 * Math.sqrt(diagram3D.nodeScale);
       }
+      const scale = diagram3D.labelSize * radius * 8.197;  // factor to make label size ~ radius
 
       spheres.forEach( (sphere) => {
          const node = sphere.userData.node;
@@ -380,14 +377,14 @@ class DisplayDiagram {
          // context.fillRect(0, 0, canvas.width, canvas.height);
          context.font = label_font;
          context.fillStyle = 'rgba(0, 0, 0, 1)';
-         context.fillText(textLabel, label_offset, 0.7*canvas.height);
+         context.fillText(textLabel, 0, 0.7*canvas.height);
 
          const texture = new THREE.Texture(canvas)
          texture.needsUpdate = true;
          const labelMaterial = new THREE.SpriteMaterial({ map: texture });
          const label = new THREE.Sprite( labelMaterial );
          label.scale.set(scale, scale*canvas.height/canvas.width, 1.0);
-         label.center = new THREE.Vector2(0.0, 0.0);
+         label.center = new THREE.Vector2(-0.09/diagram3D.labelSize, 0.30 - 0.72/diagram3D.labelSize);
          label.position.set(...node.point.toArray())
 
          labels.add(label);
@@ -723,6 +720,7 @@ class DisplayDiagram {
 
    updateNodeRadius(diagram3D) {
       this.updateNodes(diagram3D);
+      this.updateLabels(diagram3D);
       this.updateArrowheads(diagram3D);
    }
 
