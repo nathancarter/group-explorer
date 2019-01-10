@@ -217,6 +217,7 @@ class DisplayDiagram {
          const sphere = new THREE.Mesh(geometry, material);
          sphere.userData = {node: node};
          sphere.position.set(node.point.x, node.point.y, node.point.z);
+         sphere.name = diagram3D.group.representation[node.element];
          spheres.add(sphere);
       } )
    }
@@ -339,26 +340,23 @@ class DisplayDiagram {
       }
 
       const spheres = this.getGroup('spheres').children;
-      const nominal_radius = spheres.find( (el) => el !== undefined ).geometry.parameters.radius;
-      const scale = 12 * nominal_radius * diagram3D.labelSize;
-      let canvas_width, canvas_height, label_font, label_offset;
+      const radius = spheres.find( (el) => el !== undefined ).geometry.parameters.radius;
+      let canvas_width, canvas_height, label_font;
       const big_node_limit = 0.1, small_node_limit = 0.05;
-      if (nominal_radius >= big_node_limit) {
+      if (radius >= big_node_limit) {
          canvas_width = 2048
          canvas_height = 256;
          label_font = '120pt Arial';
-         label_offset = 160 * Math.sqrt(diagram3D.nodeScale);  // don't know why, it just looks better
-      } else if (nominal_radius <= small_node_limit) {
+      } else if (radius <= small_node_limit) {
          canvas_width = 512;
          canvas_height = 64;
          label_font = '32pt Arial';
-         label_offset = 40 * Math.sqrt(diagram3D.nodeScale);
       } else {
          canvas_width = 1024;
          canvas_height = 128;
          label_font = '64pt Arial';
-         label_offset = 80 * Math.sqrt(diagram3D.nodeScale);
       }
+      const scale = diagram3D.labelSize * radius * 8.197;  // factor to make label size ~ radius
 
       spheres.forEach( (sphere) => {
          const node = sphere.userData.node;
@@ -379,14 +377,14 @@ class DisplayDiagram {
          // context.fillRect(0, 0, canvas.width, canvas.height);
          context.font = label_font;
          context.fillStyle = 'rgba(0, 0, 0, 1)';
-         context.fillText(textLabel, label_offset, 0.7*canvas.height);
+         context.fillText(textLabel, 0, 0.7*canvas.height);
 
          const texture = new THREE.Texture(canvas)
          texture.needsUpdate = true;
          const labelMaterial = new THREE.SpriteMaterial({ map: texture });
          const label = new THREE.Sprite( labelMaterial );
          label.scale.set(scale, scale*canvas.height/canvas.width, 1.0);
-         label.center = new THREE.Vector2(0.0, 0.0);
+         label.center = new THREE.Vector2(-0.09/diagram3D.labelSize, 0.30 - 0.72/diagram3D.labelSize);
          label.position.set(...node.point.toArray())
 
          labels.add(label);
@@ -661,10 +659,18 @@ class DisplayDiagram {
          depthTest: false,
       } );
 
+      let subgroup_name;  // MathML subgroup name, generated first time through
       const createChunks = (arr, desired, current = diagram3D.strategies.length - 1) => {
          if (current == desired) {
-            const points = arr._flatten().map( (node) => node.point );
+            const nodes = arr._flatten();
+            const elements = new BitSet(diagram3D.group.order, nodes.map( (node) => node.element ));
+            const points = nodes.map( (node) => node.point );
             const box = new THREE.Mesh(box_geometry, box_material);
+            if (subgroup_name === undefined) {
+               const subgroup_index = diagram3D.group.subgroups.findIndex( (subgroup) => subgroup.members.equals(elements) );
+               subgroup_name = `<msub><mi>H</mi><mn>${subgroup_index}</mn></msub>`;
+            }
+            box.name = diagram3D.group.representation[nodes[0].element] + subgroup_name;
             box.position.set(...centroid(points).toArray());
             return [box];
          } else {
@@ -676,12 +682,12 @@ class DisplayDiagram {
                const center = centroid(all_boxes.map( (box) => box.position ));
                // calculate normalized vector from centroid of all boxes to centroid of boxes[0]
                const ref = centroid(boxes[0].map( (box) => box.position )).sub(center).normalize();
-               // calculate normal
+               // calculate normal to plane containing center, first, and second (and presumably all other) centroids
                const normal = centroid(boxes[1].map( (box) => box.position )).sub(center).normalize().cross(ref).normalize();
                boxes.forEach( (bxs) => {
                   // find angle between centroid of first box and centroid(bxs)
                   const curr = centroid(bxs.map( (box) => box.position )).sub(center).normalize();
-                  if (Math.abs(1 - curr.dot(ref)) > 1e-6) {
+                  if (Math.abs(1 - curr.dot(ref)) > 1e-6) {  // check that boxes aren't co-linear
                      const theta = Math.acos(ref.dot(curr))*Math.sign(normal.dot(new THREE.Vector3().crossVectors(ref,curr)));
                      bxs.forEach( (box) => box.rotateOnAxis(normal, theta) );
                   }
@@ -714,6 +720,7 @@ class DisplayDiagram {
 
    updateNodeRadius(diagram3D) {
       this.updateNodes(diagram3D);
+      this.updateLabels(diagram3D);
       this.updateArrowheads(diagram3D);
    }
 
@@ -729,6 +736,20 @@ class DisplayDiagram {
 
    updateArrowheadPlacement(diagram3D) {
       this.updateArrowheads(diagram3D);
+   }
+
+   // get objects at point x,y using raycasting
+   getObjectsAtPoint(x, y) {
+      const mouse = new THREE.Vector2(x, y);
+      const raycaster = new THREE.Raycaster();
+      raycaster.setFromCamera(mouse, this.camera);
+
+      let intersects = raycaster.intersectObjects(this.getGroup('spheres').children, false);
+      if (intersects.length == 0) {
+         intersects = raycaster.intersectObjects(this.getGroup('chunks').children, false);
+      }
+
+      return Array.from(new Set(intersects.map( (intersect) => intersect.object )));
    }
 
    // Be able to answer the question of where in the diagram any given element is drawn.
@@ -828,7 +849,6 @@ DisplayDiagram.LineDnD = class {
       // if ambiguous or empty intersect just return
       if (!(   intersects.length == 1
             || intersects.length == 2 && intersects[0].object == intersects[1].object)) {
-         console.log(intersects.length);
          return;
       }
 
@@ -856,8 +876,8 @@ DisplayDiagram.LineDnD = class {
       $(this.canvas).off('mousemove', this.event_handler);
       $(this.canvas).off('mouseup', this.event_handler);
       this.canvas.style.cursor = '';
-      window.clearInterval(this.repainter);
-      this.repainter = undefined;
+      window.clearInterval(this.repaint_poller);
+      this.repaint_poller = undefined;
       this.line = undefined;
    }
 

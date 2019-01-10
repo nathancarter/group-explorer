@@ -96,7 +96,7 @@ class DisplayMulttable {
       }
 
       // note that background shows through in separations between cosets
-      this.context.setTransform([1, 0, 0, 1, 0, 0]);
+      this.context.setTransform(1, 0, 0, 1, 0, 0);
       this.context.fillStyle = DisplayMulttable.BACKGROUND;
       this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
 

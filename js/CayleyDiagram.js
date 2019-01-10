@@ -94,11 +94,13 @@ class CayleyDiagram extends Diagram3D {
    _generateNodes(strategies) {
       const generators = this.strategies.map( (strategy) => strategy.generator );
 
-      return strategies.reduce( (nodes, strategy, inx) => {
+      const node_list = strategies.reduce( (nodes, strategy, inx) => {
          [nodes, strategies[inx].bitset] = this._extendSubgroup(nodes, generators.slice(0, inx+1));
          return (inx == 0) ? nodes._flatten() : nodes;
       }, [0]);
+
       this.emitStateChange();
+      return node_list;
    }
 
    _extendSubgroup(H_prev, generators) {

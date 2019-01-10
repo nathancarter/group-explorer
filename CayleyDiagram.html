@@ -19,6 +19,26 @@
        #view-control, #diagram-control {
           display: none;  /* hidden initially, renders faster */
        }
+
+       #tooltip {
+          background-color: #FFFFD6;		/* light yellow (matches subset display) */
+          border: 1px solid #CFCFCF;		/* ~silver */
+          box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);	/* gray mist */
+          color: #000000;
+          font-size: medium;
+          font-style: normal;
+          font-weight: normal;
+          padding: 1em;
+          position: fixed;
+          z-index: 1;
+          white-space: nowrap;
+          list-style-type: none;
+          visibility: visible;
+       }
+       #tooltip ul {
+          margin: 0;
+          padding-inline-start: 1em;
+       }
       </style>
 
       <script type="text/x-mathjax-config">
@@ -64,6 +84,9 @@
           $('#diagram-button').off('click', () => show('#diagram-control') ).on('click', () => show('#diagram-control') );
           $('#help').off('click', help).on('click', help);
           $('#reset').off('click', reset).on('click', reset);
+          $('#graphic').on('mousemove', HoverHelp.handleEvent)
+                       .on('mouseleave', HoverHelp.handleEvent);
+
           $(window).off('resize', resizeBody).on('resize', resizeBody);
        }
 
@@ -106,9 +129,6 @@
 
        /* Now that all the static HTML is loaded, complete the setup */
        function completeSetup() {
-          // Register event handlers
-          registerCallbacks();
-
           // Create header from group name and queue MathJax to typeset it
           $('#header').html('Cayley Diagram for&nbsp;' + math(Group.name));
           MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'header']);
@@ -125,8 +145,10 @@
              onDrag: resizeGraphic,
           });
 
+          // Register event handlers
+          registerCallbacks();
+
           show('#subset-control');
-          resizeBody();
 
           window.addEventListener( 'message', function ( event ) {
              if ( event.data.source == 'sheet' ) {
@@ -137,7 +159,7 @@
                                group.cayleyDiagrams.length > 0 ?
                                group.cayleyDiagrams[0].name : '';
                 $( '#diagram-select option[value="' + Diagram_name + '"]' )
-                    .prop( 'selected', true );
+                   .prop( 'selected', true );
                 Cayley_diagram = new CayleyDiagram(Group, Diagram_name);
                 if ( event.data.json.hasOwnProperty( '_use_fog' ) )
                    $( '#use-fog' ).prop( 'checked', event.data.json._use_fog );
@@ -161,9 +183,9 @@
           window.postMessage( 'listener ready', myDomain );
           var lastCamera = null;
           setInterval( function () {
-              const thisCamera = Graphic_context.camera.matrix.toArray();
-              if ( ''+lastCamera != ''+thisCamera ) emitStateChange();
-              lastCamera = thisCamera;
+             const thisCamera = Graphic_context.camera.matrix.toArray();
+             if ( ''+lastCamera != ''+thisCamera ) emitStateChange();
+             lastCamera = thisCamera;
           }, 500 );
        }
 
@@ -219,6 +241,76 @@
              } else {
                 $(name).hide();
              }
+          }
+       }
+
+       class HoverHelp {
+          // poller = id of polling routine from window.setInterval call
+          // mouse_event = event from last 'mousemove' event (event contains timestamp) (undefined => no mousemove event to be handled)
+          // tooltip_timestamp = time tooltip was created (undefined => no tooltip being shown)
+
+          static handleEvent(event) {
+             // set up polling routine first time through
+             if (HoverHelp.poller_id === undefined) {
+                HoverHelp.poller_id = window.setInterval(HoverHelp.poller, 500);
+             }
+
+             HoverHelp.mouse_event = undefined;
+             if (event.type == 'mousemove' && !event.ctrlKey && !event.shiftKey && !event.altKey) {
+                HoverHelp.mouse_event = event;
+             }
+          }
+
+          static poller() {
+             if (HoverHelp.mouse_event !== undefined && performance.now() - HoverHelp.mouse_event.timeStamp > 1000) {
+                // display new tooltip, set tooltip timestamp
+                const canvas = Graphic_context.renderer.domElement;
+                const bounding_box = canvas.getBoundingClientRect();
+                const x = ( (HoverHelp.mouse_event.clientX - bounding_box.x) / canvas.width) * 2 - 1;
+                const y = -( (HoverHelp.mouse_event.clientY - bounding_box.y) / canvas.height) * 2 + 1;
+
+                const objs = Graphic_context.getObjectsAtPoint(x, y);
+                if (objs.length != 0) {
+                   HoverHelp.eraseTooltip();
+
+                   // create, place tooltip
+                   const first = math(objs[0].name);
+                   const others = objs.filter( (_,inx) => inx != 0 ).map( (obj) => math(obj.name) );
+                   let tooltip;
+                   switch (others.length) {
+                      case 0:  tooltip = $(eval(Template.HTML('single-object_template'))); break;
+                      case 1:  tooltip = $(eval(Template.HTML('double-object_template'))); break;
+                      default:
+                         tooltip = $(eval(Template.HTML('multi-object_template')));
+                         others.forEach( (obj) => {
+                            tooltip.find('ul').append($(`<li>${obj}</li>`));
+                         } )
+                   }
+                   $('#graphic').append(tooltip);
+                   MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'tooltip']);
+                   Menu.setMenuLocations(HoverHelp.mouse_event, tooltip);
+
+                   // set tooltip_timestamp, so that tooltip will be cleared in 10 sec in code below
+                   HoverHelp.tooltip_timestamp = performance.now();
+                   
+                   // clear mouse_event to keep from displaying tooltip again
+                   HoverHelp.mouse_event = undefined;
+
+                   // run eraseTooltip on mousedown event, so that clicking mouse will clear tooltip
+                   $('#graphic').on('mousedown', HoverHelp.eraseTooltip);
+                }
+             }
+
+             // if tooltip is more than 10 sec old, clear it
+             if (performance.now() - HoverHelp.tooltip_timestamp > 10000) {
+                HoverHelp.eraseTooltip();
+             }
+          }
+
+          static eraseTooltip() {
+             $('#graphic').off('mousedown', HoverHelp.eraseTooltip);
+             $('#tooltip').remove();
+             HoverHelp.tooltip_timestamp = undefined;
           }
        }
 
@@ -313,5 +405,25 @@
 
    <template class="subgroup-extension subset-extension partition-extension">
       <li action="clearHighlights()">Clear all highlighting</li>
+   </template>
+
+   <!-- Templates for tooltips -->
+   <template id="single-object_template">
+      <div id="tooltip">${first}</div>
+   </template>
+
+   <template id="double-object_template">
+      <div id="tooltip">
+         <b>In front:</b> ${first}<br>
+         <b>Behind:</b> ${others[0]}
+      </div>
+   </template>
+
+   <template id="multi-object_template">
+      <div id="tooltip">
+         <b>In front:</b> ${first}<br>
+         <b>Others behind:</b>
+         <ul></ul>
+      </div>
    </template>
 </html>

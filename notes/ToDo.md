@@ -10,8 +10,6 @@
 
 ## CayleyDiagram diagram panel
 
- * Hover help in big Cayley diagram (including chunking)
- * Keep labels from disappearing behind nodes with changing node/label sizes
  * Change label representations in visualizers?
  * Display raw element numbers for debugging?
  * Follow up approach in https://stackoverflow.com/questions/15558418/how-do-you-save-an-image-from-a-three-js-canvas for saving buffer
@@ -230,7 +228,6 @@
    with mathml instead of text (similar to menus in Subgroups view)
 
 ## Bug fixes
- * Table on main page does not show which column is sorted at first (until you click one).
  * Setting line thickness to minimum does not work; it gets reset to a thicker value.
  * Render multiple-character element names in same font as single-character names. (By default, MathJax renders
    single-character elements in italic, multiple-character in normal font, so you get odd-looking element
