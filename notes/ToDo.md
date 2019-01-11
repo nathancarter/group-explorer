@@ -150,6 +150,10 @@
             that the result is not a single cycle of length nm.
        * Add links at the end of the page that offer to show this type of sheet using any type of
          visualizer.
+    * Design problem: Sheets cannot grow or scroll.  Some auto-generated sheets stick off the
+      right or bottom of the window.
+    * Bug fix: The Help button at the bottom of the sheet controls pane is not visible without
+      scrolling.
  * Rename Cycle Diagram HTML page to Cycle Graph instead
  * Add an object of symmetry for Z_1: something with no symmetry
  * Design how permalinks to GE resources should work and add a plan for
