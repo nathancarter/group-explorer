@@ -27,15 +27,6 @@
 # Nathan's List
 
  * Sheets
-    * In ClassEquationInfo.html:
-       * Import allSheets.js.
-       * Add a script function that pops up a sheet illustrating the class equation for
-         the page's group, given a visualizer type as its parameter.  The sheet should
-         contain the class equation ord1+ord2+...+ordN=|G|, a title, and a visualizer
-         underneath each class equation highlighting that class (the final one with all
-         conjugacy classes highlighted in different colors).
-       * Replace the "not implemented" text at the end of the page with links to a sheet
-         showing the class equation using each type of visualizer.
     * In SubgroupInfo.html:
        * Import allSheets.js.
        * Add a script function that pops up a sheet illustrating the subgroup lattice
