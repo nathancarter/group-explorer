@@ -27,15 +27,6 @@
 # Nathan's List
 
  * Sheets
-    * In SubgroupInfo.html:
-       * Import allSheets.js.
-       * Add a script function that pops up a sheet illustrating the subgroup lattice
-         for the page's group, given a visualizer type as its parameter.  Come up with a
-         simple but halfway-decent layout algorithm.  Note that the existing
-         `SubgroupFinder` class already implements `getSubgroups()`, which also creates
-         the whole inclusion relation as well.
-       * Replace the first "not implemented" text in that page with links to a sheet
-         showing the subgroup lattice using each type of visulizer.
     * In BasicGroup.js:
        * Extend the existing `getSubgroupAsGroup()` function to retain, in some inner
          private attribute, the mapping from old element indices to new element indices.

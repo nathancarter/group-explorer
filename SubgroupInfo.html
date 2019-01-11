@@ -32,6 +32,7 @@
       </script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=MML_CHTML"></script>
       <script src="./build/allGroupExplorer.js"></script>
+      <script src="./build/allSheets.js"></script>
 
       <script>
        // Global variables
@@ -70,6 +71,12 @@
 
           $('body').append($rslt);
           MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
+
+          $( '.show-lattice' ).on( 'click', function ( event ) {
+             event.preventDefault();
+             const type = event.target.getAttribute( 'data-type' );
+             showSubgroupLattice( type );
+          } );
        }
 
        function subgroupInfo(index) {
@@ -142,6 +149,127 @@
 
           return rslt;
        }
+
+       function highlightSubgroup ( H ) {
+          return Array( group.order ).fill( '' ).map( ( e, i ) =>
+             H.members.isSet( i ) ? 'hsl(0, 100%, 80%)' : e );
+       }
+       function showSubgroupLattice ( type ) {
+          // Handy function
+          function subset ( H, K ) { return K.members.contains( H.members ); }
+          // Let's tier the group's subgroups by order.
+          var subgroupTiers = [ ];
+          for ( var i = 0 ; i < group.subgroups.length ; i++ ) {
+             const sgp = group.subgroups[i];
+             var existingTier = subgroupTiers.find( ( tier ) => tier[0].order == sgp.order );
+             if ( existingTier )
+                existingTier.push( sgp );
+             else
+                subgroupTiers.push( [ sgp ] );
+          }
+          // Now sort those tiers with the smallest subgroups first, largest later.
+          // Sort the original list of subgroups as well.
+          subgroupTiers.sort( ( tiera, tierb ) => tiera[0].order - tierb[0].order );
+          subgroupTiers.map( ( tier, i ) => tier.map( sgp => {
+             sgp._tierIndex = i;
+             sgp._used = false;
+          } ) );
+          // We wish to organize each tier so that connections between tiers are least tangled.
+          // We begin by getting a list of the tiers' orders.
+          const tierOrders = subgroupTiers.map( ( tier ) => tier[0].order );
+          // We now compute a series of paths from {e} to G, passing through as many subgroups
+          // as possible, so we can form chains that should be vertically arranged.
+          // As we place subgroups in a chain, we remove them from placement in other chains.
+          function pathsUpFrom ( H ) {
+             H._used = true;
+             // This is a recursive walk through the graph, turning it into a tree.
+             if ( H._tierIndex == subgroupTiers.length - 1 ) {
+                // Base case: We've already reached the top node.
+                // Thus there is one path up, the one-step path containing just H, which is G.
+                return [ [ H ] ];
+             } else {
+                // Find the tier containing the next subgroup we can walk to.
+                var result = [ ];
+                var initialSegment = [ H ];
+                for ( var tierIdx = H._tierIndex + 1 ; tierIdx < subgroupTiers.length ; tierIdx++ ) {
+                   subgroupTiers[tierIdx].filter( K => subset( H, K ) && !K._used ).map( K => {
+                      pathsUpFrom( K ).map( path => {
+                         result.push( initialSegment.concat( path ) );
+                         initialSegment[0] = null;
+                      } );
+                   } );
+                   initialSegment.push( null );
+                }
+                if ( initialSegment[0] != null ) result.push( initialSegment );
+                return result;
+             }
+          }
+          const chains = pathsUpFrom( group.subgroups[0] );
+          console.log( chains.map( chain => chain.map( sgp =>
+             sgp ? sgp.members.toArray().join(',') : 'null' ) ) );
+          // Now we write a function that uses the chains structure to compute a position on
+          // the sheet for a visualizer of the subgroup.
+          const hSize = chains.length, vSize = chains[0].length,
+                cellWidth = Math.min( 300, Math.ceil( 800 / hSize ) ),
+                cellHeight = cellWidth * 1.5,
+                hMargin = Math.ceil( cellWidth * 0.1 ),
+                vMargin = hMargin + ( cellHeight - cellWidth ) / 2,
+                latticeTop = 100, latticeLeft = 50;
+          function subgroupPosition ( H ) {
+             var x, y;
+             if ( ( H.order == 1 ) || ( H.order == group.order ) ) {
+                x = chains.length * cellWidth / 2 - cellWidth / 2;
+                y = ( H.order == 1 ) ? cellHeight * ( vSize - 1 ) : 0;
+             } else {
+                const hIndex = chains.indexOf( chains.find(
+                   chain => chain.indexOf( H ) > -1 ) );
+                x = hIndex * cellWidth;
+                const vIndex = vSize - 1 - chains[hIndex].indexOf( H );
+                y = vIndex * cellHeight;
+             }
+             return { x : latticeLeft + x, y : latticeTop + y };
+          }
+          // Build a sheet with subgroups shown at those locations.
+          var sheetElementsAsJSON = [ ];
+          group.subgroups.map( H => {
+             const pos = subgroupPosition( H );
+             sheetElementsAsJSON.push( {
+                className : type, groupURL : group.URL,
+                x : pos.x + hMargin, y : pos.y + vMargin,
+                w : cellWidth - 2 * hMargin, h : cellHeight - 2 * vMargin,
+                highlights : { background : highlightSubgroup( H ) }
+             } );
+          } );
+          // Connect every pair of subgroups that don't have an intermediate connection.
+          function existsIntermediateSubgroup ( H, K ) {
+             for ( var i = 0 ; i < group.subgroups.length ; i++ ) {
+                const considerMe = group.subgroups[i];
+                if ( ( H != considerMe ) && ( K != considerMe )
+                  && subset( H, considerMe ) && subset( considerMe, K ) )
+                   return true;
+             }
+             return false;
+          }
+          group.subgroups.map( ( H, i ) => {
+             group.subgroups.map( ( K, j ) => {
+                if ( ( H != K ) && subset( H, K ) && !existsIntermediateSubgroup( H, K ) ) {
+                   sheetElementsAsJSON.push( {
+                      className : 'ConnectingElement', fromIndex : i, toIndex : j
+                   } );
+                }
+             } );
+          } );
+          // Add a title.
+          sheetElementsAsJSON.push( {
+             className : 'TextElement',
+             text : `Subgroup Lattice for the Group ${group.shortName}`,
+             x : latticeLeft, y : latticeTop / 2,
+             w : hSize * cellWidth, h : latticeTop / 2,
+             fontSize : '20pt', alignment : 'center'
+          } );
+          // Show the sheet.
+          CreateNewSheet( sheetElementsAsJSON );
+       }
       </script>
    </head>
 
@@ -164,8 +292,10 @@
          <p>The subgroups can also be shown arranged in a
             <a href="./help/rf-groupterms.html#subgrouplattice">lattice</a>, each shown as
             highlighted portions of the whole group, connected by the identity (inclusion)
-            homomorphism. You may see that lattice by Cayley Diagram or by Cycle Graph or
-            by Multiplication Table. <i>(Not implemented)</i>.</p>
+            homomorphism. You may see that lattice by
+            <a href="" class="show-lattice" data-type="CDElement">Cayley diagram</a>,
+            <a href="" class="show-lattice" data-type="CGElement">cycle graph</a>, or
+            <a href="" class="show-lattice" data-type="MTElement">multiplication table</a>.</p>
          <p id="simple">None of the subgroups on the list below is
             <a href="./help/rf-groupterms.html#normalsubgroup">normal</a>.
             For this reason, ${math(group.name)} is a
