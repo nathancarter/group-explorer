@@ -772,7 +772,12 @@ class DisplayDiagram {
          fogLevel : cayleyDiagram.fogLevel,
          labelSize : cayleyDiagram.labelSize,
          arrowheadPlacement : cayleyDiagram.arrowheadPlacement,
-         _camera : this.camera.matrix.toArray()
+         _camera : this.camera.matrix.toArray(),
+         highlights : {
+            background : cayleyDiagram.nodes.map( n => n.colorHighlight ),
+            ring : cayleyDiagram.nodes.map( n => n.ringHighlight ),
+            square : cayleyDiagram.nodes.map( n => n.squareHighlight )
+         }
       };
    }
    fromJSON ( json, cayleyDiagram ) {
@@ -800,6 +805,18 @@ class DisplayDiagram {
             this.camera.scale
          );
       }
+      if ( json.highlights && json.highlights.background )
+         json.highlights.background.map( ( color, index ) => {
+            cayleyDiagram.nodes[index].colorHighlight = color;
+         } );
+      if ( json.highlights && json.highlights.ring )
+         json.highlights.ring.map( ( color, index ) => {
+            cayleyDiagram.nodes[index].ringHighlight = color;
+         } );
+      if ( json.highlights && json.highlights.square )
+         json.highlights.square.map( ( color, index ) => {
+            cayleyDiagram.nodes[index].squareHighlight = color;
+         } );
    }
 }
 

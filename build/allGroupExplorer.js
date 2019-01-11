@@ -3121,7 +3121,12 @@ class DisplayDiagram {
          fogLevel : cayleyDiagram.fogLevel,
          labelSize : cayleyDiagram.labelSize,
          arrowheadPlacement : cayleyDiagram.arrowheadPlacement,
-         _camera : this.camera.matrix.toArray()
+         _camera : this.camera.matrix.toArray(),
+         highlights : {
+            background : cayleyDiagram.nodes.map( n => n.colorHighlight ),
+            ring : cayleyDiagram.nodes.map( n => n.ringHighlight ),
+            square : cayleyDiagram.nodes.map( n => n.squareHighlight )
+         }
       };
    }
    fromJSON ( json, cayleyDiagram ) {
@@ -3149,6 +3154,18 @@ class DisplayDiagram {
             this.camera.scale
          );
       }
+      if ( json.highlights && json.highlights.background )
+         json.highlights.background.map( ( color, index ) => {
+            cayleyDiagram.nodes[index].colorHighlight = color;
+         } );
+      if ( json.highlights && json.highlights.ring )
+         json.highlights.ring.map( ( color, index ) => {
+            cayleyDiagram.nodes[index].ringHighlight = color;
+         } );
+      if ( json.highlights && json.highlights.square )
+         json.highlights.square.map( ( color, index ) => {
+            cayleyDiagram.nodes[index].squareHighlight = color;
+         } );
    }
 }
 
@@ -3616,7 +3633,7 @@ class DisplayMulttable {
       const height = this.canvas.height;
       multtable.elements.forEach( (i,inx) => {
          multtable.elements.forEach( (j,jnx) => {
-            this.context.fillStyle = colors[multtable.group.mult(i,j)];
+            this.context.fillStyle = colors[multtable.group.mult(i,j)] || DisplayMulttable.BACKGROUND;
             this.context.fillRect(frac(inx, width), frac(jnx, height), frac(inx+1, width), frac(jnx+1, height));
          } )
       } )
@@ -3673,7 +3690,7 @@ class DisplayMulttable {
             const product = multtable.group.mult(multtable.elements[inx], multtable.elements[jnx]);
 
             // color box according to product
-            this.context.fillStyle = multtable.colors[product];
+            this.context.fillStyle = multtable.colors[product] || DisplayMulttable.BACKGROUND;
             this.context.fillRect(x, y, 1, 1);
 
             // draw borders if cell has border highlighting
@@ -3853,9 +3870,11 @@ class DisplayMulttable {
          colors : multtable._colors,
          stride : multtable.stride,
          elements : multtable.elements,
-         backgrounds : multtable.backgrounds,
-         borders : multtable.borders,
-         corners : multtable.corners
+         highlights : {
+            background : multtable.backgrounds,
+            border : multtable.borders,
+            corner : multtable.corners
+         }
       };
    }
    fromJSON ( json, multtable ) {
@@ -3863,9 +3882,12 @@ class DisplayMulttable {
       if ( json.colors ) multtable._colors = json.colors;
       if ( json.stride ) multtable.stride = json.stride;
       if ( json.elements ) multtable.elements = json.elements;
-      if ( json.backgrounds ) multtable.backgrounds = json.backgrounds;
-      if ( json.borders ) multtable.borders = json.borders;
-      if ( json.corners ) multtable.corners = json.corners;
+      if ( json.highlights && json.highlights.background )
+         multtable.backgrounds = json.highlights.background;
+      if ( json.highlights && json.highlights.border )
+         multtable.borders = json.highlights.border;
+      if ( json.highlights && json.highlights.corner )
+         multtable.corners = json.highlights.corner;
    }
 }
 

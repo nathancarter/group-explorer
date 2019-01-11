@@ -27,19 +27,6 @@
 # Nathan's List
 
  * Sheets
-    * Standardize the way that subgroup highlighting is stored in the JSON representations
-      of visualizers, so that when creating sheets programmatically, we can highlight a
-      subgroup without worrying about determining the type of visualizer first, and then
-      choosing a custom storage format based on that.
-       * CGElements use a `highlights` member, an object with these fields:
-          * `background` - array mapping elements to HTML color strings,
-            or undefined if not highlighted
-          * `border` - same as previous
-          * `top` - same as previous
-       * MTElements use separate members, `backgrounds`, `borders`, and `corners`;
-         should standardize these into a single `highlights` member, like CGElements
-       * CDElements don't store this yet; update them so that they do, and use the
-         same format given above.
     * In ClassEquationInfo.html:
        * Import allSheets.js.
        * Add a script function that pops up a sheet illustrating the class equation for
