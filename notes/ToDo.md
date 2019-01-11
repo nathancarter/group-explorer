@@ -30,9 +30,6 @@
     * In BasicGroup.js:
        * Extend the existing `getSubgroupAsGroup()` function to retain, in some inner
          private attribute, the mapping from old element indices to new element indices.
-       * Extend the existing `getQuotientGroup()` function to retain, in some inner
-         private attribute, the mapping from old element indices to coset indices.
-         (This is already called `elementMap` in the code, and just needs to be stored.)
     * In IsomorphicGroups.js:
        * Create a function `findEmbedding(G,H)` (with H a subgroup of G) that does this:
           * Let H be `G.getSubgroupAsGroup()`.
@@ -42,15 +39,7 @@
             so that f' now embeds H' in G.
           * Return the pair [H',f'].
           * (If any of the above steps fail, return null.)
-       * Create a function `findQuotient(G,N)` (with N a normal subgroup of G) that does this:
-          * Let K be `G.getQuotientGroup(N)`.
-          * Let K' be `IsomorphicGroups.find(K)`.
-          * Let f be `IsomorphicGroups.isomorphism(K,K')`.
-          * Let f' be f composed with the quotient map stored in a private member of K,
-            so that f' now divides G by N to yield K'.
-          * Return the pair [K',f'].
-          * (If any of the above steps fail, return null.)
-    * Back in SubgroupInfo.html:
+    * In SubgroupInfo.html:
        * Add a script function that pops up a sheet illustrating the embedding of any given
          subgroup of the page's group.  It should be a single row of two visualizers, one of the
          subgroup on the left and one of G on the right, with one embedding morphism between.
@@ -59,6 +48,20 @@
          visualizers (the whole left one, and part of the right one).
        * Replace the first remaining "not implemented" text in that page with links to a sheet
          showing this embedding visualization using any of the 3 main visualizer types.
+    * In BasicGroup.js:
+       * Extend the existing `getQuotientGroup()` function to retain, in some inner
+         private attribute, the mapping from old element indices to coset indices.
+         (This is already called `elementMap` in the code, and just needs to be stored.)
+    * In IsomorphicGroups.js:
+       * Create a function `findQuotient(G,N)` (with N a normal subgroup of G) that does this:
+          * Let K be `G.getQuotientGroup(N)`.
+          * Let K' be `IsomorphicGroups.find(K)`.
+          * Let f be `IsomorphicGroups.isomorphism(K,K')`.
+          * Let f' be f composed with the quotient map stored in a private member of K,
+            so that f' now divides G by N to yield K'.
+          * Return the pair [K',f'].
+          * (If any of the above steps fail, return null.)
+    * In SubgroupInfo.html:
        * Add a script function that pops up a sheet illustrating the short exact sequence for
          any normal subgroup of the page's group.  It should use `findEmbedding()` and `findQuotient()`
          to obtain groups N and Q plus morphisms e:N->G (inj) and q:G->Q (surj).  It creates a
