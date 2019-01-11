@@ -28,27 +28,6 @@
 
  * Sheets
     * In BasicGroup.js:
-       * Extend the existing `getSubgroupAsGroup()` function to retain, in some inner
-         private attribute, the mapping from old element indices to new element indices.
-    * In IsomorphicGroups.js:
-       * Create a function `findEmbedding(G,H)` (with H a subgroup of G) that does this:
-          * Let H be `G.getSubgroupAsGroup()`.
-          * Let H' be `IsomorphicGroups.find(H)`.
-          * Let f be `IsomorphicGroups.isomorphism(H',H)`.
-          * Let f' be f composed with the renaming stored in a private member of H,
-            so that f' now embeds H' in G.
-          * Return the pair [H',f'].
-          * (If any of the above steps fail, return null.)
-    * In SubgroupInfo.html:
-       * Add a script function that pops up a sheet illustrating the embedding of any given
-         subgroup of the page's group.  It should be a single row of two visualizers, one of the
-         subgroup on the left and one of G on the right, with one embedding morphism between.
-         Ensure that the morphism has "injective" showing.  Get both the subgroup and the embedding
-         from the new `IsomorphicGroups.findEmbedding(G,H)`.  Highlight the subgroup in both
-         visualizers (the whole left one, and part of the right one).
-       * Replace the first remaining "not implemented" text in that page with links to a sheet
-         showing this embedding visualization using any of the 3 main visualizer types.
-    * In BasicGroup.js:
        * Extend the existing `getQuotientGroup()` function to retain, in some inner
          private attribute, the mapping from old element indices to coset indices.
          (This is already called `elementMap` in the code, and just needs to be stored.)

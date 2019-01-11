@@ -609,7 +609,9 @@ class BasicGroup {
                this.multtable[subgroupElements[i]][subgroupElements[j]]];
          }
       }
-      return new BasicGroup(newMult);
+      var result = new BasicGroup(newMult);
+      result._indexInParentGroup = subgroupElements;
+      return result;
    }
 
    mult(a,b) {
@@ -1169,7 +1171,7 @@ class IsomorphicGroups {
       if (IsomorphicGroups.map !== undefined) {
          return;
       }
-      
+
       IsomorphicGroups.map = Library.getGroups()
                                     .reduce(
                                        (map, group) => {
@@ -1314,6 +1316,22 @@ class IsomorphicGroups {
       }
 
       return undefined;
+   }
+
+   // findEmbedding(G,H), with H a subgroup of G, returns a pair [H',f]
+   // such that H' is in the groups library and f is an embedding of H'
+   // into G and onto H.  f is stored as an array such that f[i] means f(i),
+   // for all i in H'.  If this computation can't be done, return null.
+   // The most common reason that this might fail is not having sufficient
+   // groups loaded into the Library.  You may want to run a call to
+   // Library.loadAllGroups() first.
+   static findEmbedding ( G, H ) {
+      const groupH = G.getSubgroupAsGroup( H ),
+            libraryH = IsomorphicGroups.find( groupH );
+      if ( !libraryH ) return null;
+      const almostF = IsomorphicGroups.isomorphism( libraryH, groupH );
+      if ( !almostF ) return null;
+      return [ libraryH, almostF.map( elt => groupH._indexInParentGroup[elt] ) ];
    }
 }
 /*
@@ -1531,6 +1549,8 @@ class Library {
 
    static getGroupFromURL(groupURL) {
       return new Promise( (resolve, reject) => {
+         const alreadyLoaded = Library.groups.find( group => group.URL == groupURL );
+         if ( alreadyLoaded ) return resolve( alreadyLoaded );
          $.ajax({ url: groupURL,
                   success: (txt) => {
                      try {
@@ -1616,6 +1636,33 @@ class Library {
          }
       }
       return url;
+   }
+
+   // can be used in a page that has only one group loaded to load all the remaining
+   // groups in the library if some computation is attempted that needs them.
+   // the callback is called with each group as it is loaded, and passed a second
+   // parameter that is true iff the group in question is the final one.
+   // all parameters are optional.
+   // The first defaults to the empty function.
+   // The second defaults to urls, which will exist if groupURLs.js was imported.
+   // The third defaults to the base URL taken from window.location.href.
+   static loadAllGroups ( callback, urlsToLoad, baseURL ) {
+      if ( !callback ) callback = function () { };
+      if ( !urlsToLoad ) urlsToLoad = urls;
+      if ( !baseURL ) {
+         var baseURL = new URL( window.location.href );
+         baseURL = baseURL.origin + baseURL.pathname; // trim off search string
+         baseURL = baseURL.slice( 0, baseURL.lastIndexOf('/') + 1 ); // trim off page
+      }
+      let numLoaded = 0;
+      urlsToLoad.map( url => {
+         Library.getGroupFromURL( baseURL + url )
+                .then( group => {
+                   Library.add( group );
+                   callback( group, ++numLoaded == urlsToLoad.length );
+                } )
+                .catch( error => console.log( error ) );
+      } );
    }
 }
 

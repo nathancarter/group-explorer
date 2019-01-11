@@ -290,7 +290,9 @@ class BasicGroup {
                this.multtable[subgroupElements[i]][subgroupElements[j]]];
          }
       }
-      return new BasicGroup(newMult);
+      var result = new BasicGroup(newMult);
+      result._indexInParentGroup = subgroupElements;
+      return result;
    }
 
    mult(a,b) {

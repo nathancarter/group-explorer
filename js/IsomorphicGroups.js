@@ -4,7 +4,7 @@ class IsomorphicGroups {
       if (IsomorphicGroups.map !== undefined) {
          return;
       }
-      
+
       IsomorphicGroups.map = Library.getGroups()
                                     .reduce(
                                        (map, group) => {
@@ -149,5 +149,21 @@ class IsomorphicGroups {
       }
 
       return undefined;
+   }
+
+   // findEmbedding(G,H), with H a subgroup of G, returns a pair [H',f]
+   // such that H' is in the groups library and f is an embedding of H'
+   // into G and onto H.  f is stored as an array such that f[i] means f(i),
+   // for all i in H'.  If this computation can't be done, return null.
+   // The most common reason that this might fail is not having sufficient
+   // groups loaded into the Library.  You may want to run a call to
+   // Library.loadAllGroups() first.
+   static findEmbedding ( G, H ) {
+      const groupH = G.getSubgroupAsGroup( H ),
+            libraryH = IsomorphicGroups.find( groupH );
+      if ( !libraryH ) return null;
+      const almostF = IsomorphicGroups.isomorphism( libraryH, groupH );
+      if ( !almostF ) return null;
+      return [ libraryH, almostF.map( elt => groupH._indexInParentGroup[elt] ) ];
    }
 }
