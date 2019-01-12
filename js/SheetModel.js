@@ -1204,8 +1204,8 @@ class MorphismElement extends ConnectingElement {
                 lines.push( `${that.name}(${elt})=${image}` );
             } );
         if ( this.showInjSurj ) {
-            lines.push( `${this.name} is ${this.isInjective() ? '' : 'not '}injective` );
-            lines.push( `${this.name} is ${this.isSurjective() ? '' : 'not '}surjective` );
+            lines.push( this.isInjective() ? '1-1' : 'not 1-1' );
+            lines.push( this.isSurjective() ? 'onto' : 'not onto' );
         }
         MorphismElement.drawTextLines( lines,
             ( exit.x + enter.x ) / 2, ( exit.y + enter.y ) / 2, context );

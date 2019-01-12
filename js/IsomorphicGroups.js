@@ -166,4 +166,21 @@ class IsomorphicGroups {
       if ( !almostF ) return null;
       return [ libraryH, almostF.map( elt => groupH._indexInParentGroup[elt] ) ];
    }
+
+   // findQuotient(G,N), with N a normal subgroup of G, returns a pair [Q,q]
+   // such that Q is in the groups library and q is an onto map from G to Q
+   // with kernel K.  q is stored as an array such that q[i] means q(i),
+   // for all i in G.  If this computation can't be done, return null.
+   // The most common reason for failure would be passing a non-normal subgroup.
+   // Alternatively, this might fail without enough groups loaded into the Library.
+   // You may want to run a call to Library.loadAllGroups() first.
+   static findQuotient ( G, N ) {
+      if ( !G.isNormal( N ) ) return null;
+      const groupQ = G.getQuotientGroup( N.members ),
+            libraryQ = IsomorphicGroups.find( groupQ );
+      if ( !libraryQ ) return null;
+      const almostMap = IsomorphicGroups.isomorphism( groupQ, libraryQ );
+      if ( !almostMap ) return null;
+      return [ libraryQ, G.elements.map( elt => almostMap[groupQ._cosetIndices[elt]] ) ];
+   }
 }

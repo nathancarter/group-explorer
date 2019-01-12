@@ -272,7 +272,9 @@ class BasicGroup {
             newMult[i][j] = elementMap[this.multtable[ii][jj]];
          }
       }
-      return new BasicGroup(newMult);
+      var result = new BasicGroup(newMult);
+      result._cosetIndices = elementMap;
+      return result;
    }
 
    // save generators in _loadedGenerators?

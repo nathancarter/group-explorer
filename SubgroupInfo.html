@@ -87,6 +87,13 @@
                          index = parseInt( event.target.getAttribute( 'data-index' ) );
                    showEmbeddingSheet( index, type );
                 } );
+
+                $( '.show-quotient' ).on( 'click', function ( event ) {
+                   event.preventDefault();
+                   const type = event.target.getAttribute( 'data-type' ),
+                         index = parseInt( event.target.getAttribute( 'data-index' ) );
+                   showQuotientSheet( index, type );
+                } );
              }
           } );
        }
@@ -317,6 +324,138 @@
              }
           ] );
        }
+
+       function showQuotientSheet ( indexOfN, type ) {
+          const N = group.subgroups[indexOfN],
+                [ libraryQ, quotientMap ] = IsomorphicGroups.findQuotient( group, N ),
+                [ libraryN, embedding ] = IsomorphicGroups.findEmbedding( group, N ),
+                L = 25, T = 150, W = 120, H = W, gap = 100;
+          function shrink ( order, x, y, w, h ) {
+             const factor = 0.5 * ( 1 + order / group.order ),
+                   hMargin = ( w - factor * w ) / 2,
+                   vMargin = ( h - factor * h ) / 2;
+             return {
+                x : x + hMargin, y : y + vMargin, w : factor * w, h : factor * h
+             };
+          }
+          const col1 = 'hsl(60, 100%, 60%)',
+                col2 = 'hsl(240, 100%, 80%)',
+                col3 = '',
+                col4 = 'hsl(120, 100%, 50%)',
+                col5 = 'hsl(120, 90%, 85%)',
+                loc1 = shrink( 1, L, T, W, H ),
+                loc2 = shrink( libraryN.order, L+W+gap, T, W, H ),
+                loc3 = shrink( group.order, L+2*W+2*gap, T, W, H ),
+                loc4 = shrink( libraryQ.order, L+3*W+3*gap, T, W, H ),
+                loc5 = shrink( 1, L+4*W+4*gap, T, W, H ),
+                high1 = Array( 1 ).fill( col1 ),
+                high2 = Array( libraryN.order ).fill( col2 ),
+                high3 = Array( group.order ).fill( col3 ),
+                high4 = Array( libraryQ.order ).fill( col3 ),
+                high5 = Array( 1 ).fill( col5 );
+          embedding.map( elt => high3[elt] = col2 );
+          high2[0] = col1;
+          high3[0] = col1;
+          high4[0] = col4;
+          CreateNewSheet( [
+             {
+                className : 'TextElement',
+                x : L, y : T-100, w : 5*W+4*gap, h : 50,
+                text : 'Short Exact Sequence showing '
+                     + `${group.shortName} / ${libraryN.shortName} = ${libraryQ.shortName}`,
+                fontSize : '20pt', alignment : 'center'
+             },
+             {
+                className : 'TextElement',
+                x : L, y : T-50, w : W, h : 50,
+                text : 'Z_1', alignment : 'center'
+             },
+             {
+                className : type, groupURL : './groups/Trivial.group',
+                x : loc1.x, y : loc1.y, w : loc1.w, h : loc1.h,
+                highlights : { background : high1 }
+             },
+             {
+                className : 'TextElement',
+                x : L+W+gap, y : T-50, w : W, h : 50,
+                text : libraryN.shortName, alignment : 'center'
+             },
+             {
+                className : type, groupURL : libraryN.URL,
+                x : loc2.x, y : loc2.y, w : loc2.w, h : loc2.h,
+                highlights : { background : high2 }
+             },
+             {
+                className : 'TextElement',
+                x : L+2*W+2*gap, y : T-50, w : W, h : 50,
+                text : group.shortName, alignment : 'center'
+             },
+             {
+                className : type, groupURL : group.URL,
+                x : loc3.x, y : loc3.y, w : loc3.w, h : loc3.h,
+                highlights : { background : high3 }
+             },
+             {
+                className : 'TextElement',
+                x : L+3*W+3*gap, y : T-50, w : W, h : 50,
+                text : libraryQ.shortName, alignment : 'center'
+             },
+             {
+                className : type, groupURL : libraryQ.URL,
+                x : loc4.x, y : loc4.y, w : loc4.w, h : loc4.h,
+                highlights : { background : high4 }
+             },
+             {
+                className : 'TextElement',
+                x : L+4*W+4*gap, y : T-50, w : W, h : 50,
+                text : 'Z_1', alignment : 'center'
+             },
+             {
+                className : type, groupURL : './groups/Trivial.group',
+                x : loc5.x, y : loc5.y, w : loc5.w, h : loc5.h,
+                highlights : { background : high5 }
+             },
+             {
+                className : 'TextElement',
+                x : L+W+gap, y : T+H+25, w : W, h : 50,
+                text : 'Im(id)=Ker(e)', alignment : 'center'
+             },
+             {
+                className : 'TextElement',
+                x : L+2*W+2*gap, y : T+H+25, w : W, h : 50,
+                text : 'Im(e)=Ker(q)', alignment : 'center'
+             },
+             {
+                className : 'TextElement',
+                x : L+3*W+3*gap, y : T+H+25, w : W, h : 50,
+                text : 'Im(q)=Ker(z)', alignment : 'center'
+             },
+             {
+                className : 'MorphismElement', name : 'id',
+                fromIndex : 2, toIndex : 4,
+                showManyArrows : true, showInjSurj : true,
+                definingPairs : [ [ 0, 0 ] ]
+             },
+             {
+                className : 'MorphismElement', name : 'e',
+                fromIndex : 4, toIndex : 6,
+                showManyArrows : true, showInjSurj : true,
+                definingPairs : libraryN.generators[0].map( gen => [ gen, embedding[gen] ] )
+             },
+             {
+                className : 'MorphismElement', name : 'q',
+                fromIndex : 6, toIndex : 8,
+                showManyArrows : true, showInjSurj : true,
+                definingPairs : group.generators[0].map( gen => [ gen, quotientMap[gen] ] )
+             },
+             {
+                className : 'MorphismElement', name : 'z',
+                fromIndex : 8, toIndex : 10,
+                showManyArrows : true, showInjSurj : true,
+                definingPairs : libraryQ.generators[0].map( gen => [ gen, 0 ] )
+             }
+          ] );
+       }
       </script>
    </head>
 
@@ -414,10 +553,9 @@
             exhibiting the
             <a href="./help/rf-groupterms.html#quotient">quotient group</a>,
             isomorphic to ${math(isomorphicGroup.name)}, by
-            <a href="">Cayley Diagram</a> or by
-            <a href="">Cycle Graph</a> or by
-            <a href="">Multiplication Table</a>.
-            <i>(Not implemented)</i>
+            <a href="" class="show-quotient" data-type="CDElement" data-index="${index}">Cayley diagram</a>,
+            <a href="" class="show-quotient" data-type="CGElement" data-index="${index}">cycle graph</a>, or
+            <a href="" class="show-quotient" data-type="MTElement" data-index="${index}">multiplication table</a>.
          </li>
       </template>
       <template id="no_quotient_group_template">

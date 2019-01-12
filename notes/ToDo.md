@@ -27,28 +27,6 @@
 # Nathan's List
 
  * Sheets
-    * In BasicGroup.js:
-       * Extend the existing `getQuotientGroup()` function to retain, in some inner
-         private attribute, the mapping from old element indices to coset indices.
-         (This is already called `elementMap` in the code, and just needs to be stored.)
-    * In IsomorphicGroups.js:
-       * Create a function `findQuotient(G,N)` (with N a normal subgroup of G) that does this:
-          * Let K be `G.getQuotientGroup(N)`.
-          * Let K' be `IsomorphicGroups.find(K)`.
-          * Let f be `IsomorphicGroups.isomorphism(K,K')`.
-          * Let f' be f composed with the quotient map stored in a private member of K,
-            so that f' now divides G by N to yield K'.
-          * Return the pair [K',f'].
-          * (If any of the above steps fail, return null.)
-    * In SubgroupInfo.html:
-       * Add a script function that pops up a sheet illustrating the short exact sequence for
-         any normal subgroup of the page's group.  It should use `findEmbedding()` and `findQuotient()`
-         to obtain groups N and Q plus morphisms e:N->G (inj) and q:G->Q (surj).  It creates a
-         single row of 5 visualizers, Z_1 -> N -> G -> Q -> Z_1, with morphisms id,e,q,zero,
-         and text below the middle three visualizers, saying: Im(id)=Ker(e), Im(e)=Ker(q),
-         and Im(q)=Ker(z).
-       * Replace the first remaining "not implemented" text in that page with links to a sheet
-         showing this SES visualization using any of the 3 main visualizer types.
     * In SolvableInfo.html:
        * Write a function that computes the solvable decomposition, as a list of groups in that
          decomposition plus the corresponding abelian quotient groups and the quotient maps,
@@ -134,6 +112,8 @@
          visualizer.
     * Design problem: Sheets cannot grow or scroll.  Some auto-generated sheets stick off the
       right or bottom of the window.
+    * Bug fix: Visualizers created programmatically (through `CreateNewSheet()`) don't propagate
+      changes back from their editor version in the new tab.
     * Bug fix: The Help button at the bottom of the sheet controls pane is not visible without
       scrolling.
  * Rename Cycle Diagram HTML page to Cycle Graph instead
