@@ -1074,6 +1074,7 @@ class MorphismElement extends ConnectingElement {
         result.name = this.name;
         result.showManyArrows = this.showManyArrows;
         result.showDomAndCod = this.showDomAndCod;
+        result.showInjSurj = this.showInjSurj;
         result.showDefiningPairs = this.showDefiningPairs;
         result.definingPairs = this.definingPairs;
         return result;
@@ -1084,6 +1085,7 @@ class MorphismElement extends ConnectingElement {
         this.name = json.name;
         if ( json.hasOwnProperty( 'showManyArrows' ) ) this.showManyArrows = json.showManyArrows;
         if ( json.hasOwnProperty( 'showDomAndCod' ) ) this.showDomAndCod = json.showDomAndCod;
+        if ( json.hasOwnProperty( 'showInjSurj' ) ) this.showInjSurj = json.showInjSurj;
         if ( json.hasOwnProperty( 'showDefiningPairs' ) ) this.showDefiningPairs = json.showDefiningPairs;
         if ( json.hasOwnProperty( 'definingPairs' ) ) this.definingPairs = json.definingPairs;
         if ( this.from && this.to && this.from.group && this.to.group )
