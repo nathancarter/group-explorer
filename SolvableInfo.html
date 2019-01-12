@@ -12,6 +12,8 @@
       </script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=MML_CHTML"></script>
       <script src="./build/allGroupExplorer.js"></script>
+      <script src="./build/allSheets.js"></script>
+      <script src="./groupURLs.js"></script>
 
       <script>
        $(window).on('load', load);	// like onload handler in body
@@ -23,39 +25,50 @@
        }
 
        function formatGroup(group) {
-          let $rslt = $(document.createDocumentFragment())
-             .append(eval(Template.HTML('header')));
-          if (group.isAbelian) {
-             $rslt.append(eval(Template.HTML('abelian')));
-          } else if (group.isSolvable) {
-             try {
-                const decomposition = findSolvableDecomposition(group);
-                let decompositionDisplay = decomposition
-                   .reverse()
-                   .map( el => makeGroupRef(el) );
-                decompositionDisplay.push(makeGroupRef(IsomorphicGroups.map.get(1)[0]));
-                decompositionDisplay = decompositionDisplay.reverse().join(' &#x25c5; ');
-                $rslt.append(eval(Template.HTML('solvable')));
-                for (let i = 0; i < decomposition.length - 1; i++) {
-                   let g = decomposition[i];
-                   $rslt.find('#decomposition')
-                        .append(eval(Template.HTML('decomposition_element')));
+          window.group = group;
+          Library.loadAllGroups( ( _, isLast ) => {
+             if ( isLast ) {
+                let $rslt = $(document.createDocumentFragment())
+                   .append(eval(Template.HTML('header')));
+                if (group.isAbelian) {
+                   $rslt.append(eval(Template.HTML('abelian')));
+                } else if (group.isSolvable) {
+                   try {
+                      const decomposition = findSolvableDecomposition(group);
+                      let decompositionDisplay = decomposition
+                         .reverse()
+                         .map( el => makeGroupRef(el) );
+                      decompositionDisplay.push(makeGroupRef(IsomorphicGroups.map.get(1)[0]));
+                      decompositionDisplay = decompositionDisplay.reverse().join(' &#x25c5; ');
+                      $rslt.append(eval(Template.HTML('solvable')));
+                      for (let i = 0; i < decomposition.length - 1; i++) {
+                         let g = decomposition[i];
+                         $rslt.find('#decomposition')
+                              .append(eval(Template.HTML('decomposition_element')));
+                      }
+                      let g = decomposition[decomposition.length - 1];
+                      $rslt.find('#decomposition')
+                           .append(eval(Template.HTML('decomposition_termination')));
+                   } catch (err) {
+                      $rslt.append(eval(Template.HTML('failure')));
+                   }
+                } else {
+                   $rslt.append(eval(Template.HTML('unsolvable')));
+                   if (group.isSimple) {
+                      $rslt.append(eval(Template.HTML('simple')));
+                   }
                 }
-                let g = decomposition[decomposition.length - 1];
-                $rslt.find('#decomposition')
-                     .append(eval(Template.HTML('decomposition_termination')));
-             } catch (err) {
-                $rslt.append(eval(Template.HTML('failure')));
-             }
-          } else {
-             $rslt.append(eval(Template.HTML('unsolvable')));
-             if (group.isSimple) {
-                $rslt.append(eval(Template.HTML('simple')));
-             }
-          }
 
-          $('body').append($rslt);
-          MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
+                $('body').append($rslt);
+                MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
+
+                $( '.show-decomposition' ).on( 'click', function ( event ) {
+                   event.preventDefault();
+                   const type = event.target.getAttribute( 'data-type' );
+                   showSolvableDecompositionSheet( type );
+                } );
+             }
+          } );
        }
 
        function makeGroupRef(group) {
@@ -107,6 +120,130 @@
           }
           return undefined;
        }
+
+       // Works very much like the previous function, but includes lots more
+       // details useful for illustrating the whole thing in a sheet.
+       // Assumes all groups in library loaded.
+       function getDetailedSolvableDecomposition ( G ) {
+          const Z_1 = Library.groups.find( gp => gp.order == 1 );
+          if ( !G.isSolvable ) {
+             return null;
+          }
+          if ( G.isAbelian ) {
+             return [
+                {
+                   group : Z_1
+                },
+                {
+                   group : G,
+                   embeddingFromPrevious : [ 0 ],
+                   quotientByPrevious : G,
+                   quotientMap : G.elements.slice()
+                }
+             ];
+          }
+          for ( var i = 0 ; i < G.subgroups.length ; i++ ) {
+             const H = G.subgroups[i];
+             if ( H.order == 1 ) continue;
+             if ( H.order == G.order ) continue;
+             if ( !G.isNormal( H ) ) continue;
+             var pair = IsomorphicGroups.findEmbedding( G, H );
+             if ( !pair ) continue;
+             const [ N, e ] = pair;
+             pair = IsomorphicGroups.findQuotient( G, H );
+             if ( !pair ) continue;
+             const [ Q, q ] = pair;
+             const D = getDetailedSolvableDecomposition( N );
+             if ( !D ) continue;
+             D.push( {
+                group : G,
+                embeddingFromPrevious : e,
+                quotientByPrevious : Q,
+                quotientMap : q
+             } );
+             return D;
+          }
+          console.error( `Warning!  The group ${G.shortName} was not solvable, `
+                       + 'but this function checked G.isSolvable at the outset!  '
+                       + 'Something is wrong.' );
+          return null;
+       }
+
+       function showSolvableDecompositionSheet ( type ) {
+          const D = getDetailedSolvableDecomposition( group );
+          if ( !D ) return alert( 'Error computing solvable decomposition' );
+          const n = D.length,
+                L = 25, T = 175, txtH = 50, W = Math.floor( 600 / n ), H = W,
+                hgap = Math.floor( W / 3 ), vgap = 100;
+          // create sheet title and description
+          var sheetElementsAsJSON = [
+             {
+                className : 'TextElement',
+                text : `Solvable Decomposition for the group ${group.shortName}`,
+                x : L, y : T - 3*txtH, w : n*W + (n-1)*hgap, h : txtH,
+                fontSize : '20pt', alignment : 'center'
+             },
+             {
+                className : 'TextElement',
+                text : 'The top row is the solvable decomposition.  '
+                     + 'The bottom row are abelian quotient groups.',
+                x : L, y : T - 2*txtH, w : n*W + (n-1)*hgap, h : txtH,
+                alignment : 'center'
+             }
+          ];
+          var previous = null, previousIndex = -1;
+          D.map( ( entry, index ) => {
+             // put name of group atop each element in top row, the decomposition
+             sheetElementsAsJSON.push( {
+                className : 'TextElement',
+                text : entry.group.shortName,
+                x : L+index*W+index*hgap, y : T-txtH, w : W, h : txtH,
+                alignment : 'center'
+             } );
+             // put visualizer for each element in top row, the decomposition
+             sheetElementsAsJSON.push( {
+                className : type, groupURL : entry.group.URL,
+                x : L+index*W+index*hgap, y : T, w : W, h : H
+             } );
+             // for every visualizer except the trivial group, add the
+             // embedding map, the quotient group, the quotient map, and its name.
+             const thisIndex = sheetElementsAsJSON.length - 1;
+             if ( previous ) {
+                // embedding from previous
+                sheetElementsAsJSON.push( {
+                   className : 'MorphismElement', name : `e${index}`,
+                   fromIndex : previousIndex, toIndex : thisIndex,
+                   showManyArrows : true,
+                   definingPairs : previous.group.generators[0].map( gen =>
+                      [ gen, entry.embeddingFromPrevious[gen] ] )
+                } );
+                // quotient group
+                sheetElementsAsJSON.push( {
+                   className : type, groupURL : entry.quotientByPrevious.URL,
+                   x : L+index*W+index*hgap, y : T+H+vgap, w : W, h : H
+                } );
+                const quotientIndex = sheetElementsAsJSON.length - 1;
+                // quotient group name
+                sheetElementsAsJSON.push( {
+                   className : 'TextElement',
+                   text : `${entry.group.shortName} / ${previous.group.shortName} &cong; ${entry.quotientByPrevious.shortName}`,
+                   x : L+index*W+index*hgap, y : T+2*H+vgap+txtH/2, w : W, h : txtH,
+                   alignment : 'center'
+                } );
+                // quotient map
+                sheetElementsAsJSON.push( {
+                   className : 'MorphismElement', name : `q${index}`,
+                   fromIndex : thisIndex, toIndex : quotientIndex,
+                   showManyArrows : true,
+                   definingPairs : entry.group.generators[0].map( gen =>
+                      [ gen, entry.quotientMap[gen] ] )
+                } );
+             }
+             previous = entry;
+             previousIndex = thisIndex;
+          } );
+          CreateNewSheet( sheetElementsAsJSON );
+       }
       </script>
    </head>
 
@@ -128,10 +265,9 @@
 
          <p>You can see a diagram of all the groups in the solvable decomposition,
             including quotient maps, by
-            <a href="">Cayley Diagram</a> or by
-            <a href="">Cycle Graph</a> or by
-            <a href="">Multiplication Table</a>.
-            <i>(Not implemented)</i>
+            <a href="" class="show-decomposition" data-type="CDElement">Cayley diagram</a>,
+            <a href="" class="show-decomposition" data-type="CGElement">cycle graph</a>, or
+            <a href="" class="show-decomposition" data-type="MTElement">multiplication table</a>.
          </p>
       </template>
       <template id="decomposition_element">

@@ -27,56 +27,6 @@
 # Nathan's List
 
  * Sheets
-    * In SolvableInfo.html:
-       * Write a function that computes the solvable decomposition, as a list of groups in that
-         decomposition plus the corresponding abelian quotient groups and the quotient maps,
-         plus the necessary embeddings.  Call it `getSolvableDecomposition(G)` and it does this:
-          * If `!G.isSolvable`, return null.
-          * If G is abelian, return this data structure:
-```
-[
-    {
-        group : Z_1 // always the leftmost in the chain
-    },
-    {
-        group : G,
-        embedding : [ 0 ], // from previous
-        quotientGroup : G,
-        quotientMap : [0,...,|G|-1]
-    }
-]
-```
-          * When G is not abelian:  For each normal subgroup N of G:
-             * Let [N',e] be `IsomorphicGroups.findEmbedding(G,N)`.
-               (If that fails, skip to the next loop iteration.)
-             * Let [Q,q] be `IsomorphicGroups.findQuotient(G,N)`.
-               (If that fails, skip to the next loop iteration.)
-             * Let D be `getSolvableDecomposition(N')`.
-               (If that fails, skip to the next loop iteration.)
-             * Return D with one more element appended:
-```
-    {
-        group : G,
-        embedding : e,
-        quotientGroup : Q,
-        quotientMap : q
-    }
-```
-          * If that loop terminates, then G is not solvable, so return null, but dump a warning
-            to the console that this should have been detected earlier.
-       * Write a function that pops up a sheet showing the solvable decomposition.  It contains
-         these items, all of which are provided by `getSolvableDecomposition(G)`:
-          * Title text
-          * Descriptive text: "The top row is the solvable decomposition.  The bottom row are
-            abelian quotient groups."
-          * Top row of visualizers: Z_1 -> H_1 -> ... -> H_n -> G, with each arrow an embedding,
-            e_1, ..., e_{n+1}.  (Use the actual names of the H_i from the group library.)
-          * Names of the subgroups above those subgroups.
-          * Quotient groups below every group except Z_1, Q_1,...,Q_{n+1}, with quotient maps
-            q_1,...,q_{n+1} from H_1,...,H_n,G to the Q_1,...,Q_{n+1}.
-          * Names of the quotient groups below their visualizers.
-       * Replace the "not implemented" text in the page with links to a sheet showing the solvable
-         decomposition for each type of visualizer.
     * Extend the toJSON() and fromJSON() in CayleyDiagram.html to also respect:
        * all the rest of the Diagram panel needs to wait until I talk to Ray
        * background color:
