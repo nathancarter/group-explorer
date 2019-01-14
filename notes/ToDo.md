@@ -66,6 +66,7 @@
       changes back from their editor version in the new tab.
     * Bug fix: The Help button at the bottom of the sheet controls pane is not visible without
       scrolling.
+    * Make it so that clicking on the sheet background unselects all sheet items.
  * Rename Cycle Diagram HTML page to Cycle Graph instead
  * Add an object of symmetry for Z_1: something with no symmetry
  * Design how permalinks to GE resources should work and add a plan for

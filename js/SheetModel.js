@@ -1040,7 +1040,9 @@ class MorphismElement extends ConnectingElement {
         super( model, from, to );
         this.name = this.getUnusedName();
         this.showDomAndCod = false;
+        this.showInjSurj = false;
         this.showDefiningPairs = false;
+        this.arrowMargin = 3;
         this.definingPairs = [ ];
         if ( from && to && from.group && to.group )
             this._map = this.getFullMap( this.definingPairs );
@@ -1077,6 +1079,7 @@ class MorphismElement extends ConnectingElement {
         result.showInjSurj = this.showInjSurj;
         result.showDefiningPairs = this.showDefiningPairs;
         result.definingPairs = this.definingPairs;
+        result.arrowMargin = this.arrowMargin;
         return result;
     }
     // Corresponding fromJSON()
@@ -1088,6 +1091,7 @@ class MorphismElement extends ConnectingElement {
         if ( json.hasOwnProperty( 'showInjSurj' ) ) this.showInjSurj = json.showInjSurj;
         if ( json.hasOwnProperty( 'showDefiningPairs' ) ) this.showDefiningPairs = json.showDefiningPairs;
         if ( json.hasOwnProperty( 'definingPairs' ) ) this.definingPairs = json.definingPairs;
+        if ( json.hasOwnProperty( 'arrowMargin' ) ) this.arrowMargin = json.arrowMargin;
         if ( this.from && this.to && this.from.group && this.to.group )
             this._map = this.getFullMap( this.definingPairs );
     }
@@ -1112,20 +1116,22 @@ class MorphismElement extends ConnectingElement {
         // Convert that back into a point and return it.
         return { x : start.x + t * v.x, y : start.y + t * v.y };
     }
-    // Auxiliary function for drawing an arrow from A to B with arrowhead of size S.
-    static drawArrow ( A, B, S, context ) {
-        context.beginPath();
-        context.moveTo( A.x, A.y );
-        context.lineTo( B.x, B.y );
+    // Auxiliary function for drawing an arrow from A to B with arrowhead of size S
+    // and margin of m pixels.
+    static drawArrow ( A, B, S, m, context ) {
         const dir = { x : B.x - A.x, y : B.y - A.y },
-              len = Math.sqrt( Math.pow( dir.x, 2 ) + Math.pow( dir.y, 2 ) );
-        if ( len > 0 ) {
-            const unit = { x : dir.x / len, y : dir.y / len },
-                  perp = { x : -unit.y / 2, y : unit.x / 2 };
-            context.moveTo( B.x - S * unit.x + S * perp.x, B.y - S * unit.y + S * perp.y );
-            context.lineTo( B.x, B.y );
-            context.lineTo( B.x - S * unit.x - S * perp.x, B.y - S * unit.y - S * perp.y );
-        }
+              len = Math.sqrt( Math.pow( dir.x, 2 ) + Math.pow( dir.y, 2 ) ),
+              unit = { x : ( len > 0 ? dir.x / len : 0 ),
+                       y : ( len > 0 ? dir.y / len : 0 ) },
+              perp = { x : -unit.y / 2, y : unit.x / 2 },
+              A2 = { x : A.x + m * unit.x, y : A.y + m * unit.y },
+              B2 = { x : B.x - m * unit.x, y : B.y - m * unit.y };
+        context.beginPath();
+        context.moveTo( A2.x, A2.y );
+        context.lineTo( B2.x, B2.y );
+        context.moveTo( B2.x - S * unit.x + S * perp.x, B2.y - S * unit.y + S * perp.y );
+        context.lineTo( B2.x, B2.y );
+        context.lineTo( B2.x - S * unit.x - S * perp.x, B2.y - S * unit.y - S * perp.y );
         context.stroke();
     }
     // Auxiliary function for writing text at a certain place.
@@ -1134,11 +1140,11 @@ class MorphismElement extends ConnectingElement {
     static drawTextLines ( lines, x, y, context ) {
         context.font = '12pt Arial';
         const approxLineHeight = 1.4 * context.measureText( 'M' ).width,
-              margin = approxLineHeight / 2;
-        const lineWidths = lines.map( function ( line ) {
-            return context.measureText( line ).width;
-        } );
-        const width = Math.max.apply( null, lineWidths ) + 2 * margin,
+              margin = approxLineHeight / 2,
+              lineWidths = lines.map( function ( line ) {
+                  return context.measureText( line ).width;
+              } ),
+              width = Math.max.apply( null, lineWidths ) + 2 * margin,
               height = approxLineHeight * lines.length + 2 * margin;
         context.fillStyle = '#ffffff';
         context.fillRect( x - width/2, y - height/2, width, height );
@@ -1190,10 +1196,11 @@ class MorphismElement extends ConnectingElement {
                           x : t1.x + ( t2.x - t1.x ) * codeltUnitCoords.x,
                           y : t1.y + ( t2.y - t1.y ) * codeltUnitCoords.y
                       };
-                MorphismElement.drawArrow( domeltRealCoords, codeltRealCoords, 20, context );
+                MorphismElement.drawArrow( domeltRealCoords, codeltRealCoords, 20,
+                                           this.arrowMargin, context );
             }
         } else {
-            MorphismElement.drawArrow( exit, enter, 20, context );
+            MorphismElement.drawArrow( exit, enter, 20, 0, context );
         }
         var lines = [ this.name ];
         if ( this.showDomAndCod )
@@ -1228,6 +1235,8 @@ class MorphismElement extends ConnectingElement {
           + ( this.showInjSurj ? 'checked' : '' ) + '/> Show injective/surjective</p>'
           + '<p><input type="checkbox" class="arrows-input" '
           + ( this.showManyArrows ? 'checked' : '' ) + '/> Draw multiple arrows</p>'
+          + '<p>Arrows margin: '
+          + `<input type="range" min="0" max="20" class="margin-input" value="${this.arrowsMargin}"/></p>`
           + '<hr/>'
           + '<p>Define the homomorphism here:</p>'
           + '<center><table border=1 cellspacing=0>'
@@ -1287,6 +1296,7 @@ class MorphismElement extends ConnectingElement {
         this.showManyArrows = $edit.find( '.arrows-input' ).prop( 'checked' );
         this.showDefiningPairs = $edit.find( '.pairs-input' ).prop( 'checked' );
         this.showInjSurj = $edit.find( '.injsurj-input' ).prop( 'checked' );
+        this.arrowMargin = $edit.find( '.margin-input' ).val();
         this._map = this.getFullMap( this.definingPairs );
         this.reposition();
         this.model.sync();
@@ -1298,6 +1308,7 @@ class MorphismElement extends ConnectingElement {
         $edit.find( '.arrows-input' ).prop( 'checked', this.showManyArrows );
         $edit.find( '.pairs-input' ).prop( 'checked', this.showDefiningPairs );
         $edit.find( '.injsurj-input' ).prop( 'checked', this.showInjSurj );
+        $edit.find( '.margin-input' ).val( this.arrowMargin );
         this.fillTableWithPairs();
         $edit[0].definingPairsCopy = this.definingPairs.slice();
     }
