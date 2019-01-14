@@ -67,6 +67,8 @@
     * Bug fix: The Help button at the bottom of the sheet controls pane is not visible without
       scrolling.
     * Make it so that clicking on the sheet background unselects all sheet items.
+    * Bug fix: Sometimes double-clicking a morphism to edit it does nothing.
+    * Bug fix: It is possible to connect a connection to something else; disable this.
  * Rename Cycle Diagram HTML page to Cycle Graph instead
  * Add an object of symmetry for Z_1: something with no symmetry
  * Design how permalinks to GE resources should work and add a plan for
