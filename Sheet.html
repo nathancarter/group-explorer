@@ -31,6 +31,11 @@
             position: absolute;
             z-index: 999999;
          }
+
+         .narrow-control { width: 31%; }
+         .normal-control { width: 47%; }
+         .wide-control { width: 65%; }
+         .huge-control { width: 96%; }
       </style>
 
       <script type="text/x-mathjax-config">
@@ -330,68 +335,83 @@
    <body class="vert">
       <div id="sheet-control" class="fill-vert">
          <p class="button-row">
-            <button id="addRectangleButton" onclick="addRectangle();">Add rectangle</button>
-            <button id="addTextButton" onclick="addText();">Add text box</button>
+            <button id="loadButton" onclick="loadChosen();"
+                    class="narrow-control">Load sheet:</button>
+            <select id="savedSheetsList" class="wide-control"></select>
          </p>
          <p class="button-row">
-            <button id="addVisualizerButton" onclick="addVisualizer();">Add this visualizer:</button>
+            <button id="saveButton" onclick="saveAs();"
+                    class="narrow-control">Save as:</button>
+            <input type="text" id="filenameInput" value="My Sheet"
+                    class="wide-control"/>
+         </p>
+
+         <hr/>
+
+         <p class="button-row">
+            <button id="addRectangleButton" onclick="addRectangle();"
+                    class="normal-control">Add rectangle</button>
+            <button id="addTextButton" onclick="addText();"
+                    class="normal-control">Add text box</button>
+         </p>
+         <p class="button-row">
+            <button id="addVisualizerButton" onclick="addVisualizer();"
+                    class="huge-control">Add this visualizer:</button>
          </p>
          <p>
-            &nbsp; &nbsp;
-            <select id="visualizerList">
+            <select id="visualizerList" class="normal-control">
                <option value="CD">Cayley diagram</option>
                <option value="MT">multiplication table</option>
                <option value="CG">cycle graph</option>
             </select>
-            <select id="groupList"></select>
+            <select id="groupList" class="normal-control"></select>
+         </p>
+
+         <hr/>
+
+         <p class="button-row">
+            <button id="copyButton" onclick="copySelected();"
+                    class="for-selected-element narrow-control">Copy</button>
+            <button id="pasteButton" onclick="pasteItem();"
+                    class="narrow-control">Paste</button>
+            <button id="deleteButton" onclick="deleteSelected();"
+                    class="for-selected-element narrow-control">Delete</button>
          </p>
          <p class="button-row">
-            <button id="connectButton"
-                    onclick="connectSelected();">Connect to:</button>
-            <select id="connectToList">
-            </select>
+            <button id="undoButton" onclick="undo();"
+                    class="normal-control">Undo</button>
+            <button id="redoButton" onclick="redo();"
+                    class="normal-control">Redo</button>
          </p>
+
+         <hr/>
+
          <p class="button-row">
-            <button id="morphismButton"
-                    onclick="morphismSelected();">Morphism to:</button>
+            <button id="morphismButton" class="narrow-control"
+                    onclick="morphismSelected();">Map to:</button>
             <select id="morphismToList">
             </select>
          </p>
          <p class="button-row">
-            <button id="deleteButton" onclick="deleteSelected();"
-                    class="for-selected-element">Delete selected item</button>
+            <button id="connectButton" class="narrow-control"
+                    onclick="connectSelected();">Connect to:</button>
+            <select id="connectToList">
+            </select>
          </p>
+
          <hr/>
+
          <p class="button-row">
             <button id="moveUpButton" onclick="moveSelectedUp();"
-                    class="for-selected-element">Move forward</button>
+                    class="for-selected-element normal-control">Move forward</button>
             <button id="moveDownButton" onclick="moveSelectedDown();"
-                    class="for-selected-element">Move backward</button>
+                    class="for-selected-element normal-control">Move backward</button>
          </p>
          <p class="button-row">
             <button id="moveToTopButton" onclick="moveSelectedToTop();"
-                    class="for-selected-element">Move to front</button>
+                    class="for-selected-element normal-control">Move to front</button>
             <button id="moveToBottomButton" onclick="moveSelectedToBottom();"
-                    class="for-selected-element">Move to back</button>
-         </p>
-         <hr/>
-         <p class="button-row">
-            <button id="copyButton" onclick="copySelected();"
-                    class="for-selected-element">Copy selected item</button>
-            <button id="pasteButton" onclick="pasteItem();">Paste</button>
-         </p>
-         <p class="button-row">
-            <button id="undoButton" onclick="undo();">Undo</button>
-            <button id="redoButton" onclick="redo();">Redo</button>
-         </p>
-         <hr/>
-         <p class="button-row">
-            <button id="saveButton" onclick="saveAs();">Save as:</button>
-            <input type="text" id="filenameInput" value="My Sheet"/>
-         </p>
-         <p class="button-row">
-            <button id="loadButton" onclick="loadChosen();">Load sheet:</button>
-            <select id="savedSheetsList"></select>
+                    class="for-selected-element normal-control">Move to back</button>
          </p>
       </div>
    </body>

@@ -103,7 +103,6 @@
 
 ### Sheets
 
- * Add HR after insertion controls section.
  * Bug: Can't double-click to edit text (errors in console).
  * Bug: Can't OK to save changes to connection (errors in console).
  * Bug: Build a morphism A_4 -> A_4 and try to add a pair mapping (0 1)(2 3) to something.  Can't map to anything but ().  Bug.
