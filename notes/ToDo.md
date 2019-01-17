@@ -103,7 +103,6 @@
 
 ### Sheets
 
- * Remove "Sheet Controls" button, since there's only one "tab."
  * Add HR after insertion controls section.
  * Bug: Can't double-click to edit text (errors in console).
  * Bug: Can't OK to save changes to connection (errors in console).
