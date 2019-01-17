@@ -103,7 +103,6 @@
 
 ### Sheets
 
- * Bug: Can't OK to save changes to connection (errors in console).
  * Bug: Build a morphism A_4 -> A_4 and try to add a pair mapping (0 1)(2 3) to something.  Can't map to anything but ().  Bug.
  * Bug: Show full table of morphism values; they all map to () even if that's not correct.
  * Bug? Load My Sheet 3: moving one end of the connection doesn't move the connection.

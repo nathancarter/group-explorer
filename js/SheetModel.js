@@ -985,9 +985,10 @@ class ConnectingElement extends SheetElement {
         // Draw arrowhead if requested.
         const len = Math.sqrt( Math.pow( stop.x - start.x, 2 ) + Math.pow( stop.y - start.y, 2 ) );
         if ( ( len > 0 ) && this.useArrowhead ) {
-            const unit = { x : ( stop.x - start.x ) / len, y : ( stop.y - start.y ) / len };
-            const mid = { x : ( stop.x + start.x ) / 2, y : ( stop.y + start.y ) / 2 };
-            const perp = { x : -unit.y, y : unit.x };
+            const unit = { x : ( stop.x - start.x ) / len, y : ( stop.y - start.y ) / len },
+                  mid = { x : ( stop.x + start.x ) / 2, y : ( stop.y + start.y ) / 2 },
+                  perp = { x : -unit.y, y : unit.x },
+                  margin = this.margin();
             context.beginPath();
             context.moveTo( mid.x + margin * unit.x, mid.y + margin * unit.y );
             context.lineTo( mid.x - margin * unit.x + margin * perp.x,
