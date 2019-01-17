@@ -770,8 +770,9 @@ class TextElement extends SheetElement {
     }
     // when editing, use one input for each defining feature
     createHtmlEditElement () {
+        var that = this;
         function isSelected ( align ) {
-            return this.alignment == align ? ' selected' : '';
+            return that.alignment == align ? ' selected' : '';
         }
         return $(
             '<div style="min-width: 200px; border: 1px solid black;">'
