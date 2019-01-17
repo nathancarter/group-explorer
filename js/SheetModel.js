@@ -1183,10 +1183,8 @@ class MorphismElement extends ConnectingElement {
         context.transform( 1, 0, 0, 1, -left, -top );
         context.strokeStyle = '#000000';
         if ( this.showManyArrows && this.from.group && this.to.group ) {
-            if ( !this._map ) {
-                console.log( `building map from ${this.from.group.shortName} to ${this.to.group.shortName}` );
+            if ( !this._map )
                 this._map = this.getFullMap( this.definingPairs );
-            }
             for ( var domelt = 0 ; domelt < this.from.group.order ; domelt++ ) {
                 const domeltUnitCoords = this.from.unitSquarePosition( domelt ),
                       domeltRealCoords = {
