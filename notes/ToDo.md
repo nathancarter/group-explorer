@@ -104,7 +104,6 @@
 ### Sheets
 
  * Bug? Load My Sheet 3: moving one end of the connection doesn't move the connection.
- * Give right pane a big z-index so nothing is ever on top of it.
  * Make all sheets have a fixed size - say, 10000x7500.
  * For improving math content in sheets text:  Use Ray's global `mathml2text()` function
    that takes a MathML string as input and produces unicode text output that uses all the
