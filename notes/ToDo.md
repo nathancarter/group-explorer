@@ -103,7 +103,6 @@
 
 ### Sheets
 
- * Bug: Show full table of morphism values; they all map to () even if that's not correct.
  * Bug? Load My Sheet 3: moving one end of the connection doesn't move the connection.
  * Give right pane a big z-index so nothing is ever on top of it.
  * Make all sheets have a fixed size - say, 10000x7500.

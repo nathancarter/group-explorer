@@ -1472,9 +1472,10 @@ class MorphismElement extends ConnectingElement {
               + '<p>Feel free to close this window when you\'re done with its content.</p>'
               + '<table border=1 cellspacing=0>'
               + '<tr><th>This element</th><th>Maps to this</th></tr>';
+            const f = that.getFullMap( that.definingPairs );
             for ( var i = 0 ; i < that.from.group.order ; i++ )
                 html += `<tr><td>${that._drep( i )}</td>`
-                      + `<td>${that._crep( that._map[i] )}</td></tr>`;
+                      + `<td>${that._crep( f[i] )}</td></tr>`;
             html += '</table></center>';
             var newWindow = window.open();
             newWindow.document.write( html );
