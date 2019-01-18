@@ -69,9 +69,6 @@
 ### Miscellany
 
  * Debug the ugliness of the Tesseract CG.
- * Many subgroup images on the subgroup info page do not load, and show the
-   "broken image" icon.  Take code from GroupExplorer.html for creating the images
-   rather than trying to load them from the library blob.
  * Visualizer pages also hide the "Help" and "Reset" buttons, just like Sheets do.
    But that's working on Ray's laptop, so figure out what's going on.
  * Change all instances where caught errors are sent to `alert` to go to a `console.error`

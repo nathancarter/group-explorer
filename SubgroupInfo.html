@@ -31,6 +31,7 @@
        });
       </script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=MML_CHTML"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/95/three.js"></script>
       <script src="./build/allGroupExplorer.js"></script>
       <script src="./build/allSheets.js"></script>
       <script src="./groupURLs.js"></script>
@@ -42,6 +43,7 @@
        $(window).on('load', load);	// like onload handler in body
 
        function load() {
+          window.graphicContext = new DisplayDiagram( { width : 50, height : 50, fog : false } );
           Library.loadFromInvocation()
                  .then( ({library, groupIndex}) => {
                     window.group = library[groupIndex];
@@ -111,8 +113,7 @@
           if (isomorphicGroup === undefined) {
              $row.find('ul').append(eval(Template.HTML('no_isomorphism_template')));
           } else {
-             const img = new Image();
-             img.src = isomorphicGroup.imageSource;
+             const img = window.graphicContext.getImage( new CayleyDiagram(isomorphicGroup) );
              img.height = img.width = 50;
              $row.find('.image').html(img);
              $row.find('ul').append(eval(Template.HTML('isomorphism_template')));
