@@ -71,6 +71,8 @@
  * Debug the ugliness of the Tesseract CG.
  * Visualizer pages also hide the "Help" and "Reset" buttons, just like Sheets do.
    But that's working on Ray's laptop, so figure out what's going on.
+ * Make all right hand panes hideable, across the whole app.  This way the visualizer
+   or sheet in question can be printed (or printed to a PDF) easily.
 
 ### Page-level issues
 
@@ -98,9 +100,6 @@
  * For improving math content in sheets text:  Use Ray's global `mathml2text()` function
    that takes a MathML string as input and produces unicode text output that uses all the
    nice tricks to make it as good as possible.
- * Until you have custom code for exporting sheets, make the right hand pane hideable.
-   Do this for all right hand panes consistently across the app.  This way the visualizer
-   or sheet in question can be printed (or printed to a PDF) easily.
  * Extend the toJSON() and fromJSON() in CayleyDiagram.html to also respect:
     * all the rest of the Diagram panel needs to wait until I talk to Ray
     * background color:
