@@ -134,7 +134,6 @@
     * Add links at the end of the page that offer to show this type of sheet using any type of
       visualizer.
  * Make it so that clicking on the sheet background unselects all sheet items.
- * Bug fix: It is possible to connect a connection to something else; disable this.
 
 # In GAP's Group Explorer package
 

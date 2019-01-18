@@ -157,7 +157,7 @@
                 $mlist = $( '#morphismToList' );
             $clist.children().remove();
             $mlist.children().remove();
-            if ( sel )
+            if ( sel && !( sel instanceof ConnectingElement ) )
                Model.elements.map( function ( element, index ) {
                   const item = `<option value="${index}">${element.toString()}</option>`;
                   if ( ( element instanceof ConnectingElement ) || ( element == sel ) ) return;
