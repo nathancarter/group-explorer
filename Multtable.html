@@ -108,7 +108,7 @@
           // When group and framework are loaded, insert subset_page and complete rest of setup
           Promise.all([groupLoad, bodyLoad])
                  .then( () => SSD.load($('#subset-control')).then(completeSetup) )
-                 .catch( (error) => alert(error) );
+                 .catch( console.error );
        }
 
        /* Now that subsetDisplay is loaded, complete the setup */

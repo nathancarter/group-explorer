@@ -99,7 +99,7 @@
                 Group = group = library[group_index];
                 setDiagramName();
              } )
-             .catch( (error) => alert(error) );
+             .catch( console.error );
 
           // Promise to load visualizer framework around visualizer-specific code in this file
           const body_load = VC.load();
@@ -107,7 +107,7 @@
           // When group and framework are loaded, load panels and complete setup
           Promise.all([group_load, body_load])
                  .then(loadPanels)
-                 .catch( (error) => alert(error) );
+                 .catch( console.error );
        }
 
        function loadPanels() {
@@ -116,7 +116,7 @@
           const diagram_controller_load = DC.load($('#diagram-control'));
           Promise.all([subset_display_load, view_controller_load, diagram_controller_load])
                  .then(completeSetup)
-                 .catch( (error) => alert(error) );
+                 .catch( console.error );
        }
 
        /* Set Diagram_name from URL (undefined => use generated Cayley diagram) */
@@ -292,7 +292,7 @@
 
                    // set tooltip_timestamp, so that tooltip will be cleared in 10 sec in code below
                    HoverHelp.tooltip_timestamp = performance.now();
-                   
+
                    // clear mouse_event to keep from displaying tooltip again
                    HoverHelp.mouse_event = undefined;
 

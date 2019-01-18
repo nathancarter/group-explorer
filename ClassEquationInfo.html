@@ -20,7 +20,7 @@
        function load() {
           Library.loadFromInvocation()
                  .then( ({library, groupIndex}) => formatGroup(library[groupIndex]) )
-                 .catch( (error) => alert(error) );
+                 .catch( console.error );
        }
 
        function formatGroup(group) {

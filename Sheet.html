@@ -85,7 +85,7 @@
          function load() {
             VC.load()
               .then(completeSetup)
-              .catch((error) => alert(error));
+              .catch( console.error );
          }
          /* Now that all the static HTML is loaded, complete the setup */
          function completeSetup() {

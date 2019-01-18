@@ -71,8 +71,6 @@
  * Debug the ugliness of the Tesseract CG.
  * Visualizer pages also hide the "Help" and "Reset" buttons, just like Sheets do.
    But that's working on Ray's laptop, so figure out what's going on.
- * Change all instances where caught errors are sent to `alert` to go to a `console.error`
-   or similar routine instead.
 
 ### Page-level issues
 
