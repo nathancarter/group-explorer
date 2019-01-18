@@ -70,7 +70,9 @@
 
  * Debug the ugliness of the Tesseract CG.
  * Visualizer pages also hide the "Help" and "Reset" buttons, just like Sheets do.
-   But that's working on Ray's laptop, so figure out what's going on.
+   This bug appears in Chrome 72 on Mac, but not on Chrome 71, nor on Safari.
+   Thus we table this until later; it is probably not our problem, and maybe Chrome
+   will fix it if we just wait and see.
  * Make all right hand panes hideable, across the whole app.  This way the visualizer
    or sheet in question can be printed (or printed to a PDF) easily.
 
@@ -96,7 +98,6 @@
 
 ### Sheets
 
- * Make all sheets have a fixed size - say, 10000x7500.
  * For improving math content in sheets text:  Use Ray's global `mathml2text()` function
    that takes a MathML string as input and produces unicode text output that uses all the
    nice tricks to make it as good as possible.
@@ -134,6 +135,7 @@
     * Add links at the end of the page that offer to show this type of sheet using any type of
       visualizer.
  * Make it so that clicking on the sheet background unselects all sheet items.
+ * Make all sheets have a fixed size - say, 10000x7500.
 
 # In GAP's Group Explorer package
 
