@@ -133,8 +133,6 @@
          that the result is not a single cycle of length nm.
     * Add links at the end of the page that offer to show this type of sheet using any type of
       visualizer.
- * Bug fix: Visualizers created programmatically (through `CreateNewSheet()`) don't propagate
-   changes back from their editor version in the new tab.
  * Make it so that clicking on the sheet background unselects all sheet items.
  * Bug fix: It is possible to connect a connection to something else; disable this.
 
