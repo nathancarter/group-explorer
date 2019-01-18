@@ -1,28 +1,17 @@
 
 # To-dos for first release, Group Explorer v3.0
 
-## To work on together, or whoever gets to it first
-
- * Visualizer pages also hide the "Help" and "Reset" buttons, just like Sheets do.
-   But that's working on Ray's laptop, so figure out what's going on.
- * Make the mesh lines respect fog like the rest of the 3D diagram does.  (Ray will do
-   the initial investigations on this one.)
-
 ## Assigned to Ray
 
 ### Miscellany
 
+ * Make the mesh lines respect fog like the rest of the 3D diagram does.  (Ray will do
+   the initial investigations on this one.)
  * In GroupExplorer.html:
     * Each td containing a link should be active, with the correct hand cursor over the whole td.
     * Each such td should change its background on mouse enter, along with the cursor.
     * Use gray background for links to GroupInfo.html, colors for visualizers.
- * Subgroup info page for Tesseract group takes forever to load.  Initialize the page with
-   "Loading ${N} subgroups..." so that as the long time passes, people understand to wait.
-   Later this could be enhanced with a progress bar or percent-complete indicator, but it
-   can start this simply.
- * The SolvableInfo.html page says it can't report whether the group is solvable, because
-   it can't convert subgroups into their names from the library.  But it knows the subgroup
-   chain, so it should be able to report it using just `H_*` names.
+ * Comment 168 and 384 groups out of URLs file for release.
  * The Notes section of the GroupInfo.html page should be a text box that, whenever its
    contents change, writes them to `localStorage`, and reloads them from there on page load.
  * When using subset diagram, "Organize by" should reset the innermost/outermost/etc. column
@@ -31,6 +20,7 @@
    throughout the app thereafter.
  * Setting line thickness to minimum does not work; it gets reset to a thicker value.
  * Fix test for circular/rotary layout in `CayleyDiagram.setStrategies`
+ * Create the UI for adding a naming scheme, and store it in `localStorage`.
 
 ### Fonts and math
 
@@ -49,8 +39,9 @@
 
 ### Help system
 
- * Complete the integration
+ * Complete the integration (or pass to Nathan if he finishes his stuff first)
  * On SubgroupInfo page, link to First Iso Theorem is broken.
+ * GroupExplorer.html column headings should be link to help on that topic.
 
 ### 3D diagrams and viewing angles
 
@@ -81,6 +72,10 @@
  * Many subgroup images on the subgroup info page do not load, and show the
    "broken image" icon.  Take code from GroupExplorer.html for creating the images
    rather than trying to load them from the library blob.
+ * Visualizer pages also hide the "Help" and "Reset" buttons, just like Sheets do.
+   But that's working on Ray's laptop, so figure out what's going on.
+ * Change all instances where caught errors are sent to `alert` to go to a `console.error`
+   or similar routine instead.
 
 ### Page-level issues
 
@@ -100,6 +95,7 @@
    menu that contains "New Sheet" and "Load Sheet > [submenu of all saved sheets]".
  * Change the default so that navigating into a group's Group Info page doesn't use a
    blob URL, but the group URL, so that users can share links to such pages the usual way.
+   Make this change for all pages.
 
 ### Sheets
 
@@ -157,10 +153,23 @@
  * If a name is not provided, use `IsomorphicGroups.find()` to try to find one
  * If you found one, make it a link to the group info page for that group
 
+---
+
+Items below here are roughly prioritized in the order we will consider doing them,
+but that order is not set in stone.
+
+---
+
 # To-dos related to tablet support
 
  * In general, check how everything works on a tablet, find those things that don't work,
    and then design how we want them to work, and make it happen.
+ * Consider all the places where performance becomes evident due to lower tablet compute
+   power, and which can easily be improved.  What tables struggle with is graphics, so:
+    * One performance improvement may come when we replace spheres with sprites of circles.
+      This may have a huge impact.
+    * Another improvement may be simply to make the "show labels" option default to false
+      on tablets.
  * Change subset control: don't pop up elements on double-click, but on hover...unless
    that's bad for tablets?
 
@@ -181,10 +190,62 @@
  * Clients can query the library (synchronously) for metadata just with `Library.metadata`.
  * Replace `Library.loadAllGroups()` with `Library.load()`, and the default is to use
    `Library.metadata`, but you can filter it if you like and pass a subset.
- * Use this new feature to stop passing blob data around, so that all pages have permalink
-   URLs (with the query string using the database key).
+ * Consider then expanding each group file to include pre-computed things like sets of
+   subgroups.
+
+# To-dos related to the Group Info page
+
+[The section after this one](#to-dos-related-to-the-subgroup-info-page) is very related,
+and may benefit from being done in concert.
+
+ * Basic facts table should be headings and text under them, rather than a table
+ * Computed Properties table:
+    * The third column isn't always necessary; for Abelian and Cyclic it should just put
+      the evidence right in the table, with no "Tell me more" link.
+    * Many that use a "tell me more" page now could have their info precomputed but hidden,
+      because it's not very much info, actually.  Just expand/collapse with "more" and
+      "less" links.
+    * For the ones that need a tell me more page, just use the blog-like UI paradigm
+      "more..." as a link at the end of the second column's content.
+ * Remove "Related Sheets" and "File Data"
+    * File Data's URL will go away when the library becomes one big JSON structure.
+    * Author could be moved to the page subtitle or to the Basic Facts section.
+ * Views section: Rather than have headings with "Help on this" links below them, just
+   make the titles the help link in the first place.
+ * Later, once all GE2 functionality is working well, consider this next:
+    * Two-column layout
+    * Left column is vertical list of all visualizers (1/3 or 1/4 width of screen)
+    * Right column is all rest of page, each section as a header with a brief summary
+      sentence and a disclosure triangle showing the rest, so that the page content and
+      its ToC merge into one, and you can delete the ToC from the top.  At the same time,
+      flatten the Computed Properties section out into main headings.
+    * If you do that, sort them so that column 2 has mathy stuff on top and data-related
+      stuff further down
+
+# To-dos related to the subgroup info page
+
+ * Consider eventually making the SubgroupInfo.html page not its own page, but just one
+   of the sections on the main GroupInfo.html page.  Some of them are big, but you choose
+   whether to expand it or not anyway.  This may impact the following changes, so decide
+   whether you want to do it first or not.
+ * Add column for elements, remove that data from the text rows.  (For really
+   large subgroups, use "more..." and "less..." links.)
+ * Add column for whether it's a Sylow p-subgroup, remove that data from the text
+   rows.
+ * Extend name column to say `H_i \cong [shortname of group it's isomorphic to]`, remove
+   that data from the interstitial rows.  In that same cell, include the links to
+   embedding sheets as tersely as possible.
+ * Rename "Normal" column to "Quotient" and have it be one of two things, then remove that
+   data from the interstitial rows:
+    * No quotient, subgroup not normal
+    * `G / H_i \cong Q`, then links to see it shown as an SES via CD, CG, MT.
+ * For big groups like the Tesseract, the SubgroupInfo.html page says it can't show the
+   embedding of `H_{1522}`, because it's a group of order 32 not in the library.  But it
+   should be able to just visualize it because it has the multiplication table, period.
 
 # To-dos related to the main page
+
+Note that these ideas are contingent upon what feedback we receive from first users.
 
  * Remove the definition column?
     * Makes room for other things like number of subgroups, etc.
@@ -205,60 +266,6 @@
       at the bottom to load the next 20?  (In fact, showing the 168 and 384 groups is a
       bit ugly and resource-intensive, and should probably be disabled by default.)
 
-# To-dos related to the Group Info page
-
- * Basic facts table should be headings and text under them, rather than a table
- * Computed Properties table:
-    * The third column isn't always necessary; for Abelian and Cyclic it should just put
-      the evidence right in the table, with no "Tell me more" link.
-    * Many that use a "tell me more" page now could have their info precomputed but hidden,
-      because it's not very much info, actually.  Just expand/collapse with "more" and
-      "less" links.
-    * For the ones that need a tell me more page, just use the blog-like UI paradigm
-      "more..." as a link at the end of the second column's content.
- * Remove "Related Sheets" and "File Data"
-    * File Data's URL will go away when the library becomes one big JSON structure.
-    * Author could be moved to the page subtitle or to the Basic Facts section.
- * Add a sharing button for naming conventions and notes that pops up a window with an
-   email the user can copy&paste&send, containing instructions and a big JSON bolus at
-   the end, of where in GE to paste the whole email's content to import the original
-   user's notes/representations/etc. (all at once, not each note/representation
-   separately).  Alternately, the original user can just post that JSON on their
-   website/blog, then give you the URL to it, and you can paste the URL into GE, and
-   import data that way (which GE will handle by an XHR to the blog/website).
- * Views section
-    * Rather than have headings with "Help on this" links below them, just make the
-      titles the help link in the first place.
- * Later, once all GE2 functionality is working well, consider this next:
-    * Two-column layout
-    * Left column is vertical list of all visualizers (1/3 or 1/4 width of screen)
-    * Right column is all rest of page, each section as a header with a brief summary
-      sentence and a disclosure triangle showing the rest, so that the page content and
-      its ToC merge into one, and you can delete the ToC from the top.  At the same time,
-      flatten the Computed Properties section out into main headings.
-    * If you do that, sort them so that column 2 has mathy stuff on top and data-related
-      stuff further down
-
-# To-dos related to the subgroup info page
-
- * Add column for elements, remove that data from the interstitial rows.  (For really
-   large subgroups, use "more..." and "less..." links.)
- * Add column for whether it's a Sylow p-subgroup, remove that data from the interstitial
-   rows.
- * Extend name column to say H_i \cong [shortname of group it's isomorphic to], remove
-   that data from the interstitial rows.  In that same cell, include the links to
-   embedding sheets as tersely as possible.
- * Rename "Normal" column to "Quotient" and have it be one of two things, then remove that
-   data from the interstitial rows:
-    * No quotient, subgroup not normal
-    * `G / H_i \cong Q`, then links to see it shown as an SES via CD, CG, MT.
- * For big groups like the Tesseract, the SubgroupInfo.html page says it can't show the
-   embedding of `H_{1522}`, because it's a group of order 32 not in the library.  But it
-   should be able to just visualize it because it has the multiplication table, period.
- * Consider eventually making the SubgroupInfo.html page not its own page, but just one
-   of the sections on the main GroupInfo.html page.  Some of them are big, but you choose
-   whether to expand it or not anyway.
-
 # To-dos related to sheets
 
  * Title DIV of the Sheet page should update itself with the name of the sheet when you
@@ -274,7 +281,15 @@
 
 ## Unassigned
 
- * GroupExplorer.html column headings should be link to help on that topic.
+ * Subgroup info page for Tesseract group takes forever to load.  Initialize the page with
+   "Loading ${N} subgroups..." so that as the long time passes, people understand to wait.
+   Later this could be enhanced with a progress bar or percent-complete indicator, but it
+   can start this simply.
+ * The SolvableInfo.html page says it can't report whether the group is solvable, because
+   it can't convert subgroups into their names from the library.  But it knows the subgroup
+   chain, so it should be able to report it using just `H_*` names.  (This "bug" will not
+   manifest until you include in the release groups of order >40, because all groups of
+   order 20 or less are present.  So this is low-priority.)
  * Change subgroup control so that it doesn't list subsets in sentences
    ("`H_0 = { e }` is the subset of order 1") but rather as a table (headings for
    "name", "elements", "order", and "normal?").  This will make it more succinct,
@@ -283,23 +298,21 @@
    left-to-right as well.
  * Include fog in small visualizers of 3D CDs, so that you can tell the back of the
    bucky ball from the front, fex.
- * How can we integrate into GE a way to ask, for any computation that's done, a way for
-   the user to ask how you would do the same thing in GAP?
- * One day: Bootstrap or something for auto-reflow on small screens??  Not yet...too
-   much work for little gain.
  * Visualizers:
     * Make group name a link to visit its group info page in a new tab
     * Make visualizer name a link that pops up a context menu with the two other
       visualizers as options, and if you choose one, reload the same page with that
       visualizer name in the URL in place of the old one (if the group doesn't have a URL,
       then pass the multiplication table in the URL as a blob URL).
- * One day make OSs full citizens of GE by making a Spins-like game out of them, but low
-   pedagogical value, so long into the future.
- * It is possible to ask GE3 to generate diagrams in a way that nodes become too close
-   together.  Do this for example:
-    * Open a Cayley Diagram for A_5.
-    * Make the first generator (0 1 2 3 4), linear in x, innermost.
-    * Make the second generator (0 1)(2 3), rotary in x,y, outermost.
+ * Design question, to talk with users about: Do people want to be able to add groups?
+   Perhaps the way to do this is, when someone is using the GE package for GAP, and they
+   visualize a group that yields `IsomorphicGroups.find(G)==null`, there is a "Save to
+   group library" button on the visualizer that lets them do so; it goes in `localStorage`.
+ * One day replace all MathML in the app with LaTeX instead, which should improve overall
+   results because MathJax doesn't seem to be as good at processing MathML as it is at
+   processing LaTeX, and Ray has had to write some code to tweak/prod the MathJax input
+   or output in order to get it to make nice results from our MathML input.  LaTeX will
+   also be easier to read for programmers and much less verbose.
 
 ## Assigned to Ray
 
@@ -308,24 +321,33 @@
  * Internal documentation
  * Rationalize coding style (add leading underscore to internal methods?)
  * Re-factor to hide internal implementations (e.g., js/DisplayXX classes)
+ * It is possible to ask GE3 to generate diagrams in a way that nodes become too close
+   together.  Do this for example:
+    * Open a Cayley Diagram for A_5.
+    * Make the first generator (0 1 2 3 4), linear in x, innermost.
+    * Make the second generator (0 1)(2 3), rotary in x,y, outermost.
+ * Remove colored background from all three visualizers.
 
 ### CayleyDiagram diagram panel
 
- * Change label representations in visualizers?
  * Display raw element numbers for debugging?
  * Follow up approach in https://stackoverflow.com/questions/15558418/how-do-you-save-an-image-from-a-three-js-canvas for saving buffer
- * Add indication to Subgroups panel that subgroup is normal?
-
-### Local files
-
- * Group Explorer
-    * add groups
- * Group Info page
-    * user-defined naming scheme
- * Preferences
+ * Investigate how to get Cayley Diagrams to look more like VGT and less
+   like GE2.0.
 
 ## Assigned to Nathan
 
+ * Add a sharing button for naming conventions and notes that pops up a window with an
+   email the user can copy&paste&send, containing instructions and a big JSON bolus at
+   the end, of where in GE to paste the whole email's content to import the original
+   user's notes/representations/etc. (all at once, not each note/representation
+   separately).  Alternately, the original user can just post that JSON on their
+   website/blog, then give you the URL to it, and you can paste the URL into GE, and
+   import data that way (which GE will handle by an XHR to the blog/website).
+ * Integrate into GE a way to ask, for any computation that's done, a way for
+   the user to ask how you would do the same thing in GAP.
+ * One day make OSs full citizens of GE by making a Spins-like game out of them, but low
+   pedagogical value, so long into the future.
  * Find out whether Tom Leong might want to make us a nice set of CSS to make the whole
    app prettier.
  * Rename Cycle Diagram HTML page to Cycle Graph instead
@@ -335,11 +357,10 @@
    `<iframe>[load sheet.html]</iframe><script>(after iframe loaded, pass it the sheet JSON)</script>`.
  * Add an object of symmetry for Z_1: something with no symmetry
  * Consider how to improve the default style of the three visualizations:
-    * Remove colored background from all three?
     * Investigate drawing Cycle Graphs with SVGs; let the browser do the
       rendering optimizations and get free vector graphics as a result.
-    * Investigate how to get Cayley Diagrams to look more like VGT and less
-      like GE2.0.
+      Is this doomed when the CG is really large?  E.g., for Tesseract, could it fail
+      because SVGs can't handle that many little line segments?
     * Consider how to create an exporter for 3D Cayley Diagrams to SVGs,
       for users to download for use in contexts where they want vector graphics.
        * [Recall your 3D SVG library](https://github.com/nathancarter/svg3d)
