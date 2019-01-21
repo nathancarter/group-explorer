@@ -78,10 +78,6 @@
 
 ### Page-level issues
 
- * Replace `index.html` redirector with an actual landing page, one that follows
-   the pattern of `groupexplorer.sourceforge.net`, and maybe uses the logo from
-   `GroupExplorer/images/biglogo.png`.  On that same page, explain the idea that
-   GE3.0 is GE2.0 on the web, with improvements to come in 3.1, 3.2, etc.
  * Get the following stuff into the heading on the main page:
     * Simple logo, w/version number
     * Link to landing page for the app (to be created)
@@ -89,7 +85,7 @@
     * [GitHub icon](https://github.com/logos) linking to this source code repository
  * Some subset of this could go on every page (visualizer, sheet, etc.).
    Logo, link to landing page, link to github, others?
- * Main page heading doesn't need contributors names; but put them in GitHub README.md.
+ * Put contributor names in GitHub README.md.
  * Make the "settings" menu in the top right of the main page actually a three-lines
    menu that contains "New Sheet" and "Load Sheet > [submenu of all saved sheets]".
  * Change the default so that navigating into a group's Group Info page doesn't use a
