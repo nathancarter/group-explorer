@@ -68,16 +68,6 @@
 
 ## Assigned to Nathan
 
-### Miscellany
-
- * Debug the ugliness of the Tesseract CG.
- * Visualizer pages also hide the "Help" and "Reset" buttons, just like Sheets do.
-   This bug appears in Chrome 72 on Mac, but not on Chrome 71, nor on Safari.
-   Thus we table this until later; it is probably not our problem, and maybe Chrome
-   will fix it if we just wait and see.
- * Make all right hand panes hideable, across the whole app.  This way the visualizer
-   or sheet in question can be printed (or printed to a PDF) easily.
-
 ### Page-level issues
 
  * Some subset of this could go on every page (visualizer, sheet, etc.).
@@ -129,9 +119,17 @@
  * Make it so that clicking on the sheet background unselects all sheet items.
  * Make all sheets have a fixed size - say, 10000x7500.
 
-# In GAP's Group Explorer package
+### Miscellany
 
-## Assigned to Nathan
+ * Debug the ugliness of the Tesseract CG.
+ * Visualizer pages also hide the "Help" and "Reset" buttons, just like Sheets do.
+   This bug appears in Chrome 72 on Mac, but not on Chrome 71, nor on Safari.
+   Thus we table this until later; it is probably not our problem, and maybe Chrome
+   will fix it if we just wait and see.
+ * Make all right hand panes hideable, across the whole app.  This way the visualizer
+   or sheet in question can be printed (or printed to a PDF) easily.
+
+## GAP's Group Explorer package
 
  * Support accepting a name in the JSON options
  * If a name is not provided, use `IsomorphicGroups.find()` to try to find one
