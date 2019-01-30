@@ -18,12 +18,13 @@ version has held up remarkably well.)
 Some functionality is not yet implemented and only a little testing has been
 done.  You have been warned.
 
-## Credits: Thanks, Ray!
+## Contributors
 
-Most of the code so far has been written by Ray Ellis, following the design
-patterns and ideas in the original application's source code.  I (Nathan)
-will be helping out as often as time permits, but Ray has been by far the
-largest contributor so far.
+ * Ray Ellis
+    * developed most of the web version
+ * Nathan Carter
+    * developed the original version
+    * added sheets and some miscellany to the web version
 
 ## License
 
