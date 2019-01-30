@@ -106,15 +106,16 @@
        });
        $(window).on('load', readLibrary);	// like onload handler in body
 
+       var numGroupsToLoad = -1;
        // Load group library from urls
        function readLibrary() {
           // only read in a few groups if URL specifies 'debug' (for impatient programmers)
           const urlDebug = new URL(window.location.href).searchParams.get('debug');
           const numRows = (urlDebug == null) ? urls.length : Math.min(urls.length, (urlDebug || 10));
+          numGroupsToLoad = numRows;
 
           Library.loadAllGroups( ( group, isLast ) => {
              displayGroup( group );
-             if ( isLast ) columnSort( 1 );
           }, urls.slice( 0, numRows ) );
 
           window.graphicContext = new DisplayDiagram({width: 50, height: 50, fog: false});
@@ -122,6 +123,7 @@
           window.cycleGraphContext = new DisplayCycleGraph({height: 32, width: 32});
        }
 
+       var numGroupsLoaded = 0;
        // add row to table that displays this name, order, etc. of group
        function displayGroup(group) {
           const index = Library.findIndex(group);
@@ -134,9 +136,20 @@
                                 group.symmetryObjects[0].name;
 
           const $row = $(eval(Template.HTML('row_template')));
+          $row.hide();
+          const id = $row[0].id = `RowForGroup${index}`;
 
           // typeset this row
-          MathJax.Hub.Queue(['Typeset', MathJax.Hub, $row.attr('id')]);
+          MathJax.Hub.Queue(['Typeset', MathJax.Hub, id, function () {
+             $( `#${id}` ).show();
+             if ( ++numGroupsLoaded == numGroupsToLoad ) {
+                $( '#loadingMessage' ).hide();
+                columnSort( 1 );
+             } else {
+                const pct = ( numGroupsLoaded * 100 / numGroupsToLoad ) | 0;
+                $( '#loadingMessage i' ).html( `Loading groups (${pct}%)...` );
+             }
+          } ]);
 
           // draw Cayley diagram
           let graphicData = new CayleyDiagram(group, cayleyTitle);
@@ -217,6 +230,11 @@
                <th class="diagramHeader">Multiplication table</th>
                <th class="diagramHeader">Object of symmetry</th>
                <th class="diagramHeader">Cycle graph</th>
+            </tr>
+            <tr id='loadingMessage'>
+               <th colspan=7>
+                  <center><i>Loading groups...</i></center>
+               </th>
             </tr>
          </thead>
          <tbody>
