@@ -40,6 +40,8 @@
 ### Help system
 
  * Complete the integration (or pass to Nathan if he finishes his stuff first)
+   and then update the help link on the library page to go to the newly created
+   help index page.
  * On SubgroupInfo page, link to First Iso Theorem is broken.
  * GroupExplorer.html column headings should be link to help on that topic.
 
@@ -78,11 +80,6 @@
 
 ### Page-level issues
 
- * Get the following stuff into the heading on the main page:
-    * Simple logo, w/version number
-    * Link to landing page for the app (to be created)
-    * Link to help files (or to help stub if they're not yet done)
-    * [GitHub icon](https://github.com/logos) linking to this source code repository
  * Some subset of this could go on every page (visualizer, sheet, etc.).
    Logo, link to landing page, link to github, others?
  * Put contributor names in GitHub README.md.

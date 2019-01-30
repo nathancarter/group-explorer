@@ -4,6 +4,7 @@
 
       <link rel="icon" type="image/png" href="./images/favicon.png"></link>
       <link rel="stylesheet" href="./style/fonts.css" type="text/css"></link>
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css">
 
       <style type="text/css">
        .hidden {
@@ -57,6 +58,25 @@
        .sort-down,
        .sort-none {
           padding-right: 10px;
+       }
+
+       .top-right-menu {
+          position: fixed;
+          right: 0;
+          top: 0;
+          margin: 10px;
+       }
+       a:link .trm-item {
+          color: #2196f3;
+       }
+       a:visited .trm-item {
+          color: #2196f3;
+       }
+       a:hover .trm-item {
+          color: #2196f3;
+       }
+       a:active .trm-item {
+          color: #2196f3;
        }
       </style>
 
@@ -182,6 +202,11 @@
          <img style='border: 1px solid black;' src='images/logo.png'/>
       </div>
       <br>
+      <div class="top-right-menu">
+         <a href='index.html'><i class="fa fa-home fa-2x trm-item"></i></a>
+         <a href='help/rf-groupterms.html'><i class="fa fa-question-circle fa-2x trm-item"></i></a>
+         <a href='https://github.com/nathancarter/group-explorer'><i class="fa fa-github fa-2x trm-item"></i></a>
+      </div>
       <table id="GroupTable" style="width: 100%;">
          <thead>
             <tr id="GroupTableHeaders" height="32px">
