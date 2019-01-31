@@ -17,10 +17,8 @@ class BasicGroup {
       this.order = this.multtable.length;
       this.elements = this.multtable[0];
       this.inverses = this.elements.map(el => this.multtable[el].indexOf(0));
-      this.isAbelian = this.multtable.every(
-         (el, i) => this.multtable[i].every(
-            (el, j) => (this.multtable[i][j] == this.multtable[j][i])
-         ));
+      this.nonAbelianExample = this.findNonAbelianExample();
+      this.isAbelian = (this.nonAbelianExample === undefined);
       [this.elementPowers, this.elementPrimePowers] = this.getElementPowers(this);
       this.elementOrders = this.elementPowers.map(el => el.popcount());
       this.isCyclic = this.elementOrders.some(el => el == this.order);
@@ -57,6 +55,16 @@ class BasicGroup {
       }
 
       return group;
+   }
+
+   findNonAbelianExample() {
+      for (let i = 1; i < this.order; i++) {
+         for (let j = i; j < this.order; j++) {
+            if (this.multtable[i][j] != this.multtable[j][i]) {
+               return [i,j];
+            }
+         }
+      }
    }
 
    // calculate subgroups on demand -- slows down initial load too much (still true?)
