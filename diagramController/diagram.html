@@ -33,7 +33,7 @@
             <tr>
                <td draggable="true">${inx+1}</td>
                <td action="DC.Generator.showGeneratorMenu(event, ${inx})">
-                  ${math(group.representation[strategy.generator])}
+                  ${MathML.sans(group.representation[strategy.generator])}
                </td>
                <td action="DC.Generator.showAxisMenu(event, ${inx})">
                   <img src="./images/${DC.Generator.axis_image[strategy.layout][strategy.direction]}">
@@ -57,7 +57,8 @@
          </template>
          <template id="organize-menu-item-template">
             <li action="DC.Generator.organizeBy(${inx})">
-               <i>H<sub>${inx}</sub></i>, a subgroup of order ${subgroup.order}</li>
+               ${MathML.sans(MathML.sub('H', inx) + '<mtext>, a subgroup of order&nbsp;</mtext>' +
+               '<mn>' + subgroup.order + '</mn>')}</li>
          </template>
          <template id="axis-menu-template">
             <li action="DC.Generator.updateAxes(${strategy_index}, 0, 0)">Linear in x</li>
@@ -86,7 +87,7 @@
             <ul id="arrow-list"></ul>
             <template id="arrow-list-item-template">
                <li arrow="${element}" color="${color}" action="DC.Arrow.selectArrow(${element})"><hr style="border: 2px solid ${color}">
-                  ${math(Group.representation[element])}</li>
+                  ${MathML.sans(Group.representation[element])}</li>
             </template>
          </div>
          <div id="arrow-buttons" class="vert">

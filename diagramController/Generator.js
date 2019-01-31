@@ -45,7 +45,16 @@ DC.Generator = class {
       );
 
       $('#generation-table').append($generator_menu);
-      Menu.setMenuLocations(event, $generator_menu);
+      DC.Generator._showMenu(event, $generator_menu);
+   }
+
+   static _showMenu(event, $menu) {
+      $menu.css('visibility', 'hidden');
+      MathJax.Hub.Queue(['Typeset', MathJax.Hub, $menu[0]],
+                        () => {
+                           Menu.setMenuLocations(event, $menu);
+                           $menu.css('visibility', 'visible');
+                        });
    }
 
    static showAxisMenu(event, strategy_index) {
@@ -62,7 +71,7 @@ DC.Generator = class {
                              .prepend($(eval(Template.HTML('axis-menu-template'))));
 
       $('#generation-table').append($layout_menu);
-      Menu.setMenuLocations(event, $layout_menu);
+      DC.Generator._showMenu(event, $layout_menu);
    }
 
    static showOrderMenu(event, strategy_index) {
@@ -75,7 +84,7 @@ DC.Generator = class {
                        (_,order) => $(eval(Template.HTML('order-menu-item-template')))));
 
       $('#generation-table').append($order_menu);
-      Menu.setMenuLocations(event, $order_menu);
+      DC.Generator._showMenu(event, $order_menu);
    }
 
    static getGenericMenu() {
