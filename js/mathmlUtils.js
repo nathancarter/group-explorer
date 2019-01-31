@@ -115,3 +115,39 @@ const MATHML_2_HTML =
 
 </xsl:stylesheet>
    `;
+
+
+class MathML {
+   // format mathml in sans-serif font, italicizing all identifier (<mi>) elements, including multi-characters identifiers
+   static sans(mathml_string) {
+      return '<math xmlns="http://www.w3.org/1998/Math/MathML" mathvariant="sans-serif">' +
+             mathml_string.replace(/<mi>/g, '<mi mathvariant="sans-serif-italic">') +
+             '</math>';
+   }
+
+   // format identifier with subscript in mathml
+   static sub(identifier, subscript) {
+      return '<msub><mi>' + identifier + '</mi><mn>' + subscript + '</mn></msub>';
+   }
+
+   static csList(elements) {
+      return elements
+         .map( (el, inx) => MathML.sans(el) + (inx < elements.length-1 ? ',&nbsp;' : '') ).join('');
+   }
+
+   static rowList(elements) {
+      return elements.map( (el, inx) => MathML.sans(el) + '<br>').join('');
+   }
+
+   static setList(elements) {
+      return MathML.sans('<mtext>{&nbsp;</mtext>') +
+             MathML.csList(elements) +
+             MathML.sans('<mtext>&nbsp;}</mtext>');
+   }
+
+   static genList(generators) {
+      return MathML.sans('<mtext mathvariant="bold">&#x27E8;&nbsp;&nbsp;</mtext>') +
+             MathML.csList(generators) +
+             MathML.sans('<mtext mathvariant="bold">&nbsp;&nbsp;&#x27E9;</mtext>');
+   }
+}
