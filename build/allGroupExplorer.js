@@ -4097,37 +4097,60 @@ class CycleGraph {
          // continue iff there's stuff left in the notYetPlaced array
       }
       this.cycles = cycles;
+      // console.log( 'cycle', JSON.stringify( cycles ) );
 
-      // partition the cycles, forming a list of lists
-      var toPartition = cycles.slice();
-      var partition = [ ];
-      var cycle;
-      // consider each cycle one at a time...
-      while ( cycle = toPartition.shift() ) {
-         // find which part this cycle belongs in
-         var found = false;
-         for ( var i = 0 ; !found && i < partition.length ; i++ ) {
-            for ( var j = 0 ; !found && j < partition[i].length ; j++ ) {
-               var otherCycle = partition[i][j];
-               for ( var k = 0 ; !found && k < cycle.length ; k++ ) {
-                  // cycle has something in common with one of the other
-                  // cycles in part i of the partition, so add it there
-                  // (but first reorder it to play nicely with what's there)
-                  if ( otherCycle.indexOf( cycle[k] ) > -1 ) {
-                     var cycleGen = cycle[0];
-                     var partGen = partition[i][0][0];
-                     var replacement = this.raiseToThe( cycleGen,
-                        this.bestPowerRelativeTo( cycleGen, partGen ) );
-                     partition[i].push( this.orbitOf( replacement ) );
-                     found = true;
-                  }
+      // partition the cycles, forming a list of lists.
+      // begin with all cycles in their own part of the partition,
+      // and we will unite parts until we can no longer do so.
+      var partition = cycles.map( cycle => [ cycle ] );
+      var that = this;
+      function uniteParts ( partIndex1, partIndex2 ) {
+         partition[partIndex2].forEach( cycle => {
+            var cycleGen = cycle[0];
+            var partGen = partition[partIndex1][0][0];
+            var replacement = that.raiseToThe( cycleGen,
+               that.bestPowerRelativeTo( cycleGen, partGen ) );
+            partition[partIndex1].push( that.orbitOf( replacement ) );
+         } );
+         partition.splice( partIndex2, 1 );
+      }
+      function flattenPart ( part ) {
+         return part.reduce( ( acc, cur ) => acc.concat( cur ) );
+      }
+      function arraysIntersect ( a1, a2 ) {
+         return a1.findIndex( elt => a2.indexOf( elt ) > -1 ) > -1;
+      }
+      var keepChecking = true;
+      while ( keepChecking ) {
+         keepChecking = false;
+         for ( var i = 0 ; !keepChecking && i < partition.length ; i++ ) {
+            for ( var j = 0 ; !keepChecking && j < i ; j++ ) {
+               if ( arraysIntersect( flattenPart( partition[i] ),
+                                     flattenPart( partition[j] ) ) ) {
+                  uniteParts( i, j );
+                  keepChecking = true;
                }
             }
          }
-         // it didn't belong in any, so start a new part of the partition
-         if ( !found ) partition.push( [ cycle ] );
       }
-      // console.log( partition );
+      // console.log( 'partition', JSON.stringify( partition ) );
+      // sanity check:
+      // partition.forEach( ( part, i ) => {
+      //    partition.forEach( ( otherPart, j ) => {
+      //       if ( i > j ) return;
+      //       part.forEach( ( cycle, ii ) => {
+      //          otherPart.forEach( ( otherCycle, jj ) => {
+      //             const inSamePart = ( i == j );
+      //             const commonElt = cycle.find( ( x ) => otherCycle.indexOf( x ) > -1 );
+      //             if ( !inSamePart && typeof( commonElt ) != 'undefined' ) {
+      //                console.error( `Cycle ${ii} in part ${i} is ${cycle} `
+      //                             + `and cycle ${jj} in part ${j} is ${otherCycle} `
+      //                             + `and they share ${commonElt}.` );
+      //             }
+      //          } );
+      //       } );
+      //    } );
+      // } );
 
       // assign arc sizes to parts of the partition
       // (unless there is only one part, the degenerate case)
@@ -4157,6 +4180,7 @@ class CycleGraph {
       } else { // handle degenerate case
          var cumsums = [ 0, Math.PI ];
       }
+      // console.log( 'cumsums', cumsums );
 
       // rotate things so that the largest partition is hanging
       // straight downwards
@@ -4172,6 +4196,7 @@ class CycleGraph {
          ( cumsums[maxPartIndex] + cumsums[maxPartIndex+1] ) / 2;
       var diff = -1 / 2 * Math.PI - maxPartCenter;
       cumsums = cumsums.map( angle => angle + diff );
+      // console.log( 'angle-ified', cumsums );
 
       // assign locations in the plane to each element,
       // plus create paths to be drawn to connect them
@@ -4181,6 +4206,7 @@ class CycleGraph {
       this.rings = [ ];
       while ( this.rings.length < this.group.order ) this.rings.push( 0 );
       this.cyclePaths = [ ];
+      this.partIndices = [ ];
       partition.forEach( ( part, partIndex ) => {
          // compute the peak of each part's "flower petal" curve
          var r = part.length / maxPartLength;
@@ -4200,11 +4226,17 @@ class CycleGraph {
                var prev = ( i == 0 ) ? 0 : cycle[i-1];
                var curr = ( i == cycle.length ) ? 0 : cycle[i];
                if ( !this.positions[curr] ) {
+                   this.partIndices[curr] = partIndex;
                    this.rings[curr] = cycleIndex;
+                   // console.log( `rings[${curr}] := ${cycleIndex}` );
                    this.positions[curr] = f( this.rings[curr], i, 1 );
                }
                var path = [ ];
-               for ( var t = 0 ; t <= 1.0 ; t += 0.02 ) {
+               const step = 0.02;
+               // console.log( `connecting ${this.rings[prev]} to ${this.rings[curr]}` );
+               // if ( prev && curr && this.partIndices[prev] != this.partIndices[curr] )
+               //    console.error( `index[${prev}]=${this.partIndices[prev]}!=${this.partIndices[curr]}=index[${curr}]` );
+               for ( var t = 0 ; t <= 1+step/2 ; t += step ) {
                   var ring1 = f( this.rings[prev], i, t );
                   var ring2 = f( this.rings[curr], i, t );
                   var et = CycleGraph.easeUp( t );

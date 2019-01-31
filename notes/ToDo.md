@@ -121,7 +121,6 @@
 
 ### Miscellany
 
- * Debug the ugliness of the Tesseract CG.
  * Visualizer pages also hide the "Help" and "Reset" buttons, just like Sheets do.
    This bug appears in Chrome 72 on Mac, but not on Chrome 71, nor on Safari.
    Thus we table this until later; it is probably not our problem, and maybe Chrome
