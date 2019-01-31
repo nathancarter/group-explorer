@@ -7,7 +7,7 @@
             <mrow><msup><mi>a</mi><mn>4</mn></msup><mo>=</mo><msup><mi>b</mi><mn>5</mn></msup><mo>=</mo><mn>1</mn><mo>,</mo><mi>b</mi><mi>a</mi><mi>b</mi><mo>=</mo><mi>a</mi></mrow>
         </mfenced>
     </definition>
-    <phrase>The semidirect product of Z_4 and Z_5</phrase>
+    <phrase>The semidirect product of &Zopf;&#x2084; and &Zopf;&#x2085;</phrase>
     <author>Nathan Carter (ncarter@bentley.edu)</author>
     <multtable>
         <row> 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 </row>
