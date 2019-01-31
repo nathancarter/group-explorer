@@ -33,8 +33,9 @@
                 if (group.isAbelian) {
                    $rslt.append(eval(Template.HTML('abelian')));
                 } else if (group.isSolvable) {
+                   let decomposition;
                    try {
-                      const decomposition = findSolvableDecomposition(group);
+                      decomposition = findSolvableDecomposition(group);
                       let decompositionDisplay = decomposition
                          .reverse()
                          .map( el => makeGroupRef(el) );
@@ -50,6 +51,7 @@
                       $rslt.find('#decomposition')
                            .append(eval(Template.HTML('decomposition_termination')));
                    } catch (err) {
+                      const unknown_subgroup = decomposition.find( (gr) => gr.name === undefined );
                       $rslt.append(eval(Template.HTML('failure')));
                    }
                 } else {
@@ -73,13 +75,8 @@
 
        function makeGroupRef(group) {
           const g = (group.name === undefined ? group.isIsomorphicTo : group);
-          return `<a href="javascript:groupRef(${g.libraryIndex})">${math(g.name)}</a>`;
-       }
-
-       function groupRef(groupIndex) {
-          const blobURL = URL.createObjectURL(
-             new Blob([libraryJSON], {type: 'application/json'}));
-          window.open(`GroupInfo.html?library=${blobURL}&index=${groupIndex}`);
+          g.libraryIndex = Library.groups.findIndex( (gr,inx) => gr.shortName == g.shortName );
+          return `<a href="javascript:Library.openWithLibrary('GroupInfo.html', ${g.libraryIndex})">${MathML.sans(g.name)}</a>`;
        }
 
        // given group, returns sequence of subgroups as BasicGroups
@@ -92,9 +89,7 @@
           const subgroups = group.subgroups;
           for (let i = 0; i < subgroups.length; i++) {
              const subgroup = subgroups[i];
-             if (   subgroup.members.popcount() == 1
-                 || subgroup.members.popcount() == group.order
-                 || !group.isNormal(subgroup) ) {
+             if (subgroup.order == 1 || subgroup.order == group.order || !subgroup.isNormal ) {
                 continue;
              }
 
@@ -249,14 +244,14 @@
 
    <body>
       <template id="header">
-         <h3>Results of "Solvable group" computation for ${math(group.name)}</h3>
+         <h3>${MathML.sans('<mtext>Results of &#8220;Solvable group&#8221; computation for&nbsp;</mtext>' + group.name)}</h3>
       </template>
       <template id="abelian">
-         ${math(group.name)} is <a href="./help/rf-groupterms.html#solvable">solvable</a>
+         ${MathML.sans(group.name)} is <a href="./help/rf-groupterms.html#solvable">solvable</a>
          because it is <a href="./help/rf-groupterms.html#abelian">abelian</a>.
       </template>
       <template id="solvable">
-         ${math(group.name)} is a <a href="./help/rf-groupterms.html#solvable">solvable</a>
+         ${MathML.sans(group.name)} is a <a href="./help/rf-groupterms.html#solvable">solvable</a>
          group by the following solvable decomposition:
          <ul id="decomposition" style="list-style-type: none">
          </ul>
@@ -274,7 +269,7 @@
          <li>The <a href="./help/rf-groupterms.html#quotient">quotient</a> of
             ${makeGroupRef(g)}</a> by its
             <a href="./help/rf-groupterms.html#normalsubgroup">normal subgroup</a>
-            <i>H<sub>${g.subgroupIndex}</sub></i>
+            ${MathML.sans(MathML.sub('H', g.subgroupIndex))}
             (<a href="./help/rf-groupterms.html#isomorphism">isomorphic</a> to
             ${makeGroupRef(g.subgroupIsomorphicTo)}) gives
             ${makeGroupRef(g.quotientIsomorphicTo)}.</li>
@@ -284,7 +279,7 @@
             <a href="./help/rf-groupterms.html#abelian">abelian</a>.</li>
       </template>
       <template id="unsolvable">
-         ${math(group.name)} is not a <a href="./help/rf-groupterms.html#solvable">solvable</a>
+         ${MathML.sans(group.name)} is not a <a href="./help/rf-groupterms.html#solvable">solvable</a>
          group.
       </template>
       <template id ="simple">
@@ -294,13 +289,13 @@
          <a href="./help/rf-groupterms.html#quotient">quotient</a> group.
       </template>
       <template id="failure">
-         <p>Group Explorer is currently unable to determine whether ${math(group.name)} is a
+         <p>Group Explorer is currently unable to determine whether ${MathML.sans(group.name)} is a
             <a href="./help/rf-groupterms.html#solvable">solvable</a> group because it does
-            not have access to all the groups it needs. For example, the
+            not have access to all the groups it needs. For example, there is a 
             <a href="./help/rf-groupterms.html#normalsubgroup">normal subgroup</a>
-            <i>H<sub>{subgroupIndex}</sub></i> yields an
+            of order ${unknown_subgroup.order} that yields an
             <a href="./help/rf-groupterms.html#abelian">abelian</a>
-            <a href="./help/rf-groupterms.html#quotient">quotient</a> group, but it is not
+            <a href="./help/rf-groupterms.html#quotient">quotient</a> group, but that is not
             <a href="./help/rf-groupterms.html#isomorphism">isomorphic</a> to any group in
             the library currently loaded.</p>
          <p>You will need to more groups loaded (see <a href="">options window</a> for starters)

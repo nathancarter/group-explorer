@@ -13,7 +13,7 @@
 
       <style>
        #vert-container {
-          min-width: 400px;  /* Ensure room for diagram-control graphic */
+          min-width: 20em;  /* Ensure room for diagram-control graphic */
        }
 
        #view-control, #diagram-control {
@@ -44,7 +44,7 @@
       <script type="text/x-mathjax-config">
        MathJax.Hub.Config({
           CommonHTML: {
-             scale: 95,   /* scale MathJax to match the HTML around it */
+             scale: 90,   /* scale MathJax to match the HTML around it */
           },
           showMathMenu: false,   /* disable MathJax context menu (it interferes with subsetDisplay context menu) */
        });
@@ -113,7 +113,7 @@
        function loadPanels() {
           const subset_display_load = SSD.load($('#subset-control'));
           const view_controller_load = CVC.load($('#view-control'));
-          const diagram_controller_load = DC.load($('#diagram-control'));
+          const diagram_controller_load = DC.load($('#diagram-control')); 
           Promise.all([subset_display_load, view_controller_load, diagram_controller_load])
                  .then(completeSetup)
                  .catch( console.error );
@@ -130,7 +130,7 @@
        /* Now that all the static HTML is loaded, complete the setup */
        function completeSetup() {
           // Create header from group name and queue MathJax to typeset it
-          $('#header').html('Cayley Diagram for&nbsp;' + math(Group.name));
+          $('#header').html(MathML.sans('<mtext>Cayley Diagram for&nbsp;</mtext>' + Group.name));
           MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'header']);
 
           // Create graphic context
@@ -262,7 +262,7 @@
           }
 
           static poller() {
-             if (HoverHelp.mouse_event !== undefined && performance.now() - HoverHelp.mouse_event.timeStamp > 1000) {
+             if (HoverHelp.mouse_event !== undefined && performance.now() - HoverHelp.mouse_event.timeStamp > 500) {
                 // display new tooltip, set tooltip timestamp
                 const canvas = Graphic_context.renderer.domElement;
                 const bounding_box = canvas.getBoundingClientRect();
@@ -274,8 +274,9 @@
                    HoverHelp.eraseTooltip();
 
                    // create, place tooltip
-                   const first = math(objs[0].name);
-                   const others = objs.filter( (_,inx) => inx != 0 ).map( (obj) => math(obj.name) );
+                   const first = MathML.sans(objs[0].name);
+                   const others = objs.filter( (_,inx) => inx != 0 )
+                                      .map( (obj) => MathML.sans(obj.name) );
                    let tooltip;
                    switch (others.length) {
                       case 0:  tooltip = $(eval(Template.HTML('single-object_template'))); break;

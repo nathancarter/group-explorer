@@ -2,11 +2,16 @@
    <head>
       <link rel="stylesheet" href="./style/fonts.css" type="text/css">
 
+      <style>
+       li {
+          margin-top: 0.2em;
+       }
+      </style>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
       <script type="text/x-mathjax-config">
        MathJax.Hub.Config({
       	  CommonHTML: {
-             scale: 95,
+             scale: 90,
           },
        });
       </script>
@@ -33,29 +38,28 @@
              group.orderClasses.forEach( (members, order) =>
                 $rslt.find('#order_class_list')
                      .append($('<li>').html(
-                        eval('`Elements of order ${order}: ' +
-                             members.toArray()
-                                    .map( member => math(group.representation[member]) )
-                                    .join(', ') + '`') ) ) );
+                        MathML.sans('<mtext>Elements of order ' + order + ' :&nbsp;</mtext>') +
+                        MathML.csList(members.toArray().map( (el) => group.representation[el] ))
+                     )))
           }
 
           $('body').append($rslt);
-          MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
+          MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'conjugacy_list']);
        }
       </script>
    </head>
 
    <body>
       <template id="header">
-         <h3>Results of "Order classes" computation for ${math(group.name)}</h3>
+         <h3>${MathML.sans('<mtext>Results of &#8220;Order classes&#8221; computation for&nbsp;</mtext>' + group.name)}</h3>
       </template>
       <template id="single">
-         <p>In ${math(group.name)}, there is just one
+         <p>In ${MathML.sans(group.name)}, there is just one
             <a href="./help/rf-groupterms.html#orderclasses">order class</a>
             containing all the elements of the group.
       </template>
       <template id="multiple">
-         <p>In ${math(group.name)} there are ${numOrderClasses}
+         <p>In ${MathML.sans(group.name)} there are ${numOrderClasses}
             <a href="./help/rf-groupterms.html#orderclasses">order classes</a>.
             Each is listed here:
             <ul id="order_class_list">

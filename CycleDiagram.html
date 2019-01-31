@@ -32,7 +32,7 @@
       <script type="text/x-mathjax-config">
        MathJax.Hub.Config({
           CommonHTML: {
-             scale: 95,
+             scale: 90,   /* scale MathJax to match the HTML around it */
           },
           showMathMenu: false,
        });
@@ -99,7 +99,7 @@
        /* Now that subsetDisplay is loaded, complete the setup */
        function completeSetup() {
           // Create header from group name and queue MathJax to typeset it
-          $('#header').html('Cycle Graph for&nbsp;' + math(group.name));
+          $('#header').html(MathML.sans('<mtext>Cycle Graph for&nbsp;</mtext>' + group.name));
           MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
 
           // Create Cycle Graph, graphic context (it will be displayed in resizeBody below)
@@ -186,7 +186,7 @@
           const clickY = event.clientY - bounding_rectangle.y;
           const element = graphicContext.select(clickX, clickY);
           if (element !== undefined) {
-             const $label = $('<div id="nodeLabel">').html(math(group.representation[element]));
+             const $label = $('<div id="nodeLabel">').html(MathML.sans(group.representation[element]));
              $('#graphic').append($label);
              Menu.setMenuLocations(event, $label);
              MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'nodeLabel']);

@@ -41,7 +41,7 @@
       <script type="text/x-mathjax-config">
        MathJax.Hub.Config({
       	  CommonHTML: {
-             scale: 95,
+             scale: 90,
           },
        });
       </script>
@@ -64,6 +64,7 @@
              .on('click', (ev) => Library.openWithLibrary($(ev.target).attr('page'), group));
        });
        $(window).on('load', load);	// like onload handler in body
+       // $(window).on('resize', resize);
 
        // read in library, group from invocation
        function load() {
@@ -215,7 +216,7 @@
           return group.generators.map(
              (gen) => gen.reduce(
                 (acc, el, inx) => {
-                   const rep = math(group.representation[el]);
+                   const rep = MathML.sans(group.representation[el]);
                    if (gen.length == 1) {
                       return `The element ${rep} generates the group.`;
                    } else if (inx == 0) {
@@ -231,19 +232,17 @@
        }
 
        function displayDefaultElementNames() {
-          return group.elements.map( (el) => math(group.representation[el]) ).join(', ') +
-                 '<br>This representation was loaded from the group file.';
+          return MathML.csList(group.elements.map( (el) => group.representation[el] )) +
+                 '<br><br>This representation was loaded from the group file.';
        }
 
        function displayNamingSchemes() {
           const def = group.representation;
           const oneScheme = (rep, repNum) =>
-             group.elements
-                  .reduce( (acc, el) => acc.append(`${math(def[el])} = ${math(rep[el])}<br>`),
-                           $('<li>') )
-                  .append($('<span class="programLink">Click here</span>')
-                     .on('click', () => setRepresentation(repNum)) )
-                  .append(' to make this the default representation.');
+             $('<li>').html(MathML.rowList(group.elements.map( (el) => def[el] + '<mo>=</mo>' + rep[el] )))
+                      .append($('<br><span class="programLink">Click here</span>')
+                         .on('click', () => setRepresentation(repNum)) )
+                      .append(' to make this the default representation.<br><br>');
           return group.representations
                       .reduce( (frag, rep, inx) => inx == group.representationIndex ?
                                                  frag : frag.append(oneScheme(rep, inx)),
@@ -314,7 +313,7 @@
    <body>
       <h2 id="heading" align="center">
          <template id="heading_template">
-            ${math(group.name)} ${(group.phrase == "") ? '' : ' - ' + group.phrase}
+            ${MathML.sans(group.name + ((group.phrase == "") ? '' : '<mtext> - ' + group.phrase + '</mtext>'))}
          </template>
       </h2>
       <p align="center">
@@ -337,7 +336,7 @@
          <template id="basicFacts_template">
             <table>
                <tr><th align="right">Definition</th>
-                  <td align="left">${math(group.definition)}</td>
+                  <td align="left">${MathML.sans(group.definition)}
                </tr>
                <tr><th align="right">Order</th>
                   <td align="left">${group.order}</td>
@@ -428,15 +427,15 @@
          </template>
          <template id="Z_mn-row-template">
             <tr>
-               <th align="right">&Zopf;<sub>nm</sub> group</th>
-               <td>= &Zopf;<sub>${m}</sub> x &Zopf;<sub>${n}</sub></td>
+               <th align="right">${MathML.sans(MathML.sub('&Zopf;', 'nm') + '<mtext>&nbsp;group</mtext>')}</th>
+               <td>= ${MathML.sans(MathML.sub('&Zopf;', m) + '<mo>&times;</mo>' + MathML.sub('&Zopf;', n))}</td>
                <td page="ZmnInfo.html" class="programLink">Tell me more</td>
             </tr>
          </template>
          <template id="not-Z_mn-row-template">
             <tr>
-               <th align="right">&Zopf;<sub>nm</sub> group</th>
-               <td>= no &Zopf;<sub>m</sub> x &Zopf;<sub>n</sub></td>
+               <th align="right">${MathML.sans(MathML.sub('&Zopf;', 'nm') + '<mtext>&nbsp;group</mtext>')}</th>
+               <td>= no ${MathML.sans(MathML.sub('&Zopf;', 'm') + '<mo>&times;</mo>' + MathML.sub('&Zopf;', 'n'))}</td>
                <td page="ZmnInfo.html" class="programLink">Tell me more</td>
             </tr>
          </template>

@@ -2,11 +2,16 @@
    <head>
       <link rel="stylesheet" href="./style/fonts.css" type="text/css">
 
+      <style>
+       li {
+          margin-top: 0.2em;
+       }
+      </style>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
       <script type="text/x-mathjax-config">
        MathJax.Hub.Config({
       	  CommonHTML: {
-             scale: 95,
+             scale: 90,
           },
        });
       </script>
@@ -17,14 +22,17 @@
       <script>
        $(window).on('load', load);	// like onload handler in body
 
+       let group;
        function load() {
           Library.loadFromInvocation()
-                 .then( ({library, groupIndex}) => formatGroup(library[groupIndex]) )
+                 .then( ({library, groupIndex}) => {
+                    group = library[groupIndex];
+                    formatGroup()
+                 } )
                  .catch( console.error );
        }
 
-       function formatGroup(group) {
-          window.group = group;
+       function formatGroup() {
           const $rslt = $(document.createDocumentFragment())
              .append(eval(Template.HTML('header')));
           if (group.isAbelian) {
@@ -34,15 +42,15 @@
              for (const conjugacyClass of group.conjugacyClasses) {
                 $rslt.find('#conjugacy_list')
                      .append($('<li>').html(
-                        conjugacyClass.toArray()
-                                      .map(el => math(group.representation[el]))
-                                      .join(', ')
-                     ) );
+                        MathML.csList(conjugacyClass
+                           .toArray()
+                           .map( (el) => group.representation[el] )
+                        )))
              }
           }
           $rslt.append(eval(Template.HTML('trailer')));
           $('body').append($rslt);
-          MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
+          MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'conjugacy_list']);
 
           $( '.show-class-equation-sheet' ).on( 'click', function ( event ) {
              event.preventDefault();
@@ -157,9 +165,9 @@
 
    <body>
       <template id="header">
-         <h3>Results of "Class equation" computation for ${math(group.name)}</h3>
+         <h3>${MathML.sans('<mtext>Results of &#8220;Class equation&#8221; computation for&nbsp;</mtext>' + group.name)}</h3>
          <p>The <a href="./help/rf-groupterms.html#classequation">class equation</a>
-            for ${math(group.name)} is ${formatClassEquation(group)}.</p>
+            for ${MathML.sans(group.name)} is ${formatClassEquation(group)}.</p>
       </template>
       <template id="abelian">
          <p>Each of the ${group.order} elements in the group is in a conjugacy class of its own,

@@ -243,11 +243,11 @@
       <template id="row_template">
          <tr>
             <td class="groupName">
-               <a title="Open GroupInfo page" href="javascript:Library.openWithGroup('GroupInfo.html', ${index})">${ math(group.name) }</a>
+               <a title="Open GroupInfo page" href="javascript:Library.openWithGroup('GroupInfo.html', ${index})">${ MathML.sans(group.name) }</a>
             </td>
             <td class="groupOrder">${ group.order }</td>
             <td class="description">
-               <a title="Open GroupInfo page" href="javascript:Library.openWithGroup('GroupInfo.html', ${index})">${ math(group.definition) }</a>
+               <a title="Open GroupInfo page" href="javascript:Library.openWithGroup('GroupInfo.html', ${index})">${ MathML.sans(group.definition) }</a>
             </td>
             <td class="cayleyDiagram">
                <a title="Open Cayley diagram visualizer" href="javascript:Library.openWithGroup('CayleyDiagram.html', ${index}, {diagram: '${cayleyTitle}'})"></a>

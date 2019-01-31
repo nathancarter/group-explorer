@@ -37,7 +37,7 @@
       <script type="text/x-mathjax-config">
        MathJax.Hub.Config({
           CommonHTML: {
-             scale: 95,   /* scale MathJax to match the HTML around it */
+             scale: 90,   /* scale MathJax to match the HTML around it */
           },
           showMathMenu: false,   /* disable MathJax context menu (it interferes with subsetDisplay context menu) */
        });
@@ -113,9 +113,8 @@
 
        /* Now that subsetDisplay is loaded, complete the setup */
        function completeSetup() {
-          // Create header from group name and queue MathJax to typeset it
-          $('#header').html('Multiplication Table for&nbsp;' + math(group.name));
-          MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
+          // Create header from group name
+          $('#header').html(MathML.sans('<mtext>Multiplication Table for&nbsp;</mtext>' + group.name));
 
           // Create list of subgroups for select options, one choice for each proper subgroup
           //   (Note that counting starts at 1; subgroup 0, the identity group, is already filled in by static HTML)
@@ -276,7 +275,7 @@
              }
              clearLabels(event);
              const product = group.mult(multtable.elements[location.x], multtable.elements[location.y]);
-             const $label = $(`<div id="nodeLabel" col="${location.x}" row="${location.y}">`).html(math(group.representation[product]));
+             const $label = $(`<div id="nodeLabel" col="${location.x}" row="${location.y}">`).html(MathML.sans(group.representation[product]));
              $('#graphic').append($label);
              Menu.setMenuLocations(event, $label);
              MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'nodeLabel']);

@@ -2,9 +2,6 @@
    <head>
       <link rel="stylesheet" href="./style/fonts.css" type="text/css">
       <style>
-       sub, sup {
-          font-size: 70%;
-       }
        table {
           width: 100%;
        }
@@ -19,6 +16,7 @@
        }
        .intro {
           margin-bottom: 6px;
+          width: 90%;
        }
       </style>
 
@@ -26,7 +24,7 @@
       <script type="text/x-mathjax-config">
        MathJax.Hub.Config({
       	  CommonHTML: {
-             scale: 85,
+             scale: 90,
           },
        });
       </script>
@@ -104,9 +102,8 @@
           const subgroup = group.subgroups[index];
           const subgroupOrder = subgroup.members.popcount();
           const optionalDescription = shortDescription(subgroup);
-          const elements = subgroup.members.toArray()
-                                   .map( el => math(group.representation[el]) )
-                                   .join(', ');
+          const element_representations = subgroup.members.toArray().map( el => group.representation[el] );
+
           const $row = $(eval(Template.HTML('data_row_template')));
 
           let isomorphicGroup = IsomorphicGroups.findForSubgroup(group, subgroup);
@@ -462,16 +459,16 @@
 
    <body>
       <template id="header_template">
-         <h3>Results of "Subgroup" computation for ${math(group.name)}</h3>
+         <h3>${MathML.sans('<mtext>Results of &#8220;Subgroup&#8221;computation for&nbsp;</mtext>' + group.name)}</h3>
          <p>All <a href="./help/rf-groupterms.html#subgroup">subgroups</a> of
-            ${math(group.name)} are listed in the following table. Also, a link
+            ${MathML.sans(group.name)} are listed in the following table. Also, a link
             which exhibits the embedding for each subgroup is also provided, or in
             some cases a reason why it is not possible right now. Subgroup
             <a href="./help/rf-groupterms.html#ordersub">order</a> and
             <a href="./help/rf-groupterms.html#indexsub">index</a> are also given.</p>
          <p>The column entitled "normal" reports whether the subgroup is
             <a href="./help/rf-groupterms.html#normalsubgroup">normal</a>
-            in ${math(group.name)}, and if so, tries to provide a link to
+            in ${MathML.sans(group.name)}, and if so, tries to provide a link to
             showing that normality by means of a sheet showing a
             short exact sequence (SES) which exhibits the
             <a href="./help/rf-groupterms.html#IT')">First Isomorphism Theorem</a>
@@ -485,13 +482,13 @@
             <a href="" class="show-lattice" data-type="MTElement">multiplication table</a>.</p>
          <p id="simple">None of the subgroups on the list below is
             <a href="./help/rf-groupterms.html#normalsubgroup">normal</a>.
-            For this reason, ${math(group.name)} is a
+            For this reason, ${MathML.sans(group.name)} is a
             <a href="./help/rf-groupterms.html#normalsubgroup">simple</a> group.</p>
          <p id="not-simple">At least one of the subgroups on the list below is
             <a href="./help/rf-groupterms.html#normalsubgroup">normal</a>.
-            For this reason, ${math(group.name)} is not a
+            For this reason, ${MathML.sans(group.name)} is not a
             <a href="./help/rf-groupterms.html#normalsubgroup">simple</a> group.</p>
-         <table>
+         <table id="subgroup_table">
             <thead>
                <tr>
                   <th>Image</th>
@@ -513,7 +510,7 @@
             <a href="">options window</a>.</p>
          <p id="no_quotient_group_reason">** No group
             <a href="./help/rf-groupterms.html#isomorphism">isomorphic</a>
-            to the quotient of ${math(group.name)} by the normal subgroup appears
+            to the quotient of ${MathML.sans(group.name)} by the normal subgroup appears
             in the group library. This makes it impossible to illustrate the quotient
             group. You can choose what groups to include in your group library in the
             <a href="">options window</a>.</p>
@@ -521,15 +518,15 @@
       <template id="data_row_template">
          <tr>
             <td class="image">image</td>
-            <td><i>H</i><sub>${index}</sub></td>
+            <td>${MathML.sans(MathML.sub('H', index))}</td>
             <td>${subgroup.order}</td>
             <td>${subgroup.index}</td>
             <td>${group.isNormal(subgroup) ? 'yes' : 'no'}</td>
          </tr>
          <tr>
             <td colspan="5">
-               <p class="intro"><i>H</i><sub>${index}</sub>${optionalDescription}
-                  is {${elements}}.</p>
+               <p class="intro">${MathML.sans(MathML.sub('H', index))}${optionalDescription} is 
+                  {&nbsp;${MathML.csList(element_representations)}&nbsp;}.</p>
                <ul class="points">
                </ul>
             </td>
@@ -538,7 +535,7 @@
       <template id="isomorphism_template">
          <li>It is
             <a href="./help/rf-groupterms.html#isomorphism">isomorphic</a> to
-            ${math(isomorphicGroup.name)}, and you can see the embedding by
+            ${MathML.sans(isomorphicGroup.name)}, and you can see the embedding by
             <a href="" class="show-embedding" data-type="CDElement" data-index="${index}">Cayley diagram</a>,
             <a href="" class="show-embedding" data-type="CGElement" data-index="${index}">cycle graph</a>, or
             <a href="" class="show-embedding" data-type="MTElement" data-index="${index}">multiplication table</a>.
@@ -553,7 +550,7 @@
          <li >See the <a href="./help/rf-groupterms.html#ses">short exact sequence</a>
             exhibiting the
             <a href="./help/rf-groupterms.html#quotient">quotient group</a>,
-            isomorphic to ${math(isomorphicGroup.name)}, by
+            isomorphic to ${MathML.sans(isomorphicGroup.name)}, by
             <a href="" class="show-quotient" data-type="CDElement" data-index="${index}">Cayley diagram</a>,
             <a href="" class="show-quotient" data-type="CGElement" data-index="${index}">cycle graph</a>, or
             <a href="" class="show-quotient" data-type="MTElement" data-index="${index}">multiplication table</a>.

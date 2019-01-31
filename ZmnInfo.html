@@ -6,7 +6,7 @@
       <script type="text/x-mathjax-config">
        MathJax.Hub.Config({
       	  CommonHTML: {
-             scale: 85,
+             scale: 90,
           },
        });
       </script>
@@ -56,18 +56,36 @@
 
    <body>
       <template id="header">
-         <h3>Results of "<i>&Zopf;<sub>nm</sub></i> groups" computation for <b>${group_name}</b></h3>
+         <h3>${MathML.sans('<mtext>Results of &#8220;</mtext>' + MathML.sub('&Zopf;', 'nm') + '<mtext>&nbsp;group&#8221; computation for&nbsp;</mtext>' + group.name)}</h3>
       </template>
       <template id="Z_mn-group">
-         <p>A group of the form <i>&Zopf;<sub>mn</sub></i> is isomorphic to the product group <i>&Zopf;<sub>m</sub></i> x <i>&Zopf;<sub>n</sub></i> just when <i>m</i> and <i>n</i> are relatively prime.  In this case, because ${m} and ${n} are relatively prime, <i>&Zopf;<sub>m</sub></i> x <i>&Zopf;<sub>n</sub></i> is isomorphic to <i>&Zopf;<sub>mn</sub></i>.</p>
+         <p>A group of the form ${MathML.sans('<msub><mi>&Zopf;</mi><mn>mn</mn></msub>')}
+            is isomorphic to the product group
+            ${MathML.sans('<msub><mi>&Zopf;</mi><mn>m</mn></msub><mo>&times;</mo><msub><mi>&Zopf;</mi><mn>n</mn></msub>')}
+            just when ${MathML.sans('<mi>m</mi>')} and ${MathML.sans('<mi>n</mi>')} are relatively prime.
+            In this case, because ${m} and ${n} are relatively prime,
+            ${MathML.sans('<msub><mi>&Zopf;</mi><mn>m</mn></msub><mo>&times;</mo><msub><mi>&Zopf;</mi><mn>n</mn></msub>')}
+            is isomorphic to ${MathML.sans('<msub><mi>&Zopf;</mi><mn>mn</mn></msub>')}.</p>
          <p><a href="#">Click here</a> to see an illustration of why this is true. <i>(Not implemented yet.)</i></p>
       </template>
       <template id="non-Z_mn-group-prime">
-         <p>A group of the form <i>&Zopf;<sub>mn</sub></i> is isomorphic to the product group <i>&Zopf;<sub>m</sub></i> x <i>&Zopf;<sub>n</sub></i> just when <i>m</i> and <i>n</i> are relatively prime.  In this case, <i>mn</i> = ${group.order}, which gives no possibilities for <i>m</i> and <i>n</i>.</p>
-         <p>Thus there is not even a product group <i>&Zopf;<sub>m</sub></i> x <i>&Zopf;<sub>n</sub></i> to speak of being isomorphic to.</p>
+         <p>A group of the form ${MathML.sans('<msub><mi>&Zopf;</mi><mn>mn</mn></msub>')}
+            is isomorphic to the product group
+            ${MathML.sans('<msub><mi>&Zopf;</mi><mn>m</mn></msub><mo>&times;</mo><msub><mi>&Zopf;</mi><mn>n</mn></msub>')}
+            just when ${MathML.sans('<mi>m</mi>')} and ${MathML.sans('<mi>n</mi>')} are relatively prime.
+            In this case, ${MathML.sans('<mi>mn</mi>')} = ${group.order}, which gives no possibilities for
+            ${MathML.sans('<mi>m</mi>')} and ${MathML.sans('<mi>n</mi>')}.</p>
+         <p>Thus there is not even a product group
+            ${MathML.sans('<msub><mi>&Zopf;</mi><mn>m</mn></msub><mo>&times;</mo><msub><mi>&Zopf;</mi><mn>n</mn></msub>')}
+            to speak of being isomorphic to.</p>
       </template>
       <template id="non-Z_mn-group">
-         <p>A group of the form <i>&Zopf;<sub>mn</sub></i> is isomorphic to the product group <i>&Zopf;<sub>m</sub></i> x <i>&Zopf;<sub>n</sub></i> just when <i>m</i> and <i>n</i> are relatively prime.  In this case, the factors of <i>mn</i> are ${facs}, which cannot be divided into two non-trivial sets that do not both contain ${factors[0]}.  Thus, there cannot be two relatively prime factors of <i>mn</i> since any non-trivial factors must both be divisible by ${factors[0]}.</p>
+         <p>A group of the form ${MathML.sans(MathML.sub('&Zopf;', 'mn'))} is isomorphic to the product group
+            ${MathML.sans('<msub><mi>&Zopf;</mi><mn>m</mn></msub><mo>&times;</mo><msub><mi>&Zopf;</mi><mn>n</mn></msub>')}
+            just when ${MathML.sans('<mi>m</mi>')} and ${MathML.sans('<mi>n</mi>')} are relatively prime.
+            In this case, the factors of ${MathML.sans('<mi>mn</mi>')} are ${facs}, which cannot be divided into
+            two non-trivial sets that do not both contain ${factors[0]}.  Thus, there cannot be two relatively prime
+            factors of ${MathML.sans('<mi>mn</mi>')} since any non-trivial factors must both be divisible by ${factors[0]}.</p>
       </template>
    </body>
 </html>

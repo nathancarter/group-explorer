@@ -6,7 +6,7 @@
       <script type="text/x-mathjax-config">
        MathJax.Hub.Config({
       	  CommonHTML: {
-             scale: 85,
+             scale: 90,
           },
        });
       </script>
@@ -28,15 +28,8 @@
           if (group.isAbelian) {
              $rslt.append(eval(Template.HTML('abelian')));
           } else {
-             outerLoop:
-             for (let i = 1; i < group.order; i++) {
-                for (let j = i; j < group.order; j++) {
-                   if (group.multtable[i][j] != group.multtable[j][i]) {
-                      $rslt.append(eval(Template.HTML('non-abelian')));
-                      break outerLoop;
-                   }
-                }
-             }
+             const [i,j] = group.nonAbelianExample;
+             $rslt.append(eval(Template.HTML('non-abelian')));
           }
 
           $('body').append($rslt);
@@ -47,19 +40,21 @@
 
    <body>
       <template id="header">
-         <h3>Results of "Abelian group" computation for ${math(group.name)}</h3>
+         <h3>${MathML.sans('<mtext>Results of &#8220;Abelian group&#8221; computation for&nbsp;</mtext>' + group.name)}</h3>
       </template>
       <template id="abelian">
-         ${math(group.name)} is <a href="./help/rf-groupterms.html#abelian">abelian</a>;
+         ${MathML.sans(group.name)} is <a href="./help/rf-groupterms.html#abelian">abelian</a>;
          every pair of elements commutes.
       </template>
       <template id="non-abelian">
-         ${math(group.name)} is not <a href="./help/rf-groupterms.html#abelian">abelian</a>.
+         ${MathML.sans(group.name)} is not <a href="./help/rf-groupterms.html#abelian">abelian</a>.
          We can find two elements that do not commute:
-         ${math(group.representation[i])} &#x2219 ${math(group.representation[j])}
-         = ${math(group.representation[group.multtable[i][j]])},
-         but ${math(group.representation[j])} &#x2219 ${math(group.representation[i])}
-         = ${math(group.representation[group.multtable[j][i]])}
+         ${MathML.sans(group.representation[i] + '<mo>&nbsp;&#x2219;</mo>')}
+         ${MathML.sans(group.representation[j] + '<mo>=</mo>')}
+         ${MathML.sans(group.representation[group.multtable[i][j]])}, but
+         ${MathML.sans(group.representation[j] + '<mo>&nbsp;&#x2219;</mo>')}
+         ${MathML.sans( group.representation[i] + '<mo>=</mo>')}
+         ${MathML.sans(group.representation[group.multtable[j][i]])}
       </template>
    </body>
 </html>
