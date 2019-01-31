@@ -20,8 +20,7 @@
    text-decoration: none;
 }
 .menu ul {
-   position: absolute;
-   top: 0;
+   position: fixed;
    visibility: hidden;
 }
 .menu li {

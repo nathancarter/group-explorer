@@ -1,18 +1,23 @@
 
 class Menu {
    static setMenuLocations(event, $menu) {
+      const menuBox = $menu[0].getBoundingClientRect();
+      const menuHeight = menuBox.height;
+      const windowHeight = 0.99*window.innerHeight;
       // set top edge so menu grows down until it sits on the bottom, up until it reaches the top
-      if ($menu.outerHeight() > $(window).innerHeight()) {
-         $menu.css({top: 0, height: $(window).innerHeight()});    // too tall for window
-      } else if (event.clientY + $menu.outerHeight() > $(window).innerHeight()) {
-         $menu.css({top: $(window).innerHeight() - $menu.outerHeight()});    // won't fit below click
+      if (menuHeight > windowHeight) {
+         $menu.css({top: 0, height: windowHeight, 'overflow-y': 'auto'});    // too tall for window
+      } else if (event.clientY + menuHeight > windowHeight) {
+         $menu.css({top: windowHeight - menuHeight});    // won't fit below click
       } else {
          $menu.css({top: event.clientY});  // fits below click
       }
 
       // set left edge location so menu doesn't disappear to the right
-      if (event.clientX + $menu.outerWidth() > $(window).innerWidth()) {
-         $menu.css({left: $(window).innerWidth() - $menu.outerWidth()});
+      const menuWidth = menuBox.width;
+      const windowWidth = window.innerWidth;
+      if (event.clientX + menuWidth > windowWidth) {
+         $menu.css({left: windowWidth - menuWidth});
       } else {
          $menu.css({left: event.clientX});
       }
@@ -24,27 +29,31 @@ class Menu {
    }
 
    static setSubMenuLocation($menu, $subMenu) {
-      const bottomRoom = $(window).innerHeight() - ($subMenu.offset().top + $subMenu.outerHeight());
-      if (bottomRoom < 0) {
-         if ($subMenu.outerHeight() < $(window).innerHeight()) {
-            $subMenu.css({top: bottomRoom});
-         } else {
-            $subMenu.css({top: -$subMenu.offset().top, height: $(window).innerHeight()})
-         }
+      const parentBox = $subMenu.parent()[0].getBoundingClientRect();
+      const menuBox = $menu[0].getBoundingClientRect();
+      const subMenuBox = $subMenu[0].getBoundingClientRect();
+      const windowHeight = 0.99*window.innerHeight;
+      const bottomRoom = windowHeight - (parentBox.top + subMenuBox.height);
+      if (parentBox.top + subMenuBox.height < windowHeight) {  // subMenu can drop down from parent
+         $subMenu.css({top: parentBox.top});
+      } else if (subMenuBox.height < windowHeight) {  // subMenu fits in window, but not below parent
+         $subMenu.css({top: windowHeight - subMenuBox.height});
+      } else {  // subMenu doesn't fit in window
+         $subMenu.css({top: 0, height: windowHeight, 'overflow-y': 'auto'})
       }
 
-      const rightRoom = $(window).innerWidth() -
-                        ($menu.offset().left + $menu.outerWidth() + $subMenu.outerWidth());
-      const leftRoom = $menu.offset().left - $subMenu.outerWidth();
-      const widthMargin = ($subMenu.outerWidth() - $subMenu.width())/2;
+      const windowWidth = window.innerWidth;
+      const rightRoom = windowWidth - (menuBox.right + subMenuBox.width);
+      const leftRoom = menuBox.left - subMenuBox.width;
+      const overlap = (subMenuBox.width - $subMenu.width())/2;
       if (rightRoom > 0) {
-         $subMenu.css({left: '100%'});
+         $subMenu.css({left: menuBox.right - overlap});
       } else if (leftRoom > 0) {
-         $subMenu.css({right: '100%'});
+         $subMenu.css({left: menuBox.left - subMenuBox.width + overlap});
       } else if (rightRoom > leftRoom) {
-         $subMenu.css({left: $menu.outerWidth() + rightRoom - widthMargin});
+         $subMenu.css({left: window.width - subMenuBox.width});
       } else {
-         $subMenu.css({right: $menu.outerWidth() + leftRoom - widthMargin});
+         $subMenu.css({left: 0});
       }
 
       $subMenu.children('li:has(span.menu-arrow)')
