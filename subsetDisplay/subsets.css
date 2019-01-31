@@ -45,6 +45,11 @@ ul.subset_page_content {
    z-index: 1;
 }
 
+.elements h3 {
+    margin-top: 0;
+    margin-bottom: 0.3em;
+}
+
 /* Subset editor styling */
 #subset_editor {
    font-size: 10pt;

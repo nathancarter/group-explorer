@@ -15,7 +15,7 @@ SSD.Subset = class Subset extends SSD.BasicSubset {
    }
 
    get name() {
-      return `<i>S<sub>${this.subsetIndex}</sub></i>`;
+      return MathML.sub('S', this.subsetIndex);
    }
 
    get displayLine() {
@@ -23,10 +23,9 @@ SSD.Subset = class Subset extends SSD.BasicSubset {
       let items = this.elements
                       .toArray()
                       .slice(0, 3)
-                      .map( (el) => math(window.group.representation[el]) )
-                      .join(', ');
-      if (numElements > 3) {
-         items += ', ...';
+                      .map( (el) => window.group.representation[el] );
+       if (numElements > 3) {
+         items.push('<mtext>...</mtext>');
       }
       return eval(Template.HTML('subset_template'));
    }
@@ -45,6 +44,6 @@ SSD.Subset = class Subset extends SSD.BasicSubset {
    }
 
    static nextName() {
-      return `<i>S<sub>${SSD.nextSubsetIndex}</sub></i>`;
+      return MathML.sub('S', SSD.nextSubsetIndex);
    }
 }

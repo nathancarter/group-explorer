@@ -8,12 +8,12 @@ SSD.Subgroup = class Subgroup extends SSD.BasicSubset {
    }
 
    get name() {
-      return `<i>H<sub>${this.subgroupIndex}</sub></i>`;
+      return MathML.sub('H', this.subgroupIndex);
    }
 
    get displayLine() {
       const generators = window.group.subgroups[this.subgroupIndex].generators.toArray()
-                               .map( el => math(group.representation[el]) ).join(', ');
+                               .map( el => group.representation[el] );
       let templateName;
       switch (this.subgroupIndex) {
          case 0:

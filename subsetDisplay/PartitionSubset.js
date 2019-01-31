@@ -1,7 +1,7 @@
 SSD.PartitionSubset = class PartitionSubset extends SSD.BasicSubset {
    constructor(parent, subIndex, elements, name, partitionClass) {
       super();
-      
+
       this.parent = parent;
       this.subIndex = subIndex;
       this.elements = elements;
@@ -13,10 +13,13 @@ SSD.PartitionSubset = class PartitionSubset extends SSD.BasicSubset {
       const result = [];
       for (let i = 0; i < this.elements.len && result.length < 3; i++) {
          if (this.elements.isSet(i)) {
-            result.push(math(group.representation[i]));
+            result.push(group.representation[i]);
          }
       }
-      return result.join(', ') + (this.elements.popcount() > 3 ? ', ...' : '');
+      if (this.elements.popcount() > 3) {
+         result.push('<mtext>...</mtext>');
+      }
+      return result;
    }
 
    get menu() {

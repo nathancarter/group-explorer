@@ -19,63 +19,86 @@
 <div id="subgroup_templates">
    <template id="firstSubgroup_template">
       <li id="${this.id}">
-         ${this.name} = &lt; ${generators} &gt; is the trivial subgroup { ${generators} }.
+         ${MathML.sans(this.name)}
+         <b>&nbsp;=&nbsp;</b>
+         ${MathML.genList([group.representation[0]])}
+         ${MathML.sans('<mtext>is the trivial subgroup&nbsp;</mtext>' +
+         MathML.setList([group.representation[0]]))}.
       </li>
    </template>
    <template id="subgroup_template">
       <li id="${this.id}">
-         ${this.name} = &lt; ${generators} &gt;
-         is a subgroup of order ${group.subgroups[this.subgroupIndex].members.popcount()}.
+         ${MathML.sans(this.name)}
+         <b>&nbsp;=&nbsp;</b>
+         ${MathML.genList(generators)}
+         ${MathML.sans('<mtext>is a subgroup of order&nbsp;</mtext>' +
+         '<mn>' + group.subgroups[this.subgroupIndex].order + '</mn>')}.
       </li>
    </template>
    <template id="lastSubgroup_template">
       <li id="${this.id}">
-         ${this.name} = &lt; ${generators} &gt; is the group itself.
+         ${MathML.sans(this.name)}
+         <b>&nbsp;=&nbsp;</b>
+         ${MathML.genList(generators)}
+         ${MathML.sans('<mtext>is the group itself.</mtext>')}
       </li>
    </template>
 </div>
 
 <template id="subset_template">
    <li id="${this.id}">
-      ${this.name} = { ${items} } is
-      ${ (numElements == 0 || numElements == group.order) ? 'the' : 'a' }
-      subset of size ${numElements}.
+      ${MathML.sans(this.name)}
+      <b>&nbsp;=&nbsp;</b>
+      ${MathML.setList(items)}
+      ${MathML.sans('<mtext>is ' +
+         ((numElements == 0 || numElements == group.order) ? 'the' : 'a') +
+         ' subset of size&nbsp;</mtext>' +
+      '<mn>' + numElements + '</mn><mtext>.</mtext>')}
    </li>
 </template>
 
 <template id="orderClass_template">
    <li id="${this.id}" class="orderClass">
-      ${this.name} = { ${this.elementRepresentations} } is an order class of
-      size ${this.elements.popcount()}.
+      ${MathML.sans(this.name)}
+      <b>&nbsp;=&nbsp;</b>
+      ${MathML.setList(this.elementRepresentations)}
+      ${MathML.sans('<mtext>is an order class of size&nbsp;</mtext>' +
+      '<mn>' + this.elements.popcount() + '</mn><mtext>.</mtext>')}
    </li>
 </template>
 
 <template id="conjugacyClass_template">
    <li id="${this.id}" class="conjugacyClass">
-      ${this.name} = { ${this.elementRepresentations} } is a conjugacy class of
-      size ${this.elements.popcount()}.
+      ${MathML.sans(this.name)}
+      <b>&nbsp;=&nbsp;</b>
+      ${MathML.setList(this.elementRepresentations)}
+      ${MathML.sans('<mtext>is a conjugacy class of size&nbsp;</mtext>' +
+      '<mn>' + this.elements.popcount() + '</mn><mtext>.</mtext>')}
    </li>
 </template>
 
 <template id="cosetClass_template">
    <li id="${this.id}" class="${this.parent.side}coset${this.parent.subgroup.id}">
-      ${this.name} = { ${this.elementRepresentations} } is the ${this.parent.side} coset of
-      ${this.parent.subgroup.name} by ${math(group.representation[this.elements.toArray()[0]])}
+      ${MathML.sans(this.name)}
+      <b>&nbsp;=&nbsp;</b>
+      ${MathML.setList(this.elementRepresentations)}
+      ${MathML.sans('<mtext>&nbsp;is the ' + this.parent.side + ' coset of&nbsp;</mtext>' +
+      this.parent.subgroup.name + '<mtext>&nbsp;by&nbsp;</mtext>' +
+      group.representation[this.elements.toArray()[0]] + '<mtext>.</mtext>')}
    </li>
 </template>
 
 <template id="subsetElements_template">
-   <div class="elements">
-      <div><b>Elements of ${subsetName}:</b></div>
-      <p></p>
-      <div>${subsetElements}</div>
+   <div class="elements" style="visibility: hidden">
+      <h3>${MathML.sans('<mtext>Elements of&nbsp;</mtext>' + subsetName + '<mtext>:</mtext>')}</h3>
+      ${MathML.csList(subsetElements)}
    </div>
 </template>
 
 <template id="headerMenu_template">
    <ul class="menu">
       <li action="SSD.SubsetEditor.open()">
-         Create ${SSD.Subset.nextName()}</li>
+         Create ${MathML.sans(SSD.Subset.nextName())}</li>
       <hr>
       <li class="${ ($('#partitions li.conjugacyClass').length *
                  $('#partitions li.orderClass').length != 0) ? 'hidden' : '' }">
@@ -83,10 +106,10 @@
          <ul>
             <li class="${ $('#partitions li.conjugacyClass').length != 0 ? 'hidden' : '' }"
                 action="new SSD.ConjugacyClasses()">
-               all conjugacy classes <i>CC<sub>i</sub></i></li>
+               all conjugacy classes ${MathML.sans(MathML.sub('CC', 'i'))}</li>
             <li class="${ $('#partitions li.orderClass').length != 0 ? 'hidden' : '' }"
                 action="new SSD.OrderClasses()">
-               all order classes <i>OC<sub>i</sub></i></li>
+               all order classes ${MathML.sans(MathML.sub('OC', 'i'))}</li>
          </ul>
       </li>
       <li><a href="#">
@@ -97,38 +120,35 @@
 <template id="subgroupMenu_template">
    <ul class="menu">
       <li action="SSD.SubsetEditor.open()">
-         Create ${SSD.Subset.nextName()}</li>
+         Create ${MathML.sans(SSD.Subset.nextName())}</li>
       <hr>
       <li>Compute<span class="menu-arrow"></span>
          <ul>
             <li class="${ $('#partitions li.conjugacyClass').length != 0 ? 'hidden' : '' }"
                 action="new SSD.ConjugacyClasses()">
-               all conjugacy classes <i>CC<sub>i</sub></i></li>
+               all conjugacy classes ${MathML.sans(MathML.sub('CC', 'i'))}</li>
             <li class="${ $('#partitions li.orderClass').length != 0 ? 'hidden' : '' }"
                 action="new SSD.OrderClasses()">
-               all order classes <i>OC<sub>i</sub></i></li>
+               all order classes ${MathML.sans(MathML.sub('OC', 'i'))}</li>
             <li action="SSD.displayList[${this.id}].normalizer">
-               the normalizer of ${this.name}, Norm(${this.name})</li>
+               the normalizer of ${MathML.sans(this.name + '<mtext>, Norm(</mtext>' +
+               this.name + '<mtext>)</mtext>')}</li>
             <li class="${ $('#partitions li.leftCoset'+this.subgroupIndex).length != 0?'hidden':'' }"
                 action="SSD.displayList[${this.id}].leftCosets">
-               all left cosets g${this.name} of ${this.name}</li>
+               all left cosets ${MathML.sans('<mi>g</mi>' + this.name +
+               '<mtext>&nbsp;of&nbsp;</mtext>' + this.name)}</li>
             <li class="${ $('#partitions li.rightCoset'+this.subgroupIndex).length != 0?'hidden':'' }"
                 action="SSD.displayList[${this.id}].rightCosets">
-               all right cosets ${this.name}g of ${this.name}</a></li>
+               all right cosets ${MathML.sans(this.name +
+               '<mi>g</mi><mtext>&nbsp;of&nbsp;</mtext>' + this.name)}</a></li>
             <li>an intersection<span class="menu-arrow"></span>
-               <ul class="intersection">
-                  ${SSD.displayList[this.id].menuItems('intersection')}
-               </ul>
+               <ul class="intersection"></ul>
             </li>
             <li>a union<span class="menu-arrow"></span>
-               <ul class="union">
-                  ${SSD.displayList[this.id].menuItems('union')}
-               </ul>
+               <ul class="union"></ul>
             </li>
             <li>an elementwise product<span class="menu-arrow"></span>
-               <ul class="elementwise-product">
-                  ${SSD.displayList[this.id].menuItems('elementwiseProduct')}
-               </ul>
+               <ul class="elementwise-product"></ul>
             </li>
          </ul>
       </li>
@@ -138,34 +158,29 @@
 <template id="subsetMenu_template">
    <ul class="menu">
       <li action="SSD.SubsetEditor.open(${this.id})">
-         Edit list of elements in ${this.name}</sub></li>
-      <li action="SSD.displayList[${this.id}].destroy()">Delete ${this.name}</li>
-      <li action="SSD.SubsetEditor.open()">Create ${SSD.Subset.nextName()}</li>
+         Edit list of elements in ${MathML.sans(this.name)}</sub></li>
+      <li action="SSD.displayList[${this.id}].destroy()">Delete ${MathML.sans(this.name)}</li>
+      <li action="SSD.SubsetEditor.open()">Create ${MathML.sans(SSD.Subset.nextName())}</li>
       <hr>
       <li>Compute<span class="menu-arrow"></span>
          <ul>
             <li class="${ $('#partitions li.conjugacyClass').length != 0 ? 'hidden' : '' }"
                 action="new SSD.ConjugacyClasses()">
-               all conjugacy classes <i>CC<sub>i</sub></i></li>
+               all conjugacy classes ${MathML.sans(MathML.sub('CC', 'i'))}</li>
             <li class="${ $('#partitions li.orderClass').length != 0 ? 'hidden' : '' }"
                 action="new SSD.OrderClasses()">
-               all order classes <i>OC<sub>i</sub></i></li>
+               all order classes ${MathML.sans(MathML.sub('OC', 'i'))}</li>
             <li action="SSD.displayList[${this.id}].closure">
-               the closure of ${this.name}, &lt; ${this.name} &gt;</li>
+               the closure of ${MathML.sans(this.name + '<mtext>,&nbsp;&#x27E8;&nbsp;</mtext>' +
+               this.name + '<mtext>&nbsp;&#x27E9;</mtext><mspace width="2em"/>')}</li>
             <li>an intersection<span class="menu-arrow"></span>
-               <ul class="intersection">
-                  ${SSD.displayList[this.id].menuItems('intersection')}
-               </ul>
+               <ul class="intersection"></ul>
             </li>
             <li>a union<span class="menu-arrow"></span>
-               <ul class="union">
-                  ${SSD.displayList[this.id].menuItems('union')}
-               </ul>
+               <ul class="union"></ul>
             </li>
             <li>an elementwise product<span class="menu-arrow"></span>
-               <ul class="elementwise-product">
-                  ${SSD.displayList[this.id].menuItems('elementwiseProduct')}
-               </ul>
+               <ul class="elementwise-product"></ul>
             </li>
          </ul>
       </li>
@@ -175,33 +190,28 @@
 <template id="partitionMenu_template">
    <ul class="menu">
       <li action="SSD.displayList[${this.id}].parent.destroy()">
-         Delete partition { ${this.parent.name} }</li>
-      <li action="SSD.SubsetEditor.open()">Create ${SSD.Subset.nextName()}</li>
+         Delete partition ${this.parent.name}</li>
+      <li action="SSD.SubsetEditor.open()">Create ${MathML.sans(SSD.Subset.nextName())}</li>
       <hr>
       <li>Compute<span class="menu-arrow"></span>
          <ul>
             <li class="${ $('#partitions li.conjugacyClass').length != 0 ? 'hidden' : '' }"
                 action="new SSD.ConjugacyClasses()">
-               all conjugacy classes <i>CC<sub>i</sub></i></li>
+               all conjugacy classes ${MathML.sans(MathML.sub('CC', 'i'))}</li>
             <li class="${ $('#partitions li.orderClass').length != 0 ? 'hidden' : '' }"
                 action="new SSD.OrderClasses()">
-               all order classes <i>OC<sub>i</sub></i></li>
+               all order classes ${MathML.sans(MathML.sub('OC', 'i'))}</li>
             <li action="SSD.displayList[${this.id}].closure">
-               the closure of ${this.name}, &lt; ${this.name} &gt;</li>
+               the closure of ${MathML.sans(this.name + '<mtext>,&nbsp;&#x27E8;&nbsp;</mtext>' +
+               this.name + '<mtext>&nbsp;&#x27E9;</mtext>')}</li>
             <li>an intersection<span class="menu-arrow"></span>
-               <ul class="intersection">
-                  ${SSD.displayList[this.id].menuItems('intersection')}
-               </ul>
+               <ul class="intersection"></ul>
             </li>
             <li>a union<span class="menu-arrow"></span>
-               <ul class="union">
-                  ${SSD.displayList[this.id].menuItems('union')}
-               </ul>
+               <ul class="union"></ul>
             </li>
             <li>an elementwise product<span class="menu-arrow"></span>
-               <ul class="elementwise-product">
-                  ${SSD.displayList[this.id].menuItems('elementwiseProduct')}
-               </ul>
+               <ul class="elementwise-product"></ul>
             </li>
          </ul>
       </li>

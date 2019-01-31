@@ -4,7 +4,7 @@ SSD.ConjugacyClasses = class ConjugacyClasses extends SSD.Partition {
       super();
 
       this.subsets = window.group.conjugacyClasses.map( (conjugacyClass, inx) => 
-         new SSD.PartitionSubset(this, inx, conjugacyClass, `<i>CC<sub>${inx}</sub></i>`, 'conjugacyClass') );
+         new SSD.PartitionSubset(this, inx, conjugacyClass, MathML.sub('CC', inx), 'conjugacyClass') );
       
       $('#partitions_placeholder').hide();
       $('#partitions').append(

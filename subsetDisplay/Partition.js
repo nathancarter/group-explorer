@@ -4,9 +4,7 @@ SSD.Partition = class Partition {
    }
 
    get name() {
-      return this.subsets[0].name +
-             ', ..., ' +
-             this.subsets[this.subsets.length - 1].name;
+      return MathML.setList([this.subsets[0].name, '<mtext>...</mtext>', this.subsets[this.subsets.length - 1].name]);
    }
 
    destroy() {

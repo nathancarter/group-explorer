@@ -15,7 +15,7 @@ SSD.SubsetEditor = class SubsetEditor {
       
       for (const el of group.elements) {
          const elementHTML =
-            `<li element=${el} draggable="true">${math(window.group.representation[el])}</li>`;
+            `<li element=${el} draggable="true">${MathML.sans(window.group.representation[el])}</li>`;
          const listName = elements.isSet(el) ? 'elementsIn' : 'elementsNotIn';
          $(elementHTML).appendTo($subsetEditor.find(`#${listName}`))
                        .on('dragstart', (ev) => ev.originalEvent.dataTransfer.setData("text", el));

@@ -57,23 +57,6 @@ SSD.BasicSubset = class BasicSubset {
       }
       return new SSD.Subset(newElements);      
    }
-   
-   menuItems(operation) {
-      const printOp = operation == 'elementwiseProduct' ? 'elementwise product' : operation;
-      const action = (other) => `SSD.displayList[${this.id}].${operation}(SSD.displayList[${other.id}])`;      
-      const li = (other) => eval('`' + `<li action="${action(other)}">the ${printOp} of ` +
-                                    `${math(this.name)} with ${math(other.name)}</li>` + '`');
-
-      const otherSubsets = SSD.displayList.filter( (el) => el != this );
-      const frag =
-         otherSubsets.filter( (el) => el instanceof SSD.Subgroup )
-                     .reduce( (frag, el) => frag += li(el), '' ) +
-         otherSubsets.filter( (el) => el instanceof SSD.Subset )
-                     .reduce( (frag, el) => frag += li(el), '' ) +
-         otherSubsets.filter( (el) => el instanceof SSD.PartitionSubset )
-                     .reduce( (frag, el) => frag += li(el), '' );
-      return frag;
-   }
 
    get elementString() {
       return '[' + this.elements.toString() + ']';
