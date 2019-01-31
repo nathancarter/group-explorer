@@ -246,7 +246,8 @@ class CycleGraph {
                    this.positions[curr] = f( this.rings[curr], i, 1 );
                }
                var path = [ ];
-               for ( var t = 0 ; t <= 1.0 ; t += 0.02 ) {
+               const step = 0.02;
+               for ( var t = 0 ; t <= 1+step/2 ; t += step ) {
                   var ring1 = f( this.rings[prev], i, t );
                   var ring2 = f( this.rings[curr], i, t );
                   var et = CycleGraph.easeUp( t );
