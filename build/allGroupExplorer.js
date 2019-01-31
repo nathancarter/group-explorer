@@ -336,10 +336,8 @@ class BasicGroup {
       this.order = this.multtable.length;
       this.elements = this.multtable[0];
       this.inverses = this.elements.map(el => this.multtable[el].indexOf(0));
-      this.isAbelian = this.multtable.every(
-         (el, i) => this.multtable[i].every(
-            (el, j) => (this.multtable[i][j] == this.multtable[j][i])
-         ));
+      this.nonAbelianExample = this.findNonAbelianExample();
+      this.isAbelian = (this.nonAbelianExample === undefined);
       [this.elementPowers, this.elementPrimePowers] = this.getElementPowers(this);
       this.elementOrders = this.elementPowers.map(el => el.popcount());
       this.isCyclic = this.elementOrders.some(el => el == this.order);
@@ -376,6 +374,16 @@ class BasicGroup {
       }
 
       return group;
+   }
+
+   findNonAbelianExample() {
+      for (let i = 1; i < this.order; i++) {
+         for (let j = i; j < this.order; j++) {
+            if (this.multtable[i][j] != this.multtable[j][i]) {
+               return [i,j];
+            }
+         }
+      }
    }
 
    // calculate subgroups on demand -- slows down initial load too much (still true?)
@@ -1362,12 +1370,12 @@ Most of what appears on the screen in GE3 is dynamic HTML, created at runtime by
 
 *(Note that example code may be simplified from the actual implementation.)*
 
-The subset display panel in the visualizer pages provides a ready example. The format for a subgroup is given by a template tag like this, similar to those in [subsets.html](../subsetDisplay/subsets.html):
+The subset display panel in the visualizer pages provides a ready example. The format for a subgroup is given by a template tag like this, similar to those in [subsets.html](../subsetDisplay/subsets.html) (Note: &amp;#x27E8; and &amp;#x27E9; are entity numbers for mathematical left and right angle brackets, &#x27E8; and &#x27e9;.):
 
 ```html
 <template id="subgroup_template">
    <li id="${this.id}">
-      ${this.name} = &lt; ${generators} &gt; is a subgroup of ${subgroupOrder}
+      ${this.name} = &#x27E8; ${generators} &#x27E9; is a subgroup of ${subgroupOrder}
    </li>
 </template>
 ```
@@ -1382,23 +1390,23 @@ When executed, `Template.HTML` produces the template contents as a string litera
 
 ```js
 `<li id="${this.id}">
-     ${this.name} = &lt; ${generators} &gt; is a subgroup of order ${subgroupOrder}
+     ${this.name} = &#x27E8; ${generators} &#x27E9; is a subgroup of order ${subgroupOrder}
  </li>`
 ```
 
 Note the back ticks ` at the start and end of the string: this is an ES6 template literal.  When it is eval'd in a scope which has the referenced values defined, as excerpted from [SSD.Subgroups](../subsetDisplay/Subgroup.js):
 
 ```js
-const generators = this.generators.toArray().map( el => math(group.representation[el]) ).join(', ');
+const generators = this.generators.toArray().map( el => MathML.sans(group.representation[el]) );
 const subgroupOrder = this.subgroup.order;
 const subgroupLine = eval(Template.HTML('subgroup_template');
 ```
 
-The expressions enclosed by curly braces ${...} are evaluated and replaced in the string. At this point (for one of the subgroups of <i>D<sub>4</sub></i>), `subgroupLine` will be a string of HTML like the following:
+The expressions enclosed by curly braces ${...} are evaluated and replaced in the string. At this point (for one of the subgroups of <i>D</i><sub>4</sub>), `subgroupLine` will be a string of HTML like the following (using an HTML equivalent of the actual MathML):
 
 ```html
 <li id="1">
-    <i>H<sub>1</sub></i> = &lt; <i>r<sup>2</sup></i> &gt; is a subgroup of order 2.
+    <i>H<i><sub>1</sub> = &#x27E8; <i>r</i><sup>2</sup> &#x27E9; is a subgroup of order 2.
 </li>
 ```
 
@@ -1410,7 +1418,7 @@ $('#subgroups').append(subgroupLine)
 
 to give the following line in the list of subgroups:
 
-&nbsp;&nbsp;&nbsp;&nbsp;<i>H<sub>1</sub></i> = &lt; <i>r<sup>2</sup></i> &gt; is a subgroup of order 2.
+&nbsp;&nbsp;&nbsp;&nbsp;<i>H</i><sub>1</sub> = &#x27E8; <i>r</i><sup>2</sup> &#x27E9; is a subgroup of order 2.
 
 While this example may seem too simple to provide much justification for introducing a sort of arcane use of HTML5 templates, in practice they get considerably more involved. There are quite a number of three-deep floating menus in `subsetDisplay`, for example.
 
@@ -2759,19 +2767,19 @@ class DisplayDiagram {
       let canvas_width, canvas_height, label_font;
       const big_node_limit = 0.1, small_node_limit = 0.05;
       if (radius >= big_node_limit) {
-         canvas_width = 2048
+         canvas_width = 4096;
          canvas_height = 256;
          label_font = '120pt Arial';
       } else if (radius <= small_node_limit) {
-         canvas_width = 512;
+         canvas_width = 1024;
          canvas_height = 64;
          label_font = '32pt Arial';
       } else {
-         canvas_width = 1024;
+         canvas_width = 2048;
          canvas_height = 128;
          label_font = '64pt Arial';
       }
-      const scale = diagram3D.labelSize * radius * 8.197;  // factor to make label size ~ radius
+      const scale = diagram3D.labelSize * radius * 8.197 * 2;  // factor to make label size ~ radius
 
       spheres.forEach( (sphere) => {
          const node = sphere.userData.node;
@@ -2799,7 +2807,7 @@ class DisplayDiagram {
          const labelMaterial = new THREE.SpriteMaterial({ map: texture });
          const label = new THREE.Sprite( labelMaterial );
          label.scale.set(scale, scale*canvas.height/canvas.width, 1.0);
-         label.center = new THREE.Vector2(-0.09/diagram3D.labelSize, 0.30 - 0.72/diagram3D.labelSize);
+         label.center = new THREE.Vector2(-0.045/diagram3D.labelSize, 0.30 - 0.72/diagram3D.labelSize);
          label.position.set(...node.point.toArray())
 
          labels.add(label);
@@ -3481,6 +3489,42 @@ const MATHML_2_HTML =
 
 </xsl:stylesheet>
    `;
+
+
+class MathML {
+   // format mathml in sans-serif font, italicizing all identifier (<mi>) elements, including multi-characters identifiers
+   static sans(mathml_string) {
+      return '<math xmlns="http://www.w3.org/1998/Math/MathML" mathvariant="sans-serif">' +
+             mathml_string.replace(/<mi>/g, '<mi mathvariant="sans-serif-italic">') +
+             '</math>';
+   }
+
+   // format identifier with subscript in mathml
+   static sub(identifier, subscript) {
+      return '<msub><mi>' + identifier + '</mi><mn>' + subscript + '</mn></msub>';
+   }
+
+   static csList(elements) {
+      return elements
+         .map( (el, inx) => MathML.sans(el) + (inx < elements.length-1 ? ',&nbsp;' : '') ).join('');
+   }
+
+   static rowList(elements) {
+      return elements.map( (el, inx) => MathML.sans(el) + '<br>').join('');
+   }
+
+   static setList(elements) {
+      return MathML.sans('<mtext>{&nbsp;</mtext>') +
+             MathML.csList(elements) +
+             MathML.sans('<mtext>&nbsp;}</mtext>');
+   }
+
+   static genList(generators) {
+      return MathML.sans('<mtext mathvariant="bold">&#x27E8;&nbsp;&nbsp;</mtext>') +
+             MathML.csList(generators) +
+             MathML.sans('<mtext mathvariant="bold">&nbsp;&nbsp;&#x27E9;</mtext>');
+   }
+}
 /*
  * generate {nodes, lines} from $xml data
  *

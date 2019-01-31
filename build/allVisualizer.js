@@ -1,18 +1,23 @@
 
 class Menu {
    static setMenuLocations(event, $menu) {
+      const menuBox = $menu[0].getBoundingClientRect();
+      const menuHeight = menuBox.height;
+      const windowHeight = 0.99*window.innerHeight;
       // set top edge so menu grows down until it sits on the bottom, up until it reaches the top
-      if ($menu.outerHeight() > $(window).innerHeight()) {
-         $menu.css({top: 0, height: $(window).innerHeight()});    // too tall for window
-      } else if (event.clientY + $menu.outerHeight() > $(window).innerHeight()) {
-         $menu.css({top: $(window).innerHeight() - $menu.outerHeight()});    // won't fit below click
+      if (menuHeight > windowHeight) {
+         $menu.css({top: 0, height: windowHeight, 'overflow-y': 'auto'});    // too tall for window
+      } else if (event.clientY + menuHeight > windowHeight) {
+         $menu.css({top: windowHeight - menuHeight});    // won't fit below click
       } else {
          $menu.css({top: event.clientY});  // fits below click
       }
 
       // set left edge location so menu doesn't disappear to the right
-      if (event.clientX + $menu.outerWidth() > $(window).innerWidth()) {
-         $menu.css({left: $(window).innerWidth() - $menu.outerWidth()});
+      const menuWidth = menuBox.width;
+      const windowWidth = window.innerWidth;
+      if (event.clientX + menuWidth > windowWidth) {
+         $menu.css({left: windowWidth - menuWidth});
       } else {
          $menu.css({left: event.clientX});
       }
@@ -24,27 +29,31 @@ class Menu {
    }
 
    static setSubMenuLocation($menu, $subMenu) {
-      const bottomRoom = $(window).innerHeight() - ($subMenu.offset().top + $subMenu.outerHeight());
-      if (bottomRoom < 0) {
-         if ($subMenu.outerHeight() < $(window).innerHeight()) {
-            $subMenu.css({top: bottomRoom});
-         } else {
-            $subMenu.css({top: -$subMenu.offset().top, height: $(window).innerHeight()})
-         }
+      const parentBox = $subMenu.parent()[0].getBoundingClientRect();
+      const menuBox = $menu[0].getBoundingClientRect();
+      const subMenuBox = $subMenu[0].getBoundingClientRect();
+      const windowHeight = 0.99*window.innerHeight;
+      const bottomRoom = windowHeight - (parentBox.top + subMenuBox.height);
+      if (parentBox.top + subMenuBox.height < windowHeight) {  // subMenu can drop down from parent
+         $subMenu.css({top: parentBox.top});
+      } else if (subMenuBox.height < windowHeight) {  // subMenu fits in window, but not below parent
+         $subMenu.css({top: windowHeight - subMenuBox.height});
+      } else {  // subMenu doesn't fit in window
+         $subMenu.css({top: 0, height: windowHeight, 'overflow-y': 'auto'})
       }
 
-      const rightRoom = $(window).innerWidth() -
-                        ($menu.offset().left + $menu.outerWidth() + $subMenu.outerWidth());
-      const leftRoom = $menu.offset().left - $subMenu.outerWidth();
-      const widthMargin = ($subMenu.outerWidth() - $subMenu.width())/2;
+      const windowWidth = window.innerWidth;
+      const rightRoom = windowWidth - (menuBox.right + subMenuBox.width);
+      const leftRoom = menuBox.left - subMenuBox.width;
+      const overlap = (subMenuBox.width - $subMenu.width())/2;
       if (rightRoom > 0) {
-         $subMenu.css({left: '100%'});
+         $subMenu.css({left: menuBox.right - overlap});
       } else if (leftRoom > 0) {
-         $subMenu.css({right: '100%'});
+         $subMenu.css({left: menuBox.left - subMenuBox.width + overlap});
       } else if (rightRoom > leftRoom) {
-         $subMenu.css({left: $menu.outerWidth() + rightRoom - widthMargin});
+         $subMenu.css({left: window.width - subMenuBox.width});
       } else {
-         $subMenu.css({right: $menu.outerWidth() + leftRoom - widthMargin});
+         $subMenu.css({left: 0});
       }
 
       $subMenu.children('li:has(span.menu-arrow)')
@@ -52,6 +61,8 @@ class Menu {
               .each( (_, subMenu) => Menu.setSubMenuLocation($subMenu, $(subMenu)) );
    }
 }
+var SubgroupNames = [],
+    ElementNames = [];
 
 class SSD {
    static _init() {
@@ -101,7 +112,19 @@ class SSD {
 
       // Display all subgroups
       SSD.Subgroup.displayAll();
-      MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
+      MathJax.Hub.Queue(['Typeset', MathJax.Hub],
+                        // save references to MathJax formatted H_{inx} in global variable
+                        () => {
+                           $('#subgroups')
+                              .children()
+                              .each( (inx, li) => {
+                                 const childElements = $(li).children('span[tabindex]');
+                                 SubgroupNames.push(childElements[0].outerHTML);
+                                 Group.subgroups[inx].generators.toArray().forEach( (gen, jnx) => {
+                                    ElementNames[gen] = childElements[jnx+2].outerHTML;
+                                 } );
+                              } );
+                        });
    }
 
    /*
@@ -115,18 +138,21 @@ class SSD {
       if (id != undefined) {
          const subset = SSD.displayList[id];
          const subsetName = subset.name;
-         const subsetElements = subset
-            .elements.toArray()
-            .reduce( (elements, element) => {
-               elements.push(math(group.representation[element]));
-               return elements;
-            }, [] )
-            .join(', ');
+         const subsetElements = subset.elements.toArray().map( (el) => group.representation[el] );
          const $menu = $(eval(Template.HTML('subsetElements_template')));
          $curr.addClass('highlighted').append($menu);
-         Menu.setMenuLocations(event, $menu);
          event.stopPropagation();
-         MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
+         MathJax.Hub.Queue(['Typeset', MathJax.Hub, $menu[0]],
+                           () => {
+                              const [leftmost, rightmost] =
+                                 $menu.find('span.mjx-chtml').toArray().reduce( ([l,r],span) => {
+                                    const rect = span.getBoundingClientRect();
+                                    return [l < rect.left ? l : rect.left, r > rect.right ? r : rect.right];
+                                 }, [Number.MAX_SAFE_INTEGER, Number.MIN_SAFE_INTEGER] );
+                              $menu.css({'width': rightmost - leftmost, 'max-width': ''});
+                              Menu.setMenuLocations(event, $menu);
+                              $menu.css('visibility', 'visible');
+                           });
       }
    }
 
@@ -140,7 +166,7 @@ class SSD {
          eval($curr.attr('action'));
          SSD.clearMenus();
          event.stopPropagation();
-         MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
+         MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'subset_page']);
       }
    }
 
@@ -150,17 +176,61 @@ class SSD {
     *   -- li element id (<subset>.menu)
     */
    static contextMenuHandler(event) {
+      const start = performance.now();
       event.preventDefault();
       const $curr = $(event.target).closest('p.subset_page_header, p.placeholder, li[id]');
-      if ($curr.length != 0) {
-         SSD.clearMenus();
-         const $menu =($curr.hasClass('subset_page_header') || $curr.hasClass('placeholder')) ?
-                      $(eval(Template.HTML('headerMenu_template'))) :
-                      SSD.displayList[$curr.attr('id')].menu;
-         $menu.on('click', SSD.menuClickHandler);
-         $curr.addClass('highlighted').append($menu);
-         Menu.setMenuLocations(event, $menu);
-         event.stopPropagation();
+
+      // unrecognized event
+      if ($curr.length == 0) return;
+
+      SSD.clearMenus();
+      
+      const isHeaderMenu = $curr[0].tagName == "P";
+      const $menu = isHeaderMenu ?
+                    $(eval(Template.HTML('headerMenu_template'))) :
+                    SSD.displayList[$curr[0].id].menu;
+      $menu.on('click', SSD.menuClickHandler);
+      $curr.addClass('highlighted').append($menu);
+      $menu.css('visibility', 'hidden');
+      event.stopPropagation();
+
+      MathJax.Hub.Queue(
+         ['Typeset', MathJax.Hub, $menu[0]],
+         () => {
+            if (!isHeaderMenu) {
+               SSD._makeLongLists($curr[0].id, $menu);
+            }
+            Menu.setMenuLocations(event, $menu);
+            $menu.css('visibility', 'visible');
+            console.log(`${performance.now() - start}`);
+         });
+   }
+
+   static _makeLongLists(id, $menu) {
+      const classes = ['.intersection', '.union', '.elementwise-product'];
+      const operations = ['intersection', 'union', 'elementwiseProduct'];
+      const printOps = ['intersection', 'union', 'elementwise product'];
+      const node = SubgroupNames[id];
+      for (let inx = 0; inx < classes.length; inx++) {
+         const operation = operations[inx];
+         const printOp = printOps[inx];
+         let frag = '';
+         for (let otherId = 0; otherId < SubgroupNames.length; otherId++) {
+            if (id != otherId) {
+               frag += 
+                  `<li action="SSD.displayList[${id}].${operation}(SSD.displayList[${otherId}])">` +
+                  `the ${printOp} of ${node} with ${SubgroupNames[otherId]}</li>`;
+            }
+         }
+         for (let otherId = SubgroupNames.length; otherId < SSD.displayList.length; otherId++) {
+            if (id != otherId && SSD.displayList[otherId] !== undefined) {
+               const otherName = $(`#${otherId}`).children()[1].outerHTML;
+               frag += 
+                  `<li action="SSD.displayList[${id}].${operation}(SSD.displayList[${otherId}])">` +
+                  `the ${printOp} of ${node} with ${otherName}</li>`;
+            }
+         }
+         $menu.find(classes[inx]).html(frag);
       }
    }
 }
@@ -225,23 +295,6 @@ SSD.BasicSubset = class BasicSubset {
       }
       return new SSD.Subset(newElements);      
    }
-   
-   menuItems(operation) {
-      const printOp = operation == 'elementwiseProduct' ? 'elementwise product' : operation;
-      const action = (other) => `SSD.displayList[${this.id}].${operation}(SSD.displayList[${other.id}])`;      
-      const li = (other) => eval('`' + `<li action="${action(other)}">the ${printOp} of ` +
-                                    `${math(this.name)} with ${math(other.name)}</li>` + '`');
-
-      const otherSubsets = SSD.displayList.filter( (el) => el != this );
-      const frag =
-         otherSubsets.filter( (el) => el instanceof SSD.Subgroup )
-                     .reduce( (frag, el) => frag += li(el), '' ) +
-         otherSubsets.filter( (el) => el instanceof SSD.Subset )
-                     .reduce( (frag, el) => frag += li(el), '' ) +
-         otherSubsets.filter( (el) => el instanceof SSD.PartitionSubset )
-                     .reduce( (frag, el) => frag += li(el), '' );
-      return frag;
-   }
 
    get elementString() {
       return '[' + this.elements.toString() + ']';
@@ -257,12 +310,12 @@ SSD.Subgroup = class Subgroup extends SSD.BasicSubset {
    }
 
    get name() {
-      return `<i>H<sub>${this.subgroupIndex}</sub></i>`;
+      return MathML.sub('H', this.subgroupIndex);
    }
 
    get displayLine() {
       const generators = window.group.subgroups[this.subgroupIndex].generators.toArray()
-                               .map( el => math(group.representation[el]) ).join(', ');
+                               .map( el => group.representation[el] );
       let templateName;
       switch (this.subgroupIndex) {
          case 0:
@@ -321,7 +374,7 @@ SSD.Subset = class Subset extends SSD.BasicSubset {
    }
 
    get name() {
-      return `<i>S<sub>${this.subsetIndex}</sub></i>`;
+      return MathML.sub('S', this.subsetIndex);
    }
 
    get displayLine() {
@@ -329,10 +382,9 @@ SSD.Subset = class Subset extends SSD.BasicSubset {
       let items = this.elements
                       .toArray()
                       .slice(0, 3)
-                      .map( (el) => math(window.group.representation[el]) )
-                      .join(', ');
-      if (numElements > 3) {
-         items += ', ...';
+                      .map( (el) => window.group.representation[el] );
+       if (numElements > 3) {
+         items.push('<mtext>...</mtext>');
       }
       return eval(Template.HTML('subset_template'));
    }
@@ -351,7 +403,7 @@ SSD.Subset = class Subset extends SSD.BasicSubset {
    }
 
    static nextName() {
-      return `<i>S<sub>${SSD.nextSubsetIndex}</sub></i>`;
+      return MathML.sub('S', SSD.nextSubsetIndex);
    }
 }
 
@@ -371,7 +423,7 @@ SSD.SubsetEditor = class SubsetEditor {
       
       for (const el of group.elements) {
          const elementHTML =
-            `<li element=${el} draggable="true">${math(window.group.representation[el])}</li>`;
+            `<li element=${el} draggable="true">${MathML.sans(window.group.representation[el])}</li>`;
          const listName = elements.isSet(el) ? 'elementsIn' : 'elementsNotIn';
          $(elementHTML).appendTo($subsetEditor.find(`#${listName}`))
                        .on('dragstart', (ev) => ev.originalEvent.dataTransfer.setData("text", el));
@@ -413,9 +465,7 @@ SSD.Partition = class Partition {
    }
 
    get name() {
-      return this.subsets[0].name +
-             ', ..., ' +
-             this.subsets[this.subsets.length - 1].name;
+      return MathML.setList([this.subsets[0].name, '<mtext>...</mtext>', this.subsets[this.subsets.length - 1].name]);
    }
 
    destroy() {
@@ -432,7 +482,7 @@ SSD.Partition = class Partition {
 SSD.PartitionSubset = class PartitionSubset extends SSD.BasicSubset {
    constructor(parent, subIndex, elements, name, partitionClass) {
       super();
-      
+
       this.parent = parent;
       this.subIndex = subIndex;
       this.elements = elements;
@@ -444,10 +494,13 @@ SSD.PartitionSubset = class PartitionSubset extends SSD.BasicSubset {
       const result = [];
       for (let i = 0; i < this.elements.len && result.length < 3; i++) {
          if (this.elements.isSet(i)) {
-            result.push(math(group.representation[i]));
+            result.push(group.representation[i]);
          }
       }
-      return result.join(', ') + (this.elements.popcount() > 3 ? ', ...' : '');
+      if (this.elements.popcount() > 3) {
+         result.push('<mtext>...</mtext>');
+      }
+      return result;
    }
 
    get menu() {
@@ -469,7 +522,7 @@ SSD.OrderClasses = class OrderClasses extends SSD.Partition {
          .orderClasses
          .filter( (orderClass) => orderClass != undefined )
          .map( (orderClass, inx) => 
-            new SSD.PartitionSubset(this, inx, orderClass, `<i>OC<sub>${inx}</sub></i>`, 'orderClass')
+            new SSD.PartitionSubset(this, inx, orderClass, MathML.sub('OC', inx), 'orderClass')
          );
 
       $('#partitions_placeholder').hide();
@@ -490,7 +543,7 @@ SSD.ConjugacyClasses = class ConjugacyClasses extends SSD.Partition {
       super();
 
       this.subsets = window.group.conjugacyClasses.map( (conjugacyClass, inx) => 
-         new SSD.PartitionSubset(this, inx, conjugacyClass, `<i>CC<sub>${inx}</sub></i>`, 'conjugacyClass') );
+         new SSD.PartitionSubset(this, inx, conjugacyClass, MathML.sub('CC', inx), 'conjugacyClass') );
       
       $('#partitions_placeholder').hide();
       $('#partitions').append(
@@ -516,7 +569,7 @@ SSD.Cosets = class Cosets extends SSD.Partition {
          .group
          .getCosets(this.subgroup.elements, this.isLeft)
          .map( (coset, inx) => {
-            const rep = math(window.group.representation[coset.first()]);
+            const rep = window.group.representation[coset.first()];
             const name = this.isLeft ? rep + this.subgroup.name : this.subgroup.name + rep;
             return new SSD.PartitionSubset(this, inx, coset, name, 'cosetClass');
          } );
@@ -632,7 +685,16 @@ DC.Generator = class {
       );
 
       $('#generation-table').append($generator_menu);
-      Menu.setMenuLocations(event, $generator_menu);
+      DC.Generator._showMenu(event, $generator_menu);
+   }
+
+   static _showMenu(event, $menu) {
+      $menu.css('visibility', 'hidden');
+      MathJax.Hub.Queue(['Typeset', MathJax.Hub, $menu[0]],
+                        () => {
+                           Menu.setMenuLocations(event, $menu);
+                           $menu.css('visibility', 'visible');
+                        });
    }
 
    static showAxisMenu(event, strategy_index) {
@@ -649,7 +711,7 @@ DC.Generator = class {
                              .prepend($(eval(Template.HTML('axis-menu-template'))));
 
       $('#generation-table').append($layout_menu);
-      Menu.setMenuLocations(event, $layout_menu);
+      DC.Generator._showMenu(event, $layout_menu);
    }
 
    static showOrderMenu(event, strategy_index) {
@@ -662,7 +724,7 @@ DC.Generator = class {
                        (_,order) => $(eval(Template.HTML('order-menu-item-template')))));
 
       $('#generation-table').append($order_menu);
-      Menu.setMenuLocations(event, $order_menu);
+      DC.Generator._showMenu(event, $order_menu);
    }
 
    static getGenericMenu() {
