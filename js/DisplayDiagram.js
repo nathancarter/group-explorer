@@ -344,19 +344,19 @@ class DisplayDiagram {
       let canvas_width, canvas_height, label_font;
       const big_node_limit = 0.1, small_node_limit = 0.05;
       if (radius >= big_node_limit) {
-         canvas_width = 2048
+         canvas_width = 4096;
          canvas_height = 256;
          label_font = '120pt Arial';
       } else if (radius <= small_node_limit) {
-         canvas_width = 512;
+         canvas_width = 1024;
          canvas_height = 64;
          label_font = '32pt Arial';
       } else {
-         canvas_width = 1024;
+         canvas_width = 2048;
          canvas_height = 128;
          label_font = '64pt Arial';
       }
-      const scale = diagram3D.labelSize * radius * 8.197;  // factor to make label size ~ radius
+      const scale = diagram3D.labelSize * radius * 8.197 * 2;  // factor to make label size ~ radius
 
       spheres.forEach( (sphere) => {
          const node = sphere.userData.node;
@@ -384,7 +384,7 @@ class DisplayDiagram {
          const labelMaterial = new THREE.SpriteMaterial({ map: texture });
          const label = new THREE.Sprite( labelMaterial );
          label.scale.set(scale, scale*canvas.height/canvas.width, 1.0);
-         label.center = new THREE.Vector2(-0.09/diagram3D.labelSize, 0.30 - 0.72/diagram3D.labelSize);
+         label.center = new THREE.Vector2(-0.045/diagram3D.labelSize, 0.30 - 0.72/diagram3D.labelSize);
          label.position.set(...node.point.toArray())
 
          labels.add(label);
