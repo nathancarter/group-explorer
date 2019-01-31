@@ -7,12 +7,12 @@ Most of what appears on the screen in GE3 is dynamic HTML, created at runtime by
 
 *(Note that example code may be simplified from the actual implementation.)*
 
-The subset display panel in the visualizer pages provides a ready example. The format for a subgroup is given by a template tag like this, similar to those in [subsets.html](../subsetDisplay/subsets.html):
+The subset display panel in the visualizer pages provides a ready example. The format for a subgroup is given by a template tag like this, similar to those in [subsets.html](../subsetDisplay/subsets.html) (Note: &amp;#x27E8; and &amp;#x27E9; are entity numbers for mathematical left and right angle brackets, &#x27E8; and &#x27e9;.):
 
 ```html
 <template id="subgroup_template">
    <li id="${this.id}">
-      ${this.name} = &lt; ${generators} &gt; is a subgroup of ${subgroupOrder}
+      ${this.name} = &#x27E8; ${generators} &#x27E9; is a subgroup of ${subgroupOrder}
    </li>
 </template>
 ```
@@ -27,23 +27,23 @@ When executed, `Template.HTML` produces the template contents as a string litera
 
 ```js
 `<li id="${this.id}">
-     ${this.name} = &lt; ${generators} &gt; is a subgroup of order ${subgroupOrder}
+     ${this.name} = &#x27E8; ${generators} &#x27E9; is a subgroup of order ${subgroupOrder}
  </li>`
 ```
 
 Note the back ticks ` at the start and end of the string: this is an ES6 template literal.  When it is eval'd in a scope which has the referenced values defined, as excerpted from [SSD.Subgroups](../subsetDisplay/Subgroup.js):
 
 ```js
-const generators = this.generators.toArray().map( el => math(group.representation[el]) ).join(', ');
+const generators = this.generators.toArray().map( el => MathML.sans(group.representation[el]) );
 const subgroupOrder = this.subgroup.order;
 const subgroupLine = eval(Template.HTML('subgroup_template');
 ```
 
-The expressions enclosed by curly braces ${...} are evaluated and replaced in the string. At this point (for one of the subgroups of <i>D<sub>4</sub></i>), `subgroupLine` will be a string of HTML like the following:
+The expressions enclosed by curly braces ${...} are evaluated and replaced in the string. At this point (for one of the subgroups of <i>D</i><sub>4</sub>), `subgroupLine` will be a string of HTML like the following (using an HTML equivalent of the actual MathML):
 
 ```html
 <li id="1">
-    <i>H<sub>1</sub></i> = &lt; <i>r<sup>2</sup></i> &gt; is a subgroup of order 2.
+    <i>H<i><sub>1</sub> = &#x27E8; <i>r</i><sup>2</sup> &#x27E9; is a subgroup of order 2.
 </li>
 ```
 
@@ -55,7 +55,7 @@ $('#subgroups').append(subgroupLine)
 
 to give the following line in the list of subgroups:
 
-&nbsp;&nbsp;&nbsp;&nbsp;<i>H<sub>1</sub></i> = &lt; <i>r<sup>2</sup></i> &gt; is a subgroup of order 2.
+&nbsp;&nbsp;&nbsp;&nbsp;<i>H</i><sub>1</sub> = &#x27E8; <i>r</i><sup>2</sup> &#x27E9; is a subgroup of order 2.
 
 While this example may seem too simple to provide much justification for introducing a sort of arcane use of HTML5 templates, in practice they get considerably more involved. There are quite a number of three-deep floating menus in `subsetDisplay`, for example.
 

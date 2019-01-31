@@ -126,7 +126,7 @@ Invokes [VC.load()](./visualizerFramework_js.md#vc-load-) to wrap visualizer fra
           registerEventHandlers();
 
           // Create header from group name and queue MathJax to typeset it
-          $('#header').html('Visualizer Example for&nbsp;' + math(group.name));
+          $('#header').html('Visualizer Example for&nbsp;' + MathML.sans(group.name));
           MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'header']);
 
           // Create list of subgroups for select options, one choice for each proper subgroup
