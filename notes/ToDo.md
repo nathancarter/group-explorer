@@ -61,10 +61,6 @@
 
 ### Page-level issues
 
- * Some subset of this could go on every page (visualizer, sheet, etc.).
-   Logo, link to landing page, link to github, others?
- * Make the "settings" menu in the top right of the main page actually a three-lines
-   menu that contains "New Sheet" and "Load Sheet > [submenu of all saved sheets]".
  * Change the default so that navigating into a group's Group Info page doesn't use a
    blob URL, but the group URL, so that users can share links to such pages the usual way.
    Make this change for all pages.

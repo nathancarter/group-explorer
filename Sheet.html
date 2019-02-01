@@ -6,6 +6,8 @@
       <link rel="stylesheet" href="./style/fonts.css" type="text/css"></link>
       <link rel="stylesheet" href="./style/sliders.css" type="text/css"></link>
       <link rel="stylesheet" href="./visualizerFramework/visualizer.css" type="text/css"></link>
+      <link rel="stylesheet" href="./style/menu.css" type="text/css"></link>
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css">
 
       <style>
          #view-control {
@@ -341,6 +343,20 @@
    </head>
 
    <body class="vert">
+      <div class="top-right-menu">
+         <a href='index.html'><i title="Project Home" class="fa fa-home fa-2x trm-black"></i></a>
+         <a href='GroupExplorer.html'><i title="Group Library"
+             class="fa fa-book fa-2x trm-black"></i></a>
+         <!--
+         <a href='Sheet.html'><i title="Sheets" class="fa fa-file trm-black"
+             style="font-size:1.5em;vertical-align:10%;"></i></a>
+         -->
+         <a href='help/rf-groupterms.html'><i title="Help"
+             class="fa fa-question-circle fa-2x trm-black"></i></a>
+         <a href='https://github.com/nathancarter/group-explorer'><i
+             title="Source on GitHub" class="fa fa-github fa-2x trm-black"></i></a>
+      </div>
+
       <div id="sheet-control" class="fill-vert">
          <p class="button-row">
             <button id="loadButton" onclick="loadChosen();"

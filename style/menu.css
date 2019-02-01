@@ -53,3 +53,18 @@
 #arrow-menu {
     overflow-y: auto;
 }
+
+.top-right-menu {
+  position: absolute;
+  right: 0;
+  top: 0;
+  margin: 10px;
+}
+a:link .trm-blue { color: #2196f3; }
+a:visited .trm-blue { color: #2196f3; }
+a:hover .trm-blue { color: #2196f3; }
+a:active .trm-blue { color: #2196f3; }
+a:link .trm-black { color: #000000; }
+a:visited .trm-black { color: #000000; }
+a:hover .trm-black { color: #000000; }
+a:active .trm-black { color: #000000; }
