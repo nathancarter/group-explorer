@@ -24,18 +24,9 @@
 
 ### Fonts and math
 
- * Change sdp symbol from left to right join
- * Render multiple-character element names in same font as single-character names.
-   (By default, MathJax renders single-character elements in italic, multiple-character
-   in normal font, so you get odd-looking element names like `&#x27E8;<i>e</i>,fr&#x27E9;`
-   in `D<sub>4</sub> x &Zopf;<sub>2</sub>`.)
- * Eliminate juxtapositions of dissimilar fonts in, e.g., visualizer titles (perhaps make
-   entire title mathml?).
- * Some element names are shown in non-math font.  For example, fr and rf in S_3.
- * Improve the Subgroups view so that instead of using HTML with MathJax inside,
-   the entire `H_{index} = < element names >` portion is MathJax.
  * Change `<select>` elements that use formatted math strings to use hand-rolled menus
    with mathml instead of text (similar to menus in Subgroups view)
+ * Improve MathJax output HTML caching.
 
 ### Help system
 
