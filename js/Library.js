@@ -47,7 +47,7 @@ class Library {
                    .then( (group) =>
                       resolve({library: Library.add(group), groupIndex: Library.findIndex(group)}))
                    .catch( (error) => reject(error) );
-         } else {
+         } else if (hrefURL.searchParams.get('waitForMessage') !== null) {
             /*
              * When this page is loaded in an iframe, the parent window can
              * indicate which group to load by passing the full JSON
