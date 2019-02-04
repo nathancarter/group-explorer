@@ -5,7 +5,7 @@ class IsomorphicGroups {
          return;
       }
 
-      IsomorphicGroups.map = Library.getGroups()
+      IsomorphicGroups.map = Library.getAllGroups()
                                     .reduce(
                                        (map, group) => {
                                           if (!map.has(group.order)) {

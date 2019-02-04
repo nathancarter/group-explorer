@@ -45,7 +45,7 @@
             </tr>
          </template>
          <template id="generation-menu-template">
-            <ul id="generation-list" class="menu" style="padding-left: 25px">
+            <ul id="generation-list" class="menu">
                <hr>
                <li>Organize by&nbsp;&nbsp;<span class="menu-arrow"></span>
                   <ul id="generation-organize-menu"></ul>
@@ -87,7 +87,7 @@
             <ul id="arrow-list"></ul>
             <template id="arrow-list-item-template">
                <li arrow="${element}" color="${color}" action="DC.Arrow.selectArrow(${element})"><hr style="border: 2px solid ${color}">
-                  ${MathML.sans(Group.representation[element])}</li>
+                  ${MathML.sans(group.representation[element])}</li>
             </template>
          </div>
          <div id="arrow-buttons" class="vert">

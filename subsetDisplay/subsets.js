@@ -57,7 +57,7 @@ class SSD {
                               .each( (inx, li) => {
                                  const childElements = $(li).children('span[tabindex]');
                                  SubgroupNames.push(childElements[0].outerHTML);
-                                 Group.subgroups[inx].generators.toArray().forEach( (gen, jnx) => {
+                                 group.subgroups[inx].generators.toArray().forEach( (gen, jnx) => {
                                     ElementNames[gen] = childElements[jnx+2].outerHTML;
                                  } );
                               } );

@@ -58,9 +58,7 @@
            canEmit = true;  // flag: whether to notify parent window of table changes
        const panelNames = ['#subset-control', '#table-control'];
 
-       const myURL = window.location.href;
-       const thirdSlash = myURL.indexOf( '/', 8 );
-       const myDomain = myURL.substring( 0, thirdSlash > -1 ? thirdSlash : myURL.length );
+       const myDomain = new URL(window.location.href).origin;
 
        /* Initial entry to javascript, called once after document load */
        $(window).one('load', load);
@@ -98,10 +96,9 @@
        function load() {
           // Promise to load group from invocation URL
           const groupLoad = Library
-             .loadFromInvocation()
-             .then( ({library, groupIndex}) => {
-                group = library[groupIndex];
-             } );
+             .loadFromURL()
+             .then( (_group) => group = _group )
+             .catch( console.error );
 
           // Promise to load visualizer framework around visualizer-specific code in this file
           const bodyLoad = VC.load();

@@ -658,13 +658,19 @@ class XMLGroup extends BasicGroup {
          return;
       }
 
-      // Replacing named entities with values ensure that later fragment parsing succeeds...
-      const cleanText = text.replace(/&Zopf;/g, "&#8484;")
-                            .replace(/&times;/g, "&#215;")
-                            .replace(/&ltimes;/g, "&#8905;")
-                            .replace(/&rtimes;/g, "&#8906;")
-                            .replace(/<br.>/g, "&lt;br/&gt;");  // hack to read fgb notes
-      const $xml = $($.parseXML(cleanText));
+      let $xml;
+      if (typeof(text) == 'string') {
+         // Replacing named entities with values ensure that later fragment parsing succeeds...
+         const cleanText = text.replace(/&Zopf;/g, "&#8484;")
+                               .replace(/&times;/g, "&#215;")
+                               .replace(/&ltimes;/g, "&#8905;")
+                               .replace(/&rtimes;/g, "&#8906;")
+                               .replace(/<br.>/g, "&lt;br/&gt;");  // hack to read fgb notes
+         $xml = $($.parseXML(cleanText));
+      } else {
+         $xml = $(text);
+      }
+      
       super(XMLGroup._multtable_from_xml($xml));
 
       this.$xml = $xml;
@@ -1182,7 +1188,7 @@ class IsomorphicGroups {
          return;
       }
 
-      IsomorphicGroups.map = Library.getGroups()
+      IsomorphicGroups.map = Library.getAllGroups()
                                     .reduce(
                                        (map, group) => {
                                           if (!map.has(group.order)) {
@@ -1455,245 +1461,121 @@ class Template {
  */
 
 class Library {
-   static _init() {
-      if (Library.groups === undefined) {
-         Library.groups = [];
+   static _baseURL() {
+      var baseURL = new URL( window.location.href );
+      baseURL = baseURL.origin + baseURL.pathname; // trim off search string
+      baseURL = baseURL.slice( 0, baseURL.lastIndexOf('/') + 1 ); // trim off page
+      return baseURL;
+   }
+
+   static loadFromURL() {
+      const hrefURL = new URL(window.location.href);
+      if (hrefURL.searchParams.get('groupURL') !== null) {
+         return Library.getGroup(hrefURL.searchParams.get('groupURL'));
+      } else {
+         /*
+          * When this page is loaded in an iframe, the parent window can
+          * indicate which group to load by passing the full JSON
+          * definition of the group in a postMessage() call to this
+          * window, with the format { type : 'load group', group : G },
+          * where G is the JSON data in question.
+          */
+         addEventListener( 'message', function ( event ) {
+            if (event.data.type == 'load group') {
+               Library.getGroupFromJSON(event.data.group)
+                      .then( (group) =>
+                         resolve({library: Library.add(group), groupIndex: Library.findIndex(group)}) )
+                      .catch( (error) => reject(error) );
+            }
+         }, false );
       }
    }
 
-   static loadFromInvocation() {
-      const hrefURL = new URL(window.location.href);
-      return new Promise( (resolve, reject) => {
-         if (hrefURL.searchParams.get('library') !== null) {
-            const libraryBlobURL = hrefURL.searchParams.get('library');
-            Library.getLibraryFromBlob(libraryBlobURL)
-                   .then( (library) => {
-                      const groupIndex = hrefURL.searchParams.get('index');
-                      resolve({library: library, groupIndex: groupIndex})
-                   } )
-                   .catch( (error) => reject(error) );
-         } else if (hrefURL.searchParams.get('group') !== null) {
-            const groupBlobURL = hrefURL.searchParams.get('group');
-            Library.getGroupFromBlob(groupBlobURL)
-                   .then( (group) =>
-                      resolve({library: Library.add(group), groupIndex: Library.findIndex(group)}))
-                   .catch( (error) => reject(error) );
-         } else if (hrefURL.searchParams.get('groupJSONURL') !== null) {
-            const groupJSONURL = hrefURL.searchParams.get('groupJSONURL');
-            Library.getGroupFromJSONURL(groupJSONURL)
-                   .then( (group) =>
-                      resolve({library: Library.add(group), groupIndex: Library.findIndex(group)}) )
-                   .catch( (error) => reject(error) );
-         } else if (hrefURL.searchParams.get('groupJSON') !== null) {
-            const groupJSONText = hrefURL.searchParams.get('groupJSON');
-            var groupJSON;
-            try {
-               groupJSON = JSON.parse( groupJSONText );
-            } catch ( error ) {
-               reject( error );
-            }
-            Library.getGroupFromJSON(groupJSON)
-                   .then( (group) =>
-                      resolve({library: Library.add(group), groupIndex: Library.findIndex(group)}) )
-                   .catch( (error) => reject(error) );
-         } else if (hrefURL.searchParams.get('groupURL') !== null) {
-            const groupURL = hrefURL.searchParams.get('groupURL');
-            Library.getGroupFromURL(groupURL)
-                   .then( (group) =>
-                      resolve({library: Library.add(group), groupIndex: Library.findIndex(group)}))
-                   .catch( (error) => reject(error) );
-         } else {
-            /*
-             * When this page is loaded in an iframe, the parent window can
-             * indicate which group to load by passing the full JSON
-             * definition of the group in a postMessage() call to this
-             * window, with the format { type : 'load group', group : G },
-             * where G is the JSON data in question.
-             */
-            addEventListener( 'message', function ( event ) {
-               if (event.data.type == 'load group') {
-                  Library.getGroupFromJSON(event.data.group)
-                         .then( (group) =>
-                            resolve({library: Library.add(group), groupIndex: Library.findIndex(group)}) )
-                         .catch( (error) => reject(error) );
-               }
-            }, false );
+   static clear() {
+      Library.group = [];
+      const libraryLength = localStorage.length;
+      for (let inx = libraryLength-1; inx >= 0; inx--) {
+         const key = localStorage.key(inx);
+         if (key.startsWith('http')) {
+            localStorage.removeItem(key);
          }
-      } )
+      }
    }
 
-   static getLibraryFromBlob(libraryBlobURL) {
-      return new Promise( (resolve, reject) => {
-         $.ajax({ url: libraryBlobURL,
-                  success: (data) => {
-                     Library.groups = data.map( jsonObject => XMLGroup.parseJSON(jsonObject) );
-                     resolve(Library.groups);
-                  },
-                  error: (_jqXHR, _status, err) => {
-                     reject(`Error loading ${libraryBlobURL}: ${err}`);
-                  }
-         })
-      } );
-   }
-
-   static getGroupFromBlob(groupBlobURL) {
-      return new Promise( (resolve, reject) => {
-         $.ajax({ url: groupBlobURL,
-                  success: (data) => {
-                     const group = XMLGroup.parseJSON(data);
-                     resolve(group);
-                  },
-                  error: (_jqXHR, _status, err) => {
-                     reject(`Error loading ${libraryBlobURL}: ${err}`);
-                  }
-         })
-      } );
-   }
-
-   static getGroupFromJSON(groupJSON) {
-      return new Promise( (resolve, reject) => {
-         try {
-            resolve( XMLGroup.parseJSON( groupJSON ) );
-         } catch ( error ) {
-            reject( error );
+   static getAllGroups() {
+      const urls = new Set(Library.groups.map( (g) => g.URL ));
+      const numGroups = localStorage.length;
+      for (let inx = 0; inx < numGroups; inx++) {
+         const key = localStorage.key(inx);
+         if (key.startsWith('http') && !urls.has(key.slice(6))) {
+            const group = XMLGroup.parseJSON(JSON.parse(localStorage.getItem(key)));
+            Library.groups.push(group);
          }
-      } )
+      }
+      return Library.groups;
    }
 
-   static getGroupFromJSONURL(groupJSONURL) {
+   static getGroup(url, baseURL) {
+      const groupURL = new URL(url, (baseURL === undefined) ? Library._baseURL() : baseURL).toString();
+      const localData = localStorage.getItem(groupURL);
+      const storedGroup = (localData == undefined) ? undefined : XMLGroup.parseJSON(JSON.parse(localData));
+      const lastModifiedOnServer = (storedGroup == undefined) ? undefined : storedGroup.lastModifiedOnServer;
       return new Promise( (resolve, reject) => {
-         $.ajax({ url: groupJSONURL,
-                  success: (json) => {
-                     const group = XMLGroup.parseJSON(json);
-                     resolve(group);
-                  },
-                  error: (_jqXHR, _status, err) => {
-                     reject(`Error loading ${groupJSON}: ${err}`);
-                  }
-         })
-      } )
-   }
-
-   static getGroupFromURL(groupURL) {
-      return new Promise( (resolve, reject) => {
-         const alreadyLoaded = Library.groups.find( group => group.URL == groupURL );
-         if ( alreadyLoaded ) return resolve( alreadyLoaded );
          $.ajax({ url: groupURL,
-                  success: (txt) => {
+                  headers: (lastModifiedOnServer == undefined) ? {} : {'if-modified-since': lastModifiedOnServer},
+                  success: (data, textStatus, jqXHR) => {
                      try {
-                        const group = new XMLGroup(txt);
-                        group.URL = groupURL;
-                        resolve(group);
+                        if (jqXHR.status == 200) {
+                           const contentTypeHeader = jqXHR.getResponseHeader('content-type');
+                           let remoteGroup;
+                           if (typeof(data) == 'string') {
+                              remoteGroup = data.includes('<!DOCTYPE groupexplorerml>') ? new XMLGroup(data) : XMLGroup.parseJSON(JSON.parse(data));
+                           } else if (contentTypeHeader != undefined && contentTypeHeader.includes('xml')) {
+                              remoteGroup = new XMLGroup(data);
+                           } else if (contentTypeHeader != undefined && contentTypeHeader.includes('json')) {
+                              remoteGroup = XMLGroup.parseJSON(data);
+                           } else {
+                              reject(`Error reading ${groupURL}: unknown data type`);
+                           }
+                           remoteGroup.lastModifiedOnServer = jqXHR.getResponseHeader('last-modified');
+                           remoteGroup.URL = groupURL;
+                           localStorage.setItem(groupURL, JSON.stringify(remoteGroup));
+                           Library.groups.push(remoteGroup);
+                           resolve(remoteGroup);
+                        } else if (jqXHR.status == 304) {
+                           Library.groups.push(storedGroup);
+                           resolve(storedGroup);
+                        } else {
+                           reject(`Error fetching ${groupURL}: ${textStatus} (HTTP status code ${jqXHR.status})`);
+                        }
                      } catch (err) {
-                        reject(`Error parsing ${groupURL}: ${err}`);
+                        reject(`Error parsing ${groupURL}: ${textStatus} (HTTP status code ${jqXHR.status}), ${err}`);
                      }
                   },
-                  error: (_jqXHR, _status, err) => {
-                     reject(`Error loading ${groupURL}: ${err}`);
+                  error: (jqXHR, textStatus, err) => {
+                     reject(`Error loading ${groupURL}: ${textStatus} (HTTP status code ${jqXHR.status}), ${err}`);
                   }
          })
-      } );
+      } )
    }
+   
+   static openWithGroupURL(pageURL, g, options) {
+      // routine can be invoked with g as index in Library.groups, or the group itself
+      const groupURL = (typeof g == 'number') ? Library.groups[g].URL : g.URL;
 
-   static addGroupFromText(groupFileText) {
-   }
-
-   static getGroups() {
-      return Library.groups;
-   }
-
-   static add(group) {
-      Library.groups.push(group);
-      return Library.groups;
+      // compute URL
+      const url = `./${pageURL}?groupURL=${groupURL}` +
+                  ((options == undefined) ? '' : Object.keys(options)
+                                                       .reduce( (url, option) => url + `&${option}=${options[option]}`, ''));
+      window.open(url);
    }
 
    static findIndex(group) {
       return Library.groups.findIndex( (g) => g == group );
    }
-
-   static openWithLibrary(pageURL, g, opts) {
-      // routine can be invoked with several meanings for 'g'
-      let groupIndex;
-      if (typeof g == 'number') {	// we were passed the index of the group
-         groupIndex = g;
-      } else {				// we were passed the group itself
-         groupIndex = Library.findIndex(g);
-         if (groupIndex == -1) {	// the group was not in the library
-            Library.add(g);		//   add it and pretend it was there all along
-            groupIndex = Library.findIndex(g);
-         }
-      }
-
-      // create Blob from library
-      const blobURL = URL.createObjectURL(
-         new Blob([JSON.stringify(Library.groups)], {type: 'application/json'}));
-
-      // compute URL
-      let url = Library._appendOptions(`./${pageURL}?library=${blobURL}&index=${groupIndex}`, opts);
-
-      window.open(url);
-   }
-
-   static openWithGroup(pageURL, g, opts) {
-      // routine can be invoked with several meanings for 'g'
-      let group
-      if (typeof g == 'number') {	// we were passed the index of the group
-         group = Library.groups[g];
-      } else {				// we were passed the group itself
-         group = g;
-      }
-
-      // create Blob from group
-      const blobURL = URL.createObjectURL(
-         new Blob([JSON.stringify(group)], {type: 'application/json'}));
-
-      // compute URL
-      let url = Library._appendOptions(`./${pageURL}?group=${blobURL}`, opts);
-
-      window.open(url);
-   }
-
-   // append optional parameters to the URL, if supplied
-   static _appendOptions(url, options) {
-      if (options !== undefined) {
-         for (const option in options) {
-            if (options[option] !== undefined) {
-               url += `&${option}=${options[option]}`;
-            }
-         }
-      }
-      return url;
-   }
-
-   // can be used in a page that has only one group loaded to load all the remaining
-   // groups in the library if some computation is attempted that needs them.
-   // the callback is called with each group as it is loaded, and passed a second
-   // parameter that is true iff the group in question is the final one.
-   // all parameters are optional.
-   // The first defaults to the empty function.
-   // The second defaults to urls, which will exist if groupURLs.js was imported.
-   // The third defaults to the base URL taken from window.location.href.
-   static loadAllGroups ( callback, urlsToLoad, baseURL ) {
-      if ( !callback ) callback = function () { };
-      if ( !urlsToLoad ) urlsToLoad = urls;
-      if ( !baseURL ) {
-         var baseURL = new URL( window.location.href );
-         baseURL = baseURL.origin + baseURL.pathname; // trim off search string
-         baseURL = baseURL.slice( 0, baseURL.lastIndexOf('/') + 1 ); // trim off page
-      }
-      let numLoaded = 0;
-      urlsToLoad.map( url => {
-         Library.getGroupFromURL( baseURL + url )
-                .then( group => {
-                   Library.add( group );
-                   callback( group, ++numLoaded == urlsToLoad.length );
-                } )
-                .catch( error => console.log( error ) );
-      } );
-   }
 }
 
-Library._init();
+Library.groups = [];
 
 /*
  * Structure used to describe Cayley diagram, symmetry object to DrawDiagram
@@ -2226,7 +2108,7 @@ class CayleyDiagram extends Diagram3D {
       this.diagram_name = json.diagram_name;
       this.arrowheadPlacement = json.arrowheadPlacement;
       var that = this;
-      Library.getGroupFromURL( json.groupURL )
+      Library.getGroup( json.groupURL )
              .then( ( group ) => { that.group = group; } );
    }
 }

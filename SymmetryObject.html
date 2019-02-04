@@ -60,11 +60,12 @@
        function load() {
           // Promise to load group from invocation URL
           const groupLoad = Library
-             .loadFromInvocation()
-             .then( ({library, groupIndex}) => {
-                group = library[groupIndex];
+             .loadFromURL()
+             .then( (_group) => {
+                group = _group;
                 setDiagramName();
-             } );
+             } )
+             .catch( console.error );
 
           // Promise to load visualizer framework around visualizer-specific code in this file
           const bodyLoad = VC.load();

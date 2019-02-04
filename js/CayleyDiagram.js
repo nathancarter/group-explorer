@@ -280,7 +280,7 @@ class CayleyDiagram extends Diagram3D {
       this.diagram_name = json.diagram_name;
       this.arrowheadPlacement = json.arrowheadPlacement;
       var that = this;
-      Library.getGroupFromURL( json.groupURL )
+      Library.getGroup( json.groupURL )
              .then( ( group ) => { that.group = group; } );
    }
 }

@@ -17,8 +17,8 @@
        $(window).on('load', load);	// like onload handler in body
 
        function load() {
-          Library.loadFromInvocation()
-                 .then( ({library, groupIndex}) => formatGroup(library[groupIndex]) )
+          Library.loadFromURL()
+                 .then( (group) => formatGroup(group) )
                  .catch( console.error );
        }
 

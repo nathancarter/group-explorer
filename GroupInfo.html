@@ -63,16 +63,16 @@
        // Static event managers (setup after document is available)
        $(function() {
           $('#Computed_properties + p')
-             .on('click', (ev) => Library.openWithLibrary($(ev.target).attr('page'), group));
+             .on('click', (ev) => Library.openWithGroupURL($(ev.target).attr('page'), group));
        });
        $(window).on('load', load);	// like onload handler in body
        // $(window).on('resize', resize);
 
        // read in library, group from invocation
        function load() {
-          Library.loadFromInvocation()
-                 .then( ({library, groupIndex}) => {
-                    window.group = library[groupIndex];
+          Library.loadFromURL()
+                 .then( (group) => {
+                    window.group = group;
                     displayStatic();
                     displayDynamic();
                  } )
@@ -109,7 +109,7 @@
                     .addClass('programLink')
                     .text(diagramName)
                     .on('click', () =>
-                       Library.openWithGroup('CayleyDiagram.html', group, {diagram: diagramName}))
+                       Library.openWithGroupURL('CayleyDiagram.html', group, {diagram: diagramName}))
                     .prepend(img);
              }
 
@@ -120,7 +120,7 @@
                 $row.children(':nth-child(2)')
                     .addClass('programLink')
                     .text('')
-                    .on('click', () => Library.openWithGroup('CycleDiagram.html', group))
+                    .on('click', () => Library.openWithGroupURL('CycleDiagram.html', group))
                     .prepend(img);
              }
 
@@ -131,7 +131,7 @@
                 $row.children(':nth-child(3)')
                     .addClass('programLink')
                     .text('')
-                    .on('click', () => Library.openWithGroup('Multtable.html', group))
+                    .on('click', () => Library.openWithGroupURL('Multtable.html', group))
                     .prepend(img);
              }
 
@@ -143,7 +143,7 @@
                     .addClass('programLink')
                     .text(objectName)
                     .on('click', () =>
-                       Library.openWithGroup('SymmetryObject.html', group, {diagram: objectName}))
+                       Library.openWithGroupURL('SymmetryObject.html', group, {diagram: objectName}))
                     .prepend(img);
              }
           }
@@ -466,6 +466,7 @@
             <table>
                <tr><th align="right">Author</th><td align="left">${group.author}</td></tr>
                <tr><th align="right">URL</th><td align="left">${group.URL}</td></tr>
+               <tr><th align="right">Last modified</th><td align="left">${group.lastModifiedOnServer}</td></tr>
             </table>
          </template>
       </p>

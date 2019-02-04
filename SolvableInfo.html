@@ -19,64 +19,61 @@
        $(window).on('load', load);	// like onload handler in body
 
        function load() {
-          Library.loadFromInvocation()
-                 .then( ({library, groupIndex}) => formatGroup(library[groupIndex]) )
+          Library.loadFromURL()
+                 .then( (group) => formatGroup(group) )
                  .catch( console.error );
+          Library.getAllGroups();
        }
 
-       function formatGroup(group) {
-          window.group = group;
-          Library.loadAllGroups( ( _, isLast ) => {
-             if ( isLast ) {
-                let $rslt = $(document.createDocumentFragment())
-                   .append(eval(Template.HTML('header')));
-                if (group.isAbelian) {
-                   $rslt.append(eval(Template.HTML('abelian')));
-                } else if (group.isSolvable) {
-                   let decomposition;
-                   try {
-                      decomposition = findSolvableDecomposition(group);
-                      let decompositionDisplay = decomposition
-                         .reverse()
-                         .map( el => makeGroupRef(el) );
-                      decompositionDisplay.push(makeGroupRef(IsomorphicGroups.map.get(1)[0]));
-                      decompositionDisplay = decompositionDisplay.reverse().join(' &#x25c5; ');
-                      $rslt.append(eval(Template.HTML('solvable')));
-                      for (let i = 0; i < decomposition.length - 1; i++) {
-                         let g = decomposition[i];
-                         $rslt.find('#decomposition')
-                              .append(eval(Template.HTML('decomposition_element')));
-                      }
-                      let g = decomposition[decomposition.length - 1];
-                      $rslt.find('#decomposition')
-                           .append(eval(Template.HTML('decomposition_termination')));
-                   } catch (err) {
-                      const unknown_subgroup = decomposition.find( (gr) => gr.name === undefined );
-                      $rslt.append(eval(Template.HTML('failure')));
-                   }
-                } else {
-                   $rslt.append(eval(Template.HTML('unsolvable')));
-                   if (group.isSimple) {
-                      $rslt.append(eval(Template.HTML('simple')));
-                   }
+       function formatGroup(_group) {
+          window.group = _group;
+          let $rslt = $(document.createDocumentFragment())
+             .append(eval(Template.HTML('header')));
+          if (group.isAbelian) {
+             $rslt.append(eval(Template.HTML('abelian')));
+          } else if (group.isSolvable) {
+             let decomposition;
+             try {
+                decomposition = findSolvableDecomposition(group);
+                let decompositionDisplay = decomposition
+                   .reverse()
+                   .map( el => makeGroupRef(el) );
+                decompositionDisplay.push(makeGroupRef(IsomorphicGroups.map.get(1)[0]));
+                decompositionDisplay = decompositionDisplay.reverse().join(' &#x25c5; ');
+                $rslt.append(eval(Template.HTML('solvable')));
+                for (let i = 0; i < decomposition.length - 1; i++) {
+                   let g = decomposition[i];
+                   $rslt.find('#decomposition')
+                        .append(eval(Template.HTML('decomposition_element')));
                 }
-
-                $('body').append($rslt);
-                MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
-
-                $( '.show-decomposition' ).on( 'click', function ( event ) {
-                   event.preventDefault();
-                   const type = event.target.getAttribute( 'data-type' );
-                   showSolvableDecompositionSheet( type );
-                } );
+                let g = decomposition[decomposition.length - 1];
+                $rslt.find('#decomposition')
+                     .append(eval(Template.HTML('decomposition_termination')));
+             } catch (err) {
+                const unknown_subgroup = decomposition.find( (gr) => gr.name === undefined );
+                $rslt.append(eval(Template.HTML('failure')));
              }
+          } else {
+             $rslt.append(eval(Template.HTML('unsolvable')));
+             if (group.isSimple) {
+                $rslt.append(eval(Template.HTML('simple')));
+             }
+          }
+
+          $('body').append($rslt);
+          MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
+
+          $( '.show-decomposition' ).on( 'click', function ( event ) {
+             event.preventDefault();
+             const type = event.target.getAttribute( 'data-type' );
+             showSolvableDecompositionSheet( type );
           } );
        }
 
        function makeGroupRef(group) {
           const g = (group.name === undefined ? group.isIsomorphicTo : group);
           g.libraryIndex = Library.groups.findIndex( (gr,inx) => gr.shortName == g.shortName );
-          return `<a href="javascript:Library.openWithLibrary('GroupInfo.html', ${g.libraryIndex})">${MathML.sans(g.name)}</a>`;
+          return `<a href="javascript:Library.openWithGroupURL('GroupInfo.html', ${g.libraryIndex})">${MathML.sans(g.name)}</a>`;
        }
 
        // given group, returns sequence of subgroups as BasicGroups
@@ -291,7 +288,7 @@
       <template id="failure">
          <p>Group Explorer is currently unable to determine whether ${MathML.sans(group.name)} is a
             <a href="./help/rf-groupterms.html#solvable">solvable</a> group because it does
-            not have access to all the groups it needs. For example, there is a 
+            not have access to all the groups it needs. For example, there is a
             <a href="./help/rf-groupterms.html#normalsubgroup">normal subgroup</a>
             of order ${unknown_subgroup.order} that yields an
             <a href="./help/rf-groupterms.html#abelian">abelian</a>

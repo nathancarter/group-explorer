@@ -45,7 +45,7 @@ DC.Arrow = class {
    static showArrowMenu(event) {
       DC.clearMenus();
       const $menu = $(eval(Template.HTML('arrow-menu-template')));
-      Group.elements.forEach( (element) => {
+      group.elements.forEach( (element) => {
          if (element != 0 && $(`#arrow-list li[arrow=${element}]`).length == 0) {
             $menu.append(
                $(eval(Template.HTML('arrow-menu-item-template')))
@@ -96,7 +96,7 @@ DC.Arrow = class {
          const color = hash.slice(-7);
          $('#arrow-list').append(eval(Template.HTML('arrow-list-item-template')));  // make entry in arrow-list
       } );
-      if (arrow_hashes.size == Group.order - 1) {  // can't make an arrow out of the identity
+      if (arrow_hashes.size == group.order - 1) {  // can't make an arrow out of the identity
          DC.Arrow.disable()
       } else {
          DC.Arrow.enable()

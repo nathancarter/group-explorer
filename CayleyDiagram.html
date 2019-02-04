@@ -63,17 +63,14 @@
 
       <script>
        /* Global variables */
-       var Group,		// group about which information will be displayed
-           group,		// global value used by other packages (until code style is implemented)
+       var group,		// group about which information will be displayed
            Diagram_name,	// name of Cayley diagram, or undefined if generated
            Cayley_diagram,	// data being displayed in large diagram
            Graphic_context,	// graphic context for large diagram
            canEmit = true;  // flag: whether to notify parent window of table changes
        const PANEL_NAMES = ['#subset-control', '#view-control', '#diagram-control'];
 
-       const myURL = window.location.href;
-       const thirdSlash = myURL.indexOf( '/', 8 );
-       const myDomain = myURL.substring( 0, thirdSlash > -1 ? thirdSlash : myURL.length );
+       const myDomain = new URL(window.location.href).origin;
 
        /* Initial entry to javascript, called once after document load */
        $(window).one('load', load);
@@ -95,10 +92,10 @@
        function load() {
           // Promise to load group from invocation URL
           const group_load = Library
-             .loadFromInvocation()
-             .then( ({library, groupIndex: group_index}) => {
-                Group = group = library[group_index];
-                setDiagramName();
+             .loadFromURL()
+             .then( (_group) => {
+                group = _group;
+                setDiagramName()
              } )
              .catch( console.error );
 
@@ -107,7 +104,7 @@
 
           // When group and framework are loaded, load panels and complete setup
           Promise.all([group_load, body_load])
-                 .then(loadPanels)
+                 .then( loadPanels )
                  .catch( console.error );
        }
 
@@ -123,7 +120,7 @@
        /* Set Diagram_name from URL (undefined => use generated Cayley diagram) */
        function setDiagramName() {
           Diagram_name = new URL(window.location.href).searchParams.get('diagram');
-          if (Diagram_name == null || !Group.cayleyDiagrams.some( (diagram) => diagram.name == Diagram_name )) {
+          if (Diagram_name == null || !group.cayleyDiagrams.some( (diagram) => diagram.name == Diagram_name )) {
              Diagram_name = undefined;
           }
        }
@@ -131,7 +128,7 @@
        /* Now that all the static HTML is loaded, complete the setup */
        function completeSetup() {
           // Create header from group name and queue MathJax to typeset it
-          $('#header').html(MathML.sans('<mtext>Cayley Diagram for&nbsp;</mtext>' + Group.name));
+          $('#header').html(MathML.sans('<mtext>Cayley Diagram for&nbsp;</mtext>' + group.name));
           MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'header']);
 
           // Create graphic context
@@ -161,7 +158,7 @@
                                group.cayleyDiagrams[0].name : '';
                 $( '#diagram-select option[value="' + Diagram_name + '"]' )
                    .prop( 'selected', true );
-                Cayley_diagram = new CayleyDiagram(Group, Diagram_name);
+                Cayley_diagram = new CayleyDiagram(group, Diagram_name);
                 if ( event.data.json.hasOwnProperty( '_use_fog' ) )
                    $( '#use-fog' ).prop( 'checked', event.data.json._use_fog );
                 if ( event.data.json.hasOwnProperty( '_fog_level' ) )
@@ -205,7 +202,7 @@
 
        // Draw Cayley diagram in graphic
        function displayGraphic() {
-          Cayley_diagram = new CayleyDiagram(Group, Diagram_name);
+          Cayley_diagram = new CayleyDiagram(group, Diagram_name);
           Graphic_context.showGraphic(Cayley_diagram);
           DC.update();
        }

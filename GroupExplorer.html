@@ -60,13 +60,32 @@
        .sort-none {
           padding-right: 10px;
        }
+
+       .top-right-menu {
+          position: absolute;
+          right: 0;
+          top: 0;
+          margin: 10px;
+       }
+       a:link .trm-item {
+          color: #2196f3;
+       }
+       a:visited .trm-item {
+          color: #2196f3;
+       }
+       a:hover .trm-item {
+          color: #2196f3;
+       }
+       a:active .trm-item {
+          color: #2196f3;
+       }
       </style>
 
       <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
       <script type="text/x-mathjax-config">
        MathJax.Hub.Config({
           CommonHTML: {
-             scale: 95,
+             scale: 90,
           },
        });
       </script>
@@ -89,6 +108,8 @@
        $(window).on('load', readLibrary);	// like onload handler in body
 
        var numGroupsToLoad = -1;
+       var numGroupsLoaded = 0;
+
        // Load group library from urls
        function readLibrary() {
           // only read in a few groups if URL specifies 'debug' (for impatient programmers)
@@ -96,16 +117,19 @@
           const numRows = (urlDebug == null) ? urls.length : Math.min(urls.length, (urlDebug || 10));
           numGroupsToLoad = numRows;
 
-          Library.loadAllGroups( ( group, isLast ) => {
-             displayGroup( group );
-          }, urls.slice( 0, numRows ) );
+          const promises = [];
+          for (const url of urls.slice(0, numRows)) {
+             promises.push(Library.getGroup(url)
+                                  .then( (group) => displayGroup(group) )
+                                  .catch( console.error )
+             );
+          }
 
           window.graphicContext = new DisplayDiagram({width: 50, height: 50, fog: false});
           window.multtableContext = new DisplayMulttable({height: 32, width: 32});
           window.cycleGraphContext = new DisplayCycleGraph({height: 32, width: 32});
        }
 
-       var numGroupsLoaded = 0;
        // add row to table that displays this name, order, etc. of group
        function displayGroup(group) {
           const index = Library.findIndex(group);
@@ -233,23 +257,23 @@
       <template id="row_template">
          <tr>
             <td class="groupName">
-               <a title="Open GroupInfo page" href="javascript:Library.openWithGroup('GroupInfo.html', ${index})">${ MathML.sans(group.name) }</a>
+               <a title="Open GroupInfo page" href="javascript:Library.openWithGroupURL('GroupInfo.html', ${index})">${ MathML.sans(group.name) }</a>
             </td>
             <td class="groupOrder">${ group.order }</td>
             <td class="description">
-               <a title="Open GroupInfo page" href="javascript:Library.openWithGroup('GroupInfo.html', ${index})">${ MathML.sans(group.definition) }</a>
+               <a title="Open GroupInfo page" href="javascript:Library.openWithGroupURL('GroupInfo.html', ${index})">${ MathML.sans(group.definition) }</a>
             </td>
             <td class="cayleyDiagram">
-               <a title="Open Cayley diagram visualizer" href="javascript:Library.openWithGroup('CayleyDiagram.html', ${index}, {diagram: '${cayleyTitle}'})"></a>
+               <a title="Open Cayley diagram visualizer" href="javascript:Library.openWithGroupURL('CayleyDiagram.html', ${index}, {diagram: '${cayleyTitle}'})"></a>
             </td>
             <td class="multiplicationTable">
-               <a title="Open multiplication table visualizer" href="javascript:Library.openWithGroup('Multtable.html', ${index})"></a>
+               <a title="Open multiplication table visualizer" href="javascript:Library.openWithGroupURL('Multtable.html', ${index})"></a>
             </td>
             <td class="symmetryObject">
-               <a title="Open object of symmetry visualizer" href="javascript:Library.openWithGroup('SymmetryObject.html', ${index}, {diagram: '${symmetryTitle}'})"></a>
+               <a title="Open object of symmetry visualizer" href="javascript:Library.openWithGroupURL('SymmetryObject.html', ${index}, {diagram: '${symmetryTitle}'})"></a>
             </td>
             <td class="cycleGraph">
-               <a title="Open cycle graph visualizer" href="javascript:Library.openWithGroup('CycleDiagram.html', ${index})"></a>
+               <a title="Open cycle graph visualizer" href="javascript:Library.openWithGroupURL('CycleDiagram.html', ${index})"></a>
             </td>
          </tr>
       </template>

@@ -21,9 +21,9 @@ DC.Chunking = class {
             return;
          }
          // find matching subgroup for chunking option
-         const subgroup_index = Group.subgroups.findIndex( (subgroup) => strategy.bitset.equals(subgroup.members) );
+         const subgroup_index = group.subgroups.findIndex( (subgroup) => strategy.bitset.equals(subgroup.members) );
          generators.push(strategy.generator);
-         const generator_strings = generators.map( (el) => mathml2text(Group.representation[el]) ).join(', ');
+         const generator_strings = generators.map( (el) => mathml2text(group.representation[el]) ).join(', ');
          $('#chunk-select').append(eval(Template.HTML('chunk-select-other-template')));
       } );
       $('#chunk-select').append(eval(Template.HTML('chunk-select-last-template')));
