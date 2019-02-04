@@ -220,7 +220,7 @@ Note that these ideas are contingent upon what feedback we receive from first us
       (which could be direct links to subgroup info.,html, etc.)
     * Lets us move visualizations to the left, giving them central visual prominence
  * Consider striping the table rows by group order.
- * Add to the three-lines menu these settings:
+ * Add a settings menu to the main page (top right, a gear icon) with these settings:
     * size of visualizers, as a range slider
     * filter for group families (Add "family" column to group page, plus "description",
       and anything from group info window that has a one-word answer (solvable, etc.))
