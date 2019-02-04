@@ -59,12 +59,6 @@
 
 ## Assigned to Nathan
 
-### Page-level issues
-
- * Change the default so that navigating into a group's Group Info page doesn't use a
-   blob URL, but the group URL, so that users can share links to such pages the usual way.
-   Make this change for all pages.
-
 ### Sheets
 
  * For improving math content in sheets text:  Use Ray's global `mathml2text()` function
