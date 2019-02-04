@@ -281,6 +281,15 @@ Note that these ideas are contingent upon what feedback we receive from first us
    processing LaTeX, and Ray has had to write some code to tweak/prod the MathJax input
    or output in order to get it to make nice results from our MathML input.  LaTeX will
    also be easier to read for programmers and much less verbose.
+ * The group Z3 semidirect product Z4 in the library is correctly named (including with
+   the factors in the correct order) but its naming scheme is poorly chosen, because the
+   generator of the normal 3-element subgroup is b^2 (or alternatively ab^2), which is
+   neither of the named generators (a and b).  Create a naming scheme that makes the two
+   factors Z3 and Z4 clear.
+ * The group Z4 semidirect product Z5 in the library is correctly named, except that the
+   operator is backwards from what it is in the other semidirect product groups.  Change
+   the operator to its mirror inverse horizontally and swap the order of the factors, so
+   that the meaning stays the same, but the notation becomes consistent.
 
 ## Assigned to Ray
 
