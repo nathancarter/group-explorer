@@ -63,7 +63,7 @@
        // Static event managers (setup after document is available)
        $(function() {
           $('#Computed_properties + p')
-             .on('click', (ev) => Library.openWithGroupURL($(ev.target).attr('page'), group));
+             .on('click', (ev) => Library.openWithGroupURL($(ev.target).attr('page'), group.URL));
        });
        $(window).on('load', load);	// like onload handler in body
        // $(window).on('resize', resize);
@@ -109,7 +109,7 @@
                     .addClass('programLink')
                     .text(diagramName)
                     .on('click', () =>
-                       Library.openWithGroupURL('CayleyDiagram.html', group, {diagram: diagramName}))
+                       Library.openWithGroupURL('CayleyDiagram.html', group.URL, {diagram: diagramName}))
                     .prepend(img);
              }
 
@@ -120,7 +120,7 @@
                 $row.children(':nth-child(2)')
                     .addClass('programLink')
                     .text('')
-                    .on('click', () => Library.openWithGroupURL('CycleDiagram.html', group))
+                    .on('click', () => Library.openWithGroupURL('CycleDiagram.html', group.URL))
                     .prepend(img);
              }
 
@@ -131,7 +131,7 @@
                 $row.children(':nth-child(3)')
                     .addClass('programLink')
                     .text('')
-                    .on('click', () => Library.openWithGroupURL('Multtable.html', group))
+                    .on('click', () => Library.openWithGroupURL('Multtable.html', group.URL))
                     .prepend(img);
              }
 
@@ -143,7 +143,7 @@
                     .addClass('programLink')
                     .text(objectName)
                     .on('click', () =>
-                       Library.openWithGroupURL('SymmetryObject.html', group, {diagram: objectName}))
+                       Library.openWithGroupURL('SymmetryObject.html', group.URL, {diagram: objectName}))
                     .prepend(img);
              }
           }

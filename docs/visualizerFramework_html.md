@@ -1,6 +1,6 @@
 # Visualizer framework HTML
 
-Used by CayleyDiagram.html, CycleDiagram.html, Multtable.html, SymmetryObject.html, and Sheet.html
+Used by CayleyDiagram.html, CycleDiagram.html, Multtable.html, and SymmetryObject.html
 ```html
 <body class="vert">
    <div id="header" class="horiz"></div>

@@ -73,7 +73,7 @@
        function makeGroupRef(group) {
           const g = (group.name === undefined ? group.isIsomorphicTo : group);
           g.libraryIndex = Library.groups.findIndex( (gr,inx) => gr.shortName == g.shortName );
-          return `<a href="javascript:Library.openWithGroupURL('GroupInfo.html', ${g.libraryIndex})">${MathML.sans(g.name)}</a>`;
+          return `<a href="javascript:Library.openWithGroupURL('GroupInfo.html', '${g.URL}')">${MathML.sans(g.name)}</a>`;
        }
 
        // given group, returns sequence of subgroups as BasicGroups

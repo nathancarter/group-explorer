@@ -1472,7 +1472,7 @@ class Library {
       const hrefURL = new URL(window.location.href);
       if (hrefURL.searchParams.get('groupURL') !== null) {
          return Library.getGroup(hrefURL.searchParams.get('groupURL'));
-      } else {
+      } else if (hrefURL.searchParams.get('waitForMessage') !== null) {
          /*
           * When this page is loaded in an iframe, the parent window can
           * indicate which group to load by passing the full JSON
@@ -1488,6 +1488,8 @@ class Library {
                       .catch( (error) => reject(error) );
             }
          }, false );
+      } else {
+         alert('error in URL');
       }
    }
 
@@ -1513,6 +1515,10 @@ class Library {
          }
       }
       return Library.groups;
+   }
+
+   static saveGroup(group) {
+      localStorage.setItem(group.URL, JSON.stringify(group));
    }
 
    static getGroup(url, baseURL) {
@@ -1559,14 +1565,10 @@ class Library {
       } )
    }
    
-   static openWithGroupURL(pageURL, g, options) {
-      // routine can be invoked with g as index in Library.groups, or the group itself
-      const groupURL = (typeof g == 'number') ? Library.groups[g].URL : g.URL;
-
-      // compute URL
+   static openWithGroupURL(pageURL, groupURL, options) {
       const url = `./${pageURL}?groupURL=${groupURL}` +
-                  ((options == undefined) ? '' : Object.keys(options)
-                                                       .reduce( (url, option) => url + `&${option}=${options[option]}`, ''));
+                   ((options == undefined) ? '' : Object.keys(options)
+                                                        .reduce( (url, option) => url + `&${option}=${options[option]}`, ''));
       window.open(url);
    }
 
