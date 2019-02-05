@@ -90,27 +90,27 @@
               .catch( console.error );
          }
          /* Now that all the static HTML is loaded, complete the setup */
-         function completeSetup() {
+         function completeSetup () {
             // Document is assembled, register event handlers
             registerEventHandlers();
-            $sheet = $('#graphic');
+            $sheet = $( '#graphic' );
             Model = new SheetModel( $sheet[0] );
 
             // Create header from group name and queue MathJax to typeset it
-            $('#header').html('Group Explorer Sheet');
+            $( '#header' ).html( 'Group Explorer Sheet' );
             MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'header']);
             // Register the splitter with jquery-resizable, so you can resize the graphic horizontally
             // by grabbing the border between the graphic and the subset control and dragging it
-            $('#vert-container').resizable({
+            $( '#vert-container' ).resizable( {
                handleSelector: '#splitter',
                resizeHeight: false,
                resizeWidthFrom: 'left',
                onDrag: resizeGraphic
-            });
+            } );
 
-            $('#graphic').css({backgroundColor:'#f8f8f8'})
-                         .append('<canvas id="overlay"></canvas>');
-            show('#sheet-control');
+            $sheet.css( { backgroundColor:'#f8f8f8' } )
+                  .append( '<canvas id="overlay"></canvas>' );
+            show( '#sheet-control' );
             resizeBody();
 
             if ( !localStorage.getItem( 'sheets' ) ) localStorage.setItem( 'sheets', '{}' );
@@ -137,13 +137,20 @@
             updateUndoRedoButtons();
 
             urls.map( function ( url ) {
-                var name = url;
-                if ( /\.group$/.test( name ) ) name = name.substring( 0, name.length - 6 );
-                var lastSlash = name.lastIndexOf( '/' );
-                if ( lastSlash > -1 ) name = name.substring( lastSlash + 1, name.length );
-                $( groupList ).append( $(
-                    `<option value="${url}">${name}</option>`
-                ) );
+               var name = url;
+               if ( /\.group$/.test( name ) ) name = name.substring( 0, name.length - 6 );
+               var lastSlash = name.lastIndexOf( '/' );
+               if ( lastSlash > -1 ) name = name.substring( lastSlash + 1, name.length );
+               $( groupList ).append( $(
+                  `<option value="${url}">${name}</option>`
+               ) );
+            } );
+
+            $sheet.on( 'click', function ( event ) {
+               if ( event.target != $sheet[0] ) return;
+               const selected = Model.selected();
+               if ( selected && selected.htmlViewElement() )
+                  $( selected.htmlViewElement().parentElement ).removeDragAndSizeSelection();
             } );
 
             $( reset ).hide();
@@ -348,8 +355,8 @@
          <a href='GroupExplorer.html'><i title="Group Library"
              class="fa fa-book fa-2x trm-black"></i></a>
          <!--
-         <a href='Sheet.html'><i title="Sheets" class="fa fa-file trm-black"
-             style="font-size:1.5em;vertical-align:10%;"></i></a>
+         <a href='Sheet.html' target='_blank'><i title="Sheets"
+             class="fa fa-file trm-black" style="font-size:1.5em;vertical-align:10%;"></i></a>
          -->
          <a href='help/rf-groupterms.html'><i title="Help"
              class="fa fa-question-circle fa-2x trm-black"></i></a>

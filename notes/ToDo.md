@@ -103,7 +103,6 @@
          that the result is not a single cycle of length nm.
     * Add links at the end of the page that offer to show this type of sheet using any type of
       visualizer.
- * Make it so that clicking on the sheet background unselects all sheet items.
  * Make all sheets have a fixed size - say, 10000x7500.
 
 ### Miscellany
