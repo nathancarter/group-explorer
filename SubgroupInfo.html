@@ -222,8 +222,6 @@
              }
           }
           const chains = pathsUpFrom( group.subgroups[0] );
-          console.log( chains.map( chain => chain.map( sgp =>
-             sgp ? sgp.members.toArray().join(',') : 'null' ) ) );
           // Now we write a function that uses the chains structure to compute a position on
           // the sheet for a visualizer of the subgroup.
           const hSize = chains.length, vSize = chains[0].length,
