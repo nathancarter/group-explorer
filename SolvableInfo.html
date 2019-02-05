@@ -191,7 +191,7 @@
              // put name of group atop each element in top row, the decomposition
              sheetElementsAsJSON.push( {
                 className : 'TextElement',
-                text : entry.group.shortName,
+                text : mathml2text( entry.group.name ),
                 x : L+index*W+index*hgap, y : T-txtH, w : W, h : txtH,
                 alignment : 'center'
              } );
@@ -206,7 +206,8 @@
              if ( previous ) {
                 // embedding from previous
                 sheetElementsAsJSON.push( {
-                   className : 'MorphismElement', name : `e${index}`,
+                   className : 'MorphismElement',
+                   name : mathml2text( `<msub><mi>e</mi><mn>${index}</mn></msub>` ),
                    fromIndex : previousIndex, toIndex : thisIndex,
                    showManyArrows : true,
                    definingPairs : previous.group.generators[0].map( gen =>
@@ -221,13 +222,16 @@
                 // quotient group name
                 sheetElementsAsJSON.push( {
                    className : 'TextElement',
-                   text : `${entry.group.shortName} / ${previous.group.shortName} &cong; ${entry.quotientByPrevious.shortName}`,
+                   text : mathml2text( entry.group.name ) + ' / '
+                        + mathml2text( previous.group.name ) + ' &cong; '
+                        + mathml2text( entry.quotientByPrevious.name ),
                    x : L+index*W+index*hgap, y : T+2*H+vgap+txtH/2, w : W, h : txtH,
                    alignment : 'center'
                 } );
                 // quotient map
                 sheetElementsAsJSON.push( {
-                   className : 'MorphismElement', name : `q${index}`,
+                   className : 'MorphismElement',
+                   name : mathml2text( `<msub><mi>q</mi><mn>${index}</mn></msub>` ),
                    fromIndex : thisIndex, toIndex : quotientIndex,
                    showManyArrows : true,
                    definingPairs : entry.group.generators[0].map( gen =>
@@ -291,7 +295,7 @@
       <template id="failure">
          <p>Group Explorer is currently unable to determine whether ${MathML.sans(group.name)} is a
             <a href="./help/rf-groupterms.html#solvable">solvable</a> group because it does
-            not have access to all the groups it needs. For example, there is a 
+            not have access to all the groups it needs. For example, there is a
             <a href="./help/rf-groupterms.html#normalsubgroup">normal subgroup</a>
             of order ${unknown_subgroup.order} that yields an
             <a href="./help/rf-groupterms.html#abelian">abelian</a>

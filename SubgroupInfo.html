@@ -277,7 +277,7 @@
           // Add a title.
           sheetElementsAsJSON.push( {
              className : 'TextElement',
-             text : `Subgroup Lattice for the Group ${group.shortName}`,
+             text : `Subgroup Lattice for the Group ${mathml2text( group.name )}`,
              x : latticeLeft, y : latticeTop / 2,
              w : hSize * cellWidth, h : latticeTop / 2,
              fontSize : '20pt', alignment : 'center'
@@ -292,7 +292,9 @@
           CreateNewSheet( [
              {
                 className : 'TextElement',
-                text : `Embedding ${libraryH.shortName} as H_${indexOfH} in ${group.shortName}`,
+                text : `Embedding ${mathml2text( libraryH.name )} as `
+                     + mathml2text( `<msub><mi>H</mi><mn>${indexOfH}</mn></msub>` )
+                     + ` in ${mathml2text( group.name )}`,
                 x : 50, y : 50, w : 500, h : 40,
                 fontSize : '20pt', alignment : 'center'
              },
@@ -313,7 +315,7 @@
              },
              {
                 className : 'MorphismElement',
-                fromIndex : 1, toIndex : 2, name : 'e',
+                fromIndex : 1, toIndex : 2, name : mathml2text( '<mi>e</mi>' ),
                 definingPairs : libraryH.generators[0].map( gen =>
                    [ gen, embedding[gen] ] ),
                 showManyArrows : true, showInjSurj : true
@@ -358,13 +360,16 @@
                 className : 'TextElement',
                 x : L, y : T-100, w : 5*W+4*gap, h : 50,
                 text : 'Short Exact Sequence showing '
-                     + `${group.shortName} / ${libraryN.shortName} &cong; ${libraryQ.shortName}`,
+                     + mathml2text( group.name ) + ' / '
+                     + mathml2text( libraryN.name ) + ' &cong; '
+                     + mathml2text( libraryQ.name ),
                 fontSize : '20pt', alignment : 'center'
              },
              {
                 className : 'TextElement',
                 x : L, y : T-50, w : W, h : 50,
-                text : 'Z_1', alignment : 'center'
+                text : mathml2text( '<msub><mi>Z</mi><mn>1</mn></msub>' ),
+                alignment : 'center'
              },
              {
                 className : type, groupURL : './groups/Trivial.group',
@@ -374,7 +379,7 @@
              {
                 className : 'TextElement',
                 x : L+W+gap, y : T-50, w : W, h : 50,
-                text : libraryN.shortName, alignment : 'center'
+                text : mathml2text( libraryN.name ), alignment : 'center'
              },
              {
                 className : type, groupURL : libraryN.URL,
@@ -384,7 +389,7 @@
              {
                 className : 'TextElement',
                 x : L+2*W+2*gap, y : T-50, w : W, h : 50,
-                text : group.shortName, alignment : 'center'
+                text : mathml2text( group.name ), alignment : 'center'
              },
              {
                 className : type, groupURL : group.URL,
@@ -394,7 +399,7 @@
              {
                 className : 'TextElement',
                 x : L+3*W+3*gap, y : T-50, w : W, h : 50,
-                text : libraryQ.shortName, alignment : 'center'
+                text : mathml2text( libraryQ.name ), alignment : 'center'
              },
              {
                 className : type, groupURL : libraryQ.URL,
@@ -404,7 +409,8 @@
              {
                 className : 'TextElement',
                 x : L+4*W+4*gap, y : T-50, w : W, h : 50,
-                text : 'Z_1', alignment : 'center'
+                text : mathml2text( '<msub><mi>Z</mi><mn>1</mn></msub>' ),
+                alignment : 'center'
              },
              {
                 className : type, groupURL : './groups/Trivial.group',
@@ -414,17 +420,32 @@
              {
                 className : 'TextElement',
                 x : L+W+gap, y : T+H+25, w : W, h : 50,
-                text : 'Im(id)=Ker(e)', alignment : 'center'
+                text : mathml2text(
+                    '<mrow>'
+                  + '<mi>Im</mi><mfenced open="(" close=")"><mi>id</mi></mfenced>'
+                  + '<mo>=</mo>'
+                  + '<mi>Ker</mi><mfenced open="(" close=")"><mi>e</mi></mfenced>'
+                  + '</mrow>' ), alignment : 'center'
              },
              {
                 className : 'TextElement',
                 x : L+2*W+2*gap, y : T+H+25, w : W, h : 50,
-                text : 'Im(e)=Ker(q)', alignment : 'center'
+                text : mathml2text(
+                    '<mrow>'
+                  + '<mi>Im</mi><mfenced open="(" close=")"><mi>e</mi></mfenced>'
+                  + '<mo>=</mo>'
+                  + '<mi>Ker</mi><mfenced open="(" close=")"><mi>q</mi></mfenced>'
+                  + '</mrow>' ), alignment : 'center'
              },
              {
                 className : 'TextElement',
                 x : L+3*W+3*gap, y : T+H+25, w : W, h : 50,
-                text : 'Im(q)=Ker(z)', alignment : 'center'
+                text : mathml2text(
+                    '<mrow>'
+                  + '<mi>Im</mi><mfenced open="(" close=")"><mi>q</mi></mfenced>'
+                  + '<mo>=</mo>'
+                  + '<mi>Ker</mi><mfenced open="(" close=")"><mi>z</mi></mfenced>'
+                  + '</mrow>' ), alignment : 'center'
              },
              {
                 className : 'MorphismElement', name : 'id',
@@ -523,7 +544,7 @@
          </tr>
          <tr>
             <td colspan="5">
-               <p class="intro">${MathML.sans(MathML.sub('H', index))}${optionalDescription} is 
+               <p class="intro">${MathML.sans(MathML.sub('H', index))}${optionalDescription} is
                   {&nbsp;${MathML.csList(element_representations)}&nbsp;}.</p>
                <ul class="points">
                </ul>

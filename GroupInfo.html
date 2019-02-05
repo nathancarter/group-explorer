@@ -262,7 +262,7 @@
              {
                 className : 'TextElement',
                 x : 50, y : 50, w : 800, h : 50,
-                text : `All Visualizers for the Group ${group.shortName}`,
+                text : `All Visualizers for the Group ${mathml2text(group.name)}`,
                 fontSize : '20pt', alignment : 'center'
              },
              {
@@ -298,14 +298,14 @@
              {
                 className : `MorphismElement`,
                 fromIndex : 4, toIndex : 5,
-                name : 'id1', showInjSurj : true, showManyArrows : true,
-                definingPairs : iso
+                name : mathml2text( '<msub><mi>id</mi><mn>1</mn></msub>' ),
+                showInjSurj : true, showManyArrows : true, definingPairs : iso
              },
              {
                 className : `MorphismElement`,
                 fromIndex : 5, toIndex : 6,
-                name : 'id2', showInjSurj : true, showManyArrows : true,
-                definingPairs : iso
+                name : mathml2text( '<msub><mi>id</mi><mn>2</mn></msub>' ),
+                showInjSurj : true, showManyArrows : true, definingPairs : iso
              }
           ] );
        }

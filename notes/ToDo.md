@@ -67,9 +67,6 @@
 
 ### Sheets
 
- * For improving math content in sheets text:  Use Ray's global `mathml2text()` function
-   that takes a MathML string as input and produces unicode text output that uses all the
-   nice tricks to make it as good as possible.
  * Extend the toJSON() and fromJSON() in CayleyDiagram.html to also respect:
     * all the rest of the Diagram panel needs to wait until I talk to Ray
     * background color:
