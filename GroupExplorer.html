@@ -43,11 +43,11 @@
           left: 10px;
           border: 7px solid transparent;
        }
-       .sort-down:after {
+       .sort-up:after {
           top: 10px;
           border-top-color: #787878;
        }
-       .sort-up:after {
+       .sort-down:after {
           bottom: 10px;
           border-bottom-color: #787878;
        }
@@ -110,62 +110,77 @@
        });
        $(window).on('load', readLibrary);	// like onload handler in body
 
-       let numGroupsLoaded;
        // Load group library from urls
        function readLibrary() {
-          // only read in a few groups if URL specifies 'debug' (for impatient programmers)
-          const urlDebug = new URL(window.location.href).searchParams.get('debug');
-          let numRows = (urlDebug == null) ? urls.length : Math.min(urls.length, (urlDebug || 10));
-
           window.graphicContext = new DisplayDiagram({width: 50, height: 50, fog: false});
           window.multtableContext = new DisplayMulttable({height: 32, width: 32});
           window.cycleGraphContext = new DisplayCycleGraph({height: 32, width: 32});
 
+          // only read in a few groups if URL specifies 'debug' (for impatient programmers)
+          const urlDebug = new URL(window.location.href).searchParams.get('debug');
+          const urlsToDisplay = (urlDebug == undefined) ?
+                                Array.from(new Set(urls.concat(Library.getAllLocalURLs()))) :
+                                urls.slice(0, (urlDebug || 10));
+
           // display locally stored group defintions
-          const groups = new Map(Library.getAllGroups().map( (g) => [g.URL, g] ));
-          const baseURL = new URL(window.location.href);
-          for (let inx = 0; inx < numRows; inx++) {
-             const g = groups.get(new URL(urls[inx], baseURL).href);
-             if (g !== undefined) {
+          for (const url of urlsToDisplay) {
+             const g = Library.getLocalGroup(url);
+             if (g != undefined) {
                 displayGroup(g);
              }
           }
-          MathJax.Hub.Queue(['Typeset', MathJax.Hub, GroupTable, () => $('#GroupTable tbody tr').show()]);
 
+          if (Library.isEmpty()) {
+             finish(urlsToDisplay);
+          } else {
+             MathJax.Hub.Queue( ['Typeset', MathJax.Hub, $(`#GroupTable`)[0],
+                                 () => {
+                                    $(`#GroupTable tbody tr`).show();
+                                    finish(urlsToDisplay);
+                                 }] );
+          }
+       }
+
+       function finish(urlsToDisplay) {
+          columnSort(1, true);
+          $( '#loadingMessage' ).show();
+          
           // check that the locally stored definitions currently displayed are the latest; refresh if not
-          numGroupsLoaded = 0;
-          for (const url of urls.slice(0, numRows)) {
-             Library.getGroup(url)
+          let numGroupsToLoad = urlsToDisplay.length;
+          let numGroupsLoaded = 0;
+          const loadNextURL = (urls) => {
+             url = urls.pop();
+             const localGroup = Library.getLocalGroup(url);
+             Library.getLatestGroup(url)
                     .then( (group) => {
                        // if we already had the group and it's current, just check to see if we're done
-                       const localGroup = groups.get(group.URL);
                        if (localGroup != undefined && group.lastModifiedOnServer == localGroup.lastModifiedOnServer) {
-                          if ( ++numGroupsLoaded == numRows ) {
+                          if ( ++numGroupsLoaded == numGroupsToLoad ) {
                              $( '#loadingMessage' ).hide();
-                             columnSort( 1 );
+                             columnSort( 1, true );
+                          } else if (urls.length > 0) {
+                             loadNextURL(urls);
                           }
                        } else {
-                          // remove the old row
-                          if (groups.has(group.URL)) {
-                             $(`#GroupTable tr[group="${group.URL}"]`).remove();
-                          }
-                          // and format the new one
+                          // format new group
                           const row = displayGroup(group)[0];
 
                           // typeset this row
                           MathJax.Hub.Queue(['Typeset', MathJax.Hub, row, function () {
                              $(row).show();
-                             if ( ++numGroupsLoaded == numRows ) {
+                             if ( ++numGroupsLoaded == numGroupsToLoad ) {
                                 $( '#loadingMessage' ).hide();
-                                columnSort( 1 );
-                             } else {
-                                const pct = ( numGroupsLoaded * 100 / numRows ) | 0;
+                                columnSort( 1, true );
+                             } else if (urls.length > 0) {
+                                const pct = ( numGroupsLoaded * 100 / numGroupsToLoad ) | 0;
                                 $( '#loadingMessage i' ).html( `Loading groups (${pct}%)...` );
+                                loadNextURL(urls);
                              }
                           } ]);
                        } } )
                     .catch( console.error );
           }
+          loadNextURL(urlsToDisplay);
        }
 
        // add row to table that displays this name, order, etc. of group
@@ -177,7 +192,13 @@
                                 undefined :
                                 group.symmetryObjects[0].name;
 
-          const $row = $(eval(Template.HTML('row_template')));
+          let $row = $(`#GroupTable tr[group="${group.URL}"]`);
+          if ($row.length == 0) {
+             $row = $(eval(Template.HTML('row_template')));
+          } else {
+             $($row[0].children[0].children[0]).html(MathML.sans(group.name));
+             $($row[0].children[2].children[0]).html(MathML.sans(group.definition));
+          }
           $row.attr('group', group.URL)
 
           // draw Cayley diagram
@@ -238,8 +259,7 @@
        }
 
        // callback to sort table on column value, invoked by clicking on column head
-       function columnSort(columnIndex) {
-          const makeSortUp = ! $($('th')[columnIndex]).hasClass('sort-up');
+       function columnSort(columnIndex, makeSortUp = ! $($('th')[columnIndex]).hasClass('sort-up')) {
           for (let i = 0; i < 2; i++) {
              $($('th')[i]).removeClass('sort-down')
                           .removeClass('sort-up')
@@ -295,7 +315,7 @@
                <th class="diagramHeader">Object of symmetry</th>
                <th class="diagramHeader">Cycle graph</th>
             </tr>
-            <tr id='loadingMessage'>
+            <tr id="loadingMessage" class="hidden">
                <th colspan=7>
                   <center><i class="slowflash">Loading groups...</i></center>
                </th>
