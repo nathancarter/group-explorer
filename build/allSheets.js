@@ -852,7 +852,7 @@ class VisualizerElement extends SheetElement {
         this.vizdisplay = this.makeVisualizerDisplay( { width : 100, height : 100 } );
         var that = this;
         if ( groupURL ) { // may be absent if they will fill it using fromJSON()
-            Library.getGroup( groupURL )
+            Library.getGroupOrDownload( groupURL )
                    .then( ( group ) => {
                        that.vizobj = that.makeVisualizerObject( that.group = group );
                        that.rerender();
@@ -949,7 +949,7 @@ class VisualizerElement extends SheetElement {
         if ( json.groupURL ) {
             if ( json.groupURL != this.groupURL ) {
                 this.groupURL = json.groupURL;
-                Library.getGroup( json.groupURL )
+                Library.getGroupOrDownload( json.groupURL )
                        .then( ( group ) => {
                            that.vizobj = that.makeVisualizerObject( that.group = group );
                            that.vizdisplay.fromJSON( json, that.vizobj );
