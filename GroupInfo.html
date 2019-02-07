@@ -66,13 +66,12 @@
              .on('click', (ev) => Library.openWithGroupURL($(ev.target).attr('page'), group.URL));
        });
        $(window).on('load', load);	// like onload handler in body
-       // $(window).on('resize', resize);
 
        // read in library, group from invocation
        function load() {
           Library.loadFromURL()
-                 .then( (group) => {
-                    window.group = group;
+                 .then( (_group) => {
+                    group = _group;
                     displayStatic();
                     displayDynamic();
                  } )

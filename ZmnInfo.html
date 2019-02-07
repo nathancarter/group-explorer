@@ -23,9 +23,6 @@
        }
 
        function formatGroup(group) {
-          $('body').append($('<div id="tmp" style="display: none">').html(mathml2html(group.name)));
-          const group_name = $('#tmp').html()
-          $('#tmp').remove();
           const $rslt = $(document.createDocumentFragment())
              .append(eval(Template.HTML('header')));
 

@@ -35,21 +35,21 @@
       <script src="./groupURLs.js"></script>
 
       <script>
-       // Global variables
-       var group;	// group for which subgroups are being displayed
-
        $(window).on('load', load);	// like onload handler in body
+
+       let group;	// group for which subgroups are being displayed
 
        function load() {
           window.graphicContext = new DisplayDiagram( { width : 50, height : 50, fog : false } );
           Library.loadFromURL()
-                 .then( (group) => displayGroup(group) )
+                 .then( (_group) => {
+                    group = _group;
+                    displayGroup()
+                 } )
                  .catch( console.error );
-          Library.getAllGroups();
        }
 
-       function displayGroup(_group) {
-          group = _group;
+       function displayGroup() {
           const $rslt = $(document.createDocumentFragment())
              .append(eval(Template.HTML('header_template')));
           if (group.isSimple) {

@@ -18,16 +18,18 @@
       <script>
        $(window).on('load', load);	// like onload handler in body
 
+       let group;
        function load() {
           Library.loadFromURL()
-                 .then( (group) => formatGroup(group) )
+                 .then( (_group) => {
+                    group = _group;
+                    formatGroup()
+                 } )
                  .catch( console.error );
-          Library.getAllGroups();
        }
 
-       function formatGroup(_group) {
-          window.group = _group;
-          let $rslt = $(document.createDocumentFragment())
+       function formatGroup() {
+          const $rslt = $(document.createDocumentFragment())
              .append(eval(Template.HTML('header')));
           if (group.isAbelian) {
              $rslt.append(eval(Template.HTML('abelian')));
@@ -72,7 +74,6 @@
 
        function makeGroupRef(group) {
           const g = (group.name === undefined ? group.isIsomorphicTo : group);
-          g.libraryIndex = Library.groups.findIndex( (gr,inx) => gr.shortName == g.shortName );
           return `<a href="javascript:Library.openWithGroupURL('GroupInfo.html', '${g.URL}')">${MathML.sans(g.name)}</a>`;
        }
 
@@ -117,7 +118,7 @@
        // details useful for illustrating the whole thing in a sheet.
        // Assumes all groups in library loaded.
        function getDetailedSolvableDecomposition ( G ) {
-          const Z_1 = Library.groups.find( gp => gp.order == 1 );
+          const Z_1 = Library.getAllLocalGroups().find( gp => gp.order == 1 );
           if ( !G.isSolvable ) {
              return null;
           }
