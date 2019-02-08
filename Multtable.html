@@ -328,8 +328,11 @@
                 $('#graphic').append(image);
                 event.originalEvent.dataTransfer.setDragImage(image, drag_width/2, drag_height/2);
              }
-             event.originalEvent.dataTransfer.setData('text/plain', 'anything');  // needed for Firefox (!?)
           }
+          // dataTransfer must be set in event for Firefox to fire a dragstart event
+          // (this seems to be a well-known bug -- see https://bugzilla.mozilla.org/show_bug.cgi?id=1352852
+          //   or https://stackoverflow.com/questions/19055264/why-doesnt-html5-drag-and-drop-work-in-firefox)
+          event.originalEvent.dataTransfer.setData('text', 'anything');
        }
 
        function dragOver(event) {
