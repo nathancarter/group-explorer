@@ -57,7 +57,7 @@ class SSD {
                               .each( (inx, li) => {
                                  const childElements = $(li).children('span[tabindex]');
                                  SubgroupNames.push(childElements[0].outerHTML);
-                                 Group.subgroups[inx].generators.toArray().forEach( (gen, jnx) => {
+                                 group.subgroups[inx].generators.toArray().forEach( (gen, jnx) => {
                                     ElementNames[gen] = childElements[jnx+2].outerHTML;
                                  } );
                               } );
@@ -113,7 +113,6 @@ class SSD {
     *   -- li element id (<subset>.menu)
     */
    static contextMenuHandler(event) {
-      const start = performance.now();
       event.preventDefault();
       const $curr = $(event.target).closest('p.subset_page_header, p.placeholder, li[id]');
 
@@ -139,7 +138,6 @@ class SSD {
             }
             Menu.setMenuLocations(event, $menu);
             $menu.css('visibility', 'visible');
-            console.log(`${performance.now() - start}`);
          });
    }
 

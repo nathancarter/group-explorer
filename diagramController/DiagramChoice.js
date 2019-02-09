@@ -3,7 +3,7 @@ DC.DiagramChoice = class {
    
    /* Populate diagram select element, show selected diagram */
    static setupDiagramSelect() {
-      Group.cayleyDiagrams.forEach( (diagram) => {
+      group.cayleyDiagrams.forEach( (diagram) => {
          $('#diagram-select').append(eval(Template.HTML('diagram-choice-template')));
       } );
       $(`#diagram-select option[value='${(Diagram_name === undefined) ? '' : Diagram_name}']`).attr('selected', 'selected')

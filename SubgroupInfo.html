@@ -42,10 +42,10 @@
 
        function load() {
           window.graphicContext = new DisplayDiagram( { width : 50, height : 50, fog : false } );
-          Library.loadFromInvocation()
-                 .then( ({library, groupIndex}) => {
-                    window.group = library[groupIndex];
-                    displayGroup();
+          Library.loadFromURL()
+                 .then( (_group) => {
+                    group = _group;
+                    displayGroup()
                  } )
                  .catch( console.error );
        }
@@ -59,42 +59,38 @@
              $rslt.find('#simple').remove();
           }
 
-          Library.loadAllGroups( ( _, isLast ) => {
-             if ( isLast ) {
-                for (let inx = 0; inx < group.subgroups.length; inx++) {
-                   $rslt.find('tbody').append(subgroupInfo(inx)).html();
-                }
+          for (let inx = 0; inx < group.subgroups.length; inx++) {
+             $rslt.find('tbody').append(subgroupInfo(inx)).html();
+          }
 
-                if ($rslt.find('li.no_isomorphism').length == 0) {
-                   $rslt.find('#no_isomorphism_reason').remove();
-                }
-                if ($rslt.find('li.no_quotient_group').length == 0) {
-                   $rslt.find('#no_quotient_group_reason').remove();
-                }
+          if ($rslt.find('li.no_isomorphism').length == 0) {
+             $rslt.find('#no_isomorphism_reason').remove();
+          }
+          if ($rslt.find('li.no_quotient_group').length == 0) {
+             $rslt.find('#no_quotient_group_reason').remove();
+          }
 
-                $('body').append($rslt);
-                MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
+          $('body').append($rslt);
+          MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
 
-                $( '.show-lattice' ).on( 'click', function ( event ) {
-                   event.preventDefault();
-                   const type = event.target.getAttribute( 'data-type' );
-                   showSubgroupLattice( type );
-                } );
+          $( '.show-lattice' ).on( 'click', function ( event ) {
+             event.preventDefault();
+             const type = event.target.getAttribute( 'data-type' );
+             showSubgroupLattice( type );
+          } );
 
-                $( '.show-embedding' ).on( 'click', function ( event ) {
-                   event.preventDefault();
-                   const type = event.target.getAttribute( 'data-type' ),
-                         index = parseInt( event.target.getAttribute( 'data-index' ) );
-                   showEmbeddingSheet( index, type );
-                } );
+          $( '.show-embedding' ).on( 'click', function ( event ) {
+             event.preventDefault();
+             const type = event.target.getAttribute( 'data-type' ),
+                   index = parseInt( event.target.getAttribute( 'data-index' ) );
+             showEmbeddingSheet( index, type );
+          } );
 
-                $( '.show-quotient' ).on( 'click', function ( event ) {
-                   event.preventDefault();
-                   const type = event.target.getAttribute( 'data-type' ),
-                         index = parseInt( event.target.getAttribute( 'data-index' ) );
-                   showQuotientSheet( index, type );
-                } );
-             }
+          $( '.show-quotient' ).on( 'click', function ( event ) {
+             event.preventDefault();
+             const type = event.target.getAttribute( 'data-type' ),
+                   index = parseInt( event.target.getAttribute( 'data-index' ) );
+             showQuotientSheet( index, type );
           } );
        }
 
@@ -502,11 +498,11 @@
          <p id="simple">None of the subgroups on the list below is
             <a href="./help/rf-groupterms.html#normalsubgroup">normal</a>.
             For this reason, ${MathML.sans(group.name)} is a
-            <a href="./help/rf-groupterms.html#normalsubgroup">simple</a> group.</p>
+            <a href="./help/rf-groupterms.html#simple">simple</a> group.</p>
          <p id="not-simple">At least one of the subgroups on the list below is
             <a href="./help/rf-groupterms.html#normalsubgroup">normal</a>.
             For this reason, ${MathML.sans(group.name)} is not a
-            <a href="./help/rf-groupterms.html#normalsubgroup">simple</a> group.</p>
+            <a href="./help/rf-groupterms.html#simple">simple</a> group.</p>
          <table id="subgroup_table">
             <thead>
                <tr>

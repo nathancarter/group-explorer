@@ -5,7 +5,7 @@ class IsomorphicGroups {
          return;
       }
 
-      IsomorphicGroups.map = Library.getGroups()
+      IsomorphicGroups.map = Library.getAllLocalGroups()
                                     .reduce(
                                        (map, group) => {
                                           if (!map.has(group.order)) {
@@ -157,7 +157,7 @@ class IsomorphicGroups {
    // for all i in H'.  If this computation can't be done, return null.
    // The most common reason that this might fail is not having sufficient
    // groups loaded into the Library.  You may want to run a call to
-   // Library.loadAllGroups() first.
+   // Library.getAllLocalGroups() first.
    static findEmbedding ( G, H ) {
       const groupH = G.getSubgroupAsGroup( H ),
             libraryH = IsomorphicGroups.find( groupH );
@@ -173,7 +173,7 @@ class IsomorphicGroups {
    // for all i in G.  If this computation can't be done, return null.
    // The most common reason for failure would be passing a non-normal subgroup.
    // Alternatively, this might fail without enough groups loaded into the Library.
-   // You may want to run a call to Library.loadAllGroups() first.
+   // You may want to run a call to Library.getAllLocalGroups() first.
    static findQuotient ( G, N ) {
       if ( !G.isNormal( N ) ) return null;
       const groupQ = G.getQuotientGroup( N.members ),

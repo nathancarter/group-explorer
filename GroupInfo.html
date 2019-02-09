@@ -11,6 +11,26 @@
           padding: 5px;
           border-collapse: collapse;
        }
+
+       #notes-area {
+          font-size: 14pt;
+          width: 40em;
+       }
+       #notes-text {
+          background-color: #F2F2F2;
+          width: 100%;
+          margin-bottom: 10px;
+          display: block;
+       }
+       #notes-buttons > button {
+          font-size: 14pt;
+          background-image: linear-gradient(#DDDDDD, #C0C0C0);
+          float: right;
+          height: 1.5em;
+          width: 5em;
+          margin-left: 0.3em;
+       }
+
        .views {
           border: none;
           text-align: left;
@@ -63,16 +83,15 @@
        // Static event managers (setup after document is available)
        $(function() {
           $('#Computed_properties + p')
-             .on('click', (ev) => Library.openWithLibrary($(ev.target).attr('page'), group));
+             .on('click', (ev) => Library.openWithGroupURL($(ev.target).attr('page'), group.URL));
        });
        $(window).on('load', load);	// like onload handler in body
-       // $(window).on('resize', resize);
 
        // read in library, group from invocation
        function load() {
-          Library.loadFromInvocation()
-                 .then( ({library, groupIndex}) => {
-                    window.group = library[groupIndex];
+          Library.loadFromURL()
+                 .then( (_group) => {
+                    group = _group;
                     displayStatic();
                     displayDynamic();
                  } )
@@ -109,7 +128,7 @@
                     .addClass('programLink')
                     .text(diagramName)
                     .on('click', () =>
-                       Library.openWithGroup('CayleyDiagram.html', group, {diagram: diagramName}))
+                       Library.openWithGroupURL('CayleyDiagram.html', group.URL, {diagram: diagramName}))
                     .prepend(img);
              }
 
@@ -120,7 +139,7 @@
                 $row.children(':nth-child(2)')
                     .addClass('programLink')
                     .text('')
-                    .on('click', () => Library.openWithGroup('CycleDiagram.html', group))
+                    .on('click', () => Library.openWithGroupURL('CycleDiagram.html', group.URL))
                     .prepend(img);
              }
 
@@ -131,7 +150,7 @@
                 $row.children(':nth-child(3)')
                     .addClass('programLink')
                     .text('')
-                    .on('click', () => Library.openWithGroup('Multtable.html', group))
+                    .on('click', () => Library.openWithGroupURL('Multtable.html', group.URL))
                     .prepend(img);
              }
 
@@ -143,7 +162,7 @@
                     .addClass('programLink')
                     .text(objectName)
                     .on('click', () =>
-                       Library.openWithGroup('SymmetryObject.html', group, {diagram: objectName}))
+                       Library.openWithGroupURL('SymmetryObject.html', group.URL, {diagram: objectName}))
                     .prepend(img);
              }
           }
@@ -188,6 +207,9 @@
           if (group.representations.length > 1) {
              $('#loaded_naming_schemes').html(displayNamingSchemes());
           }
+
+          // notes
+          reloadNotes();
 
           MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
 
@@ -253,7 +275,21 @@
 
        function setRepresentation(index) {
           group.representationIndex = index;
+          Library.saveGroup(group);
           displayDynamic();
+       }
+
+       function clearNotes() {
+          $('#notes-text')[0].value = '';
+       }
+
+       function saveNotes() {
+          group.userNotes = $('#notes-text')[0].value;
+          Library.saveGroup(group);
+       }
+
+       function reloadNotes() {
+          $('#notes-text')[0].value = (group.userNotes === undefined) ? '' : group.userNotes;
        }
 
        function showAllVisualizersSheet () {
@@ -466,6 +502,7 @@
             <table>
                <tr><th align="right">Author</th><td align="left">${group.author}</td></tr>
                <tr><th align="right">URL</th><td align="left">${group.URL}</td></tr>
+               <tr><th align="right">Last modified</th><td align="left">${group.lastModifiedOnServer}</td></tr>
             </table>
          </template>
       </p>
@@ -495,8 +532,14 @@
       </p>
 
       <h3 id="Notes">Notes</h3>
-      <p class="indent1">
-         <i>(Not implemented)</i>
-      </p>
+      <div id="notes-area" class="indent1">
+         <textarea id="notes-text" maxlength="1000" rows="10"></textarea>
+         <div id="notes-buttons">
+            <button onclick="clearNotes()">Clear</button>
+            <button onclick="reloadNotes()">Cancel</button>
+            <button onclick="saveNotes()">Save</button>
+         </div>
+      </div>
+      <br><br><br><br><br>
    </body>
 </html>

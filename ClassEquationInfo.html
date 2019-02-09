@@ -24,10 +24,10 @@
 
        let group;
        function load() {
-          Library.loadFromInvocation()
-                 .then( ({library, groupIndex}) => {
-                    group = library[groupIndex];
-                    formatGroup()
+          Library.loadFromURL()
+                 .then( (_group) => {
+                    group = _group;
+                    formatGroup();
                  } )
                  .catch( console.error );
        }
