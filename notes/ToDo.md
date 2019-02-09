@@ -12,12 +12,8 @@
     * Each such td should change its background on mouse enter, along with the cursor.
     * Use gray background for links to GroupInfo.html, colors for visualizers.
  * Comment 168 and 384 groups out of URLs file for release.
- * The Notes section of the GroupInfo.html page should be a text box that, whenever its
-   contents change, writes them to `localStorage`, and reloads them from there on page load.
  * When using subset diagram, "Organize by" should reset the innermost/outermost/etc. column
    to the identity permutation.
- * Default naming scheme, when changed, should be written to `localStorage` and re-used
-   throughout the app thereafter.
  * Setting line thickness to minimum does not work; it gets reset to a thicker value.
  * Fix test for circular/rotary layout in `CayleyDiagram.setStrategies`
  * Create the UI for adding a naming scheme, and store it in `localStorage`.
@@ -33,7 +29,6 @@
  * Complete the integration (or pass to Nathan if he finishes his stuff first)
    and then update the help link on the library page to go to the newly created
    help index page.
- * On SubgroupInfo page, link to First Iso Theorem is broken.
  * GroupExplorer.html column headings should be link to help on that topic.
 
 ### 3D diagrams and viewing angles
