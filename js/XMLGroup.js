@@ -25,13 +25,19 @@ class XMLGroup extends BasicGroup {
          return;
       }
 
-      // Replacing named entities with values ensure that later fragment parsing succeeds...
-      const cleanText = text.replace(/&Zopf;/g, "&#8484;")
-                            .replace(/&times;/g, "&#215;")
-                            .replace(/&ltimes;/g, "&#8905;")
-                            .replace(/&rtimes;/g, "&#8906;")
-                            .replace(/<br.>/g, "&lt;br/&gt;");  // hack to read fgb notes
-      const $xml = $($.parseXML(cleanText));
+      let $xml;
+      if (typeof(text) == 'string') {
+         // Replacing named entities with values ensure that later fragment parsing succeeds...
+         const cleanText = text.replace(/&Zopf;/g, "&#8484;")
+                               .replace(/&times;/g, "&#215;")
+                               .replace(/&ltimes;/g, "&#8905;")
+                               .replace(/&rtimes;/g, "&#8906;")
+                               .replace(/<br.>/g, "&lt;br/&gt;");  // hack to read fgb notes
+         $xml = $($.parseXML(cleanText));
+      } else {
+         $xml = $(text);
+      }
+      
       super(XMLGroup._multtable_from_xml($xml));
 
       this.$xml = $xml;
