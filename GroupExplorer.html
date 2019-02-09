@@ -43,11 +43,11 @@
           left: 10px;
           border: 7px solid transparent;
        }
-       .sort-down:after {
+       .sort-up:after {
           top: 10px;
           border-top-color: #787878;
        }
-       .sort-up:after {
+       .sort-down:after {
           bottom: 10px;
           border-bottom-color: #787878;
        }
@@ -66,7 +66,10 @@
       <script type="text/x-mathjax-config">
        MathJax.Hub.Config({
           CommonHTML: {
-             scale: 95,
+             scale: 90,
+          },
+          "fast-preview": {
+             disabled: false,
           },
        });
       </script>
@@ -88,28 +91,81 @@
        });
        $(window).on('load', readLibrary);	// like onload handler in body
 
-       var numGroupsToLoad = -1;
        // Load group library from urls
        function readLibrary() {
-          // only read in a few groups if URL specifies 'debug' (for impatient programmers)
-          const urlDebug = new URL(window.location.href).searchParams.get('debug');
-          const numRows = (urlDebug == null) ? urls.length : Math.min(urls.length, (urlDebug || 10));
-          numGroupsToLoad = numRows;
-
-          Library.loadAllGroups( ( group, isLast ) => {
-             displayGroup( group );
-          }, urls.slice( 0, numRows ) );
-
           window.graphicContext = new DisplayDiagram({width: 50, height: 50, fog: false});
           window.multtableContext = new DisplayMulttable({height: 32, width: 32});
           window.cycleGraphContext = new DisplayCycleGraph({height: 32, width: 32});
+
+          // only read in a few groups if URL specifies 'debug' (for impatient programmers)
+          const urlDebug = new URL(window.location.href).searchParams.get('debug');
+          const urlsToDisplay = (urlDebug == undefined) ?
+                                Array.from(new Set(urls.concat(Library.getAllLocalURLs()))) :
+                                urls.slice(0, (urlDebug || 10));
+
+          // display locally stored group defintions
+          for (const url of urlsToDisplay) {
+             const g = Library.getLocalGroup(url);
+             if (g != undefined) {
+                displayGroup(g);
+             }
+          }
+
+          if (Library.isEmpty()) {
+             finish(urlsToDisplay);
+          } else {
+             MathJax.Hub.Queue( ['Typeset', MathJax.Hub, $(`#GroupTable`)[0],
+                                 () => {
+                                    $(`#GroupTable tbody tr`).show();
+                                    finish(urlsToDisplay);
+                                 }] );
+          }
        }
 
-       var numGroupsLoaded = 0;
+       function finish(urlsToDisplay) {
+          columnSort(1, true);
+          $( '#loadingMessage' ).show();
+          
+          // check that the locally stored definitions currently displayed are the latest; refresh if not
+          let numGroupsToLoad = urlsToDisplay.length;
+          let numGroupsLoaded = 0;
+          const loadNextURL = (urls) => {
+             url = urls.pop();
+             const localGroup = Library.getLocalGroup(url);
+             Library.getLatestGroup(url)
+                    .then( (group) => {
+                       // if we already had the group and it's current, just check to see if we're done
+                       if (localGroup != undefined && group.lastModifiedOnServer == localGroup.lastModifiedOnServer) {
+                          if ( ++numGroupsLoaded == numGroupsToLoad ) {
+                             $( '#loadingMessage' ).hide();
+                             columnSort( 1, true );
+                          } else if (urls.length > 0) {
+                             loadNextURL(urls);
+                          }
+                       } else {
+                          // format new group
+                          const row = displayGroup(group)[0];
+
+                          // typeset this row
+                          MathJax.Hub.Queue(['Typeset', MathJax.Hub, row, function () {
+                             $(row).show();
+                             if ( ++numGroupsLoaded == numGroupsToLoad ) {
+                                $( '#loadingMessage' ).hide();
+                                columnSort( 1, true );
+                             } else if (urls.length > 0) {
+                                const pct = ( numGroupsLoaded * 100 / numGroupsToLoad ) | 0;
+                                $( '#loadingMessage i' ).html( `Loading groups (${pct}%)...` );
+                                loadNextURL(urls);
+                             }
+                          } ]);
+                       } } )
+                    .catch( console.error );
+          }
+          loadNextURL(urlsToDisplay);
+       }
+
        // add row to table that displays this name, order, etc. of group
        function displayGroup(group) {
-          const index = Library.findIndex(group);
-
           const cayleyTitle = (group.cayleyDiagrams.length == 0) ?
                               undefined :
                               group.cayleyDiagrams[0].name;
@@ -117,38 +173,49 @@
                                 undefined :
                                 group.symmetryObjects[0].name;
 
-          const $row = $(eval(Template.HTML('row_template')));
-          $row.hide();
-          const id = $row[0].id = `RowForGroup${index}`;
-
-          // typeset this row
-          MathJax.Hub.Queue(['Typeset', MathJax.Hub, id, function () {
-             $( `#${id}` ).show();
-             if ( ++numGroupsLoaded == numGroupsToLoad ) {
-                $( '#loadingMessage' ).hide();
-                columnSort( 1 );
-             } else {
-                const pct = ( numGroupsLoaded * 100 / numGroupsToLoad ) | 0;
-                $( '#loadingMessage i' ).html( `Loading groups (${pct}%)...` );
-             }
-          } ]);
+          let $row = $(`#GroupTable tr[group="${group.URL}"]`);
+          if ($row.length == 0) {
+             $row = $(eval(Template.HTML('row_template')));
+          } else {
+             $($row[0].children[0].children[0]).html(MathML.sans(group.name));
+             $($row[0].children[2].children[0]).html(MathML.sans(group.definition));
+          }
+          $row.attr('group', group.URL)
 
           // draw Cayley diagram
-          let graphicData = new CayleyDiagram(group, cayleyTitle);
-          let img = graphicContext.getImage(graphicData);
-          group.imageSource = img.src;
+          let img;
+          if (group.CayleyThumbnail === undefined) {
+             const  graphicData = new CayleyDiagram(group, cayleyTitle);
+             img = graphicContext.getImage(graphicData);
+             group.CayleyThumbnail = img.src;
+          } else {
+             img = new Image();
+             img.src = group.CayleyThumbnail;
+          }
           img.height = img.width = 32;
           $row.find("td.cayleyDiagram > a").html(img);
 
           // draw Multtable
-          graphicData = new Multtable(group);
-          img = multtableContext.getImage(graphicData);
+          if (group.multtableThumbnail === undefined) {
+             const graphicData = new Multtable(group);
+             img = multtableContext.getImage(graphicData);
+             group.multtableThumbnail = img.src;
+          } else {
+             img = new Image();
+             img.src = group.multtableThumbnail;
+          }
           $row.find("td.multiplicationTable > a").html(img);
 
           // draw Symmetry Object
           if (group.symmetryObjects.length != 0) {
-             graphicData = SymmetryObject.generate(group, symmetryTitle);
-             img = graphicContext.getImage(graphicData);
+             if (group.symmetryObjectThumbnail === undefined) {
+                const graphicData = SymmetryObject.generate(group, symmetryTitle);
+                img = graphicContext.getImage(graphicData);
+                group.symmetryObjectThumbnail = img.src;
+             } else {
+                img = new Image();
+                img.src = group.symmetryObjectThumbnail;
+             }
              img.height = img.width = 32;
              $row.find("td.symmetryObject > a").html(img);
           } else {
@@ -156,16 +223,24 @@
           }
 
           // draw Cycle Graph
-          graphicData = new CycleGraph( group );
-          img = cycleGraphContext.getImage( graphicData );
+          if (group.cycleGraphThumbnail === undefined) {
+             const graphicData = new CycleGraph( group );
+             img = cycleGraphContext.getImage( graphicData );
+             group.cycleGraphThumbnail = img.src;
+             Library.saveGroup(group);
+          } else {
+             img = new Image();
+             img.src = group.cycleGraphThumbnail;
+          }
           $row.find("td.cycleGraph > a").html(img);
 
           $row.appendTo($('#GroupTable tbody'));
+
+          return $row;
        }
 
        // callback to sort table on column value, invoked by clicking on column head
-       function columnSort(columnIndex) {
-          const makeSortUp = ! $($('th')[columnIndex]).hasClass('sort-up');
+       function columnSort(columnIndex, makeSortUp = ! $($('th')[columnIndex]).hasClass('sort-up')) {
           for (let i = 0; i < 2; i++) {
              $($('th')[i]).removeClass('sort-down')
                           .removeClass('sort-up')
@@ -221,7 +296,7 @@
                <th class="diagramHeader">Object of symmetry</th>
                <th class="diagramHeader">Cycle graph</th>
             </tr>
-            <tr id='loadingMessage'>
+            <tr id="loadingMessage" class="hidden">
                <th colspan=7>
                   <center><i class="slowflash">Loading groups...</i></center>
                </th>
@@ -231,25 +306,31 @@
          </tbody>
       </table>
       <template id="row_template">
-         <tr>
+         <tr style="display: none">
             <td class="groupName">
-               <a title="Open GroupInfo page" href="javascript:Library.openWithGroup('GroupInfo.html', ${index})">${ MathML.sans(group.name) }</a>
+               <a title="Open GroupInfo page"
+                  href="javascript:Library.openWithGroupURL('GroupInfo.html', '${group.URL}')">${ MathML.sans(group.name) }</a>
             </td>
             <td class="groupOrder">${ group.order }</td>
             <td class="description">
-               <a title="Open GroupInfo page" href="javascript:Library.openWithGroup('GroupInfo.html', ${index})">${ MathML.sans(group.definition) }</a>
+               <a title="Open GroupInfo page"
+                  href="javascript:Library.openWithGroupURL('GroupInfo.html', '${group.URL}')">${ MathML.sans(group.definition) }</a>
             </td>
             <td class="cayleyDiagram">
-               <a title="Open Cayley diagram visualizer" href="javascript:Library.openWithGroup('CayleyDiagram.html', ${index}, {diagram: '${cayleyTitle}'})"></a>
+               <a title="Open Cayley diagram visualizer"
+                  href="javascript:Library.openWithGroupURL('CayleyDiagram.html', '${group.URL}', {diagram: '${cayleyTitle}'})"></a>
             </td>
             <td class="multiplicationTable">
-               <a title="Open multiplication table visualizer" href="javascript:Library.openWithGroup('Multtable.html', ${index})"></a>
+               <a title="Open multiplication table visualizer"
+                  href="javascript:Library.openWithGroupURL('Multtable.html', '${group.URL}')"></a>
             </td>
             <td class="symmetryObject">
-               <a title="Open object of symmetry visualizer" href="javascript:Library.openWithGroup('SymmetryObject.html', ${index}, {diagram: '${symmetryTitle}'})"></a>
+               <a title="Open object of symmetry visualizer"
+                  href="javascript:Library.openWithGroupURL('SymmetryObject.html', '${group.URL}', {diagram: '${symmetryTitle}'})"></a>
             </td>
             <td class="cycleGraph">
-               <a title="Open cycle graph visualizer" href="javascript:Library.openWithGroup('CycleDiagram.html', ${index})"></a>
+               <a title="Open cycle graph visualizer"
+                  href="javascript:Library.openWithGroupURL('CycleDiagram.html', '${group.URL}')"></a>
             </td>
          </tr>
       </template>
