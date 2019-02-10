@@ -147,12 +147,12 @@ class DisplayDiagram {
     * Position the camera and point it at the center of the scene
     *
     * Camera positioned to match point of view in GE2:
-    *   If diagram lies entirely in y-z plane (all x == 0)
-    *     place camera on z-axis, x-axis to the right, y-axis down
-    *   If diagram lies entirely in the x-z plane
-    *     place camera on negative y-axis, x-axis to the right, z-axis up
-    *   If diagram lies entirely in the x-y plane
-    *     place camera on negative z-axis, x-axis to the right, y-axis down
+    *   If diagram lies entirely in the y-z plane (all x == 0)
+    *     place camera on x-axis, y-axis up (z-axis to the left)
+    *   If diagram lies entirely in the x-z plane (all y == 0)
+    *     place camera on y-axis, z-axis down (x-axis to the right)
+    *   If diagram lies entirely in the x-y plane (all z == 0)
+    *     place camera on z-axis, y-axis up (x-axis to the right)
     *   Otherwise place camera on (1,-1,-1) vector with y-axis down
     */
    setCamera(diagram3D) {
@@ -160,13 +160,13 @@ class DisplayDiagram {
 
       if (diagram3D.nodes.every( (node) => node.point.x == 0.0 )) {
          this.camera.position.set(3, 0, 0);
-         this.camera.up.set(0, -1, 0);
+         this.camera.up.set(0, 1, 0);
       } else if (diagram3D.nodes.every( (node) => node.point.y == 0.0 )) {
-         this.camera.position.set(0, -3, 0);
-         this.camera.up.set(0, 0, 1);
+         this.camera.position.set(0, 3, 0);
+         this.camera.up.set(0, 0, -1);
       } else if (diagram3D.nodes.every( (node) => node.point.z == 0.0 )) {
-         this.camera.position.set(0, 0, -3);
-         this.camera.up.set(0, -1, 0);
+         this.camera.position.set(0, 0, 3);
+         this.camera.up.set(0, 1, 0);
       } else {
          this.camera.position.set(2, -2, -2);
          this.camera.up.set(0, -1, 0);

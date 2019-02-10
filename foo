@@ -1,0 +1,1995 @@
+commit 796b0e781004d0f9f5d23096c54a15adbc558389
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Sun Feb 10 17:47:30 2019 -0600
+
+    don't normalize() diagrams that were loaded from the group file
+
+commit 51914bf508bc60fd175f3a49b4d16140ffd5438a
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Fri Feb 8 23:23:25 2019 -0600
+
+    add changes to build
+
+commit 79b7240a8e3fed8481f63a7ce1035a7319674c12
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Fri Feb 8 23:22:02 2019 -0600
+
+    fix broken name
+
+commit fc46e3405bf622cee92a2fec77be5a7048afeee1
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Fri Feb 8 23:21:40 2019 -0600
+
+    reflect progress in ToDo list
+
+commit 15193be654d3a201599ab4d31e7c0310abaa3be3
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Fri Feb 8 23:21:13 2019 -0600
+
+    use localStorage Library to provide initial display quickly, then update based on more recent definitions downloaded from server
+
+commit 4c0c5fa9e1c42c49935e5b8610a7c6d8eefbb998
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Fri Feb 8 23:19:15 2019 -0600
+
+    use new localStorage Library
+
+commit 7f1afa0789e8d90eb335e80ae9afcc9a0b7d6583
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Fri Feb 8 23:17:37 2019 -0600
+
+    rewrite Library.js to use localStorage (see comments at start of class)
+
+commit a186ac0b6743c392aeab97a5a069dac49bb66e42
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Fri Feb 8 23:16:40 2019 -0600
+
+    constructor now accepts text string or parsed XML document
+
+commit 9837be7155059b728f5f6b794bac626df9724a93
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Thu Feb 7 18:19:09 2019 -0600
+
+    moved misplaced Firefox bug workaround so that shift-drag will also work -- Multtable single row/column dnd now works on all platforms, all latest browsers
+
+commit 0989bf088e6c43e8340ce1619ada623ee63da0aa
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Tue Feb 5 16:23:53 2019 +0000
+
+    Improving auto-generated sheets with mathml2text()
+
+commit a21dafb7e59433e299f2085d32191a2480535c43
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Tue Feb 5 16:23:38 2019 +0000
+
+    Removing debugging spam
+
+commit 2abe894555619f3f144a512767325733479119f9
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Tue Feb 5 15:05:38 2019 +0000
+
+    Now clicking sheet background unselects all items
+
+commit 663e6c8927467940f446aa742590f32c104b4106
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Tue Feb 5 15:04:54 2019 +0000
+
+    Make sheet button open Sheet.html in new tab
+
+commit d9e349284a5766fafec0ce61da65bf5e0b91c5c7
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Mon Feb 4 16:15:59 2019 +0000
+
+    Clarifying a to-do that was poorly written
+
+commit 87fa36efc34f7248340e1678f104ee987205e1b7
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Mon Feb 4 16:02:43 2019 +0000
+
+    Require explicit command to listen for group JSON
+    
+    This way the behavior is only enabled if requested, to keep things cleaner and less potentially surprising.
+
+commit c03dd699901ffd62cc44f8d6c716d69732ee8a09
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Mon Feb 4 15:57:44 2019 +0000
+
+    Adding to-dos based on recent emails
+
+commit 5a73ea390618bde6faaacc9ae4807dcc71d5d21f
+Author: Ray Ellis <ellisr@lubuntu-18.04-base>
+Date:   Sun Feb 3 19:05:53 2019 -0600
+
+    used subscript character in description
+
+commit 3833b8a0c2d050a2b1fc1afa65a59ace50fbe0de
+Author: Ray Ellis <ellisr@lubuntu-18.04-base>
+Date:   Sun Feb 3 19:02:55 2019 -0600
+
+    fix broken link to First Isomorphism Theorem in SubgroupInfo page
+
+commit 1dbe8d0dc3e1c14885978f63f9cdc00abe7dd7df
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Fri Feb 1 17:40:25 2019 +0000
+
+    Extending library page menu to all important pages
+    
+    Plus adding to that menu a link to the sheets page
+
+commit a9fb7ad8c2fb4c8a5040d28dc83abbfb84cdb319
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Fri Feb 1 17:39:33 2019 +0000
+
+    Making the loading message a bit more visually obvious
+
+commit 4e1a5b15341ad3800b315db874632c493379c6ab
+Author: Ray Ellis <ellisr@lubuntu-18.04-base>
+Date:   Thu Jan 31 20:12:14 2019 -0600
+
+    reflected status in ToDo, added MathJax linebreaking comments in gotchas
+
+commit 313b39fb4e72d54fa5b3cf95d05ed57fc5efd9e5
+Author: Ray Ellis <ellisr@lubuntu-18.04-base>
+Date:   Thu Jan 31 17:09:41 2019 -0600
+
+    changed &ltimes; to &rtimes; where appropriate (I think Z_4 sdp Z_5 was OK)
+
+commit ef3a2e7abc7d97fb39563d56c9a90240bb901e37
+Author: Ray Ellis <ellisr@lubuntu-18.04-base>
+Date:   Thu Jan 31 17:08:18 2019 -0600
+
+    adjust header formatting
+
+commit 802f67cf7f4033e391b0044abe948b95d00c790d
+Author: Ray Ellis <ellisr@lubuntu-18.04-base>
+Date:   Thu Jan 31 15:59:12 2019 -0600
+
+    add changes to build
+
+commit 1ace9b2894c87836fdda68cdc854cfec410d200d
+Author: Ray Ellis <ellisr@lubuntu-18.04-base>
+Date:   Thu Jan 31 15:58:23 2019 -0600
+
+    use MathML routines, granularity to support re-sizing well
+
+commit ecadec63cfb0c61ed2ec50af8352299ffb130c0b
+Author: Ray Ellis <ellisr@lubuntu-18.04-base>
+Date:   Thu Jan 31 15:55:14 2019 -0600
+
+    increase size of label to accommodate long names (e.g., (Z_3 x Z_3) sdp Z_2 permutation representation)
+
+commit 1631c3ae83ee795d52725c8ca5d6aeb3e84da282
+Author: Ray Ellis <ellisr@lubuntu-18.04-base>
+Date:   Thu Jan 31 15:53:38 2019 -0600
+
+    use MathJax in subset panel display, menus; improve performance by caching some formatted results
+
+commit 753107cb169aea3e6a66badc28bf3aeeedc692d2
+Author: Ray Ellis <ellisr@lubuntu-18.04-base>
+Date:   Thu Jan 31 15:52:17 2019 -0600
+
+    use MathJax in Cayley diagram visualizer diagram panel display, menus
+
+commit 96e7d5652ffddb14e8442b951263e66c8718c7bb
+Author: Ray Ellis <ellisr@lubuntu-18.04-base>
+Date:   Thu Jan 31 15:50:44 2019 -0600
+
+    improve menu positioning, formatting for use with MathML content
+
+commit 57a06768e392008cc96f454ce1302d8b69ee4e66
+Author: Ray Ellis <ellisr@lubuntu-18.04-base>
+Date:   Thu Jan 31 15:49:39 2019 -0600
+
+    replace obsolete math(...) references with MathML.sans(...) in documentation
+
+commit 16ba26872a90fea1d7a39b530a0eed84340bea23
+Author: Ray Ellis <ellisr@lubuntu-18.04-base>
+Date:   Thu Jan 31 15:46:22 2019 -0600
+
+    saved first non-commuting pair in non-abelian groups
+
+commit 8cc73bac3ef4e796ddadfdc13d808cf58b3c314a
+Author: Ray Ellis <ellisr@lubuntu-18.04-base>
+Date:   Thu Jan 31 15:43:41 2019 -0600
+
+    created MathML class, added utility formatting routines (start of re-factoring formatting code)
+
+commit fe67f6dab45f9fd4b8f0671ad8e6ae2ccc9cccc2
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Thu Jan 31 14:58:37 2019 +0000
+
+    Bug fix: Cycle graph partition was wrong for large groups
+
+commit 8e3f9df66d80c3f9500fadc60973b12d0dd8ec31
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Thu Jan 31 12:20:58 2019 +0000
+
+    Bug fix: float error caused gaps in cycle graph paths
+
+commit cb47867796c508ef9a8c7a1e7e2e60b5eabaeb67
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Thu Jan 31 12:10:11 2019 +0000
+
+    Fixing main page menu to stay at top right
+
+commit b03a32b27fda591e6c071dca647c552e7916f4bb
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Wed Jan 30 16:17:24 2019 +0000
+
+    Reorganizing to-do list
+
+commit a5fc87b7f393bf87f1f674d9c6f64722f5069f59
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Wed Jan 30 16:15:36 2019 +0000
+
+    Making a contributors section in the README
+
+commit d31b843b5a3cefac96a22b3a8312fa295795f38d
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Wed Jan 30 16:01:36 2019 +0000
+
+    Making library page show loading progress
+
+commit 47b453d6703c2dbd346e312e21c212338c5724b0
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Wed Jan 30 16:01:24 2019 +0000
+
+    Completing new logo and menu for library page
+
+commit 8b3c3e95dd9439ea72551eeb2f44d62b462466ea
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Wed Jan 30 15:02:09 2019 +0000
+
+    Add new logo to group library page
+
+commit b28efc28249229bf2314903a9a157333b64b2d69
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Wed Jan 30 14:59:27 2019 +0000
+
+    Creating new logo for web page
+
+commit 61d8b61c5adc21ad4d4dfd8f72c2e2ff568a6fdf
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Wed Jan 30 14:21:14 2019 +0000
+
+    Removing unused scripts from main page
+
+commit 596630a29636d1402b250a5da0a28d696ba68c7f
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Mon Jan 21 17:07:05 2019 +0000
+
+    Trimming edges of image for cleanness
+
+commit a52fc9f54fb4d4e3d0e265187eff106c8f7c63c1
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Mon Jan 21 17:06:25 2019 +0000
+
+    Adds PowerPoint file I used to lay out images for website
+
+commit 7778413f4888fc96b752a791f1e38f12c8f7ab9c
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Mon Jan 21 13:51:12 2019 +0000
+
+    Adding main website landing page
+
+commit 659673cf99284520974b5b9f4039e44e75947fc2
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Fri Jan 18 14:49:39 2019 +0000
+
+    Adding notes and reordering to-dos
+
+commit 9b8a3df3e0d70a5ea254c971d1b8c9d83c54c23c
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Fri Jan 18 14:48:14 2019 +0000
+
+    Disabling connections to connections in sheets
+
+commit 0c680c637549ae52e98a31cc6a8d6e12c6182ece
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Fri Jan 18 14:41:19 2019 +0000
+
+    Checking off an already-fixed bug
+
+commit 12e29b154ce935f316984bcf976a7ffe02c27e07
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Fri Jan 18 14:39:56 2019 +0000
+
+    Clarifying an item in the to-do list
+
+commit 182f18f99ccb11fe4eb5e7321647b33b107f824f
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Fri Jan 18 14:38:48 2019 +0000
+
+    Updating to-do list, noting already-fixed bug
+
+commit 28deb629adf4a0827dc45a7bcf27f7d3a2ba5738
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Fri Jan 18 14:30:49 2019 +0000
+
+    Tweaking help error messages in anticipation of release
+
+commit 1233b64ddea842d15f218f695c46ad5aa6cbf5d6
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Fri Jan 18 14:29:16 2019 +0000
+
+    More developer-friendly error handling
+
+commit 65fac75504caac26d7addb9130f93f7dd120f58c
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Fri Jan 18 13:11:10 2019 +0000
+
+    Bug fix: Subgroup info page now shows subgroup CDs
+
+commit f1d04488733cd30cdab5006815b76f06c43826d8
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Fri Jan 18 13:10:53 2019 +0000
+
+    NC&RE worked together to organize to-do list
+
+commit 7d5c8b7a6f3f0b50b19713476848c97a5eb283da
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Thu Jan 17 16:23:43 2019 +0000
+
+    Bug fix: Sheet elements stay below sheet controls
+
+commit 8ca37a666df29b3571f36798cbab162094f23458
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Thu Jan 17 16:19:45 2019 +0000
+
+    Bug fix: Homomorphism preview had incorrect contents
+
+commit 7c568212f53ad47f01ed8e5e8b76d0e11b72d7fb
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Thu Jan 17 16:16:31 2019 +0000
+
+    Bug fix: Mathematical error in homomorphism code
+
+commit 1f582d47d7b961373263f48d3e4772b697c8b65d
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Thu Jan 17 16:15:04 2019 +0000
+
+    Removing debugging spam accidentally left in
+
+commit 61e3e1b0d8995918afbbfeff1cff10f1f560b7e0
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Thu Jan 17 14:48:07 2019 +0000
+
+    Bug fix: Couldn't draw connecting line arrowheads
+
+commit 13395824428ef15f2cf8713cba86595ac30dfea0
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Thu Jan 17 14:45:06 2019 +0000
+
+    Bug fix: Console errors prevented editing sheet text
+
+commit a8655792787da45ae0af80df2090a2adf7a4f885
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Thu Jan 17 14:41:15 2019 +0000
+
+    Improving layout of Sheet controls
+
+commit ebe856dab64578ddbc10a70e25fdbf1b4a0d0b75
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Thu Jan 17 14:19:05 2019 +0000
+
+    Removing unnecessary header
+
+commit 560b4dae7832cefc89a4992b636bb0a62c63f438
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Thu Jan 17 14:08:19 2019 +0000
+
+    Huge to-do list update from meeting in St Andrews
+
+commit 650fd4c46f5c42be9ae05f704791aceec3abc27b
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Mon Jan 14 10:30:05 2019 +0000
+
+    Adding sheets-related bug reports
+
+commit 341726ad13404eb3cf0a96d6e2c740bce0cd4778
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Mon Jan 14 10:29:24 2019 +0000
+
+    Adding arrows margin option to morphisms
+
+commit ee9201d54559efb7032df967d447c13cec43afa3
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Sat Jan 12 17:56:27 2019 +0000
+
+    Adds support for visualizing solvable decompositions with sheets
+
+commit 46e8b88cfcfcf61a78b5a6914fddb73f6363d98e
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Sat Jan 12 17:53:54 2019 +0000
+
+    Fixing sheet to use correct mathematical relation
+
+commit 63e99fa4566e6c234a684d026a8ecdd125ed494f
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Sat Jan 12 12:22:00 2019 +0000
+
+    Adds support for visualizing quotient maps with sheets
+
+commit 206470adff82dcabdc2c7fc1be955839e38014ef
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Sat Jan 12 12:21:34 2019 +0000
+
+    Bug fix: wasn't tracking injective/surjective option
+
+commit d8b13deb5f82f74c4b04df9852aa211869845605
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Fri Jan 11 16:41:02 2019 +0000
+
+    Bug report re: images in subgroup info page
+
+commit 84eb30d812154decf872149437c8bad00f535723
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Fri Jan 11 16:40:44 2019 +0000
+
+    Adds support for visualizing subgroup embeddings with sheets
+
+commit 5a8f9eded208802aa80c782e21417d6fe7dee381
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Fri Jan 11 15:01:33 2019 +0000
+
+    Reordering next steps of my plan
+
+commit 1b3f2433be6ec0f9d2e76b45f624c9bf9cc23ce4
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Fri Jan 11 15:00:26 2019 +0000
+
+    Adding bug report about element names
+
+commit 76db1fcc418605547b149fc25872499b3eae5c24
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Fri Jan 11 14:46:26 2019 +0000
+
+    Adds bug report re: sheets, to handle later
+
+commit 8ee8bc401a9061773336c78428606be43828d34a
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Fri Jan 11 14:46:15 2019 +0000
+
+    Adds support for visualizing subgroup lattices with sheets
+
+commit c26d331a1d30abb64ec2352a542c5d63be756a68
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Fri Jan 11 12:44:30 2019 +0000
+
+    Adds support for visualizing class equations with sheets
+
+commit 2043d3981228e03d19147e55cc8c8437eea2afe1
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Fri Jan 11 11:17:06 2019 +0000
+
+    Standardizing highlighting in VisualizerElement JSON
+
+commit 0dfd321c931cae02a9415d8827ee536400d8c13e
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Thu Jan 10 20:04:46 2019 +0000
+
+    Updating plan for programmatically generating sheets
+
+commit d6ac365eb77d99e3ff76169df5072e204712437b
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Thu Jan 10 17:02:15 2019 +0000
+
+    Adding a feature idea
+
+commit b7bc3878e533b6f38013abe85b22589f73eaf2b7
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Thu Jan 10 16:55:59 2019 +0000
+
+    Removing accidental html redirection line
+
+commit 2fedbc2aef17a76ae32b3317eb41da6a041ff871
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Thu Jan 10 16:49:27 2019 +0000
+
+    Support text alignment in sheets
+
+commit edd28da69559ea3c9774111c73d8aaab3a532687
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Thu Jan 10 16:43:56 2019 +0000
+
+    First generated sheet: All visualizers for a group
+
+commit f75134a0f3d04e752dff3dad911128bb8388b73e
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Thu Jan 10 16:43:51 2019 +0000
+
+    Bug fix: Clients expect sheet element coords relative to container
+
+commit c23048826076912a6188ce5a9afccc64d03ffdd5
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Thu Jan 10 16:42:40 2019 +0000
+
+    Bug fixes in sheet visualizer serialization
+
+commit c0fda9cc89042d011e2b834bb04a9d11906bda54
+Merge: 571d844 4aa4d26
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Thu Jan 10 15:45:51 2019 +0000
+
+    Merge branch 'master' of https://github.com/nathancarter/group-explorer
+
+commit 571d844faca5fc0a24c93b3c1eaa93ebc0acd571
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Thu Jan 10 15:45:44 2019 +0000
+
+    Adding plan for how to finish sheets
+
+commit 8799a9413ddcc8af4c4d26771aa822259d301af5
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Thu Jan 10 15:45:35 2019 +0000
+
+    Building several recent commits
+
+commit b428a36f089e9f5b1b2f79af8adaca2afe6964ca
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Thu Jan 10 15:45:16 2019 +0000
+
+    Adding support for programmatically launching sheets
+
+commit 6d8cf330485d81b5d916af4bcff3a150dba86622
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Thu Jan 10 15:44:55 2019 +0000
+
+    Fixing bugs in how visualizers are loaded from JSON
+
+commit 34fcb9546a000e00d0c89ca417017090debb230e
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Thu Jan 10 15:43:52 2019 +0000
+
+    Removing experimental warning on sheets
+
+commit 4aa4d26be0161a56138102e6a0acc9927cc279f6
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Wed Jan 9 23:58:21 2019 -0600
+
+    fix updateLabels so labels don't disappear behind nodes upon changing node radius or label size
+
+commit 482ac895159bdb6262df59375ff3ba3fd9b8966d
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Wed Jan 9 23:56:53 2019 -0600
+
+    fixed unreachable emitStateChange code in _generateNodes (accidentally placed after return)
+
+commit 3820b6b4614749fa37957c11f7673e110ba9dcf6
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Wed Jan 9 23:27:53 2019 -0600
+
+    fix bug in context.setTransform call (Chrome didn't care, but Firefox did)
+
+commit d51454f392bb5ca69c8bcfda5976b873665efdbc
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Wed Jan 9 12:48:05 2019 -0600
+
+    add tooltips to large graphic in Cayley diagram visualizer
+
+commit 7b36cd00ba9338ea5612f1da29395a9acae7ff3e
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Wed Jan 9 16:13:14 2019 +0000
+
+    Bug fix: an earlier commit broke the main page
+
+commit d5c01f70f655c954353a481968f74ccb5e15fedd
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Wed Jan 9 16:07:40 2019 +0000
+
+    Morphisms can now report injective/surjective
+
+commit 36d15cf89ebe88ed31a6c70b950f7e784aa21a64
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Wed Jan 9 15:56:06 2019 +0000
+
+    Morphisms can now show their list of defining pairs
+
+commit 9ab85dc8ccbe70bf63d92d562d4787d9c0ec50bb
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Wed Jan 9 15:44:53 2019 +0000
+
+    Adds support for morphism preview window
+
+commit 3ea9d657ae2644905a837b4fb0d533c26d248008
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Wed Jan 9 15:23:59 2019 +0000
+
+    Morphism edit dialog now fully functional
+
+commit 9f05d6eb8adf512f054cb0bfdec28388feefceea
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Wed Jan 9 15:23:39 2019 +0000
+
+    Bug fix: mathematical design flaw in getFullMap()
+
+commit 49c150d2695321469fcfbfc12d5af20669af4512
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Wed Jan 9 15:22:42 2019 +0000
+
+    Using easier way to access domain and codomain groups
+
+commit 218b3fd41c21dd212c1b2feb7a756d0c625b38c3
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Wed Jan 9 12:46:42 2019 +0000
+
+    Adds function for extending partial homomorphisms
+
+commit eaa614562a7fcc9c40b1c3498c62e1428ba6ab63
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Wed Jan 9 12:32:57 2019 +0000
+
+    Supports drawing morphisms with all arrows shown
+
+commit b93c07170c2969cf656f14475ddd702b75167bac
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Wed Jan 9 11:52:10 2019 +0000
+
+    Bug fix: overlay wasn't redrawn when canceling edits
+
+commit 5a86abde496969c9a93dfdc8951d2b8af8bd1e43
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Wed Jan 9 10:53:08 2019 +0000
+
+    Permit including domain/codomain in morphism text
+
+commit f8af9e531406f9d669c45e36d849aa3da6aa9b39
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Wed Jan 9 10:41:26 2019 +0000
+
+    Let users edit morphism names
+
+commit c915bb542973640fd52d1e7a237ccf0bc1afb641
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Wed Jan 9 10:41:10 2019 +0000
+
+    Fixing outdated comments
+
+commit 15f4717e9a7f3c9b3abf9a9226e049166fc176db
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Wed Jan 9 10:28:29 2019 +0000
+
+    Build all recent commits
+
+commit e18a4e64a11af57fe72951403e4450fea4b1a734
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Wed Jan 9 10:28:19 2019 +0000
+
+    Show morphism names on sheets
+
+commit 9d6ce2d101e7d4dd2136124f8341ea16a69aefca
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Wed Jan 9 10:27:58 2019 +0000
+
+    Update morphism insertion tools after inserting one
+
+commit 4cd2f9ddf92a4bfdec8d412d66229036d5d32ff5
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Wed Jan 9 10:27:13 2019 +0000
+
+    Bug fix: pair beginPath()/stroke() calls
+
+commit 70625b1558cb95d69c8f92ead9dd9bd5b7176bee
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Wed Jan 9 10:26:33 2019 +0000
+
+    Bug fix: remove half-written code
+
+commit 248a41e6beb3600bcef8e71ff7b4ceac23be0a3c
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Wed Jan 9 10:26:20 2019 +0000
+
+    Bug fix: initialize arrowheadSize in constructor
+
+commit 4a8fdc42548ae3cd2a46353235b3d23c3e948831
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Wed Jan 9 10:26:07 2019 +0000
+
+    Removing debugging spam accidentally left in
+
+commit b5fb0d6ed735fa3d56625847dd0185893e26a920
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Tue Jan 8 16:55:57 2019 +0000
+
+    Morphisms now draw 1 arrow from domain to codomain
+
+commit fc146fc65943d1fe56ebcfa36ff30d1d1bb0b421
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Tue Jan 8 16:21:35 2019 +0000
+
+    Adding extended plan for how to implement sheet morphisms
+
+commit f18072b3dd9f7344d6ae8235d46f623ece116c64
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Tue Jan 8 14:40:59 2019 +0000
+
+    Very simple morphism class created; does no math yet
+
+commit 1591ca5d2ad15786ba7c0de9d42c9b3a7af08498
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Tue Jan 8 13:29:56 2019 +0000
+
+    Adding the ConnectingElement class to sheets
+
+commit d8beffcfb8d7f338dbe89896767d9c68321e40fb
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Tue Jan 8 11:18:43 2019 +0000
+
+    Removing debugging spam accidentally left in
+
+commit 9d0e0ed45df11a29f4edbe6b5613166cd7b61560
+Merge: 93d1507 97fc48d
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Mon Jan 7 13:00:35 2019 +0000
+
+    Merge branch 'master' of https://github.com/nathancarter/group-explorer
+
+commit 93d1507da455d70e94ad18697ed7cbaeb7877639
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Mon Jan 7 12:53:40 2019 +0000
+
+    Significant refactoring of sheets code to fix bugs
+    
+    See changes to notes/ToDo.md for details.
+
+commit ee93da2b53291116d4fa92e3de8bda9a61b6c572
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Mon Jan 7 12:52:07 2019 +0000
+
+    Small typo fixes
+
+commit c0d2cbb33bc22032449ddc41e7bc9b5430da9cc0
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Mon Jan 7 12:51:44 2019 +0000
+
+    Small typo fix
+
+commit 97fc48d146b8880a69bd79fa1a884a614a7e4711
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Sun Jan 6 21:59:27 2019 -0600
+
+    reflect progress in ToDo list
+
+commit 4cc508490337701eb43ad5ba80d2e317a84a3a59
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Sun Jan 6 21:53:37 2019 -0600
+
+    substantially re-write chunking
+
+commit c697ef74794e3f9531b6c268e41b473dabfc95c7
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Thu Jan 3 14:16:36 2019 -0600
+
+    re-use sphere geometry, material where possible to improve performance
+
+commit 3ba06245520c8fbe40ba1961c90c606ff8997def
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Wed Jan 2 23:07:56 2019 -0600
+
+    reflect progress in ToDo list; add Chunking bug (blush)
+
+commit 72c823d9e436131ec06b3c523ad578d93fcae901
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Wed Jan 2 23:06:25 2019 -0600
+
+    add links from diagrams to visualizers; has cursor change on mouseover, text color change on hover, and tooltip to indicate function; center diagrams in table cell
+
+commit 968c56285ccbb5d8a836287cee59b990448d46f4
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Wed Jan 2 10:54:51 2019 -0600
+
+    show progress in ToDo list, add some topics from email
+
+commit be5f0798d55d12f26b9810c44c718c40713170b6
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Wed Jan 2 10:13:27 2019 -0600
+
+    removed gratuitous spacing around delimiters so graphic labels like <e,a,b> are more compact
+
+commit b543f1ac65a895fe74dae82fe30e92770f9949e9
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Wed Jan 2 10:10:34 2019 -0600
+
+    replaced &lt; and &gt; mfenced values in definitions and representations with &#x27E8; (\langle) and &#x27E9; (\rangle)
+
+commit 99c7bf95a83bea5fa6e04e6c9ae4b14c8f260315
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Tue Jan 1 22:47:21 2019 -0600
+
+    sort rows by group order (instead of leaving them unsorted)
+
+commit c8546bf9eebef04679368db95ee5fc77e6b0f980
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Tue Jan 1 22:27:09 2019 -0600
+
+    record progress, comments in ToDo
+
+commit cdda39ea8447e3f7e34ccd2e5b6ea8dde7fcc8f0
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Tue Jan 1 22:25:57 2019 -0600
+
+    add Chunking to Cayley diagram panel, large graphic
+
+commit 513b1f3bae525c53149d57383b01b6564cacf38d
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Tue Jan 1 22:24:00 2019 -0600
+
+    remove redundant (and time-wasting) resize call
+
+commit fcc2808ed8b2bb15acd385fc45a81098e3fd94cd
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Wed Dec 26 17:24:16 2018 -0600
+
+    record progress in ToDo notes
+
+commit 4de500a7ecd58fb5037b5f437b14a27e47110fca
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Wed Dec 26 17:22:05 2018 -0600
+
+    improve curved arrows choice by maintaining center of circular or rotated group
+
+commit a06f39bf71fa9ff036b988de2090b29c2646cb56
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Mon Dec 24 21:18:34 2018 -0600
+
+    recorded THREE.js raycasting issue
+
+commit 7d3fa73a3c8139e7bd775d4da4cb17e9675762e5
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Mon Dec 24 21:04:50 2018 -0600
+
+    reflect progress in ToDo list
+
+commit 3220510c73c0cc2a551b5185e5a2d9bebe925ffd
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Mon Dec 24 21:04:31 2018 -0600
+
+    add changes to build
+
+commit b8f7e0e34c28574b1e898309c5772286d1041d7f
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Mon Dec 24 21:03:16 2018 -0600
+
+    add shift-dnd line pull to Cayley diagram; fix arrowheads to come cleanly up to the node
+
+commit d9efa732fa7c1f908071eb4e1c0f1abe5c6f57b0
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Mon Dec 24 13:07:52 2018 -0600
+
+    explictly declare Diagram3D.Line.offset
+
+commit 83019672899c0c2362ffc063e2aeb362f129b280
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Mon Dec 24 13:04:48 2018 -0600
+
+    replace 'remove' with 'detach' in resizeGraphic, to preserve listeners
+
+commit 4b98ec53fd7789ae19f1d336aeade2699c58133b
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Thu Dec 20 17:46:35 2018 +0000
+
+    Some bug fixes, still to be improved
+
+commit 64a613c91e938e3c095c28817eb22905dd8e2473
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Thu Dec 20 17:46:20 2018 +0000
+
+    Adding Cayley Diagram support to sheets
+
+commit e8bff659c9f47f7dbe7048031355b3925773fa69
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Thu Dec 20 15:07:29 2018 +0000
+
+    Typo fixes
+
+commit ff4b103346f308a9372846e1f1f3b6feb522a759
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Thu Dec 20 14:45:56 2018 +0000
+
+    Factoring common code out of MTElement/CGElement
+
+commit 1469874204795902dc95f0985d9c23336832a100
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Thu Dec 20 12:27:48 2018 +0000
+
+    Adds Cycle Graph support to sheets
+
+commit ef93382fceb536207795d314ab53cc52698cccf3
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Thu Dec 20 12:12:11 2018 +0000
+
+    Updating JS build files
+
+commit a0cd34d272aa9eb2596b61f8ad767d016ab1acae
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Thu Dec 20 12:12:01 2018 +0000
+
+    Bug fix: Sheet loading had gotten broken
+
+commit a7dd9e4f2fe3693122ee93236f8427685c3afc21
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Thu Dec 20 12:11:41 2018 +0000
+
+    Ensure loading message appears after sheet
+
+commit 4f995b95eef93c98d329f533f9a18a9771f8d59a
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Thu Dec 20 12:11:29 2018 +0000
+
+    Make visualizers not selectable as text
+
+commit bb54b69258a204a50a1529212163be2d70c9c890
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Thu Dec 20 11:49:22 2018 +0000
+
+    Making MTElements editable
+
+commit 475b2538ea21bba8344a32f218aefdd61209a14c
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Wed Dec 19 16:16:42 2018 +0000
+
+    Initial work on MT visualizer in sheets
+
+commit acad8222b65d8e4686d4f72da192fdf1342248a4
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Wed Dec 19 15:12:34 2018 +0000
+
+    Move sheets html file to main folder w/other html files
+
+commit acf63db0e97831afafdac818525d2596f1476b6d
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Wed Dec 19 15:09:28 2018 +0000
+
+    Add undo/redo to sheets
+
+commit bbaefbad93727e06c3d4ec5d6602b4b93a1cbbce
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Wed Dec 19 15:09:22 2018 +0000
+
+    Add move/resize events to DragResizeExtension
+
+commit 050d80b403606f6157f285647c5a59f599160116
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Wed Dec 19 13:44:21 2018 +0000
+
+    Sheets now support move fw/bw/to front/to back
+
+commit b4243fae1cb0e84ae2aa47f48cb2e17f2abc35dd
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Wed Dec 19 13:13:30 2018 +0000
+
+    Removing unused code
+
+commit d947831483f0613ff54a57e812b1efd4ecf92d0f
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Wed Dec 19 13:13:26 2018 +0000
+
+    Implement Copy and Paste for sheet elements
+
+commit edfa6306e5fed84d2592565bd5b9c036c4ceb55e
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Wed Dec 19 13:12:41 2018 +0000
+
+    Add select/deselect events to DragResizeExtension
+
+commit 731973f2011ff45a9a57b8573798dc4941b641e9
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Wed Dec 19 12:43:38 2018 +0000
+
+    Adds saving and loading to sheets
+
+commit 98729ef0dea180a6f95c7149437092ae6533c3d2
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Tue Dec 18 17:27:53 2018 +0000
+
+    Adding TextElement support to sheets
+
+commit 3a53700adfb583ea24414427033445231162b273
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Tue Dec 18 17:27:25 2018 +0000
+
+    Bug fixes and extensions to DragResizeExtension
+
+commit e08d0f11c74500e7dade889e152d0a472f62b46f
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Tue Dec 18 16:01:07 2018 +0000
+
+    Implements editing for SheetElements
+
+commit f10e01e2501158154f25f3d76d1e441a7a7c30d2
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Tue Dec 18 15:16:38 2018 +0000
+
+    Updating sheets HTML file and to-do list
+
+commit 35a7e9e461975906b4d9952a4e6802288351aea7
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Tue Dec 18 15:16:27 2018 +0000
+
+    Adding make target for sheets-related items
+
+commit 59c9b3096d0fe3eab8eb42e974af868c8ba51455
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Tue Dec 18 15:16:10 2018 +0000
+
+    Adding SheetModel and SheetElement classes
+
+commit 17c31874e16bdee601c5a8faa7a16dc67bfe3b1e
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Tue Dec 18 15:15:54 2018 +0000
+
+    Bug fix: drag/resize failed for multiple selectable elements
+
+commit 01f6c00bb36be3aabfc47d42dc3f728dfb827e5a
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Tue Dec 18 15:15:33 2018 +0000
+
+    Bug fix: drag/resize failed for elements with padding
+
+commit d11d198a3ce23d381a7e60001e6b6f19a1f9b115
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Tue Dec 18 15:14:32 2018 +0000
+
+    Rebuilt Markdown file from fixed HTML file
+
+commit 70d41555017c5be02064c9b3cb57f0cf54989491
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Tue Dec 18 12:52:51 2018 +0000
+
+    Removing debugging command accidentally left in
+
+commit 603ea4e87e9999a1934d3ba4aeedafdbeee9b62c
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Tue Dec 18 12:52:40 2018 +0000
+
+    Completing organization phase of sheets development
+
+commit 459d15e9a99efd65d24b8c907edcf38a0563ab9e
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Tue Dec 18 11:58:01 2018 +0000
+
+    Typo fix in visualizerExemplar.html
+
+commit 4e12fee07a6ac6d2309ecc2c83306c215c97c4bf
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Tue Dec 18 11:56:06 2018 +0000
+
+    Enable developers to have experiments subfolders
+
+commit 9e70298a75dc4c19ff96f74649298a964886f8aa
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Tue Dec 18 11:54:57 2018 +0000
+
+    Adds Drag/Resize jQuery extension
+    
+    (This will later be used in sheets.)
+
+commit 4a9625f93953425f2a32979e4c5394aa73e5f86c
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Tue Dec 18 10:17:10 2018 +0000
+
+    Tweaks to to-do list
+
+commit 746a50d072bb9d31ffa11ce092e2752dd365370b
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Mon Dec 17 21:11:31 2018 -0600
+
+    getImageURL no longer returns data URL (and hasn't for some time) -- it returns an <img> element, rename to getImage
+
+commit 8e6ec28984ca307355ed12eb1677306336251710
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Mon Dec 17 17:55:30 2018 -0600
+
+    reflected progress in ToDo file; moved GroupExplorer performance considerations to PostponedOrAbandoned.txt for the time being
+
+commit 1a8c46a0e2ac8ea9bc79ee5237f1183e2db665ba
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Mon Dec 17 17:42:47 2018 -0600
+
+    add ability to drag-and-drop a row in the generation-table to change the order of generation
+
+commit 90d9a8c3a77b4b655f5683e6077cc24987489acb
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Mon Dec 17 17:34:06 2018 +0000
+
+    Updating plan for sheets
+
+commit d8e04d536bc8efe821ca278a892b72486a47bee9
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Mon Dec 17 14:50:31 2018 +0000
+
+    Switching Ctrl+Drag to Shift+Drag to work with Macs
+
+commit 8f3d4efbb8894e5831076a408a5f7a13b917869d
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Sun Dec 16 13:36:21 2018 -0600
+
+    move longest label calculation to XMLGroup
+
+commit 557ad9963ac75a07ab187292b7c969dd5bf19e9b
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Fri Dec 14 21:33:51 2018 -0600
+
+    reflect solution to large group display problems in ToDo list
+
+commit d9041f8b7e7b42b0a57d9383de7da64361c7bf56
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Fri Dec 14 21:32:18 2018 -0600
+
+    add changes to build
+
+commit 64e4f32733472810373d074a3c9a6e341ea97020
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Fri Dec 14 21:31:35 2018 -0600
+
+    finish large graphic mouse events: zoom in/out, zoom to fit, display/clear cell label, re-position multtable, exchange two rows/two columns; re-scale separation slider from [0,0.2] to [0, 1.0]
+
+commit eb5422ef34735b2cef0ecda8c0e8f7b1e8faf676
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Fri Dec 14 21:25:12 2018 -0600
+
+    expand on code that avoids iterating over off-screen elements; cache permutation labels
+
+commit 6a8eeb901d30918a3cd813931c1a3483e1ab0cf5
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Fri Dec 14 21:14:10 2018 -0600
+
+    add size, label, longestLabel attributes, index<->position functions
+
+commit cc10a1782e43c83ca84234018f7849866f160edf
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Fri Dec 14 11:53:52 2018 -0600
+
+    remove unused code; factor out large graphic click handler
+
+commit 4ae950c6abb979b1da8a2b8835da1f2b9bee7c69
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Fri Dec 14 11:49:29 2018 -0600
+
+    add changes to build
+
+commit 6addfd5b98c2046ccc0f0fbe47d7ec7b043c2ea4
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Fri Dec 14 11:29:01 2018 -0600
+
+    only calculate longest_label_length on changing cycleGraph
+
+commit c452a81862adf729e5285612cde1493b0b35e7f8
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Fri Dec 14 11:27:52 2018 -0600
+
+    only find closestTwoPositions once, on construction; only find distance between elements in one direction
+
+commit 98536785c592cdfa75438564d025b1d4859b65a9
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Wed Dec 12 17:13:12 2018 +0000
+
+    Adding more to-dos for myself
+
+commit 1f0f4201cb20c4f2531d2510429c9abbf84ab4d9
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Wed Dec 12 16:30:47 2018 +0000
+
+    Updating notes file
+
+commit 0eb113cf925076bbdb60b1822cce2404078ed55f
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Wed Dec 12 16:30:38 2018 +0000
+
+    Making mult tables draw only what's visible on screen
+
+commit 3e17760b570f1ff275cbf6e5ed5c227d7a2f2b23
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Wed Dec 12 16:07:21 2018 +0000
+
+    Making cycle graphs draw only what's visible on screen
+
+commit 703412b93f4fd561a317583a5eaac5562ea5b9a1
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Wed Dec 12 12:55:10 2018 +0000
+
+    Replace taxicab metric with Euclidean
+
+commit d82c1037258c0168219fad8546cce40f979420cf
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Sun Dec 9 14:52:18 2018 -0600
+
+    notes to document unexpected limitations, etc.
+
+commit 99717cbc26f6990911ec68591279e75399ee6f72
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Sun Dec 9 14:51:20 2018 -0600
+
+    add changes to build
+
+commit 7bdca486491b2900c754a90b184f6433221e30e9
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Sun Dec 9 14:50:59 2018 -0600
+
+    add zoom in/out, reset, node label display, and drag-and-drop (with left-click)
+
+commit a004265b5c8585dba332c3c8a0ccaa5040754142
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Sun Dec 9 14:48:15 2018 -0600
+
+    draw figure directly from CycleGraph to real screen; add support for zoom, drag-and-drop
+
+commit d7538705c95dbd7847490548b785e270b7d49c34
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Sun Dec 9 14:26:06 2018 -0600
+
+    move closestTwoPosition calculation to CycleGraph class, return cycleGraph units instead of pixels
+
+commit 043189b7f81b1a51c1b65be7badb1caedac3013b
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Sun Dec 9 14:21:05 2018 -0600
+
+    remove extraneous character
+
+commit 734570e14c42db35502da2473914df14cccb1cab
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Tue Nov 27 22:59:10 2018 -0600
+
+    fix <link...></style> tag errors -- tolerated by Chrome, but not by all browsers
+
+commit a1545d9b46d9f8528bc0534fb4ec451b28c828e0
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Mon Nov 26 22:56:56 2018 -0600
+
+    add changes to build
+
+commit dd7f758ecd37e014006af7c93358d9e01c9f2692
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Mon Nov 26 20:59:25 2018 -0600
+
+    Update ToDo.md
+
+commit fcdc10ce5c9fa8b58706dcf8046aba929d9ac3da
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Mon Nov 26 20:33:02 2018 -0600
+
+    fix bug when deleting redundant generators; implement 'Oranize by' menu option
+
+commit d3ef4063519de8db814fc88808776d684db8ece6
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Mon Nov 26 20:31:42 2018 -0600
+
+    use both generators subset calculation and those from XML spec when calculated generator set is shorter
+
+commit cc675be9eb9dc7805fc5d708a3fe8b9c443d61e4
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Mon Nov 26 20:27:12 2018 -0600
+
+    if group is not solvable extend final subgroup with random choice, minimize generator set, and mark group as not solvable
+
+commit 86c451f98f5ace9418180cbf3876e6d1600bfb40
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Mon Nov 26 20:19:57 2018 -0600
+
+    implement 'Arrow means' right/left multiplication choice on diagram panel
+
+commit 6cad5b5eabf1e2c200f78df742a14c2ef4a358e5
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Mon Nov 26 14:27:27 2018 +0000
+
+    Update ToDo.md
+
+commit 4b1aff737547a4af06ff126db54d5bc7f7127530
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Sun Nov 25 11:46:21 2018 -0600
+
+    use visualizerFramework stylesheet
+
+commit da31dfaef0417ba75395e252aef5d21a37c6c8f2
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Sun Nov 25 11:30:38 2018 -0600
+
+    add forgotten reference to menu.css
+
+commit dc304ca017d46c67f6566ec1abbe7f53fe59204f
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Sat Nov 24 15:46:25 2018 -0600
+
+    add changes to build
+
+commit 81b162206c3a229c6249a53d6d3c8bb6ee9c93cd
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Sat Nov 24 15:45:48 2018 -0600
+
+    reflect progress in ToDo list
+
+commit a8f1810df5e0de2987d3d771e448cb3e81c1295e
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Sat Nov 24 15:39:37 2018 -0600
+
+    factor out view, diagram panel html, js, css
+
+commit eca76c1552029fb6aaf671c2163565295da1316f
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Sat Nov 24 15:32:08 2018 -0600
+
+    process new files
+
+commit 3695fa9615c9b752f9deee686eeacc75e8294d96
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Sat Nov 24 15:27:47 2018 -0600
+
+    add group to Diagram3D; calculate line colors from number of arrows; add method to remove duplicate lines, arrows; fix bug in normalization
+
+commit c4bc7c98c4bd2685f021fdd9aed99e8307af0de5
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Sat Nov 24 15:17:25 2018 -0600
+
+    use new CayleyDiagram interface
+
+commit 1690b3b41dd23538020419543b3d084d10eee720
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Sat Nov 24 15:11:16 2018 -0600
+
+    factor out diagram panel html, style, routines
+
+commit 0c9525501dedc5df3994b4c4238c2b42b14cf7c7
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Sat Nov 24 15:09:23 2018 -0600
+
+    factor out view panel html, routines
+
+commit 7c5d80d0f7a12bd4388b52337e81114fec3dfacd
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Sat Nov 24 15:07:50 2018 -0600
+
+    factor out menu style, routines from subsetDisplay
+
+commit a512193b878b11a2ee24df2aafe6603e79997227
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Sat Nov 24 15:03:46 2018 -0600
+
+    add group to Diagram3D generator call, don't use global variable
+
+commit 3b8841d4c787d5ba5966da7f98bc47703f39c692
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Sat Nov 24 15:02:48 2018 -0600
+
+    set default camera position to match GE2; simplify small graphic for faster rendering; simplify labels for faster rendering; calculate line curvature to avoid interference with nodes
+
+commit f7f032a8f60c9107f745c925030f8c8857e558a0
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Sat Nov 24 15:01:41 2018 -0600
+
+    calculate colors rather than pulling from pool
+
+commit a993e5f087c33c4ca877d2432b903f5413ed7ddf
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Sat Nov 24 15:00:58 2018 -0600
+
+    re-implement Cayley diagram generation
+
+commit d7556333fd1ceaa180771b41b64f309dc3d12115
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Sat Nov 24 14:59:05 2018 -0600
+
+    change names of custom Array routines to have leading _; add _flatten, _last methods
+
+commit ef8302558e013c394e1dd0b0bd02f52496f4764c
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Sat Nov 24 14:56:04 2018 -0600
+
+    separate generators spec'd in XML from those determined in subset calculation
+
+commit efc44bd77d168e87387c16328530ae2d283c62ed
+Author: Your Name <you@example.com>
+Date:   Fri Nov 23 10:58:05 2018 -0600
+
+    add Z_nm calculation to computed properties
+
+commit 36bc50f257af698d890966b19bfa0af8462c6906
+Author: Your Name <you@example.com>
+Date:   Fri Nov 23 10:52:32 2018 -0600
+
+    improve generator set minimization
+
+commit 4e7ab97b55596d7ab1787e9e3bfde8e534b31300
+Author: Your Name <you@example.com>
+Date:   Fri Nov 23 10:51:02 2018 -0600
+
+    added isNormal method (uses BasicGroup method)
+
+commit 1bdc71b70cb27e5f6dd517e773b526813be4f89e
+Author: Your Name <you@example.com>
+Date:   Fri Nov 23 10:46:54 2018 -0600
+
+    add Z_nm group computation
+
+commit 5b7e39c5325fb9ed236bf1522a33588a380e6778
+Author: Your Name <you@example.com>
+Date:   Fri Nov 23 10:45:58 2018 -0600
+
+    fixed bug in constructor for size 0; added complement function; extend some static to instance functions
+
+commit 5e384dd475a9f0a2befb9abf86f013abe9a687b8
+Author: Your Name <you@example.com>
+Date:   Thu Nov 22 23:24:38 2018 -0600
+
+    change mathml in groups -- remove <mo>,</mo> from representations that caused unintended commas; changed width of space in permutation representation to 0.3em
+
+commit b39a2bf2aec2bd0fd33e78ec9e79cc450879f9ac
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Tue Oct 23 17:03:30 2018 +0100
+
+    Checking off completed to-do item
+
+commit 2675faad6807192f1cc9944a022112e2ed9f094a
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Tue Oct 23 17:02:01 2018 +0100
+
+    Adding missing stylesheets to Cycle Graph page
+
+commit 51af4c682ba865c69a5764a51113cbf789c327bb
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Tue Oct 23 17:00:12 2018 +0100
+
+    Bug fix: Make cycle graphs go clockwise
+
+commit 7d721728c045d5fa5f11349f6faf62b7acfeba5e
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Tue Oct 23 16:58:45 2018 +0100
+
+    Adding highlighting to Cycle Graphs
+
+commit ff6211050ce7e06a00167b566a7a49d3113e31fc
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Tue Oct 23 16:33:45 2018 +0100
+
+    Bug fix in computation of best cycle graph size
+
+commit c6ab8000e6915985fd263bd872b1c905afd411ac
+Merge: b003bbb 924eb80
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Tue Oct 23 16:11:17 2018 +0100
+
+    Merge branch 'master' of https://github.com/nathancarter/group-explorer
+
+commit b003bbb8b12204b7e893e12f10655acaa6c3e22e
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Tue Oct 23 16:08:29 2018 +0100
+
+    Adding first version of Cycle Graph visualizer
+
+commit 924eb80e67f3adc0bb3c8e81bbdff7cf8444b940
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Fri Oct 19 22:06:21 2018 -0500
+
+    fix typo in superscript 0 conversion from mathml to unicode superscript character
+
+commit 796ecf98e98723b3e67657e8b851601c2f59ce7f
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Fri Oct 19 22:00:05 2018 -0500
+
+    fix typo in superscript 0 conversion from mathml to unicode superscript character
+
+commit 21bd7e254c58521ddc324793a27c5d3adbbd376a
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Thu Oct 18 20:18:41 2018 -0500
+
+    fix bug in addLines to insure that only one line with no arrows would be drawn between two nodes in the case that there were arrows coming and going
+
+commit 8b792395cd8f36fae47e88bc23d88ab88f3c14b8
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Wed Oct 17 11:50:12 2018 -0500
+
+    Arrgh! Git handles links fine, but it doesn't display a link name ~.md as markdown. Reverting to copies, think some more on it. Sigh.
+
+commit ce8a1327a8393e913b6007cc0c687e0cf9bdfee5
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Wed Oct 17 11:32:49 2018 -0500
+
+    links work fine -- removing .md files that are simply copies of their source and making them links
+
+commit 48f72698e81b369628f77be45cc21a116ff0a5d0
+Merge: 5481659 1531513
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Wed Oct 17 11:19:52 2018 -0500
+
+    merge with Library.js updates
+
+commit 548165987855228bbf7fe643c3874b9d83e5a109
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Wed Oct 17 11:08:56 2018 -0500
+
+    replace copy with link (bit of an experiment, not sure how well git supports this)
+
+commit a516d38715af4c536268d854f62fa052181bdf5e
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Wed Oct 17 10:55:48 2018 -0500
+
+    attempt to unify style across visualizers; (note introduction of css custom variables)
+
+commit 153151339881d6bfe3d86263a026ce67ae853cf3
+Merge: fe91184 e468cbd
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Tue Oct 16 11:25:09 2018 +0100
+
+    Merge branch 'master' of https://github.com/nathancarter/group-explorer
+
+commit fe911845967458f1072c83b22bb606f8f7a7b9ba
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Tue Oct 16 11:25:02 2018 +0100
+
+    Adding support for visualizing groups in iframes
+
+commit e468cbd51c5c6dd6282d246f0c606ffe9443bc62
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Mon Oct 15 19:48:42 2018 -0500
+
+    cosmetic changes left from merge
+
+commit 7a22137141b5cd48b802ed1fdf9466e3f222f0f9
+Merge: 95af589 e59ab02
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Mon Oct 15 19:38:29 2018 -0500
+
+    merge completed: XMLGroup, Library changes used; DisplayMulttable changes replaced by more extensive bugfix
+
+commit e59ab026a351ec2f67d139fb13a1a8de354901ad
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Mon Oct 15 17:29:44 2018 +0100
+
+    Bug fix: boxSize needed in _drawLabel, was undefined
+
+commit 92f71dd1da2c535635c71821bea85fe2abf9d12a
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Mon Oct 15 15:16:19 2018 +0100
+
+    Adds support for JSON groups with multiplication tables only
+
+commit e7ae66acf2dbb0f6a655420bd542b27dac69f27f
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Mon Oct 15 15:07:55 2018 +0100
+
+    Also permit loading groups from JSON directly in query string
+
+commit 5e09325925fe67bf0840699a2bf9122475d6020e
+Merge: 9c9df30 a595d9e
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Mon Oct 15 14:48:45 2018 +0100
+
+    Merge branch 'tmp-bug-fix'
+
+commit a595d9e1637f93f7329ba76aff1b468372ff5553
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Mon Oct 15 14:46:54 2018 +0100
+
+    Bug fix: undef var prevented page loading
+
+commit 95af589ebe3cdeaa112bcf2a9656b018a8119867
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Sun Oct 14 18:12:13 2018 -0500
+
+    first run at Display control: diagram choice, arrow add/remove working
+
+commit 998ea46b467720b4786b5c5419abd3ac43ba19ee
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Sun Oct 14 18:11:13 2018 -0500
+
+    commit build products
+
+commit 5a687576aa8aeb4dac7a656f8e47effa0e61b497
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Sun Oct 14 17:55:23 2018 -0500
+
+    fix bug introduced in 'cosmetic' re-factoring
+
+commit 783bc8b9a3f2dfa696ad58693ab1676287b7ece9
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Sun Oct 14 16:15:38 2018 -0500
+
+    add tentative notes on (small-scale) programming style
+
+commit b5b98225a3980f6d3c5f8882f3aa15af7327c906
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Sun Oct 14 16:14:47 2018 -0500
+
+    build results
+
+commit 5fb2d3297c4a98b308ffd3e5c7b0ff2948ef4b8d
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Sun Oct 14 16:13:42 2018 -0500
+
+    add ColorPool to build procedure
+
+commit 79bf5e7230f17c2b37c98660d35dd2f8ace27f2e
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Sun Oct 14 16:12:52 2018 -0500
+
+    add capability to  add and remove arrows in Diagram3D
+
+commit 02d7ded209600540df14d23ef87755f9574ed063
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Sun Oct 14 16:08:16 2018 -0500
+
+    move Cayley diagram line coloring to Diagram3D
+
+commit 71f76012a44db6122dda00566a5936a17c0c4b03
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Sun Oct 14 16:05:45 2018 -0500
+
+    create ColorPool from which to choose, e.g., Cayley diagram line colorsa
+
+commit 81b92bdd2ceaeca47d719d5f2c5533b5a49a4ea9
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Sun Oct 14 15:12:47 2018 -0500
+
+    make special delimiters \<\!--Markdown Markdown--> to set off Markdown in .html files; (these delimiters are removed in build to turn html into markdown document)
+
+commit 4e7689e9bfbf62c1bd074700ec13fcf66cc7d5fc
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Sun Oct 14 14:06:14 2018 -0500
+
+    limit effect of default window click to clearing highlighting, menus, and pop-ups within subset page
+
+commit 584bac4a9f2c6e486733155d448f15939674dc90
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Sun Oct 14 00:23:13 2018 -0500
+
+    fix vert-container to re-size properly (add to doc)
+
+commit 5b46ad58b8308b90842a3688ef4b88d6e2a8a324
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Fri Oct 12 09:29:39 2018 -0500
+
+    fix vert-container to re-size properly
+
+commit 91f1309f8f226687cd92bbf916483241426b668c
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Wed Oct 10 17:11:32 2018 -0500
+
+    add to visualizer documentation
+
+commit 9c9df3008664225ed850114fbc206f5f50a5766c
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Tue Oct 9 23:25:41 2018 -0500
+
+    added JSON input; re-compute BasicGroup values [calculates and caches subgroups on demand, uses passed values if available]; specified default values for XMLGroup
+
+commit 5b4c20bdd97111ef00c63c37226a13ed2c66b220
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Mon Oct 8 23:07:31 2018 -0500
+
+    marked off CayleyDiagram, Multtable highlighting; add some thoughts on improving main page load
+
+commit 0e38f8b241bdbfb74137c773b6502baf5349d8f7
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Mon Oct 8 22:50:27 2018 -0500
+
+    complete Cayley diagram highlighting from subset control
+
+commit c1817d620e5847eb7e1155419069f591b44f9d9d
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Sun Oct 7 16:53:29 2018 -0500
+
+    minor reformatting
+
+commit b6a69aa9a1ee43bd3521041a87d65f90872078b4
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Sun Oct 7 16:44:53 2018 -0500
+
+    cosmetic re-factoring
+
+commit 25265611b27580abae8d2844969ab95fb3d6d127
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Sat Oct 6 23:50:44 2018 -0500
+
+    separated highlighting menus from subsetDislay routines into visualizer HTML pages; implemented highlighting in Multtable, stubbed out calls in CayleyDiagram
+
+commit d18e47ef6d83ee230292584c54868872bccbcd4e
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Fri Oct 5 22:51:29 2018 -0500
+
+    if template is not found store value undefined in map, not the string 'undefined'
+
+commit 719d5be923766833543b1a42ae6f9562412d0de8
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Fri Oct 5 17:42:51 2018 -0500
+
+    show initial choice for coloration radio button
+
+commit ba6bb1471ec5368524eff27746aa40619a605db3
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Fri Oct 5 11:53:55 2018 -0500
+
+    Add drag-and-drop to large graphic. (Note use of global variables to pass the drag info between handlers, instead of using the event's dataTransfer object. This is to work around Chrome access limitations to the dataTransfer object and may be re-visited in the future.)
+
+commit fb3aee5b624ff6833ec9499d9e14131d3f29b9c8
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Fri Oct 5 11:02:19 2018 -0500
+
+    introduce restore capability to visualizerFramerwork that recovers the original visualizer-specific panel layout in the case of a reset
+
+commit 268e0fb09b5b6d60e43ce9c078ae2c0115ea5dde
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Wed Oct 3 15:36:48 2018 -0500
+
+    spruce up the documentation a bit; add several new docs to the build
+
+commit 252bff6cf489ce72ba7cfea8d439d85163e4db36
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Sun Sep 30 13:43:24 2018 -0500
+
+    organize visualFramework to re-use the same layout HTML, css, etc. across visualizers; introduce new visualizerFramework component, documented visualizer layout in docs/visualizerLayout.md, and gave an fairly complete, self-contained example in docs/visualizerExemplar.html
+
+commit ef1b029e5f00312d70097ddf3d35f11daf0dbcef
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Thu Sep 27 20:03:56 2018 -0500
+
+    minor organization change -- all : product, docs
+
+commit df74968660e97f3b98dbd15c806e293508608cd3
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Thu Sep 27 20:02:51 2018 -0500
+
+    extracted common slider, visualizer styling to separate .css files
+
+commit bb1b2fcae0a1d5df5202d2f0be7d111ca0364289
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Thu Sep 27 17:48:20 2018 -0500
+
+    break long cycle expression into smaller pieces, one per row
+
+commit 293222064d27d32ad7f42a2a9680ffc29ea0b013
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Thu Sep 27 17:47:38 2018 -0500
+
+    break long cycle expression into smaller pieces, one per row
+
+commit 667295b5b4fab1e48ccc8bd378922373ae248a45
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Mon Sep 24 01:07:43 2018 -0500
+
+    fix canvas size calculation to include separation
+
+commit 9d5cd857dcf0c65da3e33e0a63fbfa2c62a92a94
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Mon Sep 24 01:06:05 2018 -0500
+
+    add documentation for visualizer layout
+
+commit e5218c278567cf851dd250240d548c775cac0af0
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Mon Sep 24 01:05:15 2018 -0500
+
+    copy  slider CSS used in several visualizers into new file
+
+commit 54a249bebc2cb93fae4d04ae0b705c2bba8a371d
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Mon Sep 24 01:04:01 2018 -0500
+
+    separate visualizer shared CSS into new file
+
+commit 12602e213565f36c1985f9f86f219623937592e5
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Sun Sep 16 19:21:24 2018 -0500
+
+    changed the interface to a low-level routine, Template.HTML, from a jQuery selector to a template id (just scrape the leading '#' character off the string passed before)
+
+commit 10c5f28f989b2e60f5d20d92f5ea01d8be9bb6f3
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Sun Sep 16 18:28:14 2018 -0500
+
+    added markdown documentation to Template.js in a /*...*/ comment; the triple backticks in comments before and after the code cause markdown to highlight the javascript without confusing the javascript engine
+
+commit 504216d606e60f6817bf101fa7f1a19c2f74318d
+Merge: 334df88 56d5d69
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Sun Sep 9 22:36:21 2018 -0500
+
+    substantial re-factoring of subsetDisplay (it was pretty messy)
+
+commit 334df88b66d77725ddbe78a17873d17cc4fa80aa
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Sun Sep 9 22:27:59 2018 -0500
+
+    display (None) placeholders when last element in list is destroyed
+
+commit ac58a1b9fc4faada2b11dadbb1058a7809d343bb
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Sun Sep 9 22:21:26 2018 -0500
+
+    remove un-needed routine
+
+commit 399afb2e42ea12ae145306b3331d046e9a3ff5a4
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Sun Sep 9 22:20:00 2018 -0500
+
+    simplify event management: right-click always brings up menus; left click always executes from menu
+
+commit 37af4fb5197dea080ff290e56c67c39f4b37b241
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Sun Sep 9 21:17:39 2018 -0500
+
+    display subset elements on double-click in subsetDisplay
+
+commit 5b3ec7bc0b2686e9c69b0998db92515a7cb1bfc6
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Sun Sep 9 21:16:25 2018 -0500
+
+    minor re-formatting
+
+commit df052e3247979e603b094d64edd9fc668b0ba18c
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Sun Sep 9 20:31:02 2018 -0500
+
+    substantial re-factoring of subsetDisplay
+
+commit 7b58a29d3f82cc3d6358a5472150892f8e01740a
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Sun Sep 9 20:26:20 2018 -0500
+
+    turn off MathJax context menu
+
+commit 56d5d69202c982e60e7034ae2561307a3d314f1c
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Thu Sep 6 15:58:11 2018 +0100
+
+    Switched to-do list into Markdown, separated Ray and Nathan's to-dos
+
+commit 5807cce19bf1126dde58c294d695fb641db8ae07
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Tue Sep 4 20:02:37 2018 -0500
+
+    fix bug that could leave an empty row in multi-row label
+
+commit a7c838b6562e7b4fac25755889c3e7b3762f222b
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Tue Sep 4 15:24:41 2018 -0500
+
+    change Subsets frame menu display from left click to right click (context menu), as GE2 has it
+
+commit 61dc9692be3354a2a0e9a2c231d9c9476dc757a9
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Mon Sep 3 11:43:48 2018 -0500
+
+    turn off MathJax context menu; interfering with subset context menu
+
+commit ca62d4e22967d222909ab63ac60ad34c0c4954da
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Mon Sep 3 10:39:49 2018 -0500
+
+    fixed misspelled SubgroupFinder class name (prevented displaying subgroup normalizer)
+
+commit b4b155ec1bbef36adc416ec497f2ee607aa06348
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Mon Sep 3 10:36:28 2018 -0500
+
+    fix element name display to flow properly
+
+commit e2f6307e443197b07fbcfe23657bd4eff7586518
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Sat Sep 1 17:06:24 2018 -0500
+
+    added ToDo file of generally accepted tasks, and list of considered but postponed or abandoned tasks
+
+commit 3708462fdf7966eb30af96edb13d0f5e728610f3
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Sat Sep 1 17:05:12 2018 -0500
+
+    overlooked when js/DisplayMulttable.js re-write was checked in
+
+commit 6b904d01e3b1dd84d3ff42210ba3967c5c734c0c
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Fri Aug 31 21:28:39 2018 -0500
+
+    convert Multtable display from HTML table to primitive drawing on canvas context
+
+commit 30693e2bc503822d055036a411d6c004ab6cf178
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Thu Aug 30 14:41:42 2018 -0500
+
+    simple shell for cycle graph display, html page and js routines that draw to <canvas> context
+
+commit 4161bc3ec52e2f1a906139227f375628dcb9fc42
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Tue Aug 28 22:39:44 2018 -0500
+
+    display subsets; make large diagram resizable
+
+commit 7825d3dea39a0a0b97b799cf5d53aced0c741cb0
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Tue Aug 28 22:37:40 2018 -0500
+
+    ignore emacs artifacts
+
+commit e56d10628cd35c41dfab61d121c730935f27f75f
+Author: Ray Ellis <rayellis4@gmail.com>
+Date:   Tue Aug 28 22:05:47 2018 -0500
+
+    Replaced script source https://cdn.jsdelivr.net/npm/jquery-resizable@1.0.6/resizable.js with the intended https://cdn.jsdelivr.net/npm/jquery-resizable-dom@0.32.0/dist/jquery-resizable.js. (The two were confused because of their similar names.)  Large graphic resizing now works.
+
+commit 21939c11a6a23b89558b99a0a2adc290f50c0a10
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Fri Aug 17 17:02:11 2018 +0100
+
+    Updating README to mention GitHub hosting
+
+commit 6f3de73b0838b1d1610f3d68f65acd23bf50df85
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Fri Aug 17 16:54:26 2018 +0100
+
+    Creating redirector so GitHub can serve the site
+
+commit 5ec9a3c59670f43de82a73ee27a3c220e5a61855
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Fri Aug 17 16:54:15 2018 +0100
+
+    Pages now import compiled scripts from build folder
+
+commit 3bb7dea73199e5dc44ac88afbab6cd8447b3eb59
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Fri Aug 17 16:53:50 2018 +0100
+
+    Making build process put output in build folder
+
+commit 26b74a16ed08b81919fbba4c8b273429da97f48c
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Fri Aug 17 14:59:21 2018 +0100
+
+    Adding README for GitHub
+
+commit 1b69c2ccbf7a9347c972bcee959b5084621538b1
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Fri Aug 17 14:51:44 2018 +0100
+
+    Removing unused dependency
+
+commit 6e15f52a752ccfe95360564e2989fb31b3997c0b
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Fri Aug 17 14:48:00 2018 +0100
+
+    Updating code to use THREE.Meshline from a CDN
+
+commit 64ba1206db7a8125a25a67acc3c49afe960100af
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Fri Aug 17 14:43:54 2018 +0100
+
+    Updating code to use Trackball Controls from a CDN
+
+commit 0d9a0703586027e5c13a8e6d360413b2489260ca
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Fri Aug 17 14:30:09 2018 +0100
+
+    Updating code to use three.js from a CDN
+
+commit 69869e13005990fa17e04ac2e73ead1fc53995e7
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Fri Aug 17 14:27:06 2018 +0100
+
+    Updating code to use jQuery-resizable from a CDN
+
+commit 20cd458382a40a30c7491b9844c06060bb72fc3d
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Fri Aug 17 14:24:00 2018 +0100
+
+    Updating code to use jQuery from a CDN
+
+commit 75e9869a2af42c2a2b7ed6204157d23b3f15988c
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Fri Aug 17 14:18:36 2018 +0100
+
+    Updating code to use MathJax from a CDN
+
+commit 590e139a33faf005d2819b0bc96a5469b2216cec
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Fri Aug 17 13:58:02 2018 +0100
+
+    Importing work already done by Ray
+
+commit 8692af3cbdb512f169ae67f1552da8ecaf759052
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Fri Aug 17 13:57:48 2018 +0100
+
+    Adding .gitignore file in preparation for importing existing work
+
+commit 899472b93274eafc3f3af1f6d3a1c8c611d19809
+Author: Nathan Carter <ncarter@bentley.edu>
+Date:   Fri Aug 17 13:52:20 2018 +0100
+
+    Initializing repository with package.json
