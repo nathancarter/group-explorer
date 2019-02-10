@@ -153,7 +153,9 @@ class DisplayDiagram {
     *     place camera on y-axis, z-axis down (x-axis to the right)
     *   If diagram lies entirely in the x-y plane (all z == 0)
     *     place camera on z-axis, y-axis up (x-axis to the right)
-    *   Otherwise place camera on (1,-1,-1) vector with y-axis down
+    *   Otherwise place camera with y-axis up, offset a bit from
+    *     the (1,1,1) vector so that opposite corners don't line up
+    *     and make cubes look flat
     */
    setCamera(diagram3D) {
       Log.log('setCamera');
@@ -168,8 +170,8 @@ class DisplayDiagram {
          this.camera.position.set(0, 0, 3);
          this.camera.up.set(0, 1, 0);
       } else {
-         this.camera.position.set(2, -2, -2);
-         this.camera.up.set(0, -1, 0);
+         this.camera.position.set(1.45, 1.55, 1.9);
+         this.camera.up.set(0, 1, 0);
       }
       this.camera.lookAt(new THREE.Vector3(0, 0, 0));
    }

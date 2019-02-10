@@ -33,16 +33,6 @@
 
 ### 3D diagrams and viewing angles
 
- * Offset default 3D viewing angle in CD and OS a bit from (1,1,1) so that opposite
-   corners don't align, making too-symmetrical things that aren't obviously 3D.
-   Ensure that this change also solves the problem for CayleyDiagram.html and
-   SymmetryObject.html as well, not just the small images in the main table.  In
-   fact, the default viewing angle isn't the same in both those cases, so that may
-   need to be fixed as well.
- * Small visualizer for OS for A_4 shows at different angle than large visualizer.
-   Also, neither angle is very good; adjust coords in group file to make it obvious
-   that it's a tetrahedral pyramid?  Same for aligned tetrahedral CD for Q_4 --
-   coordinates don't have the top of the pyramid facing the camera's UP vector (+/-y).
  * Eventually, we want to have a camera position be specifiable in the OS/CD diagram
    itself, so the diagram author can choose it.
  * Change fog color to match background color.
