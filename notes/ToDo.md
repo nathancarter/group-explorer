@@ -43,8 +43,6 @@
    Also, neither angle is very good; adjust coords in group file to make it obvious
    that it's a tetrahedral pyramid?  Same for aligned tetrahedral CD for Q_4 --
    coordinates don't have the top of the pyramid facing the camera's UP vector (+/-y).
- * Don't `diagram3D.normalize()` for diagrams that were loaded from the group file.
-   Just trust that their coordinates are correct.
  * The +y and -y axes are backwards from GE2, and so some pre-specified diagrams look
    different (and a few aren't good), e.g. V_4 Tetrahedron.
  * Eventually, we want to have a camera position be specifiable in the OS/CD diagram

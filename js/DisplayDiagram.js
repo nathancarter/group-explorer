@@ -92,15 +92,18 @@ class DisplayDiagram {
          this.scene.userData = diagram3D;
       }
 
-      diagram3D.normalize();
+      // diagrams with names were loaded from a group file -- don't normalize them
+      if (diagram3D.name === undefined) {
+         diagram3D.normalize();
+      }
 
       if ( options.resetCamera ) this.setCamera(diagram3D);
       this.setBackground(diagram3D);
       this.updateLights(diagram3D);
       this.updateNodes(diagram3D, options.size == "large" ? 20 : 5);
       if ( options.size == "large" ) {
-          this.updateHighlights(diagram3D);
-          this.updateLabels(diagram3D);
+         this.updateHighlights(diagram3D);
+         this.updateLabels(diagram3D);
       }
       this.updateLines(diagram3D, options.size == "small");
       this.updateArrowheads(diagram3D);
@@ -119,7 +122,10 @@ class DisplayDiagram {
          this.scene.userData = diagram3D;
       }
 
-      diagram3D.normalize();
+      // diagrams with names were loaded from a group file -- don't normalize them
+      if (diagram3D.name === undefined) {
+         diagram3D.normalize();
+      }
 
       this.setCamera(diagram3D);
       this.setBackground(diagram3D);
