@@ -59,6 +59,8 @@ const urls = [
    "./groups/Z_7.group",
    "./groups/Z_8.group",
    "./groups/Z_9.group",
+/*
    "./groups/168.group",
    "./groups/Tesseract.group",
+ */
 ];

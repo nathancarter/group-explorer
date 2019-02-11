@@ -11,7 +11,6 @@
     * Each td containing a link should be active, with the correct hand cursor over the whole td.
     * Each such td should change its background on mouse enter, along with the cursor.
     * Use gray background for links to GroupInfo.html, colors for visualizers.
- * Comment 168 and 384 groups out of URLs file for release.
  * When using subset diagram, "Organize by" should reset the innermost/outermost/etc. column
    to the identity permutation.
  * Setting line thickness to minimum does not work; it gets reset to a thicker value.
