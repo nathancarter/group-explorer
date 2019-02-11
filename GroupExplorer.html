@@ -125,7 +125,7 @@
        function finish(urlsToDisplay) {
           columnSort(1, true);
           $( '#loadingMessage' ).show();
-          
+
           // check that the locally stored definitions currently displayed are the latest; refresh if not
           let numGroupsToLoad = urlsToDisplay.length;
           let numGroupsLoaded = 0;
@@ -147,8 +147,9 @@
                           const row = displayGroup(group)[0];
 
                           // typeset this row
-                          MathJax.Hub.Queue(['Typeset', MathJax.Hub, row, function () {
+                          MathJax.Hub.Queue(['Typeset', MathJax.Hub, row, () => {
                              $(row).show();
+                             Library.saveGroup(group);
                              if ( ++numGroupsLoaded == numGroupsToLoad ) {
                                 $( '#loadingMessage' ).hide();
                                 columnSort( 1, true );
@@ -227,7 +228,6 @@
              const graphicData = new CycleGraph( group );
              img = cycleGraphContext.getImage( graphicData );
              group.cycleGraphThumbnail = img.src;
-             Library.saveGroup(group);
           } else {
              img = new Image();
              img.src = group.cycleGraphThumbnail;
@@ -305,6 +305,7 @@
          <tbody>
          </tbody>
       </table>
+
       <template id="row_template">
          <tr style="display: none">
             <td class="groupName">
@@ -312,7 +313,7 @@
                   href="javascript:Library.openWithGroupURL('GroupInfo.html', '${group.URL}')">${ MathML.sans(group.name) }</a>
             </td>
             <td class="groupOrder">${ group.order }</td>
-            <td class="description">
+            <td class="definition">
                <a title="Open GroupInfo page"
                   href="javascript:Library.openWithGroupURL('GroupInfo.html', '${group.URL}')">${ MathML.sans(group.definition) }</a>
             </td>
