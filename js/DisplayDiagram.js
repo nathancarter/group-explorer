@@ -28,7 +28,7 @@ class DisplayDiagram {
       } );
 
       if (options.fog === undefined || options.fog) {
-         this.scene.fog = new THREE.Fog(DisplayDiagram.DEFAULT_FOG_COLOR, 2, 100);
+         this.scene.fog = new THREE.Fog(DisplayDiagram.DEFAULT_BACKGROUND);
       }
 
       // take canvas dimensions from container (if specified), option, or default
@@ -732,10 +732,16 @@ class DisplayDiagram {
       this.updateArrowheads(diagram3D);
    }
 
-   // reduce fog level by increasing 'far' parameter (experimentally determined parameters :-)
+   // reduce fog level by increasing 'far' parameter (experimentally determined coefficients :-)
+   //   (diagram3D.fogLevel is in [0,1])
    updateFogLevel(diagram3D) {
+      // distance of furthest point from (0,0,0)
+      const squaredRadius = diagram3D.nodes.reduce( (sqrad,nd) => Math.max(sqrad, nd.point.lengthSq()), 0 );
+      const sceneRadius = (squaredRadius == 0) ? 1 : Math.sqrt(squaredRadius);  // in case there's only one element
       const cameraDistance = this.camera.position.length();
-      this.scene.fog.far = (diagram3D.fogLevel == 0) ? 100 : (cameraDistance + 6 - 7*diagram3D.fogLevel);
+      this.scene.fog.color = new THREE.Color(diagram3D.background);
+      this.scene.fog.near = cameraDistance - sceneRadius - 1;
+      this.scene.fog.far = (diagram3D.fogLevel == 0) ? 100 : (cameraDistance + sceneRadius*(5 - 4*diagram3D.fogLevel));
    }
 
    updateLabelSize(diagram3D) {
