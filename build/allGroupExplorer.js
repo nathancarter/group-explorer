@@ -2454,7 +2454,7 @@ class DisplayDiagram {
       } );
 
       if (options.fog === undefined || options.fog) {
-         this.scene.fog = new THREE.Fog(DisplayDiagram.DEFAULT_FOG_COLOR, 2, 100);
+         this.scene.fog = new THREE.Fog(DisplayDiagram.DEFAULT_BACKGROUND);
       }
 
       // take canvas dimensions from container (if specified), option, or default
@@ -2518,15 +2518,18 @@ class DisplayDiagram {
          this.scene.userData = diagram3D;
       }
 
-      diagram3D.normalize();
+      // diagrams with names were loaded from a group file -- don't normalize them
+      if (diagram3D.name === undefined) {
+         diagram3D.normalize();
+      }
 
       if ( options.resetCamera ) this.setCamera(diagram3D);
       this.setBackground(diagram3D);
       this.updateLights(diagram3D);
       this.updateNodes(diagram3D, options.size == "large" ? 20 : 5);
       if ( options.size == "large" ) {
-          this.updateHighlights(diagram3D);
-          this.updateLabels(diagram3D);
+         this.updateHighlights(diagram3D);
+         this.updateLabels(diagram3D);
       }
       this.updateLines(diagram3D, options.size == "small");
       this.updateArrowheads(diagram3D);
@@ -2545,7 +2548,10 @@ class DisplayDiagram {
          this.scene.userData = diagram3D;
       }
 
-      diagram3D.normalize();
+      // diagrams with names were loaded from a group file -- don't normalize them
+      if (diagram3D.name === undefined) {
+         diagram3D.normalize();
+      }
 
       this.setCamera(diagram3D);
       this.setBackground(diagram3D);
@@ -2567,29 +2573,31 @@ class DisplayDiagram {
     * Position the camera and point it at the center of the scene
     *
     * Camera positioned to match point of view in GE2:
-    *   If diagram lies entirely in y-z plane (all x == 0)
-    *     place camera on z-axis, x-axis to the right, y-axis down
-    *   If diagram lies entirely in the x-z plane
-    *     place camera on negative y-axis, x-axis to the right, z-axis up
-    *   If diagram lies entirely in the x-y plane
-    *     place camera on negative z-axis, x-axis to the right, y-axis down
-    *   Otherwise place camera on (1,-1,-1) vector with y-axis down
+    *   If diagram lies entirely in the y-z plane (all x == 0)
+    *     place camera on x-axis, y-axis up (z-axis to the left)
+    *   If diagram lies entirely in the x-z plane (all y == 0)
+    *     place camera on y-axis, z-axis down (x-axis to the right)
+    *   If diagram lies entirely in the x-y plane (all z == 0)
+    *     place camera on z-axis, y-axis up (x-axis to the right)
+    *   Otherwise place camera with y-axis up, offset a bit from
+    *     the (1,1,1) vector so that opposite corners don't line up
+    *     and make cubes look flat
     */
    setCamera(diagram3D) {
       Log.log('setCamera');
 
       if (diagram3D.nodes.every( (node) => node.point.x == 0.0 )) {
          this.camera.position.set(3, 0, 0);
-         this.camera.up.set(0, -1, 0);
+         this.camera.up.set(0, 1, 0);
       } else if (diagram3D.nodes.every( (node) => node.point.y == 0.0 )) {
-         this.camera.position.set(0, -3, 0);
-         this.camera.up.set(0, 0, 1);
+         this.camera.position.set(0, 3, 0);
+         this.camera.up.set(0, 0, -1);
       } else if (diagram3D.nodes.every( (node) => node.point.z == 0.0 )) {
-         this.camera.position.set(0, 0, -3);
-         this.camera.up.set(0, -1, 0);
+         this.camera.position.set(0, 0, 3);
+         this.camera.up.set(0, 1, 0);
       } else {
-         this.camera.position.set(2, -2, -2);
-         this.camera.up.set(0, -1, 0);
+         this.camera.position.set(1.45, 1.55, 1.9);
+         this.camera.up.set(0, 1, 0);
       }
       this.camera.lookAt(new THREE.Vector3(0, 0, 0));
    }
@@ -3150,10 +3158,16 @@ class DisplayDiagram {
       this.updateArrowheads(diagram3D);
    }
 
-   // reduce fog level by increasing 'far' parameter (experimentally determined parameters :-)
+   // reduce fog level by increasing 'far' parameter (experimentally determined coefficients :-)
+   //   (diagram3D.fogLevel is in [0,1])
    updateFogLevel(diagram3D) {
+      // distance of furthest point from (0,0,0)
+      const squaredRadius = diagram3D.nodes.reduce( (sqrad,nd) => Math.max(sqrad, nd.point.lengthSq()), 0 );
+      const sceneRadius = (squaredRadius == 0) ? 1 : Math.sqrt(squaredRadius);  // in case there's only one element
       const cameraDistance = this.camera.position.length();
-      this.scene.fog.far = (diagram3D.fogLevel == 0) ? 100 : (cameraDistance + 6 - 7*diagram3D.fogLevel);
+      this.scene.fog.color = new THREE.Color(diagram3D.background);
+      this.scene.fog.near = cameraDistance - sceneRadius - 1;
+      this.scene.fog.far = (diagram3D.fogLevel == 0) ? 100 : (cameraDistance + sceneRadius*(5 - 4*diagram3D.fogLevel));
    }
 
    updateLabelSize(diagram3D) {
