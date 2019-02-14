@@ -60,6 +60,22 @@
        .sort-none {
           padding-right: 10px;
        }
+
+       #tooltip {
+          background-color: #FFFFD6;		/* light yellow (matches subset display) */
+          border: 1px solid #CFCFCF;		/* ~silver */
+          box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);	/* gray mist */
+          color: #000000;
+          font-size: medium;
+          font-style: normal;
+          font-weight: normal;
+          padding: 1em;
+          position: fixed;
+          z-index: 1;
+          white-space: nowrap;
+          list-style-type: none;
+          visibility: visible;
+       }
       </style>
 
       <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
@@ -67,9 +83,6 @@
        MathJax.Hub.Config({
           CommonHTML: {
              scale: 90,
-          },
-          "fast-preview": {
-             disabled: false,
           },
        });
       </script>
@@ -88,8 +101,12 @@
        $(function() {
           $('#GroupTableHeaders th:nth-child(1)').on('click', () => columnSort(0));
           $('#GroupTableHeaders th:nth-child(2)').on('click', () => columnSort(1));
+          $('#GroupTable tbody').on('click', HoverHelp.eventHandler)
+                                .on('mousemove', HoverHelp.eventHandler)
+                                .on('mouseleave', HoverHelp.eventHandler);
        });
        $(window).on('load', readLibrary);	// like onload handler in body
+
 
        // Load group library from urls
        function readLibrary() {
@@ -97,72 +114,88 @@
           window.multtableContext = new DisplayMulttable({height: 32, width: 32});
           window.cycleGraphContext = new DisplayCycleGraph({height: 32, width: 32});
 
+          // create mathjax style element from localStorage (needed to display locally stored definitions)
+          const styleHTML = localStorage.getItem('mathjax_stylesheet');
+          if (styleHTML != undefined) {
+             $('head').append(styleHTML);
+          }
+
           // only read in a few groups if URL specifies 'debug' (for impatient programmers)
           const urlDebug = new URL(window.location.href).searchParams.get('debug');
+          const resolvedURLs = urls.map( (url) => Library.resolveURL(url) );
           const urlsToDisplay = (urlDebug == undefined) ?
-                                Array.from(new Set(urls.concat(Library.getAllLocalURLs()))) :
-                                urls.slice(0, (urlDebug || 10));
+                                Array.from(new Set(resolvedURLs.concat(Library.getAllLocalURLs()))) :
+                                resolvedURLs.slice(0, (urlDebug || 10));
 
           // display locally stored group defintions
           for (const url of urlsToDisplay) {
              const g = Library.getLocalGroup(url);
              if (g != undefined) {
-                displayGroup(g);
+                const $img = $('<img>').attr('src', g.CayleyThumbnail).attr('height', 32).attr('width', 32);
+                const $row = $(g.rowHTML);
+                $row.find('td.cayleyDiagram').append($img);
+                $('#GroupTable tbody').append($row);
              }
           }
 
-          if (Library.isEmpty()) {
-             finish(urlsToDisplay);
-          } else {
-             MathJax.Hub.Queue( ['Typeset', MathJax.Hub, $(`#GroupTable`)[0],
-                                 () => {
-                                    $(`#GroupTable tbody tr`).show();
-                                    finish(urlsToDisplay);
-                                 }] );
-          }
+          finish(urlsToDisplay);
        }
 
        function finish(urlsToDisplay) {
+          const exit = () => {
+             $( '#loadingMessage' ).hide();
+             columnSort( 1, true );
+
+             // store stylesheet in localStorage
+             const mathjaxStylesheet = $('style').toArray().filter( (s) => s.textContent.trim().startsWith('.mjx-chtml') )[0];
+             if (mathjaxStylesheet != undefined) {
+                localStorage.setItem('mathjax_stylesheet',mathjaxStylesheet.outerHTML);
+             }
+          };
+
           columnSort(1, true);
           $( '#loadingMessage' ).show();
 
           // check that the locally stored definitions currently displayed are the latest; refresh if not
-          let numGroupsToLoad = urlsToDisplay.length;
-          let numGroupsLoaded = 0;
-          const loadNextURL = (urls) => {
-             url = urls.pop();
+          const loadNextURL = (urlIndex) => {
+             const url = urlsToDisplay[urlIndex++];
              const localGroup = Library.getLocalGroup(url);
              Library.getLatestGroup(url)
                     .then( (group) => {
-                       // if we already had the group and it's current, just check to see if we're done
-                       if (localGroup != undefined && group.lastModifiedOnServer == localGroup.lastModifiedOnServer) {
-                          if ( ++numGroupsLoaded == numGroupsToLoad ) {
-                             $( '#loadingMessage' ).hide();
-                             columnSort( 1, true );
-                          } else if (urls.length > 0) {
-                             loadNextURL(urls);
+                       // if we already have the latest group in the Library, just check to see if we're done
+                       if (group == localGroup) {
+                          if ( urlIndex == urlsToDisplay.length ) {
+                             exit();
+                          } else {
+                             loadNextURL(urlIndex);
                           }
                        } else {
                           // format new group
                           const row = displayGroup(group)[0];
+                          $('#ScratchTable').append(row);
 
                           // typeset this row
-                          MathJax.Hub.Queue(['Typeset', MathJax.Hub, row, () => {
-                             $(row).show();
-                             Library.saveGroup(group);
-                             if ( ++numGroupsLoaded == numGroupsToLoad ) {
-                                $( '#loadingMessage' ).hide();
-                                columnSort( 1, true );
-                             } else if (urls.length > 0) {
-                                const pct = ( numGroupsLoaded * 100 / numGroupsToLoad ) | 0;
-                                $( '#loadingMessage i' ).html( `Loading groups (${pct}%)...` );
-                                loadNextURL(urls);
-                             }
-                          } ]);
+                          MathJax.Hub.Queue(
+                             ['Typeset', MathJax.Hub, 'ScratchTable', () => {
+                                // remove un-needed spans from mathjax output
+                                $(row).find('span.MathJax_Preview, span.MJX_Assistive_MathML, script[type="math/mml"]').remove();
+                                const $cayleyDiagram = $(row).find('td.cayleyDiagram img').detach();
+                                group.rowHTML = row.outerHTML;
+                                $(row).find('td.cayleyDiagram').append($cayleyDiagram);
+                                $(row).detach().appendTo('#GroupTable tbody');
+                                Library.saveGroup(group);
+                                if ( urlIndex == urlsToDisplay.length ) {
+                                   exit();
+                                } else {
+                                   const pct = ( urlIndex * 100 / urlsToDisplay.length ) | 0;
+                                   $( '#loadingMessage i' ).html( `Loading groups (${pct}%)...` );
+                                   loadNextURL(urlIndex);
+                                }
+                             }] );
                        } } )
                     .catch( console.error );
           }
-          loadNextURL(urlsToDisplay);
+          loadNextURL(0);
        }
 
        // add row to table that displays this name, order, etc. of group
@@ -174,67 +207,39 @@
                                 undefined :
                                 group.symmetryObjects[0].name;
 
-          let $row = $(`#GroupTable tr[group="${group.URL}"]`);
-          if ($row.length == 0) {
-             $row = $(eval(Template.HTML('row_template')));
-          } else {
-             $($row[0].children[0].children[0]).html(MathML.sans(group.name));
-             $($row[0].children[2].children[0]).html(MathML.sans(group.definition));
-          }
-          $row.attr('group', group.URL)
+          $(`tr[group="${group.URL}"]`).remove();
+          let $row = $(eval(Template.HTML('row_template')));
 
           // draw Cayley diagram
-          let img;
-          if (group.CayleyThumbnail === undefined) {
-             const  graphicData = new CayleyDiagram(group, cayleyTitle);
-             img = graphicContext.getImage(graphicData);
+          {
+             const graphicData = new CayleyDiagram(group, cayleyTitle);
+             const img = graphicContext.getImage(graphicData);
              group.CayleyThumbnail = img.src;
-          } else {
-             img = new Image();
-             img.src = group.CayleyThumbnail;
+             img.height = img.width = 32;
+             $row.find("td.cayleyDiagram").html(img);
           }
-          img.height = img.width = 32;
-          $row.find("td.cayleyDiagram > a").html(img);
 
           // draw Multtable
-          if (group.multtableThumbnail === undefined) {
+          {
              const graphicData = new Multtable(group);
-             img = multtableContext.getImage(graphicData);
-             group.multtableThumbnail = img.src;
-          } else {
-             img = new Image();
-             img.src = group.multtableThumbnail;
+             const img = multtableContext.getImage(graphicData);
+             $row.find("td.multiplicationTable").html(img);
           }
-          $row.find("td.multiplicationTable > a").html(img);
 
           // draw Symmetry Object
           if (group.symmetryObjects.length != 0) {
-             if (group.symmetryObjectThumbnail === undefined) {
-                const graphicData = SymmetryObject.generate(group, symmetryTitle);
-                img = graphicContext.getImage(graphicData);
-                group.symmetryObjectThumbnail = img.src;
-             } else {
-                img = new Image();
-                img.src = group.symmetryObjectThumbnail;
-             }
+             const graphicData = SymmetryObject.generate(group, symmetryTitle);
+             const img = graphicContext.getImage(graphicData);
              img.height = img.width = 32;
-             $row.find("td.symmetryObject > a").html(img);
-          } else {
-             $row.find("td.symmetryObject").text('none');
+             $row.find("td.symmetryObject").html(img);
           }
 
           // draw Cycle Graph
-          if (group.cycleGraphThumbnail === undefined) {
+          {
              const graphicData = new CycleGraph( group );
-             img = cycleGraphContext.getImage( graphicData );
-             group.cycleGraphThumbnail = img.src;
-          } else {
-             img = new Image();
-             img.src = group.cycleGraphThumbnail;
+             const img = cycleGraphContext.getImage( graphicData );
+             $row.find("td.cycleGraph").html(img);
           }
-          $row.find("td.cycleGraph > a").html(img);
-
-          $row.appendTo($('#GroupTable tbody'));
 
           return $row;
        }
@@ -264,6 +269,110 @@
                                 .sort(compareFunction(columnIndex, makeSortUp))
                                 .each((_,tr) => $('#GroupTable tbody').append(tr))
        }
+
+       class HoverHelp {
+          // pollerID = id of polling routine from window.setInterval call
+          // mouse_event = event from last 'mousemove' event (event contains timestamp) (undefined => no mousemove event to be handled)
+          // tooltip_timestamp = time tooltip was created (undefined => no tooltip being shown)
+
+          static eventHandler(event) {
+             if (event.ctrlKey || event.shiftKey || event.altKey) {
+                return;
+             }
+
+             if (event.type == 'click') {
+                // clear background, mouse_event, tooltip
+                if (HoverHelp.mouse_event != undefined) {
+                   $(HoverHelp.mouse_event.target).closest('td')
+                                                  .css('background-color', '#FFFFFF')
+                                                  .css('cursor', 'default');
+                }
+                HoverHelp.mouse_event = undefined;
+                $('#tooltip').remove();
+
+                // get td, class
+                const $td = $(event.target).closest('td');
+                if ($td.text() != 'none') {
+                   for (const {klass, pageURL} of HoverHelp.data) {
+                      if ($td.hasClass(klass)) {
+                         const groupURL = $td.parent().attr('group');
+                         const options = undefined;
+                         Library.openWithGroupURL(pageURL, groupURL, options);
+                         break;
+                      }
+                   }
+                }
+             } else if (event.type == 'mousemove') {
+                const $old_td = (HoverHelp.mouse_event === undefined) ? undefined : $(HoverHelp.mouse_event.target).closest('td');
+                const $new_td = $(event.target).closest('td');
+                if ($old_td === undefined || $old_td[0] != $new_td[0]) {
+                   if ($old_td !== undefined) {
+                      $old_td.css('background-color', '#FFFFFF')
+                             .css('cursor', 'default');
+                   }
+                   for (const {klass, background} of HoverHelp.data) {
+                      if ($new_td.hasClass(klass) && $new_td.text() != 'none') {
+                         $new_td.css('background-color', background)
+                                .css('cursor', 'pointer');
+                         break;
+                      }
+                   }
+                   event.tooltip_shown = false;
+                   $('#tooltip').remove();
+                } else {
+                   event.tooltip_shown = (HoverHelp.mouse_event === undefined) ? false : HoverHelp.mouse_event.tooltip_shown;
+                }
+                if ($new_td.text() != 'none') {
+                   HoverHelp.mouse_event = event;
+                }
+             } else if (event.type = 'mouseleave') {
+                // clear background
+                if (HoverHelp.mouse_event != undefined) {
+                   $(HoverHelp.mouse_event.target).closest('td')
+                                                  .css('background-color', '#FFFFFF')
+                                                  .css('cursor', 'default');
+                }
+                // clear mouse_event, tooltip
+                HoverHelp.mouse_event = undefined;
+                $('#tooltip').remove();
+             }
+          }
+
+          static poller() {
+             if (   HoverHelp.mouse_event !== undefined
+                 && !HoverHelp.mouse_event.tooltip_shown
+                 && $(HoverHelp.mouse_event.target).closest('td') !== undefined
+                 && performance.now() - HoverHelp.mouse_event.timeStamp > 500) {
+                const $td = $(HoverHelp.mouse_event.target).closest('td');
+                for (const {klass, tooltip} of HoverHelp.data) {
+                   if ($td.hasClass(klass)) {
+                      const $tooltip = $('<div id="tooltip" class="menu">')
+                         .attr('timestamp', performance.now())
+                         .text(tooltip)
+                         .appendTo($td);
+                      Menu.setMenuLocations(HoverHelp.mouse_event, $tooltip);
+                      HoverHelp.mouse_event.tooltip_shown = true;
+                      break;
+                   }
+                }
+             }
+
+             // if tooltip is more than 10 sec old, clear it
+             if ($('#tooltip')[0] !== undefined && performance.now() - $('#tooltip').attr('timestamp') > 10000) {
+                $('#tooltip').remove()
+             }
+          }
+       }
+
+       HoverHelp.data = [
+          {klass: 'groupName', pageURL: 'GroupInfo.html', background: '#F2F2F2', tooltip: 'Open Group Info page'},
+          {klass: 'definition', pageURL: 'GroupInfo.html', background: '#F2F2F2', tooltip: 'Open Group Info page'},
+          {klass: 'cayleyDiagram', pageURL: 'CayleyDiagram.html', background: '#F7EDED', tooltip: 'Open Cayley Diagram visualizer'},
+          {klass: 'multiplicationTable', pageURL: 'Multtable.html', background: '#F2FFD6', tooltip: 'Open Multiplication Table visualizer'},
+          {klass: 'symmetryObject', pageURL: 'SymmetryObject.html', background: '#EDF7ED', tooltip: 'Open Symmetry Object visualizer'},
+          {klass: 'cycleGraph', pageURL: 'CycleDiagram.html', background: '#EDEDF7', tooltip: 'Open Cycle Graph Visualizer'},
+       ]
+       HoverHelp.pollerID = setInterval(HoverHelp.poller, 500);
       </script>
    </head>
    <body>
@@ -275,16 +384,19 @@
       <div class="top-right-menu">
          <a href='index.html'><i title="Project Home" class="fa fa-home fa-2x trm-blue"></i></a>
          <!--
-         <a href='GroupExplorer.html'><i title="Group Library"
-             class="fa fa-book fa-2x trm-blue"></i></a>
+              <a href='GroupExplorer.html'><i title="Group Library"
+              class="fa fa-book fa-2x trm-blue"></i></a>
          -->
          <a href='Sheet.html' target='_blank'><i title="Sheets"
-             class="fa fa-file trm-blue" style="font-size:1.5em;vertical-align:10%;"></i></a>
+                                                 class="fa fa-file trm-blue" style="font-size:1.5em;vertical-align:10%;"></i></a>
          <a href='help/rf-groupterms.html'><i title="Help"
-             class="fa fa-question-circle fa-2x trm-blue"></i></a>
+                                              class="fa fa-question-circle fa-2x trm-blue"></i></a>
          <a href='https://github.com/nathancarter/group-explorer'><i
-             title="Source on GitHub" class="fa fa-github fa-2x trm-blue"></i></a>
+                                                                     title="Source on GitHub" class="fa fa-github fa-2x trm-blue"></i></a>
       </div>
+
+      <table id="ScratchTable" style="width: 100%; display: none"></table>
+
       <table id="GroupTable" style="width: 100%;">
          <thead>
             <tr id="GroupTableHeaders" height="32px">
@@ -307,32 +419,18 @@
       </table>
 
       <template id="row_template">
-         <tr style="display: none">
+         <tr group="${group.URL}">
             <td class="groupName">
-               <a title="Open GroupInfo page"
-                  href="javascript:Library.openWithGroupURL('GroupInfo.html', '${group.URL}')">${ MathML.sans(group.name) }</a>
+               ${ (group.nameHTML === undefined) ? MathML.sans(group.name) : group.nameHTML }
             </td>
             <td class="groupOrder">${ group.order }</td>
             <td class="definition">
-               <a title="Open GroupInfo page"
-                  href="javascript:Library.openWithGroupURL('GroupInfo.html', '${group.URL}')">${ MathML.sans(group.definition) }</a>
+               ${ (group.definitionHTML === undefined) ? MathML.sans(group.definition) : group.definitionHTML }
             </td>
-            <td class="cayleyDiagram">
-               <a title="Open Cayley diagram visualizer"
-                  href="javascript:Library.openWithGroupURL('CayleyDiagram.html', '${group.URL}', {diagram: '${cayleyTitle}'})"></a>
-            </td>
-            <td class="multiplicationTable">
-               <a title="Open multiplication table visualizer"
-                  href="javascript:Library.openWithGroupURL('Multtable.html', '${group.URL}')"></a>
-            </td>
-            <td class="symmetryObject">
-               <a title="Open object of symmetry visualizer"
-                  href="javascript:Library.openWithGroupURL('SymmetryObject.html', '${group.URL}', {diagram: '${symmetryTitle}'})"></a>
-            </td>
-            <td class="cycleGraph">
-               <a title="Open cycle graph visualizer"
-                  href="javascript:Library.openWithGroupURL('CycleDiagram.html', '${group.URL}')"></a>
-            </td>
+            <td class="cayleyDiagram"></td>
+            <td class="multiplicationTable"></td>
+            <td class="symmetryObject">none</td>
+            <td class="cycleGraph"></td>
          </tr>
       </template>
    </body>

@@ -7,10 +7,6 @@
 
  * Make the mesh lines respect fog like the rest of the 3D diagram does.  (Ray will do
    the initial investigations on this one.)
- * In GroupExplorer.html:
-    * Each td containing a link should be active, with the correct hand cursor over the whole td.
-    * Each such td should change its background on mouse enter, along with the cursor.
-    * Use gray background for links to GroupInfo.html, colors for visualizers.
  * When using subset diagram, "Organize by" should reset the innermost/outermost/etc. column
    to the identity permutation.
  * Setting line thickness to minimum does not work; it gets reset to a thicker value.
@@ -40,9 +36,7 @@
 
 ### Page-level issues
 
- * Change the default so that navigating into a group's Group Info page doesn't use a
-   blob URL, but the group URL, so that users can share links to such pages the usual way.
-   Make this change for all pages.
+(none)
 
 ### Sheets
 
