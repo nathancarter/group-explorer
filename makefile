@@ -4,11 +4,10 @@ JS_FILES = js/init.js             js/Log.js            js/BitSet.js        js/Ma
            js/IsomorphicGroups.js js/Template.js       js/Library.js       js/Diagram3D.js       \
            js/CayleyDiagram.js    js/DisplayDiagram.js js/mathmlUtils.js   js/SymmetryObject.js  \
            js/Multtable.js        js/DisplayMulttable.js                                         \
-           js/CycleGraph.js       js/DisplayCycleGraph.js
+           js/CycleGraph.js       js/DisplayCycleGraph.js                                        \
+           js/Menu.js
 
-SUB_FILES = js/Menu.js                                                          \
-										\
-            subsetDisplay/subsets.js           subsetDisplay/BasicSubset.js     \
+SUB_FILES = subsetDisplay/subsets.js           subsetDisplay/BasicSubset.js     \
             subsetDisplay/Subgroup.js          subsetDisplay/Subset.js          \
             subsetDisplay/SubsetEditor.js      subsetDisplay/Partition.js       \
             subsetDisplay/PartitionSubset.js   subsetDisplay/OrderClasses.js    \
