@@ -34,10 +34,6 @@
 
 ## Assigned to Nathan
 
-### Page-level issues
-
-(none)
-
 ### Sheets
 
  * Extend the toJSON() and fromJSON() in CayleyDiagram.html to also respect:
