@@ -8,6 +8,10 @@
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css">
 
       <style>
+       #vert-container {
+          min-width: 20em;  /* Ensure same min width as CayleyDiagram page, for consistency */
+       }
+
        #diagram-select {
           width: 90%;
           margin: 0 5% 25px 5%;
@@ -127,6 +131,8 @@
              resizeWidthFrom: 'left',
              onDrag: resizeGraphic,
           })
+
+          setupTopRightMenu();
        }
 
        /* Resize the body, including the graphic */
@@ -196,6 +202,23 @@
           VC.reset();
           load();
        }
+
+       function setupTopRightMenu () {
+          $( '.top-right-menu' ).appendTo( document.body );
+          showControls();
+       }
+
+       function hideControls () {
+          $( '#hide-controls' ).hide();
+          $( '#show-controls' ).show();
+          $( '#vert-container' ).hide().resize();
+       }
+
+       function showControls () {
+          $( '#hide-controls' ).show();
+          $( '#show-controls' ).hide();
+          $( '#vert-container' ).show().resize();
+       }
       </script>
    </head>
    <body class="vert">
@@ -209,6 +232,10 @@
              class="fa fa-question-circle fa-2x trm-black"></i></a>
          <a href='https://github.com/nathancarter/group-explorer'><i
              title="Source on GitHub" class="fa fa-github fa-2x trm-black"></i></a>
+         <a href='javascript:hideControls();' id='hide-controls'><i title="Hide controls"
+             class="fa fa-chevron-circle-right fa-2x trm-black"></i></a>
+         <a href='javascript:showControls();' id='show-controls'><i title="Show controls"
+             class="fa fa-chevron-circle-left fa-2x trm-black"></i></a>
       </div>
 
       <div class="fill-vert control">

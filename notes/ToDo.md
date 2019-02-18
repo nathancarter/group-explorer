@@ -71,11 +71,6 @@
       visualizer.
  * Make all sheets have a fixed size - say, 10000x7500.
 
-### Miscellany
-
- * Make all right hand panes hideable, across the whole app.  This way the visualizer
-   or sheet in question can be printed (or printed to a PDF) easily.
-
 ## GAP's Group Explorer package
 
  * Support accepting a name in the JSON options

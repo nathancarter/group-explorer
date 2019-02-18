@@ -185,6 +185,8 @@
              if ( ''+lastCamera != ''+thisCamera ) emitStateChange();
              lastCamera = thisCamera;
           }, 500 );
+
+          setupTopRightMenu();
        }
 
        function emitStateChange () {
@@ -347,6 +349,23 @@
           VC.reset();
           load();
        }
+
+       function setupTopRightMenu () {
+          $( '.top-right-menu' ).appendTo( document.body );
+          showControls();
+       }
+
+       function hideControls () {
+          $( '#hide-controls' ).hide();
+          $( '#show-controls' ).show();
+          $( '#vert-container' ).hide().resize();
+       }
+
+       function showControls () {
+          $( '#hide-controls' ).show();
+          $( '#show-controls' ).hide();
+          $( '#vert-container' ).show().resize();
+       }
       </script>
    </head>
    <body class="vert">
@@ -360,6 +379,10 @@
              class="fa fa-question-circle fa-2x trm-black"></i></a>
          <a href='https://github.com/nathancarter/group-explorer'><i
              title="Source on GitHub" class="fa fa-github fa-2x trm-black"></i></a>
+         <a href='javascript:hideControls();' id='hide-controls'><i title="Hide controls"
+             class="fa fa-chevron-circle-right fa-2x trm-black"></i></a>
+         <a href='javascript:showControls();' id='show-controls'><i title="Show controls"
+             class="fa fa-chevron-circle-left fa-2x trm-black"></i></a>
       </div>
 
       <div id="control-options" class="horiz">
