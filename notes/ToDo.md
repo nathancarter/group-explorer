@@ -15,8 +15,6 @@
 
 ### Fonts and math
 
- * Change `<select>` elements that use formatted math strings to use hand-rolled menus
-   with mathml instead of text (similar to menus in Subgroups view)
  * Improve MathJax output HTML caching.
 
 ### Help system
