@@ -1,4 +1,56 @@
 
+/* .faux-select* elements style a select-like structure which can contain HTML (and MathML), not just text
+ *    .faux-select: <div> which contains the entire structure
+ *    .faux-selection: <div> which contains the current selection
+ *    .faux-select-arrow: a css down-arrow to the right of the selection
+ *    .faux-select-options: <ul> with options
+ */
+.faux-select {
+    border: 1px solid var(--visualizer-button-border);
+    background-image: var(--visualizer-button-gradient);
+    font-size: 12pt;
+    width: 90%;
+    height: 1.5em;
+    margin: 0 5% 0 5%;
+}
+
+.faux-selection {
+    display: inline-block;
+    position: relative;
+    top: 55%;
+    padding-left: 0.5em;
+    transform: translateY(-50%);
+}
+
+.faux-select-arrow {
+    top: 50%;
+    transform: translateY(-50%);
+    border-top: 16px solid #000000;
+    border-right: 6px solid rgba(0,0,0,0);
+    border-left: 6px solid rgba(0,0,0,0);
+    margin-right: 4px;
+    content: '';
+    float: right;
+    height: 0;
+    width: 0;
+    position: relative;
+}
+
+.faux-select-options {
+    margin: 1.6em 0 0 -1;
+    position: absolute;
+    background-color: #EEEEEE;		/* very light gray (~gainsboro)*/
+    border: 1px solid #CFCFCF;		/* ~silver */
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);	/* gray mist */
+    color: #000000;	
+    padding: 4px 8px;
+    z-index: 20;
+    list-style-type: none;
+    max-height: 40em;
+    overflow-y: auto;
+}
+
+
 .menu,
 .menu ul {
    background-color: #EEEEEE;		/* very light gray (~gainsboro)*/
