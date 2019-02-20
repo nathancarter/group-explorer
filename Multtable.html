@@ -34,9 +34,9 @@
           z-index: 1;
        }
 
-       #organization-select {
-          width: 90%;
-          margin: 0 5% 25px 5%;
+       .graphic-lead {
+          margin-top: 1.5em;
+          margin-bottom: 0.5em;
        }
       </style>
       <script type="text/x-mathjax-config">
@@ -89,11 +89,9 @@
           $('#table-button').off('click', () => showPanel('#table-control') ).on('click', () => showPanel('#table-control') );
           $('#help').off('click', help).on('click', help);
           $('#reset').off('click', reset).on('click', reset);
-          $('#organization-select').off('change', selectSubgroup).on('change', selectSubgroup);
+          $(window).off('click', organizationClickHandler).on('click', organizationClickHandler);
           $('#separation-slider').off('input', separation).on('input', separation);
-          $('#rainbow').off('click', () => color('Rainbow')).on('click', () => color('Rainbow'));
-          $('#grayscale').off('click', () => color('Grayscale')).on('click', () => color('Grayscale'));
-          $('#no-coloration').off('click', () => color('None')).on('click', () => color('None'));
+          $('#coloration-choice').off('click', colorClickHandler).on('click', colorClickHandler);
        }
 
        /* Load the static components of the page */
@@ -118,22 +116,20 @@
           // Create header from group name
           $('#header').html(MathML.sans('<mtext>Multiplication Table for&nbsp;</mtext>' + group.name));
 
-          // Create list of subgroups for select options, one choice for each proper subgroup
-          //   (Note that counting starts at 1; subgroup 0, the identity group, is already filled in by static HTML)
-          for (let inx = 1; inx < group.subgroups.length - 1; inx++) {
-             // Recursive routine calculates multi-character subscript as Unicode text, since <option> tags cannot contain HTML
-             // (We could also roll our own <select> here)
-             const subscript = (jnx) =>
-                (jnx == 0) ? '' : (subscript(Math.floor(jnx / 10)) + subscripts[jnx % 10]);  // subscripts defined in js/mathmlUtils.js
-             const subgroup = group.subgroups[inx];
+          // Create list of subgroups for Organize by subgroup menu:
+          $('#organization-choices').html(
+             $('<li action="organizeBySubgroup(0)">').html(MathML.sans('<mtext>none</mtext>')));
+          for (let subgroupIndex = 1; subgroupIndex < group.subgroups.length-1; subgroupIndex++) {
+             const subgroup = group.subgroups[subgroupIndex];
              const option =  eval(Template.HTML('organization-choice-template'));
-             $('#organization-select').append(option);
+             $('#organization-choices').append(option);
           }
+          MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'organization-choices',
+                             () => $('#organization-choice').html($('#organization-choices > li:first-of-type').html())]);
 
           // Draw Multtable in graphic
           multtable = new Multtable(group);
           graphicContext = new DisplayMulttable({container: $('#graphic')});
-          organizeBySubgroup(0);  // Initialize Multtable to display with no grouping
 
           // Register event handlers
           registerCallbacks();
@@ -183,20 +179,28 @@
        }
 
        /* Find subgroup index (the "value" attribute of the option selected) and display multtable accordingly */
-       function selectSubgroup(ev) {
-          ev.stopPropagation();
-          organizeBySubgroup(ev.target.value);
-          graphicContext.showLargeGraphic(multtable);
+       function organizationClickHandler(event) {
+          const $curr = $(event.target).closest('[action]');
+          if ($curr.length == 0) {
+             $('#organization-choices').hide();
+          } else {
+             eval($curr.attr('action'));
+          }
        }
 
-       /* Display multtable grouped by group.subgroup[inx] */
-       function organizeBySubgroup(inx) {
-          if (inx == 0) {
+       /* Display multtable grouped by group.subgroup[subgroupIndex] */
+       function organizeBySubgroup(subgroupIndex) {
+          if (subgroupIndex == 0) {
              multtable.reset();
           } else {
-             multtable.organizeBySubgroup(group.subgroups[inx]);
+             multtable.organizeBySubgroup(group.subgroups[subgroupIndex]);
           }
+          // copy already-formatted text from menu
+          $('#organization-choice').html(
+             $(`#organization-choices > li:nth-of-type(${subgroupIndex+1})`).html());
+          $('#organization-choices').hide();
           emitStateChange();
+          graphicContext.showLargeGraphic(multtable);
        }
 
        /* Set separation between cosets in multtable display, and re-draw graphic */
@@ -207,10 +211,15 @@
        }
 
        /* Set coloration option in multtable, and re-draw graphic */
-       function color(coloration) {
-          multtable.colors = coloration;
-          emitStateChange();
-          graphicContext.showLargeGraphic(multtable);
+       function colorClickHandler(event) {
+          const $input = $(event.target).closest('[coloration]');
+          if ($input.length != 0) {
+             const coloration = $input.attr('coloration');
+             multtable.colors = coloration;
+             $(`input[coloration="${coloration}"]`)[0].checked = true;
+             emitStateChange();
+             graphicContext.showLargeGraphic(multtable);
+          }
        }
 
        /* Resize the body */
@@ -467,22 +476,28 @@
       </div>
 
       <div id="table-control" class="fill-vert control">
-         <p>Organize by subgroup:</p>
-         <select id="organization-select">
-            <option value="0">none</option>
-         </select>
+         <div class="graphic-lead">Organize by subgroup:</div>
+         <div id="organization-select" class="faux-select" action="$('#organization-choices').toggle()">
+            <ul id="organization-choices" class="faux-select-options" style="width: 13em"></ul>
+            <span id="organization-choice" class="faux-selection">none</span>
+            <div class="faux-select-arrow"></div>
+         </div>
          <template id="organization-choice-template">
-            <option value="${inx}">H${subscript(inx)}, a subgroup of order ${subgroup.order}</option>
+            <li action="organizeBySubgroup(${subgroupIndex})">
+               ${MathML.sans(MathML.sub('H', subgroupIndex) + '<mo>,</mo><mtext>a subgroup of order&nbsp;</mtext><mn>' +
+               subgroup.order + '</mn>')}
+            </li>
          </template>
 
-         <p>Separate cosets by:</p>
+         <div class="graphic-lead" style="margin-top: 3em">Separate cosets by:</div>
          <input id="separation-slider" type="range" min="0" max="100" value="0"> <!-- [0-100] => [0,box width] -->
-         <p>Default coloration:</p>
-         <form>
-            <input id="rainbow" name="coloration" type="radio" checked>Spectrum/rainbow<br>
-            <input id="grayscale" name="coloration" type="radio">Grayscale<br>
-            <input id="no-coloration" name="coloration" type="radio">None<br>
-         </form>
+
+         <div class="graphic-lead" style="margin-bottom: 0">Default coloration:</div>
+         <div id="coloration-choice" style="margin-left: 5%">
+            <input coloration="Rainbow" name="coloration" type="radio" checked><span coloration="Rainbow">Spectrum/rainbow</span><br>
+            <input coloration="Grayscale" name="coloration" type="radio"><span coloration="Grayscale">Grayscale</span><br>
+            <input coloration="None" name="coloration" type="radio"><span coloration="None">None</span><br>
+         </div>
       </div>
 
       <img id="blank" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAQAAAAnOwc2AAAAD0lEQVR42mNkwAIYh7IgAAVVAAuInjI5AAAAAElFTkSuQmCC" height="1px" width="1px" class="hidden">
