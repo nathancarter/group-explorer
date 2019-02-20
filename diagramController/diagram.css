@@ -7,13 +7,13 @@
     z-index: 10;
 }
 
-#diagram-control {
-   padding: 8;  /* margin around all elements of diagram-control */
+.graphic-lead {
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
 }
 
-#diagram-choice > select, #chunk-control > select {
-   width: 100%;  /* select choice full width */
-   margin: 0;
+#diagram-control {
+    padding: 8;  /* margin around all elements of diagram-control */
 }
 
 /* Generation control */
@@ -37,6 +37,7 @@
    border-bottom: 1px solid #B1B1B1;
 }
 #generation-strategy tbody td {
+   padding-left: 3px;
    background-color: white;
    border-right: 1px solid black;
    border-bottom: 1px solid black;
@@ -82,15 +83,8 @@
 
 /* Left-right multiplication select */
 #multiplication-control {
-   margin-block-start: 1em;
+    margin-top: 1em;
 }
-#multiplication-control > span {
-   width: 50%;
-   margin: auto 0 auto 0;
+#multiplication-control [multiplication] {
+    margin-left: 5%;
 }
-#multiplication-control select {
-   width: 50%;
-   margin: 0;
-   float: right;
-}
-

@@ -22,10 +22,14 @@ DC.Generator = class {
 
       // add a row for each strategy in Cayley diagram
       const num_strategies = Cayley_diagram.strategies.length;
-      Cayley_diagram.strategies.forEach( (strategy, inx) =>
-         $generation_table.append($(eval(Template.HTML('generation-template')))) );
-
-      MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'generation-table']);
+      if (num_strategies == 0) {
+         $('#generation-table').html(
+            '<tr style="height: 3em"><td></td><td style="width: 25%"></td><td style="width: 40%"></td><td></td></tr>');
+      } else {
+         Cayley_diagram.strategies.forEach( (strategy, inx) =>
+            $generation_table.append($(eval(Template.HTML('generation-template')))) );
+         MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'generation-table']);
+      }
    }
 
    static showGeneratorMenu(event, strategy_index) {
@@ -41,10 +45,11 @@ DC.Generator = class {
       $generator_menu.prepend(
          ...eligible.map( (generator) =>
             $(eval(Template.HTML('generator-menu-item-template')))
-               .html(mathml2html(group.representation[generator])) )
+               .html(MathML.sans(group.representation[generator])) )
       );
 
       $('#generation-table').append($generator_menu);
+      MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'generation-list']);
       DC.Generator._showMenu(event, $generator_menu);
    }
 
@@ -228,9 +233,15 @@ DC.Generator = class {
 
 // layout (linear/circular/rotated), direction (X/Y/Z)
 DC.Generator.axis_label = [
-   ['Linear in x', 'Linear in y', 'Linear in z'],
-   ['Circular in y,z', 'Circular in x,z', 'Circular in x,y'],
-   ['Rotated in y,z', 'Rotated in x,z', 'Rotated in x,y'],
+   [MathML.sans('<mtext>Linear in&nbsp;</mtext><mi>x</mi>'),
+    MathML.sans('<mtext>Linear in&nbsp;</mtext><mi>y</mi>'),
+    MathML.sans('<mtext>Linear in&nbsp;</mtext><mi>z</mi>')],
+   [MathML.sans('<mtext>Circular in&nbsp;</mtext><mi>y</mi><mo>,</mo><mi>z</mi>'),
+    MathML.sans('<mtext>Circular in&nbsp;</mtext><mi>x</mi><mo>,</mo><mi>z</mi>'),
+    MathML.sans('<mtext>Circular in&nbsp;</mtext><mi>x</mi><mo>,</mo><mi>y</mi>')],
+   [MathML.sans('<mtext>Rotated in&nbsp;</mtext><mi>y</mi><mo>,</mo><mi>z</mi>'),
+    MathML.sans('<mtext>Rotated in&nbsp;</mtext><mi>x</mi><mo>,</mo><mi>z</mi>'),
+    MathML.sans('<mtext>Rotated in&nbsp;</mtext><mi>x</mi><mo>,</mo><mi>y</mi>')],
 ];
 
 DC.Generator.axis_image = [
@@ -242,9 +253,19 @@ DC.Generator.axis_image = [
 // wording for nesting order
 DC.Generator.orders = [
    [],
-   ['N/A'],
-   ['inside', 'outside'],
-   ['innermost', 'middle', 'outermost'],
-   ['innermost', 'second innermost', 'second outermost', 'outermost'],
-   ['innermost', 'second innermost', 'middle', 'second outermost', 'outermost']
+   [MathML.sans('<mtext>N/A</mtext>')],
+   [MathML.sans('<mtext>inside</mtext>'),
+    MathML.sans('<mtext>outside</mtext>')],
+   [MathML.sans('<mtext>innermost</mtext>'),
+    MathML.sans('<mtext>middle</mtext>'),
+    MathML.sans('<mtext>outermost</mtext>')],
+   [MathML.sans('<mtext>innermost</mtext>'),
+    MathML.sans('<mtext>second innermost</mtext>'),
+    MathML.sans('<mtext>second outermost</mtext>'),
+    MathML.sans('<mtext>outermost</mtext>')],
+   [MathML.sans('<mtext>innermost</mtext>'),
+    MathML.sans('<mtext>second innermost</mtext>'),
+    MathML.sans('<mtext>middle</mtext>'),
+    MathML.sans('<mtext>second outermost</mtext>'),
+    MathML.sans('<mtext>outermost</mtext>')]
 ];

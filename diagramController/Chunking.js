@@ -1,40 +1,48 @@
 
 DC.Chunking = class {
    static updateChunkingSelect() {
-      $('#chunk-select').html(eval(Template.HTML('chunk-select-first-template')));
       // check that first generator is innermost, second is middle, etc.
       if (   Cayley_diagram.strategies.every( (strategy, inx) => strategy.nesting_level == inx )
-          && $('#diagram-select')[0].value == '' ) {
+          && $('#diagram-choice').attr('index') == '-1' ) {
          DC.Chunking.enable();
       } else {
          DC.Chunking.disable();
          return;
       }
-      $('#chunk-select').html(eval(Template.HTML('chunk-select-first-template')));
-      // Generate multi-character subscript as Unicode text (<option> tags cannot contain HTML)
-      const subscript = (jnx) =>
-         (jnx == 0) ? '' : (subscript(Math.floor(jnx / 10)) + subscripts[jnx % 10]);  // subscripts defined in js/mathmlUtils.js
+
+      $('#chunk-choices').html(eval(Template.HTML('chunk-select-first-template')));
       const generators = [];
       // generate option for each strategy in Cayley diagram
       Cayley_diagram.strategies.forEach( (strategy, strategy_index) => {
-         if (strategy == Cayley_diagram.strategies._last()) {
-            return;
+         if (strategy != Cayley_diagram.strategies._last()) {
+            // find matching subgroup for chunking option
+            const subgroup_index = group.subgroups.findIndex( (subgroup) => strategy.bitset.equals(subgroup.members) );
+            generators.push(group.representation[strategy.generator]);
+            $('#chunk-choices').append(eval(Template.HTML('chunk-select-other-template')));
          }
-         // find matching subgroup for chunking option
-         const subgroup_index = group.subgroups.findIndex( (subgroup) => strategy.bitset.equals(subgroup.members) );
-         generators.push(strategy.generator);
-         const generator_strings = generators.map( (el) => mathml2text(group.representation[el]) ).join(', ');
-         $('#chunk-select').append(eval(Template.HTML('chunk-select-other-template')));
       } );
-      $('#chunk-select').append(eval(Template.HTML('chunk-select-last-template')));
+      $('#chunk-choices').append(eval(Template.HTML('chunk-select-last-template')));
+      MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'chunk-choices',
+                         () => $('#chunk-choice').html($('#chunk-choices > li:first-of-type').html())
+      ]);
    }
 
-   static selectChunk(event) {
-      event.stopPropagation();
-      if (DC.Chunking.isDisabled()) {
-         return;
+   static clickHandler(event) {
+      event.preventDefault();
+
+      if (!DC.Chunking.isDisabled()) {
+         const $curr = $(event.target).closest('[action]');
+         if ($curr != undefined) {
+            eval($curr.attr('action'));
+            event.stopPropagation();
+         }
       }
-      Cayley_diagram.chunk = (event.target.value == -1) ? undefined : event.target.value;
+   }
+
+   static selectChunk(strategy_index) {
+      $('#chunk-choices').hide();
+      $('#chunk-choice').html($(`#chunk-choices > li:nth-of-type(${strategy_index + 2})`).html());
+      Cayley_diagram.chunk = (strategy_index == -1) ? undefined : strategy_index;
       Graphic_context.updateChunking(Cayley_diagram);
    }
    

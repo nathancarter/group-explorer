@@ -1,26 +1,46 @@
 
 DC.DiagramChoice = class {
-   
+
    /* Populate diagram select element, show selected diagram */
    static setupDiagramSelect() {
-      group.cayleyDiagrams.forEach( (diagram) => {
-         $('#diagram-select').append(eval(Template.HTML('diagram-choice-template')));
+      $('#diagram-choices').html(eval(Template.HTML('diagram-select-first-template'))).hide();
+      group.cayleyDiagrams.forEach( (diagram, index) => {
+         $('#diagram-choices').append(eval(Template.HTML('diagram-select-other-template'))).hide();
       } );
-      $(`#diagram-select option[value='${(Diagram_name === undefined) ? '' : Diagram_name}']`).attr('selected', 'selected')
+      MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'diagram-choices',
+                         () => $('#diagram-choice')
+                            .html($('#diagram-choices > li:first-of-type').html())
+                            .attr('index', -1)
+                            .show()
+      ]);
    }
 
    /* Display control routines */
-   static selectDiagram(event) {
-      Diagram_name = $('#diagram-select')[0].value;
-      if (Diagram_name == "") {
+   static clickHandler(event) {
+      event.preventDefault();
+
+      const $curr = $(event.target).closest('[action]');
+      if ($curr != undefined) {
+         eval($curr.attr('action'));
+         event.stopPropagation();
+      }
+   }
+
+   static selectDiagram(index) {
+      if (index == -1) {
          Diagram_name = undefined;
+         $('#diagram-choice').html($('#diagram-choices > li:first-of-type').html());
          DC.Generator.enable();
          DC.Chunking.enable();
       } else {
+         Diagram_name = group.cayleyDiagrams[index].name;
+         $('#diagram-choice').html($(`#diagram-choices > li:nth-of-type(${index+2})`).html());
          DC.Generator.disable();
          DC.Chunking.disable();
       }
-      
-      displayGraphic();
+      $('#diagram-choice').attr('index',  index);
+      $('#diagram-choices').hide();
+ 
+     displayGraphic();
    }
 }

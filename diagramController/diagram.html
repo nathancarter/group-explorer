@@ -1,17 +1,20 @@
 
 <!-- Diagram-page layout -->
 <div id="diagram-page">
-   <div id="diagram-choice">
-      <select id="diagram-select">
-         <option value="">Generate diagram</option>
-      </select>
-      <template id="diagram-choice-template">
-         <option value="${diagram.name}">Use ${diagram.name}</option>
-      </template>
+   <div id="diagram-select" class="faux-select" action="$('#diagram-choices').toggle()">
+      <ul id="diagram-choices" class="faux-select-options"></ul>
+      <span id="diagram-choice" class="faux-selection" index="-1">Generate diagram</span>
+      <div class="faux-select-arrow"></div>
    </div>
+   <template id="diagram-select-first-template">
+      <li action="DC.DiagramChoice.selectDiagram(-1)">${MathML.sans('<mtext>Generate diagram</mtext>')}</li>
+   </template>
+   <template id="diagram-select-other-template">
+      <li action="DC.DiagramChoice.selectDiagram(${index})">${MathML.sans('<mtext>' + diagram.name + '</mtext>')}</li>
+   </template>
 
    <div id="generation-control">
-      <p>Generate diagram this way:</p>
+      <div class="graphic-lead">Generate diagram this way:</div>
       <div id="generation-strategy" style="position: relative">
          <table>
             <thead>
@@ -47,7 +50,7 @@
          <template id="generation-menu-template">
             <ul id="generation-list" class="menu">
                <hr>
-               <li>Organize by&nbsp;&nbsp;<span class="menu-arrow"></span>
+               <li>${MathML.sans('<mtext>Organize by&nbsp;&nbsp;</mtext>')}<span class="menu-arrow"></span>
                   <ul id="generation-organize-menu"></ul>
                </li>
             </ul>
@@ -61,16 +64,16 @@
                '<mn>' + subgroup.order + '</mn>')}</li>
          </template>
          <template id="axis-menu-template">
-            <li action="DC.Generator.updateAxes(${strategy_index}, 0, 0)">Linear in x</li>
-            <li action="DC.Generator.updateAxes(${strategy_index}, 0, 1)">Linear in y</li>
-            <li action="DC.Generator.updateAxes(${strategy_index}, 0, 2)">Linear in z</li>
+            <li action="DC.Generator.updateAxes(${strategy_index}, 0, 0)">${DC.Generator.axis_label[0][0]}</li>
+            <li action="DC.Generator.updateAxes(${strategy_index}, 0, 1)">${DC.Generator.axis_label[0][1]}</li>
+            <li action="DC.Generator.updateAxes(${strategy_index}, 0, 2)">${DC.Generator.axis_label[0][2]}</li>
             <div class="${curvable ? '' : 'hidden'}">
-               <li action="DC.Generator.updateAxes(${strategy_index}, 1, 2)">Circular in x,y</li>
-               <li action="DC.Generator.updateAxes(${strategy_index}, 1, 1)">Circular in x,z</li>
-               <li action="DC.Generator.updateAxes(${strategy_index}, 1, 0)">Circular in y,z</li>
-               <li action="DC.Generator.updateAxes(${strategy_index}, 2, 2)">Rotated in x,y</li>
-               <li action="DC.Generator.updateAxes(${strategy_index}, 2, 1)">Rotated in x,z</li>
-               <li action="DC.Generator.updateAxes(${strategy_index}, 2, 0)">Rotated in y,z</li>
+               <li action="DC.Generator.updateAxes(${strategy_index}, 1, 2)">${DC.Generator.axis_label[1][2]}</li>
+               <li action="DC.Generator.updateAxes(${strategy_index}, 1, 1)">${DC.Generator.axis_label[1][1]}</li>
+               <li action="DC.Generator.updateAxes(${strategy_index}, 1, 0)">${DC.Generator.axis_label[1][0]}</li>
+               <li action="DC.Generator.updateAxes(${strategy_index}, 2, 2)">${DC.Generator.axis_label[2][2]}</li>
+               <li action="DC.Generator.updateAxes(${strategy_index}, 2, 1)">${DC.Generator.axis_label[2][1]}</li>
+               <li action="DC.Generator.updateAxes(${strategy_index}, 2, 0)">${DC.Generator.axis_label[2][0]}</li>
             </div>
          </template>
          <template id="order-menu-item-template">
@@ -81,7 +84,7 @@
    </div>
 
    <div id="arrow-control">
-      <p>Show these arrows:</p>
+      <div class="graphic-lead">Show these arrows:</div>
       <div class="horiz">
          <div id="arrow-display">
             <ul id="arrow-list"></ul>
@@ -103,29 +106,33 @@
       </div>
    </div>
 
-   <div id="multiplication-control" class="horiz">
-      <span>Arrows mean:</span>
-      <select id="multiplication-select">
-         <option value="right" selected>right multiplication</option>
-         <option value="left">left multiplication</option>
-      </select>
+   <div id="multiplication-control">
+      <div class="graphic-lead" style="margin-bottom: 0">Arrows mean</div>
+      <div multiplication="right"><input name="multiplication" type="radio" checked>right multiplication</div>
+      <div multiplication="left"><input name="multiplication" type="radio">left multiplication</div>
    </div>
 
    <div id="chunk-control" style="position: relative">
-      <p>Chunk this subgroup:</p>
-      <select id="chunk-select" disable="false">
-      </select>
+      <div class="graphic-lead">Chunk this subgroup:</div>
+      <div id="chunk-select" class="faux-select" action="$('#chunk-choices').toggle()">
+         <ul id="chunk-choices" class="faux-select-options"></ul>
+         <span id="chunk-choice" class="faux-selection">(no chunking)</span>
+         <div class="faux-select-arrow"></div>
+      </div>
 
-      <div id="chunking-fog" class="fog hidden"></div>
-      
       <template id="chunk-select-first-template">
-         <option value="-1">(no chunking)</option>
+         <li action="DC.Chunking.selectChunk(-1)">${MathML.sans('<mtext>(no chunking)</mtext>')}</li>
       </template>
       <template id="chunk-select-other-template">
-         <option value="${strategy_index}">H${subscript(subgroup_index)}, generated by { ${generator_strings} }</option>
+         <li action="DC.Chunking.selectChunk(${strategy_index})">
+            ${MathML.sans(MathML.sub('H', subgroup_index) + '<mtext>, generated by&nbsp;</mtext>') + MathML.setList(generators)}
+
+         </li>
       </template>
       <template id="chunk-select-last-template">
-         <option value="${Cayley_diagram.strategies.length-1}">The whole group</option>
+         <li action="DC.Chunking.selectChunk(${Cayley_diagram.strategies.length-1})">${MathML.sans('<mtext>The whole group</mtext>')}</li>
       </template>
+
+      <div id="chunking-fog" class="fog hidden"></div>
    </div>
 </div>

@@ -4,6 +4,8 @@ class DC {
       $('#diagram-page .highlighted').removeClass('highlighted');
       $('#diagram-page .menu:visible').remove();
       $('#remove-arrow-button').prop('disabled', true);
+      $('#diagram-choices').hide();
+      $('#chunk-choices').hide();
    }
 
    /* Load, initialize diagram control */
@@ -27,7 +29,7 @@ class DC {
                .off('contextmenu', DC.clearMenus).on('contextmenu', DC.clearMenus);
 
       DC.DiagramChoice.setupDiagramSelect();
-      $('#diagram-select').off('click', DC.DiagramChoice.selectDiagram).on('click', DC.DiagramChoice.selectDiagram);
+      $('#diagram-select').off('click', DC.DiagramChoice.clickHandler).on('click', DC.DiagramChoice.clickHandler);
 
       $('#arrow-control').off('click', DC.Arrow.clickHandler).on('click', DC.Arrow.clickHandler);
 
@@ -39,7 +41,7 @@ class DC {
 
       $('#multiplication-control').off('click', DC.ArrowMult.clickHandler).on('click', DC.ArrowMult.clickHandler);
 
-      $('#chunk-select').off('change', DC.Chunking.selectChunk).on('change', DC.Chunking.selectChunk);
+      $('#chunk-select').off('click', DC.Chunking.clickHandler).on('click', DC.Chunking.clickHandler);
    }
 
    static update() {
