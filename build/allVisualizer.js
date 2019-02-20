@@ -527,6 +527,8 @@ class DC {
       $('#diagram-page .highlighted').removeClass('highlighted');
       $('#diagram-page .menu:visible').remove();
       $('#remove-arrow-button').prop('disabled', true);
+      $('#diagram-choices').hide();
+      $('#chunk-choices').hide();
    }
 
    /* Load, initialize diagram control */
@@ -550,7 +552,7 @@ class DC {
                .off('contextmenu', DC.clearMenus).on('contextmenu', DC.clearMenus);
 
       DC.DiagramChoice.setupDiagramSelect();
-      $('#diagram-select').off('click', DC.DiagramChoice.selectDiagram).on('click', DC.DiagramChoice.selectDiagram);
+      $('#diagram-select').off('click', DC.DiagramChoice.clickHandler).on('click', DC.DiagramChoice.clickHandler);
 
       $('#arrow-control').off('click', DC.Arrow.clickHandler).on('click', DC.Arrow.clickHandler);
 
@@ -562,7 +564,7 @@ class DC {
 
       $('#multiplication-control').off('click', DC.ArrowMult.clickHandler).on('click', DC.ArrowMult.clickHandler);
 
-      $('#chunk-select').off('change', DC.Chunking.selectChunk).on('change', DC.Chunking.selectChunk);
+      $('#chunk-select').off('click', DC.Chunking.clickHandler).on('click', DC.Chunking.clickHandler);
    }
 
    static update() {
@@ -597,10 +599,14 @@ DC.Generator = class {
 
       // add a row for each strategy in Cayley diagram
       const num_strategies = Cayley_diagram.strategies.length;
-      Cayley_diagram.strategies.forEach( (strategy, inx) =>
-         $generation_table.append($(eval(Template.HTML('generation-template')))) );
-
-      MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'generation-table']);
+      if (num_strategies == 0) {
+         $('#generation-table').html(
+            '<tr style="height: 3em"><td></td><td style="width: 25%"></td><td style="width: 40%"></td><td></td></tr>');
+      } else {
+         Cayley_diagram.strategies.forEach( (strategy, inx) =>
+            $generation_table.append($(eval(Template.HTML('generation-template')))) );
+         MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'generation-table']);
+      }
    }
 
    static showGeneratorMenu(event, strategy_index) {
@@ -616,10 +622,11 @@ DC.Generator = class {
       $generator_menu.prepend(
          ...eligible.map( (generator) =>
             $(eval(Template.HTML('generator-menu-item-template')))
-               .html(mathml2html(group.representation[generator])) )
+               .html(MathML.sans(group.representation[generator])) )
       );
 
       $('#generation-table').append($generator_menu);
+      MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'generation-list']);
       DC.Generator._showMenu(event, $generator_menu);
    }
 
@@ -803,9 +810,15 @@ DC.Generator = class {
 
 // layout (linear/circular/rotated), direction (X/Y/Z)
 DC.Generator.axis_label = [
-   ['Linear in x', 'Linear in y', 'Linear in z'],
-   ['Circular in y,z', 'Circular in x,z', 'Circular in x,y'],
-   ['Rotated in y,z', 'Rotated in x,z', 'Rotated in x,y'],
+   [MathML.sans('<mtext>Linear in&nbsp;</mtext><mi>x</mi>'),
+    MathML.sans('<mtext>Linear in&nbsp;</mtext><mi>y</mi>'),
+    MathML.sans('<mtext>Linear in&nbsp;</mtext><mi>z</mi>')],
+   [MathML.sans('<mtext>Circular in&nbsp;</mtext><mi>y</mi><mo>,</mo><mi>z</mi>'),
+    MathML.sans('<mtext>Circular in&nbsp;</mtext><mi>x</mi><mo>,</mo><mi>z</mi>'),
+    MathML.sans('<mtext>Circular in&nbsp;</mtext><mi>x</mi><mo>,</mo><mi>y</mi>')],
+   [MathML.sans('<mtext>Rotated in&nbsp;</mtext><mi>y</mi><mo>,</mo><mi>z</mi>'),
+    MathML.sans('<mtext>Rotated in&nbsp;</mtext><mi>x</mi><mo>,</mo><mi>z</mi>'),
+    MathML.sans('<mtext>Rotated in&nbsp;</mtext><mi>x</mi><mo>,</mo><mi>y</mi>')],
 ];
 
 DC.Generator.axis_image = [
@@ -817,36 +830,66 @@ DC.Generator.axis_image = [
 // wording for nesting order
 DC.Generator.orders = [
    [],
-   ['N/A'],
-   ['inside', 'outside'],
-   ['innermost', 'middle', 'outermost'],
-   ['innermost', 'second innermost', 'second outermost', 'outermost'],
-   ['innermost', 'second innermost', 'middle', 'second outermost', 'outermost']
+   [MathML.sans('<mtext>N/A</mtext>')],
+   [MathML.sans('<mtext>inside</mtext>'),
+    MathML.sans('<mtext>outside</mtext>')],
+   [MathML.sans('<mtext>innermost</mtext>'),
+    MathML.sans('<mtext>middle</mtext>'),
+    MathML.sans('<mtext>outermost</mtext>')],
+   [MathML.sans('<mtext>innermost</mtext>'),
+    MathML.sans('<mtext>second innermost</mtext>'),
+    MathML.sans('<mtext>second outermost</mtext>'),
+    MathML.sans('<mtext>outermost</mtext>')],
+   [MathML.sans('<mtext>innermost</mtext>'),
+    MathML.sans('<mtext>second innermost</mtext>'),
+    MathML.sans('<mtext>middle</mtext>'),
+    MathML.sans('<mtext>second outermost</mtext>'),
+    MathML.sans('<mtext>outermost</mtext>')]
 ];
 
 DC.DiagramChoice = class {
-   
+
    /* Populate diagram select element, show selected diagram */
    static setupDiagramSelect() {
-      group.cayleyDiagrams.forEach( (diagram) => {
-         $('#diagram-select').append(eval(Template.HTML('diagram-choice-template')));
+      $('#diagram-choices').html(eval(Template.HTML('diagram-select-first-template'))).hide();
+      group.cayleyDiagrams.forEach( (diagram, index) => {
+         $('#diagram-choices').append(eval(Template.HTML('diagram-select-other-template'))).hide();
       } );
-      $(`#diagram-select option[value='${(Diagram_name === undefined) ? '' : Diagram_name}']`).attr('selected', 'selected')
+      MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'diagram-choices',
+                         () => $('#diagram-choice')
+                            .html($('#diagram-choices > li:first-of-type').html())
+                            .attr('index', -1)
+                            .show()
+      ]);
    }
 
    /* Display control routines */
-   static selectDiagram(event) {
-      Diagram_name = $('#diagram-select')[0].value;
-      if (Diagram_name == "") {
+   static clickHandler(event) {
+      event.preventDefault();
+
+      const $curr = $(event.target).closest('[action]');
+      if ($curr != undefined) {
+         eval($curr.attr('action'));
+         event.stopPropagation();
+      }
+   }
+
+   static selectDiagram(index) {
+      if (index == -1) {
          Diagram_name = undefined;
+         $('#diagram-choice').html($('#diagram-choices > li:first-of-type').html());
          DC.Generator.enable();
          DC.Chunking.enable();
       } else {
+         Diagram_name = group.cayleyDiagrams[index].name;
+         $('#diagram-choice').html($(`#diagram-choices > li:nth-of-type(${index+2})`).html());
          DC.Generator.disable();
          DC.Chunking.disable();
       }
-      
-      displayGraphic();
+      $('#diagram-choice').attr('index',  index);
+      $('#diagram-choices').hide();
+ 
+     displayGraphic();
    }
 }
 /* This class brings together the functions used in managing the "Show these arrows:" arrow-list display and its side effects
@@ -970,51 +1013,60 @@ DC.ArrowMult = class {
    static clickHandler(event) {
       event.preventDefault();
 
-      Cayley_diagram.right_multiplication = (event.target.value == 'right');
-      Graphic_context.showGraphic(Cayley_diagram);
-
+      const $curr = $(event.target).closest('[multiplication]');
+      if ($curr.length != 0) {
+         Cayley_diagram.right_multiplication = ($curr.attr('multiplication') == 'right');
+         $curr.children('input')[0].checked = true;
+         Graphic_context.showGraphic(Cayley_diagram);
+      }
       event.stopPropagation();
    }
-
 }
-  
 
 DC.Chunking = class {
    static updateChunkingSelect() {
-      $('#chunk-select').html(eval(Template.HTML('chunk-select-first-template')));
       // check that first generator is innermost, second is middle, etc.
       if (   Cayley_diagram.strategies.every( (strategy, inx) => strategy.nesting_level == inx )
-          && $('#diagram-select')[0].value == '' ) {
+          && $('#diagram-choice').attr('index') == '-1' ) {
          DC.Chunking.enable();
       } else {
          DC.Chunking.disable();
          return;
       }
-      $('#chunk-select').html(eval(Template.HTML('chunk-select-first-template')));
-      // Generate multi-character subscript as Unicode text (<option> tags cannot contain HTML)
-      const subscript = (jnx) =>
-         (jnx == 0) ? '' : (subscript(Math.floor(jnx / 10)) + subscripts[jnx % 10]);  // subscripts defined in js/mathmlUtils.js
+
+      $('#chunk-choices').html(eval(Template.HTML('chunk-select-first-template')));
       const generators = [];
       // generate option for each strategy in Cayley diagram
       Cayley_diagram.strategies.forEach( (strategy, strategy_index) => {
-         if (strategy == Cayley_diagram.strategies._last()) {
-            return;
+         if (strategy != Cayley_diagram.strategies._last()) {
+            // find matching subgroup for chunking option
+            const subgroup_index = group.subgroups.findIndex( (subgroup) => strategy.bitset.equals(subgroup.members) );
+            generators.push(group.representation[strategy.generator]);
+            $('#chunk-choices').append(eval(Template.HTML('chunk-select-other-template')));
          }
-         // find matching subgroup for chunking option
-         const subgroup_index = group.subgroups.findIndex( (subgroup) => strategy.bitset.equals(subgroup.members) );
-         generators.push(strategy.generator);
-         const generator_strings = generators.map( (el) => mathml2text(group.representation[el]) ).join(', ');
-         $('#chunk-select').append(eval(Template.HTML('chunk-select-other-template')));
       } );
-      $('#chunk-select').append(eval(Template.HTML('chunk-select-last-template')));
+      $('#chunk-choices').append(eval(Template.HTML('chunk-select-last-template')));
+      MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'chunk-choices',
+                         () => $('#chunk-choice').html($('#chunk-choices > li:first-of-type').html())
+      ]);
    }
 
-   static selectChunk(event) {
-      event.stopPropagation();
-      if (DC.Chunking.isDisabled()) {
-         return;
+   static clickHandler(event) {
+      event.preventDefault();
+
+      if (!DC.Chunking.isDisabled()) {
+         const $curr = $(event.target).closest('[action]');
+         if ($curr != undefined) {
+            eval($curr.attr('action'));
+            event.stopPropagation();
+         }
       }
-      Cayley_diagram.chunk = (event.target.value == -1) ? undefined : event.target.value;
+   }
+
+   static selectChunk(strategy_index) {
+      $('#chunk-choices').hide();
+      $('#chunk-choice').html($(`#chunk-choices > li:nth-of-type(${strategy_index + 2})`).html());
+      Cayley_diagram.chunk = (strategy_index == -1) ? undefined : strategy_index;
       Graphic_context.updateChunking(Cayley_diagram);
    }
    
