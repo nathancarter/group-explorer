@@ -692,6 +692,7 @@ DC.Generator = class {
       // add subgroup generator(s) to start of strategies
       for (let g = 0; g < subgroup_generators.length; g++) {
          DC.Generator.updateGenerator(g, subgroup_generators[g]);
+         DC.Generator.updateOrder(g, g);
       }
    }
 
