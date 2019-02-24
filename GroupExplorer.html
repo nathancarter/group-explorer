@@ -130,7 +130,7 @@
           // display locally stored group defintions
           for (const url of urlsToDisplay) {
              const g = Library.getLocalGroup(url);
-             if (g != undefined) {
+             if (g != undefined && g.CayleyThumbnail != undefined && g.rowHTML != undefined) {
                 const $img = $('<img>').attr('src', g.CayleyThumbnail).attr('height', 32).attr('width', 32);
                 const $row = $(g.rowHTML);
                 $row.find('td.cayleyDiagram').append($img);
@@ -163,7 +163,7 @@
              Library.getLatestGroup(url)
                     .then( (group) => {
                        // if we already have the latest group in the Library, just check to see if we're done
-                       if (group == localGroup) {
+                       if (localGroup == group && localGroup.CayleyThumbnail != undefined && localGroup.rowHTML != undefined) {
                           if ( urlIndex == urlsToDisplay.length ) {
                              exit();
                           } else {
