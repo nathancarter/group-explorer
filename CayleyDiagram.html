@@ -104,7 +104,10 @@
 
           // When group and framework are loaded, load panels and complete setup
           Promise.all([group_load, body_load])
-                 .then( loadPanels )
+                 .then( () =>
+                    // Preload MathML cache for subsetDisplay, diagramControl
+                    MathML.preload().then( loadPanels )
+                 )
                  .catch( console.error );
        }
 

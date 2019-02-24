@@ -107,7 +107,13 @@
 
           // When group and framework are loaded, insert subset_page and complete rest of setup
           Promise.all([groupLoad, bodyLoad])
-                 .then( () => SSD.load($('#subset-control')).then(completeSetup) )
+                 .then( () =>
+                    // Preload MathML cache for subsetDisplay
+                    MathML.preload().then( () =>
+                       // Load subset display, and complete setup
+                       SSD.load($('#subset-control')).then(completeSetup)
+                    )
+                 )
                  .catch( console.error );
        }
 
