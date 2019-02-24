@@ -49,7 +49,7 @@ DC.Arrow = class {
          if (element != 0 && $(`#arrow-list li[arrow=${element}]`).length == 0) {
             $menu.append(
                $(eval(Template.HTML('arrow-menu-item-template')))
-                  .html(mathml2html(group.representation[element])));
+                  .html(MathML.sans(group.representation[element])));
          }
       } );
       // $('#add-arrow-button').append($menu);

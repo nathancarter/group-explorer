@@ -3,14 +3,16 @@ DC.DiagramChoice = class {
 
    /* Populate diagram select element, show selected diagram */
    static setupDiagramSelect() {
+      let diagram_index = -1;
       $('#diagram-choices').html(eval(Template.HTML('diagram-select-first-template'))).hide();
       group.cayleyDiagrams.forEach( (diagram, index) => {
          $('#diagram-choices').append(eval(Template.HTML('diagram-select-other-template'))).hide();
+         diagram_index = (diagram.name == Diagram_name) ? index : diagram_index;
       } );
       MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'diagram-choices',
                          () => $('#diagram-choice')
-                            .html($('#diagram-choices > li:first-of-type').html())
-                            .attr('index', -1)
+                            .html($(`#diagram-choices > li:nth-of-type(${diagram_index+2}`).html())
+                            .attr('index', diagram_index)
                             .show()
       ]);
    }

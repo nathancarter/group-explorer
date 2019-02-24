@@ -22,8 +22,8 @@
          ${MathML.sans(this.name)}
          <b>&nbsp;=&nbsp;</b>
          ${MathML.genList([group.representation[0]])}
-         ${MathML.sans('<mtext>is the trivial subgroup&nbsp;</mtext>' +
-         MathML.setList([group.representation[0]]))}.
+         ${MathML.sans('<mtext>is the trivial subgroup</mtext>')}
+         ${MathML.setList([group.representation[0]])}.
       </li>
    </template>
    <template id="subgroup_template">
@@ -31,8 +31,8 @@
          ${MathML.sans(this.name)}
          <b>&nbsp;=&nbsp;</b>
          ${MathML.genList(generators)}
-         ${MathML.sans('<mtext>is a subgroup of order&nbsp;</mtext>' +
-         '<mn>' + group.subgroups[this.subgroupIndex].order + '</mn>')}.
+         ${MathML.sans('<mtext>is a subgroup of order</mtext>')}
+         ${MathML.sans('<mn>' + group.subgroups[this.subgroupIndex].order + '</mn>')}.
       </li>
    </template>
    <template id="lastSubgroup_template">
@@ -62,8 +62,8 @@
       ${MathML.sans(this.name)}
       <b>&nbsp;=&nbsp;</b>
       ${MathML.setList(this.elementRepresentations)}
-      ${MathML.sans('<mtext>is an order class of size&nbsp;</mtext>' +
-      '<mn>' + this.elements.popcount() + '</mn><mtext>.</mtext>')}
+      ${MathML.sans('<mtext>is an order class of size</mtext>')}
+      ${MathML.sans('<mn>' + this.elements.popcount() + '</mn>')}.
    </li>
 </template>
 
@@ -72,19 +72,22 @@
       ${MathML.sans(this.name)}
       <b>&nbsp;=&nbsp;</b>
       ${MathML.setList(this.elementRepresentations)}
-      ${MathML.sans('<mtext>is a conjugacy class of size&nbsp;</mtext>' +
-      '<mn>' + this.elements.popcount() + '</mn><mtext>.</mtext>')}
+      ${MathML.sans('<mtext>is a conjugacy class of size</mtext>')}
+      ${MathML.sans('<mn>' + this.elements.popcount() + '</mn>')}.
    </li>
 </template>
 
 <template id="cosetClass_template">
    <li id="${this.id}" class="${this.parent.side}coset${this.parent.subgroup.id}">
-      ${MathML.sans(this.name)}
+      ${this.name}
       <b>&nbsp;=&nbsp;</b>
       ${MathML.setList(this.elementRepresentations)}
-      ${MathML.sans('<mtext>&nbsp;is the ' + this.parent.side + ' coset of&nbsp;</mtext>' +
-      this.parent.subgroup.name + '<mtext>&nbsp;by&nbsp;</mtext>' +
-      group.representation[this.elements.toArray()[0]] + '<mtext>.</mtext>')}
+      ${this.parent.isLeft ?
+      MathML.sans('<mtext>is the left coset of</mtext>') :
+      MathML.sans('<mtext>is the right coset of</mtext>')}
+      ${MathML.sans(this.parent.subgroup.name)}
+      ${MathML.sans('<mtext>by</mtext>')}
+      ${MathML.sans(group.representation[this.elements.toArray()[0]])}.
    </li>
 </template>
 

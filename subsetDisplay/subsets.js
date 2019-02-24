@@ -1,5 +1,3 @@
-var SubgroupNames = [],
-    ElementNames = [];
 
 class SSD {
    static _init() {
@@ -49,19 +47,7 @@ class SSD {
 
       // Display all subgroups
       SSD.Subgroup.displayAll();
-      MathJax.Hub.Queue(['Typeset', MathJax.Hub],
-                        // save references to MathJax formatted H_{inx} in global variable
-                        () => {
-                           $('#subgroups')
-                              .children()
-                              .each( (inx, li) => {
-                                 const childElements = $(li).children('span[tabindex]');
-                                 SubgroupNames.push(childElements[0].outerHTML);
-                                 group.subgroups[inx].generators.toArray().forEach( (gen, jnx) => {
-                                    ElementNames[gen] = childElements[jnx+2].outerHTML;
-                                 } );
-                              } );
-                        });
+      MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'subset_page']);
    }
 
    /*
@@ -145,19 +131,19 @@ class SSD {
       const classes = ['.intersection', '.union', '.elementwise-product'];
       const operations = ['intersection', 'union', 'elementwiseProduct'];
       const printOps = ['intersection', 'union', 'elementwise product'];
-      const node = SubgroupNames[id];
+      const node = MathML.sans(SSD.displayList[id].name);
       for (let inx = 0; inx < classes.length; inx++) {
          const operation = operations[inx];
          const printOp = printOps[inx];
          let frag = '';
-         for (let otherId = 0; otherId < SubgroupNames.length; otherId++) {
+         for (let otherId = 0; otherId < group.subgroups.length; otherId++) {
             if (id != otherId) {
                frag += 
                   `<li action="SSD.displayList[${id}].${operation}(SSD.displayList[${otherId}])">` +
-                  `the ${printOp} of ${node} with ${SubgroupNames[otherId]}</li>`;
+                  `the ${printOp} of ${node} with ${MathML.sans(SSD.displayList[otherId].name)}</li>`;
             }
          }
-         for (let otherId = SubgroupNames.length; otherId < SSD.displayList.length; otherId++) {
+         for (let otherId = group.subgroups.length; otherId < SSD.displayList.length; otherId++) {
             if (id != otherId && SSD.displayList[otherId] !== undefined) {
                const otherName = $(`#${otherId}`).children()[1].outerHTML;
                frag += 
