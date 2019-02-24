@@ -11,10 +11,6 @@
  * Fix test for circular/rotary layout in `CayleyDiagram.setStrategies`
  * Create the UI for adding a naming scheme, and store it in `localStorage`.
 
-### Fonts and math
-
- * Improve MathJax output HTML caching.
-
 ### Help system
 
  * Complete the integration (or pass to Nathan if he finishes his stuff first)
