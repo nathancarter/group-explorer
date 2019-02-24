@@ -1,5 +1,3 @@
-var SubgroupNames = [],
-    ElementNames = [];
 
 class SSD {
    static _init() {
@@ -49,19 +47,7 @@ class SSD {
 
       // Display all subgroups
       SSD.Subgroup.displayAll();
-      MathJax.Hub.Queue(['Typeset', MathJax.Hub],
-                        // save references to MathJax formatted H_{inx} in global variable
-                        () => {
-                           $('#subgroups')
-                              .children()
-                              .each( (inx, li) => {
-                                 const childElements = $(li).children('span[tabindex]');
-                                 SubgroupNames.push(childElements[0].outerHTML);
-                                 group.subgroups[inx].generators.toArray().forEach( (gen, jnx) => {
-                                    ElementNames[gen] = childElements[jnx+2].outerHTML;
-                                 } );
-                              } );
-                        });
+      MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'subset_page']);
    }
 
    /*
@@ -145,19 +131,19 @@ class SSD {
       const classes = ['.intersection', '.union', '.elementwise-product'];
       const operations = ['intersection', 'union', 'elementwiseProduct'];
       const printOps = ['intersection', 'union', 'elementwise product'];
-      const node = SubgroupNames[id];
+      const node = MathML.sans(SSD.displayList[id].name);
       for (let inx = 0; inx < classes.length; inx++) {
          const operation = operations[inx];
          const printOp = printOps[inx];
          let frag = '';
-         for (let otherId = 0; otherId < SubgroupNames.length; otherId++) {
+         for (let otherId = 0; otherId < group.subgroups.length; otherId++) {
             if (id != otherId) {
                frag += 
                   `<li action="SSD.displayList[${id}].${operation}(SSD.displayList[${otherId}])">` +
-                  `the ${printOp} of ${node} with ${SubgroupNames[otherId]}</li>`;
+                  `the ${printOp} of ${node} with ${MathML.sans(SSD.displayList[otherId].name)}</li>`;
             }
          }
-         for (let otherId = SubgroupNames.length; otherId < SSD.displayList.length; otherId++) {
+         for (let otherId = group.subgroups.length; otherId < SSD.displayList.length; otherId++) {
             if (id != otherId && SSD.displayList[otherId] !== undefined) {
                const otherName = $(`#${otherId}`).children()[1].outerHTML;
                frag += 
@@ -505,7 +491,9 @@ SSD.Cosets = class Cosets extends SSD.Partition {
          .getCosets(this.subgroup.elements, this.isLeft)
          .map( (coset, inx) => {
             const rep = window.group.representation[coset.first()];
-            const name = this.isLeft ? rep + this.subgroup.name : this.subgroup.name + rep;
+            const name = this.isLeft ?
+                         MathML.sans(rep) + MathML.sans(this.subgroup.name) :
+                         MathML.sans(this.subgroup.name) + MathML.sans(rep);
             return new SSD.PartitionSubset(this, inx, coset, name, 'cosetClass');
          } );
 
@@ -852,14 +840,16 @@ DC.DiagramChoice = class {
 
    /* Populate diagram select element, show selected diagram */
    static setupDiagramSelect() {
+      let diagram_index = -1;
       $('#diagram-choices').html(eval(Template.HTML('diagram-select-first-template'))).hide();
       group.cayleyDiagrams.forEach( (diagram, index) => {
          $('#diagram-choices').append(eval(Template.HTML('diagram-select-other-template'))).hide();
+         diagram_index = (diagram.name == Diagram_name) ? index : diagram_index;
       } );
       MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'diagram-choices',
                          () => $('#diagram-choice')
-                            .html($('#diagram-choices > li:first-of-type').html())
-                            .attr('index', -1)
+                            .html($(`#diagram-choices > li:nth-of-type(${diagram_index+2}`).html())
+                            .attr('index', diagram_index)
                             .show()
       ]);
    }
@@ -944,7 +934,7 @@ DC.Arrow = class {
          if (element != 0 && $(`#arrow-list li[arrow=${element}]`).length == 0) {
             $menu.append(
                $(eval(Template.HTML('arrow-menu-item-template')))
-                  .html(mathml2html(group.representation[element])));
+                  .html(MathML.sans(group.representation[element])));
          }
       } );
       // $('#add-arrow-button').append($menu);
