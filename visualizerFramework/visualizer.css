@@ -16,6 +16,7 @@
 /* Make the web page to fill the window */
 body {
    margin: 0;
+   overflow: hidden;
    height: 100%;
    width: 100%;
 }
@@ -29,14 +30,6 @@ button {
 }
 button:focus {
    outline: 0;
-}
-
-select {
-   background-image: var(--visualizer-button-gradient);
-   border: 1px solid var(--visualizer-button-border);
-   height: 30px;
-   font-size: 16px;
-   padding-left: 10;
 }
 
 /* identifies vertical and horizontal flex containers */
@@ -56,7 +49,7 @@ select {
    align-items: center;
    font-size: 40px;
    height: 60px;
-   flex: 0 1 60px;
+   flex: 0 0 60px;
 }
 
 /* horizontal container for everything but the header; stretches to fill the height available */
@@ -70,7 +63,7 @@ select {
 #graphic {
    flex: 1 1 auto;
    background-color: var(--visualizer-body-background);
-   width: 100%;
+   width: 100px;
 }
 
 /* grab here to resize graphic; changes cursor */
