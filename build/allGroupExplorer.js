@@ -1478,8 +1478,8 @@ class Template {
  *   getAllLocalURLs -- return array of URLs from Library.map/localStorage
  *   getGroupOrDownload -- return Promise for group, resolved from localStorage if there
  *   getLatestGroup -- return Promise for current copy of group from server
- *   getLocalGroup -- return group from localStorage, 
- *   isEmpty -- true if localStorage contains no groups 
+ *   getLocalGroup -- return group from localStorage,
+ *   isEmpty -- true if localStorage contains no groups
  *   loadFromURL -- get groupURL from window.location.href and return Promise to load it (see getGroupOrDownload)
  *   openWithGroupURL -- utility routine to window.open page with ?groupURL=... search string
  *   resolveURL -- get full URL
@@ -1547,7 +1547,7 @@ class Library {
       return Array.from(Library.map.keys());
    }
 
-   // returns Promise to get group from localStorage or, if not there, download it from server 
+   // returns Promise to get group from localStorage or, if not there, download it from server
    static getGroupOrDownload(url, baseURL) {
       const groupURL = Library.resolveURL(url, baseURL);
       const localGroup = Library.map.get(groupURL);
@@ -1658,7 +1658,7 @@ class Library {
             addEventListener( 'message', function ( event ) {
                if (event.data.type == 'load group') {
                   try {
-                     const group = Library._dataToGroup(event.data.group);
+                     const group = Library._dataToGroup(event.data.group,'json');
                      Library.map.set(undefined, group);
                      resolve(group);
                   } catch (error) {
@@ -1673,7 +1673,7 @@ class Library {
    }
 
    // utility routine to open web page with "...?groupURL=..." with search string containing groupURL
-   //   and options from {a: b, ...} included as '&a=b...', 
+   //   and options from {a: b, ...} included as '&a=b...',
    static openWithGroupURL(pageURL, groupURL, options = {}) {
       const url = `./${pageURL}?groupURL=${groupURL}` +
                   Object.keys(options).reduce( (url, option) => url + `&${option}=${options[option]}`, '');
