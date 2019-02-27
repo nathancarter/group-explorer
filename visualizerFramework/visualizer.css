@@ -62,7 +62,7 @@ select {
 /* horizontal container for everything but the header; stretches to fill the height available */
 #horiz-container {
    flex: 1 1 auto;
-   height: 100%;
+   height: 100px;
    xtouch-action: none;   /* for splitter */
 }
 
