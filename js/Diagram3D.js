@@ -18,6 +18,7 @@ class Diagram3D {
       this.fogLevel = 0;
       this.labelSize = 1;
       this.arrowheadPlacement = 1;
+      this.isGenerated = false;
 
       if (options !== undefined) {
          for (const opt in options) {
@@ -135,6 +136,15 @@ class Diagram3D {
                                            }
                                         } ) );
       if ( this.emitStateChange ) this.emitStateChange();
+   }
+
+   get radius() {
+      const centroid = this.nodes
+                           .reduce( (cent, nd) => cent.add(nd.point), new THREE.Vector3(0,0,0) )
+                           .multiplyScalar(1/this.nodes.length);
+      const squaredRadius = this.nodes
+                                .reduce( (sqrad,nd) => Math.max(sqrad, nd.point.distanceToSquared(centroid)), 0 );
+      return (squaredRadius == 0) ? 1 : Math.sqrt(squaredRadius);  // in case there's only one element
    }
 
    _setNodeField(field, nodes, value) {
