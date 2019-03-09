@@ -246,7 +246,7 @@ class BasicGroup {
       return result.sort((a,b) => a.popcount() - b.popcount());
    }
 
-   getCosets(subgroupBitset, isLeft = true) {
+   getCosets(subgroupBitset, isLeft) {
       const mult = isLeft ? (a,b) => this.multtable[a][b] : (a,b) => this.multtable[b][a];
       const cosets = [subgroupBitset];
       const todo = new BitSet(this.order).setAll().subtract(subgroupBitset);
@@ -263,7 +263,7 @@ class BasicGroup {
 
    // assumes subgroup is normal
    getQuotientGroup(subgroupBitset) {
-      const cosets = this.getCosets(subgroupBitset);
+      const cosets = this.getCosets(subgroupBitset, true);
       const quotientOrder = cosets.length;
       const cosetReps = cosets.map( coset => coset.first() );
       const elementMap = [];
@@ -307,6 +307,72 @@ class BasicGroup {
 
    mult(a,b) {
       return this.multtable[a][b];
+   }
+
+   // returns closure of passed generators as an array of arrays of ...
+   // generators may be passed as a bitset, array, or a single element
+   closureArray(generators) {
+      const deepMultiply = (array, factor, elementsUsed) => array.map( (el) => {
+         if (Array.isArray(el)) {
+            return deepMultiply(el, factor, elementsUsed);
+         } else {
+            const product = this.mult(el, factor);
+            elementsUsed.set(product);
+            return product;
+         }
+      } );
+
+      const close = (remainingGens, elementsUsed, gensUsed) => {
+         if (remainingGens.length == 1) {
+            const generator = remainingGens.pop();
+            const rslt = [0];
+            for (let g = generator, s = g; g != 0; g = this.mult(g, s)) {
+               rslt.push(g);
+               elementsUsed.set(g);
+            }
+            gensUsed.push(generator);
+            return rslt;
+         } else {
+            const generator = remainingGens.pop();
+            const curr = [close(remainingGens, elementsUsed, gensUsed)];
+            gensUsed.push(generator);
+            const prevRslt = curr[0].slice();
+            const cosetReps = [0];
+            for (const g of cosetReps) {
+               for (const s of gensUsed) {
+                  const gXs = this.mult(g,s);
+                  if (!elementsUsed.isSet(gXs)) {
+                     cosetReps.push(gXs);
+                     curr.push(deepMultiply(prevRslt, gXs, elementsUsed));
+                  }
+               }
+            }
+            return curr;
+         }
+      }
+
+      const gens = ((typeof(generators) == 'object') ?
+                    (Array.isArray(generators) ? generators.slice() : generators.toArray()) :
+                    [generators]);
+
+      return close(gens, new BitSet(this.order, [0]), []);
+   }
+
+   // calculates cosets of the passed group as an array of arrays
+   // subgroup is passed as an instance of class Subgroup
+   cosetsArray(subgroup, isLeft) {
+      const mult = isLeft ? (a,b) => this.multtable[a][b] : (a,b) => this.multtable[b][a];
+      const cosets = [subgroup];
+      const cosetReps = [subgroup[0]];
+      const todo = new BitSet(this.order, subgroup).complement();
+      while (!todo.isEmpty()) {
+         const g = todo.pop();
+         cosetReps.push(g);
+         const newCoset = subgroup.map( (el) => mult(g,el) );
+         cosets.push(newCoset);
+         todo.subtract(new BitSet(this.order, newCoset));
+      }
+      return cosets;
    }
 }
 /*
