@@ -94,8 +94,9 @@ class BitSet {
    }
 
    complement() {
+      const mask = 0xFFFFFFFF >>> (0x20 - (this.len & 0x1F));
       for (let i = 0; i < this.arr.length; i++) {
-         this.arr[i] = ~ this.arr[i];
+         this.arr[i] = (~ this.arr[i]) & mask;
       }
       return this;
    }
@@ -135,12 +136,12 @@ class BitSet {
    }
 
    isEmpty() {
-      for (let i = 0; i < this.arr.length; i++) {
+      for (let i = 0; i < this.arr.length - 1; i++) {
 	 if (this.arr[i] != 0) {
 	    return false;
 	 }
       };
-      return true;
+      return (this.arr[this.arr.length - 1] & (0xFFFFFFFF >>> (0x20 - (this.len & 0x1F)))) == 0;
    }
 
    isSet(pos) {
@@ -565,7 +566,7 @@ class BasicGroup {
       return result.sort((a,b) => a.popcount() - b.popcount());
    }
 
-   getCosets(subgroupBitset, isLeft = true) {
+   getCosets(subgroupBitset, isLeft) {
       const mult = isLeft ? (a,b) => this.multtable[a][b] : (a,b) => this.multtable[b][a];
       const cosets = [subgroupBitset];
       const todo = new BitSet(this.order).setAll().subtract(subgroupBitset);
@@ -582,7 +583,7 @@ class BasicGroup {
 
    // assumes subgroup is normal
    getQuotientGroup(subgroupBitset) {
-      const cosets = this.getCosets(subgroupBitset);
+      const cosets = this.getCosets(subgroupBitset, true);
       const quotientOrder = cosets.length;
       const cosetReps = cosets.map( coset => coset.first() );
       const elementMap = [];
@@ -626,6 +627,72 @@ class BasicGroup {
 
    mult(a,b) {
       return this.multtable[a][b];
+   }
+
+   // returns closure of passed generators as an array of arrays of ...
+   // generators may be passed as a bitset, array, or a single element
+   closureArray(generators) {
+      const deepMultiply = (array, factor, elementsUsed) => array.map( (el) => {
+         if (Array.isArray(el)) {
+            return deepMultiply(el, factor, elementsUsed);
+         } else {
+            const product = this.mult(el, factor);
+            elementsUsed.set(product);
+            return product;
+         }
+      } );
+
+      const close = (remainingGens, elementsUsed, gensUsed) => {
+         if (remainingGens.length == 1) {
+            const generator = remainingGens.pop();
+            const rslt = [0];
+            for (let g = generator, s = g; g != 0; g = this.mult(g, s)) {
+               rslt.push(g);
+               elementsUsed.set(g);
+            }
+            gensUsed.push(generator);
+            return rslt;
+         } else {
+            const generator = remainingGens.pop();
+            const curr = [close(remainingGens, elementsUsed, gensUsed)];
+            gensUsed.push(generator);
+            const prevRslt = curr[0].slice();
+            const cosetReps = [0];
+            for (const g of cosetReps) {
+               for (const s of gensUsed) {
+                  const gXs = this.mult(g,s);
+                  if (!elementsUsed.isSet(gXs)) {
+                     cosetReps.push(gXs);
+                     curr.push(deepMultiply(prevRslt, gXs, elementsUsed));
+                  }
+               }
+            }
+            return curr;
+         }
+      }
+
+      const gens = ((typeof(generators) == 'object') ?
+                    (Array.isArray(generators) ? generators.slice() : generators.toArray()) :
+                    [generators]);
+
+      return close(gens, new BitSet(this.order, [0]), []);
+   }
+
+   // calculates cosets of the passed group as an array of arrays
+   // subgroup is passed as an instance of class Subgroup
+   cosetsArray(subgroup, isLeft) {
+      const mult = isLeft ? (a,b) => this.multtable[a][b] : (a,b) => this.multtable[b][a];
+      const cosets = [subgroup];
+      const cosetReps = [subgroup[0]];
+      const todo = new BitSet(this.order, subgroup).complement();
+      while (!todo.isEmpty()) {
+         const g = todo.pop();
+         cosetReps.push(g);
+         const newCoset = subgroup.map( (el) => mult(g,el) );
+         cosets.push(newCoset);
+         todo.subtract(new BitSet(this.order, newCoset));
+      }
+      return cosets;
    }
 }
 /*
@@ -681,6 +748,7 @@ class XMLGroup extends BasicGroup {
       this.notes = $xml.find('notes').text();
       this.author = $xml.find('author').text();
       this._XML_generators = XMLGroup._generators_from_xml($xml);
+      this.reps = XMLGroup._reps_from_xml($xml);
       this.representations = XMLGroup._representations_from_xml($xml);
       this.representationIndex = 0;
       this.cayleyDiagrams = XMLGroup._cayley_diagrams_from_xml($xml);
@@ -712,6 +780,10 @@ class XMLGroup extends BasicGroup {
 
    get representation() {
       return this.representations[this.representationIndex];
+   }
+
+   get rep() {
+      return this.reps[this.representationIndex];
    }
 
    get labels() {
@@ -1717,6 +1789,7 @@ class Diagram3D {
       this.fogLevel = 0;
       this.labelSize = 1;
       this.arrowheadPlacement = 1;
+      this.isGenerated = false;
 
       if (options !== undefined) {
          for (const opt in options) {
@@ -1834,6 +1907,15 @@ class Diagram3D {
                                            }
                                         } ) );
       if ( this.emitStateChange ) this.emitStateChange();
+   }
+
+   get radius() {
+      const centroid = this.nodes
+                           .reduce( (cent, nd) => cent.add(nd.point), new THREE.Vector3(0,0,0) )
+                           .multiplyScalar(1/this.nodes.length);
+      const squaredRadius = this.nodes
+                                .reduce( (sqrad,nd) => Math.max(sqrad, nd.point.distanceToSquared(centroid)), 0 );
+      return (squaredRadius == 0) ? 1 : Math.sqrt(squaredRadius);  // in case there's only one element
    }
 
    _setNodeField(field, nodes, value) {
@@ -1960,6 +2042,7 @@ class CayleyDiagram extends Diagram3D {
       this.strategies = [];
 
       this.diagram_name = diagram_name;
+      this.isGenerated = (diagram_name === undefined);
       this._update();
    }
 
@@ -2004,11 +2087,12 @@ class CayleyDiagram extends Diagram3D {
    _update() {
       this.nodes = [];
       this.lines = [];
-      if (this.diagram_name === undefined) {
+      if (this.isGenerated) {
          if (this.strategies.length == 0) {
             this._generateStrategy();
          } else {
             this._generateFromStrategy();
+            this.normalize();
          }
       } else {
          this._generateFromGroup();
@@ -2518,11 +2602,6 @@ class DisplayDiagram {
          this.scene.userData = diagram3D;
       }
 
-      // diagrams with names were loaded from a group file -- don't normalize them
-      if (diagram3D.name === undefined) {
-         diagram3D.normalize();
-      }
-
       if ( options.resetCamera ) this.setCamera(diagram3D);
       this.setBackground(diagram3D);
       this.updateLights(diagram3D);
@@ -2548,11 +2627,6 @@ class DisplayDiagram {
          this.scene.userData = diagram3D;
       }
 
-      // diagrams with names were loaded from a group file -- don't normalize them
-      if (diagram3D.name === undefined) {
-         diagram3D.normalize();
-      }
-
       this.setCamera(diagram3D);
       this.setBackground(diagram3D);
       this.updateLights(diagram3D);
@@ -2573,31 +2647,60 @@ class DisplayDiagram {
     * Position the camera and point it at the center of the scene
     *
     * Camera positioned to match point of view in GE2:
-    *   If diagram lies entirely in the y-z plane (all x == 0)
-    *     place camera on x-axis, y-axis up (z-axis to the left)
-    *   If diagram lies entirely in the x-z plane (all y == 0)
-    *     place camera on y-axis, z-axis down (x-axis to the right)
-    *   If diagram lies entirely in the x-y plane (all z == 0)
-    *     place camera on z-axis, y-axis up (x-axis to the right)
-    *   Otherwise place camera with y-axis up, offset a bit from
-    *     the (1,1,1) vector so that opposite corners don't line up
-    *     and make cubes look flat
+    *   If diagram is generated by GE:
+    *     If diagram lies entirely in y-z plane (all x == 0)
+    *       place camera on z-axis, x-axis to the right, y-axis down
+    *     If diagram lies entirely in the x-z plane
+    *       place camera on negative y-axis, x-axis to the right, z-axis up
+    *     If diagram lies entirely in the x-y plane
+    *       place camera on negative z-axis, x-axis to the right, y-axis down
+    *     Otherwise place camera with y-axis down, offset a bit from 
+    *       the (1,-1,-1) vector so that opposite corners don't line up
+    *       and make cubes look flat
+    *   else (diagram is specified in .group file)
+    *     If diagram lies entirely in the y-z plane (all x == 0)
+    *       place camera on x-axis, y-axis up (z-axis to the left)
+    *     If diagram lies entirely in the x-z plane (all y == 0)
+    *       place camera on y-axis, z-axis down (x-axis to the right)
+    *     If diagram lies entirely in the x-y plane (all z == 0)
+    *       place camera on z-axis, y-axis up (x-axis to the right)
+    *     Otherwise place camera with y-axis up, offset a bit from
+    *       the (1,1,1) vector so that opposite corners don't line up
+    *       and make cubes look flat; look at origina, and adjust camera
+    *       distance so that diagram fills field of view
     */
    setCamera(diagram3D) {
       Log.log('setCamera');
 
-      if (diagram3D.nodes.every( (node) => node.point.x == 0.0 )) {
-         this.camera.position.set(3, 0, 0);
-         this.camera.up.set(0, 1, 0);
-      } else if (diagram3D.nodes.every( (node) => node.point.y == 0.0 )) {
-         this.camera.position.set(0, 3, 0);
-         this.camera.up.set(0, 0, -1);
-      } else if (diagram3D.nodes.every( (node) => node.point.z == 0.0 )) {
-         this.camera.position.set(0, 0, 3);
-         this.camera.up.set(0, 1, 0);
+      if (diagram3D.isGenerated) {
+         if (diagram3D.nodes.every( (node) => node.point.x == 0.0 )) {
+            this.camera.position.set(3, 0, 0);
+            this.camera.up.set(0, -1, 0);
+         } else if (diagram3D.nodes.every( (node) => node.point.y == 0.0 )) {
+            this.camera.position.set(0, -3, 0);
+            this.camera.up.set(0, 0, 1);
+         } else if (diagram3D.nodes.every( (node) => node.point.z == 0.0 )) {
+            this.camera.position.set(0, 0, -3);
+            this.camera.up.set(0, -1, 0);
+         } else {
+            this.camera.position.set(1.7, -1.6, -1.9);
+            this.camera.up.set(0, -1, 0);
+         }
       } else {
-         this.camera.position.set(1.45, 1.55, 1.9);
-         this.camera.up.set(0, 1, 0);
+         if (diagram3D.nodes.every( (node) => node.point.x == 0.0 )) {
+            this.camera.position.set(3, 0, 0);
+            this.camera.up.set(0, 1, 0);
+         } else if (diagram3D.nodes.every( (node) => node.point.y == 0.0 )) {
+            this.camera.position.set(0, 3, 0);
+            this.camera.up.set(0, 0, -1);
+         } else if (diagram3D.nodes.every( (node) => node.point.z == 0.0 )) {
+            this.camera.position.set(0, 0, 3);
+            this.camera.up.set(0, 1, 0);
+         } else {
+            const position = new THREE.Vector3(1.7, 1.6, 1.9).multiplyScalar(diagram3D.radius);
+            this.camera.position.set(position.x, position.y, position.z);
+            this.camera.up.set(0, 1, 0);
+         }
       }
       this.camera.lookAt(new THREE.Vector3(0, 0, 0));
    }
@@ -3062,7 +3165,7 @@ class DisplayDiagram {
             padding = 0.2 * Math.max(X_max - X_min, Y_max - Y_min, Z_max - Z_min);
          } else {
             const coset_membership = diagram3D.group
-                                              .getCosets(chunk_members)
+                                              .getCosets(chunk_members, true)
                                               .reduce( (mem, coset, inx) => {
                                                  coset.toArray().forEach( (el) => mem[el] = inx );
                                                  return mem;
@@ -3733,18 +3836,18 @@ class Multtable {
    }
 
    reset() {
-      this.elements = this.group.elements.slice();
+      this.elements = this.group.cosetsArray(this.group.closureArray(this.group.generators[0])._flatten(), false)._flatten();
       this.separation = 0;
-      this.colors = Multtable.COLORATION_RAINBOW;
+      this.coloration = Multtable.COLORATION_RAINBOW;
+      this.colors = this.coloration;
       this.stride = this.group.order;
       this.clearHighlights();
    }
 
    organizeBySubgroup(subgroup) {
-      this.elements = [];
-      const cosets = this.group.getCosets(subgroup.members);
-      cosets.forEach( (coset) => this.elements.push(...coset.toArray()) );
+      this.elements = this.group.cosetsArray(this.group.closureArray(subgroup.generators)._flatten(), false)._flatten();
       this.stride = subgroup.order;
+      this.colors = this.coloration;
       return this;
    }
 
@@ -3773,7 +3876,11 @@ class Multtable {
             fn = (inx) => DisplayMulttable.BACKGROUND;
             break;
       }
-      this._colors = this.group.elements.map( (_, inx) => fn(inx) );
+
+      this._colors = this.elements
+                         .map( (el,inx) => [inx, el] )
+                         .sort( ([_a, x], [_b, y]) => x - y )
+                         .map( ([inx,_]) => fn(inx) );
    }
 
    get size() {
@@ -3910,7 +4017,7 @@ class DisplayMulttable {
       const height = this.canvas.height;
       multtable.elements.forEach( (i,inx) => {
          multtable.elements.forEach( (j,jnx) => {
-            this.context.fillStyle = colors[multtable.group.mult(i,j)] || DisplayMulttable.BACKGROUND;
+            this.context.fillStyle = colors[multtable.group.mult(j,i)] || DisplayMulttable.BACKGROUND;
             this.context.fillRect(frac(inx, width), frac(jnx, height), frac(inx+1, width), frac(jnx+1, height));
          } )
       } )
@@ -3964,7 +4071,7 @@ class DisplayMulttable {
             const x = multtable.position(inx);
             const y = multtable.position(jnx);
 
-            const product = multtable.group.mult(multtable.elements[inx], multtable.elements[jnx]);
+            const product = multtable.group.mult(multtable.elements[jnx], multtable.elements[inx]);
 
             // color box according to product
             this.context.fillStyle = multtable.colors[product] || DisplayMulttable.BACKGROUND;
@@ -4003,7 +4110,7 @@ class DisplayMulttable {
          for (let jnx = minY; jnx < maxY; jnx++) {
             const x = multtable.position(inx);
             const y = multtable.position(jnx);
-            const product = multtable.group.mult(multtable.elements[inx], multtable.elements[jnx]);
+            const product = multtable.group.mult(multtable.elements[jnx], multtable.elements[inx]);
             this._drawLabel(x, y, product, scale, fontScale);
          }
       }
