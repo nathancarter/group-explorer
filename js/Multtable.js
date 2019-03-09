@@ -12,18 +12,18 @@ class Multtable {
    }
 
    reset() {
-      this.elements = this.group.elements.slice();
+      this.elements = this.group.cosetsArray(this.group.closureArray(this.group.generators[0])._flatten(), false)._flatten();
       this.separation = 0;
-      this.colors = Multtable.COLORATION_RAINBOW;
+      this.coloration = Multtable.COLORATION_RAINBOW;
+      this.colors = this.coloration;
       this.stride = this.group.order;
       this.clearHighlights();
    }
 
    organizeBySubgroup(subgroup) {
-      this.elements = [];
-      const cosets = this.group.getCosets(subgroup.members);
-      cosets.forEach( (coset) => this.elements.push(...coset.toArray()) );
+      this.elements = this.group.cosetsArray(this.group.closureArray(subgroup.generators)._flatten(), false)._flatten();
       this.stride = subgroup.order;
+      this.colors = this.coloration;
       return this;
    }
 
@@ -52,7 +52,11 @@ class Multtable {
             fn = (inx) => DisplayMulttable.BACKGROUND;
             break;
       }
-      this._colors = this.group.elements.map( (_, inx) => fn(inx) );
+
+      this._colors = this.elements
+                         .map( (el,inx) => [inx, el] )
+                         .sort( ([_a, x], [_b, y]) => x - y )
+                         .map( ([inx,_]) => fn(inx) );
    }
 
    get size() {
