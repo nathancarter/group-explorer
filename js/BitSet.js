@@ -48,8 +48,9 @@ class BitSet {
    }
 
    complement() {
+      const mask = 0xFFFFFFFF >>> (0x20 - (this.len & 0x1F));
       for (let i = 0; i < this.arr.length; i++) {
-         this.arr[i] = ~ this.arr[i];
+         this.arr[i] = (~ this.arr[i]) & mask;
       }
       return this;
    }
@@ -89,12 +90,12 @@ class BitSet {
    }
 
    isEmpty() {
-      for (let i = 0; i < this.arr.length; i++) {
+      for (let i = 0; i < this.arr.length - 1; i++) {
 	 if (this.arr[i] != 0) {
 	    return false;
 	 }
       };
-      return true;
+      return (this.arr[this.arr.length - 1] & (0xFFFFFFFF >>> (0x20 - (this.len & 0x1F)))) == 0;
    }
 
    isSet(pos) {
