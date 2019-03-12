@@ -48,6 +48,7 @@ class XMLGroup extends BasicGroup {
       this.notes = $xml.find('notes').text();
       this.author = $xml.find('author').text();
       this._XML_generators = XMLGroup._generators_from_xml($xml);
+      this.reps = XMLGroup._reps_from_xml($xml);
       this.representations = XMLGroup._representations_from_xml($xml);
       this.representationIndex = 0;
       this.cayleyDiagrams = XMLGroup._cayley_diagrams_from_xml($xml);
@@ -79,6 +80,10 @@ class XMLGroup extends BasicGroup {
 
    get representation() {
       return this.representations[this.representationIndex];
+   }
+
+   get rep() {
+      return this.reps[this.representationIndex];
    }
 
    get labels() {

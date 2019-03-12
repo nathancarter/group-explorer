@@ -70,7 +70,7 @@ class DisplayMulttable {
       const height = this.canvas.height;
       multtable.elements.forEach( (i,inx) => {
          multtable.elements.forEach( (j,jnx) => {
-            this.context.fillStyle = colors[multtable.group.mult(i,j)] || DisplayMulttable.BACKGROUND;
+            this.context.fillStyle = colors[multtable.group.mult(j,i)] || DisplayMulttable.BACKGROUND;
             this.context.fillRect(frac(inx, width), frac(jnx, height), frac(inx+1, width), frac(jnx+1, height));
          } )
       } )
@@ -124,7 +124,7 @@ class DisplayMulttable {
             const x = multtable.position(inx);
             const y = multtable.position(jnx);
 
-            const product = multtable.group.mult(multtable.elements[inx], multtable.elements[jnx]);
+            const product = multtable.group.mult(multtable.elements[jnx], multtable.elements[inx]);
 
             // color box according to product
             this.context.fillStyle = multtable.colors[product] || DisplayMulttable.BACKGROUND;
@@ -163,7 +163,7 @@ class DisplayMulttable {
          for (let jnx = minY; jnx < maxY; jnx++) {
             const x = multtable.position(inx);
             const y = multtable.position(jnx);
-            const product = multtable.group.mult(multtable.elements[inx], multtable.elements[jnx]);
+            const product = multtable.group.mult(multtable.elements[jnx], multtable.elements[inx]);
             this._drawLabel(x, y, product, scale, fontScale);
          }
       }

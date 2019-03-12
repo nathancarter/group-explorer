@@ -1,0 +1,101 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html><!-- InstanceBegin template="/Templates/ge-doc-template.dwt" codeOutsideHTMLIsLocked="false" -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<!-- InstanceBeginEditable name="doctitle" -->
+<title>Group library window</title>
+<!-- InstanceEndEditable -->
+<!-- InstanceBeginEditable name="head" -->
+
+<!-- InstanceEndEditable -->
+
+<link rel="stylesheet" href="../style/fonts.css" type="text/css">
+</head>
+
+<body>
+<center>
+  <h1><!-- InstanceBeginEditable name="TitleRegion" -->
+<center>
+  Main window (Group Library)
+</center>
+<!-- InstanceEndEditable -->
+  </h1>
+</center>
+<hr>
+<!-- InstanceBeginEditable name="MainEditRegion" -->
+<p>This page documents the first window that first opens after Group Explorer's splash screen closes, the window from which all other windows are opened.</p>
+<h2>Data in the group table</h2>
+<table border="0" cellpadding="10">
+  <tr>
+    <td><img src="img/illustration-tablecorner.jpg" width="312" height="230"></td>
+    <td><p>Each row in the table shown in the main Group Explorer window represents a group. By default, the following columns are visible (in this order) when Group Explorer has opened:</p>
+      <ol>
+        <li> Name - the symbolic name of the group, as shown in the image to the left </li>
+        <li><a href="rf-groupterms.html#order">Order</a></li>
+        <li><a href="rf-groupterms.html#gensrels">Definition</a></li>
+        <li><a href="rf-groupterms.html#cayleydiagram">Cayley Diagram</a></li>
+        <li><a href="rf-groupterms.html#multtable">Multiplication table</a></li>
+        <li><a href="rf-groupterms.html#symmetryobject">Object of symmetry</a></li>
+        <li><a href="rf-groupterms.html#cyclegraph">Cycle graph</a></li>
+        <li><a href="rf-geterms.html#groupfilename">Filename</a></li>
+    </ol></td>
+  </tr>
+</table>
+<p>To change which columns are present in the table, <a href="#alteringrowscols">see below</a>.</p>
+<table border="0" cellpadding="10">
+  <tr>
+    <td bgcolor="#BFFFFF"><strong>To learn more about any group in the table, simple double-click it. This opens its <a href="rf-um-helpwindow.html">Group Info window</a>, which contains everything Group Explorer knows about the group, and is the launchpad for exploring the group.</strong> To ask for explanation about the contents of an individual cell in the main group table, right-click the cell and choose &quot;Explain this&quot; from the menu that appears.</td>
+  </tr>
+</table>
+<p>The groups that are loaded by default are all groups that come with the software, are of order less than or equal to 60, and whose size on disk is smaller than 125 kilobytes. The reason for these restrictions is to speed up the loading of the software while still allowing the user to retain copies of large groups for occasional use. If all groups were loaded at startup and the user had several large groups on disk, starting Group Explorer could take several minutes. Thus only small groups are loaded by default. You can change these <a href="rf-um-options-dialog.html">options</a>, of course. Note that computations are done upon startup that, for very large groups, may take a great deal of time; you are forewarned.</p>
+<h2><a name="alteringrowscols">Altering rows and columns</a></h2>
+<p>You can customize the table in the main window in many ways. Let's examine them from the most common (and simplest) to the least. </p>
+<h3>Reordering and resizing </h3>
+<p>To reorder the columns in the group table, hold the Control (or Command on Mac OS) key and drag a column's header to the left or right. Release when you have the column in the new position. Reordering the rows in the table can be done the same way, Control- (or Command-) dragging the row headers up and down. You can also reorder the rows in the table by clicking a column header to sort by it. Clicking again on the same header reverses the sort. </p>
+<p>You can resize the rows or columns by dragging the boundary of the row's or column's header. You will be cued in to the fact that this option is available by noticing how your mouse cursor changes when you hover it over the boundary of a row or column header. </p>
+<h3>Adding and removing columns</h3>
+<table border="0" cellpadding="10">
+  <tr>
+    <td>The default columns are not the only pieces of information available about a group. To show more information in the group table, right-click on a column header and you will see a menu. The first item on the menu hides the column on whose header you clicked. But you can also choose to show any of the columns that are not currently visible. Any of these columns whose names are not self-explanatory are explained in <a href="rf-geterms.html">the Group Explorer terminology page</a>. Also, the last choice on the menu is to create a new column. When creating a new column, you can choose its name and fill it with any data you please. </td>
+    <td><img src="img/illustration-changecols.jpg" width="299" height="258"></td>
+  </tr>
+</table>
+<p>If the column on whose header you clicked was a column that you had created, another menu option will be visible, one for erasing the column. Columns which you erase can only be restored by using the &quot;undo&quot; option on the Edit menu. Once you have quit Group Explorer, deleted columns are forever lost. Otherwise, data in columns you have created (as well as all your selections about which columns are visible, and column and row positions) are stored in your personal configuration file, and are preserved across runs of Group Explorer. Because a single settings file is used, it would be inadvisable to open more than one instance of Group Explorer at a time. </p>
+<h2>Toolbar and menu</h2>
+<h3>The File menu</h3>
+<h4>New sheet... <img src="iconimg/filenew.png" width="22" height="22"></h4>
+<p>Creates a blank sheet of size 500x500. For information on working with sheets, refer to <a href="rf-um-sheetwindow.html">the help page for sheets</a>. </p>
+<h4>Open... <img src="iconimg/fileopen.png" width="22" height="22"></h4>
+<p>Provides you with a window for choosing a sheet file from your computer for Group Explorer to load. Group Explorer expects such files to end with the extension <code>.sheet</code>. If you select a valid sheet file, it will be opened in a new window. For information on working with sheets, refer to <a href="rf-um-sheetwindow.html">the help page for sheets</a>. </p>
+<h4>Save settings <img src="iconimg/filesave.png" width="22" height="22"></h4>
+<p>Flushes the settings file out to the disk. Group Explorer does this every time it closes anyway, but if for some reason you think your computer is going to crash and you want to be sure your data is saved first, you can save it at any time with this command. </p>
+<h3>The Edit menu</h3>
+<h4>Copy table selection <img src="iconimg/editcopy.png" width="22" height="22"></h4>
+<p>Copies to the clipboard a section of HTML text describing a table that looks like the selected portion of the group table. This may be one cell (the last one you clicked, which has a darker border than the others) or a range of cells (if you clicked and dragged, highlighting a rectangular portion of cells). Because the format is HTML, no images will be embedded in the data. If you need to copy images, you will need to open them one at a time and copy them from their <a href="rf-um-largewindow.html">large visualizers</a>. </p>
+<h4>Search/find... <img src="iconimg/searchfind.png" width="22" height="22"></h4>
+<p>Opens Group Explorer's search window, with all searchable locations active, as shown here.</p>
+<p align="center"><img src="img/illustration-searchall.jpg" width="472" height="85"> </p>
+<p align="left">For more help on the search window, refer to <a href="rf-um-searchwindow.html">the help page for searching</a>. </p>
+<h4>Undo <img src="iconimg/undo.png" width="22" height="22"></h4>
+<p>Any action taken in the main window (i.e. all actions described on this page--rearranging columns and rows, creating columns, sorting) as well as changes in preferences can be undone by clicking this button on the toolbar or choosing it from the Edit menu. Note that hovering your mouse over it will describe in the main window's status bar what you are about to undo. </p>
+<h4>Redo <img src="iconimg/redo.png" width="22" height="22"></h4>
+<p>Any action undone can be redone with this button (or menu item). As with Undo, hovering your mouse will describe in the main window's status bar what you are about to redo. </p>
+<h3>The Help menu</h3>
+<h4>User Manual <img src="iconimg/helpdocs.png" width="22" height="22"></h4>
+<p>You are currently reading a page of the user manual. Clicking this button (or using the menu item) will open a help window at <a href="rf-um-index.html">the table of contents for the User Manual</a>. Note that the user manual <em>is not all</em> of the Group Explorer documentation; it is simply the reference part. But every page in the documentation has quick links at the bottom for getting to commonly-used places, like <a href="gs-index.html">Getting Started</a>, <a href="rf-um-helpwindow.html">Help on help</a>, etc. </p>
+<h4>Tutorials <img src="iconimg/tutorials.png" width="22" height="22"></h4>
+<p>Clicking this button (or using the menu item) will open a help window at <a href="tu-index.html">the table of contents for the Group Explorer Tutorials</a>. The tutorials are a good complement to the reference documentation of the user manual. As mentioned above, every page in the documentation has quick links at the bottom for getting to commonly-used places, like <a href="gs-index.html">Getting Started</a>, <a href="rf-um-helpwindow.html">Help on help</a>, etc. </p>
+<h4>Search help... <img src="iconimg/searchdocs.png" width="22" height="22"> </h4>
+<p>Opens Group Explorer's search window, with only the checkbox for searching the help documentation active, as shown here.</p>
+<p align="center"><img src="img/illustration-searchhelp.jpg" width="473" height="86"> </p>
+<p align="left">For more help on the search window, refer to <a href="rf-um-searchwindow.html">the help page for searching</a>. </p>
+<h3>The &quot;What's this?&quot; button <img src="iconimg/whatsthis.png" width="24" height="28">  </h3>
+<p>The &quot;What's this?&quot; button appears on the toolbar of the main window, and has <a href="rf-um-whatsthis.html">its own separate help page here</a>. </p>
+<!-- InstanceEndEditable -->
+<hr>
+<p align="center"><strong>Quick help links:</strong><br>
+  <a href="index.html">Contents</a> | <a href="gs-index.html">Getting Started</a> | <a href="tu-index.html">Tutorials</a> | <a href="rf-um-index.html">User Manual</a> | <a href="rf-miscreference.html">Miscellaneous Reference</a><br> 
+<a href="rf-geterms.html">GE terminology</a> | <a href="rf-um-helpwindow.html">Help on help</a></p>
+</body>
+<!-- InstanceEnd --></html>

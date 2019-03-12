@@ -11,6 +11,7 @@ class CayleyDiagram extends Diagram3D {
       this.strategies = [];
 
       this.diagram_name = diagram_name;
+      this.isGenerated = (diagram_name === undefined);
       this._update();
    }
 
@@ -55,11 +56,12 @@ class CayleyDiagram extends Diagram3D {
    _update() {
       this.nodes = [];
       this.lines = [];
-      if (this.diagram_name === undefined) {
+      if (this.isGenerated) {
          if (this.strategies.length == 0) {
             this._generateStrategy();
          } else {
             this._generateFromStrategy();
+            this.normalize();
          }
       } else {
          this._generateFromGroup();

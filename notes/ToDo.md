@@ -10,6 +10,7 @@
  * Setting line thickness to minimum does not work; it gets reset to a thicker value.
  * Fix test for circular/rotary layout in `CayleyDiagram.setStrategies`
  * Create the UI for adding a naming scheme, and store it in `localStorage`.
+ * Make test to simulate loading GE from GAP using 'waitForMessage'
 
 ### Help system
 

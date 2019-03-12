@@ -121,6 +121,7 @@
        function completeSetup() {
           // Create header from group name
           $('#header').html(MathML.sans('<mtext>Multiplication Table for&nbsp;</mtext>' + group.name));
+          MathJax.Hub.Queue(['Typeset', MathJax.Hub, $('#header')[0]]);
 
           // Create list of subgroups for Organize by subgroup menu:
           $('#organization-choices').html(
@@ -230,8 +231,8 @@
 
        /* Resize the body */
        function resizeBody() {
-          $('body').height(window.innerHeight - 8);
-          $('body').width(window.innerWidth - 8);
+          $('body').height(window.innerHeight);
+          $('body').width(window.innerWidth);
 
           resizeGraphic();
        }
@@ -293,7 +294,7 @@
                 return;
              }
              clearLabels(event);
-             const product = group.mult(multtable.elements[location.x], multtable.elements[location.y]);
+             const product = group.mult(multtable.elements[location.y], multtable.elements[location.x]);
              const $label = $(`<div id="nodeLabel" col="${location.x}" row="${location.y}">`).html(MathML.sans(group.representation[product]));
              $('#graphic').append($label);
              Menu.setMenuLocations(event, $label);
@@ -481,7 +482,7 @@
          <!-- This is filled in by subsetDisplay/subsets.html -->
       </div>
 
-      <div id="table-control" class="fill-vert control">
+      <div id="table-control" class="fill-vert control hidden">
          <div class="graphic-lead">Organize by subgroup:</div>
          <div id="organization-select" class="faux-select" action="$('#organization-choices').toggle()">
             <ul id="organization-choices" class="faux-select-options" style="width: 13em"></ul>
