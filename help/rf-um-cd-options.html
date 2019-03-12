@@ -1,0 +1,154 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html><!-- InstanceBegin template="/Templates/ge-doc-template.dwt" codeOutsideHTMLIsLocked="false" -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<!-- InstanceBeginEditable name="doctitle" -->
+<title>Cayley Diagrams</title>
+<!-- InstanceEndEditable -->
+<!-- InstanceBeginEditable name="head" -->
+<!-- InstanceEndEditable -->
+
+<link rel="stylesheet" href="../style/fonts.css" type="text/css">
+</head>
+
+<body>
+<center>
+  <h1><!-- InstanceBeginEditable name="TitleRegion" -->
+     Cayley diagram visualizer <!-- InstanceEndEditable -->
+  </h1>
+</center>
+<hr>
+<!-- InstanceBeginEditable name="MainEditRegion" -->
+<p>This page documents the interface for the large view of a <a href="rf-groupterms.html#cayleydiagram">Cayley diagram</a>. A Cayley diagram is one of Group Explorer's four <a href="rf-geterms.html#visualizers">visualizers</a>, all of which can appear either in <a href="rf-um-helpwindow.html">help windows</a>, <a href="rf-geterms.html#sheet">sheets</a>, or in their own windows. When they appear in their own windows, this is refered to as a &quot;large view,&quot; and you can read about it in general <a href="rf-um-largewindow.html">here</a>. This page concentrates specifically on the differences between a large view for Cayley diagram, as compared to the other visualizers. </p>
+<p align="center"><img src="img/illustration-largecd.jpg" width="400" height="308"></p>
+<h2>Interface specifics </h2>
+<h3> Choosing which diagram to view</h3>
+<p>There are two types of Cayley diagrams available in Group Explorer, the kind you instruct Group Explorer to construct for you and the kind that was designed in advance by the author of the <a href="rf-geterms.html#groupfilename">group file</a>. Most group files do not come with diagrams defined by the author, but Group Explorer can construct Cayley diagrams for any group, so no group will be without a diagram.</p>
+<p>The top of the Diagram tab (the third of the three tabs in the right hand pane) allows you to choose a diagram from a drop-down list. The items in the list are one of two types.</p>
+<ul>
+  <li>Items of the form &quot;Use [name of diagram here]&quot; instruct Group Explorer to load a diagram defined by the group author. In doing so, you will disable the controls for <a href="#generatortable">generating</a> and <a href="#chunking">chunking</a> in the diagram.</li>
+  <li>The one item in the drop down list which reads &quot;Generate diagram&quot; instructs Group Explorer to generate a Cayley diagram according to the instructions you provide in the other controls on the diagrm page, specifically the <a href="#generatortable">generation table</a>.</li>
+</ul>
+<h3>Viewing the diagram </h3>
+<p>A Cayley diagram (unlike multiplication tables and cycle graphs) is a three-dimensional structure. Thus you can click and drag on the view to rotate it in three-dimensional space. This lets you see all sides of the diagram, and seeing it in motion can give you a better mental picture of it.</p>
+<p>Note that because Cayley diagrams are three-dimensional, <a href="rf-um-graphicshardware.html">the note on graphics hardware acceleration</a> applies. </p>
+<h3>Changing the positions of nodes in the diagram </h3>
+<p>You can customize the appearance of any Cayley diagram by dragging the nodes in it around in three dimensions to any position you like. To drag the nodes around, hold the shift key while you click on the node and drag. It will move in the plane parallel to the screen. If you don't like the position to which you've moved a node, feel free to Undo<img src="iconimg/undo.png" width="22" height="22"> your action.</p>
+<p>Note that because <a href="#chunking">chunking</a> depends on the positions of nodes in the diagram, if you reposition the nodes in this way you will not be able to chunk cosets without allowing Group Explorer to put the nodes back to their original position. </p>
+<h3>Changing the arcing of arrows in the diagram</h3>
+<p>You can customize the degree to which the arcs and arrows in the diagram are curved. Usually an arc in the diagram takes a straight path from its source node to its destination node. The exceptions to this are when the diagram is inherently round, and so the arrows follow the curvature of the diagram, or when there are nodes in the way and a curved path would avoid them.</p>
+<p>However you can feel free to improve on Group Explorer's decisions in this matter by clicking on an arc in the diagram while holding down the shift key, and dragging to increase or decrease the amount of arcing it has. You will not be able to change the direction of the arcing, only its amount. </p>
+<h3>The Diagram tab</h3>
+<table width="100%"  border="0" cellpadding="10">
+  <tr>
+    <td><img src="img/illustration-diagramtab.png" width="338" height="426"></td>
+    <td><p>Note that the controls panel for Cayley diagram large views has three tabs at the top: Subsets, View, and Diagram.</p>
+      <p>The Subsets tab allows you to compute and highlight subsets of the group, and the View tab allows you to change some cosmetic options of the diagram; <a href="#relatedinterfaces">see below for information on each of these tabs</a>.</p>
+    <p>The Diagram tab allows you to choose a predefined diagram to view, or  specify parameters for how Group Explorer should construct a diagram for you. This section describes the controls on the Diagram tab.</p>
+    </td>
+  </tr>
+</table>
+<h4>Organizing by a subgroup</h4>
+<p>The most common way a user reorganizes a diagram is to focus on a particular subgroup. Group Explorer therefore has a shortcut for this purpose, to alleviate wading through the technical options documented below. Right-clicking anywhere in the generator table (command-clicking on Macintosh) brings up a menu, the last item of which is &quot;Organize by.&quot; Choosing that option lists all the subgroups by which one can organize the Cayley diagram. Selecting one reorganizes the entire generator table (and therefore the diagram) to bring together the elements in the subgroup and in each of its cosets. Further tweaking of the axes assigned to each generator may be necessary to get the diagram to look exactly the way you like, but this shortcut can save a lot of time.</p>
+<p>It is particularly useful in examining whether a subgroup is <a href="rf-groupterms.html#normalsubgroup">normal</a>. When the diagram is organized by the subgroup and its cosets, is it clear that the arrows for generators that connect one coset to another agree on where each coset should be mapped? </p>
+<h4><a name="generatortable"></a>Generators, and assigning them priority, axes, and an order</h4>
+<p>The generation of a diagram is accomplished by Group Explorer taking into account three factors--a list of generators for the group, an axis for each generator, and an order for nesting those axes. Each of these options is specified in the table titled &quot;Generate diagram this way:&quot; in the image above. Let us consider each of these options here.</p>
+<blockquote>
+<h5>A list of generators for the group</h5>
+<p>The leftmost column in the table lists generators for the group. The order is significant when the group is nonabelian. You can select new generators by right-clicking (command-clicking on Macintosh) on a generator and selecting a new one from the list. When you are choosing generator <em>n</em>, only the elements not in the subgroup generated by generators 1 through <em>n</em>-1 are available as options. You can reorder the generators in the table by control-clicking (command-clicking) a row header (numbered 1, 2, ...) and dragging it up or down. </p>
+<p>The first step Group Explorer peforms (invisibly) when generating a Cayley diagram is to create the grid of elements without assigning them positions in space. Generators that are higher in the table have local significance, and those that are lower in the table have global significance. For instance, here is a comparison of two different choices of generators for the group <a href="../GroupInfo.html?groupURL=groups/S_3.group"><i>S</i><sub>3</sub></a>.  (Note that <i>rf = fr</i><sup>2</sup> and <i>fr = r</i><sup>2</sup><i>f</i>, and we assume right multiplication in both cases.)</p>
+<table border="1" cellpadding="10">
+  <tr valign="top">
+    <td>Using generators <em>r</em> and <em>f</em> (in that order) </td>
+    <td>Using generators <em>f</em> and <em>r</em> (in that order) </td>
+  </tr>
+  <tr valign="top">
+    <td><p>Creates an internal table which looks like</p>
+      <table border="0" cellpadding="10">
+        <tr>
+          <td><em>e</em></td>
+          <td><em>r</em></td>
+          <td><em>r</em><sup>2</sup></td>
+        </tr>
+        <tr>
+          <td><em>f</em></td>
+          <td><em>fr</em></td>
+          <td><em>fr</em><sup>2</sup></td>
+        </tr>
+      </table>
+	</td>
+    <td><p>Creates an internal table which looks like</p>
+      <table border="0" cellpadding="10">
+        <tr>
+          <td><em>e</em></td>
+          <td><em>f</em></td>
+        </tr>
+        <tr>
+          <td><em>r</em></td>
+          <td><em>rf</em></td>
+        </tr>
+        <tr>
+          <td><em>r</em><sup>2</sup></td>
+          <td><em>r</em><sup>2</sup><em>f</em></td>
+        </tr>
+      </table>      
+    </td>
+  </tr>
+  <tr valign="top">
+    <td><p>Which in turn creates a diagram which looks like either of the following two, depending on the axes chosen</p>
+      <p><img src="img/illustration-cds3frxy.png" width="200" height="205"></p>
+      <p><img src="img/illustration-cds3frpolar.png" width="200" height="190"></p></td>
+    <td><p>Which in turn creates a diagram which looks like either of the following two, depending on the axes chosen</p>
+      <p><img src="img/illustration-cds3rfxy.png" width="199" height="209"></p>
+      <p><img src="img/illustration-cds3rfpolar.png" width="200" height="182"></p></td>
+  </tr>
+</table>
+<h5>An axis for each generator</h5>
+<p>The second column in the table shows axes graphically, one for each generator. These determine how the tables of elements discussed above will be laid out in space. In the upper diagram of each pair above, the generator <em>r</em> was assigned the axis <img src="img/axis-y.png" width="50" height="50"> Linear in y and the generator <em>f</em> was assigned the axis <img src="img/axis-x.png" width="50" height="50"> Linear in x; you can see how the <em>r</em> arrows move vertically and the <em>f</em> arrows move horizontally, respecting this setting. In the lower diagram of each pair above, the generator <em>r</em> was assigned the axis <img src="img/axis-rxy.png" width="50" height="50"> Rotated in x,y and the generator <em>f</em> was assigned the axis <img src="img/axis-y.png" width="50" height="50"> Linear in y (notice how it is vertical at the top of the diagram).</p>
+<h5>An order for nesting the axes</h5>
+<p>Even having chosen all of the above options does not completely determine how the diagram should be laid out in space. For instance, in the round diagrams above the user chose one linear axis and one rotational axis. How did Group Explorer know to make it a ring of lines as opposed to a line of rings? The answer is that the <em>f</em> generator was marked &quot;inside&quot; and the <em>r</em> generator was marked &quot;outside&quot; in the order column.</p>
+<table border="0" cellpadding="10">
+  <tr align="center" valign="top">
+    <td>A ring of lines </td>
+    <td>A line of rings </td>
+  </tr>
+  <tr align="center" valign="top">
+    <td><img src="img/illustration-cds3rfpolar.png" width="200" height="182"></td>
+    <td><img src="img/illustration-cdlinering.png" width="200" height="87"></td>
+  </tr>
+</table>
+<p><em><a name="chunking-note"></a>Note: If the order is changed from the default (which has the innermost generator on top, down to the outermost on bottom) then chunking will be disabled. </em>The reason for this is that with some more complex groups, if the order of generation does not match the order of nesting of the axes, chunks could take on complex shapes that would need to twist to avoid one another, etc. See <a href="#chunking">Chunking</a>, below. </p>
+</blockquote>
+<h4>Arrows</h4>
+<p>You can put into a Cayley diagram a different colored set of arrows for any element in the group except the identity. You can put as many or as few arrows in the diagram as you like, and Group Explorer automatically colors them with hues as far apart in the spectrum as it can (given how many different types of arrows you require).</p>
+<p>Custom Cayley diagrams come with their own lists of default arrows, but you can still add or remove them after you have called up the custom diagram. Auto-generated diagrams, by default, use one type of arrow for each generator in the table at the top of the Diagram tab; again, add and remove as you like. </p>
+<p>You can also choose whether arrows indicate right multiplication by a generator, or left multiplication. By default, Group Explorer assumes right multiplication, and the predefined Cayley diagrams shipped with Group Explorer use right multiplication; they will not look good if the arrows mean left multiplication.</p>
+<p>You can also control the placement of arrowheads from the View tab (<a href="#relatedinterfaces">see below</a>). </p>
+<h4><a name="chunking"></a>Chunking</h4>
+When trying to visualize the cosets of a subgroup, it can be useful to have them grouped visually. This option is available in both multiplication tables and Cayley diagrams, two situations in which such an organization is possible. Chunking cosets in a Cayley diagram means wrapping them in semi-transparent boxes which group the nodes of the cosets. For example, consider the grouping of two-element cosets of the subgroup <nobr>{ <em>e</em>, <em>f</em> }</nobr> in <a href="../GroupInfo.html?groupURL=groups/S_3.group"><i>S</i><sub>3</sub></a> shown below.
+<p align="center"><img src="img/illustration-cdchunking.png" width="183" height="172">
+<p>To choose what subgroup's cosets should be chunked, simply choose the subgroup from the drop-down list at the bottom of the Diagram tab. Note that what subgroups are available is determined by the structure of the diagram, which is determined by the order of generators. If the generators are <em>a</em>, <em>b</em>, <em>c</em>, and <em>d</em> (in that order) then the only cosets available for chunking will be <nobr>&lt; <em>d</em> &gt;</nobr>, <nobr>&lt; <em>c</em>, <em>d</em> &gt;</nobr>, <nobr>&lt; <em>b</em>, <em>c</em>, <em>d</em> &gt;</nobr>, and the whole group <nobr>&lt; <em>a</em>, <em>b</em>, <em>c</em>, <em>d</em> &gt;</nobr>.</p>
+<p>Note also that chunking is disabled when the order of generation of the diagram does not match the order of nesting of the axes; <a href="#chunking-note">more information above</a>. </p>
+<h2><a name="relatedinterfaces"></a>Related interfaces</h2>
+<p>The controls in the Subsets tab on the right side of the large window for Cayley diagrams are described in <a href="rf-um-subsetlistbox.html">the help page for subset controls</a>.</p>
+<p>The controls in the View tab on the right side of the large window for Cayley diagrams are described in <a href="rf-um-modelview.html">the help page for three-dimensional controls</a>, with the exception of two controls specific to Cayley diagrams.</p>
+<table cellpadding="10">
+  <tr>
+    <td><p>The 3D controls shown to the right are specific to Cayley diagrams.</p>
+    <p>Use the checkbox next to the phrase &quot;Show labels of this size:&quot; to turn on or off the text next to each node in the diagram, which labels the node with the name of the element which it represents.</p>
+    </td>
+    <td><img src="img/illustration-cdextractrls.png" width="342" height="133"></td>
+  </tr>
+  <tr>
+    <td colspan="2"><p>The slider beneath the phrase &quot;Show labels of this size:&quot; decides the size of the font used in the labels. Moving the slider to the left gives small fonts, and to the right large fonts. </p>
+    <p>You can control the placement of arrowheads along arcs in the diagram by dragging the &quot;Arrowhead placement&quot; slider. When it is at its right extent, arrowheads are abutted against the destination node of the arc; when it is at its left extent, they are near the source node. </p></td>
+  </tr>
+</table>
+<!-- InstanceEndEditable -->
+<hr>
+<p align="center"><strong>Quick help links:</strong><br>
+  <a href="index.html">Contents</a> | <a href="gs-index.html">Getting Started</a> | <a href="tu-index.html">Tutorials</a> | <a href="rf-um-index.html">User Manual</a> | <a href="rf-miscreference.html">Miscellaneous Reference</a><br> 
+<a href="rf-geterms.html">GE terminology</a> | <a href="rf-um-helpwindow.html">Help on help</a></p>
+</body>
+<!-- InstanceEnd --></html>
