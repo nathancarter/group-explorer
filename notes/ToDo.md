@@ -26,6 +26,10 @@
 
 ## Assigned to Nathan
 
+### Help pages
+
+Re-read all help pages and completely update them to match the new version.
+
 ### Sheets
 
  * Extend the toJSON() and fromJSON() in CayleyDiagram.html to also respect:
