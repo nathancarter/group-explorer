@@ -2,8 +2,9 @@
 const fs = require( 'fs' );
 const { exec } = require( 'child_process' );
 
-function processOneFile ( filename, callback ) {
-    const cmd = `lynx --dump --nolist ${filename}`;
+function processOneFile ( path, filename, callback ) {
+    const full = require( 'path' ).join( path, filename );
+    const cmd = `lynx --dump --nolist ${full}`;
     exec( cmd, ( err, stdout, stderr ) => {
         if ( err ) {
             console.error( 'Could not execute this command: '
@@ -31,7 +32,7 @@ function processFolder ( path, callback ) {
         var results = Array( files.length );
         var count = 0;
         files.sort().forEach( ( file, index ) => {
-            processOneFile( file, ( result ) => {
+            processOneFile( __dirname, file, ( result ) => {
                 results[index] = result;
                 if ( ++count == files.length )
                     callback( results );
@@ -40,11 +41,12 @@ function processFolder ( path, callback ) {
     } );
 }
 
-processFolder( '.', ( results ) => {
+processFolder( __dirname, ( results ) => {
     const code = 'function setupDB ( db ) {\n'
                + `\t${results.join( '\n\t' )}\n`
                + '}';
-    const outfile = 'setup-db.js';
+    const outfile =
+        require( 'path' ).join( __dirname, 'setup-db.js' );
     fs.writeFile( outfile, code, ( err ) => {
         if ( err )
             console.error( err );
