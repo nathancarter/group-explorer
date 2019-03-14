@@ -8,7 +8,6 @@ If you have not yet encountered the multiplication table
 [visualizer](rf-geterms.md#visualizers), start with these help pages:
 
  * [The definition of a Cayley diagram](rf-groupterms.md#cayleydiagram)
- * [A little information about visualizing them](rf-grouptheorytopics.md#cayleydiag)
  * [The documentation on the Cayley diagram interface in
    *Group Explorer*](rf-um-cd-options.md)
 

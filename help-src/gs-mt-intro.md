@@ -7,7 +7,6 @@ If you have not yet encountered the multiplication table
 [visualizer](rf-geterms.md#visualizers), start with these help pages:
 
  * [The definition of a multiplication table](rf-groupterms.md#multtable)
- * [A little information about visualizing them](rf-grouptheorytopics.md#multtable)
  * [The documentation on the multiplication table interface in
    *Group Explorer*](rf-um-mt-options.md)
 
