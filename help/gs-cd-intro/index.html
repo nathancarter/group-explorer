@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<title>Cayley Diagram Overview - Group Explorer 3.0 Help</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="../w3.css">
+<link rel="stylesheet" href="../w3-theme-blue.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<body>
+
+<!-- Header -->
+<header class="w3-container w3-theme w3-padding" id="myHeader">
+  <!--<i onclick="w3_open()" class="fa fa-bars w3-xlarge w3-button w3-theme"></i>-->
+  <div class="w3-center">
+  <h1 class="w3-xxxlarge">Group Explorer 3.0 Help: Cayley Diagram Overview</h1>
+  </div>
+</header>
+
+<hr>
+
+<div class="w3-container">
+    <div class="w3-row w3=border">
+        <div class="w3-quarter w3-container">
+            <div class="w3-padding w3-card w3-bar-block">
+                <h3>Contents</h3>
+                <ul>
+                
+                    <li><a style="text-decoration: none;"
+                          href="#introduction-to-cayley-diagrams">Introduction to Cayley diagrams</a></li>
+                
+                    <li><a style="text-decoration: none;"
+                          href="#what-cayley-diagrams-do-well">What Cayley diagrams do well</a></li>
+                
+                    <li><a style="text-decoration: none;"
+                          href="#a-cayley-diagram-for-the-group-s_4">A Cayley diagram for the group S_4</a></li>
+                
+                    <li><a style="text-decoration: none;"
+                          href="#a-cayley-diagram-for-the-group-a_5">A Cayley diagram for the group A_5</a></li>
+                
+                </ul>
+
+                <hr>
+
+                <h3><a style="text-decoration: none;"
+                      href="http://nathancarter.github.io/group-explorer">Back to Main Page</a></h3>
+
+                <hr>
+
+                <h3>More help</h3>
+                
+                    <ul>
+                    
+                    
+                        <li><a href=".."
+                               style="text-decoration: none;"
+                               class=""
+                               >Main Help Page</a></li>
+                    
+                    
+                    
+                        <li><a href="../welcome/"
+                               style="text-decoration: none;"
+                               class=""
+                               >Welcome</a></li>
+                    
+                    
+                    
+                        <li><a href="../gs-index/"
+                               style="text-decoration: none;"
+                               class=""
+                               >Getting Started</a></li>
+                    
+                    
+                    
+                    
+                    
+                        <li><a href="../tu-index.md"
+                               style="text-decoration: none;"
+                               class=""
+                               >Tutorials</a></li>
+                    
+                    
+                    
+                    
+                    
+                        <li><a href="../rf-um-index.md"
+                               style="text-decoration: none;"
+                               class=""
+                               >User Manual</a></li>
+                    
+                    
+                    
+                    
+                    </ul>
+                
+            </div>
+        </div>
+        <div class="w3-threequarter w3-container">
+            <h2 id="introduction-to-cayley-diagrams">Introduction to Cayley diagrams</h2>
+<p>The Cayley diagram is the clearest <a href="rf-geterms.md#visualizers">visualizer</a>
+for depicting groups as sets with structure.  They also clearly show the
+group as acting on itself.
+If you have not yet encountered the multiplication table
+<a href="rf-geterms.md#visualizers">visualizer</a>, start with these help pages:</p>
+<ul>
+<li><a href="rf-groupterms.md#cayleydiagram">The definition of a Cayley diagram</a></li>
+<li><a href="rf-grouptheorytopics.md#cayleydiag">A little information about visualizing them</a></li>
+<li><a href="rf-um-cd-options.md">The documentation on the Cayley diagram interface in
+   <em>Group Explorer</em></a></li>
+</ul>
+<h2 id="what-cayley-diagrams-do-well">What Cayley diagrams do well</h2>
+<p>The Cayley diagram is the only visualizer in Group Explorer with the
+following two useful properties.</p>
+<ul>
+<li>Each element in the group is represented by a unique item in the visualizer.</li>
+<li>Full information about the group structure is immediately visible in the diagram.</li>
+</ul>
+<p><a href="rf-groupterms.md#cyclegraph">Cycle graphs</a> also satisfy the first of these
+requirements but not the second. <a href="rf-groupterms.md#multtable">Multiplication
+tables</a> satisfy the second but not the first.</p>
+<p>Consider the Cayley diagram of
+<a href="http://nathancarter.github.io/group-explorer/GroupInfo.html?groupURL=groups/S_3.group"><script type="math/tex">S_3</script></a>
+shown below. There is a node in the diagram for each element of the group
+and all information for determining the structure of the group can be
+immediately seen (or sometimes inferred) from the arrows connecting the
+nodes.</p>
+<p><a href="http://nathancarter.github.io/group-explorer/GroupInfo.html?groupURL=groups/S_3.group"><img alt="Cayley diagram for the group S_3" src="../s_3_cayley_miniature.png" /></a></p>
+<p>The fact that a red arrow goes from <script type="math/tex">f</script> to <script type="math/tex">fr</script> indicates that the red
+arrows signify right-multiplication by the generator <script type="math/tex">r</script>. So one can
+see how two generators (the red arrows meaning <script type="math/tex">r</script> and the blue-green
+arcs meaning <script type="math/tex">f</script>) combine to create all the structure of the group.
+Following a red arrow and then a blue-green one will lead you to a different
+location than following a blue-green arrow and then a red one; in this way
+one can see that
+<a href="http://nathancarter.github.io/group-explorer/GroupInfo.html?groupURL=groups/S_3.group"><script type="math/tex">S_3</script></a>
+is not abelian.</p>
+<p>Some groups in <em>Group Explorer</em> come with a human-designed Cayley diagram
+that has a particular beauty or symmetry which best shows off the symmetry
+inherent in the group.  Such diagrams are included if the standard
+algorithms <em>Group Explorer</em> uses for auto-generating Cayley diagrams do not
+yield aesthetically good results for that group.  Here are two particularly
+pleasing Cayley diagrams.</p>
+<h2 id="a-cayley-diagram-for-the-group-s_4">A Cayley diagram for the group <a href="http://nathancarter.github.io/group-explorer/GroupInfo.html?groupURL=groups/S_4.group"><script type="math/tex">S_4</script></a></h2>
+<p><a href="http://nathancarter.github.io/group-explorer/GroupInfo.html?groupURL=groups/S_4.group"><img alt="A Cayley diagram for the group S_4" src="../illustration-cds4.png" /></a></p>
+<p>Node color is highlighted to indicate membership in cosets of the subgroup
+<script type="math/tex">\langle(1~2~3)\rangle</script>.</p>
+<h2 id="a-cayley-diagram-for-the-group-a_5">A Cayley diagram for the group <a href="http://nathancarter.github.io/group-explorer/GroupInfo.html?groupURL=groups/A_5.group"><script type="math/tex">A_5</script></a></h2>
+<p><a href="http://nathancarter.github.io/group-explorer/GroupInfo.html?groupURL=groups/A_5.group"><img alt="A Cayley diagram for the group A_5" src="../illustration-cda5.png" /></a></p>
+<p>Node color is highlighted to indicate membership in cosets of the subgroup
+<script type="math/tex">\langle(0~1~2~3~4)\rangle</script>.</p>
+<p>There are some illustrations can be made from just about any kind of
+visualization, including Cayley diagrams.  For instance, although this
+<a href="../s_3_multtable_lattice.png">lattice of subgroups</a> and this
+<a href="../s_3_multtable_ses.png">short exact sequence of groups</a> use multiplication
+tables, they could just as easily have used Cayley diagrams instead.
+In fact, you can ask <em>Group Explorer</em> to automatically generate such
+visualizations for you; see the help on <a href="rf-um-sheetwindow.md">sheets</a>.</p>
+        </div>
+    </div>
+</div>
+
+<hr>
+
+<!-- Footer -->
+<footer class="w3-container w3-blue w3-padding-16">
+  <p>Based on a <a href="https://www.w3schools.com/w3css/default.asp" target="_blank">w3.css</a> template.
+  Thanks to them for sharing!</p>
+</footer>
+
+</body>
+</html>
