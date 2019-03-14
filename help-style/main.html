@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<title>{% if page.title %}{{ page.title }} - {% endif %}{{ config.site_name }}</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="{{ base_url }}/w3.css">
+<link rel="stylesheet" href="{{ base_url }}/w3-theme-blue.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<body>
+
+<!-- Header -->
+<header class="w3-container w3-theme w3-padding" id="myHeader">
+  <!--<i onclick="w3_open()" class="fa fa-bars w3-xlarge w3-button w3-theme"></i>-->
+  <div class="w3-center">
+  <h1 class="w3-xxxlarge">{{ config.site_name }}{% if not page.is_homepage %}: {{ page.title }}{% endif %}</h1>
+  </div>
+</header>
+
+<hr>
+
+<div class="w3-container">
+    <div class="w3-row w3=border">
+        <div class="w3-quarter w3-container">
+            <div class="w3-padding w3-card w3-bar-block">
+                <h3>Contents</h3>
+                <ul>
+                {% for toc_item in page.toc %}
+                    <li><a style="text-decoration: none;"
+                          href="{{ toc_item.url }}">{{ toc_item.title }}</a></li>
+                {% endfor %}
+                </ul>
+
+                <hr>
+
+                <h3><a style="text-decoration: none;"
+                      href="http://nathancarter.github.io/group-explorer">Back to Main Page</a></h3>
+
+                <hr>
+
+                <h3>More help</h3>
+                {% if nav|length>1 %}
+                    <ul>
+                    {% for nav_item in nav %}
+                    {% if nav_item.title|length %}
+                        <li><a href="{{ nav_item.url|url }}"
+                               style="text-decoration: none;"
+                               class="{% if nav_item.active%}current{% endif %}"
+                               >{{ nav_item.title }}</a></li>
+                    {% endif %}
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+        </div>
+        <div class="w3-threequarter w3-container">
+            {{ page.content }}
+        </div>
+    </div>
+</div>
+
+<hr>
+
+<!-- Footer -->
+<footer class="w3-container w3-blue w3-padding-16">
+  <p>Based on a <a href="https://www.w3schools.com/w3css/default.asp" target="_blank">w3.css</a> template.
+  Thanks to them for sharing!</p>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,61 @@
+site_name: Group Explorer 3.0 Help
+site_url: http://nathancarter.github.io/group-explorer/help/
+site_description: Help pages for the Group Explorer 3.0 web application
+site_author: Nathan Carter, Ray Ellis
+repo_url: http://github.com/nathancarter/group-explorer/
+repo_name: GitHub
+docs_dir: help-src
+site_dir: help
+dev_addr: 127.0.0.1:8989
+markdown_extensions:
+    - extra
+    - abbr
+    - def_list
+    - fenced_code
+    - footnotes
+    - tables
+    - admonition
+    - codehilite
+    - smarty
+    - toc
+    - mdx_math
+nav:
+    - Main Help Page: index.md
+    - Welcome: welcome.md
+    - Getting Started: gs-index.md
+    - "": # subtopics within "Getting Started"
+        - Multiplication Table Overview: gs-mt-intro.md
+        - Cayley Diagram Overview: gs-cd-intro.md
+    - Tutorials: tu-index.md
+    - "": # subtopics within "Tutorials"
+        - First Tutorial: tu-first.md
+        - Discovery Tutorial: tu-discovery.md
+        - Multiplication Table Tutorial: tu-mt-manip.md
+        - Cayley Diagram Tutorial: tu-cd-manip.md
+        - Saving and Printing Tutorial: tu-saveprint.md
+        - Sheets Tutorial: tu-sheets.md
+    - User Manual: rf-um-index.md
+    - "": # subtopics within "User Manual"
+        - Help System: rf-um-helpwindow.md
+        - Group Theory Terminology: rf-groupterms.md
+        - Group Explorer Terminology: rf-geterms.md
+        # split out of the help system the stuff on group info
+        # windows, add to it the stuff from rf-um-namescheme-dialog.md,
+        # and produce this new page:
+        - Group Info Pages: rf-um-groupwindow.md # split out of previous
+        - Group Library: rf-um-mainwindow.md
+        - Visualizers: rf-um-largewindow.md
+        - Cayley Diagram Options: rf-um-cd-options.md
+        - Cycle Graph Options: rf-um-cg-options.md
+        - Multiplication Table Options: rf-um-mt-options.md
+        - Symmetry Object Options: rf-um-mt-options.md
+        - Subset Options: rf-um-subsetlistbox.md
+        - Viewing 3D models: rf-um-modelview.md
+        - Sheet Options: rf-um-sheetwindow.md
+        - Editing Homomorphisms: rf-um-morphedit.md
+theme:
+    name: null
+    custom_dir: 'help-style/'
+extra_css:
+    - w3.css
+    - w3-theme-blue.css
