@@ -29,7 +29,39 @@
 
 ### Help pages
 
-Re-read all help pages and completely update them to match the new version.
+Update all help pages to mkdocs format.  I list here those left to be done.
+A bit more information appears in the [mkdocs.yml](mkdocs.yml) file.
+
+ * `tu-index.html`
+ * `tu-first.html`
+ * `tu-discovery.html`
+ * `tu-mt-manip.html`
+ * `tu-cd-manip.html`
+ * `tu-saveprint.html`
+ * `tu-sheets.html`
+ * `rf-um-index.html`
+ * `rf-um-helpwindow.html`
+ * `rf-groupterms.html`
+ * `rf-geterms.html`
+ * `rf-um-namescheme-dialog.html`
+ * `rf-um-mainwindow.html`
+ * `rf-um-largewindow.html`
+ * `rf-um-cd-options.html`
+ * `rf-um-cg-options.html`
+ * `rf-um-mt-options.html`
+ * `rf-um-os-options.html`
+ * `rf-um-subsetlistbox.html`
+ * `rf-um-modelview.html`
+ * `rf-um-sheetwindow.html`
+ * `rf-um-morphedit.html`
+
+Get search working in help.
+[See here.](https://www.mkdocs.org/user-guide/custom-themes/#search-and-themes)
+
+Add to the help references to specific locations in VGT where users can go to read more.
+
+Add to the help references to other web resources where users can go to read more,
+such as Matthew Macauley's lecture videos on Visual Group Theory.
 
 ### Sheets
 
