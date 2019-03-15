@@ -32,8 +32,6 @@
 Update all help pages to mkdocs format.  I list here those left to be done.
 A bit more information appears in the [mkdocs.yml](mkdocs.yml) file.
 
- * `tu-index.html`
- * `tu-first.html`
  * `tu-discovery.html`
  * `tu-mt-manip.html`
  * `tu-cd-manip.html`
@@ -57,6 +55,8 @@ A bit more information appears in the [mkdocs.yml](mkdocs.yml) file.
 
 Get search working in help.
 [See here.](https://www.mkdocs.org/user-guide/custom-themes/#search-and-themes)
+
+Ensure each help page has a link to its source code on GitHub so that people can fix typos.
 
 Add to the help references to specific locations in VGT where users can go to read more.
 
