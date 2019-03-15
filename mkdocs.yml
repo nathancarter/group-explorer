@@ -32,7 +32,6 @@ nav:
         - Discovery Tutorial: tu-discovery.md
         - Multiplication Table Tutorial: tu-mt-manip.md
         - Cayley Diagram Tutorial: tu-cd-manip.md
-        - Saving and Printing Tutorial: tu-saveprint.md
         - Sheets Tutorial: tu-sheets.md
     - User Manual: rf-um-index.md
     - "": # subtopics within "User Manual"

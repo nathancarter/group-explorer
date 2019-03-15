@@ -25,6 +25,11 @@
    itself, so the diagram author can choose it.
  * In an object of symmetry, disable the Shift+Drag feature that lets the user curve the lines.
 
+### Bugs to fix
+
+ * Dragging the identity element in the multiplication table to a new column
+   does not move it, but it permutes the other elements in some way.
+
 ## Assigned to Nathan
 
 ### Help pages
@@ -32,11 +37,6 @@
 Update all help pages to mkdocs format.  I list here those left to be done.
 A bit more information appears in the [mkdocs.yml](mkdocs.yml) file.
 
- * `tu-discovery.html`
- * `tu-mt-manip.html`
- * `tu-cd-manip.html`
- * `tu-saveprint.html`
- * `tu-sheets.html`
  * `rf-um-index.html`
  * `rf-um-helpwindow.html`
  * `rf-groupterms.html`
@@ -53,15 +53,20 @@ A bit more information appears in the [mkdocs.yml](mkdocs.yml) file.
  * `rf-um-sheetwindow.html`
  * `rf-um-morphedit.html`
 
-Get search working in help.
-[See here.](https://www.mkdocs.org/user-guide/custom-themes/#search-and-themes)
+Get search working in help. [See
+here.](https://www.mkdocs.org/user-guide/custom-themes/#search-and-themes)
 
-Ensure each help page has a link to its source code on GitHub so that people can fix typos.
+Ensure each help page has a link to its source code on GitHub so that people
+can fix typos.
 
-Add to the help references to specific locations in VGT where users can go to read more.
+Add to the help references to specific locations in VGT where users can go
+to read more.
 
-Add to the help references to other web resources where users can go to read more,
-such as Matthew Macauley's lecture videos on Visual Group Theory.
+Add to the help references to other web resources where users can go to read
+more, such as Matthew Macauley's lecture videos on Visual Group Theory.
+
+Replace all occurrences of GE2-generated help images with GE3-generated
+ones.
 
 ### Sheets
 
