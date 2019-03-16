@@ -550,8 +550,6 @@ class DC {
       $('#generation-table').off('drop', DC.Generator.drop).on('drop', DC.Generator.drop);
       $('#generation-table').off('dragover', DC.Generator.dragOver).on('dragover', DC.Generator.dragOver);
 
-      $('#multiplication-control').off('click', DC.ArrowMult.clickHandler).on('click', DC.ArrowMult.clickHandler);
-
       $('#chunk-select').off('click', DC.Chunking.clickHandler).on('click', DC.Chunking.clickHandler);
    }
 
@@ -1001,16 +999,9 @@ DC.Arrow = class {
 }
 
 DC.ArrowMult = class {
-   static clickHandler(event) {
-      event.preventDefault();
-
-      const $curr = $(event.target).closest('[multiplication]');
-      if ($curr.length != 0) {
-         Cayley_diagram.right_multiplication = ($curr.attr('multiplication') == 'right');
-         $curr.children('input')[0].checked = true;
-         Graphic_context.showGraphic(Cayley_diagram);
-      }
-      event.stopPropagation();
+   static setMult(rightOrLeft) {
+      Cayley_diagram.right_multiplication = (rightOrLeft == 'right');
+      Graphic_context.showGraphic(Cayley_diagram);
    }
 }
 

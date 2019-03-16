@@ -85,6 +85,6 @@
 #multiplication-control {
     margin-top: 1em;
 }
-#multiplication-control [multiplication] {
+#multiplication-control > div {
     margin-left: 5%;
 }
