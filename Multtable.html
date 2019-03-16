@@ -38,6 +38,10 @@
           margin-top: 1.5em;
           margin-bottom: 0.5em;
        }
+
+       #coloration-choice > div {
+          margin-left: 5%;
+       }
       </style>
       <script type="text/x-mathjax-config">
        MathJax.Hub.Config({
@@ -90,7 +94,6 @@
           $('#table-button').off('click', () => showPanel('#table-control') ).on('click', () => showPanel('#table-control') );
           $(window).off('click', organizationClickHandler).on('click', organizationClickHandler);
           $('#separation-slider').off('input', separation).on('input', separation);
-          $('#coloration-choice').off('click', colorClickHandler).on('click', colorClickHandler);
        }
 
        /* Load the static components of the page */
@@ -215,15 +218,10 @@
        }
 
        /* Set coloration option in multtable, and re-draw graphic */
-       function colorClickHandler(event) {
-          const $input = $(event.target).closest('[coloration]');
-          if ($input.length != 0) {
-             const coloration = $input.attr('coloration');
-             multtable.colors = coloration;
-             $(`input[coloration="${coloration}"]`)[0].checked = true;
-             emitStateChange();
-             graphicContext.showLargeGraphic(multtable);
-          }
+       function chooseColoration(coloration) {
+          multtable.colors = coloration;
+          emitStateChange();
+          graphicContext.showLargeGraphic(multtable);
        }
 
        // Resize the body, including the graphic
@@ -450,12 +448,21 @@
          <div class="graphic-lead" style="margin-top: 3em">Separate cosets by:</div>
          <input id="separation-slider" type="range" min="0" max="100" value="0"> <!-- [0-100] => [0,box width] -->
 
-         <div class="graphic-lead" style="margin-bottom: 0">Default coloration:</div>
-         <div id="coloration-choice" style="margin-left: 5%">
-            <input coloration="Rainbow" name="coloration" type="radio" checked><span coloration="Rainbow">Spectrum/rainbow</span><br>
-            <input coloration="Grayscale" name="coloration" type="radio"><span coloration="Grayscale">Grayscale</span><br>
-            <input coloration="None" name="coloration" type="radio"><span coloration="None">None</span><br>
-         </div>
+         <form id="coloration-choice" class="graphic-lead" style="margin-bottom: 0">
+            Default coloration:
+            <div>
+               <input id="Rainbow" name="coloration" type="radio" onclick="chooseColoration(Multtable.COLORATION_RAINBOW)" checked>
+               <label for="Rainbow">Spectrum/rainbow</label>
+            </div>
+            <div>
+               <input id="Grayscale" name="coloration" type="radio" onclick="chooseColoration(Multtable.COLORATION_GRAYSCALE)">
+               <label for="Grayscale">Grayscale</label>
+            </div>
+            <div>
+               <input id="None" name="coloration" type="radio" onclick="chooseColoration(Multtable.COLORATION_NONE)">
+               <label for="None">None</label>
+            </div>
+         </form>
       </div>
 
       <img id="blank" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAQAAAAnOwc2AAAAD0lEQVR42mNkwAIYh7IgAAVVAAuInjI5AAAAAElFTkSuQmCC" height="1px" width="1px" class="hidden">
