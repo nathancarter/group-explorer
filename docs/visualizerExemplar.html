@@ -8,22 +8,18 @@ interspersed.
 ## Visualizer invocation
 
 The visualizer exemplar may be viewed in the browser by entering a URL like
-  <br>&nbsp;&nbsp;&nbsp;&nbsp;http://localhost:8080/group-explorer/docs/visualizerExemplar.html?groupURL=/group-explorer/groups/D_4.group,
+  <br>&nbsp;&nbsp;&nbsp;&nbsp;http://localhost:8080/group-explorer/docs/visualizerExemplar.html?groupURL=../groups/D_4.group,
 <br>which passes the visualizer the URL of a group definition in .group file XML, or
-  <br>&nbsp;&nbsp;&nbsp;&nbsp;http://localhost:8080/group-explorer/docs/visualizerExemplar.html?groupJSON=/group-explorer/groups/D_4.json,
-<br>which passes the visualizer the URL of a group definition in JSON format.
+  <br>&nbsp;&nbsp;&nbsp;&nbsp;http://localhost:8080/group-explorer/docs/visualizerExemplar.html?groupJSON=../groups/D_4.json,
+<br>which passes the visualizer the URL of a group definition in JSON format. (Note that this won't work with the current release -- there are no .json files in the library.)
 
 In the normal use of GE3 the visualizers are opened from the GroupInfo page by selecting one of the visualizer thumbnails. The GroupInfo
 page opens the visualizer with a URL like
-  <br>&nbsp;&nbsp;&nbsp;&nbsp;http://localhost:8080/group-explorer/Multtable.html?group=blob:http://localhost:8080/b4ecb095-f696-46d4-a065-c00a90f13920,
-<br>passing it a blob containing a single group definition in JSON format. Other parameters may also be passed in the URL.
+  <br>&nbsp;&nbsp;&nbsp;&nbsp;http://localhost:8080/group-explorer/Multtable.html?groupURL=./groups/D_4.group
+<br>passing it a URL referencing a group definition in XML (.group) format. Other parameters may also be passed in the URL.
 For example, this invocation of a Cayley diagram
-  <br>&nbsp;&nbsp;&nbsp;&nbsp;http://localhost:8080/group-explorer/CayleyDiagram.html?group=blob:http://localhost:8080/b4ecb095-f696-46d4-a065-c00a90f13920&diagram=Truncated%20icosahedron
-<br>specifies that the `Truncated icosahedron` diagram is to be displayed initially. These parameters are passed to the visualizer
-the same way, regardless of how the group definition is passed.
-
-Since the visualizer exemplar is only an example, not a functional component of GE3, the GroupInfo page has no link to it and one of
-the first two methods shown must be used.
+  <br>&nbsp;&nbsp;&nbsp;&nbsp;http://localhost:8080/group-explorer/CayleyDiagram.html?groupURL=./groups/S_4.group&diagram=Truncated%20cube
+<br>specifies that the `Truncated cube` diagram is to be displayed initially.
 
 ## Visualizer display
 
@@ -48,7 +44,9 @@ Markdown-->
       <link rel="stylesheet" href="./style/fonts.css" type="text/css"></link>
       <link rel="stylesheet" href="./style/sliders.css" type="text/css"></link>
       <link rel="stylesheet" href="./visualizerFramework/visualizer.css" type="text/css"></link>
+      <link rel="stylesheet" href="./style/menu.css" type="text/css"></link>
       <link rel="stylesheet" href="./subsetDisplay/subsets.css" type="text/css"></link>
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css">
 
       <style>
        #view-control {
@@ -78,6 +76,7 @@ Markdown-->
        /* Global variables */
        var group;  // group about which information will be displayed
        const panelNames = ['#subset-control', '#view-control'];
+       const HELP_PAGE = 'help/index.html';
 
        /* Initial entry to javascript -- called once after document load */
        $(window).one('load', load);
@@ -89,9 +88,6 @@ Markdown-->
        function registerEventHandlers() {
           $('#subset-button').off('click', () => show('#subset-control') ).on('click', () => show('#subset-control') );
           $('#view-button').off('click', () => show('#view-control') ).on('click', () => show('#view-control') );
-          $('#help').off('click', help).on('click', help);
-          $('#reset').off('click', reset).on('click', reset);
-          $('#organization-select').off('change', choose).on('change', choose);
           $(window).off('resize', resizeBody).on('resize', resizeBody);
        }
 
@@ -99,17 +95,15 @@ Markdown-->
 ```
 ## Visualizer framework loading
 
-Invokes [VC.load()](./visualizerFramework_js.md#vc-load-) to wrap visualizer framework layout around visualizer-specific controls
+Invokes [VC.load()](visualizerFramework_js.md#vc-load-) to wrap visualizer framework layout around visualizer-specific controls
 ```javascript
        /* Load the static components of the page */
        function load() {
           // Create a Promise to load group from invocation URL
           const groupLoad = Library
-             .loadFromInvocation()
-             .then( ({library, groupIndex}) => {
-                group = library[groupIndex];
-             } )
-             .catch( (error) => console.error('Error loading group (groupURL or similar required):\n\n' + error) );
+             .loadFromURL()
+             .then( (_group) => group = _group )
+             .catch( console.error );
 
           // Create a Promise to load visualizer framework around visualizer-specific code in this file
           const bodyLoad = VC.load();
@@ -122,7 +116,7 @@ Invokes [VC.load()](./visualizerFramework_js.md#vc-load-) to wrap visualizer fra
 
        /*
 ```
-
+## Exemplar initialization
 ```javascript
        /* Now that all the static HTML is loaded, complete the setup */
        function completeSetup() {
@@ -133,16 +127,17 @@ Invokes [VC.load()](./visualizerFramework_js.md#vc-load-) to wrap visualizer fra
           $('#header').html('Visualizer Example for&nbsp;' + MathML.sans(group.name));
           MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'header']);
 
-          // Create list of subgroups for select options, one choice for each proper subgroup
-          for (let inx = 1; inx < group.subgroups.length - 1; inx++) {
-             // Recursive routine calculates multi-character subscript as Unicode text, since option tags cannot contain HTML
-             const subscript = (jnx) =>
-                (jnx == 0) ? '' : (subscript(Math.floor(jnx / 10)) + subscripts[jnx % 10]);  // subscripts defined in js/mathmlUtils.js
-             const subgroup = group.subgroups[inx];
-             const option =  eval(Template.HTML('organization-choice-template'));
-             $('#organization-select').append(option);
+          $('#organization-choices').append(
+             $('<li onclick="choose(0)">').html(MathML.sans('<mtext>none</mtext>')));
+          for (let subgroupIndex = 1; subgroupIndex < group.subgroups.length-1; subgroupIndex++) {
+             const subgroup = group.subgroups[subgroupIndex];
+             const option = eval(Template.HTML('organization-choice-template'));
+             $('#organization-choices').append(option);
           }
+          MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'organization-choices',
+                             () => $('#organization-choice').html($('#organization-choices > li:first-of-type').html())]);
 
+             
           // Register the splitter with jquery-resizable, so you can resize the graphic horizontally
           // by grabbing the border between the graphic and the subset control and dragging it
           $('#vert-container').resizable({
@@ -159,12 +154,11 @@ Invokes [VC.load()](./visualizerFramework_js.md#vc-load-) to wrap visualizer fra
        }
 
        /*
-        * Resize the body, accounting for the body margins
-        *    (Note that this routine would have to resize the graphic, too, if needed.)
+        * Resize the body (including the graphic, if necessary).
         */
        function resizeBody() {
-          $('body').height(window.innerHeight - 8);
-          $('body').width(window.innerWidth - 8);
+          $('body').height(window.innerHeight);
+          $('body').width(window.innerWidth);
        }
 
        /* Show the desired panel, hide the rest */
@@ -179,25 +173,8 @@ Invokes [VC.load()](./visualizerFramework_js.md#vc-load-) to wrap visualizer fra
        }
 
        /* Example event handler, set up in registerCallback */
-       function choose(ev) {
-          alert(`subgroup ${ev.target.value} selected`);
-       }
-
-       /* Routines for Help, Reset buttons at bottom of control panel */
-       function help() {
-          alert('This is a simple example to show how visualizers are built.');
-       }
-
-       /*
-```
-## Visualizer framework reset
-
-Uses [VC.restore()](./visualizerFramework_js.md#vs-restore-) to recover visualizer-specific layout
-```javascript
-       */
-       function reset() {
-          VC.reset();
-          load();
+       function choose(subgroupIndex) {
+          $('#organization-choice').html($(`#organization-choices > li:nth-of-type(${subgroupIndex+1})`).html());
        }
       </script>
    </head>
@@ -206,6 +183,8 @@ Uses [VC.restore()](./visualizerFramework_js.md#vs-restore-) to recover visualiz
 ## Visualizer-specific HTML
 
 The body contains the visualizer-specific HTML to lay out the controls for this visualizer.  This HTML will be wrapped in the visualizer framework by [VC.load()](./visualizerFramework_js.md#vc-load-), called during [initialization](#visualizer-framework-loading).
+
+Note the use of [faux-select](visualizerFramework_css.md#faux-select) and associated classes to simulate an HTML select element with HTML and MathML formatted text.
 ```html
 Markdown-->
    <body class="vert">
@@ -220,11 +199,15 @@ Markdown-->
 
       <div id="view-control" class="fill-vert">
          <p>Organize by subgroup:</p>
-         <select id="organization-select" class="select">
-            <option value="0">none</option>
-         </select>
+         <div id="organization-select" class="faux-select" onclick="$('#organization-choices').toggle()">
+            <ul id="organization-choices" class="faux-select-options hidden"></ul>
+            <span id="organization-choice" class="faux-selection">none</span>
+         </div>
          <template id="organization-choice-template">
-            <option value="${inx}">H${subscript(inx)}, a subgroup of order ${subgroup.order}</option>
+            <li onclick="choose(${subgroupIndex})">
+               ${MathML.sans(MathML.sub('H', subgroupIndex) + '<mo>,</mo><mtext>a subgroup of order&nbsp;</mtext><mn>' +
+               subgroup.order + '</mn>')}
+            </li>
          </template>
 
          <p>Zoom level:</p>
