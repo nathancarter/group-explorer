@@ -2041,6 +2041,7 @@ class CayleyDiagram extends Diagram3D {
       this.background = CayleyDiagram.BACKGROUND_COLOR;
       this.strategies = [];
 
+      this.isCayleyDiagram = true;
       this.diagram_name = diagram_name;
       this.isGenerated = (diagram_name === undefined);
       this._update();
@@ -2562,7 +2563,6 @@ class DisplayDiagram {
 
       if (options.trackballControlled) {
          this.camControls = new THREE.TrackballControls(this.camera, options.container[0]);
-         this.lineDnD = new DisplayDiagram.LineDnD(this);
       }
    }
 
@@ -2623,7 +2623,10 @@ class DisplayDiagram {
       Log.log('showGraphic');
 
       // save diagram for use by LineDnD
-      if (this.lineDnD !== undefined) {
+      if (this.camControls !== undefined && diagram3D.isCayleyDiagram) {
+         if (this.lineDnD === undefined) {
+            this.lineDnD = new DisplayDiagram.LineDnD(this);
+         }
          this.scene.userData = diagram3D;
       }
 

@@ -10,6 +10,7 @@ class CayleyDiagram extends Diagram3D {
       this.background = CayleyDiagram.BACKGROUND_COLOR;
       this.strategies = [];
 
+      this.isCayleyDiagram = true;
       this.diagram_name = diagram_name;
       this.isGenerated = (diagram_name === undefined);
       this._update();

@@ -23,7 +23,6 @@
 
  * Eventually, we want to have a camera position be specifiable in the OS/CD diagram
    itself, so the diagram author can choose it.
- * In an object of symmetry, disable the Shift+Drag feature that lets the user curve the lines.
 
 ## Assigned to Nathan
 
