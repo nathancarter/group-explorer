@@ -69,6 +69,7 @@
            Graphic_context,	// graphic context for large diagram
            canEmit = true;  // flag: whether to notify parent window of table changes
        const PANEL_NAMES = ['#subset-control', '#view-control', '#diagram-control'];
+       const HELP_PAGE = 'help/rf-um-cd-options.html';
 
        const myDomain = new URL(window.location.href).origin;
 
@@ -80,8 +81,6 @@
           $('#subset-button').off('click', () => show('#subset-control') ).on('click', () => show('#subset-control') );
           $('#view-button').off('click', () => show('#view-control') ).on('click', () => show('#view-control') );
           $('#diagram-button').off('click', () => show('#diagram-control') ).on('click', () => show('#diagram-control') );
-          $('#help').off('click', help).on('click', help);
-          $('#reset').off('click', reset).on('click', reset);
           $('#graphic').on('mousemove', HoverHelp.handleEvent)
                        .on('mouseleave', HoverHelp.handleEvent);
 
@@ -188,8 +187,6 @@
              if ( ''+lastCamera != ''+thisCamera ) emitStateChange();
              lastCamera = thisCamera;
           }, 500 );
-
-          setupTopRightMenu();
        }
 
        function emitStateChange () {
@@ -342,52 +339,9 @@
           Graphic_context.updateHighlights(Cayley_diagram);
           emitStateChange();
        }
-
-       /* Help, Reset routines */
-       function help() {
-          alert('Help system not yet implemented.  Check back soon!');
-       }
-
-       function reset() {
-          VC.reset();
-          load();
-       }
-
-       function setupTopRightMenu () {
-          $( '.top-right-menu' ).appendTo( document.body );
-          showControls();
-       }
-
-       function hideControls () {
-          $( '#hide-controls' ).hide();
-          $( '#show-controls' ).show();
-          $( '#vert-container' ).hide().resize();
-       }
-
-       function showControls () {
-          $( '#hide-controls' ).show();
-          $( '#show-controls' ).hide();
-          $( '#vert-container' ).show().resize();
-       }
       </script>
    </head>
    <body class="vert">
-      <div class="top-right-menu">
-         <a href='index.html'><i title="Project Home" class="fa fa-home fa-2x trm-black"></i></a>
-         <a href='GroupExplorer.html'><i title="Group Library"
-             class="fa fa-book fa-2x trm-black"></i></a>
-         <a href='Sheet.html' target='_blank'><i title="Sheets"
-             class="fa fa-file trm-black" style="font-size:1.5em;vertical-align:10%;"></i></a>
-         <a href='help/rf-um-cd-options.html'><i title="Help"
-             class="fa fa-question-circle fa-2x trm-black"></i></a>
-         <a href='https://github.com/nathancarter/group-explorer'><i
-             title="Source on GitHub" class="fa fa-github fa-2x trm-black"></i></a>
-         <a href='javascript:hideControls();' id='hide-controls'><i title="Hide controls"
-             class="fa fa-chevron-circle-right fa-2x trm-black"></i></a>
-         <a href='javascript:showControls();' id='show-controls'><i title="Show controls"
-             class="fa fa-chevron-circle-left fa-2x trm-black"></i></a>
-      </div>
-
       <div id="control-options" class="horiz">
          <button id="subset-button">Subsets</button>
          <button id="view-button">View</button>

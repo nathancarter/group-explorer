@@ -46,6 +46,10 @@
          #splitter {
              z-index: 999999999;
          }
+
+         #reset {
+             display: none;
+         }
       </style>
 
       <script type="text/x-mathjax-config">
@@ -68,6 +72,8 @@
       <script>
          /* Global variables */
          const panelNames = ['#sheet-control'];
+         const HELP_PAGE = 'help/rf-um-sheetwindow.html';
+
          var $sheet;
          var Model;
 
@@ -80,13 +86,15 @@
           */
          function registerEventHandlers() {
             $('#sheet-button').on('click', () => show('#sheet-control') );
-            $('#help').off('click', help).on('click', help);
             $(window).off('resize', resizeBody).on('resize', resizeBody);
          }
          /* Load the static components of the page */
          function load() {
             VC.load()
-              .then(completeSetup)
+              .then( () => {
+                 $('.top-right-menu > a[href="Sheet.html"]').hide();  // hide top-right-menu Sheets icon
+                 completeSetup();
+              } )
               .catch( console.error );
          }
          /* Now that all the static HTML is loaded, complete the setup */
@@ -152,10 +160,6 @@
                if ( selected && selected.htmlViewElement() )
                   $( selected.htmlViewElement().parentElement ).removeDragAndSizeSelection();
             } );
-
-            $( reset ).hide();
-
-            setupTopRightMenu();
          }
 
          function handleSelectionChanged () {
@@ -241,10 +245,6 @@
                   $(name).hide();
                }
             }
-         }
-
-         function help() {
-            alert('This is a simple example to show how visualizers are built.');
          }
 
          function addRectangle () {
@@ -348,45 +348,10 @@
              if ( elementJSON.hasOwnProperty( 'y' ) )
                  elementJSON.y += $('#graphic').offset().top;
          }
-
-         function setupTopRightMenu () {
-             $( '.top-right-menu' ).appendTo( document.body );
-             showControls();
-         }
-
-         function hideControls () {
-             $( '#hide-controls' ).hide();
-             $( '#show-controls' ).show();
-             $( '#vert-container' ).hide().resize();
-         }
-
-         function showControls () {
-             $( '#hide-controls' ).show();
-             $( '#show-controls' ).hide();
-             $( '#vert-container' ).show().resize();
-         }
       </script>
    </head>
 
    <body class="vert">
-      <div class="top-right-menu">
-         <a href='index.html'><i title="Project Home" class="fa fa-home fa-2x trm-black"></i></a>
-         <a href='GroupExplorer.html'><i title="Group Library"
-             class="fa fa-book fa-2x trm-black"></i></a>
-         <!--
-         <a href='Sheet.html' target='_blank'><i title="Sheets"
-             class="fa fa-file trm-black" style="font-size:1.5em;vertical-align:10%;"></i></a>
-         -->
-         <a href='help/rf-um-sheetwindow.html'><i title="Help"
-             class="fa fa-question-circle fa-2x trm-black"></i></a>
-         <a href='https://github.com/nathancarter/group-explorer'><i
-             title="Source on GitHub" class="fa fa-github fa-2x trm-black"></i></a>
-         <a href='javascript:hideControls();' id='hide-controls'><i title="Hide controls"
-             class="fa fa-chevron-circle-right fa-2x trm-black"></i></a>
-         <a href='javascript:showControls();' id='show-controls'><i title="Show controls"
-             class="fa fa-chevron-circle-left fa-2x trm-black"></i></a>
-      </div>
-
       <div id="sheet-control" class="fill-vert">
          <p class="button-row">
             <button id="loadButton" onclick="loadChosen();"
