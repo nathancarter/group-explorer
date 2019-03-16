@@ -147,9 +147,10 @@
           }, myDomain );
        }
 
+       // Resize the body, including the graphic
        function resizeBody() {
-          $('body').height(window.innerHeight - 8);
-          $('body').width(window.innerWidth - 8);
+          $('body').height(window.innerHeight);
+          $('body').width(window.innerWidth);
 
           resizeGraphic();
        };
