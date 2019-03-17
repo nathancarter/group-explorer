@@ -452,6 +452,7 @@ class DisplayDiagram {
                      sizeAttenuation: false,
                      side: THREE.DoubleSide,
                      resolution: new THREE.Vector2(window.innerWidth, window.innerHeight),
+                     fog: true,
                   }),
                geometry = new THREE.Geometry();
 

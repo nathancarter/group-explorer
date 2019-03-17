@@ -5,8 +5,6 @@
 
 ### Miscellany
 
- * Make the mesh lines respect fog like the rest of the 3D diagram does.  (Ray will do
-   the initial investigations on this one.)
  * Create the UI for adding a naming scheme, and store it in `localStorage`.
  * Make test to simulate loading GE from GAP using 'waitForMessage'
 
