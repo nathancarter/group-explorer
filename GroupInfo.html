@@ -69,10 +69,6 @@
       </script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=MML_CHTML"></script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/95/three.js"></script>
-      <script>module = { };</script>
-      <script src="https://cdn.jsdelivr.net/npm/three-trackballcontrols@0.0.7/index.js"></script>
-      <script>THREE.TrackballControls = module.exports;</script>
-      <script src="https://cdn.jsdelivr.net/npm/three.meshline@1.1.0/src/THREE.MeshLine.js"></script>
       <script src="./build/allGroupExplorer.js"></script>
       <script src="./build/allSheets.js"></script>
 
@@ -82,8 +78,8 @@
 
        // Static event managers (setup after document is available)
        $(function() {
-          $('#Computed_properties + p')
-             .on('click', (ev) => Library.openWithGroupURL($(ev.target).attr('page'), group.URL));
+          $('#Computed_properties + p').on('click', (ev) =>
+             ($(ev.target).attr('page') === undefined) ? undefined : Library.openWithGroupURL($(ev.target).attr('page'), group.URL))
        });
        $(window).on('load', load);	// like onload handler in body
 
