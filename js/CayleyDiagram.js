@@ -23,7 +23,7 @@ class CayleyDiagram extends Diagram3D {
    setStrategies(strategy_parameter_array) {
       const param_array = strategy_parameter_array
          .map( (params) => { return {generator: params[0], layout: params[1], direction: params[2], nesting_level: params[3]} } );
-
+/* Checks used in development, debugging
       // check:  generators, layouts, directions are in range
       if (param_array.find( (params) => params.generator < 1 || params.generator >= this.group.order ) !== undefined)
          console.error('strategy generator out of range');
@@ -42,12 +42,12 @@ class CayleyDiagram extends Diagram3D {
          console.error('strategy nesting levels are incomplete or redundant');
 
       // check:  can't use circular or rotary for subgroup of order 2
+      //   (not exactly true, see comment in DC.Generator.showAxisMenu)
       if (param_array.find( (params) => this.group.elementOrders[params.generator] == 2 && params.layout != CayleyDiagram.LINEAR_LAYOUT) !== undefined)
          console.error('generator must have order > 2 when using circular or rotated layout');
 
       // check:  no empty nesting levels (should this really be needed?)
-
-
+*/
       this.strategies = strategy_parameter_array
          .map( (parameters) => CayleyDiagram.LayoutStrategy._createStrategy(...parameters) );
 
