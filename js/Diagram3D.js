@@ -13,7 +13,7 @@ class Diagram3D {
       this.node_labels = group.representation;
       this.background = undefined;
       this.zoomLevel = 1;
-      this.lineWidth = 10;
+      this.lineWidth = 7;
       this.nodeScale = 1;
       this.fogLevel = 0;
       this.labelSize = 1;
