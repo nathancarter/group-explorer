@@ -13,7 +13,6 @@
  * Complete the integration (or pass to Nathan if he finishes his stuff first)
    and then update the help link on the library page to go to the newly created
    help index page.
- * GroupExplorer.html column headings should be link to help on that topic.
 
 ### 3D diagrams and viewing angles
 
