@@ -242,9 +242,6 @@ Note that these ideas are contingent upon what feedback we receive from first us
 
 ### General
 
- * Internal documentation
- * Rationalize coding style (add leading underscore to internal methods?)
- * Re-factor to hide internal implementations (e.g., js/DisplayXX classes)
  * It is possible to ask GE3 to generate diagrams in a way that nodes become too close
    together.  Do this for example:
     * Open a Cayley Diagram for A_5.
@@ -255,7 +252,6 @@ Note that these ideas are contingent upon what feedback we receive from first us
 ### CayleyDiagram diagram panel
 
  * Display raw element numbers for debugging?
- * Follow up approach in https://stackoverflow.com/questions/15558418/how-do-you-save-an-image-from-a-three-js-canvas for saving buffer
  * Investigate how to get Cayley Diagrams to look more like VGT and less
    like GE2.0.
 
