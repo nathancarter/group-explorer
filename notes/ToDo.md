@@ -31,11 +31,8 @@
 Update all help pages to mkdocs format.  I list here those left to be done.
 A bit more information appears in the [mkdocs.yml](mkdocs.yml) file.
 
- * `rf-um-index.html`
- * `rf-um-helpwindow.html`
  * `rf-groupterms.html`
  * `rf-geterms.html`
- * `rf-um-namescheme-dialog.html`
  * `rf-um-mainwindow.html`
  * `rf-um-largewindow.html`
  * `rf-um-cd-options.html`

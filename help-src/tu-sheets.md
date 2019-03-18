@@ -88,12 +88,11 @@ shows much more.
 
 ## Getting *Group Explorer* to make sheets for you
 
-The [help documents](rf-um-helpwindow.md) and [group info
-pages](rf-um-groupwindow.md) of *Group Explorer* are full of links that
-create sheets. For many common computations, it is very interesting to be
-able to see the result of the computation visually. I will whet your
-appetite for such illustrations by giving a few examples here, and providing
-links for you to browse further yourself.
+The [group info pages](rf-um-groupwindow.md) of *Group Explorer* are full of
+links that create sheets. For many common computations, it is very
+interesting to be able to see the result of the computation visually. I will
+whet your appetite for such illustrations by giving a few examples here, and
+providing links for you to browse further yourself.
 
  * To see a [short exact sequence](rf-groupterms.md#ses) exhibiting the
    [normality](rf-groupterms.md#normalsubgroup) of a

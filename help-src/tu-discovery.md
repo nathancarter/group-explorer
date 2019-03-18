@@ -8,7 +8,7 @@ taste of some of the value of visualization in group theory.
 
 ## Group info, all the way
 
-The first time you see a [group info window](rf-um-helpwindow.md), the
+The first time you see a [group info window](rf-um-groupwindow.md), the
 amount of information it presents may be a bit overwhelming.  But take care
 not to miss the section entitled "Computed properties."
 

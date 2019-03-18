@@ -35,13 +35,9 @@ nav:
         - Sheets Tutorial: tu-sheets.md
     - User Manual: rf-um-index.md
     - "": # subtopics within "User Manual"
-        - Help System: rf-um-helpwindow.md
         - Group Theory Terminology: rf-groupterms.md
         - Group Explorer Terminology: rf-geterms.md
-        # split out of the help system the stuff on group info
-        # windows, add to it the stuff from rf-um-namescheme-dialog.md,
-        # and produce this new page:
-        - Group Info Pages: rf-um-groupwindow.md # split out of previous
+        - Group Info Pages: rf-um-groupwindow.md
         - Group Library: rf-um-mainwindow.md
         - Visualizers: rf-um-largewindow.md
         - Cayley Diagram Options: rf-um-cd-options.md
