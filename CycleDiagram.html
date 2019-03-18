@@ -53,6 +53,7 @@
            cyclegraph,    // data being displayed in large diagram
            graphicContext,	// graphic context for large diagram
            canEmit = true;  // flag: whether to notify parent window of table changes
+       const HELP_PAGE = 'help/rf-um-cg-options.html';
 
        const myDomain = new URL(window.location.href).origin;
 
@@ -65,9 +66,6 @@
           $(window).off('click', clearLabels).on('click', clearLabels);
           $(window).off('wheel', clearLabels).on('wheel', clearLabels);
           $(window).off('contextMenu', clearLabels).on('contextMenu', clearLabels);
-
-          $('#help').off('click', help).on('click', help);
-          $('#reset').off('click', load).on('click', load);
 
           // mouse events in large graphic
           $('#graphic > canvas').off('click', displayLabel).on('click', displayLabel);
@@ -138,8 +136,6 @@
              }
           }, false );
           window.postMessage( 'listener ready', myDomain );
-
-          setupTopRightMenu();
        }
 
        function emitStateChange () {
@@ -151,9 +147,10 @@
           }, myDomain );
        }
 
+       // Resize the body, including the graphic
        function resizeBody() {
-          $('body').height(window.innerHeight - 8);
-          $('body').width(window.innerWidth - 8);
+          $('body').height(window.innerHeight);
+          $('body').width(window.innerWidth);
 
           resizeGraphic();
        };
@@ -242,10 +239,6 @@
           event.preventDefault();
        }
 
-       function help() {
-          alert('Help system not yet implemented.  Check back soon!');
-       }
-
 
        /* Highlighting routines */
        function highlightByBackground(elements) {
@@ -271,42 +264,9 @@
           emitStateChange();
           graphicContext.showLargeGraphic(cyclegraph);
        }
-
-       function setupTopRightMenu () {
-          $( '.top-right-menu' ).appendTo( document.body );
-          showControls();
-       }
-
-       function hideControls () {
-          $( '#hide-controls' ).hide();
-          $( '#show-controls' ).show();
-          $( '#vert-container' ).hide().resize();
-       }
-
-       function showControls () {
-          $( '#hide-controls' ).show();
-          $( '#show-controls' ).hide();
-          $( '#vert-container' ).show().resize();
-       }
       </script>
    </head>
    <body class="vert">
-      <div class="top-right-menu">
-         <a href='index.html'><i title="Project Home" class="fa fa-home fa-2x trm-black"></i></a>
-         <a href='GroupExplorer.html'><i title="Group Library"
-             class="fa fa-book fa-2x trm-black"></i></a>
-         <a href='Sheet.html' target='_blank'><i title="Sheets"
-             class="fa fa-file trm-black" style="font-size:1.5em;vertical-align:10%;"></i></a>
-         <a href='help/rf-um-cg-options.html'><i title="Help"
-             class="fa fa-question-circle fa-2x trm-black"></i></a>
-         <a href='https://github.com/nathancarter/group-explorer'><i
-             title="Source on GitHub" class="fa fa-github fa-2x trm-black"></i></a>
-         <a href='javascript:hideControls();' id='hide-controls'><i title="Hide controls"
-             class="fa fa-chevron-circle-right fa-2x trm-black"></i></a>
-         <a href='javascript:showControls();' id='show-controls'><i title="Show controls"
-             class="fa fa-chevron-circle-left fa-2x trm-black"></i></a>
-      </div>
-
       <div id="subset-control" class="fill-vert">
          <!-- This is filled in by subsetDisplay/subsets.html -->
       </div>

@@ -57,7 +57,7 @@
       <script src="https://cdn.jsdelivr.net/npm/three-trackballcontrols@0.0.7/index.js"></script>
       <script>THREE.TrackballControls = module.exports;</script>
       <script src="https://cdn.jsdelivr.net/npm/jquery-resizable-dom@0.32.0/dist/jquery-resizable.js"></script>
-      <script src="https://cdn.jsdelivr.net/npm/three.meshline@1.1.0/src/THREE.MeshLine.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/three.meshline@1.2.0/src/THREE.MeshLine.js"></script>
       <script src="./build/allGroupExplorer.js"></script>
       <script src="./build/allVisualizer.js"></script>
 
@@ -68,7 +68,7 @@
            Cayley_diagram,	// data being displayed in large diagram
            Graphic_context,	// graphic context for large diagram
            canEmit = true;  // flag: whether to notify parent window of table changes
-       const PANEL_NAMES = ['#subset-control', '#view-control', '#diagram-control'];
+       const HELP_PAGE = 'help/rf-um-cd-options.html';
 
        const myDomain = new URL(window.location.href).origin;
 
@@ -77,11 +77,9 @@
 
        /* Register static event managers (called after document is assembled) */
        function registerCallbacks() {
-          $('#subset-button').off('click', () => show('#subset-control') ).on('click', () => show('#subset-control') );
-          $('#view-button').off('click', () => show('#view-control') ).on('click', () => show('#view-control') );
-          $('#diagram-button').off('click', () => show('#diagram-control') ).on('click', () => show('#diagram-control') );
-          $('#help').off('click', help).on('click', help);
-          $('#reset').off('click', reset).on('click', reset);
+          $('#subset-button').on('click', () => VC.showPanel('#subset-control') );
+          $('#view-button').on('click', () => VC.showPanel('#view-control') );
+          $('#diagram-button').on('click', () => VC.showPanel('#diagram-control') );
           $('#graphic').on('mousemove', HoverHelp.handleEvent)
                        .on('mouseleave', HoverHelp.handleEvent);
 
@@ -149,7 +147,7 @@
           // Register event handlers
           registerCallbacks();
 
-          show('#subset-control');
+          VC.showPanel('#subset-control');
 
           window.addEventListener( 'message', function ( event ) {
              if ( event.data.source == 'sheet' ) {
@@ -188,8 +186,6 @@
              if ( ''+lastCamera != ''+thisCamera ) emitStateChange();
              lastCamera = thisCamera;
           }, 500 );
-
-          setupTopRightMenu();
        }
 
        function emitStateChange () {
@@ -212,10 +208,10 @@
           DC.update();
        }
 
-       /* Resize the body, including the graphic */
+       // Resize the body, including the graphic
        function resizeBody() {
-          $('body').height(window.innerHeight - 8);
-          $('body').width(window.innerWidth - 8);
+          $('body').height(window.innerHeight);
+          $('body').width(window.innerWidth);
 
           resizeGraphic();
        };
@@ -233,17 +229,6 @@
              Graphic_context.renderer.setSize($('#graphic').width(), $('#graphic').height());
              Graphic_context.updateLineWidth(Cayley_diagram);  // not sure why -- seems to be needed in Chrome
              $('#graphic').append(Graphic_context.renderer.domElement);
-          }
-       }
-
-       /* Switch panels by showing desired panel, hiding the rest */
-       function show(panel_name) {
-          for (const name of PANEL_NAMES) {
-             if (name == panel_name) {
-                $(name).show();
-             } else {
-                $(name).hide();
-             }
           }
        }
 
@@ -342,52 +327,9 @@
           Graphic_context.updateHighlights(Cayley_diagram);
           emitStateChange();
        }
-
-       /* Help, Reset routines */
-       function help() {
-          alert('Help system not yet implemented.  Check back soon!');
-       }
-
-       function reset() {
-          VC.reset();
-          load();
-       }
-
-       function setupTopRightMenu () {
-          $( '.top-right-menu' ).appendTo( document.body );
-          showControls();
-       }
-
-       function hideControls () {
-          $( '#hide-controls' ).hide();
-          $( '#show-controls' ).show();
-          $( '#vert-container' ).hide().resize();
-       }
-
-       function showControls () {
-          $( '#hide-controls' ).show();
-          $( '#show-controls' ).hide();
-          $( '#vert-container' ).show().resize();
-       }
       </script>
    </head>
    <body class="vert">
-      <div class="top-right-menu">
-         <a href='index.html'><i title="Project Home" class="fa fa-home fa-2x trm-black"></i></a>
-         <a href='GroupExplorer.html'><i title="Group Library"
-             class="fa fa-book fa-2x trm-black"></i></a>
-         <a href='Sheet.html' target='_blank'><i title="Sheets"
-             class="fa fa-file trm-black" style="font-size:1.5em;vertical-align:10%;"></i></a>
-         <a href='help/rf-um-cd-options.html'><i title="Help"
-             class="fa fa-question-circle fa-2x trm-black"></i></a>
-         <a href='https://github.com/nathancarter/group-explorer'><i
-             title="Source on GitHub" class="fa fa-github fa-2x trm-black"></i></a>
-         <a href='javascript:hideControls();' id='hide-controls'><i title="Hide controls"
-             class="fa fa-chevron-circle-right fa-2x trm-black"></i></a>
-         <a href='javascript:showControls();' id='show-controls'><i title="Show controls"
-             class="fa fa-chevron-circle-left fa-2x trm-black"></i></a>
-      </div>
-
       <div id="control-options" class="horiz">
          <button id="subset-button">Subsets</button>
          <button id="view-button">View</button>

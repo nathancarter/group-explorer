@@ -1784,7 +1784,7 @@ class Diagram3D {
       this.node_labels = group.representation;
       this.background = undefined;
       this.zoomLevel = 1;
-      this.lineWidth = 10;
+      this.lineWidth = 7;
       this.nodeScale = 1;
       this.fogLevel = 0;
       this.labelSize = 1;
@@ -2041,6 +2041,7 @@ class CayleyDiagram extends Diagram3D {
       this.background = CayleyDiagram.BACKGROUND_COLOR;
       this.strategies = [];
 
+      this.isCayleyDiagram = true;
       this.diagram_name = diagram_name;
       this.isGenerated = (diagram_name === undefined);
       this._update();
@@ -2053,7 +2054,7 @@ class CayleyDiagram extends Diagram3D {
    setStrategies(strategy_parameter_array) {
       const param_array = strategy_parameter_array
          .map( (params) => { return {generator: params[0], layout: params[1], direction: params[2], nesting_level: params[3]} } );
-
+/* Checks used in development, debugging
       // check:  generators, layouts, directions are in range
       if (param_array.find( (params) => params.generator < 1 || params.generator >= this.group.order ) !== undefined)
          console.error('strategy generator out of range');
@@ -2072,12 +2073,12 @@ class CayleyDiagram extends Diagram3D {
          console.error('strategy nesting levels are incomplete or redundant');
 
       // check:  can't use circular or rotary for subgroup of order 2
+      //   (not exactly true, see comment in DC.Generator.showAxisMenu)
       if (param_array.find( (params) => this.group.elementOrders[params.generator] == 2 && params.layout != CayleyDiagram.LINEAR_LAYOUT) !== undefined)
          console.error('generator must have order > 2 when using circular or rotated layout');
 
       // check:  no empty nesting levels (should this really be needed?)
-
-
+*/
       this.strategies = strategy_parameter_array
          .map( (parameters) => CayleyDiagram.LayoutStrategy._createStrategy(...parameters) );
 
@@ -2562,7 +2563,6 @@ class DisplayDiagram {
 
       if (options.trackballControlled) {
          this.camControls = new THREE.TrackballControls(this.camera, options.container[0]);
-         this.lineDnD = new DisplayDiagram.LineDnD(this);
       }
    }
 
@@ -2623,7 +2623,10 @@ class DisplayDiagram {
       Log.log('showGraphic');
 
       // save diagram for use by LineDnD
-      if (this.lineDnD !== undefined) {
+      if (this.camControls !== undefined && diagram3D.isCayleyDiagram) {
+         if (this.lineDnD === undefined) {
+            this.lineDnD = new DisplayDiagram.LineDnD(this);
+         }
          this.scene.userData = diagram3D;
       }
 
@@ -2960,6 +2963,7 @@ class DisplayDiagram {
                      sizeAttenuation: false,
                      side: THREE.DoubleSide,
                      resolution: new THREE.Vector2(window.innerWidth, window.innerHeight),
+                     fog: true,
                   }),
                geometry = new THREE.Geometry();
 

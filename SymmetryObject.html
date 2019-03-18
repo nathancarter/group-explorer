@@ -28,7 +28,7 @@
       <script src="https://cdn.jsdelivr.net/npm/three-trackballcontrols@0.0.7/index.js"></script>
       <script>THREE.TrackballControls = module.exports;</script>
       <script src="https://cdn.jsdelivr.net/npm/jquery-resizable-dom@0.32.0/dist/jquery-resizable.js"></script>
-      <script src="https://cdn.jsdelivr.net/npm/three.meshline@1.1.0/src/THREE.MeshLine.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/three.meshline@1.2.0/src/THREE.MeshLine.js"></script>
       <script src="./build/allGroupExplorer.js"></script>
       <script src="./build/allVisualizer.js"></script>
 
@@ -38,14 +38,13 @@
            diagramName,		// name of Cayley diagram, or undefined if generated
            graphicData,		// data being displayed in large diagram
            graphicContext;	// graphic context for large diagram
+       const HELP_PAGE = 'help/rf-um-os-options.html';
 
        /* Initial entry to javascript, called once after document load */
        $(window).one('load', load);
 
        /* Register static event managers (called after document is assembled) */
        function registerCallbacks() {
-          $('#help').off('click', help).on('click', help);
-          $('#reset').off('click', reset).on('click', reset);
           $('#zoom-level').off('input', set_zoom_level).on('input', set_zoom_level);
           $('#line-thickness').off('input', set_line_thickness).on('input', set_line_thickness);
           $('#node-radius').off('input', set_node_radius).on('input', set_node_radius);
@@ -125,14 +124,12 @@
              resizeWidthFrom: 'left',
              onDrag: resizeGraphic,
           })
-
-          setupTopRightMenu();
        }
 
-       /* Resize the body, including the graphic */
+       // Resize the body, including the graphic
        function resizeBody() {
-          $('body').height(window.innerHeight - 8);
-          $('body').width(window.innerWidth - 8);
+          $('body').height(window.innerHeight);
+          $('body').width(window.innerWidth);
 
           resizeGraphic();
        };
@@ -196,52 +193,9 @@
           graphicData.fogLevel = $('#use-fog')[0].checked ? $('#fog-level')[0].valueAsNumber/10 : 0;
           graphicContext.updateFogLevel(graphicData);
        }
-
-       /* Help, Reset routines */
-       function help() {
-          alert('Help system not yet implemented.  Check back soon!');
-       }
-
-       function reset() {
-          VC.reset();
-          load();
-       }
-
-       function setupTopRightMenu () {
-          $( '.top-right-menu' ).appendTo( document.body );
-          showControls();
-       }
-
-       function hideControls () {
-          $( '#hide-controls' ).hide();
-          $( '#show-controls' ).show();
-          $( '#vert-container' ).hide().resize();
-       }
-
-       function showControls () {
-          $( '#hide-controls' ).show();
-          $( '#show-controls' ).hide();
-          $( '#vert-container' ).show().resize();
-       }
       </script>
    </head>
    <body class="vert">
-      <div class="top-right-menu">
-         <a href='index.html'><i title="Project Home" class="fa fa-home fa-2x trm-black"></i></a>
-         <a href='GroupExplorer.html'><i title="Group Library"
-             class="fa fa-book fa-2x trm-black"></i></a>
-         <a href='Sheet.html' target='_blank'><i title="Sheets"
-             class="fa fa-file trm-black" style="font-size:1.5em;vertical-align:10%;"></i></a>
-         <a href='help/rf-um-os-options.html'><i title="Help"
-             class="fa fa-question-circle fa-2x trm-black"></i></a>
-         <a href='https://github.com/nathancarter/group-explorer'><i
-             title="Source on GitHub" class="fa fa-github fa-2x trm-black"></i></a>
-         <a href='javascript:hideControls();' id='hide-controls'><i title="Hide controls"
-             class="fa fa-chevron-circle-right fa-2x trm-black"></i></a>
-         <a href='javascript:showControls();' id='show-controls'><i title="Show controls"
-             class="fa fa-chevron-circle-left fa-2x trm-black"></i></a>
-      </div>
-
       <div class="fill-vert control">
          <br>
          <p>View this symmetry object:</p>

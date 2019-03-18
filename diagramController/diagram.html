@@ -106,11 +106,17 @@
       </div>
    </div>
 
-   <div id="multiplication-control">
-      <div class="graphic-lead" style="margin-bottom: 0">Arrows mean</div>
-      <div multiplication="right"><input name="multiplication" type="radio" checked>right multiplication</div>
-      <div multiplication="left"><input name="multiplication" type="radio">left multiplication</div>
-   </div>
+   <form id="multiplication-control" class="graphic-lead" style="margin-bottom: 0">
+      Arrows mean
+      <div>
+         <input name="multiplication" type="radio" id="right" onclick="DC.ArrowMult.setMult('right')" checked>
+         <label for="right">right multiplication</label>
+      </div>
+      <div>
+         <input name="multiplication" type="radio" id="left" onclick="DC.ArrowMult.setMult('left')">
+         <label for="left">left multiplication</label>
+      </div>
+   </form>
 
    <div id="chunk-control" style="position: relative">
       <div class="graphic-lead">Chunk this subgroup:</div>

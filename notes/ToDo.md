@@ -5,10 +5,6 @@
 
 ### Miscellany
 
- * Make the mesh lines respect fog like the rest of the 3D diagram does.  (Ray will do
-   the initial investigations on this one.)
- * Setting line thickness to minimum does not work; it gets reset to a thicker value.
- * Fix test for circular/rotary layout in `CayleyDiagram.setStrategies`
  * Create the UI for adding a naming scheme, and store it in `localStorage`.
  * Make test to simulate loading GE from GAP using 'waitForMessage'
 
@@ -17,13 +13,11 @@
  * Complete the integration (or pass to Nathan if he finishes his stuff first)
    and then update the help link on the library page to go to the newly created
    help index page.
- * GroupExplorer.html column headings should be link to help on that topic.
 
 ### 3D diagrams and viewing angles
 
  * Eventually, we want to have a camera position be specifiable in the OS/CD diagram
    itself, so the diagram author can choose it.
- * In an object of symmetry, disable the Shift+Drag feature that lets the user curve the lines.
 
 ### Bugs to fix
 
@@ -285,9 +279,6 @@ Note that these ideas are contingent upon what feedback we receive from first us
 
 ### General
 
- * Internal documentation
- * Rationalize coding style (add leading underscore to internal methods?)
- * Re-factor to hide internal implementations (e.g., js/DisplayXX classes)
  * It is possible to ask GE3 to generate diagrams in a way that nodes become too close
    together.  Do this for example:
     * Open a Cayley Diagram for A_5.
@@ -298,7 +289,6 @@ Note that these ideas are contingent upon what feedback we receive from first us
 ### CayleyDiagram diagram panel
 
  * Display raw element numbers for debugging?
- * Follow up approach in https://stackoverflow.com/questions/15558418/how-do-you-save-an-image-from-a-three-js-canvas for saving buffer
  * Investigate how to get Cayley Diagrams to look more like VGT and less
    like GE2.0.
 

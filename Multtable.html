@@ -38,6 +38,10 @@
           margin-top: 1.5em;
           margin-bottom: 0.5em;
        }
+
+       #coloration-choice > div {
+          margin-left: 5%;
+       }
       </style>
       <script type="text/x-mathjax-config">
        MathJax.Hub.Config({
@@ -60,7 +64,7 @@
            multtable,		// data being displayed in large diagram
            graphicContext,	// graphic context for large diagram
            canEmit = true;  // flag: whether to notify parent window of table changes
-       const panelNames = ['#subset-control', '#table-control'];
+       const HELP_PAGE = 'help/rf-um-mt-options.html';
 
        const myDomain = new URL(window.location.href).origin;
 
@@ -85,13 +89,10 @@
           $('#graphic > canvas').off('drop', drop).on('drop', drop);
           $('#graphic > canvas').off('dragover', dragOver).on('dragover', dragOver);
 
-          $('#subset-button').off('click', () => showPanel('#subset-control') ).on('click', () => showPanel('#subset-control') );
-          $('#table-button').off('click', () => showPanel('#table-control') ).on('click', () => showPanel('#table-control') );
-          $('#help').off('click', help).on('click', help);
-          $('#reset').off('click', reset).on('click', reset);
+          $('#subset-button').on('click', () => VC.showPanel('#subset-control') );
+          $('#table-button').on('click', () => VC.showPanel('#table-control') );
           $(window).off('click', organizationClickHandler).on('click', organizationClickHandler);
           $('#separation-slider').off('input', separation).on('input', separation);
-          $('#coloration-choice').off('click', colorClickHandler).on('click', colorClickHandler);
        }
 
        /* Load the static components of the page */
@@ -150,7 +151,7 @@
              onDrag: resizeGraphic,
           });
 
-          showPanel('#subset-control');
+          VC.showPanel('#subset-control');
 
           resizeBody();
 
@@ -170,8 +171,6 @@
              }
           }, false );
           window.postMessage( 'listener ready', myDomain );
-
-          setupTopRightMenu();
        }
 
        function emitStateChange () {
@@ -218,18 +217,13 @@
        }
 
        /* Set coloration option in multtable, and re-draw graphic */
-       function colorClickHandler(event) {
-          const $input = $(event.target).closest('[coloration]');
-          if ($input.length != 0) {
-             const coloration = $input.attr('coloration');
-             multtable.colors = coloration;
-             $(`input[coloration="${coloration}"]`)[0].checked = true;
-             emitStateChange();
-             graphicContext.showLargeGraphic(multtable);
-          }
+       function chooseColoration(coloration) {
+          multtable.colors = coloration;
+          emitStateChange();
+          graphicContext.showLargeGraphic(multtable);
        }
 
-       /* Resize the body */
+       // Resize the body, including the graphic
        function resizeBody() {
           $('body').height(window.innerHeight);
           $('body').width(window.innerWidth);
@@ -241,17 +235,6 @@
           graphicContext.canvas.width = $('#graphic').width();
           graphicContext.canvas.height = $('#graphic').height();
           graphicContext.showLargeGraphic(multtable);
-       }
-
-       /* Show the desired panel, hide the rest */
-       function showPanel(panel_name) {
-          for (const name of panelNames) {
-             if (name == panel_name) {
-                $(name).show();
-             } else {
-                $(name).hide();
-             }
-          }
        }
 
        /*
@@ -400,19 +383,6 @@
           resizeGraphic();
        }
 
-
-       /* Help routine */
-       function help() {
-          alert('Help system not yet implemented.  Check back soon!');
-       }
-
-       /* Reset function -- just starts over */
-       function reset() {
-          VC.reset();
-          load();
-       }
-
-
        /* Highlighting routines */
        function highlightByBackground(elements) {
           multtable.highlightByBackground(elements);
@@ -437,42 +407,9 @@
           emitStateChange();
           graphicContext.showLargeGraphic(multtable);
        }
-
-       function setupTopRightMenu () {
-          $( '.top-right-menu' ).appendTo( document.body );
-          showControls();
-       }
-
-       function hideControls () {
-          $( '#hide-controls' ).hide();
-          $( '#show-controls' ).show();
-          $( '#vert-container' ).hide().resize();
-       }
-
-       function showControls () {
-          $( '#hide-controls' ).show();
-          $( '#show-controls' ).hide();
-          $( '#vert-container' ).show().resize();
-       }
       </script>
    </head>
    <body class="vert">
-      <div class="top-right-menu">
-         <a href='index.html'><i title="Project Home" class="fa fa-home fa-2x trm-black"></i></a>
-         <a href='GroupExplorer.html'><i title="Group Library"
-             class="fa fa-book fa-2x trm-black"></i></a>
-         <a href='Sheet.html' target='_blank'><i title="Sheets"
-             class="fa fa-file trm-black" style="font-size:1.5em;vertical-align:10%;"></i></a>
-         <a href='help/rf-um-mt-options.html'><i title="Help"
-             class="fa fa-question-circle fa-2x trm-black"></i></a>
-         <a href='https://github.com/nathancarter/group-explorer'><i
-             title="Source on GitHub" class="fa fa-github fa-2x trm-black"></i></a>
-         <a href='javascript:hideControls();' id='hide-controls'><i title="Hide controls"
-             class="fa fa-chevron-circle-right fa-2x trm-black"></i></a>
-         <a href='javascript:showControls();' id='show-controls'><i title="Show controls"
-             class="fa fa-chevron-circle-left fa-2x trm-black"></i></a>
-      </div>
-
       <div id="control-options" class="horiz">
          <button id="subset-button">Subsets</button>
          <button id="table-button">Table</button>
@@ -499,12 +436,21 @@
          <div class="graphic-lead" style="margin-top: 3em">Separate cosets by:</div>
          <input id="separation-slider" type="range" min="0" max="100" value="0"> <!-- [0-100] => [0,box width] -->
 
-         <div class="graphic-lead" style="margin-bottom: 0">Default coloration:</div>
-         <div id="coloration-choice" style="margin-left: 5%">
-            <input coloration="Rainbow" name="coloration" type="radio" checked><span coloration="Rainbow">Spectrum/rainbow</span><br>
-            <input coloration="Grayscale" name="coloration" type="radio"><span coloration="Grayscale">Grayscale</span><br>
-            <input coloration="None" name="coloration" type="radio"><span coloration="None">None</span><br>
-         </div>
+         <form id="coloration-choice" class="graphic-lead" style="margin-bottom: 0">
+            Default coloration:
+            <div>
+               <input id="Rainbow" name="coloration" type="radio" onclick="chooseColoration(Multtable.COLORATION_RAINBOW)" checked>
+               <label for="Rainbow">Spectrum/rainbow</label>
+            </div>
+            <div>
+               <input id="Grayscale" name="coloration" type="radio" onclick="chooseColoration(Multtable.COLORATION_GRAYSCALE)">
+               <label for="Grayscale">Grayscale</label>
+            </div>
+            <div>
+               <input id="None" name="coloration" type="radio" onclick="chooseColoration(Multtable.COLORATION_NONE)">
+               <label for="None">None</label>
+            </div>
+         </form>
       </div>
 
       <img id="blank" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAQAAAAnOwc2AAAAD0lEQVR42mNkwAIYh7IgAAVVAAuInjI5AAAAAElFTkSuQmCC" height="1px" width="1px" class="hidden">
