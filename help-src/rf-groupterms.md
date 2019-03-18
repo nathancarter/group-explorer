@@ -117,7 +117,7 @@ that element. The Cyclic groups are denoted \(\mathbb{Z}_n\) or sometimes
 \(C_n\), and look just like their name (cycles) when viewed as [Cayley
 diagrams](#cayley-diagrams) or [cycle graphs](#cycle-graph).
 
-### Definition a group via generators and relations
+### Definition of a group via generators and relations
 
 One can define groups by listing
 [generators](#generators-for-a-group-or-subgroup) \(a,b,c,\ldots\) and then
