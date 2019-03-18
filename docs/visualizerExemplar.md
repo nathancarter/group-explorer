@@ -71,7 +71,6 @@ Other visualizers extend the exemplar with different displays in the graphic ele
       <script>
        /* Global variables */
        var group;  // group about which information will be displayed
-       const panelNames = ['#subset-control', '#view-control'];
        const HELP_PAGE = 'help/index.html';
 
        /* Initial entry to javascript -- called once after document load */
@@ -185,6 +184,7 @@ Note the use of [faux-select](visualizerFramework_css.md#faux-select) and associ
          <div id="organization-select" class="faux-select" onclick="$('#organization-choices').toggle()">
             <ul id="organization-choices" class="faux-select-options hidden"></ul>
             <span id="organization-choice" class="faux-selection">none</span>
+            <div class="faux-select-arrow" ></div>
          </div>
          <template id="organization-choice-template">
             <li onclick="choose(${subgroupIndex})">
