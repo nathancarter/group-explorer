@@ -82,8 +82,8 @@ Other visualizers extend the exemplar with different displays in the graphic ele
         *    (The .off(--).on(--) sequence is used to avoid accumulating event handlers after a reset.)
         */
        function registerEventHandlers() {
-          $('#subset-button').off('click', () => show('#subset-control') ).on('click', () => show('#subset-control') );
-          $('#view-button').off('click', () => show('#view-control') ).on('click', () => show('#view-control') );
+          $('#subset-button').on('click', () => VC.showPanel('#subset-control') );
+          $('#view-button').on('click', () => VC.showPanel('#view-control') );
           $(window).off('resize', resizeBody).on('resize', resizeBody);
        }
 
@@ -145,7 +145,7 @@ Invokes [VC.load()](visualizerFramework_js.md#vc-load-) to wrap visualizer frame
              }
           });
 
-          show('#subset-control');
+          VC.showPanel('#subset-control');
           resizeBody();
        }
 
@@ -155,17 +155,6 @@ Invokes [VC.load()](visualizerFramework_js.md#vc-load-) to wrap visualizer frame
        function resizeBody() {
           $('body').height(window.innerHeight);
           $('body').width(window.innerWidth);
-       }
-
-       /* Show the desired panel, hide the rest */
-       function show(panel_name) {
-          for (const name of panelNames) {
-             if (name == panel_name) {
-                $(name).show();
-             } else {
-                $(name).hide();
-             }
-          }
        }
 
        /* Example event handler, set up in registerCallback */

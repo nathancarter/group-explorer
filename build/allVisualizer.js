@@ -1158,6 +1158,8 @@ CVC.VIEW_PANEL_URL = 'cayleyViewController/view.html';
 
 [VC.hideControls()](#vc-hideControls-) and [VC.showControls()](#vc-showControls-) hide and expose the visualizer-specific control panels
 
+[VC.showPanel(panel_name)](#vc-showpanel-panel_name-) switch panel by showing desired panel_name, hiding the others
+
 [VC.help()](#vc-help-) links to the visualizer-specific help page
 
 ```javascript
@@ -1249,6 +1251,22 @@ class VC {
    static reset() {
       $('body').html($('#reset_template').html());
       load();
+   }
+
+   /*
+```
+## VC.showPanel(panel_name)
+```javascript
+   /* Switch panels by showing desired panel, hiding the rest */
+   static showPanel(panel_name) {
+      $('#vert-container > .fill-vert').each( (_, control) => {
+         const control_name = '#' + $(control).attr('id');
+         if (control_name == panel_name) {
+            $(control_name).show();
+         } else {
+            $(control_name).hide();
+         }
+      } )
    }
 }
 

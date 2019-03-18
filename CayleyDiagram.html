@@ -68,7 +68,6 @@
            Cayley_diagram,	// data being displayed in large diagram
            Graphic_context,	// graphic context for large diagram
            canEmit = true;  // flag: whether to notify parent window of table changes
-       const PANEL_NAMES = ['#subset-control', '#view-control', '#diagram-control'];
        const HELP_PAGE = 'help/rf-um-cd-options.html';
 
        const myDomain = new URL(window.location.href).origin;
@@ -78,9 +77,9 @@
 
        /* Register static event managers (called after document is assembled) */
        function registerCallbacks() {
-          $('#subset-button').off('click', () => show('#subset-control') ).on('click', () => show('#subset-control') );
-          $('#view-button').off('click', () => show('#view-control') ).on('click', () => show('#view-control') );
-          $('#diagram-button').off('click', () => show('#diagram-control') ).on('click', () => show('#diagram-control') );
+          $('#subset-button').on('click', () => VC.showPanel('#subset-control') );
+          $('#view-button').on('click', () => VC.showPanel('#view-control') );
+          $('#diagram-button').on('click', () => VC.showPanel('#diagram-control') );
           $('#graphic').on('mousemove', HoverHelp.handleEvent)
                        .on('mouseleave', HoverHelp.handleEvent);
 
@@ -148,7 +147,7 @@
           // Register event handlers
           registerCallbacks();
 
-          show('#subset-control');
+          VC.showPanel('#subset-control');
 
           window.addEventListener( 'message', function ( event ) {
              if ( event.data.source == 'sheet' ) {
@@ -230,17 +229,6 @@
              Graphic_context.renderer.setSize($('#graphic').width(), $('#graphic').height());
              Graphic_context.updateLineWidth(Cayley_diagram);  // not sure why -- seems to be needed in Chrome
              $('#graphic').append(Graphic_context.renderer.domElement);
-          }
-       }
-
-       /* Switch panels by showing desired panel, hiding the rest */
-       function show(panel_name) {
-          for (const name of PANEL_NAMES) {
-             if (name == panel_name) {
-                $(name).show();
-             } else {
-                $(name).hide();
-             }
           }
        }
 

@@ -64,7 +64,6 @@
            multtable,		// data being displayed in large diagram
            graphicContext,	// graphic context for large diagram
            canEmit = true;  // flag: whether to notify parent window of table changes
-       const panelNames = ['#subset-control', '#table-control'];
        const HELP_PAGE = 'help/rf-um-mt-options.html';
 
        const myDomain = new URL(window.location.href).origin;
@@ -90,8 +89,8 @@
           $('#graphic > canvas').off('drop', drop).on('drop', drop);
           $('#graphic > canvas').off('dragover', dragOver).on('dragover', dragOver);
 
-          $('#subset-button').off('click', () => showPanel('#subset-control') ).on('click', () => showPanel('#subset-control') );
-          $('#table-button').off('click', () => showPanel('#table-control') ).on('click', () => showPanel('#table-control') );
+          $('#subset-button').on('click', () => VC.showPanel('#subset-control') );
+          $('#table-button').on('click', () => VC.showPanel('#table-control') );
           $(window).off('click', organizationClickHandler).on('click', organizationClickHandler);
           $('#separation-slider').off('input', separation).on('input', separation);
        }
@@ -152,7 +151,7 @@
              onDrag: resizeGraphic,
           });
 
-          showPanel('#subset-control');
+          VC.showPanel('#subset-control');
 
           resizeBody();
 
@@ -236,17 +235,6 @@
           graphicContext.canvas.width = $('#graphic').width();
           graphicContext.canvas.height = $('#graphic').height();
           graphicContext.showLargeGraphic(multtable);
-       }
-
-       /* Show the desired panel, hide the rest */
-       function showPanel(panel_name) {
-          for (const name of panelNames) {
-             if (name == panel_name) {
-                $(name).show();
-             } else {
-                $(name).hide();
-             }
-          }
        }
 
        /*
