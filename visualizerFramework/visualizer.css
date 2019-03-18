@@ -100,19 +100,6 @@ button:focus {
    background-color: var(--visualizer-controls-background);
 }
 
-/* container to hold help and reset buttons */
-#help-reset {
-   background-color: var(--visualizer-body-background);
-   justify-content: space-around;
-   align-items: center;
-   height: 44px;
-}
-
-/* styles help and reset buttons */
-#help-reset > button {
-   width: 48%;
-}
-
 /*
 ```
 ### faux-select
