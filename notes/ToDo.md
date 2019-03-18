@@ -31,7 +31,6 @@
 Update all help pages to mkdocs format.  I list here those left to be done.
 A bit more information appears in the [mkdocs.yml](mkdocs.yml) file.
 
- * `rf-groupterms.html`
  * `rf-geterms.html`
  * `rf-um-mainwindow.html`
  * `rf-um-largewindow.html`
