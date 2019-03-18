@@ -62,6 +62,10 @@ more, such as Matthew Macauley's lecture videos on Visual Group Theory.
 Replace all occurrences of GE2-generated help images with GE3-generated
 ones.
 
+Verify that all instances of "help" in the app source code (which would
+indicate a potential link to the help system) go somewhere sensible in the
+new help system.
+
 ### Sheets
 
  * Extend the toJSON() and fromJSON() in CayleyDiagram.html to also respect:
@@ -98,6 +102,8 @@ ones.
     * Add links at the end of the page that offer to show this type of sheet using any type of
       visualizer.
  * Make all sheets have a fixed size - say, 10000x7500.
+ * Sometimes when creating a visualizer, its image is the "broken image" icon.
+   Investigate when/why this happens, and fix it.
 
 ## GAP's Group Explorer package
 
