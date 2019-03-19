@@ -65,11 +65,11 @@ them.
 This menu item appears only if you right-clicked on a user-defined subset.
 Choosing it deletes the user-defined subset on which you right-clicked.
 
-### Delete \(CC_i\), \(OC_i\), \(g_iH\), etc.
+### Delete \(CC_i\), \(OC_i\), \(gH_i\), etc.
 
 This menu item appears only if you right-clicked on a partition (i.e. on one
 of its sets). Partitions can be conjugacy classes \(CC_i\), order classes
-\(OC_i\), left cosets \(g_iH\), or right cosets \(Hg_i\). Choosing this
+\(OC_i\), left cosets \(gH_i\), or right cosets \(H_ig\). Choosing this
 option deletes the entire partition on which you right-clicked (e.g. all
 conjugacy classes, all order classes, or all left/right cosets of the
 subgroup, etc.).
