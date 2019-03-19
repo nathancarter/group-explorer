@@ -31,10 +31,6 @@
 Update all help pages to mkdocs format.  I list here those left to be done.
 A bit more information appears in the [mkdocs.yml](mkdocs.yml) file.
 
- * `rf-um-cd-options.html`
- * `rf-um-cg-options.html`
- * `rf-um-mt-options.html`
- * `rf-um-os-options.html`
  * `rf-um-subsetlistbox.html`
  * `rf-um-modelview.html`
  * `rf-um-sheetwindow.html`
