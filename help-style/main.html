@@ -10,6 +10,15 @@
 <script type="text/x-mathjax-config">
     MathJax.Hub.Config( { TeX: { extensions: [ "color.js" ] } } );
 </script>
+<!-- to make the help search work: -->
+<script>var base_url = '{{ base_url }}';</script>
+  {%- for path in config['extra_css'] %}
+  <link href="{{ path|url }}" rel="stylesheet">
+  {%- endfor %}
+  <script src="{{ 'js/jquery-2.1.1.min.js'|url }}" defer></script>
+  {%- for path in config['extra_javascript'] %}
+  <script src="{{ path|url }}" defer></script>
+  {%- endfor %}
 <body>
 
 <!-- Header -->
@@ -26,6 +35,18 @@
     <div class="w3-row w3=border">
         <div class="w3-quarter w3-container">
             <div class="w3-padding w3-card w3-bar-block">
+                {% if 'search' in config['plugins'] %}
+                <br>
+                <form action='search/index.html'>
+                    <input name='q' id='mkdocs-search-query' type='text'
+                           placeholder='Enter search term'
+                           title='Type search term here'/>
+                    <input type='submit' value='Search'
+                           class='w3-btn w3-theme'/>
+                </form>
+                <hr>
+                {% endif %}
+
                 <h3>Contents</h3>
                 <ul>
                 {% for toc_item in page.toc %}

@@ -10,6 +10,12 @@
 <script type="text/x-mathjax-config">
     MathJax.Hub.Config( { TeX: { extensions: [ "color.js" ] } } );
 </script>
+<!-- to make the help search work: -->
+<script>var base_url = '..';</script>
+  <link href="../w3.css" rel="stylesheet">
+  <link href="../w3-theme-blue.css" rel="stylesheet">
+  <script src="../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../search/main.js" defer></script>
 <body>
 
 <!-- Header -->
@@ -26,6 +32,18 @@
     <div class="w3-row w3=border">
         <div class="w3-quarter w3-container">
             <div class="w3-padding w3-card w3-bar-block">
+                
+                <br>
+                <form action='search/index.html'>
+                    <input name='q' id='mkdocs-search-query' type='text'
+                           placeholder='Enter search term'
+                           title='Type search term here'/>
+                    <input type='submit' value='Search'
+                           class='w3-btn w3-theme'/>
+                </form>
+                <hr>
+                
+
                 <h3>Contents</h3>
                 <ul>
                 
@@ -82,6 +100,8 @@
                                style="text-decoration: none;"
                                class=""
                                >User Manual</a></li>
+                    
+                    
                     
                     
                     

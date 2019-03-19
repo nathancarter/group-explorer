@@ -48,6 +48,8 @@ nav:
         - Viewing 3D models: rf-um-modelview.md
         - Sheet Options: rf-um-sheetwindow.md
         - Editing Homomorphisms: rf-um-morphedit.md
+    - "": # other pages
+        - Search: search.md
 theme:
     name: null
     custom_dir: 'help-style/'
