@@ -28,9 +28,6 @@
 
 ### Help pages
 
-Get search working in help. [See
-here.](https://www.mkdocs.org/user-guide/custom-themes/#search-and-themes)
-
 Ensure each help page has a link to its source code on GitHub so that people
 can fix typos.
 
