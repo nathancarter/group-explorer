@@ -1409,7 +1409,7 @@ class MorphismElement extends ConnectingElement {
     // ai->bi is the one generated from the definition of homomorphism applied to the mapping
     // di->ci.  Note that while a1,...,ak is a set (all unique) b1,...,bk may not be
     // (repeats are allowed).
-    // The result is return in the form [ [a1,...,ak], [b1,...,bk] ].
+    // The result is returned in the form [ [a1,...,ak], [b1,...,bk] ].
     expandMap ( partialMap ) {
         // handle base case which would otherwise fail as a corner case below
         if ( partialMap.length == 0 ) return [ [ 0 ], [ 0 ] ];
