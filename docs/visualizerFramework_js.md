@@ -4,8 +4,6 @@
 
 [VC.load()](#vc-load-) embeds the visualizer-specific control panels in a copy of the visualizer framework. It is called immediately after document load by CayleyDiagram.html, CycleGraph.html, Multtable.html, SymmetryObject.html, and Sheet.html
 
-[VC.reset()](#vc-reset-) restores the visualizer-specific control panels to the DOM and then re-runs the visualizer's `load` routine
-
 [VC.hideControls()](#vc-hideControls-) and [VC.showControls()](#vc-showControls-) hide and expose the visualizer-specific control panels
 
 [VC.showPanel(panel_name)](#vc-showpanel-panel_name-) switch panel by showing desired panel_name, hiding the others
@@ -33,15 +31,12 @@ class VC {
       return new Promise( (resolve, reject) => {
          $.ajax( { url: VC.visualizerLayoutURL,
                    success: (data) => {
-                      // Save current body in reset_template
-                      const $resetTemplate = $('<template id="reset_template">').html($('body').html().trim());
-
                       // The current body element contains visualizer-specific layout
                       // Detach it and save it for insertion into the visualizer framework below
                       const $customCode = $('body').children().detach();
 
                       // Replace the current body with content of visualizer.html, append resetTemplate
-                      $('body').html(data).append($resetTemplate);
+                      $('body').html(data);
 
                       // Remove controls-placeholder div and insert visualizer-specific code saved above
                       $('#controls-placeholder').remove();
@@ -88,19 +83,6 @@ class VC {
    /* Link to visualizer-specific help page */
    static help() {
       window.open(HELP_PAGE);
-   }
-
-   /*
-```
-## VC.reset()
-```javascript
-   /*
-    * Restore the initial DOM by replacing the HTML body with the contents of the reset_template element,
-    *   saved in VC.load() above, and then re-running visualizer-specific 'load()' function
-    */
-   static reset() {
-      $('body').html($('#reset_template').html());
-      load();
    }
 
    /*
