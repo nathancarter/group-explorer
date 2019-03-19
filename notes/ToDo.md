@@ -31,7 +31,6 @@
 Update all help pages to mkdocs format.  I list here those left to be done.
 A bit more information appears in the [mkdocs.yml](mkdocs.yml) file.
 
- * `rf-um-subsetlistbox.html`
  * `rf-um-modelview.html`
  * `rf-um-sheetwindow.html`
  * `rf-um-morphedit.html`
@@ -223,6 +222,9 @@ Note that these ideas are contingent upon what feedback we receive from first us
    of their origin nodes.
  * Make it possible to click on a single arrow in a morphism showing many arrows, and
    highlight that arrow brightly to distinguish it if it's among a mess of others.
+ * In GE2.0, the subset pane's context menu had a Morphisms submenu that would let you
+   push subsets through morphisms to find their image, or pull them back to find their
+   pre-image.  We have not yet added that to GE3.0.
 
 # To-dos not yet linked to a specific release or milestone
 
