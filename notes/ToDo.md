@@ -28,12 +28,6 @@
 
 ### Help pages
 
-Update all help pages to mkdocs format.  I list here those left to be done.
-A bit more information appears in the [mkdocs.yml](mkdocs.yml) file.
-
- * `rf-um-sheetwindow.html`
- * `rf-um-morphedit.html`
-
 Get search working in help. [See
 here.](https://www.mkdocs.org/user-guide/custom-themes/#search-and-themes)
 
@@ -224,6 +218,9 @@ Note that these ideas are contingent upon what feedback we receive from first us
  * In GE2.0, the subset pane's context menu had a Morphisms submenu that would let you
    push subsets through morphisms to find their image, or pull them back to find their
    pre-image.  We have not yet added that to GE3.0.
+ * In GE2.0, it was possible to toggle a multiplication table between using its left
+   column and using its top row as the source points for morphism arrows.  Add that
+   feature to GE3.0 as well.
 
 # To-dos not yet linked to a specific release or milestone
 
