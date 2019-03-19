@@ -10,16 +10,14 @@ specifics for large views of objects of symmetry.
 
 ![A large view of an object of symmetry](illustration-oswindow.jpg)
 
-## Interface specifics
-
-### Viewing the object
+## Viewing the object
 
 A symmetry object (unlike multiplication tables and cycle graphs) is a
 three-dimensional structure. Thus you can click and drag on the view to
 rotate it in three-dimensional space. This lets you see all sides of the
 object, and seeing it in motion can give you a better mental picture of it.
 
-### Choosing which object to view
+## Choosing which object to view
 
 Some groups have more than one object of symmetry defined for them. For this
 reason, the topmost portion of the control pane on the right side of a large

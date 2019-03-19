@@ -10,9 +10,7 @@ specifics for large views of multiplication tables.
 
 ![A large view of a multiplication table](illustration-mtwindow.jpg)
 
-## Interface specifics
-
-### Reordering header row or header column
+## Reordering header row or header column
 
 You can choose the order of elements along the top row (or left column) of
 the multiplication table using your mouse. (Note that order of elements in
@@ -30,7 +28,7 @@ You can also ask *Group Explorer* to organize the top row/left column of the
 table according to a particular subgroup and its cosets; [see
 below](#organization-by-subgroup).
 
-### Magnification
+## Magnification
 
 You can zoom in and out of multiplication tables with your mouse wheel.
 
@@ -41,7 +39,7 @@ the center of the view, then you can zoom in and out centered on that point.
 To restore the default magnification level (which fits the whole table into
 the view), right-click (control click on Mac) anywhere in the table.
 
-### The Table tab
+## The Table tab
 
 ![A screen shot of the table options tab](illustration-tabletab.jpg)
 
@@ -52,7 +50,7 @@ tab](#related-interfaces). The second of these allows you to change the
 structure or appearance of the table in other ways. This section describes
 those controls.
 
-#### Organization by subgroup
+### Organization by subgroup
 
 By default, the "Organize by subgroup:" drop-down list at the top of the
 Table tab has "none" selected. However, if you wish to organize the top row
@@ -64,7 +62,7 @@ You can also choose the exact order of the elements in the top row or left
 column of the table manually; [see
 above](#reordering-header-row-or-header-column).
 
-#### Separation of cosets
+### Separation of cosets
 
 If you have made a selection on the "Organize by subgroup:" drop-down list
 ([see above](#organization-by-subgroup)), then *Group Explorer* also enables
@@ -78,7 +76,7 @@ it helps visualize the quotient group. As an example, consider [this
 multiplication table](d_4_multtable_organized.png) illustrating the quotient
 of \(D_4\) by \(\mathbb{Z}_2\).
 
-#### Colorization scheme
+### Colorization scheme
 
 There are three colorization schemes for multiplication tables:
 

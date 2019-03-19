@@ -10,9 +10,7 @@ specifics for large views of Cayley diagrams.
 
 ![A large view of a Cayley diagram](illustration-largecd.jpg)
 
-## Interface specifics
-
-### Choosing which diagram to view
+## Choosing which diagram to view
 
 There are two types of Cayley diagrams available in *Group Explorer,* the
 kind you instruct *Group Explorer* to construct for you and the kind that
@@ -37,14 +35,14 @@ list are one of two types.
    [generating](#generators-and-assigning-them-priority-axes-and-an-order)
    and [chunking](#chunking) in the diagram.
 
-### Viewing the diagram
+## Viewing the diagram
 
 A Cayley diagram (unlike multiplication tables and cycle graphs) is a
 three-dimensional structure. Thus you can click and drag on the view to
 rotate it in three-dimensional space. This lets you see all sides of the
 diagram, and seeing it in motion can give you a better mental picture of it.
 
-### Changing the positions of nodes in the diagram
+## Changing the positions of nodes in the diagram
 
 You can customize the appearance of any Cayley diagram by dragging the nodes
 in it around in three dimensions to any position you like. To drag the nodes
@@ -57,7 +55,7 @@ the diagram, if you reposition the nodes in this way you will not be able to
 chunk cosets without allowing *Group Explorer* to put the nodes back to
 their original position.
 
-### Changing the arcing of arrows in the diagram
+## Changing the arcing of arrows in the diagram
 
 You can customize the degree to which the arcs and arrows in the diagram are
 curved. Usually an arc in the diagram takes a straight path from its source
@@ -70,7 +68,7 @@ matter by clicking on an arc in the diagram while holding down the shift
 key, and dragging to increase or decrease the amount of arcing it has. You
 will not be able to change the direction of the arcing, only its amount.
 
-### The Diagram tab
+## The Diagram tab
 
 ![A screenshot of the diagram tab](illustration-diagramtab.png)
 
@@ -85,7 +83,7 @@ The Diagram tab allows you to choose a predefined diagram to view or specify
 parameters for how *Group Explorer* should construct a diagram for you. This
 section describes the controls on the Diagram tab.
 
-#### Organizing by a subgroup
+### Organizing by a subgroup
 
 The most common way a user reorganizes a diagram is to focus on a particular
 subgroup. *Group Explorer* therefore has a shortcut for this purpose, to
@@ -104,7 +102,7 @@ It is particularly useful in examining whether a subgroup is
 the subgroup and its cosets, is it clear that the arrows for generators that
 connect one coset to another agree on where each coset should be mapped?
 
-#### Generators, and assigning them priority, axes, and an order
+### Generators, and assigning them priority, axes, and an order
 
 *Group Explorer* takes three factors into account when generating a
 diagram--a list of generators for the group, an axis for each generator, and
@@ -112,7 +110,7 @@ an order for nesting those axes. Each of these options is specified in the
 table titled "Generate diagram this way:" in the image above. Let us
 consider each of these options here.
 
-##### A list of generators for the group
+#### A list of generators for the group
 
 The leftmost column in the table lists generators for the group. The order
 is significant when the group is nonabelian. You can select new generators
@@ -153,7 +151,7 @@ multiplication in both cases.)
 
 The following section explains the choice of axes.
 
-##### An axis for each generator
+#### An axis for each generator
 
 The second column in the generation table shows axes graphically, one for
 each generator. These determine how the tables of elements discussed above
@@ -189,7 +187,7 @@ will be laid out in space.
       diagram, near the identity element, thus obeying the assignment to
       the "linear in \(y\)" axis.
 
-##### An order for nesting the axes
+#### An order for nesting the axes
 
 Even having chosen all of the above options does not completely determine
 how the diagram should be laid out in space. For instance, in the round
@@ -215,7 +213,7 @@ order of generation does not match the order of nesting of the axes, chunks
 could take on complex shapes that would need to twist to avoid one another.
 See [Chunking](#chunking), below.
 
-#### Arrows
+### Arrows
 
 You can put into a Cayley diagram a set of arrows representing any element
 in the group except the identity. Each new set of arrows will be a different
@@ -238,7 +236,7 @@ arrows to mean left multiplication.
 You can also control the placement of arrowheads from the View tab; [see
 below](#related-interfaces).
 
-#### Chunking
+### Chunking
 
 When trying to visualize the cosets of a subgroup, it can be useful to have them grouped visually. This option is available in both multiplication tables and Cayley diagrams, two situations in which such an organization is possible. Chunking cosets in a Cayley diagram means wrapping them in semi-transparent boxes which group the nodes of the cosets. For example, consider the grouping of two-element cosets of the subgroup \(\{ e, f \}\) in [\(S_3\)](http://nathancarter.github.io/group-explorer/GroupInfo.html?groupURL=groups/S_3.group) shown below.
 

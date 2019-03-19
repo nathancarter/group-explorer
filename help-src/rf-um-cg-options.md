@@ -10,9 +10,7 @@ specifics for large views of cycle graphs.
 
 ![A large view of a cycle graph](illustration-cgwindow.jpg)
 
-## Interface specifics
-
-### Magnification
+## Magnification
 
 You can zoom in and out of cycle graphs with your mouse wheel.
 
