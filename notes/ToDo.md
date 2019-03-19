@@ -28,9 +28,6 @@
 
 ### Help pages
 
-Ensure each help page has a link to its source code on GitHub so that people
-can fix typos.
-
 Add to the help references to specific locations in VGT where users can go
 to read more.
 
