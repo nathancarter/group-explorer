@@ -7,6 +7,9 @@
 <link rel="stylesheet" href="../w3-theme-blue.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config( { TeX: { extensions: [ "color.js" ] } } );
+</script>
 <body>
 
 <!-- Header -->
@@ -27,7 +30,16 @@
                 <ul>
                 
                     <li><a style="text-decoration: none;"
-                          href="#stub">STUB</a></li>
+                          href="#manipulating-cayley-diagrams">Manipulating Cayley Diagrams</a></li>
+                
+                    <li><a style="text-decoration: none;"
+                          href="#rotating">Rotating</a></li>
+                
+                    <li><a style="text-decoration: none;"
+                          href="#highlighting">Highlighting</a></li>
+                
+                    <li><a style="text-decoration: none;"
+                          href="#chunking">Chunking</a></li>
                 
                 </ul>
 
@@ -88,10 +100,45 @@
             </div>
         </div>
         <div class="w3-threequarter w3-container">
-            <h1 id="stub">STUB</h1>
-<p>This page is a placeholder.</p>
-<p>Its existence removes <code>mkdocs</code> error messages about missing pages.</p>
-<p>It will be filled with content later.</p>
+            <h2 id="manipulating-cayley-diagrams">Manipulating Cayley Diagrams</h2>
+<p>The Cayley diagram is the clearest <a href="../rf-geterms/#visualizers">visualizer</a>
+for depicting groups as sets with structure. They also clearly show the
+group as acting on itself. Here we will concentrate on the basic
+manipulations you might want to perform on a Cayley diagram as you
+investigate that group.</p>
+<p>For more introductory information on Cayley diagrams, refer to <a href="../rf-groupterms/#cayleydiagram">the
+definition of a Cayley diagram</a> or <a href="../gs-cd-intro/">a quick
+introduction to Cayley diagrams</a>. For more complete
+information on the Cayley diagram interface, refer to <a href="../rf-um-cd-options/">the relevant section
+of the user manual</a>.</p>
+<h2 id="rotating">Rotating</h2>
+<p>Because a Cayley diagram can be three-dimensional, you may want to rotate it
+around to get a better look at it from all sides. To do so, simply <strong>click
+and drag on the diagram.</strong></p>
+<h2 id="highlighting">Highlighting</h2>
+<p>You can highlight the nodes in the Cayley diagram according to properties of
+the group elements they represent. This can be useful for studying different
+properties of the group. <strong>Right-click on a subset in the Subsets tab of the
+controls and choose from among the highlighting options</strong> &ndash; node color
+<img alt="icon for highlighting node color" src="../hightype-sphere-node.jpg" />, ring around
+the node <img alt="icon for highlighting a node with a ring around
+it" src="../hightype-sphere-ring.jpg" />, and square around the node <img alt="icon for
+highlighting a node with a square around it" src="../hightype-sphere-square.jpg" />.</p>
+<p>See the example below, which highlights each conjugacy class a different
+color, thereby exhibiting a class equation visually.</p>
+<p><img alt="Cayley diagram of S_3 with each conjugacy class highlighted a different color" src="../s_3_cayley_highlighted.png" /></p>
+<p>For more full documentation on the Subsets tab, refer to <a href="../rf-um-subsetlistbox/">the relevant section of the user manual</a>.</p>
+<h2 id="chunking">Chunking</h2>
+<p>To help you better visualize the cosets of a particular subgroup, you can
+proceed by a two-step process. <strong>First, choose generators in the generator
+table at the top of the Diagram tab</strong> so that your subgroup&rsquo;s generators are
+first in the table. <strong>Then choose your subgroup from the list at the bottom
+of that tab</strong> to visually separate the cosets of your subgroup with
+translucent gray boxes.</p>
+<p><img alt="Cayley diagram with cosets grouped in chunks" src="../illustration-cdchunking.png" /></p>
+<p>The Diagram tab and the generator table are quite intricate. For full
+details, refer to <a href="../rf-um-cd-options/">the documentation on the interface for Cayley
+diagrams</a>.</p>
         </div>
     </div>
 </div>

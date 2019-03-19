@@ -7,6 +7,9 @@
 <link rel="stylesheet" href="../w3-theme-blue.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config( { TeX: { extensions: [ "color.js" ] } } );
+</script>
 <body>
 
 <!-- Header -->
@@ -27,7 +30,13 @@
                 <ul>
                 
                     <li><a style="text-decoration: none;"
-                          href="#stub">STUB</a></li>
+                          href="#first-tutorial">First Tutorial</a></li>
+                
+                    <li><a style="text-decoration: none;"
+                          href="#pictures">Pictures</a></li>
+                
+                    <li><a style="text-decoration: none;"
+                          href="#features">Features</a></li>
                 
                 </ul>
 
@@ -88,10 +97,90 @@
             </div>
         </div>
         <div class="w3-threequarter w3-container">
-            <h1 id="stub">STUB</h1>
-<p>This page is a placeholder.</p>
-<p>Its existence removes <code>mkdocs</code> error messages about missing pages.</p>
-<p>It will be filled with content later.</p>
+            <h2 id="first-tutorial">First Tutorial</h2>
+<p>Welcome to the first <em>Group Explorer</em> tutorial! This first tutorial is
+designed to give you both motive and opportunity to begin your own
+explorations. We start with a tour of the major visuals <em>Group Explorer</em>
+offers and then have a description of the most useful features.</p>
+<p>This page is meant to be a springboard, so don&rsquo;t hesitate to follow any of
+the (many) links below, even if you haven&rsquo;t read this whole page. That&rsquo;s the
+point of this tutorial&ndash;to help you start to explore.</p>
+<h2 id="pictures">Pictures</h2>
+<p><em>Group Explorer</em> gives four ways to answer the question &ldquo;What does a group
+look like?&rdquo;  This is its primary aim and the reason for its creation.</p>
+<p>The multiplication table is the simplest way to picture a group, and
+explicitly shows <em>the group operation.</em></p>
+<p><a href="http://nathancarter.github.io/group-explorer/Multtable.html?groupURL=groups/S_3.group"><img alt="Multiplication table for S_3" src="../s_3_multtable_thumbnail.png" /></a>
+&nbsp; &nbsp; &nbsp;
+<a href="http://nathancarter.github.io/group-explorer/Multtable.html?groupURL=groups/A_4.group"><img alt="Multiplication table for A_4" src="../a_4_multtable_thumbnail.png" /></a></p>
+<ul>
+<li><a href="../rf-groupterms/#multtable">Definition of a multiplication table</a></li>
+<li><a href="../gs-mt-intro/">Introduction to multiplication tables</a> (Getting Started pages)</li>
+<li><a href="../tu-mt-manip/">Basic manipulations of a multiplication table</a> (Tutorial)</li>
+<li><a href="../rf-um-mt-options/">Complete information about the multiplication table interface</a> (User Manual)</li>
+</ul>
+<p>Groups describe symmetry, sometimes the symmetry of three-dimensional
+objects.  Thus these objects have <em>the symmetry the group describes.</em></p>
+<p><a href="http://nathancarter.github.io/group-explorer/SymmetryObject.html?groupURL=groups/Z_9.group"><img alt="Cycle described by Z_9" src="../z_9_symmetry.png" /></a>
+&nbsp; &nbsp; &nbsp;
+<a href="http://nathancarter.github.io/group-explorer/SymmetryObject.html?groupURL=groups/A_5.group"><img alt="Platonic solid described by A_5" src="../a_5_symmetry.png" /></a></p>
+<ul>
+<li><a href="../rf-groupterms/#symmetryobject">Definition of an object of symmetry</a></li>
+<li><a href="../rf-um-os-options/">Complete information about the object of symmetry interface</a> (User Manual)</li>
+</ul>
+<p>Cayley diagrams show the group as a graph of elements interacting with each
+other.  They show the group&rsquo;s <em>structure</em> very well, exemplifying Cayley&rsquo;s
+theorem by showing <em>how the group acts on itself.</em></p>
+<p><a href="http://nathancarter.github.io/group-explorer/CayleyDiagram.html?groupURL=groups/Z_3.group"><img alt="Cayley diagram of Z_3" src="../z_3_cayley_unlabelled.png" /></a>
+&nbsp; &nbsp; &nbsp;
+<a href="http://nathancarter.github.io/group-explorer/CayleyDiagram.html?groupURL=groups/A_4.group"><img alt="Cayley diagram of A_4" src="../a_4_cayley_unlabelled.png" /></a></p>
+<ul>
+<li><a href="../rf-groupterms/#cayleydiagram">Definition of a Cayley diagram</a></li>
+<li><a href="../gs-cd-intro/">Introduction to Cayley diagrams</a> (Getting Started pages)</li>
+<li><a href="../tu-cd-manip/">Basic manipulations of a Cayley diagram</a> (Tutorial)</li>
+<li><a href="../rf-um-cd-options/">Complete information about the Cayley diagram interfacel</a> (User Manual)</li>
+</ul>
+<p>Cycle graphs show an important relationship among the elements of the group
+by exhibiting <em>the group&rsquo;s orbits.</em></p>
+<p><a href="http://nathancarter.github.io/group-explorer/CycleDiagram.html?groupURL=groups/V_4.group"><img alt="Cycle graph of V_4" src="../v_4_cycle_unlabelled.png" /></a>
+&nbsp; &nbsp; &nbsp;
+<a href="http://nathancarter.github.io/group-explorer/CycleDiagram.html?groupURL=groups/Z_16.group"><img alt="Cycle graph of Z_16" src="../z_16_cycle_unlabelled.png" /></a></p>
+<ul>
+<li><a href="../rf-groupterms/#cyclegraph">Definition of a cycle graph</a></li>
+<li><a href="../rf-um-cg-options/">Complete information about the cycle graph interface</a> (User Manual)</li>
+</ul>
+<h2 id="features">Features</h2>
+<p>Here are some of hte most important things not to miss about how <em>Group
+Explorer</em> makes gropu theory more accessible and intuitive.</p>
+<h3 id="each-picture-of-a-group-is-very-interactive">Each picture of a group is very interactive</h3>
+<p><img alt="A cycle graph with highlights" src="../illustration-highlightCG.jpg" /></p>
+<p><a href="../tu-discovery/">Study</a> properties of the group by reorganizing a diagram
+or <a href="../rf-um-subsetlistbox/">highlighting it in different ways</a>.  Save useful
+views as images to use in a document, email, or website.</p>
+<h3 id="group-explorer-has-a-large-library-of-groups"><em>Group Explorer</em> has a large library of groups</h3>
+<p><img alt="A screenshot of the group library" src="../illustration-grouptable.jpg" /></p>
+<p><a href="http://nathancarter.github.io/group-explorer/GroupExplorer.html">The main page of the
+application</a>
+is a list of groups known to the software.  It is very handy for learning by
+example, for testing conjectures, and getting one&rsquo;s hands dirty in the real
+subject matter of group theory.  Each group in the library, when clicked,
+opens a <a href="../rf-um-groupwindow/">group info window</a> full of useful information
+about the group.</p>
+<h3 id="help-links-appear-in-many-locations">Help links appear in many locations</h3>
+<p><img alt="A screenshot of some help links" src="../illustration-helplinks.jpg" /></p>
+<p>Many portions of the software contain links to useful explanations.  In
+addition to the help pages you&rsquo;re reading now, <a href="../rf-um-groupwindow/">group info
+windows</a> may contain links to the help documentation
+or to dynamic generations of illustrations of various concepts.  Also, each
+<a href="../rf-geterms/#visualizers">visualizer</a> has a <a href="../rf-um-largewindow/">help
+button</a> to take you directly to the help for that
+visualizer.</p>
+<h3 id="groups-can-be-connected-and-compared">Groups can be connected and compared</h3>
+<p><img alt="A screenshot of a morphism" src="../illustration-morphism.png" /></p>
+<p>You need not be content with examining groups in isolation.
+<a href="../tu-sheets/">Sheets</a> are an important tool that lets you create
+<a href="../rf-um-morphedit/">homomorphisms</a> between groups, see complex diagrams
+like subgroup lattices, and more.</p>
         </div>
     </div>
 </div>

@@ -7,6 +7,9 @@
 <link rel="stylesheet" href="../w3-theme-blue.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config( { TeX: { extensions: [ "color.js" ] } } );
+</script>
 <body>
 
 <!-- Header -->
@@ -27,7 +30,19 @@
                 <ul>
                 
                     <li><a style="text-decoration: none;"
-                          href="#stub">STUB</a></li>
+                          href="#manipulating-multiplication-tables">Manipulating Multiplication Tables</a></li>
+                
+                    <li><a style="text-decoration: none;"
+                          href="#zooming">Zooming</a></li>
+                
+                    <li><a style="text-decoration: none;"
+                          href="#organizing">Organizing</a></li>
+                
+                    <li><a style="text-decoration: none;"
+                          href="#highlighting">Highlighting</a></li>
+                
+                    <li><a style="text-decoration: none;"
+                          href="#cosets">Cosets</a></li>
                 
                 </ul>
 
@@ -88,10 +103,52 @@
             </div>
         </div>
         <div class="w3-threequarter w3-container">
-            <h1 id="stub">STUB</h1>
-<p>This page is a placeholder.</p>
-<p>Its existence removes <code>mkdocs</code> error messages about missing pages.</p>
-<p>It will be filled with content later.</p>
+            <h2 id="manipulating-multiplication-tables">Manipulating Multiplication Tables</h2>
+<p>Multiplication tables are the simplest and most common of the
+<a href="../rf-geterms/#visualizers">visualizers</a> <em>Group Explorer</em> provides viewing
+groups. Here we will concentrate on the basic manipulations you might want
+to perform on a group&rsquo;s multiplication table as you investigate that group.</p>
+<p>For more introductory information on multiplication tables, refer to <a href="../rf-groupterms/#multtable">the
+definition of a multiplication table</a> or <a href="../gs-mt-intro/">a
+quick introduction to multiplication tables</a>. For more
+complete information on the multiplication table interface, refer to <a href="../rf-um-mt-options/">the
+relevant section of the user manual</a>.</p>
+<h2 id="zooming">Zooming</h2>
+<p><strong>Use your mouse scroll wheel or a pinch gesture to zoom in and out.</strong></p>
+<p>If a group is very large, you may want to view its multiplication table
+shrunk to the point where you can see it comfortably on screen. Conversely,
+if a group is very small, you may want to blow up the multiplication table.</p>
+<h2 id="organizing">Organizing</h2>
+<p>The order of elements across the top and down the left side of a
+multiplication table is chosen by <em>Group Explorer</em> to be somewhat natural.
+But if you would prefer a different order, <strong>hold the Shift key while you
+click and drag on a (non-identity) element</strong> in either the top row or left
+column and drop it where you want it. The table will change when you drop
+it.</p>
+<p>You can also reorganize the table according to subgroups by using the
+drop-down list on the Table tab of the controls. For full documentation on
+the Table tab, refer to <a href="../rf-um-mt-options/">the relevant section of the user
+manual</a>.</p>
+<h2 id="highlighting">Highlighting</h2>
+<p>You can highlight the multiplication table according to various properties
+of the group elements. This can be useful for studying different properties
+of the group. <strong>Right-click on various subsets in the Subsets tab of the
+controls and choose from among the highlighting options</strong> &ndash; background
+<img alt="Square background highlighting icon" src="../hightype-square-background.jpg" />,
+border <img alt="Square border highlighting icon" src="../hightype-square-border.jpg" />, and
+corner <img alt="Square corner highlighting icon" src="../hightype-square-corner.jpg" />.</p>
+<p>The example below highlights each conjugacy class a different color, thereby
+exhibiting a class equation visually.</p>
+<p><img alt="A multiplication table with conjugacy classes highlighted by
+color" src="../s_3_multtable_cc_highlighted.png" /></p>
+<p>For fuller documentation on the Subsets tab, refer to <a href="../rf-um-subsetlistbox/">the relevant section
+of the user manual</a>.</p>
+<h2 id="cosets">Cosets</h2>
+<p>It is particularly useful to combine both the organization and highlighting
+of a multiplication table together (and use the cosets separation option on
+the Table tab) to create diagrams like the one shown below, which illustrate
+quotient groups.</p>
+<p><img alt="A multiplication table organized by a normal subgroup, with cosets highlighted by color" src="../d_4_multtable_organized.png" /></p>
         </div>
     </div>
 </div>

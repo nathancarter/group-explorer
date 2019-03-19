@@ -7,6 +7,9 @@
 <link rel="stylesheet" href="../w3-theme-blue.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config( { TeX: { extensions: [ "color.js" ] } } );
+</script>
 <body>
 
 <!-- Header -->
@@ -27,7 +30,22 @@
                 <ul>
                 
                     <li><a style="text-decoration: none;"
-                          href="#stub">STUB</a></li>
+                          href="#tour-of-the-subsets-pane">Tour of the subsets pane</a></li>
+                
+                    <li><a style="text-decoration: none;"
+                          href="#topmost-items-on-the-popup-menu">Topmost items on the popup menu</a></li>
+                
+                    <li><a style="text-decoration: none;"
+                          href="#the-compute-submenu">The Compute &gt; submenu</a></li>
+                
+                    <li><a style="text-decoration: none;"
+                          href="#highlight-subset-by-submenu">Highlight subset by &gt; submenu</a></li>
+                
+                    <li><a style="text-decoration: none;"
+                          href="#highlight-partition-by-submenu">Highlight partition by &gt; submenu</a></li>
+                
+                    <li><a style="text-decoration: none;"
+                          href="#clear-all-highlighting">Clear all highlighting</a></li>
                 
                 </ul>
 
@@ -88,10 +106,253 @@
             </div>
         </div>
         <div class="w3-threequarter w3-container">
-            <h1 id="stub">STUB</h1>
-<p>This page is a placeholder.</p>
-<p>Its existence removes <code>mkdocs</code> error messages about missing pages.</p>
-<p>It will be filled with content later.</p>
+            <p>Every <a href="../rf-geterms/#visualizers">visualizer</a> in <em>Group Explorer</em> except
+<a href="../rf-groupterms/#objects-of-symmetry">objects of symmetry</a> have a panel
+like the one shown below for examining subgroups of the group under study.</p>
+<p><img alt="A screenshot of the user interface for subsets and partitions" src="../illustration-subsetlistbox.jpg" /></p>
+<p>The particular subsets panel shown above is for <a href="http://nathancarter.github.io/group-explorer/GroupInfo.html?groupURL=groups/Q_4.group">the eight-element
+quaternion
+group</a>.</p>
+<h2 id="tour-of-the-subsets-pane">Tour of the subsets pane</h2>
+<p>The topmost portion of the interface lists all the subgroups of the group
+shown in the main portion of the view, beginning with <script type="math/tex">H_0</script>, the trivial
+(one-element) subgroup, and ending with <script type="math/tex">H_n</script>, the whole group, for a
+group with <script type="math/tex">n+1</script> subgroups. <em>Group Explorer</em> computes all subgroups of
+each group when loading it; the user cannot add or remove any entries from
+this section.</p>
+<p>The next portion of the window lists user-defined subsets, which is empty by
+default. You can add and delete subsets relevant to your study of the group;
+<a href="#topmost-items-on-the-menu">see below</a>.</p>
+<p>The last portion of the window lists partitions of the group (e.g. conjugacy
+classes, cosets of a particular subgroup, etc.) and is particularly useful
+for creating informative highlightings of the visualizer. Partitions can be
+added to this section via various computations; <a href="#the-compute-submenu">see
+below</a>.</p>
+<p>The subsets panel allows computations and highlighting with respect to both
+subsets and subgroups of whatever group is being visualized. It has many
+features, covered one at a time below.</p>
+<p>For any subset listed in the pane, you can find out its list of elements by
+double-clicking the subset you&rsquo;re interested in.</p>
+<p>Right-clicking on the subsets pane brings up a menu from which you can take
+several important actions, some of which are visible in the following
+screenshot.</p>
+<p><img alt="A screenshot of several subitems on the subset list box context menu" src="../illustration-slbmenu.jpg" /></p>
+<p>Creating and deleting user-defined subgroups are both possible using this
+menu, as well as several types of computation and highlighing. Here follows
+the documentation for each option on this menu.</p>
+<h2 id="topmost-items-on-the-popup-menu">Topmost items on the popup menu</h2>
+<h3 id="edit-list-of-elements-in-s_i">Edit list of elements in <script type="math/tex">S_i</script>
+</h3>
+<p>This menu item appears only if you right-clicked on a user-defined subset.
+If you choose it, a window like the one pictured here opens.</p>
+<p><img alt="A dialog box for editing the contents of a user-defined subset" src="../illustration-subsetedit.jpg" /></p>
+<p>The left pane shows the elements in your subset and the right pane shows the
+other elements of the group. To add elements to your subset, drag them in
+from right to left. Dragging from the left pane to the right pane takes
+elements out of your subset. OK approves your changes and Cancel discards
+them.</p>
+<h3 id="delete-s_i">Delete <script type="math/tex">S_i</script>
+</h3>
+<p>This menu item appears only if you right-clicked on a user-defined subset.
+Choosing it deletes the user-defined subset on which you right-clicked.</p>
+<h3 id="delete-cc_i-oc_i-g_ih-etc">Delete <script type="math/tex">CC_i</script>, <script type="math/tex">OC_i</script>, <script type="math/tex">g_iH</script>, etc.</h3>
+<p>This menu item appears only if you right-clicked on a partition (i.e. on one
+of its sets). Partitions can be conjugacy classes <script type="math/tex">CC_i</script>, order classes
+<script type="math/tex">OC_i</script>, left cosets <script type="math/tex">g_iH</script>, or right cosets <script type="math/tex">Hg_i</script>. Choosing this
+option deletes the entire partition on which you right-clicked (e.g. all
+conjugacy classes, all order classes, or all left/right cosets of the
+subgroup, etc.).</p>
+<h3 id="create-s_i">Create <script type="math/tex">S_i</script>
+</h3>
+<p>This menu item creates a new subset under the &ldquo;User-defined subsets&rdquo;
+heading. The subset will be empty, and you can <a href="#topmost-items-on-the-menu">add elements to it as
+described above</a>.</p>
+<h2 id="the-compute-submenu">The Compute &gt; submenu</h2>
+<h3 id="compute-all-conjugacy-classes-cc_i">Compute &gt; all conjugacy classes <script type="math/tex">CC_i</script>
+</h3>
+<p>This submenu item appears only if you have not already asked <em>Group
+Explorer</em> to perform this computation. It adds the set of <a href="../rf-groupterms/#conjugacy-classes">conjugacy
+classes</a> as a new partition under the
+&ldquo;Partitions&rdquo; heading.</p>
+<h3 id="compute-all-order-classes-oc_i">Compute &gt; all order classes <script type="math/tex">OC_i</script>
+</h3>
+<p>This submenu item appears only if you have not already asked <em>Group
+Explorer</em> to perform this computation. It adds the set of <a href="../rf-groupterms/#order-classes">order
+classes</a> as a new partition under the
+&ldquo;Partitions&rdquo; heading.</p>
+<h3 id="compute-normalizer-of-x-textnormx">Compute &gt; normalizer of <script type="math/tex">X</script>, <script type="math/tex">\text{Norm}(X)</script>
+</h3>
+<p>This submenu item appears when you right-click on the subset <script type="math/tex">X</script>, but only
+if you have not already asked <em>Group Explorer</em> to perform this computation.
+It adds the <a href="../rf-groupterms/#normalizer-of-a-subgroupsubset">normalizer</a> of
+the given subset to the list of user-defined subsets.</p>
+<p>Note that whenever you add a new subset, <em>Group Explorer</em> always checks
+whether it exists under another name, and gives you the option to cancel
+your addition if so.</p>
+<h3 id="compute-closure-of-x-langle-x-rangle">Compute &gt; closure of <script type="math/tex">X</script>, <script type="math/tex">\langle X \rangle</script>
+</h3>
+<p>This submenu item appears when you right-click on the subset <script type="math/tex">X</script>, but only
+if the subset on which you right-clicked is not a subgroup. It adds the
+<a href="../rf-groupterms/#closure-of-a-subset">closure</a> of the given subset to the
+list of user-defined subsets.</p>
+<p>Note that whenever you add a new subset, <em>Group Explorer</em> always checks
+whether it exists under another name, and gives you the option to cancel
+your addition if so.</p>
+<h3 id="compute-left-cosets-g_ih">Compute &gt; left cosets <script type="math/tex">g_iH</script>
+</h3>
+<p>This submenu item appears when you right-click on the subset <script type="math/tex">X</script>, but only
+if you have not already asked <em>Group Explorer</em> to perform this computation,
+and the subset on which you right-clicked is a subgroup. It adds the set of
+left <a href="../rf-groupterms/#cosets">cosets</a> as a new partition under the
+&ldquo;Partitions&rdquo; heading.</p>
+<h3 id="compute-right-cosets-hg_i">Compute &gt; right cosets <script type="math/tex">Hg_i</script>
+</h3>
+<p>This submenu item appears when you right-click on the subset <script type="math/tex">X</script>, but only
+if you have not already asked <em>Group Explorer</em> to perform this computation,
+and the subset on which you right-clicked is a subgroup. It adds the set of
+right <a href="../rf-groupterms/#cosets">cosets</a> as a new partition under the
+&ldquo;Partitions&rdquo; heading.</p>
+<h3 id="compute-an-intersection-subsubmenu">Compute &gt; an intersection &gt; subsubmenu</h3>
+<p>This submenu appears when you right-click no the subset <script type="math/tex">X</script>, and it
+contains items allowing you to perform an intersection of <script type="math/tex">X</script> with any
+other subset listed in the whole pane, provided that you have not already
+requested such a computation. Choosing one of the items on this submenu
+computes the intersection described in that item, e.g. &ldquo;the intersection of
+<script type="math/tex">H_2</script> with <script type="math/tex">S_5</script>.&rdquo; Intersection here means simply what it does in set
+theory&ndash;the elements in common between the two sets.</p>
+<p>Note that whenever you add a new subset, <em>Group Explorer</em> always checks
+whether it exists under another name, and gives you the option to cancel
+your addition if so.</p>
+<h3 id="compute-a-union-subsubmenu">Compute &gt; a union &gt; subsubmenu</h3>
+<p>This submenu appears when you right-click no the subset <script type="math/tex">X</script>, and it
+contains items allowing you to perform a union of <script type="math/tex">X</script> with any other
+subset listed in the whole pane, provided that you have not already
+requested such a computation. Choosing one of the items on this submenu
+computes the union described in that item, e.g. &ldquo;the union of <script type="math/tex">H_2</script> with
+<script type="math/tex">S_5</script>.&rdquo; Union here means simply what it does in set theory&ndash;the combined
+elements from the two sets.</p>
+<p>Note that whenever you add a new subset, <em>Group Explorer</em> always checks
+whether it exists under another name, and gives you the option to cancel
+your addition if so.</p>
+<h3 id="compute-an-elementwise-product-subsubmenu">Compute &gt; an elementwise product &gt; subsubmenu</h3>
+<p>This submenu appears when you right-click no the subset <script type="math/tex">X</script>, and it
+contains items allowing you to perform an <a href="../rf-groupterms/#elementwise-product">elementwise
+product</a> of <script type="math/tex">X</script> with any other
+subset listed in the whole pane, provided that you have not already
+requested such a computation. Choosing one of the items on this submenu
+computes the elementwise product described in that item, e.g. &ldquo;the
+elementwise product of <script type="math/tex">H_2</script> with <script type="math/tex">S_5</script>.&rdquo;</p>
+<p>Note that whenever you add a new subset, <em>Group Explorer</em> always checks
+whether it exists under another name, and gives you the option to cancel
+your addition if so.</p>
+<!-- removing help on morphisms section because it hasn't been built yet
+
+## The Morphisms &gt; submenu
+
+The morphism submenu appears only if the large visualizer containing the
+subset pane is connected to a small visualizer appearing in a sheet, and
+that small visualizer has one or more morphisms for which it is either the
+domain or codomain.
+
+### Push \(X\) through \(f\) into \(G\), giving \(f[X]\)
+
+A submenu item of this form appears for every morphism \(f\) whose domain is
+the small visualizer associated with the large visualizer containing this
+subset pane. Choosing it causes *Group Explorer* to compute the
+[image](rf-groupterms.md#image-of-a-subset-under-a-morphism) of \(X\) under
+\(f\) and to add that subset to the subset pane for the codomain visualizer.
+
+Note: The codomain is a different visualizer, so you will see no change in
+the subsets pane you right-clicked; you will need to open the other
+visualizer to see the new subset you created.
+
+Note that whenever you add a new subset, *Group Explorer* always checks
+whether it exists under another name, and gives you the option to cancel
+your addition if so. This holds true even in this case, when you may not be
+looking at the pane into which the new subset is being introduced.
+
+### Pull \(X\) back through \(f\) into \(G\), giving \(f^{-1}[X]\)
+
+A submenu item of this form appears for every morphism \(f\) whose codomain
+is the small visualizer associated with the large visualizer containing this
+subset pane. Choosing it causes *Group Explorer* to compute the
+[preimage](rf-groupterms.md#preimage-of-a-subset-under-a-morphism) of \(X\)
+under \(f\), and to add that subset to the subset pane for the domain
+visualizer.
+
+Note: The domain is a different visualizer, so you will see no change in the
+subsets pane you right-clicked; you will need to open the other visualizer
+to see the new subset you created.
+
+Note that whenever you add a new subset, *Group Explorer* always checks
+whether it exists under another name, and gives you the option to cancel
+your addition if so. This holds true even in this case, when you may not be
+looking at the pane into which the new subset is being introduced.
+
+-->
+
+<h2 id="highlight-subset-by-submenu">Highlight subset by &gt; submenu</h2>
+<p>This submenu appears only if you click on a subset (as opposed to a
+heading). Its items depend on the visualizer as follows.</p>
+<ul>
+<li>
+<p>For Cayley diagrams, highlighting options are<br />
+<img alt="Highlight node icon" src="../hightype-sphere-node.jpg" />
+    Node color,<br />
+<img alt="Highlight ring around node icon" src="../hightype-sphere-ring.jpg" />
+    Ring around node, and<br />
+<img alt="Highlight square around node icon" src="../hightype-sphere-square.jpg" />
+    Square around node.  </p>
+</li>
+<li>
+<p>For multiplication tables, highlighting options are<br />
+<img alt="Highlight background icon" src="../hightype-square-background.jpg" />
+    Background,<br />
+<img alt="Highlight border icon" src="../hightype-square-border.jpg" /> Border, and<br />
+<img alt="Highlight corner icon" src="../hightype-square-corner.jpg" /> Corner.  </p>
+</li>
+<li>
+<p>For cycle graphs, highlighting options are<br />
+<img alt="Highlight background icon" src="../hightype-circle-background.jpg" />
+    Background,<br />
+<img alt="Highlight border icon" src="../hightype-circle-border.jpg" /> Border, and<br />
+<img alt="Highlight top icon" src="../hightype-circle-top.jpg" /> Top.</p>
+</li>
+</ul>
+<p>Choosing one causes the subset on which you right-clicked to be highlighted
+in the visualizer (both its large and small incarnations) with the method
+you selected. For instance, here is a multiplication table with an order-4
+subgroup highlighted according to corners.</p>
+<p><img alt="Multiplication table with highlighting" src="../illustration-multhigh1.png" /></p>
+<p>Note that this undoes any other highlighting of the type in question (e.g.
+former &ldquo;Node color&rdquo; highlighting will evaporate when new &ldquo;Node color&rdquo;
+highlighting is chosen).</p>
+<p>Note further that in multiplication tables, highlighting items by background
+highlighting removes the default coloration scheme (e.g. rainbow,
+grayscale).</p>
+<p>You can undo this highlighting using the &ldquo;Clear all highlighting&rdquo; option on
+this same menu (<a href="#clear-all-highlighting">see below</a>).</p>
+<h2 id="highlight-partition-by-submenu">Highlight partition by &gt; submenu</h2>
+<p>This submenu appears only if you click on a partition (i.e. on one of its
+sets). Its items depend on the visualizer in the same way <a href="#highlight-subset-by-submenu">described
+above</a>.</p>
+<p>Choosing one of its items causes the partition on which you right-clicked to
+be highlighted in the visualizer (both its large and small incarnations)
+with the method you selected, using a different color for each set in the
+partition. For instance, here is a cycle graph with the conjugacy class
+partition highlighted according to background.</p>
+<p><img alt="A cycle graph with highlighting" src="../illustration-cychigh1.png" /></p>
+<p>Note that this undoes any other highlighting of the type in question (e.g.
+former &ldquo;Node color&rdquo; highlighting will evaporate when new &ldquo;Node color&rdquo;
+highlighting is chosen).</p>
+<p>Note further that in multiplication tables, highlighting items by background
+highlighting removes the default coloration scheme (e.g. rainbow,
+grayscale).</p>
+<p>You can undo this highlighting using the &ldquo;Clear all highlighting&rdquo; option
+documented immediately below.</p>
+<h2 id="clear-all-highlighting">Clear all highlighting</h2>
+<p>Removes all highlighting of any type from the visualizer. (Types are listed
+<a href="#highlight-subset-by-submenu">above</a>.)</p>
         </div>
     </div>
 </div>

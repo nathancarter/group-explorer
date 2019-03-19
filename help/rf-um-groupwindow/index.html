@@ -7,6 +7,9 @@
 <link rel="stylesheet" href="../w3-theme-blue.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config( { TeX: { extensions: [ "color.js" ] } } );
+</script>
 <body>
 
 <!-- Header -->
@@ -27,7 +30,28 @@
                 <ul>
                 
                     <li><a style="text-decoration: none;"
-                          href="#stub">STUB</a></li>
+                          href="#facts">Facts</a></li>
+                
+                    <li><a style="text-decoration: none;"
+                          href="#views">Views</a></li>
+                
+                    <li><a style="text-decoration: none;"
+                          href="#description">Description</a></li>
+                
+                    <li><a style="text-decoration: none;"
+                          href="#computed-properties">Computed properties</a></li>
+                
+                    <li><a style="text-decoration: none;"
+                          href="#other-definitions">Other definitions</a></li>
+                
+                    <li><a style="text-decoration: none;"
+                          href="#generators">Generators</a></li>
+                
+                    <li><a style="text-decoration: none;"
+                          href="#naming-schemes">Naming schemes</a></li>
+                
+                    <li><a style="text-decoration: none;"
+                          href="#notes">Notes</a></li>
                 
                 </ul>
 
@@ -88,10 +112,81 @@
             </div>
         </div>
         <div class="w3-threequarter w3-container">
-            <h1 id="stub">STUB</h1>
-<p>This page is a placeholder.</p>
-<p>Its existence removes <code>mkdocs</code> error messages about missing pages.</p>
-<p>It will be filled with content later.</p>
+            <p>Group Info pages are the presentation to the user of all information <em>Group
+Explorer</em> has about a given group. It may help you to open <a href="http://nathancarter.github.io/group-explorer/GroupInfo.html?groupURL=groups/Z_5.group">an example group
+info page
+now</a>
+and read it alongside this help page.</p>
+<p>Let us consider each section that appears in a Group Info page separately.
+(The header and footer of each Group Info page list these sections, as links
+to help you navigate quickly within that page.)</p>
+<h2 id="facts">Facts</h2>
+<p>The basic facts about a group are its
+<a href="../rf-groupterms/#gensrels">definition</a>, <a href="../rf-groupterms/#order">order</a>,
+and any other names it has besides its primary name (which is the title of
+each Group Info page).</p>
+<h2 id="views">Views</h2>
+<p><em>Group Explorer</em> is all about visualization. Thus the Views section receives
+high priority, showing previews of every way to visualize a group,
+including <a href="../rf-groupterms/#cayleydiagram">Cayley diagrams</a>, a
+<a href="../rf-groupterms/#multtable">multiplication table</a>, a <a href="../rf-groupterms/#cyclegraph">cycle
+graph</a>, and any <a href="../rf-groupterms/#symmetryobject">objects of
+symmetry</a> the group has.</p>
+<h2 id="description">Description</h2>
+<p>Some (but not all) groups contain a description of the group, which appears
+in this section.</p>
+<h2 id="computed-properties">Computed properties</h2>
+<p><em>Group Explorer</em> computes information about each group it loads. For
+example, it computes all of its subgroups, which ones are normal,
+information about conjugacy classes, and more. A summary of this
+information appears in the Computed properties section of the Group Info
+window, but <strong>much</strong> more information is available than it may seem from
+the summaries. Users are encouraged to click the &ldquo;tell me more&rdquo; links which
+appear in this section to find out reasons for the computations, and often
+many additional helpful illustrations and computations.</p>
+<h2 id="other-definitions">Other definitions</h2>
+<p>If the group can be <a href="../rf-groupterms/#gensrels">defined</a> multiple ways, then
+only the primary definition was listed in the Facts section (above), and all
+other definitions appear here.</p>
+<h2 id="generators">Generators</h2>
+<p>Groups can be <a href="../rf-groupterms/#generators">generated</a> in many ways and some
+groups come with a few different commonly-used sets of generators chosen. If
+the group has no pre-selected set of generators built in, <em>Group Explorer</em>
+computes one such (minimum-size) set when the group is loaded. Each list of
+generators is given in this section.</p>
+<h2 id="naming-schemes">Naming schemes</h2>
+<p>The structure of a group is independent of whatever symbols we use to
+represent the elements of the group. For this reason, a group may come with
+several different lists of names for its elements, and the user may choose
+any one of them to be used as the primary way of representing the elements
+of the group. This section lets the user make such a selection and also
+create new naming schemes.</p>
+<p>This section also lets users remove or edit any of their previously-defined
+naming schemes; this information is stored in the user&rsquo;s web browser so that
+it will be preserved even when they leave the site.</p>
+<p>The section contains a link that reads &ldquo;Click here to add a new
+<a href="../rf-geterms/#representation">representation</a> for this group&rdquo; and possibly
+also links that read &ldquo;Click here to edit this representation.&rdquo; (Note that
+&ldquo;<a href="../rf-geterms/#namingscheme">naming scheme</a>&rdquo; and
+&ldquo;<a href="../rf-geterms/#representation">representation</a>&rdquo; are interchangeable terms.)
+In both cases, if you click the link, an interface like the following one
+appears, allowing you to custom-define a naming scheme for the elements of
+the group.</p>
+<p><img alt="Group element naming scheme interface" src="../illustration-namescheme.jpg" /></p>
+<p>The left column lists the default element names, and you can double-click
+entries in the right column and type any (plain) text you like. As you can
+see in the image above, the user is typing the word &ldquo;changing&hellip;&rdquo; in the
+top right cell of the table. When you are done, if you choose OK, your
+changes will be committed and you will have defined a new representation (or
+changed an old representation) of the elements of the group.</p>
+<p>Links in the group info window to edit representations are present only for
+representations that the user has created. Naming schemes built into the
+group in <em>Group Explorer</em> are uneditable by the end user.</p>
+<h2 id="notes">Notes</h2>
+<p>Users can add their own personal notes to a group to supplement the default
+information in any way they see fit. Such information appears in this
+section, with controls for editing it. It is text only (not HTML) and will
+be stored in the user&rsquo;s browser.</p>
         </div>
     </div>
 </div>

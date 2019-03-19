@@ -7,6 +7,9 @@
 <link rel="stylesheet" href="../w3-theme-blue.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config( { TeX: { extensions: [ "color.js" ] } } );
+</script>
 <body>
 
 <!-- Header -->
@@ -27,7 +30,25 @@
                 <ul>
                 
                     <li><a style="text-decoration: none;"
-                          href="#stub">STUB</a></li>
+                          href="#author-of-a-group">Author of a group</a></li>
+                
+                    <li><a style="text-decoration: none;"
+                          href="#date-of-last-modification-for-a-group">Date of last modification for a group</a></li>
+                
+                    <li><a style="text-decoration: none;"
+                          href="#url-of-a-group">URL of a group</a></li>
+                
+                    <li><a style="text-decoration: none;"
+                          href="#naming-scheme-for-group-elements">Naming scheme (for group elements)</a></li>
+                
+                    <li><a style="text-decoration: none;"
+                          href="#representation-of-a-group">Representation of a group</a></li>
+                
+                    <li><a style="text-decoration: none;"
+                          href="#sheets">Sheets</a></li>
+                
+                    <li><a style="text-decoration: none;"
+                          href="#visualizers">Visualizers</a></li>
                 
                 </ul>
 
@@ -88,10 +109,60 @@
             </div>
         </div>
         <div class="w3-threequarter w3-container">
-            <h1 id="stub">STUB</h1>
-<p>This page is a placeholder.</p>
-<p>Its existence removes <code>mkdocs</code> error messages about missing pages.</p>
-<p>It will be filled with content later.</p>
+            <p>This page is a dictionary of terms specific to <em>Group Explorer.</em> Many other
+pages in the <em>Group Explorer</em> help link here to define terms. Unlike <a href="../rf-groupterms/">the
+group theory terminology page</a>, these terms are not
+well-known mathematical terms; they&rsquo;re used only in <em>Group Explorer.</em></p>
+<h3 id="author-of-a-group">Author of a group</h3>
+<p>The files which store group information are called group files, and they can
+contain information about the original author of the file. This person
+encoded the description of a finite group into <em>Group Explorer&rsquo;s</em> group
+definition syntax so that <em>Group Explorer</em> could load and manipulate the
+group. See also <a href="#url-of-a-group">URL of a group</a>.</p>
+<h3 id="date-of-last-modification-for-a-group">Date of last modification for a group</h3>
+<p>The date of last modification of a group actually refers to the date on
+which the file from which the group was loaded was last modified. See also
+<a href="#url-of-a-group">URL of a group</a>.</p>
+<h3 id="url-of-a-group">URL of a group</h3>
+<p>Groups are stored on the <em>Group Explorer</em> website in files that end in the
+extension <code>.group</code>. The group&rsquo;s URL is the web address (beginning with
+<code>http://</code>) pointing to the <code>.group</code> file from which the group was loaded on
+<em>Group Explorer&rsquo;s</em> website. Example:</p>
+<p><code>https://nathancarter.github.io/group-explorer/GroupInfo.html?groupURL=groups/Z_2 x Z_4.group</code></p>
+<h3 id="naming-scheme-for-group-elements">Naming scheme (for group elements)</h3>
+<p>See <a href="#representation-of-a-group">representation of a group</a>.</p>
+<h3 id="representation-of-a-group">Representation of a group</h3>
+<p>In order to display the elements of a group on the screen, <em>Group Explorer</em>
+needs to know their names. Although internally, <em>Group Explorer</em> stores
+groups in a manner consistent with the mathematical abstractions that they
+are, users prefer a prettier format. Each group file defines at least one
+representation, or naming scheme&ndash;that is, a list of names, one for each
+element of the group. Users can add additional representations (also called
+naming schemes) by using the controls in <a href="../rf-um-groupwindow/">the group info
+page</a>.</p>
+<p>Note that group elements&rsquo; representations should not be confused with group
+presentations, which are embeddings of arbitrary groups into groups of
+matrices. <em>Group Explorer</em> does not currently have any features related to
+group presentations.</p>
+<h3 id="sheets">Sheets</h3>
+<p>Sheets are a blank canvas on which the user can drop illustrations of a
+group, homomorphisms to connect them, and pieces of text for description.
+Thus groups need not be examined only in isolation; they can be compared to
+other groups.</p>
+<p>To open a new sheet, from <a href="../rf-um-mainwindow/">the main page</a>, click the
+sheet icon on the top right. For more information, see <a href="../tu-sheets/">the introduction to
+sheets</a> or the <a href="../rf-um-sheetwindow/">reference documentation on the sheet
+interface</a>.</p>
+<h3 id="visualizers">Visualizers</h3>
+<p><em>Group Explorer</em> uses the term visualizer to describe any of the various
+mechanisms for obtaining pictures of a group. For instance, one way to
+visualize a group is through its multiplication table, so we refer to
+multiplication tables as &ldquo;visualizers.&rdquo; <em>Group Explorer</em> contains four
+types of visualizers: <a href="../rf-groupterms/#multiplication-table">multiplication
+tables</a>, <a href="../rf-groupterms/#cycle-graph">cycle
+graphs</a>, <a href="../rf-groupterms/#cayley-diagrams">cayley
+diagrams</a>, and <a href="../rf-groupterms/#objects-of-symmetry">objects of
+symmetry</a>.</p>
         </div>
     </div>
 </div>

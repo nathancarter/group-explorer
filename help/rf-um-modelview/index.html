@@ -7,6 +7,9 @@
 <link rel="stylesheet" href="../w3-theme-blue.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config( { TeX: { extensions: [ "color.js" ] } } );
+</script>
 <body>
 
 <!-- Header -->
@@ -25,9 +28,6 @@
             <div class="w3-padding w3-card w3-bar-block">
                 <h3>Contents</h3>
                 <ul>
-                
-                    <li><a style="text-decoration: none;"
-                          href="#stub">STUB</a></li>
                 
                 </ul>
 
@@ -88,10 +88,30 @@
             </div>
         </div>
         <div class="w3-threequarter w3-container">
-            <h1 id="stub">STUB</h1>
-<p>This page is a placeholder.</p>
-<p>Its existence removes <code>mkdocs</code> error messages about missing pages.</p>
-<p>It will be filled with content later.</p>
+            <p>Any three-dimensional <a href="../rf-geterms/#visualizers">visualizer</a> in <em>Group
+Explorer</em> will have a panel like the one shown below for adjusting the
+properties of the three-dimensional object in view. <a href="../rf-groupterms/#cayley-diagrams">Cayley
+diagrams</a> and <a href="../rf-groupterms/#objects-of-symmetry">objects of
+symmetry</a> are three-dimensional views.</p>
+<p><img alt="A screenshot of the 3D view controls" src="../illustration-modelview.jpg" /></p>
+<p>The &ldquo;Zoom level&rdquo; slider determines how large the three-dimensional object
+will seem. It operates just like the zoom on a camera, with the left end
+being &ldquo;zoomed out&rdquo; and the right end being &ldquo;zoomed in.&rdquo;  You can also zoom
+in and out with your mouse wheel.</p>
+<p>The &ldquo;Line thickness&rdquo; slider determines how strongly the lines in the
+three-dimensional scene are drawn. The left end is faint lines, the right
+end is bold lines.</p>
+<p>The &ldquo;Node radius&rdquo; slider determines the base size of any nodes (spheres) in
+the scene. Not all nodes will be the same size, but this is the base size
+from which all sizes are calculated. Left means smaller, right means larger.</p>
+<p>The &ldquo;Use this much fog&rdquo; checkbox indicates whether fog should be turned on
+in the scene.</p>
+<p>&ldquo;Fog&rdquo; is usually the term used in video games; in scientific applications,
+it is more commonly called &ldquo;depth cueing,&rdquo; because a faint haze in the scene
+(which increases with depth) helps the viewer judge how far into the scene
+various objects (or portions of objects) are. The left end of the slider
+means very little depth cueing (or fog) should be used, and the right end
+gives more.</p>
         </div>
     </div>
 </div>

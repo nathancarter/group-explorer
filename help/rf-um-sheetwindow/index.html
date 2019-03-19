@@ -7,6 +7,9 @@
 <link rel="stylesheet" href="../w3-theme-blue.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config( { TeX: { extensions: [ "color.js" ] } } );
+</script>
 <body>
 
 <!-- Header -->
@@ -27,7 +30,19 @@
                 <ul>
                 
                     <li><a style="text-decoration: none;"
-                          href="#stub">STUB</a></li>
+                          href="#the-sheet-itself">The sheet itself</a></li>
+                
+                    <li><a style="text-decoration: none;"
+                          href="#saving-and-loading">Saving and loading</a></li>
+                
+                    <li><a style="text-decoration: none;"
+                          href="#adding-sheet-items">Adding sheet items</a></li>
+                
+                    <li><a style="text-decoration: none;"
+                          href="#editing-controls">Editing controls</a></li>
+                
+                    <li><a style="text-decoration: none;"
+                          href="#connections">Connections</a></li>
                 
                 </ul>
 
@@ -88,10 +103,143 @@
             </div>
         </div>
         <div class="w3-threequarter w3-container">
-            <h1 id="stub">STUB</h1>
-<p>This page is a placeholder.</p>
-<p>Its existence removes <code>mkdocs</code> error messages about missing pages.</p>
-<p>It will be filled with content later.</p>
+            <p>This page describes how to interact with sheets in <em>Group Explorer</em>. If you
+are unsure what sheets are, <a href="../rf-geterms/#sheets">read the description
+here</a>. A blank sheet window looks something like the
+following picture.</p>
+<p><img alt="A screenshot of a blank sheet" src="../illustration-blanksheet.jpg" /></p>
+<p>Let us consider all the things one can do with a sheet, grouping them
+categorically.</p>
+<h2 id="the-sheet-itself">The sheet itself</h2>
+<p>A blank sheet is shown as a white region, the left side of the window
+pictured above. In this region you can add various kinds of &ldquo;sheet items.&rdquo;
+Here is an image of a window containing a sheet with four items: a
+multiplication table, some text, a gray background rectangle, and a
+connecting line.</p>
+<p><img alt="A screenshot of a sheet with four items" src="../illustration-simplesheet.jpg" /></p>
+<p>If you wish to experiment with a sheet without creating one, there are links
+in each group&rsquo;s <a href="../rf-um-groupwindow/">Group Info page</a> that will create
+sheets for you (e.g. &ldquo;Show me all the views connected together in a sheet&rdquo;
+link in the Views section).</p>
+<h3 id="navigating-the-sheet">Navigating the sheet</h3>
+<p>Note that resizing the window containing the sheet does not resize the
+sheet. By default, all sheets are a fairly large size, so that you should
+not need to make them larger.  You can scroll around within the view to see
+new regions of the sheet as needed, using your mouse wheel.</p>
+<h3 id="selecting-items">Selecting items</h3>
+<p>When you click an item on the sheet, a dotted line border appears around it
+to indicate that you have selected it.</p>
+<p>Note that for nonrectangular items (lines and homomorphisms) the area of
+their sensitivity to the mouse may be fairly large, to give you ample
+opportunity to click them without having to click exactly on a line.</p>
+<h3 id="moving-and-resizing-items">Moving and resizing items</h3>
+<p>To move an item from one place to another on the sheet, simply click and
+drag it. To move an item forward or backwards on the sheet (i.e. farther
+into the background, or closer to the foreground), use one of the four
+buttons for this purpose in the right-hand pane, &ldquo;Move forward,&rdquo; &ldquo;Move to
+front,&rdquo; &ldquo;Move backward&rdquo;, and &ldquo;Move to back.&rdquo;</p>
+<p>You can resize an item by first selecting it, and then hovering your mouse
+over any part of its boundary. Your mouse cursor will shape itself like a
+pair of arrows to indicate that resizing is possible. Click and drag to
+resize the item.</p>
+<h2 id="saving-and-loading">Saving and loading</h2>
+<p>The following commands appear in the right-hand pane of the sheet window.</p>
+<h3 id="save-as">Save as:</h3>
+<p>Enter a name for your sheet and click the &ldquo;Save as:&rdquo; button to save the
+sheet into your browser&rsquo;s memory.  This will persist even when you are not
+on the <em>Group Explorer</em> website, or indeed even when your computer is off.
+(It uses your browser&rsquo;s &ldquo;local storage.&rdquo;)</p>
+<h3 id="load-sheet">Load sheet:</h3>
+<p>To load a sheet you&rsquo;ve saved in the past, choose its name from the drop-down
+menu next to the &ldquo;Load sheet:&rdquo; button and then click the button.  Any work
+you had on the left of the window will be immediately overwritten by loading
+the saved sheet.</p>
+<h2 id="adding-sheet-items">Adding sheet items</h2>
+<h3 id="add-rectangle">Add rectangle</h3>
+<p>Click this button to add a solid, gray rectangle to the sheet.  You can, of
+course, move and resize the rectangle after it has been placed, including
+move it forward or backwards in the sheet, as described above.</p>
+<p>Rectangles are useful for visually grouping items on the sheet by placing
+the rectangle behind them.  They serve only a visual purpose.</p>
+<p>As with all items on a sheet, double-click the rectangle to edit its
+properties.  In the case of the rectangle, this includes only its background
+color.</p>
+<h3 id="add-text-box">Add text box</h3>
+<p>Click this button to add a small text box to the sheet containing just the
+word &ldquo;Text.&rdquo;  You can, of course, move the text after it has been placed,
+including move it forward or backwards in the sheet, as described above.</p>
+<p>Text can be useful for labeling items on the sheet, such as with a caption
+or explanation.</p>
+<p>As with all items on a sheet, double-click the text to edit its properties.
+In the case of text, this includes the text itself, its font size, its
+alignment, and its color.</p>
+<h3 id="add-this-visualizer">Add this visualizer:</h3>
+<p>Before clicking this button, choose from the controls beneath it which kind
+of visualizer you would like to add.</p>
+<ul>
+<li>The left drop-down list presents only three options, Cayley diagrams,
+   multiplication tables, and cycle graphs. Objects of symmetry are not
+   included because they serve no purpose in sheets, because it is not yet
+   supported to connect them to any other items.</li>
+<li>The right drop-down list presents all groups in the <em>Group Explorer</em>
+   library, in alphabetical order.  Choose which group you would like to
+   visualize.</li>
+</ul>
+<p>After making these choices and clicking the &ldquo;Add this visualizer:&rdquo; button,
+a copy of the visualizer you chose will appear at the top left of the sheet.
+As with all sheet items, you can move and resize it as needed thereafter.</p>
+<p>When you double-click a visualizer to edit its properties, rather than
+presenting you a small dialog (as with, say, rectangles or text boxes),
+<em>Group Explorer</em> opens a new tab in your browser with a large view of the
+visualizer.  Changes you make in that large view (such as highlighting
+elements or changing the viewpoint on a three-dimensional diagram) will be
+reflected immediately in the sheet.  You can close that visualizer tab at
+any time; changes you make there are always synced to the sheet.</p>
+<h2 id="editing-controls">Editing controls</h2>
+<h3 id="copy-and-paste">Copy and Paste</h3>
+<p>Click this button to copy the selected item on the sheet.  You can then use
+the paste button to create another instance of the same item immediately on
+top of the first one.  Then move it to the location you desire.</p>
+<h3 id="delete">Delete</h3>
+<p>This removes the selected item from the sheet. The only way to get it back
+is to use Undo.</p>
+<p>Note that if you delete an item that is connected to another item via a
+connecting line or morphism, the connection(s) will also be deleted.</p>
+<h3 id="undo-and-redo">Undo and Redo</h3>
+<p>If you make a change to a sheet that you&rsquo;d then like to undo, click the Undo
+button.  As in many applications, you can click Undo multiple times, and
+move forward through your changes again with Redo.</p>
+<h2 id="connections">Connections</h2>
+<h3 id="connect-to">Connect to:</h3>
+<p>To connect one item in a sheet with another by a straight line, follow this
+procedure.</p>
+<ul>
+<li>Click the first item to select it.</li>
+<li>In the drop-down list next to the &ldquo;Connect to:&rdquo; button, choose the item
+   you would like to connect it to.</li>
+<li>Click the &ldquo;Connect to:&rdquo; button to make the connection.</li>
+</ul>
+<p>You can always delete a connection later by selecting the connection itself
+and clicking the Delete button documented above.</p>
+<p>Connections are useful for attaching labels to items in a complex sheet, or
+showing an intricate network of connections as in a <a href="../rf-groupterms/#lattice-of-subgroups">lattice of
+subgroups</a>.</p>
+<h3 id="map-to">Map to:</h3>
+<p>To connect one visualizer in a sheet with another by a homomorphism, follow this procedure.</p>
+<ul>
+<li>Click to select the visualizer that will be the domain of the
+   homomorphism.</li>
+<li>In the drop-down list next to the &ldquo;Map to:&rdquo; button, choose the visualizer
+   you would like to be the codomain of the homomorphism.</li>
+<li>Click the &ldquo;Map to:&rdquo; button to create a homomorphism.</li>
+</ul>
+<p>Homomorphisms are automatically given names by <em>Group Explorer</em> when you
+insert them (starting with <script type="math/tex">f</script> and <script type="math/tex">g</script>, the most common names).  You can
+edit the properties of the homomorphism by double-clicking the morphism
+itself.  By default, all homomorphisms map their entire domain to the
+identity element of the codomain (the zero homomorphism).  To see how to
+change this, visit <a href="../rf-um-morphedit/">the help page on editing
+homomorphisms</a>.</p>
         </div>
     </div>
 </div>

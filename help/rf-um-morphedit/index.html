@@ -7,6 +7,9 @@
 <link rel="stylesheet" href="../w3-theme-blue.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config( { TeX: { extensions: [ "color.js" ] } } );
+</script>
 <body>
 
 <!-- Header -->
@@ -27,7 +30,10 @@
                 <ul>
                 
                     <li><a style="text-decoration: none;"
-                          href="#stub">STUB</a></li>
+                          href="#display-of-a-homomorphism">Display of a homomorphism</a></li>
+                
+                    <li><a style="text-decoration: none;"
+                          href="#mathematical-definition-of-the-homomorphism">Mathematical definition of the homomorphism</a></li>
                 
                 </ul>
 
@@ -88,10 +94,94 @@
             </div>
         </div>
         <div class="w3-threequarter w3-container">
-            <h1 id="stub">STUB</h1>
-<p>This page is a placeholder.</p>
-<p>Its existence removes <code>mkdocs</code> error messages about missing pages.</p>
-<p>It will be filled with content later.</p>
+            <p>If you double-click on a <a href="../rf-groupterms/#homomorphism">homomorphism</a> in a
+<a href="../rf-geterms/#sheets">sheet</a>, you will be presented with the homomorphism
+edit dialog, like the one shown below.</p>
+<p><img alt="A screenshot of a homomorphism edit dialog" src="../illustration-morphedit1.jpg" /></p>
+<h2 id="display-of-a-homomorphism">Display of a homomorphism</h2>
+<p>The top of the homomorphism edit window allows you to customize the
+appearance of the homomorphism as an object in a
+<a href="../rf-geterms/#sheets">sheet</a>.</p>
+<h3 id="morphism-name">Morphism name:</h3>
+<p>This is filled with some default text, which will be shown in a small
+rectangular label on the morphism arrow in the sheet, as shown below.</p>
+<p><img alt="A screenshot of a homomorphism" src="../illustration-morph1.jpg" /></p>
+<h3 id="show-domain-and-codomain">Show domain and codomain</h3>
+<p>If the checkbox beneath it, &ldquo;Show domain and codomain,&rdquo; is checked, then the
+label will be slightly larger, including the specified information, as shown
+below.</p>
+<p><img alt="A screenshot of a homomorphism with its domain and codomain included" src="../illustration-morph2.jpg" /></p>
+<h3 id="show-defining-pairs">Show defining pairs</h3>
+<p>This box is not checked by default, but when checked, it augments the label
+with a list of all generating pairs, as in the &ldquo;Mapping&rdquo; portion of the
+dialog, discussed <a href="#pairs-in-the-map">below</a>. See the example below.</p>
+<p><img alt="A screenshot of a homomorphism with its generating pairs" src="../illustration-morph4.jpg" /></p>
+<h3 id="show-injectivesurjective">Show injective/surjective</h3>
+<p>This box is not checked by default, but when checked, it augments the label as follows:</p>
+<ul>
+<li>If the homomorphism is
+   <a href="../rf-groupterms/#injective-injection">injective</a>,
+   then the phrase &ldquo;1-1&rdquo; is added
+   (because &ldquo;one-to-one&rdquo; is a shorthand for &ldquo;injective&rdquo;).
+   Otherwise, the phrase &ldquo;not 1-1&rdquo; is added.</li>
+<li>If the homomorphism is
+   <a href="../rf-groupterms/#surjective-surjection">surjective</a>,
+   then the phrase &ldquo;onto&rdquo; is added
+   (because &ldquo;onto&rdquo; is a shorthand for &ldquo;surjective&rdquo;).
+   Otherwise, the phrase &ldquo;not onto&rdquo; is added.</li>
+</ul>
+<p>Two of these phrases appear in the example shown below.</p>
+<p><img alt="A homomorphism with injectivity and surjectivity labeled" src="../illustration-morph3.jpg" /></p>
+<h3 id="draw-multiple-arrows">Draw multiple arrows</h3>
+<p>This box is not checked by default, but when checked, it replaces the single
+arrow of the morphism with several arrows, one for each element of the
+domain. The source of these arrows is dependent on the visualizer; for
+instance, in the multiplication table below, the left column of the
+multiplication table is used. The endpoint of the arrows is determined by
+the map; in the example below, the map <script type="math/tex">z</script> is the zero map, mapping all
+elements to the identity.</p>
+<p><img alt="A homomorphism with an arrow shown for each element of the domain" src="../illustration-morph5.jpg" /></p>
+<h2 id="mathematical-definition-of-the-homomorphism">Mathematical definition of the homomorphism</h2>
+<p>The bottom half of the homomorphism edit window allows you to specify the
+homomorphism as a function, a map from one group to another.</p>
+<h3 id="pairs-in-the-map">Pairs in the map</h3>
+<p>Under the heading &ldquo;Define the homomorphism here,&rdquo; we have a table listing
+which elements of the homomorphism&rsquo;s domain map to which elements of its
+codomain.  Each row of the table is a pair of elements, call them <script type="math/tex">d</script> from
+the domain and <script type="math/tex">c</script> from the codomain, that have been added to the
+homomorphism already, meaning that the user has stipulated that <script type="math/tex">f(d)=c</script>
+(if the morphism is named <script type="math/tex">f</script>).</p>
+<p>Next to each pair in the map appears a &ldquo;Remove&rdquo; button so that if you wish
+to edit the morphism by mapping <script type="math/tex">d</script> to a different element, you can remove
+the pair <script type="math/tex">(d,c)</script> from the map and then assign <script type="math/tex">d</script> a new image, as
+documented below.</p>
+<p>The user assigns a pairing <script type="math/tex">(d,c)</script> by selecting <script type="math/tex">d</script> from the domain
+drop-down list beneath the table and <script type="math/tex">c</script> from the codomain list, then
+clicking the &ldquo;Add:&rdquo; button.  Because of the way the drop-down lists are
+arranged, they will read like the equation <script type="math/tex">f(d)=c</script> before you click
+&ldquo;Add,&rdquo; to ensure that you&rsquo;re adding the pair you intend.</p>
+<p>The domain drop-down list contains only elements whose image has not already
+been determined by the pairs that have been added to the map.  For instance,
+if you have already placed <script type="math/tex">(a_1,b_1)</script> and <script type="math/tex">(a_2,b_2)</script> into the map,
+then by the properties of homomorphisms, the image of all elements of the
+subgroup <script type="math/tex">\langle a_1,a_2 \rangle</script> have been determined.  Thus none of
+those elements will show up in the domain drop-down list, because none are
+assignable any longer.</p>
+<p>When the domain elements of the pairs in the map don&rsquo;t generate the entire
+domain, <em>Group Explorer</em> searches for any homomorphism extending the pairs
+in the table and uses that.  You can click the &ldquo;Preview&rdquo; button to see
+exactly which homomorphism was chosen, or simply add pairs to the map to
+specify exactly the one you want.</p>
+<p>The codomain drop-down list contains only elements that could legitimately
+be the image of the element chosen in the domain drop-down list.  By &ldquo;could
+legitimately be the image,&rdquo; I mean that there exists some homomorphism that
+contains the pairs already added to the map plus the new pair you might add.
+Thus this constraint ensures that you can use the editor to define only
+homomorphisms, not any other kind of function between groups.</p>
+<h3 id="other-buttons">Other buttons</h3>
+<p>The OK button saves your changes to the morphism and closes the dialog.</p>
+<p>The Cancel button closes the dialog without saving your changes into the
+sheet.</p>
         </div>
     </div>
 </div>

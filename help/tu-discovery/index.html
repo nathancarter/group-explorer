@@ -7,6 +7,9 @@
 <link rel="stylesheet" href="../w3-theme-blue.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config( { TeX: { extensions: [ "color.js" ] } } );
+</script>
 <body>
 
 <!-- Header -->
@@ -27,7 +30,19 @@
                 <ul>
                 
                     <li><a style="text-decoration: none;"
-                          href="#stub">STUB</a></li>
+                          href="#beginning-mathematical-discovery">Beginning Mathematical Discovery</a></li>
+                
+                    <li><a style="text-decoration: none;"
+                          href="#group-info-all-the-way">Group info, all the way</a></li>
+                
+                    <li><a style="text-decoration: none;"
+                          href="#class-equations">Class equations</a></li>
+                
+                    <li><a style="text-decoration: none;"
+                          href="#subgroups">Subgroups</a></li>
+                
+                    <li><a style="text-decoration: none;"
+                          href="#getting-the-fundamental-theorem">"Getting" the Fundamental Theorem</a></li>
                 
                 </ul>
 
@@ -88,10 +103,143 @@
             </div>
         </div>
         <div class="w3-threequarter w3-container">
-            <h1 id="stub">STUB</h1>
-<p>This page is a placeholder.</p>
-<p>Its existence removes <code>mkdocs</code> error messages about missing pages.</p>
-<p>It will be filled with content later.</p>
+            <h2 id="beginning-mathematical-discovery">Beginning Mathematical Discovery</h2>
+<p>This page suggests two different directions you can follow to some
+enlightening illustrations about groups.  First, we&rsquo;ll talk about a basic
+tip for how to get the most out of <em>Group Explorer.</em>  Then I&rsquo;ll give you a
+taste of some of the value of visualization in group theory.</p>
+<h2 id="group-info-all-the-way">Group info, all the way</h2>
+<p>The first time you see a <a href="../rf-um-groupwindow/">group info window</a>, the
+amount of information it presents may be a bit overwhelming.  But take care
+not to miss the section entitled &ldquo;Computed properties.&rdquo;</p>
+<p>For example, <a href="http://nathancarter.github.io/group-explorer/GroupInfo.html?groupURL=groups/Z_6.group">click
+here</a>
+to visit the group info page for the group <script type="math/tex">\mathbb{Z}_6</script> and scroll down
+to the &ldquo;Computed properties&rdquo; section.</p>
+<p>That section contains much more information that it might at first seem to,
+and I recommend taking some time to investigate it. Follow the &ldquo;tell me
+more&rdquo; links and you&rsquo;ll find that <em>Group Explorer</em> will often tell you <em>much</em>
+more.</p>
+<h2 id="class-equations">Class equations</h2>
+<p>For instance, click the &ldquo;tell me more&rdquo; link to the right of the class
+equation in the group info page you opened. You will find all of the
+following.</p>
+<ul>
+<li>A link to <a href="../rf-groupterms/#classequation">the definition of &ldquo;class equation.&rdquo;</a></li>
+<li>An explanation of why your group has the class equation it does.</li>
+<li>Three links to different ways to visualize the class equation.
+   As is an example, the class equation for <script type="math/tex">D_5</script> shown using
+   cycle graphs creates an image like the one shown below.</li>
+</ul>
+<p><img alt="A sheet showing the class equation for D_5" src="../d_5_sheet_cycle_classeqn.png" /></p>
+<p>A very important difference is that when you ask <em>Group Explorer</em> to
+automatically generate the illustration, then the result is interactive.
+You can manipulate each component of the illustration, unlike the static
+image above.</p>
+<h2 id="subgroups">Subgroups</h2>
+<p>But far more deep information is available under the &ldquo;tell me more&rdquo; link next to the number of subgroups. Under that link you will find all of the following information.</p>
+<ul>
+<li>A link that will show you the lattice of subgroups for your group,
+   in any of several formats.</li>
+<li>The name, index, and order of each subgroup of your group, in addition
+   to an illustration of it as a group on its own, and an answer as to
+   whether it is normal.</li>
+<li>Links to see each of the illustrations as a large visualizer which
+   you can edit.</li>
+<li>For normal subgroups, links to diagrams witnessing the normality of the
+   subgroup, using a short exact sequence of homomorphisms, which will
+   contain the quotient group.</li>
+<li>Whether your group is simple, and why.</li>
+<li>Links to definitions of every term used on this list,
+   as well as several others that show up.</li>
+</ul>
+<p>In summary, do not ignore the computed properties of a group in its info
+page! It is an excellent place to start learning about a group and to start
+learning some group theory terminology in a fairly concrete context, with
+definitions readily available.</p>
+<h2 id="getting-the-fundamental-theorem">&ldquo;Getting&rdquo; the Fundamental Theorem</h2>
+<p>Now let&rsquo;s get a taste of some of the power group theory visualization has
+for building intuition.</p>
+<p>The Fundamental Theorem of Abelian groups states that every abelian group is
+simply a product of cyclic groups. From this, group theorists conclude that
+abelian groups are less interesting to study than nonabelian groups, because
+this theorem effectively completely classifies them. We understand them
+thoroughly, through this theorem.</p>
+<p>But the first-time you experience group theory, such a theorem may hardly
+seem to give complete understanding of abelian groups. It may actually seem
+rather opaque. Let&rsquo;s see how <em>Group Explorer</em> can show us what this theorem
+means.</p>
+<h3 id="cyclic-groups">Cyclic groups</h3>
+<p>The theorem says that abelian groups are products of cyclic groups. So then
+we ask, what are cyclic groups? They are groups that are generated by one
+element running in a cycle, hence the name. Their Cayley diagrams and cycle
+graphs all look like circles, as shown below.  From left to right, we have
+the Cayley diagrams of <script type="math/tex">\mathbb{Z}_3</script> and <script type="math/tex">\mathbb{Z}_6</script> followed by the
+cycle graphs of <script type="math/tex">\mathbb{Z}_8</script> and <script type="math/tex">\mathbb{Z}_{15}</script>.</p>
+<p><img alt="Small Cayley diagram of Z_3" src="../z_3_cayley_thumbnail.png" />
+<img alt="Small Cayley diagram of Z_6" src="../z_6_cayley_thumbnail.png" />
+<img alt="Small cycle graph of Z_8" src="../z_8_cycle_thumbnail.png" />
+<img alt="Small cycle graph of Z_15" src="../z_15_cycle_thumbnail.png" /></p>
+<p>If we ask <em>Group Explorer</em> to use a linear axis for displaying a cyclic
+group, it stretches it out into a line, with one loop connecting the end of
+the line to the beginning, like this.</p>
+<p><img alt="Linear Cayley diagram for Z_6" src="../illustration-z6linear.png" /></p>
+<p>Remember this image, because it is important below.</p>
+<h3 id="abelian-groups">Abelian groups</h3>
+<p>Let&rsquo;s take a look at the Cayley diagrams of some abelian groups. You can
+tell which ones are abelian by looking at the &ldquo;Abelian&rdquo; computed property in
+their group info page. Better still, in <a href="../rf-um-mainwindow/">the main
+window</a> you can show the &ldquo;Abelian&rdquo; column and see
+yes/no for each group.  From left to right, we have the Cayley diagrams of
+<script type="math/tex">V_4</script>, <script type="math/tex">\mathbb{Z}_3\times\mathbb{Z}_3</script>,
+<script type="math/tex">\mathbb{Z}_2\times\mathbb{Z}_2\times\mathbb{Z}_2</script>, and
+<script type="math/tex">\mathbb{Z}_2\times\mathbb{Z}_4\times\mathbb{Z}_2</script>.</p>
+<p><img alt="Cayley diagram of V_4" src="../v_4_cayley_thumbnail.png" />
+<img alt="Cayley diagram of Z_3 x Z_3" src="../z_3_x_z_3_cayley_thumbnail.png" />
+<img alt="Cayley diagram of Z_2 x Z_2 x Z_2" src="../z_2_x_z_2_x_z_2_cayley_thumbnail.png" />
+<img alt="Cayley diagram of Z_2 x Z_4 x Z_2" src="../z_2_x_z_4_x_z_2_cayley_thumbnail.png" /></p>
+<p>What do you see when you look at these diagrams?</p>
+<p>Notice that all of these diagrams are assembled from pieces which are like
+the image of a linear cyclic group shown earlier. That is, many little
+linear cyclic groups, at right angles to one another, combine to form each
+of these diagrams.</p>
+<p>From this we can conclude two useful things.</p>
+<h3 id="we-begin-to-understand-what-a-product-is">We begin to understand what a product is.</h3>
+<p>If abelian groups are just products of cyclic groups, then this product
+operation must mean simply something like &ldquo;attaching a bunch of copies at
+right angles.&rdquo; This is essentially true, and has an important contrast to
+other kinds of group product operations, such as the semidirect product.
+(There are a few semidirect products in <em>Group Explorer&rsquo;s</em> library. If you
+view them, you will notice their Cayley diagrams are quite tangled&ndash;not
+plain and simple right angles at all!)</p>
+<h3 id="we-begin-to-understand-the-meaning-and-significance-of-the-theorem">We begin to understand the meaning and significance of the theorem.</h3>
+<p>Now when a group theorist tells you that the Fundamental Theorem of Abelian
+groups completely explains abelian groups, you can have a better
+understanding of what he&rsquo;s saying. The theorem stated</p>
+<blockquote>
+<p>Every abelian group is a product of cyclic groups.</p>
+</blockquote>
+<p>Now that we&rsquo;ve looked at a few diagrams of abelian groups, we can perhaps
+rephrase the theorem to describe what we&rsquo;ve seen.</p>
+<blockquote>
+<p>Every abelian group is composed entirely of short lines attached at right
+angles.</p>
+</blockquote>
+<p>In our rephrasing the &ldquo;short lines&rdquo; are linear representations of cyclic
+groups, and the &ldquo;attached at right angles&rdquo; corresponds to the notion of a
+product.</p>
+<p>This does make abelian groups sound both straightforward and readily
+understandable, especially when we contrast them with nonabelian groups.
+Let&rsquo;s take a look at a few Cayley diagrams for nonabelian groups.  From left
+to right, below, we have the Cayley diagrams for <script type="math/tex">Q_4</script>,
+<script type="math/tex">\mathbb{Z}_3\rtimes\mathbb{Z}_4</script>, a nonabelian group of order 21, and
+<script type="math/tex">S_4</script>.</p>
+<p><img alt="Cayley diagram for Q_4" src="../q_4_cayley_thumbnail.png" />
+<img alt="Cayley diagram for Z_3 semidirect product Z_4" src="../z_3_sdp_z_4_cayley_thumbnail.png" />
+<img alt="Cayley diagram for a nonabelian group of order 21" src="../twenty_one_cayley_thumbnail.png" />
+<img alt="Cayley diagram for S_4" src="../s_4_cayley_thumbnail.png" /></p>
+<p>See how much more tangled (and therefore complex) they are! By contrast,
+surely the nonabelian groups are the ones that require more study.</p>
         </div>
     </div>
 </div>

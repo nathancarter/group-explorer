@@ -7,6 +7,9 @@
 <link rel="stylesheet" href="../w3-theme-blue.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config( { TeX: { extensions: [ "color.js" ] } } );
+</script>
 <body>
 
 <!-- Header -->
@@ -27,7 +30,13 @@
                 <ul>
                 
                     <li><a style="text-decoration: none;"
-                          href="#stub">STUB</a></li>
+                          href="#data-in-the-group-table">Data in the group table</a></li>
+                
+                    <li><a style="text-decoration: none;"
+                          href="#sorting-the-table">Sorting the table</a></li>
+                
+                    <li><a style="text-decoration: none;"
+                          href="#menu-top-right">Menu (top right)</a></li>
                 
                 </ul>
 
@@ -88,10 +97,59 @@
             </div>
         </div>
         <div class="w3-threequarter w3-container">
-            <h1 id="stub">STUB</h1>
-<p>This page is a placeholder.</p>
-<p>Its existence removes <code>mkdocs</code> error messages about missing pages.</p>
-<p>It will be filled with content later.</p>
+            <p>This page documents the main window of the <em>Group Explorer</em> web application
+and from which all other page are opened.</p>
+<h2 id="data-in-the-group-table">Data in the group table</h2>
+<p><img alt="A portion of the main page's group library" src="../illustration-tablecorner.jpg" /></p>
+<p>Each row in the table shown in the main <em>Group Explorer</em> page represents a
+group. By default, the following columns are visible (in this order) when
+<em>Group Explorer</em> has opened:</p>
+<ol>
+<li>Name - the symbolic name of the group, as shown above</li>
+<li><a href="../rf-groupterms/#order-of-a-group">Order</a></li>
+<li><a href="../rf-groupterms/#definition-of-a-group-via-generators-and-relations">Definition</a></li>
+<li><a href="../rf-groupterms/#cayley-diagrams">Cayley Diagram</a></li>
+<li><a href="../rf-groupterms/#multiplication-table">Multiplication table</a></li>
+<li><a href="../rf-groupterms/#objects-of-symmetry">Object of symmetry</a></li>
+<li><a href="../rf-groupterms/#cycle-graph">Cycle graph</a></li>
+</ol>
+<p><strong>To learn more about any group in the table, simply click its name. This
+opens its <a href="../rf-um-groupwindow/">Group Info page</a>, which contains
+everything <em>Group Explorer</em> knows about the group and is the launchpad for
+exploring the group.</strong> To ask for explanation about the contents of an
+individual cell in the main group page, click the heading of that column,
+which is a link to the help for that topic.</p>
+<p>The first time you visit the <em>Group Explorer</em> main page, it may take some
+time to load all the groups in the library.  Future times that you visit the
+page, this should be faster, because the application stores some of the data
+in your browser so that it can be accessed more quickly in the future.</p>
+<h2 id="sorting-the-table">Sorting the table</h2>
+<p>You can sort the table by group name or order; simply click the column
+heading cell.  (The heading for the Order column is also a link to the help
+on group order; click outside the word &ldquo;Order&rdquo; to sort by that column.)</p>
+<h2 id="menu-top-right">Menu (top right)</h2>
+<p>The following icons appear on the top right of the main page.  Each is
+addressed separately, below.</p>
+<p><img alt="A screenshot of the icons on the top right of the main page" src="../main-page-menu-icons.png" /></p>
+<h3 id="home">Home</h3>
+<p>The first icon (the house) is a link to the main <em>Group Explorer</em> website.
+That is, it will take you out of the app itself and back to the home page of
+the entire project.</p>
+<h3 id="sheets">Sheets</h3>
+<p>The second icon (the sheet of paper) takes you to a blank sheet, into which
+you can insert visualizations of any groups from the library and connect
+them with morphisms.  To read more on sheets, see <a href="../tu-sheets/">the sheets
+tutorial</a> or <a href="../rf-um-sheetwindow/">the sheets reference</a>.</p>
+<h3 id="help">Help</h3>
+<p>The third icon (the question mark) takes you to the main page of these help
+files.</p>
+<h3 id="github">GitHub</h3>
+<p>The rightmost icon (the GitHub logo) takes you to <a href="https://github.com/nathancarter/group-explorer">the source code
+repository</a> from which the
+application and its website were built.  Visit that site if you would like
+to see how the application was built, make suggestions for its improvement,
+report an error in the documentation, or get involved in improving the
+software as a developer.</p>
         </div>
     </div>
 </div>

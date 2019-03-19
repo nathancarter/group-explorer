@@ -7,6 +7,9 @@
 <link rel="stylesheet" href="../w3-theme-blue.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config( { TeX: { extensions: [ "color.js" ] } } );
+</script>
 <body>
 
 <!-- Header -->
@@ -27,7 +30,16 @@
                 <ul>
                 
                     <li><a style="text-decoration: none;"
-                          href="#stub">STUB</a></li>
+                          href="#reordering-header-row-or-header-column">Reordering header row or header column</a></li>
+                
+                    <li><a style="text-decoration: none;"
+                          href="#magnification">Magnification</a></li>
+                
+                    <li><a style="text-decoration: none;"
+                          href="#the-table-tab">The Table tab</a></li>
+                
+                    <li><a style="text-decoration: none;"
+                          href="#related-interfaces">Related interfaces</a></li>
                 
                 </ul>
 
@@ -88,10 +100,84 @@
             </div>
         </div>
         <div class="w3-threequarter w3-container">
-            <h1 id="stub">STUB</h1>
-<p>This page is a placeholder.</p>
-<p>Its existence removes <code>mkdocs</code> error messages about missing pages.</p>
-<p>It will be filled with content later.</p>
+            <p>This page documents the interface for the large view of a <a href="../rf-groupterms/#multiplication-table">multiplication
+table</a>. A multiplication table is one
+of <em>Group Explorer&rsquo;s</em> four <a href="../rf-geterms/#visualizers">visualizers</a>, all of
+which can appear either in <a href="../rf-um-groupwindow/">group info pages</a>,
+<a href="../rf-geterms/#sheets">sheets</a>, or in their own pages. When they appear in
+their own pages, this is refered to as a &ldquo;large view,&rdquo; and you can read
+about it in general <a href="../rf-um-largewindow/">here</a>. This page covers the
+specifics for large views of multiplication tables.</p>
+<p><img alt="A large view of a multiplication table" src="../illustration-mtwindow.jpg" /></p>
+<h2 id="reordering-header-row-or-header-column">Reordering header row or header column</h2>
+<p>You can choose the order of elements along the top row (or left column) of
+the multiplication table using your mouse. (Note that order of elements in
+the top row and left column determine the contents of the rest of the table.
+<em>Group Explorer</em> fills it out using the group operation.)</p>
+<p>To move an element from one point to another in the top row, shift-click on
+the element&rsquo;s cell in the table and drag your mouse to the new position
+(left or right in the top row). To move an element in the left column, the
+procedure is the same, except vertical. Note that the top row and left
+column will stay synchronized, so no matter which one you reorder, both will
+change.</p>
+<p>You can also ask <em>Group Explorer</em> to organize the top row/left column of the
+table according to a particular subgroup and its cosets; <a href="#organization-by-subgroup">see
+below</a>.</p>
+<h2 id="magnification">Magnification</h2>
+<p>You can zoom in and out of multiplication tables with your mouse wheel.</p>
+<p>The center of zooming is always the center of the view, so if you wish to
+zoom around a different center, first click and drag to move that point to
+the center of the view, then you can zoom in and out centered on that point.</p>
+<p>To restore the default magnification level (which fits the whole table into
+the view), right-click (control click on Mac) anywhere in the table.</p>
+<h2 id="the-table-tab">The Table tab</h2>
+<p><img alt="A screen shot of the table options tab" src="../illustration-tabletab.jpg" /></p>
+<p>The controls panel for multiplication table large views has two tabs at the
+top: Subsets and Table. The first of these allows you to highlight subsets
+of the group in the table; <a href="#related-interfaces">see below for information on that
+tab</a>. The second of these allows you to change the
+structure or appearance of the table in other ways. This section describes
+those controls.</p>
+<h3 id="organization-by-subgroup">Organization by subgroup</h3>
+<p>By default, the &ldquo;Organize by subgroup:&rdquo; drop-down list at the top of the
+Table tab has &ldquo;none&rdquo; selected. However, if you wish to organize the top row
+(and left column) of the multiplication table so that a particular subgroup
+is at the left (top) and its cosets follow it one after the other, you can
+choose that subgroup from this drop-down list.</p>
+<p>You can also choose the exact order of the elements in the top row or left
+column of the table manually; <a href="#reordering-header-row-or-header-column">see
+above</a>.</p>
+<h3 id="separation-of-cosets">Separation of cosets</h3>
+<p>If you have made a selection on the &ldquo;Organize by subgroup:&rdquo; drop-down list
+(<a href="#organization-by-subgroup">see above</a>), then <em>Group Explorer</em> also enables
+you to put some vertical and horizontal space between the cosets in the
+multiplication table, to help the viewer visually separate them. The slider
+under the &ldquo;Separate cosets by:&rdquo; header determines how much space (the
+leftmost extreme is zero, no space, the default).</p>
+<p>This is especially useful when the subgroup in question is normal, because
+it helps visualize the quotient group. As an example, consider <a href="../d_4_multtable_organized.png">this
+multiplication table</a> illustrating the quotient
+of <script type="math/tex">D_4</script> by <script type="math/tex">\mathbb{Z}_2</script>.</p>
+<h3 id="colorization-scheme">Colorization scheme</h3>
+<p>There are three colorization schemes for multiplication tables:</p>
+<ul>
+<li>Spectrum/rainbow</li>
+<li>Grayscale</li>
+<li>None</li>
+</ul>
+<p>The first is the default, and makes multiplication tables use all the hues
+in the color spectrum, as in the first illustration on this page. Grayscale
+is appropriate if you intend to print on a black-and-white printer; the
+colors of gray contrast better than the rainbow hues, which all have the
+same saturation and intensity. Choosing None makes the multiplication table
+just black text on white background.</p>
+<p>Note that the colorization scheme you choose is overridden by any
+highlighting you do on the Subsets tab, documented on a separate page, as
+indicated below.</p>
+<h2 id="related-interfaces">Related interfaces</h2>
+<p>The controls in the Subsets tab on the right side of the large window for
+multiplication tables are described in <a href="../rf-um-subsetlistbox/">the help page for subset
+controls</a>.</p>
         </div>
     </div>
 </div>

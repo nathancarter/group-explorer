@@ -7,6 +7,9 @@
 <link rel="stylesheet" href="../w3-theme-blue.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config( { TeX: { extensions: [ "color.js" ] } } );
+</script>
 <body>
 
 <!-- Header -->
@@ -27,7 +30,10 @@
                 <ul>
                 
                     <li><a style="text-decoration: none;"
-                          href="#stub">STUB</a></li>
+                          href="#magnification">Magnification</a></li>
+                
+                    <li><a style="text-decoration: none;"
+                          href="#related-interfaces">Related interfaces</a></li>
                 
                 </ul>
 
@@ -88,10 +94,26 @@
             </div>
         </div>
         <div class="w3-threequarter w3-container">
-            <h1 id="stub">STUB</h1>
-<p>This page is a placeholder.</p>
-<p>Its existence removes <code>mkdocs</code> error messages about missing pages.</p>
-<p>It will be filled with content later.</p>
+            <p>This page documents the interface for the large view of a <a href="../rf-groupterms/#cycle-graph">cycle
+graph</a>. A cycle graph is one of
+<em>Group Explorer&rsquo;s</em> four <a href="../rf-geterms/#visualizers">visualizers</a>, all of
+which can appear either in <a href="../rf-um-groupwindow/">group info pages</a>,
+<a href="../rf-geterms/#sheets">sheets</a>, or in their own pages. When they appear in
+their own pages, this is refered to as a &ldquo;large view,&rdquo; and you can read
+about it in general <a href="../rf-um-largewindow/">here</a>. This page covers the
+specifics for large views of cycle graphs.</p>
+<p><img alt="A large view of a cycle graph" src="../illustration-cgwindow.jpg" /></p>
+<h2 id="magnification">Magnification</h2>
+<p>You can zoom in and out of cycle graphs with your mouse wheel.</p>
+<p>The center of zooming is always the center of the view, so if you wish to
+zoom around a different center, first click and drag to move that point to
+the center of the view, then you can zoom in and out centered on that point.</p>
+<p>To restore the default magnification level (which fits the whole cycle graph
+into the view), right-click (control click on Mac) anywhere in the cycle
+graph.</p>
+<h2 id="related-interfaces">Related interfaces</h2>
+<p>The controls in the right side of the large window for cycle graphs are
+described in <a href="../rf-um-subsetlistbox/">the help page for subset controls</a>.</p>
         </div>
     </div>
 </div>

@@ -7,6 +7,9 @@
 <link rel="stylesheet" href="../w3-theme-blue.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config( { TeX: { extensions: [ "color.js" ] } } );
+</script>
 <body>
 
 <!-- Header -->
@@ -27,7 +30,19 @@
                 <ul>
                 
                     <li><a style="text-decoration: none;"
-                          href="#stub">STUB</a></li>
+                          href="#what-is-a-large-visualizer">What is a "large visualizer?"</a></li>
+                
+                    <li><a style="text-decoration: none;"
+                          href="#opening-a-large-visualizer">Opening a large visualizer</a></li>
+                
+                    <li><a style="text-decoration: none;"
+                          href="#page-structure">Page structure</a></li>
+                
+                    <li><a style="text-decoration: none;"
+                          href="#toolbar">Toolbar</a></li>
+                
+                    <li><a style="text-decoration: none;"
+                          href="#four-visualizer-types">Four visualizer types</a></li>
                 
                 </ul>
 
@@ -88,10 +103,98 @@
             </div>
         </div>
         <div class="w3-threequarter w3-container">
-            <h1 id="stub">STUB</h1>
-<p>This page is a placeholder.</p>
-<p>Its existence removes <code>mkdocs</code> error messages about missing pages.</p>
-<p>It will be filled with content later.</p>
+            <h2 id="what-is-a-large-visualizer">What is a &ldquo;large visualizer?&rdquo;</h2>
+<p>Each <a href="../rf-geterms/#visualizers">visualizer</a> in <em>Group Explorer</em> can show up
+in three contexts: in a <a href="../rf-um-groupwindow/">group info page</a>, as an item
+in a <a href="../rf-geterms/#sheets">sheet</a>, or in full detail in its own editable
+window. This last case is the subject of this page.</p>
+<p>Because each visualizer is different, this page covers just what all large
+visualizer views have in common, and refers you to each visualizer&rsquo;s
+individual interface page for specific information about each.</p>
+<h2 id="opening-a-large-visualizer">Opening a large visualizer</h2>
+<p>You can obtain a large view of each visualizer one of two ways.</p>
+<ol>
+<li>
+<p>Some pages contain links that will create a large visualizer for you.</p>
+<p>For instance, each <a href="../rf-um-groupwindow/">group info page</a>
+has a Views section that gives a preview of every visualizer
+for the group and clicking any one opens a large copy
+in its own window. Thumbnails of each visualizer on
+<a href="../rf-um-mainwindow/">the main application page</a> work the same way.</p>
+<p>In this case, although you can edit the appearance of the visualizer
+and save it as an image or print it, once you close the window,
+all your changes are lost.</p>
+</li>
+<li>
+<p>You can create visualizers in <a href="../rf-geterms/#sheets">sheets</a>
+    and double-click them to open a large version.</p>
+<p>In this case, the large view is linked to the small view in the sheet,
+and all changes made to the large view in its own window
+are reflected in the image on the sheet
+and will be saved if you save the sheet.</p>
+</li>
+</ol>
+<p>Here is a screenshot of a window viewing a large version of a Cayley
+diagram.</p>
+<p><img alt="Screenshot of a large view of a Cayley diagram" src="../illustration-largecd.jpg" /></p>
+<h2 id="page-structure">Page structure</h2>
+<p>Every large visualizer page is split into two halves, like the one shown
+above. The left half will always have the picture&ndash;the visualization. The
+right half will be controls that allow you to edit the picture. The boundary
+between these two is movable; if you hover your mouse over it you will see
+your mouse cursor change to indicate that it can be slid left and right. You
+can also hide it entirely with one of the controls on the top right of the
+window.</p>
+<p>If you perform any of the edits described with the controls below but then
+wish to undo them and reset the large visualizer to its original state, just
+reload the page in your browser.  Any changes you have made will be lost.</p>
+<h2 id="toolbar">Toolbar</h2>
+<p>On the top right of any visualizer you will find the following controls.
+We cover each of them separately, below.</p>
+<p><img alt="Screenshot of the tools on the top right of a large visualizer page" src="../large-viz-menu-icons.png" /></p>
+<h3 id="home">Home</h3>
+<p>The first icon (the house) is a link to the main <em>Group Explorer</em> website.
+That is, it will take you out of the app itself and back to the home page of
+the entire project.</p>
+<h3 id="library">Library</h3>
+<p>The second icon (the book) takes you to the Group Library page, the <a href="../rf-um-mainwindow/">main
+page of the app itself</a>.</p>
+<h3 id="sheets">Sheets</h3>
+<p>The third icon (the sheet of paper) takes you to a blank sheet, into which
+you can insert visualizations of any groups from the library and connect
+them with morphisms.  To read more on sheets, see <a href="../tu-sheets/">the sheets
+tutorial</a> or <a href="../rf-um-sheetwindow/">the sheets reference</a>.</p>
+<h3 id="help">Help</h3>
+<p>The fourth icon (the question mark) takes you to the main page of these help
+files.</p>
+<h3 id="github">GitHub</h3>
+<p>The fifth icon (the GitHub logo) takes you to <a href="https://github.com/nathancarter/group-explorer">the source code
+repository</a> from which the
+application and its website were built.  Visit that site if you would like
+to see how the application was built, make suggestions for its improvement,
+report an error in the documentation, or get involved in improving the
+software as a developer.</p>
+<h3 id="hideshow">Hide/show</h3>
+<p>The rightmost icon (which looks like a right-arrow, &gt;, in the image
+above) will hide the right-hand controls pane, exposing just the visualizer
+to your view.  When you hide it, the icon becomes a left-arrow, &lt;,
+instead.  Clicking it will reveal the controls again.</p>
+<h2 id="four-visualizer-types">Four visualizer types</h2>
+<p>The controls in that right-hand pane are specific to which large visualizer
+you have open.  For more information on that controls pane, visit the
+documentation on whichever large visualizer you&rsquo;re using:</p>
+<ul>
+<li><a href="../rf-um-cd-options/">Documentation for large Cayley diagram interface</a></li>
+<li><a href="../rf-um-mt-options/">Documentation for large multiplication table interface</a></li>
+<li><a href="../rf-um-cg-options/">Documentation for large cycle graph interface</a></li>
+<li><a href="../rf-um-os-options/">Documentation for large symmetry object interface</a></li>
+</ul>
+<p>There are some controls in common among many of these visualizers; for
+convenience, we provide links to their docuemntation here.</p>
+<ul>
+<li><a href="../rf-um-subsetlistbox/">Documentation for the subset options controls</a></li>
+<li><a href="../rf-um-modelview/">Documentation for controls for viewing 3D models</a></li>
+</ul>
         </div>
     </div>
 </div>
