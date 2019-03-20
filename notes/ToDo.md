@@ -28,21 +28,23 @@
 
 ### Help pages
 
-Add to the help references to specific locations in VGT where users can go
-to read more.
-
-Add to the help references to other web resources where users can go to read
-more, such as Matthew Macauley's lecture videos on Visual Group Theory.
-
-Replace all occurrences of GE2-generated help images with GE3-generated
-ones.
-
-Verify that all instances of "help" in the app source code (which would
-indicate a potential link to the help system) go somewhere sensible in the
-new help system.
+ * Add to the help references to specific locations in VGT where users can go
+   to read more.
+ * Add to the help references to other web resources where users can go to read
+   more, such as Matthew Macauley's lecture videos on Visual Group Theory.
+ * Verify that all instances of "help" in the app source code (which would
+   indicate a potential link to the help system) go somewhere sensible in the
+   new help system.
+ * Once the naming scheme editing interface is finished, update the help image
+   `help-src/namescheme.jpg` with a new screenshot.
 
 ### Sheets
 
+ * Bug fix: The solvable decomposition sheet generator does not guarantee
+   that all quotient groups are abelian.  For example, try to show that S_4
+   is solvable; one quotient is S_3.
+   (After fixing this bug, take a new screenshot of the solvable decomposition
+   of S_4 and use it as the help image `illustration-sheettut9.png`.)
  * Extend the toJSON() and fromJSON() in CayleyDiagram.html to also respect:
     * all the rest of the Diagram panel needs to wait until I talk to Ray
     * background color:
