@@ -4,7 +4,7 @@ are unsure what sheets are, [read the description
 here](rf-geterms.md#sheets). A blank sheet window looks something like the
 following picture.
 
-![A screenshot of a blank sheet](illustration-blanksheet.jpg)
+![A screenshot of a blank sheet](illustration-blanksheet.png)
 
 Let us consider all the things one can do with a sheet, grouping them
 categorically.
