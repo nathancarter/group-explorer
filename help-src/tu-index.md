@@ -12,7 +12,7 @@ walking through some of the most important and commonly used features.
 
  * [Manipulating Multiplication Tables](tu-mt-manip.md)
 
-    [![Multiplication tabel of Z_3](illustration-z3mt.png)](tu-mt-manip.md)
+    [![Multiplication tabel of Z_3](s_3_multtable_unlabelled.png)](tu-mt-manip.md)
 
  * [Introduction to Sheets](tu-sheets.md)
 
