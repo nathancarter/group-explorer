@@ -4,7 +4,7 @@ and from which all other page are opened.
 
 ## Data in the group table
 
-![A portion of the main page's group library](illustration-tablecorner.jpg)
+![A portion of the main page's group library](illustration-tablecorner.png)
 
 Each row in the table shown in the main *Group Explorer* page represents a
 group. By default, the following columns are visible (in this order) when

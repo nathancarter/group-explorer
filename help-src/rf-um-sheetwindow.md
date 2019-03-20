@@ -17,7 +17,7 @@ Here is an image of a window containing a sheet with four items: a
 multiplication table, some text, a gray background rectangle, and a
 connecting line.
 
-![A screenshot of a sheet with four items](illustration-simplesheet.jpg)
+![A screenshot of a sheet with four items](illustration-simplesheet.png)
 
 If you wish to experiment with a sheet without creating one, there are links
 in each group's [Group Info page](rf-um-groupwindow.md) that will create

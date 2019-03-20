@@ -37,7 +37,7 @@ You can obtain a large view of each visualizer one of two ways.
 Here is a screenshot of a window viewing a large version of a Cayley
 diagram.
 
-![Screenshot of a large view of a Cayley diagram](illustration-largecd.jpg)
+![Screenshot of a large view of a Cayley diagram](illustration-largecd.png)
 
 ## Page structure
 

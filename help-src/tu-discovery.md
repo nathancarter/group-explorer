@@ -89,7 +89,7 @@ graphs all look like circles, as shown below.  From left to right, we have
 the Cayley diagrams of \(\mathbb{Z}_3\) and \(\mathbb{Z}_6\) followed by the
 cycle graphs of \(\mathbb{Z}_8\) and \(\mathbb{Z}_{15}\).
 
-![Small Cayley diagram of Z_3](z_3_cayley_thumbnail.png)
+![Small Cayley diagram of Z_3](z_3_cayley_unlabelled.png)
 ![Small Cayley diagram of Z_6](z_6_cayley_thumbnail.png)
 ![Small cycle graph of Z_8](z_8_cycle_thumbnail.png)
 ![Small cycle graph of Z_15](z_15_cycle_thumbnail.png)

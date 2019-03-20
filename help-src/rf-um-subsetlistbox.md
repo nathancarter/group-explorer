@@ -3,7 +3,7 @@ Every [visualizer](rf-geterms.md#visualizers) in *Group Explorer* except
 [objects of symmetry](rf-groupterms.md#objects-of-symmetry) have a panel
 like the one shown below for examining subgroups of the group under study.
 
-![A screenshot of the user interface for subsets and partitions](illustration-subsetlistbox.jpg)
+![A screenshot of the user interface for subsets and partitions](illustration-subsetlistbox.png)
 
 The particular subsets panel shown above is for [the eight-element
 quaternion
@@ -39,7 +39,7 @@ Right-clicking on the subsets pane brings up a menu from which you can take
 several important actions, some of which are visible in the following
 screenshot.
 
-![A screenshot of several subitems on the subset list box context menu](illustration-slbmenu.jpg)
+![A screenshot of several subitems on the subset list box context menu](illustration-slbmenu.png)
 
 Creating and deleting user-defined subgroups are both possible using this
 menu, as well as several types of computation and highlighing. Here follows
@@ -52,7 +52,7 @@ the documentation for each option on this menu.
 This menu item appears only if you right-clicked on a user-defined subset.
 If you choose it, a window like the one pictured here opens.
 
-![A dialog box for editing the contents of a user-defined subset](illustration-subsetedit.jpg)
+![A dialog box for editing the contents of a user-defined subset](illustration-subsetedit.png)
 
 The left pane shows the elements in your subset and the right pane shows the
 other elements of the group. To add elements to your subset, drag them in

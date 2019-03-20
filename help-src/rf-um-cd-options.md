@@ -8,7 +8,7 @@ their own pages, this is refered to as a "large view," and you can read
 about it in general [here](rf-um-largewindow.md). This page covers the
 specifics for large views of Cayley diagrams.
 
-![A large view of a Cayley diagram](illustration-largecd.jpg)
+![A large view of a Cayley diagram](illustration-largecd.png)
 
 ## Choosing which diagram to view
 

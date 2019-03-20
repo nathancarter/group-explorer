@@ -18,7 +18,7 @@ look like?"  This is its primary aim and the reason for its creation.
 The multiplication table is the simplest way to picture a group, and
 explicitly shows *the group operation.*
 
-[![Multiplication table for S_3](s_3_multtable_thumbnail.png)](http://nathancarter.github.io/group-explorer/Multtable.html?groupURL=groups/S_3.group)
+[![Multiplication table for S_3](s_3_multtable_unlabelled.png)](http://nathancarter.github.io/group-explorer/Multtable.html?groupURL=groups/S_3.group)
 &nbsp; &nbsp; &nbsp;
 [![Multiplication table for A_4](a_4_multtable_thumbnail.png)](http://nathancarter.github.io/group-explorer/Multtable.html?groupURL=groups/A_4.group)
 
@@ -67,7 +67,7 @@ Explorer* makes gropu theory more accessible and intuitive.
 
 ### Each picture of a group is very interactive
 
-![A cycle graph with highlights](illustration-highlightCG.jpg)
+![A cycle graph with highlights](illustration-cychigh1.png)
 
 [Study](tu-discovery.md) properties of the group by reorganizing a diagram
 or [highlighting it in different ways](rf-um-subsetlistbox.md).  Save useful
@@ -75,7 +75,7 @@ views as images to use in a document, email, or website.
 
 ### *Group Explorer* has a large library of groups
 
-![A screenshot of the group library](illustration-grouptable.jpg)
+![A screenshot of the group library](illustration-grouptable.png)
 
 [The main page of the
 application](http://nathancarter.github.io/group-explorer/GroupExplorer.html)
@@ -87,7 +87,7 @@ about the group.
 
 ### Help links appear in many locations
 
-![A screenshot of some help links](illustration-helplinks.jpg)
+![A screenshot of some help links](illustration-helplinks.png)
 
 Many portions of the software contain links to useful explanations.  In
 addition to the help pages you're reading now, [group info
@@ -99,7 +99,7 @@ visualizer.
 
 ### Groups can be connected and compared
 
-![A screenshot of a morphism](illustration-morphism.png)
+![A screenshot of a morphism](illustration-morph5.png)
 
 You need not be content with examining groups in isolation.
 [Sheets](tu-sheets.md) are an important tool that lets you create

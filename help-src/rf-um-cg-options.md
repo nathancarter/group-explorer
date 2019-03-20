@@ -8,7 +8,7 @@ their own pages, this is refered to as a "large view," and you can read
 about it in general [here](rf-um-largewindow.md). This page covers the
 specifics for large views of cycle graphs.
 
-![A large view of a cycle graph](illustration-cgwindow.jpg)
+![A large view of a cycle graph](illustration-cgwindow.png)
 
 ## Magnification
 

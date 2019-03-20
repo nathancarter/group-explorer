@@ -8,7 +8,7 @@ their own pages, this is refered to as a "large view," and you can read
 about it in general [here](rf-um-largewindow.md). This page covers the
 specifics for large views of multiplication tables.
 
-![A large view of a multiplication table](illustration-mtwindow.jpg)
+![A large view of a multiplication table](illustration-mtwindow.png)
 
 ## Reordering header row or header column
 
@@ -41,7 +41,7 @@ the view), right-click (control click on Mac) anywhere in the table.
 
 ## The Table tab
 
-![A screen shot of the table options tab](illustration-tabletab.jpg)
+![A screen shot of the table options tab](illustration-tabletab.png)
 
 The controls panel for multiplication table large views has two tabs at the
 top: Subsets and Table. The first of these allows you to highlight subsets

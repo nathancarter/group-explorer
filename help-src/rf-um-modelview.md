@@ -5,7 +5,7 @@ properties of the three-dimensional object in view. [Cayley
 diagrams](rf-groupterms.md#cayley-diagrams) and [objects of
 symmetry](rf-groupterms.md#objects-of-symmetry) are three-dimensional views.
 
-![A screenshot of the 3D view controls](illustration-modelview.jpg)
+![A screenshot of the 3D view controls](illustration-modelview.png)
 
 The "Zoom level" slider determines how large the three-dimensional object
 will seem. It operates just like the zoom on a camera, with the left end

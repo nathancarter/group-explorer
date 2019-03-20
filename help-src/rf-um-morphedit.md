@@ -3,7 +3,7 @@ If you double-click on a [homomorphism](rf-groupterms.md#homomorphism) in a
 [sheet](rf-geterms.md#sheets), you will be presented with the homomorphism
 edit dialog, like the one shown below.
 
-![A screenshot of a homomorphism edit dialog](illustration-morphedit1.jpg)
+![A screenshot of a homomorphism edit dialog](illustration-morphedit.png)
 
 ## Display of a homomorphism
 
@@ -16,7 +16,7 @@ appearance of the homomorphism as an object in a
 This is filled with some default text, which will be shown in a small
 rectangular label on the morphism arrow in the sheet, as shown below.
 
-![A screenshot of a homomorphism](illustration-morph1.jpg)
+![A screenshot of a homomorphism](illustration-morph1.png)
 
 ### Show domain and codomain
 
@@ -24,7 +24,7 @@ If the checkbox beneath it, "Show domain and codomain," is checked, then the
 label will be slightly larger, including the specified information, as shown
 below.
 
-![A screenshot of a homomorphism with its domain and codomain included](illustration-morph2.jpg)
+![A screenshot of a homomorphism with its domain and codomain included](illustration-morph2.png)
 
 ### Show defining pairs
 
@@ -32,7 +32,7 @@ This box is not checked by default, but when checked, it augments the label
 with a list of all generating pairs, as in the "Mapping" portion of the
 dialog, discussed [below](#pairs-in-the-map). See the example below.
 
-![A screenshot of a homomorphism with its generating pairs](illustration-morph4.jpg)
+![A screenshot of a homomorphism with its generating pairs](illustration-morph4.png)
 
 ### Show injective/surjective
 
@@ -51,7 +51,7 @@ This box is not checked by default, but when checked, it augments the label as f
 
 Two of these phrases appear in the example shown below.
 
-![A homomorphism with injectivity and surjectivity labeled](illustration-morph3.jpg)
+![A homomorphism with injectivity and surjectivity labeled](illustration-morph3.png)
 
 ### Draw multiple arrows
 
@@ -63,7 +63,7 @@ multiplication table is used. The endpoint of the arrows is determined by
 the map; in the example below, the map \(z\) is the zero map, mapping all
 elements to the identity.
 
-![A homomorphism with an arrow shown for each element of the domain](illustration-morph5.jpg)
+![A homomorphism with an arrow shown for each element of the domain](illustration-morph5.png)
 
 ## Mathematical definition of the homomorphism
 

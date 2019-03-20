@@ -105,7 +105,7 @@ providing links for you to browse further yourself.
       provided.
     * The illustration below shows the normality of \(V_4\) in \(A_4\).
 
-![A connection of five groups illustrating the normality of V_4 in A_4](illustration-sheettut7.png)
+![A connection of five groups illustrating the normality of V_4 in A_4](a_4_sheet_ses.png)
 
  * To see a [lattice of subgroups](rf-groupterms.md#subgrouplattice)
    for a given group:

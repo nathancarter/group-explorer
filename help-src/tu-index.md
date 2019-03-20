@@ -8,7 +8,7 @@ walking through some of the most important and commonly used features.
 
  * [Manipulating Cayley Diagrams](tu-cd-manip.md)
 
-    [![Cayley diagram of V_4](illustration-v4cd.png)](tu-cd-manip.md)
+    [![Cayley diagram of V_4](v_4_cayley_thumbnail.png)](tu-cd-manip.md)
 
  * [Manipulating Multiplication Tables](tu-mt-manip.md)
 
@@ -16,6 +16,6 @@ walking through some of the most important and commonly used features.
 
  * [Introduction to Sheets](tu-sheets.md)
 
-    [![A morphism on a sheet](illustration-morphism.png)](tu-sheets.md)
+    [![A morphism on a sheet](illustration-morph5.png)](tu-sheets.md)
 
  * [Beginning Mathematical Discovery](tu-discovery.md)

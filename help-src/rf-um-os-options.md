@@ -8,7 +8,7 @@ their own pages, this is refered to as a "large view," and you can read
 about it in general [here](rf-um-largewindow.md). This page covers the
 specifics for large views of objects of symmetry.
 
-![A large view of an object of symmetry](illustration-oswindow.jpg)
+![A large view of an object of symmetry](illustration-oswindow.png)
 
 ## Viewing the object
 
@@ -24,7 +24,7 @@ reason, the topmost portion of the control pane on the right side of a large
 view for symmetry objecst allows you to choose which of the symmetry objects
 you wish to view. You choose from a list, as shown in the picture below.
 
-![Screenshot of the control for choosing an object of symmetry](illustration-osoptions.jpg)
+![Screenshot of the control for choosing an object of symmetry](illustration-osoptions.png)
 
 In this illustration, the triangle is selected, but the user can click on it
 to open a list. Some groups only have one symmetry object on this list, but
