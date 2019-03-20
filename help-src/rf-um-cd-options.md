@@ -254,6 +254,8 @@ Note also that chunking is disabled when the order of generation of the
 diagram does not match the order of nesting of the axes; [see more
 information above](#an-order-for-nesting-the-axes).
 
+CITE(VGT-8.2 MM-4 DE-9)
+
 ## Related interfaces
 
 The controls in the Subsets tab on the right side of the large window for

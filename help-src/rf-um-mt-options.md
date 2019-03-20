@@ -76,6 +76,8 @@ it helps visualize the quotient group. As an example, consider [this
 multiplication table](d_4_multtable_organized.png) illustrating the quotient
 of \(D_4\) by \(\mathbb{Z}_2\).
 
+CITE(VGT-7.3 MM-3.5 DE-8.2)
+
 ### Colorization scheme
 
 There are three colorization schemes for multiplication tables:

@@ -30,6 +30,8 @@ quotients of them, and more.
  * [See an example multiplication table here](http://nathancarter.github.io/group-explorer/Multtable.html?groupURL=groups/S_3.group)
  * [Read more about multiplication tables here](gs-mt-intro.md)
 
+CITE(VGT-4.3 MM-1.5 DE-5.3)
+
 ## Cayley diagrams
 
 These are a less common but more potent group visualization tool and are the
@@ -40,6 +42,8 @@ by homomorphisms, etc.
 
  * [See an example Cayley diagram here](http://nathancarter.github.io/group-explorer/CayleyDiagram.html?groupURL=groups/S_3.group)
  * [Read more about Cayley diagrams here](gs-cd-intro.md)
+
+CITE(VGT-2.4 MM-1.2 DE-3)
 
 ## Other visualization techniques
 
@@ -53,3 +57,5 @@ explorations and investigations in group theory.  [*Group Explorer's* group
 library](http://nathancarter.github.io/group-explorer/GroupExplorer.html) is
 the perfect place to start for building conjectures or finding
 counterexamples.
+
+CITE(VGT-3 MM-1.3 TJ-12.2)

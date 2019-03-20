@@ -70,6 +70,8 @@ elements to the identity.
 The bottom half of the homomorphism edit window allows you to specify the
 homomorphism as a function, a map from one group to another.
 
+CITE(VGT-8 MM-4 DE-9 TJ-9 TJ-11)
+
 ### Pairs in the map
 
 Under the heading "Define the homomorphism here," we have a table listing

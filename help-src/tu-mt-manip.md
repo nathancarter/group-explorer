@@ -58,6 +58,6 @@ of the user manual](rf-um-subsetlistbox.md).
 It is particularly useful to combine both the organization and highlighting
 of a multiplication table together (and use the cosets separation option on
 the Table tab) to create diagrams like the one shown below, which illustrate
-quotient groups.
+[quotient groups](rf-groupterms.md#quotient-group).
 
 ![A multiplication table organized by a normal subgroup, with cosets highlighted by color](d_4_multtable_organized.png)

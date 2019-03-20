@@ -56,3 +56,5 @@ theme:
 extra_css:
     - w3.css
     - w3-theme-blue.css
+extra_javascript:
+    - ge-citations.js

@@ -27,6 +27,8 @@ explicitly shows *the group operation.*
  * [Basic manipulations of a multiplication table](tu-mt-manip.md) (Tutorial)
  * [Complete information about the multiplication table interface](rf-um-mt-options.md) (User Manual)
 
+CITE(VGT-4.3 MM-1.5 DE-5.3)
+
 Groups describe symmetry, sometimes the symmetry of three-dimensional
 objects.  Thus these objects have *the symmetry the group describes.*
 
@@ -36,6 +38,8 @@ objects.  Thus these objects have *the symmetry the group describes.*
 
  * [Definition of an object of symmetry](rf-groupterms.md#symmetryobject)
  * [Complete information about the object of symmetry interface](rf-um-os-options.md) (User Manual)
+
+CITE(VGT-3 MM-1.3 TJ-12.2)
 
 Cayley diagrams show the group as a graph of elements interacting with each
 other.  They show the group's *structure* very well, exemplifying Cayley's
@@ -50,6 +54,8 @@ theorem by showing *how the group acts on itself.*
  * [Basic manipulations of a Cayley diagram](tu-cd-manip.md) (Tutorial)
  * [Complete information about the Cayley diagram interfacel](rf-um-cd-options.md) (User Manual)
 
+CITE(VGT-2.4 MM-1.2 DE-3)
+
 Cycle graphs show an important relationship among the elements of the group
 by exhibiting *the group's orbits.*
 
@@ -59,6 +65,8 @@ by exhibiting *the group's orbits.*
 
  * [Definition of a cycle graph](rf-groupterms.md#cyclegraph)
  * [Complete information about the cycle graph interface](rf-um-cg-options.md) (User Manual)
+
+CITE(VGT-5.1)
 
 ## Features
 

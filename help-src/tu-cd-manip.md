@@ -51,3 +51,5 @@ translucent gray boxes.
 The Diagram tab and the generator table are quite intricate. For full
 details, refer to [the documentation on the interface for Cayley
 diagrams](rf-um-cd-options.md).
+
+CITE(VGT-7.3 MM-3.5 DE-8.2)

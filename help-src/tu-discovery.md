@@ -41,6 +41,8 @@ automatically generate the illustration, then the result is interactive.
 You can manipulate each component of the illustration, unlike the static
 image above.
 
+CITE(VGT-7.5 MM-3.7 TJ-14.2)
+
 ## Subgroups
 
 But far more deep information is available under the "tell me more" link next to the number of subgroups. Under that link you will find all of the following information.
@@ -63,6 +65,8 @@ In summary, do not ignore the computed properties of a group in its info
 page! It is an excellent place to start learning about a group and to start
 learning some group theory terminology in a fairly concrete context, with
 definitions readily available.
+
+CITE(VGT-6 MM-3.1 DE-4.1 TJ-3.3)
 
 ## "Getting" the Fundamental Theorem
 
@@ -169,3 +173,5 @@ to right, below, we have the Cayley diagrams for \(Q_4\),
 
 See how much more tangled (and therefore complex) they are! By contrast,
 surely the nonabelian groups are the ones that require more study.
+
+CITE(VGT-5.2 MM-2.1 TJ-13.1)

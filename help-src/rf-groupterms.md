@@ -11,7 +11,10 @@ See [injective](#injective-injection).
 
 ### Abelian group
 
-An abelian group is one whose binary operation is commutative. That is, for every two elements \(a\) and \(b\) in the group, \(a\cdot b=b\cdot a\).
+An abelian group is one whose binary operation is commutative. That is, for
+every two elements \(a\) and \(b\) in the group, \(a\cdot b=b\cdot a\).
+
+CITE(VGT-5.2 MM-2.1 TJ-13.1)
 
 ### Bijection, bijective
 
@@ -43,6 +46,8 @@ Cayley diagrams. It is documented in full [here](rf-um-cd-options.md),
 with an introduction [here](gs-cd-intro.md), and a tutorial
 [here](tu-cd-manip.md).
 
+CITE(VGT-2.4 MM-1.2 DE-3)
+
 ### Cayley table
 
 See [multiplication table](#multiplication-table).
@@ -59,6 +64,8 @@ is 6, and so the class equation is \[1 + 2 + 3 = 6.\]
 All class equations are of this form: The left hand side is a sum of
 positive integers, each the size of a conjugacy class, and the right side
 the order of the group.
+
+CITE(VGT-7.5 MM-3.7 TJ-14.2)
 
 ### Closure of a subset
 
@@ -78,6 +85,8 @@ The conjugacy class of an element \(g\) in a group is the set of all elements \(
 
 See also [class equation](#class-equation).
 
+CITE(VGT-7.5 MM-3.7)
+
 ### Cosets
 
 For any subgroup \(H\) of a group \(G\), we can speak of the left cosets and
@@ -88,6 +97,8 @@ One could do the same on the right and form a right coset of \(H\). The
 collection of all \(aH\) for every \(a\) in \(G\) is the collection of left
 cosets of \(H\); similarly for right cosets. Cosets of either type partition
 the elements of the group.
+
+CITE(VGT-6.4 MM-3.2 DE-7.1 TJ-6.1)
 
 ### Cycle graph
 
@@ -108,6 +119,8 @@ of the two larger four-cycles, shown at the bottom of the picture.
 *Group Explorer* has a [visualizer](rf-geterms.md#visualizers) for showing
 you Cycle graphs, documented in full [here](rf-um-cg-options.md).
 
+CITE(VGT-5.1)
+
 ### Cyclic group
 
 A cyclic group is one that is
@@ -116,6 +129,8 @@ it is comprised entirely of the [orbit](#orbit-of-an-element-in-a-group) of
 that element. The Cyclic groups are denoted \(\mathbb{Z}_n\) or sometimes
 \(C_n\), and look just like their name (cycles) when viewed as [Cayley
 diagrams](#cayley-diagrams) or [cycle graphs](#cycle-graph).
+
+CITE(VGT-5.1 MM-2.1 DE-6.1 TJ-4)
 
 ### Definition of a group via generators and relations
 
@@ -146,6 +161,8 @@ One of the columns available for view in [the main page (the group
 library)](rf-um-mainwindow.md) is the definition in this format of every
 group loaded.
 
+CITE(MM-1.4)
+
 ### Elementwise product (of two subsets of a group)
 
 The elementwise product of two subsets \(S\) and \(T\) of a group is written
@@ -175,6 +192,8 @@ more" link next to the Subgroups computation, and search for "short exact
 sequence" on that page--it will be in the description of any normal
 subgroup.)
 
+CITE(VGT-8.2 MM-4 DE-9 TJ-11.2)
+
 ### Generators for a group (or subgroup)
 
 A collection \(C\) of elements of a [group](#group) is said to generate the
@@ -198,6 +217,8 @@ elements it generates, \(\langle r\rangle\), we find only the elements
 [\(S_3\)](http://nathancarter.github.io/group-explorer/GroupInfo.html?groupURL=groups/S_3.group),
 but only a [subgroup](#subgroup).
 
+CITE(VGT-1.4 VGT-2.3)
+
 ### Group
 
 A group is a set of elements together with a binary operation (which I'll denote here by \(*\)) such that the following criteria hold.
@@ -215,6 +236,8 @@ A group is a set of elements together with a binary operation (which I'll denote
 But this is the formal definition of a group. [You should be looking at
 pictures of them!](gs-index.md) That's what this program is for!
 
+CITE(VGT-1 VGT-4 MM-1.1 DE-2 DE-5.2 TJ-3)
+
 ### Homomorphism
 
 Sometimes called simply a [morphism](#morphism), this is a function from one
@@ -224,6 +247,8 @@ That is, it must keep the group's structure intact in the following specific
 way: For every pair of elements \(a\) and \(b\) in the domain, the
 homomorphism \(f\) must satisfy the equation \(f(ab) = f(a)f(b)\).
 "Homomorphism" means "same shape/form" (homo = same, morph = shape/form).
+
+CITE(VGT-8 MM-4 DE-9 TJ-9 TJ-11)
 
 ### Image (of a subset under a morphism)
 
@@ -247,6 +272,8 @@ is the integer resulting from that division. In symbols, if \(H\) is a
 [subgroup](#subgroup) of \(G\), then because \(|H|\) divides \(|G|\), the
 index is \(\frac{|G|}{|H|}\), often written \([G:H]\).
 
+CITE(VGT-6.5 MM-3.2 DE-7.2 TJ-6.2)
+
 ### Injective, injection
 
 A function is injective (or [1-1](#1-1-one-to-one), or an injection) if no
@@ -268,6 +295,8 @@ and will therefore call two objects the same if they are isomorphic. This is
 what is meant by the phrase "the same _up to isomorphism_"; it means the
 objects are the same if we consider isomorphic things to be identical.
 
+CITE(VGT-8 MM-4 DE-9 TJ-9)
+
 ### The isomorphism theorems
 
 The [First Isomorphism Theorem](#first-isomorphism-theorem) can be
@@ -282,6 +311,8 @@ the homomorphism maps to the identity element. Sometimes written
 [preimage](#preimage-of-a-subset-under-a-morphism) of the set \(\{ e \}\)
 (where \(e\) is the identity of the group to which the homomorphism maps),
 in symbols \(\{ a : f(a) = e \}\).
+
+CITE(VGT-8.2 MM-4 DE-9 TJ-11.2)
 
 ### Lattice of subgroups
 
@@ -355,6 +386,8 @@ in the element \(rf\), in the second row, fifth column. This is because
 multiplication is done in the order you can infer from this example: element
 in left column times element in top row.
 
+CITE(VGT-4.3 MM-1.5 DE-5.3)
+
 ### Normal subgroup
 
 A [subgroup](#subgroup) is called normal when any one of the following
@@ -379,6 +412,8 @@ operation. Refer to the documentation on [the multiplication table
 interface](rf-um-mt-options.md) or [the Cayley diagram
 interface](rf-um-cd-options.md) for more information on these features.
 
+CITE(VGT-7.3 MM-3.3 DE-7.3 TJ-10)
+
 ### Normalizer of a subgroup/subset
 
 The normalizer of a [subgroup](#subgroup) \(H\) of a group \(G\), sometimes
@@ -390,6 +425,8 @@ the "problem" elements from \(G\), those that are preventing \(H\) from
 being normal, we would find a subgroup of \(G\) in which \(H\) is normal.
 The normalizer is exactly this, the subgroup which remains when you remove
 as few elements as possible from \(G\) to make \(H\) normal.
+
+CITE(VGT-7.4 MM-3.6)
 
 ### Objects of symmetry
 
@@ -404,6 +441,8 @@ objects _with_ symmetry, or symmetry objects).
 
 *Group Explorer* has a [visualizer](rf-geterms.md#visualizers) for showing
 you objects of symmetry, documented in full [here](rf-um-os-options.md).
+
+CITE(VGT-3 MM-1.3 TJ-12.2)
 
 ### One-to-one
 
@@ -420,6 +459,8 @@ powers of that element, i.e. \(\{ a^n : n\text{ is any integer} \}\). You
 can think of this as all the places one can "walk" using \(a\) as a step. In
 a [Cayley diagram](#cayley-diagrams), this would be the chain of elements
 one encounters by following \(a\)\-arrows repeatedly.
+
+CITE(VGT-5.1)
 
 ### Order classes
 
@@ -469,6 +510,8 @@ It generates the [subgroup](#subgroup) \(\{ e \}\).
 The order of a group \(G\), written \(|G|\), is simply its size (how many
 elements are in it).
 
+CITE(VGT-5.1)
+
 ### Order of a subgroup
 
 The order of a subgroup \(H\), written \(|H|\), is simply its size (how many
@@ -491,6 +534,8 @@ prime. Also, one can see that if \(H\) is a \(p\)\-subgroup for some prime
 If you click "tell me more" next to Subgroups in the Computations section of
 any [group info page](rf-um-groupwindow.md), you will see that the
 descriptions of the subgroups tell you which ones are \(p\)\-subgroups.
+
+CITE(VGT-9.3 MM-5.5 TJ-15)
 
 ### Preimage (of a subset under a morphism)
 
@@ -529,6 +574,8 @@ them) to help you visualize the quotient operation. Refer to the
 documentation on [the multiplication table interface](rf-um-mt-options.md)
 or [the Cayley diagram interface](rf-um-cd-options.md) for more information
 on these features.
+
+CITE(VGT-7.3 MM-3.5 DE-8.2 TJ-10)
 
 ### Right cosets
 
@@ -590,6 +637,8 @@ non-[trivial](#trivial-groupsubgroup), [proper](#proper-subgroup), [normal
 subgroups](#normal-subgroup). The smallest simple group is
 [\(A_5\)](http://nathancarter.github.io/group-explorer/GroupInfo.html?groupURL=groups/A_5.group).
 
+CITE(MM-5.7 TJ-10.2)
+
 ### Solvable group, solvable decomposition
 
 Solvable groups are important in Galois theory, which is too large a topic
@@ -612,6 +661,8 @@ trivial group](#trivial-groupsubgroup) and ends with \(G\). You can see a
 diagram illustrating this for any solvable group by looking under the
 Computations section of the [group's info page](rf-um-groupwindow.md).
 
+CITE(VGT-10 MM-6 TJ-13.2)
+
 ### Subgroup
 
 If \(S\) is a subset of the [group](#group) \(G\) (i.e. a subset of the set
@@ -628,6 +679,8 @@ A subset \(S\) of a group \(G\) may fail to be a subgroup in a few different way
    then the binary operation of \(G\) cannot be said to be
    a binary operation on \(S\),
    because it maps some pairs from \(S\) outside of \(S\).
+
+CITE(VGT-6 MM-3.1 DE-4.1 TJ-3.3)
 
 ### Surjective, surjection
 
@@ -646,6 +699,8 @@ If you click "tell me more" next to Subgroups in the Computations section of
 any [group info page](rf-um-groupwindow.md), you will see that the
 descriptions of the subgroups tell you which ones are Sylow
 \(p\)\-subgroups.
+
+CITE(VGT-9 MM-5.6 TJ-15)
 
 ### Symmetry objects
 

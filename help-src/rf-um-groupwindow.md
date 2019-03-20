@@ -55,6 +55,8 @@ the group has no pre-selected set of generators built in, *Group Explorer*
 computes one such (minimum-size) set when the group is loaded. Each list of
 generators is given in this section.
 
+CITE(VGT-1.4 VGT-2.3)
+
 ## Naming schemes
 
 The structure of a group is independent of whatever symbols we use to

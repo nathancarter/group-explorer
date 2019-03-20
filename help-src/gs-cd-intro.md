@@ -11,6 +11,8 @@ If you have not yet encountered the multiplication table
  * [The documentation on the Cayley diagram interface in
    *Group Explorer*](rf-um-cd-options.md)
 
+CITE(VGT-2.4 MM-1.2 DE-3)
+
 ## What Cayley diagrams do well
 
 The Cayley diagram is the only visualizer in Group Explorer with the

@@ -10,6 +10,8 @@ If you have not yet encountered the multiplication table
  * [The documentation on the multiplication table interface in
    *Group Explorer*](rf-um-mt-options.md)
 
+CITE(VGT-4.3 MM-1.5 DE-5.3)
+
 ## What multiplication tables do well
 
 Coloring the backgrounds of multiplication tables' cells reveals patterns in

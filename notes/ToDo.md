@@ -28,10 +28,6 @@
 
 ### Help pages
 
- * Add to the help references to specific locations in VGT where users can go
-   to read more.
- * Add to the help references to other web resources where users can go to read
-   more, such as Matthew Macauley's lecture videos on Visual Group Theory.
  * Verify that all instances of "help" in the app source code (which would
    indicate a potential link to the help system) go somewhere sensible in the
    new help system.
