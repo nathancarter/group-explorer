@@ -28,9 +28,6 @@
 
 ### Help pages
 
- * Verify that all instances of "help" in the app source code (which would
-   indicate a potential link to the help system) go somewhere sensible in the
-   new help system.
  * Once the naming scheme editing interface is finished, update the help image
    `help-src/namescheme.jpg` with a new screenshot.
 

@@ -1,4 +1,17 @@
 
+/*
+ * This javascript post-processes a GE Help page after it appears,
+ * replacing citation codes with links to the online resources they cite.
+ *
+ * CITE(...) - replaced by an expandable/collapsible list of citations
+ * VGT-# - replaced by a citation of a chapter in Visual Group Theory
+ * VGT-#.# - replaced by a citation of a section in Visual Group Theory
+ * MM-#/MM-#.# - same but for M.Macauley's online lectures and videos
+ * DE-#/DE-#.# - same but for D.Ernst's online IBL materials
+ * TJ-#/TJ-#.# - same but for T.Judson's free online algebra textbook
+ */
+
+// constants needed for referring to items online
 const VGTURL = 'http://web.bentley.edu/empl/c/ncarter/vgt/';
 const VGTLINK = `<a href="${VGTURL}">Visual Group Theory</a>`;
 const MMURL = 'http://www.math.clemson.edu/~macaule/classes/m18_math4120/index.html';
@@ -9,12 +22,15 @@ const TJURL = 'http://abstract.ups.edu/aata/';
 const TJLINK = "Tom Judson's free, interactive, online textbook "
              + `<a href="${TJURL}">Abstract Algebra: Theory and Applications</a>`;
 
+// utility function for distinguishing chapters from sections
 const option = ( number, option1, option2 ) => {
     if ( !option1 ) option1 = 'Section';
     if ( !option2 ) option2 = 'Chapter';
     return /\./.test( number ) ? `${option1} ${number}` : `${option2} ${number}`;
 }
 
+// utility functions for creating expandable/collapsible sections
+// in the document, giving each a unique ID, and being able to toggle visibility
 var lastUsedID = 0;
 const getNewID = () => `auto_gen_id_${++lastUsedID}`;
 const toggle = ( id ) => {
@@ -30,6 +46,8 @@ const toggle = ( id ) => {
     return false;
 };
 
+// the list of replacements documented above,
+// now formalized in computer code
 const replacements = [
     {
         pattern : /CITE\((.+)\)/,
@@ -68,10 +86,12 @@ const replacements = [
     }
 ];
 
+// find the first replacement that needs to be done in a chunk of text
 const getFirstMatch = ( text ) =>
     replacements.find( item =>
         item.lastMatch = item.pattern.exec( text ) );
 
+// apply a replacement that's been found to be needed
 const computeReplacement = ( text, using ) => {
     if ( typeof( using.replacement ) == 'string' ) {
         var copy = using.replacement;
@@ -84,6 +104,7 @@ const computeReplacement = ( text, using ) => {
     throw `Unusable replacement data: ${using.replacement}`;
 };
 
+// do all replacements in a given text node in the document
 const replaceWithin = ( node ) => {
     if ( !node.textContent ) return;
     var useThis, text = node.textContent;
@@ -105,6 +126,7 @@ const replaceWithin = ( node ) => {
     }
 };
 
+// do all replacements recursviely down through a DOM element
 const recur = ( node ) => {
     if ( node.childNodes.length == 0 )
         replaceWithin( node );
@@ -112,6 +134,7 @@ const recur = ( node ) => {
         Array.prototype.slice.apply( node.childNodes ).map( recur );
 };
 
+// do all replacements in the body after the page loads
 window.addEventListener( 'load', ( event ) => {
     recur( document.body );
 } );

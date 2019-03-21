@@ -249,11 +249,11 @@
          <h3>${MathML.sans('<mtext>Results of &#8220;Solvable group&#8221; computation for&nbsp;</mtext>' + group.name)}</h3>
       </template>
       <template id="abelian">
-         ${MathML.sans(group.name)} is <a href="./help/rf-groupterms.html#solvable">solvable</a>
-         because it is <a href="./help/rf-groupterms.html#abelian">abelian</a>.
+         ${MathML.sans(group.name)} is <a href="./help/rf-groupterms/index.html#solvable-group-solvable-decomposition">solvable</a>
+         because it is <a href="./help/rf-groupterms/index.html#abelian-group">abelian</a>.
       </template>
       <template id="solvable">
-         ${MathML.sans(group.name)} is a <a href="./help/rf-groupterms.html#solvable">solvable</a>
+         ${MathML.sans(group.name)} is a <a href="./help/rf-groupterms/index.html#solvable-group-solvable-decomposition">solvable</a>
          group by the following solvable decomposition:
          <ul id="decomposition" style="list-style-type: none">
          </ul>
@@ -268,37 +268,37 @@
          </p>
       </template>
       <template id="decomposition_element">
-         <li>The <a href="./help/rf-groupterms.html#quotient">quotient</a> of
+         <li>The <a href="./help/rf-groupterms/index.html#quotient-group">quotient</a> of
             ${makeGroupRef(g)}</a> by its
-            <a href="./help/rf-groupterms.html#normalsubgroup">normal subgroup</a>
+            <a href="./help/rf-groupterms/index.html#normal-subgroup">normal subgroup</a>
             ${MathML.sans(MathML.sub('H', g.subgroupIndex))}
-            (<a href="./help/rf-groupterms.html#isomorphism">isomorphic</a> to
+            (<a href="./help/rf-groupterms/index.html#isomorphism-isomorphic">isomorphic</a> to
             ${makeGroupRef(g.subgroupIsomorphicTo)}) gives
             ${makeGroupRef(g.quotientIsomorphicTo)}.</li>
       </template>
       <template id="decomposition_termination">
          <li>The group ${makeGroupRef(g)} is
-            <a href="./help/rf-groupterms.html#abelian">abelian</a>.</li>
+            <a href="./help/rf-groupterms/index.html#abelian-group">abelian</a>.</li>
       </template>
       <template id="unsolvable">
-         ${MathML.sans(group.name)} is not a <a href="./help/rf-groupterms.html#solvable">solvable</a>
+         ${MathML.sans(group.name)} is not a <a href="./help/rf-groupterms/index.html#solvable-group-solvable-decomposition">solvable</a>
          group.
       </template>
       <template id ="simple">
          In fact, it does not even have a
-         <a href="./help/rf-groupterms.html#normalsubgroup">normal subgroup</a>
-         that can be used to form an <a href="./help/rf-groupterms.html#abelian">abelian</a>
-         <a href="./help/rf-groupterms.html#quotient">quotient</a> group.
+         <a href="./help/rf-groupterms/index.html#normal-subgroup">normal subgroup</a>
+         that can be used to form an <a href="./help/rf-groupterms/index.html#abelian-group">abelian</a>
+         <a href="./help/rf-groupterms/index.html#quotient-group">quotient</a> group.
       </template>
       <template id="failure">
          <p>Group Explorer is currently unable to determine whether ${MathML.sans(group.name)} is a
-            <a href="./help/rf-groupterms.html#solvable">solvable</a> group because it does
+            <a href="./help/rf-groupterms/index.html#solvable-group-solvable-decomposition">solvable</a> group because it does
             not have access to all the groups it needs. For example, there is a
-            <a href="./help/rf-groupterms.html#normalsubgroup">normal subgroup</a>
+            <a href="./help/rf-groupterms/index.html#normal-subgroup">normal subgroup</a>
             of order ${unknown_subgroup.order} that yields an
-            <a href="./help/rf-groupterms.html#abelian">abelian</a>
-            <a href="./help/rf-groupterms.html#quotient">quotient</a> group, but that is not
-            <a href="./help/rf-groupterms.html#isomorphism">isomorphic</a> to any group in
+            <a href="./help/rf-groupterms/index.html#abelian-group">abelian</a>
+            <a href="./help/rf-groupterms/index.html#quotient-group">quotient</a> group, but that is not
+            <a href="./help/rf-groupterms/index.html#isomorphism-isomorphic">isomorphic</a> to any group in
             the library currently loaded.</p>
          <p>You will need to more groups loaded (see <a href="">options window</a> for starters)
             to make this computation possible.</p>
