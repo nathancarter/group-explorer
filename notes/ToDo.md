@@ -34,14 +34,25 @@
 ### Sheets
 
  * Extend the toJSON() and fromJSON() in CayleyDiagram.html to also respect:
-    * all the rest of the Diagram panel needs to wait until I talk to Ray
+    * generation options table - can be accessed through `get/setStrategies()` in the diagram.
+      It is an array [ [ eltNum, layoutCode, axisCode, nestingLevel ], ... ].
+      If you change this, you must completely rebuild the scene.
+    * arrows list - see the `Lines` field of the `CayleyDiagram`, each of which has a field
+      called `arrow` which is the generator.  After changing anything, call `updateLines()`
+      in the diagram.
     * background color:
       `Graphic_context.renderer.getClearColor().toArray()` and
       `new THREE.Color( that_array[0], that_array[1], that_array[2] )`
-    * diagram name: global var in HTML page, `Diagram_name`, plus the
-      drop-down selector with id `'#diagram-select'` (then `displayGraphic()`)
-    * node positions: `Cayley_diagram.nodes[i].point.x` (y, z), then update diagram with `updateNodes()`
-    * node radii: `Cayley_diagram.nodes[i].radius` then same (original) update routine
+    * diagram name: stored as `diagram_name` (`Diagram_name`?) in the `CayleyDiagram` object,
+      plus the drop-down selector with id `'#diagram-select'` (then `displayGraphic()`).
+      changing the value of `CayleyDiagram.isGenerated` may update the diagram.
+    * node positions: `Cayley_diagram.nodes[i].point.x` (y, z), then update diagram with
+      a full redisplay.  You will need to write a redisplay routine for this.  Ray suggests:
+       * save the camera position and fog
+       * redisplay the whole diagram
+       * restore the camera position and fog
+    * node radii: `Cayley_diagram.nodes[i].radius` then call `updateNodeRadius()` in
+      the `DisplayDiagram` instance
     * arc curvature: once I talk to Ray
     * chunking: once I talk to Ray
  * In ZmnInfo.html:
