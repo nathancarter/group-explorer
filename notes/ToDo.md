@@ -33,11 +33,6 @@
 
 ### Sheets
 
- * Bug fix: The solvable decomposition sheet generator does not guarantee
-   that all quotient groups are abelian.  For example, try to show that S_4
-   is solvable; one quotient is S_3.
-   (After fixing this bug, take a new screenshot of the solvable decomposition
-   of S_4 and use it as the help image `illustration-sheettut9.png`.)
  * Extend the toJSON() and fromJSON() in CayleyDiagram.html to also respect:
     * all the rest of the Diagram panel needs to wait until I talk to Ray
     * background color:
