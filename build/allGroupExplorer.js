@@ -4250,7 +4250,8 @@ class DisplayMulttable {
    // We answer in normalized coordinates, [0,1]x[0,1].
    unitSquarePosition ( element, multtable ) {
       const max = multtable.position( multtable.group.order - 1 ) + 1;
-      return { x : 0.5 / max, y : ( multtable.position( element ) + 0.5 ) / max };
+      const index = multtable.elements.indexOf( element );
+      return { x : 0.5 / max, y : ( multtable.position( index ) + 0.5 ) / max };
    }
 
    // two serialization functions
