@@ -168,12 +168,12 @@
           if ( !D ) return alert( 'Error computing solvable decomposition' );
           const n = D.length,
                 L = 25, T = 175, txtH = 50, W = Math.floor( 600 / n ), H = W,
-                hgap = Math.floor( W / 3 ), vgap = 100;
+                hgap = Math.floor( W / 3 ), vgap = 100, bottomShift = vgap/4;
           // create sheet title and description
           var sheetElementsAsJSON = [
              {
                 className : 'TextElement',
-                text : `Solvable Decomposition for the group ${group.shortName}`,
+                text : `Solvable Decomposition for the group ${mathml2text( group.name )}`,
                 x : L, y : T - 3*txtH, w : n*W + (n-1)*hgap, h : txtH,
                 fontSize : '20pt', alignment : 'center'
              },
@@ -185,6 +185,8 @@
                 alignment : 'center'
              }
           ];
+          const red = 'hsl(0, 100%, 80%)';
+          const notred = '';
           var previous = null, previousIndex = -1;
           D.map( ( entry, index ) => {
              // put name of group atop each element in top row, the decomposition
@@ -195,9 +197,20 @@
                 alignment : 'center'
              } );
              // put visualizer for each element in top row, the decomposition
+             const subgroupElts = entry.embeddingFromPrevious ?
+                entry.embeddingFromPrevious.filter( ( value, index, self ) =>
+                   self.indexOf( value ) === index ) : [ 0 ];
+             const subgroupBitSet = new BitSet( entry.group.order, subgroupElts );
+             const elementOrder = entry.group.getCosets( subgroupBitSet )
+                .map( coset => coset.toArray() )
+                .reduce( ( list1, list2 ) => list1.concat( list2 ), [ ] );
+             console.log( elementOrder );
+             const highlight = elementOrder.map( ( elt, index ) =>
+                subgroupBitSet.get( index ) ? red : notred );
              sheetElementsAsJSON.push( {
                 className : type, groupURL : entry.group.URL,
-                x : L+index*W+index*hgap, y : T, w : W, h : H
+                x : L+index*W+index*hgap, y : T, w : W, h : H,
+                elements : elementOrder, highlights : { background : highlight }
              } );
              // for every visualizer except the trivial group, add the
              // embedding map, the quotient group, the quotient map, and its name.
@@ -215,7 +228,11 @@
                 // quotient group
                 sheetElementsAsJSON.push( {
                    className : type, groupURL : entry.quotientByPrevious.URL,
-                   x : L+index*W+index*hgap, y : T+H+vgap, w : W, h : H
+                   x : L+index*W+index*hgap+bottomShift, y : T+H+vgap,
+                   w : W, h : H,
+                   highlights : {
+                       background : elementOrder.map( ( elt, idx ) => idx ? notred : red )
+                   }
                 } );
                 const quotientIndex = sheetElementsAsJSON.length - 1;
                 // quotient group name
@@ -224,7 +241,8 @@
                    text : mathml2text( entry.group.name ) + ' / '
                         + mathml2text( previous.group.name ) + ' &cong; '
                         + mathml2text( entry.quotientByPrevious.name ),
-                   x : L+index*W+index*hgap, y : T+2*H+vgap+txtH/2, w : W, h : txtH,
+                   x : L+index*W+index*hgap+bottomShift, y : T+2*H+vgap+txtH/2,
+                   w : W, h : txtH,
                    alignment : 'center'
                 } );
                 // quotient map
