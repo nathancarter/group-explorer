@@ -72,8 +72,6 @@
     * Add links at the end of the page that offer to show this type of sheet using any type of
       visualizer.
  * Make all sheets have a fixed size - say, 10000x7500.
- * Sometimes when creating a visualizer, its image is the "broken image" icon.
-   Investigate when/why this happens, and fix it.
 
 ## GAP's Group Explorer package
 

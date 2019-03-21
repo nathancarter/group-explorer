@@ -659,12 +659,12 @@ class VisualizerElement extends SheetElement {
         // when a resize happens, build a new image, but only if a resize actually happened
         this.on( 'resize', function () {
             var $wrapper = $( that.htmlViewElement().parentElement );
+            var w = $wrapper.width(), h = $wrapper.height();
             var lastSize = that.vizdisplay.getSize();
-            if ( ( lastSize.w != $wrapper.width() )
-              || ( lastSize.h != $wrapper.height() ) ) {
-                that.vizdisplay.setSize( $wrapper.width(), $wrapper.height() );
-                that.rerender();
-            }
+            if ( w == 0 || h == 0 ) return;
+            if ( lastSize.w == w && lastSize.h == h ) return;
+            that.vizdisplay.setSize( $wrapper.width(), $wrapper.height() );
+            that.rerender();
         } );
     }
     // not ready unless teh group has been loaded

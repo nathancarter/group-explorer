@@ -2567,7 +2567,10 @@ class DisplayDiagram {
    }
 
    setSize ( w, h ) { this.renderer.setSize( w, h ); }
-   getSize () { return { w : this.renderer.width, h : this.renderer.height }; }
+   getSize () {
+       const size = this.renderer.getSize();
+       return { w : size.width, h : size.height };
+   }
 
    static setDefaults() {
       DisplayDiagram.groupNames = ['lights', 'spheres', 'labels', 'lines', 'arrowheads', 'nodeHighlights', 'chunks']
@@ -2657,7 +2660,7 @@ class DisplayDiagram {
     *       place camera on negative y-axis, x-axis to the right, z-axis up
     *     If diagram lies entirely in the x-y plane
     *       place camera on negative z-axis, x-axis to the right, y-axis down
-    *     Otherwise place camera with y-axis down, offset a bit from 
+    *     Otherwise place camera with y-axis down, offset a bit from
     *       the (1,-1,-1) vector so that opposite corners don't line up
     *       and make cubes look flat
     *   else (diagram is specified in .group file)
