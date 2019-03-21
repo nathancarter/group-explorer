@@ -1450,8 +1450,6 @@ class MorphismElement extends ConnectingElement {
           + '<p><button id="addPairButton">Add:</button>'
           + '&nbsp;f(&nbsp;<select id="domainDropDown"></select>&nbsp;)'
           + '&nbsp;=&nbsp;<select id="codomainDropDown"></select></p></center>'
-          + '<p><font size=-1>Elements not determined by the table above '
-          + 'map to the identity.</font></p>'
           + '<p><button id="morphismPreview">Preview</button> '
           + '(Shows full map in a new window.)</p>'
           + '</div>';
@@ -1612,7 +1610,7 @@ class MorphismElement extends ConnectingElement {
     // ai->bi is the one generated from the definition of homomorphism applied to the mapping
     // di->ci.  Note that while a1,...,ak is a set (all unique) b1,...,bk may not be
     // (repeats are allowed).
-    // The result is return in the form [ [a1,...,ak], [b1,...,bk] ].
+    // The result is returned in the form [ [a1,...,ak], [b1,...,bk] ].
     expandMap ( partialMap ) {
         // handle base case which would otherwise fail as a corner case below
         if ( partialMap.length == 0 ) return [ [ 0 ], [ 0 ] ];
@@ -1643,7 +1641,7 @@ class MorphismElement extends ConnectingElement {
     // Null means there is no homomorphism extending this partial one (i.e., it's not really
     // a partial homomorphism at all)
     // An array means there is a homomorphism extending this partial one, and we've given you
-    // the simplest such one, by mapping all unspecified things to the identity in the codomain.
+    // an example such homomorphism (the first one we found in a recursive search).
     // The result array is such that result[domainElement] = itsImage,
     // with result.length == domain order.
     getFullMap ( partialMap ) {
