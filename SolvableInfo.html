@@ -146,6 +146,7 @@
              pair = IsomorphicGroups.findQuotient( G, H );
              if ( !pair ) continue;
              const [ Q, q ] = pair;
+             if ( !Q.isAbelian ) continue;
              const D = getDetailedSolvableDecomposition( N );
              if ( !D ) continue;
              D.push( {
