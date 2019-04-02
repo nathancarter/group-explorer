@@ -1,11 +1,12 @@
 
 JS_FILES = js/init.js             js/Log.js            js/BitSet.js        js/MathUtils.js       \
            js/BasicGroup.js       js/XMLGroup.js       js/Subgroup.js      js/SubgroupFinder.js  \
-           js/IsomorphicGroups.js js/Template.js       js/Library.js       js/Diagram3D.js       \
-           js/CayleyDiagram.js    js/DisplayDiagram.js js/MathML.md        js/SymmetryObject.js  \
+           js/IsomorphicGroups.js js/Template.md       js/Library.js       js/MathML.md          \
+           js/Menu.js                                                                            \
+           js/Diagram3D.js        js/DiagramDnD.js     js/CayleyDiagram.js js/SymmetryObject.js  \
+           js/DisplayDiagram.js                                                                  \
            js/Multtable.js        js/DisplayMulttable.js                                         \
            js/CycleGraph.js       js/DisplayCycleGraph.js                                        \
-           js/Menu.js
 
 SUB_FILES = subsetDisplay/subsets.js           subsetDisplay/BasicSubset.js     \
             subsetDisplay/Subgroup.js          subsetDisplay/Subset.js          \
@@ -26,8 +27,7 @@ SHEET_FILES = js/DragResizeExtension.js		js/SheetModel.js
 # PRODUCTS = build/allGroupExplorer.js build/allGroupExplorer.min.js build/allVisualizer.js
 PRODUCTS = build/allGroupExplorer.js build/allVisualizer.js build/allSheets.js
 
-DOCS =  docs/Template.md                        \
-        docs/visualizerExemplar.md              \
+DOCS =  docs/visualizerExemplar.md              \
         docs/visualizerFramework_css.md         \
         docs/visualizerFramework_js.md          \
         docs/visualizerFramework_html.md
@@ -75,10 +75,6 @@ docs/visualizerExemplar.md : docs/visualizerExemplar.html
 
 docs/visualizerFramework_html.md : visualizerFramework/visualizer.html
 	sed -e '/^<!--Markdown/d' -e '/^Markdown-->/d' < visualizerFramework/visualizer.html > docs/visualizerFramework_html.md
-
-# copy these to make them viewable on github as markdown files
-docs/Template.md : js/Template.js
-	echo '' | cat js/Template.js - > docs/Template.md
 
 # add newline to these files so git doesn't decide we're just moving the old file to a new place...
 docs/visualizerFramework_css.md : visualizerFramework/visualizer.css
