@@ -1769,6 +1769,372 @@ class Library {
 }
 
 Library._initializeGroupMap();
+/*
+# MathML utilities
+
+Nearly all mathematical text in GE is formatted with MathML and rendered into HTML by MathJax. The MathML class has utility functions for some simple formatting patterns, converting MathML to Unicode text, and caching MathJax output to improve performance.
+
+* [Formatting utilities](#formatting-utilities)
+
+* [Transformation routines](#transformation-routines)
+
+* [Caching](#caching)
+
+* [Initialization](#initialization)
+
+* [Legacy functions](#legacy-functions)
+```js
+*/
+class MathML {
+/*
+```
+## Formatting utilities
+<i>(note: examples are HTML approximations to actual MathJax output)</i>
+
+* sans -- format a MathML string in sans-serif font
+    <br>&nbsp;&nbsp;`MathML.sans('<mtext>Linear in </mtext><mi>rf</mi>')` => "Linear in <i>rf</i>"
+    + All identifiers (&lt;mi&gt; elements) are italicized, including multi-character identifiers.
+
+* sub -- format two character strings as an identifier with a subscript
+    <br>&nbsp;&nbsp;`MathML.sans(MathML.sub('CC','3'))` => "<i>CC</i><sub>3</sub>"
+    + Arguments are not treated as MathML strings.
+
+* csList -- format a list of MathML strings as a comma-separated list
+    <br>&nbsp;&nbsp;`MathML.csList(['<mi>x</mi>', '<mn>3</mn>'])` =>  "<i>x</i>, 3"
+    + The resulting list elements are separate top-level MathML constructs, separated by normal HTML. This allows the browser to re-flow the text instead of having MathJax do it.
+    + This routine is used internally by setList and genList.
+
+* setList -- format a list of MathML strings as a comma-separated list surrounded by {, } braces
+    <br>&nbsp;&nbsp;`MathML.setList(['<mi>r</mi>', '<mi>f</mi>'])` => "{ <i>r</i>, <i>f</i> }"
+
+* genList -- format a list of MathML strings as a comma-separated list surrounded by ⟨, ⟩ brackets
+    <br>&nbsp;&nbsp;`MathML.genList(['<mi>r</mi>', '<mi>f</mi>'])` => "⟨ <i>r</i>, <i>f</i> ⟩"
+    + Brackets are in bold because the normal font renders them lighter than other characters.
+
+* rowList -- format a list of MathML strings as rows (a &lt;br&gt;-separated list)
+
+```js
+*/
+    static sans(mathml) {
+        mathml = mathml.replace(/<mi>/g, '<mi mathvariant="sans-serif-italic">');
+        return '<math xmlns="http://www.w3.org/1998/Math/MathML" mathvariant="sans-serif">' + mathml + '</math>';
+    }
+
+    static sub(identifier, subscript) {
+        return '<msub><mi>' + identifier + '</mi><mn>' + subscript + '</mn></msub>';
+    }
+
+    static csList(elements) {
+        return elements
+            .map( (el, inx) => MathML.sans(el) + (inx < elements.length-1 ? ',&nbsp;' : '') ).join('');
+    }
+
+    static setList(elements) {
+        return MathML.sans('<mtext>{&nbsp;</mtext>') +
+            MathML.csList(elements) +
+            MathML.sans('<mtext>&nbsp;}</mtext>');
+    }
+
+    static genList(generators) {
+        return MathML.sans('<mtext mathvariant="bold">&#x27E8;&nbsp;&nbsp;</mtext>') +
+            MathML.csList(generators) +
+            MathML.sans('<mtext mathvariant="bold">&nbsp;&nbsp;&#x27E9;</mtext>');
+    }
+
+    static rowList(elements) {
+        return elements.map( (el, inx) => MathML.sans(el) + '<br>').join('');
+    }
+/*
+```
+## Transformation routines
+
+These routines transform the subset of MathML used in GE .group XML files into HTML5 or Unicode text using XSLT. Only a small subset of MathML capability is used in these files, limited to subscripts and superscripts of signed numeric values.
+
+* toHTML -- transform MathML into an HTML5 document fragment with &lt;sub&gt;...&lt;/sub&gt; and &lt;sup&gt;...&lt;/sup&gt; markup
+    <br>&nbsp;&nbsp;`MathML.toHTML('<msub><mi>H</mi><mn>3</mn></msub>')` => `<i>H</i><sub>3</sub>` => "<i>H</i><sub>3</sub>"
+
+* toUnicode -- transform MathML into Unicode text with numeric subscripts and superscripts
+    <br>&nbsp;&nbsp;`MathML.toUnicode('<msub><mi>H</mi><mn>3</mn></msub>')` => "H₃"
+    + Subscript and superscript characters are defined in `MathML.subscripts` and `MathML.superscripts`.
+
+```js
+*/
+   static toHTML(mathml) {
+       if (MathML.xsltProcessor === undefined) {
+           MathML.xsltProcessor = new XSLTProcessor();
+           MathML.xsltProcessor.importStylesheet($.parseXML(MathML.MATHML_2_HTML));
+       }
+       return MathML.xsltProcessor.transformToFragment($($.parseXML(mathml))[0], document);
+   }
+
+   static toUnicode(mathml) {
+       const $html = $( MathML.toHTML(mathml) );
+
+       $html.find('sub').each( (_,el) => $(el).text($(el).text().split('').map(ch => MathML.subscripts[ch]).join('')) );
+       $html.find('sup').each( (_,el) => $(el).text($(el).text().split('').map(ch => MathML.superscripts[ch]).join('')));
+
+       return $html.text();
+   }
+/*
+```
+## Caching
+
+The subgroup display that is part of many of the visualizers takes a noticeable amount of time to format with MathJax, particularly since it occurs at the same time as the main graphic is being generated and because it must complete before the browser is fully responsive. Since many formatted elements are used repeatedly, caching the results of the formatting operation can be used to improve performance. The approach below is particularly suited to the visualizers' subset display and the diagram control panels.
+
+The approach below has `MathML.sans` consult a cache of already formatted MathML elements and return the HTML generated by a previous MathJax run if a match is found. This HTML can be inserted into the DOM where a MathML expression would otherwise be put, where it needs no further MathJax processing to be displayed in its final form. The cache is initially loaded with the HTML generated by formatting all the element representations, all the subgroup names (<i>H</i><sub>0</sub>, <i>H</i><sub>1</sub>, etc.), all the subgroup orders, and a few static strings commonly used in the indicated displays. These contents are sufficient to generate the entire subgroup display, and show it immediately on construction. In the current implementation the cache is not modified after this initial load: most of the available performance improvements are realized by the choice of initial content, and this ensures that the cache doesn't grow without bound.
+
+Since repeated use of formatted elements does not occur on all pages, use of the cache is optional. Without it every MathML element inserted in the DOM must be transformed by MathJax into HTML that the browser can render; with it, some of that HTML may simply be copied from the cache. In either case, however, the same formatting routines are used (`MathML.sans`, `MathML.sub`, etc.) and the same results are achieved. To enable the cache `MathML.preload` must be called to create and populate it. Since MathJax formatting is done asynchronously to the main javascript thread the cache is not immediately available on return from the call, so the method returns a Javascript `Promise`. The cache is available when the `then` clause executes. In the GE visualizer implementations this is done during the process of loading the page, after the group is loaded (the group is needed to load the cache), but before the subset display (which uses the cache) executes.
+
+The implementation follows: The cache is a `Map` from MathML to the MathJax-generated HTML that the browser renders. The `preload` method places all the MathML representations, strings, etc. in a hidden &lt;div&gt; element, typesets it with MathJax, and on completion gathers the generated HTML into the cache and removes the hidden &lt;div&gt;. A few notes about the process:
+* The dummy &lt;div&gt; has id="mathml-cache-preload".
+* The &lt;div&gt; can't simply be hidden with `display: none`: MathJax won't size spaces like `<mspace width="0.3em"></mspace>` correctly, rendering permutation representations as `(123)` instead of `(1 2 3)`. In the implementation it's simply written beyond the bottom of the screen.
+* The cache keys are derived from the `data-mathml` attributes of all the top-level spans generated by MathJax in the hidden &lt;div&gt; as follows:
+   + Remove &lt;math...&gt;...&lt;/math&gt; tags.
+   + Translate the entity '&amp;#xA0;' to the more commonly used named entity '&amp;nbsp;'. (This means that '&amp;nbsp;' should be used in MathML expressions, not '&amp;#xA0' or equivalent!)
+* The cache values are determined by removing all the `.MJX_Assistive_MathML` spans (which aren't used in GE) and then recovering the outerHTML of every top-level span with a `data-mathml` attribute.
+
+```js
+*/
+    static preload() {
+       // dom fragment in which all MathML elements will be staged
+       const $preload = $('<div id="mathml-cache-preload">');
+
+       // cache all subgroup names, and find all subgroup orders
+       const orderSet = new Set();
+       for (let inx = 0; inx < group.subgroups.length; inx++) {
+           $preload.append(MathML.sans(MathML.sub('H', inx)));
+           orderSet.add(group.subgroups[inx].order);
+       }
+
+       // cache all subgroup orders as MathML numbers <mn>...</mn>
+       orderSet.forEach( (el) => $preload.append(MathML.sans(`<mn>${el}</mn>`)) );
+
+       // cache all element representations
+       for (let inx = 0; inx < group.representations.length; inx++) {
+           for (let jnx = 0; jnx < group.representations[inx].length; jnx++) {
+               $preload.append(MathML.sans(group.representations[inx][jnx]));
+           }
+       }
+
+       // static strings (in addition to previous data-dependent strings)
+       const staticStrings = [
+           // from subsetDisplay
+           '<mtext>is a subgroup of order</mtext>',
+           '<mtext>is the group itself.</mtext>',
+           '<mtext>is the trivial subgroup</mtext>',
+           '<mtext>{&nbsp;</mtext>',
+           '<mtext>&nbsp;}</mtext>',
+           '<mtext mathvariant="bold">&#x27E8;&nbsp;&nbsp;</mtext>',  // left math bracket, similar to <
+           '<mtext mathvariant="bold">&nbsp;&nbsp;&#x27E9;</mtext>',  // right math bracket, similart to >
+
+           // from diagramDisplay
+           '<mtext>, a subgroup of order</mtext>',
+       ];
+
+       // cache static strings
+       for (let inx = 0; inx < staticStrings.length; inx++) {
+           $preload.append(MathML.sans(staticStrings[inx]));
+       }
+
+       // append fragment to document
+       $preload.appendTo('html');
+
+       // and typeset the MathML in the mathml-cache-preload
+       return new Promise( (resolve, _reject) => {
+           MathJax.Hub.Queue(
+               ['Typeset', MathJax.Hub, 'mathml-cache-preload',
+                () => {
+                    // Create MathML.Cache, and replace MathML.sans function with version that checks it
+                    MathML.Cache = new Map();
+                    MathML.sans = (mathml_string) => {
+                        const mathml = mathml_string.replace(/<mi>/g, '<mi mathvariant="sans-serif-italic">');
+                        return MathML.Cache.get(mathml)
+                            || '<math xmlns="http://www.w3.org/1998/Math/MathML" mathvariant="sans-serif">' + mathml + '</math>';
+                    }
+
+                    // Harvest keys, values from spans generated by MathJax
+                    $('#mathml-cache-preload .MJX_Assistive_MathML').remove();
+                    $('#mathml-cache-preload > [data-mathml]').each( (_, span) => {
+                        const mathml = $(span).attr('data-mathml')
+                              .replace(/<\/?math[^>]*>/g, '')     // remove <math...>, </math> tags
+                              .replace(/&#xA0;/g, '&nbsp;');      // convert &#xA0; to query-appropriate &nbsp;
+                              // .replace(/[ ]*\/>/g, '></mspace>'); // change <mspace.../> to <mspace...></mspace>
+                        if (!MathML.Cache.has(mathml)) {
+                            MathML.Cache.set(mathml, $(span).attr('fromCache', true)[0].outerHTML);
+                        }
+                    } )
+
+                    // remove the hidden div and fulfill the Promise
+                    $('#mathml-cache-preload').remove();
+                    resolve();
+                }]);
+       });
+   }
+/*
+```
+## Initialization
+The following items are created during initialization:
+* `MathML.subscripts` and `MathML.superscripts` contain the Unicode characters for subscript and superscript numerals.
+* `MathML.MATHML_2_HTML` contains XSLT code to transform the MathML subset used in GE into HTML.
+
+```js
+*/
+   static _init() {
+       // Unicode characters for numeric subscripts, superscripts
+       MathML.subscripts =
+           {0: '\u2080', 1: '\u2081', 2: '\u2082', 3: '\u2083', 4: '\u2084',
+            5: '\u2085', 6: '\u2086', 7: '\u2087', 8: '\u2088', 9: '\u2089' };
+       MathML.superscripts =
+           {0: '\u2070', 1: '\u00B9', 2: '\u00B2', 3: '\u00B3', 4: '\u2074',
+            5: '\u2075', 6: '\u2076', 7: '\u2077', 8: '\u2078', 9: '\u2079',
+            '-': '\u207B'};
+
+       // XSLT to transform MathML subset into HTML
+       MathML.xsltProcessor = undefined;
+       MathML.MATHML_2_HTML =
+`<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:output method="html"/>
+
+<xsl:template match="math">
+   <xsl:apply-templates/>
+</xsl:template>
+
+<xsl:template match="mfenced">
+   <xsl:value-of select="@open"/>
+   <xsl:for-each select="./*">
+      <xsl:apply-templates select="."/>
+      <xsl:if test="position() != last()">
+         <xsl:choose>
+            <xsl:when test="../@separators">
+               <xsl:value-of select="../@separators"/>
+            </xsl:when>
+            <xsl:otherwise>
+               <xsl:text>,</xsl:text>
+            </xsl:otherwise>
+         </xsl:choose>
+      </xsl:if>
+   </xsl:for-each>
+   <xsl:value-of select="@close"/>
+</xsl:template>
+
+<xsl:template match="msup">
+   <xsl:apply-templates select="*[1]"/>
+   <sup><xsl:apply-templates select="*[2]"/></sup>
+</xsl:template>
+
+<xsl:template match="msub">
+   <xsl:apply-templates select="*[1]"/>
+   <sub><xsl:apply-templates select="*[2]"/></sub>
+</xsl:template>
+
+<xsl:template match="mi">
+   <i><xsl:value-of select="."/></i>
+</xsl:template>
+
+<xsl:template match="mn">
+   <xsl:value-of select="."/>
+</xsl:template>
+
+<xsl:template match="mo">
+   <xsl:if test=". != ',' and . != '(' and . != ')'"><xsl:text> </xsl:text></xsl:if>
+   <xsl:value-of select="."/>
+   <xsl:if test=". != '(' and . != ')'"><xsl:text> </xsl:text></xsl:if>
+</xsl:template>
+
+<xsl:template match="mspace">
+   <xsl:text> </xsl:text>
+</xsl:template>
+
+<xsl:template match="mtext">
+   <xsl:value-of select="."/>
+</xsl:template>
+
+</xsl:stylesheet>
+`;
+   }
+
+}
+
+MathML._init();
+
+/*
+```
+## Legacy functions
+
+These functions are deprecated in favor of their MathML equivalents. They are retained to aid migration.
+
+* math2text -- transforms the MathML subset used in GE into Unicode text with numeric subscripts and superscripts.
+
+```js
+*/
+   const mathml2text = MathML.toUnicode;
+/*
+```
+ */
+
+class Menu {
+   static setMenuLocations(event, $menu) {
+      const menuBox = $menu[0].getBoundingClientRect();
+      const menuHeight = menuBox.height;
+      const windowHeight = 0.99*window.innerHeight;
+      // set top edge so menu grows down until it sits on the bottom, up until it reaches the top
+      if (menuHeight > windowHeight) {
+         $menu.css({top: 0, height: windowHeight, 'overflow-y': 'auto'});    // too tall for window
+      } else if (event.clientY + menuHeight > windowHeight) {
+         $menu.css({top: windowHeight - menuHeight});    // won't fit below click
+      } else {
+         $menu.css({top: event.clientY});  // fits below click
+      }
+
+      // set left edge location so menu doesn't disappear to the right
+      const menuWidth = menuBox.width;
+      const windowWidth = window.innerWidth;
+      if (event.clientX + menuWidth > windowWidth) {
+         $menu.css({left: windowWidth - menuWidth});
+      } else {
+         $menu.css({left: event.clientX});
+      }
+
+      // similarly for submenus (but they also have to avoid covering the main menu)
+      $menu.children('li:has(span.menu-arrow)')
+           .children('ul')
+           .each( (_, subMenu) => Menu.setSubMenuLocation($menu, $(subMenu)) );
+   }
+
+   static setSubMenuLocation($menu, $subMenu) {
+      const parentBox = $subMenu.parent()[0].getBoundingClientRect();
+      const menuBox = $menu[0].getBoundingClientRect();
+      const subMenuBox = $subMenu[0].getBoundingClientRect();
+      const windowHeight = 0.99*window.innerHeight;
+      const bottomRoom = windowHeight - (parentBox.top + subMenuBox.height);
+      if (parentBox.top + subMenuBox.height < windowHeight) {  // subMenu can drop down from parent
+         $subMenu.css({top: parentBox.top});
+      } else if (subMenuBox.height < windowHeight) {  // subMenu fits in window, but not below parent
+         $subMenu.css({top: windowHeight - subMenuBox.height});
+      } else {  // subMenu doesn't fit in window
+         $subMenu.css({top: 0, height: windowHeight, 'overflow-y': 'auto'})
+      }
+
+      const windowWidth = window.innerWidth;
+      const rightRoom = windowWidth - (menuBox.right + subMenuBox.width);
+      const leftRoom = menuBox.left - subMenuBox.width;
+      const overlap = (subMenuBox.width - $subMenu.width())/2;
+      if (rightRoom > 0) {
+         $subMenu.css({left: menuBox.right - overlap});
+      } else if (leftRoom > 0) {
+         $subMenu.css({left: menuBox.left - subMenuBox.width + overlap});
+      } else if (rightRoom > leftRoom) {
+         $subMenu.css({left: window.width - subMenuBox.width});
+      } else {
+         $subMenu.css({left: 0});
+      }
+
+      $subMenu.children('li:has(span.menu-arrow)')
+              .children('ul')
+              .each( (_, subMenu) => Menu.setSubMenuLocation($subMenu, $(subMenu)) );
+   }
+}
 
 /*
  * Structure used to describe Cayley diagram, symmetry object to DrawDiagram
@@ -1984,6 +2350,19 @@ Diagram3D.Point = class Point {
    }
 }
 
+/*
+ * Node extends point with information about the sphere drawn at this 3D location.
+ * Values not used are 'undefined'.
+ *   element: group element associated with this node
+ *   color: this node's color, if different from the parent diagram's default color
+ *   label: label drawn next to node (element label)
+ *   radius: radius of the sphere drawn at this location
+ *   lineStyle: line style generated by the element at this node
+ * Highlight information is kept separate to support 'clear all highlighting' function
+ *   colorHighlight: highlight node with this color
+ *   ringHighlight: draw ring of this color around node
+ *   squareHighlight: draw square of this color around node
+ */
 Diagram3D.Node = class Node extends Diagram3D.Point {
    constructor(element, point, options) {
       super(point);
@@ -2027,6 +2406,173 @@ Diagram3D.Line = class Line {
          }
       }, [0, undefined] );
       return length;
+   }
+}
+/*
+ * ToDo:  disable when chunking
+ */
+class DiagramDnD {
+   constructor(displayDiagram) {
+      this.displayDiagram = displayDiagram;
+      this.canvas = displayDiagram.renderer.domElement;
+      this.mouse = new THREE.Vector2();
+      this.raycaster = new THREE.Raycaster();
+      this.raycaster.linePrecision = 0.01;
+      this.event_handler = (event) => this.eventHandler(event);
+      this.repaint_poller = undefined;
+      this.repaint_request = undefined;
+      this.object = undefined;
+
+      $(displayDiagram.renderer.domElement).on('mousedown', this.event_handler);
+   }
+
+   eventHandler(event) {
+      if (!event.shiftKey) {
+         return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      const bounding_box = this.canvas.getBoundingClientRect();
+      this.mouse.x = ( (event.clientX - bounding_box.x) / this.canvas.width) * 2 - 1;
+      this.mouse.y = -( (event.clientY - bounding_box.y) / this.canvas.height) * 2 + 1;
+
+      switch (event.type) {
+         case 'mousedown':  this.dragStart(event);  break;
+         case 'mousemove':  this.dragOver(event);   break;
+         case 'mouseup':    this.drop(event);       break;
+      }
+   }
+
+   // start drag-and-drop; see if we've found a line
+   dragStart(event) {
+      // update the picking ray with the camera and mouse position
+      this.raycaster.setFromCamera(this.mouse, this.displayDiagram.camera);
+
+      // temporarily change the width of the lines to 1 for raycasting -- doesn't seem to work with meshLines (sigh)
+      // (this change is never rendered, so user never sees it)
+      const saved_width = this.displayDiagram.scene.userData.lineWidth;
+      this.displayDiagram.scene.userData.lineWidth = 1;
+      this.displayDiagram.updateLines(this.displayDiagram.scene.userData);
+
+      // calculate objects intersecting the picking ray
+      const intersects = this.raycaster.intersectObjects(
+         this.displayDiagram.getGroup("lines").children.concat(this.displayDiagram.getGroup("spheres").children), false);
+
+      // now change the line width back
+      this.displayDiagram.scene.userData.lineWidth = saved_width;
+      this.displayDiagram.updateLines(this.displayDiagram.scene.userData);
+
+      // if empty intersect just return
+      if (intersects.length == 0) {
+         return;
+      }
+
+      // found an object (line or sphere); squirrel it away and wait for further dnd events
+      this.object = intersects[0].object;
+      $(this.canvas).off('mousemove', this.event_handler).on('mousemove', this.event_handler);
+      $(this.canvas).off('mouseup', this.event_handler).on('mouseup', this.event_handler);
+
+      // change cursor to grab
+      this.canvas.style.cursor = 'move';
+
+      this.repaint_poller = window.setInterval(() => this.repaintPoller(), 100);
+   }
+
+   dragOver(event) {
+      this.repaint_request = (this.repaint_request === undefined) ? performance.now() : this.repaint_request;
+   }
+
+   drop(event) {
+      this.repaint();
+      this.endDrag(event);
+   }
+
+   endDrag(event) {
+      $(this.canvas).off('mousemove', this.event_handler);
+      $(this.canvas).off('mouseup', this.event_handler);
+      this.canvas.style.cursor = '';
+      window.clearInterval(this.repaint_poller);
+      this.repaint_poller = undefined;
+      this.object = undefined;
+   }
+
+   repaintPoller() {
+      if (performance.now() - this.repaint_request > 100) {
+         this.repaint();
+      }
+   }
+
+   // update line to run through current mouse position
+   repaint() {
+      // get ray through mouse
+      this.raycaster.setFromCamera(this.mouse, this.displayDiagram.camera);
+
+      if (this.object.type == 'Line') {
+         this.repaintLine();
+      } else if (this.object.type == 'Mesh') {
+         this.repaintSphere();
+      }
+
+      // clear repaint request
+      this.repaint_request = undefined;
+   }
+
+   repaintLine() {
+      // get intersection of ray with plane of line (through start, end, center)
+      const start = this.object.userData.line.vertices[0].point;
+      const end = this.object.userData.line.vertices[1].point;
+      const center = this.displayDiagram._getCenter(this.object.userData.line);
+      const center2start = start.clone().sub(center);
+      const center2end = end.clone().sub(center);
+
+      // find 'intersection', the point the raycaster ray intersects the plane defined by start, end and center
+      const m = new THREE.Matrix3().set(...center2start.toArray(),
+                                        ...center2end.toArray(),
+                                        ...this.raycaster.ray.direction.toArray())
+                         .transpose();
+      const s = this.raycaster.ray.origin.clone().applyMatrix3(new THREE.Matrix3().getInverse(m));
+      const intersection = this.raycaster.ray.origin.clone().add(this.raycaster.ray.direction.clone().multiplyScalar(-s.z));
+
+      // get offset length
+      const start2intxn = intersection.clone().sub(start);
+      const start2end = end.clone().sub(start);
+      const plane_normal = new THREE.Vector3().crossVectors(center2start, center2end).normalize();
+      const line_length = start2end.length();
+      const offset = new THREE.Vector3().crossVectors(start2intxn, start2end).dot(plane_normal)/(line_length * line_length);
+
+      // set line offset in diagram, and re-paint lines, arrowheads
+      this.object.userData.line.style = Diagram3D.CURVED;
+      this.object.userData.line.offset = offset;
+      this.displayDiagram.updateLines(this.displayDiagram.scene.userData);
+      this.displayDiagram.updateArrowheads(this.displayDiagram.scene.userData);
+   }
+
+   repaintSphere() {
+      // change node location to 3D intersection between ray and plane normal to camera POV containing node
+      const node = this.object.userData.node.point;
+      const ray_origin = this.raycaster.ray.origin;
+      const ray_direction = this.raycaster.ray.direction;
+      const projection = ray_origin.clone().multiplyScalar(ray_origin.dot(node)/node.length()/ray_origin.length()/ray_origin.length());
+      const inplane = node.clone().sub(projection);
+      const normal = new THREE.Vector3().crossVectors(inplane, ray_origin).normalize();
+
+      const m = new THREE.Matrix3().set(...inplane.toArray(),
+                                        ...normal.toArray(),
+                                        ...ray_direction.toArray() )
+                         .transpose();
+      const s = ray_origin.clone().sub(projection).applyMatrix3(new THREE.Matrix3().getInverse(m));
+      const new_node = ray_origin.clone().add(ray_direction.clone().multiplyScalar(-s.z));
+
+      this.object.userData.node.point = new_node;
+
+      this.displayDiagram.updateNodes(this.displayDiagram.scene.userData);
+      this.displayDiagram.updateHighlights(this.displayDiagram.scene.userData);
+      this.displayDiagram.updateLabels(this.displayDiagram.scene.userData);
+      this.displayDiagram.updateLines(this.displayDiagram.scene.userData);
+      this.displayDiagram.updateArrowheads(this.displayDiagram.scene.userData);
+      this.displayDiagram.render();
    }
 }
 /*
@@ -2510,6 +3056,33 @@ CayleyDiagram.RotatedLayout = class extends CayleyDiagram.CurvedLayout {
    }
 }
 /*
+ * generate {nodes, lines} from $xml data
+ *
+ * caller adds node color, label; line color, width
+ */
+
+class SymmetryObject {
+   static _init() {
+      SymmetryObject.BACKGROUND_COLOR = 0xC8E8C8;
+   }
+
+   static generate(group, diagramName) {
+      const symmetryObject = group.symmetryObjects.find( (obj) => obj.name == diagramName );
+      const nodes = symmetryObject.spheres.map( (sphere, inx) =>
+         new Diagram3D.Node(inx, sphere.point, {color: sphere.color, radius: sphere.radius}) );
+
+      const lines = symmetryObject.paths.map( (path) => {
+         const vertices = path.points.map( (point) => new Diagram3D.Point(point) );
+         return new Diagram3D.Line(vertices, {color: path.color, arrowhead: false});
+      } );
+
+      return new Diagram3D(group, nodes, lines, {background: SymmetryObject.BACKGROUND_COLOR});
+   }
+}
+
+// initialize static variables
+SymmetryObject._init();
+/*
  * Routines to draw 3D ball-and-stick diagrams using three.js
  */
 
@@ -2600,7 +3173,7 @@ class DisplayDiagram {
       if ( !options ) options = { size : 'small', resetCamera : true };
       const img = new Image();
 
-      // save diagram for use by LineDnD -- not used for thumbnails
+      // save diagram for use by DiagramDnD -- not used for thumbnails
       if (this.lineDnD !== undefined) {
          this.scene.userData = diagram3D;
       }
@@ -2628,7 +3201,7 @@ class DisplayDiagram {
       // save diagram for use by LineDnD
       if (this.camControls !== undefined && diagram3D.isCayleyDiagram) {
          if (this.lineDnD === undefined) {
-            this.lineDnD = new DisplayDiagram.LineDnD(this);
+            this.lineDnD = new DiagramDnD(this);
          }
          this.scene.userData = diagram3D;
       }
@@ -3370,465 +3943,6 @@ class DisplayDiagram {
    }
 }
 
-DisplayDiagram.LineDnD = class {
-   constructor(displayDiagram) {
-      this.displayDiagram = displayDiagram;
-      this.canvas = displayDiagram.renderer.domElement;
-      this.mouse = new THREE.Vector2();
-      this.raycaster = new THREE.Raycaster();
-      this.raycaster.linePrecision = 0.01;
-      this.event_handler = (event) => this.eventHandler(event);
-      this.repaint_poller = undefined;
-      this.repaint_request = undefined;
-
-      $(displayDiagram.renderer.domElement).on('mousedown', this.event_handler);
-   }
-
-   eventHandler(event) {
-      if (!event.shiftKey) {
-         return;
-      }
-
-      event.preventDefault();
-      event.stopPropagation();
-
-      const bounding_box = this.canvas.getBoundingClientRect();
-      this.mouse.x = ( (event.clientX - bounding_box.x) / this.canvas.width) * 2 - 1;
-      this.mouse.y = -( (event.clientY - bounding_box.y) / this.canvas.height) * 2 + 1;
-
-      switch (event.type) {
-         case 'mousedown':  this.dragStart(event);  break;
-         case 'mousemove':  this.dragOver(event);   break;
-         case 'mouseup':    this.drop(event);       break;
-      }
-   }
-
-   // start drag-and-drop; see if we've found a line
-   dragStart(event) {
-      // update the picking ray with the camera and mouse position
-      this.raycaster.setFromCamera(this.mouse, this.displayDiagram.camera);
-
-      // temporarily change the width of the lines to 1 for raycasting -- doesn't seem to work with meshLines (sigh)
-      // (this change is never rendered, so user never sees it)
-      const saved_width = this.displayDiagram.scene.userData.lineWidth;
-      this.displayDiagram.scene.userData.lineWidth = 1;
-      this.displayDiagram.updateLines(this.displayDiagram.scene.userData);
-
-      // calculate objects intersecting the picking ray
-      const intersects = this.raycaster.intersectObjects( this.displayDiagram.getGroup("lines").children, false ) ;
-
-      // now change the line width back
-      this.displayDiagram.scene.userData.lineWidth = saved_width;
-      this.displayDiagram.updateLines(this.displayDiagram.scene.userData);
-
-      // if ambiguous or empty intersect just return
-      if (!(   intersects.length == 1
-            || intersects.length == 2 && intersects[0].object == intersects[1].object)) {
-         return;
-      }
-
-      // found a line, squirrel it away and wait for further dnd events
-      this.line = intersects[0].object;
-      $(this.canvas).off('mousemove', this.event_handler).on('mousemove', this.event_handler);
-      $(this.canvas).off('mouseup', this.event_handler).on('mouseup', this.event_handler);
-
-      // change cursor to grab
-      this.canvas.style.cursor = 'move';
-
-      this.repaint_poller = window.setInterval(() => this.repaintPoller(), 100);
-   }
-
-   dragOver(event) {
-      this.repaint_request = (this.repaint_request === undefined) ? performance.now() : this.repaint_request;
-   }
-
-   drop(event) {
-      this.repaintLine();
-      this.endDrag(event);
-   }
-
-   endDrag(event) {
-      $(this.canvas).off('mousemove', this.event_handler);
-      $(this.canvas).off('mouseup', this.event_handler);
-      this.canvas.style.cursor = '';
-      window.clearInterval(this.repaint_poller);
-      this.repaint_poller = undefined;
-      this.line = undefined;
-   }
-
-   repaintPoller() {
-      if (performance.now() - this.repaint_request > 100) {
-         this.repaintLine();
-      }
-   }
-
-   // update line to run through current mouse position
-   repaintLine() {
-      // get ray through mouse
-      this.raycaster.setFromCamera(this.mouse, this.displayDiagram.camera);
-
-      // get intersection of ray with plane of line (through start, end, center)
-      const start = this.line.userData.line.vertices[0].point;
-      const end = this.line.userData.line.vertices[1].point;
-      const center = this.displayDiagram._getCenter(this.line.userData.line);
-      const center2start = start.clone().sub(center);
-      const center2end = end.clone().sub(center);
-
-      // find 'intersection', the point the raycaster ray intersects the plane defined by start, end and center
-      const m = new THREE.Matrix3().set(...center2start.toArray(),
-                                        ...center2end.toArray(),
-                                        ...this.raycaster.ray.direction.toArray())
-                         .transpose();
-      const s = this.raycaster.ray.origin.clone().applyMatrix3(new THREE.Matrix3().getInverse(m));
-      const intersection = this.raycaster.ray.origin.clone().add(this.raycaster.ray.direction.clone().multiplyScalar(-s.z));
-
-      // get offset length
-      const start2intxn = intersection.clone().sub(start);
-      const start2end = end.clone().sub(start);
-      const plane_normal = new THREE.Vector3().crossVectors(center2start, center2end).normalize();
-      const line_length = start2end.length();
-      const offset = new THREE.Vector3().crossVectors(start2intxn, start2end).dot(plane_normal)/(line_length * line_length);
-
-      // set line offset in diagram, and re-paint lines, arrowheads
-      this.line.userData.line.style = Diagram3D.CURVED;
-      this.line.userData.line.offset = offset;
-      this.displayDiagram.updateLines(this.displayDiagram.scene.userData);
-      this.displayDiagram.updateArrowheads(this.displayDiagram.scene.userData);
-
-      // clear repaint request
-      this.repaint_request = undefined;
-   }
-}
-/*
-# MathML utilities
-
-Nearly all mathematical text in GE is formatted with MathML and rendered into HTML by MathJax. The MathML class has utility functions for some simple formatting patterns, converting MathML to Unicode text, and caching MathJax output to improve performance.
-
-* [Formatting utilities](#formatting-utilities)
-
-* [Transformation routines](#transformation-routines)
-
-* [Caching](#caching)
-
-* [Initialization](#initialization)
-
-* [Legacy functions](#legacy-functions)
-```js
-*/
-class MathML {
-/*
-```
-## Formatting utilities
-<i>(note: examples are HTML approximations to actual MathJax output)</i>
-
-* sans -- format a MathML string in sans-serif font
-    <br>&nbsp;&nbsp;`MathML.sans('<mtext>Linear in </mtext><mi>rf</mi>')` => "Linear in <i>rf</i>"
-    + All identifiers (&lt;mi&gt; elements) are italicized, including multi-character identifiers.
-
-* sub -- format two character strings as an identifier with a subscript
-    <br>&nbsp;&nbsp;`MathML.sans(MathML.sub('CC','3'))` => "<i>CC</i><sub>3</sub>"
-    + Arguments are not treated as MathML strings.
-
-* csList -- format a list of MathML strings as a comma-separated list
-    <br>&nbsp;&nbsp;`MathML.csList(['<mi>x</mi>', '<mn>3</mn>'])` =>  "<i>x</i>, 3"
-    + The resulting list elements are separate top-level MathML constructs, separated by normal HTML. This allows the browser to re-flow the text instead of having MathJax do it.
-    + This routine is used internally by setList and genList.
-
-* setList -- format a list of MathML strings as a comma-separated list surrounded by {, } braces
-    <br>&nbsp;&nbsp;`MathML.setList(['<mi>r</mi>', '<mi>f</mi>'])` => "{ <i>r</i>, <i>f</i> }"
-
-* genList -- format a list of MathML strings as a comma-separated list surrounded by ⟨, ⟩ brackets
-    <br>&nbsp;&nbsp;`MathML.genList(['<mi>r</mi>', '<mi>f</mi>'])` => "⟨ <i>r</i>, <i>f</i> ⟩"
-    + Brackets are in bold because the normal font renders them lighter than other characters.
-
-* rowList -- format a list of MathML strings as rows (a &lt;br&gt;-separated list)
-
-```js
-*/
-    static sans(mathml) {
-        mathml = mathml.replace(/<mi>/g, '<mi mathvariant="sans-serif-italic">');
-        return '<math xmlns="http://www.w3.org/1998/Math/MathML" mathvariant="sans-serif">' + mathml + '</math>';
-    }
-
-    static sub(identifier, subscript) {
-        return '<msub><mi>' + identifier + '</mi><mn>' + subscript + '</mn></msub>';
-    }
-
-    static csList(elements) {
-        return elements
-            .map( (el, inx) => MathML.sans(el) + (inx < elements.length-1 ? ',&nbsp;' : '') ).join('');
-    }
-
-    static setList(elements) {
-        return MathML.sans('<mtext>{&nbsp;</mtext>') +
-            MathML.csList(elements) +
-            MathML.sans('<mtext>&nbsp;}</mtext>');
-    }
-
-    static genList(generators) {
-        return MathML.sans('<mtext mathvariant="bold">&#x27E8;&nbsp;&nbsp;</mtext>') +
-            MathML.csList(generators) +
-            MathML.sans('<mtext mathvariant="bold">&nbsp;&nbsp;&#x27E9;</mtext>');
-    }
-
-    static rowList(elements) {
-        return elements.map( (el, inx) => MathML.sans(el) + '<br>').join('');
-    }
-/*
-```
-## Transformation routines
-
-These routines transform the subset of MathML used in GE .group XML files into HTML5 or Unicode text using XSLT. Only a small subset of MathML capability is used in these files, limited to subscripts and superscripts of signed numeric values.
-
-* toHTML -- transform MathML into an HTML5 document fragment with &lt;sub&gt;...&lt;/sub&gt; and &lt;sup&gt;...&lt;/sup&gt; markup
-    <br>&nbsp;&nbsp;`MathML.toHTML('<msub><mi>H</mi><mn>3</mn></msub>')` => `<i>H</i><sub>3</sub>` => "<i>H</i><sub>3</sub>"
-
-* toUnicode -- transform MathML into Unicode text with numeric subscripts and superscripts
-    <br>&nbsp;&nbsp;`MathML.toUnicode('<msub><mi>H</mi><mn>3</mn></msub>')` => "H₃"
-    + Subscript and superscript characters are defined in `MathML.subscripts` and `MathML.superscripts`.
-
-```js
-*/
-   static toHTML(mathml) {
-       if (MathML.xsltProcessor === undefined) {
-           MathML.xsltProcessor = new XSLTProcessor();
-           MathML.xsltProcessor.importStylesheet($.parseXML(MathML.MATHML_2_HTML));
-       }
-       return MathML.xsltProcessor.transformToFragment($($.parseXML(mathml))[0], document);
-   }
-
-   static toUnicode(mathml) {
-       const $html = $( MathML.toHTML(mathml) );
-
-       $html.find('sub').each( (_,el) => $(el).text($(el).text().split('').map(ch => MathML.subscripts[ch]).join('')) );
-       $html.find('sup').each( (_,el) => $(el).text($(el).text().split('').map(ch => MathML.superscripts[ch]).join('')));
-
-       return $html.text();
-   }
-/*
-```
-## Caching
-
-The subgroup display that is part of many of the visualizers takes a noticeable amount of time to format with MathJax, particularly since it occurs at the same time as the main graphic is being generated and because it must complete before the browser is fully responsive. Since many formatted elements are used repeatedly, caching the results of the formatting operation can be used to improve performance. The approach below is particularly suited to the visualizers' subset display and the diagram control panels.
-
-The approach below has `MathML.sans` consult a cache of already formatted MathML elements and return the HTML generated by a previous MathJax run if a match is found. This HTML can be inserted into the DOM where a MathML expression would otherwise be put, where it needs no further MathJax processing to be displayed in its final form. The cache is initially loaded with the HTML generated by formatting all the element representations, all the subgroup names (<i>H</i><sub>0</sub>, <i>H</i><sub>1</sub>, etc.), all the subgroup orders, and a few static strings commonly used in the indicated displays. These contents are sufficient to generate the entire subgroup display, and show it immediately on construction. In the current implementation the cache is not modified after this initial load: most of the available performance improvements are realized by the choice of initial content, and this ensures that the cache doesn't grow without bound.
-
-Since repeated use of formatted elements does not occur on all pages, use of the cache is optional. Without it every MathML element inserted in the DOM must be transformed by MathJax into HTML that the browser can render; with it, some of that HTML may simply be copied from the cache. In either case, however, the same formatting routines are used (`MathML.sans`, `MathML.sub`, etc.) and the same results are achieved. To enable the cache `MathML.preload` must be called to create and populate it. Since MathJax formatting is done asynchronously to the main javascript thread the cache is not immediately available on return from the call, so the method returns a Javascript `Promise`. The cache is available when the `then` clause executes. In the GE visualizer implementations this is done during the process of loading the page, after the group is loaded (the group is needed to load the cache), but before the subset display (which uses the cache) executes.
-
-The implementation follows: The cache is a `Map` from MathML to the MathJax-generated HTML that the browser renders. The `preload` method places all the MathML representations, strings, etc. in a hidden &lt;div&gt; element, typesets it with MathJax, and on completion gathers the generated HTML into the cache and removes the hidden &lt;div&gt;. A few notes about the process:
-* The dummy &lt;div&gt; has id="mathml-cache-preload".
-* The &lt;div&gt; can't simply be hidden with `display: none`: MathJax won't size spaces like `<mspace width="0.3em"></mspace>` correctly, rendering permutation representations as `(123)` instead of `(1 2 3)`. In the implementation it's simply written beyond the bottom of the screen.
-* The cache keys are derived from the `data-mathml` attributes of all the top-level spans generated by MathJax in the hidden &lt;div&gt; as follows:
-   + Remove &lt;math...&gt;...&lt;/math&gt; tags.
-   + Translate the entity '&amp;#xA0;' to the more commonly used named entity '&amp;nbsp;'. (This means that '&amp;nbsp;' should be used in MathML expressions, not '&amp;#xA0' or equivalent!)
-* The cache values are determined by removing all the `.MJX_Assistive_MathML` spans (which aren't used in GE) and then recovering the outerHTML of every top-level span with a `data-mathml` attribute.
-
-```js
-*/
-    static preload() {
-       // dom fragment in which all MathML elements will be staged
-       const $preload = $('<div id="mathml-cache-preload">');
-
-       // cache all subgroup names, and find all subgroup orders
-       const orderSet = new Set();
-       for (let inx = 0; inx < group.subgroups.length; inx++) {
-           $preload.append(MathML.sans(MathML.sub('H', inx)));
-           orderSet.add(group.subgroups[inx].order);
-       }
-
-       // cache all subgroup orders as MathML numbers <mn>...</mn>
-       orderSet.forEach( (el) => $preload.append(MathML.sans(`<mn>${el}</mn>`)) );
-
-       // cache all element representations
-       for (let inx = 0; inx < group.representations.length; inx++) {
-           for (let jnx = 0; jnx < group.representations[inx].length; jnx++) {
-               $preload.append(MathML.sans(group.representations[inx][jnx]));
-           }
-       }
-
-       // static strings (in addition to previous data-dependent strings)
-       const staticStrings = [
-           // from subsetDisplay
-           '<mtext>is a subgroup of order</mtext>',
-           '<mtext>is the group itself.</mtext>',
-           '<mtext>is the trivial subgroup</mtext>',
-           '<mtext>{&nbsp;</mtext>',
-           '<mtext>&nbsp;}</mtext>',
-           '<mtext mathvariant="bold">&#x27E8;&nbsp;&nbsp;</mtext>',  // left math bracket, similar to <
-           '<mtext mathvariant="bold">&nbsp;&nbsp;&#x27E9;</mtext>',  // right math bracket, similart to >
-
-           // from diagramDisplay
-           '<mtext>, a subgroup of order</mtext>',
-       ];
-
-       // cache static strings
-       for (let inx = 0; inx < staticStrings.length; inx++) {
-           $preload.append(MathML.sans(staticStrings[inx]));
-       }
-
-       // append fragment to document
-       $preload.appendTo('html');
-
-       // and typeset the MathML in the mathml-cache-preload
-       return new Promise( (resolve, _reject) => {
-           MathJax.Hub.Queue(
-               ['Typeset', MathJax.Hub, 'mathml-cache-preload',
-                () => {
-                    // Create MathML.Cache, and replace MathML.sans function with version that checks it
-                    MathML.Cache = new Map();
-                    MathML.sans = (mathml_string) => {
-                        const mathml = mathml_string.replace(/<mi>/g, '<mi mathvariant="sans-serif-italic">');
-                        return MathML.Cache.get(mathml)
-                            || '<math xmlns="http://www.w3.org/1998/Math/MathML" mathvariant="sans-serif">' + mathml + '</math>';
-                    }
-
-                    // Harvest keys, values from spans generated by MathJax
-                    $('#mathml-cache-preload .MJX_Assistive_MathML').remove();
-                    $('#mathml-cache-preload > [data-mathml]').each( (_, span) => {
-                        const mathml = $(span).attr('data-mathml')
-                              .replace(/<\/?math[^>]*>/g, '')     // remove <math...>, </math> tags
-                              .replace(/&#xA0;/g, '&nbsp;');      // convert &#xA0; to query-appropriate &nbsp;
-                              // .replace(/[ ]*\/>/g, '></mspace>'); // change <mspace.../> to <mspace...></mspace>
-                        if (!MathML.Cache.has(mathml)) {
-                            MathML.Cache.set(mathml, $(span).attr('fromCache', true)[0].outerHTML);
-                        }
-                    } )
-
-                    // remove the hidden div and fulfill the Promise
-                    $('#mathml-cache-preload').remove();
-                    resolve();
-                }]);
-       });
-   }
-/*
-```
-## Initialization
-The following items are created during initialization:
-* `MathML.subscripts` and `MathML.superscripts` contain the Unicode characters for subscript and superscript numerals.
-* `MathML.MATHML_2_HTML` contains XSLT code to transform the MathML subset used in GE into HTML.
-
-```js
-*/
-   static _init() {
-       // Unicode characters for numeric subscripts, superscripts
-       MathML.subscripts =
-           {0: '\u2080', 1: '\u2081', 2: '\u2082', 3: '\u2083', 4: '\u2084',
-            5: '\u2085', 6: '\u2086', 7: '\u2087', 8: '\u2088', 9: '\u2089' };
-       MathML.superscripts =
-           {0: '\u2070', 1: '\u00B9', 2: '\u00B2', 3: '\u00B3', 4: '\u2074',
-            5: '\u2075', 6: '\u2076', 7: '\u2077', 8: '\u2078', 9: '\u2079',
-            '-': '\u207B'};
-
-       // XSLT to transform MathML subset into HTML
-       MathML.xsltProcessor = undefined;
-       MathML.MATHML_2_HTML =
-`<?xml version="1.0" encoding="UTF-8"?>
-<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-<xsl:output method="html"/>
-
-<xsl:template match="math">
-   <xsl:apply-templates/>
-</xsl:template>
-
-<xsl:template match="mfenced">
-   <xsl:value-of select="@open"/>
-   <xsl:for-each select="./*">
-      <xsl:apply-templates select="."/>
-      <xsl:if test="position() != last()">
-         <xsl:choose>
-            <xsl:when test="../@separators">
-               <xsl:value-of select="../@separators"/>
-            </xsl:when>
-            <xsl:otherwise>
-               <xsl:text>,</xsl:text>
-            </xsl:otherwise>
-         </xsl:choose>
-      </xsl:if>
-   </xsl:for-each>
-   <xsl:value-of select="@close"/>
-</xsl:template>
-
-<xsl:template match="msup">
-   <xsl:apply-templates select="*[1]"/>
-   <sup><xsl:apply-templates select="*[2]"/></sup>
-</xsl:template>
-
-<xsl:template match="msub">
-   <xsl:apply-templates select="*[1]"/>
-   <sub><xsl:apply-templates select="*[2]"/></sub>
-</xsl:template>
-
-<xsl:template match="mi">
-   <i><xsl:value-of select="."/></i>
-</xsl:template>
-
-<xsl:template match="mn">
-   <xsl:value-of select="."/>
-</xsl:template>
-
-<xsl:template match="mo">
-   <xsl:if test=". != ',' and . != '(' and . != ')'"><xsl:text> </xsl:text></xsl:if>
-   <xsl:value-of select="."/>
-   <xsl:if test=". != '(' and . != ')'"><xsl:text> </xsl:text></xsl:if>
-</xsl:template>
-
-<xsl:template match="mspace">
-   <xsl:text> </xsl:text>
-</xsl:template>
-
-<xsl:template match="mtext">
-   <xsl:value-of select="."/>
-</xsl:template>
-
-</xsl:stylesheet>
-`;
-   }
-
-}
-
-MathML._init();
-
-/*
-```
-## Legacy functions
-
-These functions are deprecated in favor of their MathML equivalents. They are retained to aid migration.
-
-* math2text -- transforms the MathML subset used in GE into Unicode text with numeric subscripts and superscripts.
-
-```js
-*/
-   const mathml2text = MathML.toUnicode;
-/*
-```
- */
-/*
- * generate {nodes, lines} from $xml data
- *
- * caller adds node color, label; line color, width
- */
-
-class SymmetryObject {
-   static _init() {
-      SymmetryObject.BACKGROUND_COLOR = 0xC8E8C8;
-   }
-
-   static generate(group, diagramName) {
-      const symmetryObject = group.symmetryObjects.find( (obj) => obj.name == diagramName );
-      const nodes = symmetryObject.spheres.map( (sphere, inx) =>
-         new Diagram3D.Node(inx, sphere.point, {color: sphere.color, radius: sphere.radius}) );
-
-      const lines = symmetryObject.paths.map( (path) => {
-         const vertices = path.points.map( (point) => new Diagram3D.Point(point) );
-         return new Diagram3D.Line(vertices, {color: path.color, arrowhead: false});
-      } );
-
-      return new Diagram3D(group, nodes, lines, {background: SymmetryObject.BACKGROUND_COLOR});
-   }
-}
-
-// initialize static variables
-SymmetryObject._init();
 
 class Multtable {
    constructor(group) {
@@ -4960,68 +5074,5 @@ class DisplayCycleGraph {
    fromJSON ( json, cycleGraph ) {
       cycleGraph.highlights = json.highlights;
       cycleGraph.elements = json.elements;
-   }
-}
-
-class Menu {
-   static setMenuLocations(event, $menu) {
-      const menuBox = $menu[0].getBoundingClientRect();
-      const menuHeight = menuBox.height;
-      const windowHeight = 0.99*window.innerHeight;
-      // set top edge so menu grows down until it sits on the bottom, up until it reaches the top
-      if (menuHeight > windowHeight) {
-         $menu.css({top: 0, height: windowHeight, 'overflow-y': 'auto'});    // too tall for window
-      } else if (event.clientY + menuHeight > windowHeight) {
-         $menu.css({top: windowHeight - menuHeight});    // won't fit below click
-      } else {
-         $menu.css({top: event.clientY});  // fits below click
-      }
-
-      // set left edge location so menu doesn't disappear to the right
-      const menuWidth = menuBox.width;
-      const windowWidth = window.innerWidth;
-      if (event.clientX + menuWidth > windowWidth) {
-         $menu.css({left: windowWidth - menuWidth});
-      } else {
-         $menu.css({left: event.clientX});
-      }
-
-      // similarly for submenus (but they also have to avoid covering the main menu)
-      $menu.children('li:has(span.menu-arrow)')
-           .children('ul')
-           .each( (_, subMenu) => Menu.setSubMenuLocation($menu, $(subMenu)) );
-   }
-
-   static setSubMenuLocation($menu, $subMenu) {
-      const parentBox = $subMenu.parent()[0].getBoundingClientRect();
-      const menuBox = $menu[0].getBoundingClientRect();
-      const subMenuBox = $subMenu[0].getBoundingClientRect();
-      const windowHeight = 0.99*window.innerHeight;
-      const bottomRoom = windowHeight - (parentBox.top + subMenuBox.height);
-      if (parentBox.top + subMenuBox.height < windowHeight) {  // subMenu can drop down from parent
-         $subMenu.css({top: parentBox.top});
-      } else if (subMenuBox.height < windowHeight) {  // subMenu fits in window, but not below parent
-         $subMenu.css({top: windowHeight - subMenuBox.height});
-      } else {  // subMenu doesn't fit in window
-         $subMenu.css({top: 0, height: windowHeight, 'overflow-y': 'auto'})
-      }
-
-      const windowWidth = window.innerWidth;
-      const rightRoom = windowWidth - (menuBox.right + subMenuBox.width);
-      const leftRoom = menuBox.left - subMenuBox.width;
-      const overlap = (subMenuBox.width - $subMenu.width())/2;
-      if (rightRoom > 0) {
-         $subMenu.css({left: menuBox.right - overlap});
-      } else if (leftRoom > 0) {
-         $subMenu.css({left: menuBox.left - subMenuBox.width + overlap});
-      } else if (rightRoom > leftRoom) {
-         $subMenu.css({left: window.width - subMenuBox.width});
-      } else {
-         $subMenu.css({left: 0});
-      }
-
-      $subMenu.children('li:has(span.menu-arrow)')
-              .children('ul')
-              .each( (_, subMenu) => Menu.setSubMenuLocation($subMenu, $(subMenu)) );
    }
 }
