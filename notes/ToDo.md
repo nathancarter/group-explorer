@@ -19,11 +19,6 @@
  * Eventually, we want to have a camera position be specifiable in the OS/CD diagram
    itself, so the diagram author can choose it.
 
-### Bugs to fix
-
- * Dragging the identity element in the multiplication table to a new column
-   does not move it, but it permutes the other elements in some way.
-
 ## Assigned to Nathan
 
 ### Help pages
