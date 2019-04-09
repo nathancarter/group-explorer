@@ -6,12 +6,14 @@
       <link rel="stylesheet" href="./style/menu.css" type="text/css"></link>
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css">
       <style>
+       .hidden {
+          display: none;
+       }
        table, th, td {
           border: 3px solid silver;
           padding: 5px;
           border-collapse: collapse;
        }
-
        #notes-area {
           font-size: 14pt;
           width: 40em;
@@ -56,6 +58,89 @@
        .indent2 {
           margin-left: 2cm;
        }
+
+
+       /* Subset editor styling */
+       #naming-editor {
+          font-size: 11pt;
+          text-align: center;
+          display: none; /* Hidden by default */
+          position: fixed; /* Stay in place */
+          z-index: 1; /* Sit on top */
+          padding-top: 100px; /* Location of the box */
+          left: 0;
+          top: 0;
+          width: 100%; /* Full width */
+          height: 100%; /* Full height */
+          overflow: auto; /* Enable scroll if needed */
+          background-color: rgba(0,0,0,0.4); /* Gray mist */
+       }
+
+       #udredit-content {
+          background-color: #E4E4E4;		/* nearly white (~white smoke) */
+          margin: auto;
+          border: 1px solid #BFBFBF;		/* ~silver */
+          width: 49em;
+       }
+
+       #udredit-header {
+          padding: 0.3em;
+       }
+
+       #udredit-title {
+          background: #4D4D4d;		/* dark gray */
+          color: #FFFFFF;               /* white font */
+          padding: 0.3em;
+       }
+
+       #udredit-body {
+          height: 200px;
+          padding: 0 1em;
+       }
+
+       #udredit-table {
+          width: 100%;
+          height: 100%;
+          margin: 0 1em;
+          table-layout: fixed;
+          border-collapse: collapse;
+          border: none;
+       }
+
+       #udredit-table tbody {
+          display: block;
+          overflow: auto;
+          height: 100%;
+       }
+
+       #udredit-table thead tr {
+          display: block;
+       }
+
+       #udredit-table th,
+       #udredit-table td {
+          border: 1px solid black;
+          width: 20em;
+          padding: 2px;
+       }
+
+       #udredit-table th {
+          background-color: #D2D2D2;
+       }
+
+       #udredit-table td {
+          background-color: #FFFFFF;
+       }
+
+       .udredit-button {
+          background-image: linear-gradient(#DDDDDD, #C0C0C0);
+          border: 1px solid #7E7E7E;
+          height: 26px;
+          width: 80px;
+          font-size: 12pt;
+          margin: 10px;
+          float: right;
+       }
       </style>
 
 
@@ -78,7 +163,7 @@
 
        // Static event managers (setup after document is available)
        $(function() {
-          $('#Computed_properties + p').on('click', (ev) =>
+          $('#Computed_properties + div').on('click', (ev) =>
              ($(ev.target).attr('page') === undefined) ? undefined : Library.openWithGroupURL($(ev.target).attr('page'), group.URL))
        });
        $(window).on('load', load);	// like onload handler in body
@@ -102,7 +187,7 @@
           $('#heading').html(eval(Template.HTML('heading_template')));
 
           // Basic facts
-          $('#Basic_facts + p').html(eval(Template.HTML('basicFacts_template')));
+          $('#basic-facts').html(eval(Template.HTML('basicFacts_template')));
 
           // Views --
           //   Add rows to ViewTable until there are no more Cayley Diagrams (including
@@ -164,10 +249,12 @@
           }
 
           // Description
-          $('#Description + p').html(eval(Template.HTML('description_template')));
+          if (group.notes != '') {
+             $('#description').html(group.notes);
+          }
 
           // Computed properties:
-          $('#Computed_properties + p').prepend(eval(Template.HTML('computedProperties_template')));
+          $('#computed-properties').prepend(eval(Template.HTML('computedProperties_template')));
           if (group.isCyclic) {
              const [m, n, _] = MathUtils.getFactors(group.order)
                                         .reduce( ([fac1, fac2, prev], el) => {
@@ -180,32 +267,66 @@
                                            return [fac1, fac2, prev];
                                         }, [1, 1, 0] );
              const template_name = (n == 1) ? 'not-Z_mn-row-template' : 'Z_mn-row-template';
-             $('#Computed_properties + p tbody').append(eval(Template.HTML(template_name)));
+             $('#computed-properties tbody').append(eval(Template.HTML(template_name)));
           }
 
           // File data
-          $('#File_data + p').html(eval(Template.HTML('fileData_template')));
+          $('#file-data').html(eval(Template.HTML('fileData_template')));
        }
 
        // (Re-)paints group information that depends on the representation (which may change)
        function displayDynamic() {
           // Generators
           if (group.generators.length != 0) {
-             $('#Generators + p').html(displayGenerators());
+             $('#generators').html(displayGenerators());
           }
 
           // Default element names
           if (group.representation.length != 0) {
-             $('#default_element_names').html(displayDefaultElementNames());
+             $('#default-element-names').html(MathML.csList(group.elements.map( (el) => group.representation[el] )));
+             if (group.representationIndex < group.representations.length) {
+                $('#default-element-names').append('<br>This representation was loaded from the group file.');
+             } else {
+                $('#default-element-names').append('<br>This representation is user-defined; see below.');
+             }
           }
 
           // Loaded element names
-          if (group.representations.length > 1) {
-             $('#loaded_naming_schemes').html(displayNamingSchemes());
+          if (group.representations.length > 1 || group.representationIndex > group.representations.length) {
+             const fragment = group
+                .representations
+                .reduce( (frag, rep, index) => {
+                   if (group.representations[index] != group.representation) {
+                      const scheme = MathML.rowList(group.elements.map( (el) => group.representation[el] + '<mo>=</mo>' + rep[el] ));
+                      frag.append(eval(Template.HTML('loadedSchemeChoice-template')));
+                   }
+                   return frag;
+                }, $('<ol>') );
+             $('#loaded-naming-schemes').html(fragment);
+          }
+
+          // User-defined naming schemes
+          if (group.userRepresentations.length == 0) {
+             $('#no-user-defined-naming-schemes').show();
+             $('#user-defined-naming-schemes').hide();
+          } else {
+             $('#no-user-defined-naming-schemes').hide();
+             const fragment = group
+                .userRepresentations
+                .reduce( (frag, rep, index) => {
+                   if (group.userRepresentations[index] == group.representation) {
+                      frag.append(eval(Template.HTML('inUseScheme-template')));
+                   } else {
+                      const scheme = MathML.rowList(group.elements.map( (el) => group.representation[el] + '<mo>=</mo>' + rep[el] ));
+                      frag.append(eval(Template.HTML('userSchemeChoice-template')));
+                   }
+                   return frag;
+                }, $('<ol>') );
+             $('#user-defined-naming-schemes').html(fragment).show();
           }
 
           // notes
-          reloadNotes();
+          Notes.show();
 
           MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
 
@@ -251,41 +372,83 @@
           ).join('<br>');
        }
 
-       function displayDefaultElementNames() {
-          return MathML.csList(group.elements.map( (el) => group.representation[el] )) +
-                 '<br><br>This representation was loaded from the group file.';
-       }
-
-       function displayNamingSchemes() {
-          const def = group.representation;
-          const oneScheme = (rep, repNum) =>
-             $('<li>').html(MathML.rowList(group.elements.map( (el) => def[el] + '<mo>=</mo>' + rep[el] )))
-                      .append($('<br><span class="programLink">Click here</span>')
-                         .on('click', () => setRepresentation(repNum)) )
-                      .append(' to make this the default representation.<br><br>');
-          return group.representations
-                      .reduce( (frag, rep, inx) => inx == group.representationIndex ?
-                                                 frag : frag.append(oneScheme(rep, inx)),
-                               $('<ol>') );
-       }
-
-       function setRepresentation(index) {
-          group.representationIndex = index;
+       function setRep(index) {
+          group.representation = group.representations[index];
           Library.saveGroup(group);
           displayDynamic();
        }
 
-       function clearNotes() {
-          $('#notes-text')[0].value = '';
+       class UDR {
+          static setRep(index) {
+             group.representation = group.userRepresentations[index];
+             Library.saveGroup(group);
+             displayDynamic();
+          }
+
+          static create() {
+             UDR.current_index = group.userRepresentations.length;
+             UDR._showEditor(Array(group.order).fill('<mtext>change me</mtext>'));
+          }
+
+          static edit(index) {
+             UDR.current_index = index;
+             UDR._showEditor(group.userRepresentations[index]);
+          }
+
+          static _showEditor(representation) {
+             const editor = $(eval(Template.HTML('namingEditor-template')));
+             const tableBody = editor.find('tbody');
+             representation.forEach( (rep, inx) => tableBody.append(eval(Template.HTML('udredit-template'))) );
+             $('body').append(editor).find('#naming-editor').show();
+             MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'naming-editor']);
+          }
+
+          static closeEdit() {
+             UDR.current_index = undefined;
+             $('#naming-editor').remove();
+          }
+
+          static saveEdit() {
+             group.userRepresentations[UDR.current_index] =
+                $('#udredit-table tbody textarea').map( (_, el) => '<mtext>' + el.value + '</mtext>' ).toArray();
+             Library.saveGroup(group);
+             UDR.closeEdit();
+             displayDynamic();
+          }
+
+          static remove(index) {
+             group.deleteUserRepresentation(index);
+             Library.saveGroup(group);
+             displayDynamic();
+          }
        }
 
-       function saveNotes() {
-          group.userNotes = $('#notes-text')[0].value;
-          Library.saveGroup(group);
-       }
+       class Notes {
+          static show() {
+             if (group.userNotes == '') {
+                $('#notes-content').html('<i>none</i>');
+             } else {
+                $('#notes-content').text(group.userNotes);
+             }
+             $('#notes-show').show();
+             $('#notes-edit').hide();
+          }
 
-       function reloadNotes() {
-          $('#notes-text')[0].value = (group.userNotes === undefined) ? '' : group.userNotes;
+          static edit() {
+             $('#notes-text').text( (group.userNotes == undefined) ? '' : group.userNotes );
+             $('#notes-show').hide();
+             $('#notes-edit').show();
+          }
+
+          static clear() {
+             $('#notes-text')[0].value = '';
+          }
+
+          static save() {
+             group.userNotes = $('#notes-text')[0].value;
+             Library.saveGroup(group);
+             Notes.show();
+          }
        }
 
        function showAllVisualizersSheet () {
@@ -353,16 +516,16 @@
       <div class="top-right-menu">
          <a href='index.html'><i title="Project Home" class="fa fa-home fa-2x trm-black"></i></a>
          <a href='GroupExplorer.html'><i title="Group Library"
-             class="fa fa-book fa-2x trm-black"></i></a>
+                                         class="fa fa-book fa-2x trm-black"></i></a>
          <a href='Sheet.html' target='_blank'><i title="Sheets"
-             class="fa fa-file trm-black" style="font-size:1.5em;vertical-align:10%;"></i></a>
+                                                 class="fa fa-file trm-black" style="font-size:1.5em;vertical-align:10%;"></i></a>
          <a href='help/rf-um-groupwindow/index.html'><i title="Help"
-             class="fa fa-question-circle fa-2x trm-black"></i></a>
+                                                        class="fa fa-question-circle fa-2x trm-black"></i></a>
          <a href='https://github.com/nathancarter/group-explorer'><i
-             title="Source on GitHub" class="fa fa-github fa-2x trm-black"></i></a>
+                                                                     title="Source on GitHub" class="fa fa-github fa-2x trm-black"></i></a>
       </div>
 
-      <p align="center">
+      <div align="center">
          Contents: &nbsp;
          <a href="#Basic_facts">Facts</a> &nbsp; | &nbsp;
          <a href="#Views">Views</a>  &nbsp; | &nbsp;
@@ -374,27 +537,27 @@
          <a href="#Generators">Generators</a> &nbsp; | &nbsp;
          <a href="#Naming_schemes">Naming schemes</a> &nbsp; | &nbsp;
          <a href="#Notes">Notes</a>
-      </p>
+      </div>
       <hr>
 
       <h3 id="Basic_facts">Basic facts</h3>
-      <p class="indent1">
+      <div id="basic-facts" class="indent1">
          <template id="basicFacts_template">
             <table>
                <tr><th align="right">Definition</th>
-                  <td align="left">${MathML.sans(group.definition)}
+                  <td align="left">${MathML.sans(group.definition)}</td>
                </tr>
                <tr><th align="right">Order</th>
                   <td align="left">${group.order}</td>
                </tr>
             </table>
          </template>
-      </p>
+      </div>
 
       <h3 id="Views">Views</h3>
-      <p class="indent1">
+      <div class="indent1">
          Click any view to open a copy for exploration.
-         <br>
+         <br><br>
          <table id="ViewTable" class="views">
             <!-- 100x100 thumbnails for pictures -->
             <tr>
@@ -422,21 +585,19 @@
                </tr>
             </template>
          </table>
-      </p>
-      <p class="indent1">
+      </div>
+      <div class="indent1">
          To see all of these visualizations shown together on a sheet,
          <a href="" class="show-all-visualizers-sheet">click here</a>.
-      </p>
+      </div>
 
       <h3 id="Description">Description</h3>
-      <p class="indent1">
-         <template id="description_template">
-            ${(group.notes == "") ? '<i>None</i>' : group.notes}
-         </template>
-      </p>
+      <div id="description" class="indent1">
+         <i>None</i>
+      </div>
 
       <h3 id="Computed_properties">Computed Properties</h3>
-      <p class="indent1">
+      <div id="computed-properties" class="indent1">
          <template id="computedProperties_template">
             <table>
                <tr>
@@ -485,15 +646,15 @@
                <td page="ZmnInfo.html" class="programLink">Tell me more</td>
             </tr>
          </template>
-      </p>
+      </div>
 
       <h3 id="Related_sheets">Related Sheets</h3>
-      <p class="indent1">
+      <div id="related-sheets" class="indent1">
          <i>(Not implemented)</i>
-      </p>
+      </div>
 
       <h3 id="File_data">File Data</h3>
-      <p class="indent1">
+      <div id="file-data" class="indent1">
          <template id="fileData_template">
             <table>
                <tr><th align="right">Author</th><td align="left">${group.author}</td></tr>
@@ -501,41 +662,100 @@
                <tr><th align="right">Last modified</th><td align="left">${group.lastModifiedOnServer}</td></tr>
             </table>
          </template>
-      </p>
+      </div>
 
       <h3 id="Other_definitions">Other definitions</h3>
-      <p class="indent1">
+      <div id="other-definitions" class="indent1">
          <i>(Not implemented)</i>
-      </p>
+      </div>
 
       <h3 id="Generators">Generators</h3>
-      <p class="indent1">
+      <div id="generators" class="indent1">
          There are no generators in this group, only the identity element.
-      </p>
+      </div>
+
 
       <h3 id="Naming_schemes">Naming Schemes</h3>
+
       <h4 class="indent1">Default element names</h4>
-      <p id="default_element_names" class="indent2">
-         <i>None</i>
-      </p>
+      <div id="default-element-names" class="indent2"></div>
+
       <h4 class="indent1">Loaded naming schemes</h4>
-      <p id="loaded_naming_schemes" class="indent1">
-         <i>None</i>
-      </p>
+      <div id="loaded-naming-schemes" class="indent1"></div>
+      <template id="loadedSchemeChoice-template">
+         <li>${scheme}
+            <a href="javascript:setRep(${index})">Click here</a> to make this the default representation
+         </li>
+      </template>
+
+
       <h4 class="indent1">User-defined naming schemes</h4>
-      <p class="indent2">
-         <i>(Not implemented)</i>
-      </p>
+      <div id="no-user-defined-naming-schemes" class="indent1">
+         <i>none</i><br><br>
+      </div>
+      <div id="user-defined-naming-schemes" class="indent1 hidden">
+      </div>
+      <a class="indent1" href="javascript:UDR.create()">Click here</a> to add a new representation for this group.
+      <template id="userSchemeChoice-template">
+         <li>${scheme}
+            <a href="javascript:UDR.setRep(${index})">Click here</a> to make this the default representation.<br>
+            <a href="javascript:UDR.edit(${index})">Click here</a> to edit this representation.<br>
+            <a href="javascript:UDR.remove(${index})">Click here</a> to remove this representation.
+         </li>
+      </template>
+      <template id="inUseScheme-template">
+         <li>The default naming scheme shown above<br>
+            If you wish to edit or remove this representation, first make a different representation the default.
+         </li>
+      </template>
+      <template id="namingEditor-template">
+         <div id="naming-editor">
+            <div id="udredit-content" class="vert">
+               <div id="udredit-title">Edit naming scheme for ${MathML.sans(group.name)}</div>
+               <div id="udredit-header">
+                  Below are all the naming schemes for ${MathML.sans(group.name)}.  Edit the Custom
+                  representation column by clicking on the entries you wish to change and typing any plain text.
+               </div>
+               <div id="udredit-body">
+                  <table id="udredit-table">
+                     <thead>
+                        <tr>
+                           <th>Default representation</th>
+                           <th>Custom representation</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                     </tbody>
+                  </table>
+               </div>
+               <div style="height: 45px">&nbsp;
+                  <button class="udredit-button" onclick="UDR.closeEdit()">Cancel</button>
+                  <button class="udredit-button" onclick="UDR.saveEdit()">OK</button>
+               </div>
+            </div>
+         </div>
+      </template>
+      <template id="udredit-template">
+         <tr>
+            <td>${MathML.sans(group.representation[inx])}</td>
+            <td><textarea maxlength="50" rows="1" style="width: 24em">${rep.slice(7,-8)}</textarea></td>
+         </tr>
+      </template>
 
       <h3 id="Notes">Notes</h3>
       <div id="notes-area" class="indent1">
-         <textarea id="notes-text" maxlength="1000" rows="10"></textarea>
-         <div id="notes-buttons">
-            <button onclick="clearNotes()">Clear</button>
-            <button onclick="reloadNotes()">Cancel</button>
-            <button onclick="saveNotes()">Save</button>
+         <div id="notes-show">
+            <div id="notes-content"><i>none</i></div>
+            <br><a href="javascript:Notes.edit()">Click to edit notes</a>
+         </div>
+         <div id="notes-edit" class="hidden" >
+            <textarea id="notes-text" maxlength="1000" rows="10"></textarea>
+            <div id="notes-buttons">
+               <button onclick="Notes.clear()">Clear</button>
+               <button onclick="Notes.show()">Cancel</button>
+               <button onclick="Notes.save()">Save</button>
+            </div>
          </div>
       </div>
-      <br><br><br><br><br>
    </body>
 </html>
