@@ -5,7 +5,6 @@
 
 ### Miscellany
 
- * Create the UI for adding a naming scheme, and store it in `localStorage`.
  * Make test to simulate loading GE from GAP using 'waitForMessage'
 
 ### Help system
@@ -22,9 +21,6 @@
 ## Assigned to Nathan
 
 ### Help pages
-
- * Once the naming scheme editing interface is finished, update the help image
-   `help-src/namescheme.jpg` with a new screenshot.
 
 ### Sheets
 
