@@ -750,8 +750,13 @@ class XMLGroup extends BasicGroup {
       this._XML_generators = XMLGroup._generators_from_xml($xml);
       this.reps = XMLGroup._reps_from_xml($xml);
       this.representations = XMLGroup._representations_from_xml($xml);
-      this.representationIndex = 0;
       this.userRepresentations = [];
+      /*
+       * representations and userRepresentations are treated together as a contiguous array,
+       *   and representationIndex is the index of the default representation into that virtual array 
+       *   (representationIndex is an integer and not an object reference so XMLGroup can be easily serialized)
+       */
+      this.representationIndex = 0;
       this.cayleyDiagrams = XMLGroup._cayley_diagrams_from_xml($xml);
       this.symmetryObjects = XMLGroup._symmetry_objects_from_xml($xml);
    }
@@ -5100,3 +5105,24 @@ class DisplayCycleGraph {
       cycleGraph.elements = json.elements;
    }
 }
+
+/*
+# Version
+
+A simple class containing version information used to document GE releases.  The static`Version.label()`method produces the formatted output displayed in the upper right-hand corner of the [main (group library)](help/rf-um-mainwindow) page, the [group info](help/rf-um-groupwindow) pages, [sheets](help/rf-um-sheetwindow), and [visualizer](help/rf-um-largewindow) pages.
+   
+```js
+*/
+
+class Version {
+   static label() {
+      return `GE ${Version.major}.${Version.minor} ${Version.suffix}`
+   }
+}
+
+Version.major = '3';
+Version.minor = '0';
+Version.suffix = 'alpha';
+/*
+```
+*/

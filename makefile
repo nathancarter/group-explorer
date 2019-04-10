@@ -7,6 +7,7 @@ JS_FILES = js/init.js             js/Log.js            js/BitSet.js        js/Ma
            js/DisplayDiagram.js                                                                  \
            js/Multtable.js        js/DisplayMulttable.js                                         \
            js/CycleGraph.js       js/DisplayCycleGraph.js                                        \
+           Version.md                                                                            \
 
 SUB_FILES = subsetDisplay/subsets.js           subsetDisplay/BasicSubset.js     \
             subsetDisplay/Subgroup.js          subsetDisplay/Subset.js          \
