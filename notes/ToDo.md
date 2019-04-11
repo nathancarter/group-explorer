@@ -44,8 +44,8 @@
        * restore the camera position and fog
     * node radii: `Cayley_diagram.nodes[i].radius` then call `updateNodeRadius()` in
       the `DisplayDiagram` instance
-    * arc curvature: once I talk to Ray
-    * chunking: once I talk to Ray
+    * chunking: the `CayleyDiagram` has an attribute called `chunk` which is the index of the
+      subgroup by which to chunk.  Change it then call `updateChunking()`.
  * In ZmnInfo.html:
     * Create a function `showZnmIsomorphism(n,m)` that pops up a sheet with the following
       content and a suitable title.  (This works only if n and m are relatively prime.)
