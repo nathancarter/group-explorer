@@ -89,7 +89,7 @@ class DisplayDiagram {
       if ( !options ) options = { size : 'small', resetCamera : true };
       const img = new Image();
 
-      // save diagram for use by LineDnD -- not used for thumbnails
+      // save diagram for use by DiagramDnD -- not used for thumbnails
       if (this.lineDnD !== undefined) {
          this.scene.userData = diagram3D;
       }
@@ -117,7 +117,7 @@ class DisplayDiagram {
       // save diagram for use by LineDnD
       if (this.camControls !== undefined && diagram3D.isCayleyDiagram) {
          if (this.lineDnD === undefined) {
-            this.lineDnD = new DisplayDiagram.LineDnD(this);
+            this.lineDnD = new DiagramDnD(this);
          }
          this.scene.userData = diagram3D;
       }
@@ -859,132 +859,3 @@ class DisplayDiagram {
    }
 }
 
-DisplayDiagram.LineDnD = class {
-   constructor(displayDiagram) {
-      this.displayDiagram = displayDiagram;
-      this.canvas = displayDiagram.renderer.domElement;
-      this.mouse = new THREE.Vector2();
-      this.raycaster = new THREE.Raycaster();
-      this.raycaster.linePrecision = 0.01;
-      this.event_handler = (event) => this.eventHandler(event);
-      this.repaint_poller = undefined;
-      this.repaint_request = undefined;
-
-      $(displayDiagram.renderer.domElement).on('mousedown', this.event_handler);
-   }
-
-   eventHandler(event) {
-      if (!event.shiftKey) {
-         return;
-      }
-
-      event.preventDefault();
-      event.stopPropagation();
-
-      const bounding_box = this.canvas.getBoundingClientRect();
-      this.mouse.x = ( (event.clientX - bounding_box.x) / this.canvas.width) * 2 - 1;
-      this.mouse.y = -( (event.clientY - bounding_box.y) / this.canvas.height) * 2 + 1;
-
-      switch (event.type) {
-         case 'mousedown':  this.dragStart(event);  break;
-         case 'mousemove':  this.dragOver(event);   break;
-         case 'mouseup':    this.drop(event);       break;
-      }
-   }
-
-   // start drag-and-drop; see if we've found a line
-   dragStart(event) {
-      // update the picking ray with the camera and mouse position
-      this.raycaster.setFromCamera(this.mouse, this.displayDiagram.camera);
-
-      // temporarily change the width of the lines to 1 for raycasting -- doesn't seem to work with meshLines (sigh)
-      // (this change is never rendered, so user never sees it)
-      const saved_width = this.displayDiagram.scene.userData.lineWidth;
-      this.displayDiagram.scene.userData.lineWidth = 1;
-      this.displayDiagram.updateLines(this.displayDiagram.scene.userData);
-
-      // calculate objects intersecting the picking ray
-      const intersects = this.raycaster.intersectObjects( this.displayDiagram.getGroup("lines").children, false ) ;
-
-      // now change the line width back
-      this.displayDiagram.scene.userData.lineWidth = saved_width;
-      this.displayDiagram.updateLines(this.displayDiagram.scene.userData);
-
-      // if ambiguous or empty intersect just return
-      if (!(   intersects.length == 1
-            || intersects.length == 2 && intersects[0].object == intersects[1].object)) {
-         return;
-      }
-
-      // found a line, squirrel it away and wait for further dnd events
-      this.line = intersects[0].object;
-      $(this.canvas).off('mousemove', this.event_handler).on('mousemove', this.event_handler);
-      $(this.canvas).off('mouseup', this.event_handler).on('mouseup', this.event_handler);
-
-      // change cursor to grab
-      this.canvas.style.cursor = 'move';
-
-      this.repaint_poller = window.setInterval(() => this.repaintPoller(), 100);
-   }
-
-   dragOver(event) {
-      this.repaint_request = (this.repaint_request === undefined) ? performance.now() : this.repaint_request;
-   }
-
-   drop(event) {
-      this.repaintLine();
-      this.endDrag(event);
-   }
-
-   endDrag(event) {
-      $(this.canvas).off('mousemove', this.event_handler);
-      $(this.canvas).off('mouseup', this.event_handler);
-      this.canvas.style.cursor = '';
-      window.clearInterval(this.repaint_poller);
-      this.repaint_poller = undefined;
-      this.line = undefined;
-   }
-
-   repaintPoller() {
-      if (performance.now() - this.repaint_request > 100) {
-         this.repaintLine();
-      }
-   }
-
-   // update line to run through current mouse position
-   repaintLine() {
-      // get ray through mouse
-      this.raycaster.setFromCamera(this.mouse, this.displayDiagram.camera);
-
-      // get intersection of ray with plane of line (through start, end, center)
-      const start = this.line.userData.line.vertices[0].point;
-      const end = this.line.userData.line.vertices[1].point;
-      const center = this.displayDiagram._getCenter(this.line.userData.line);
-      const center2start = start.clone().sub(center);
-      const center2end = end.clone().sub(center);
-
-      // find 'intersection', the point the raycaster ray intersects the plane defined by start, end and center
-      const m = new THREE.Matrix3().set(...center2start.toArray(),
-                                        ...center2end.toArray(),
-                                        ...this.raycaster.ray.direction.toArray())
-                         .transpose();
-      const s = this.raycaster.ray.origin.clone().applyMatrix3(new THREE.Matrix3().getInverse(m));
-      const intersection = this.raycaster.ray.origin.clone().add(this.raycaster.ray.direction.clone().multiplyScalar(-s.z));
-
-      // get offset length
-      const start2intxn = intersection.clone().sub(start);
-      const start2end = end.clone().sub(start);
-      const plane_normal = new THREE.Vector3().crossVectors(center2start, center2end).normalize();
-      const line_length = start2end.length();
-      const offset = new THREE.Vector3().crossVectors(start2intxn, start2end).dot(plane_normal)/(line_length * line_length);
-
-      // set line offset in diagram, and re-paint lines, arrowheads
-      this.line.userData.line.style = Diagram3D.CURVED;
-      this.line.userData.line.offset = offset;
-      this.displayDiagram.updateLines(this.displayDiagram.scene.userData);
-      this.displayDiagram.updateArrowheads(this.displayDiagram.scene.userData);
-
-      // clear repaint request
-      this.repaint_request = undefined;
-   }
-}

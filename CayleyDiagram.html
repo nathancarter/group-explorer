@@ -80,8 +80,7 @@
           $('#subset-button').on('click', () => VC.showPanel('#subset-control') );
           $('#view-button').on('click', () => VC.showPanel('#view-control') );
           $('#diagram-button').on('click', () => VC.showPanel('#diagram-control') );
-          $('#graphic').on('mousemove', HoverHelp.handleEvent)
-                       .on('mouseleave', HoverHelp.handleEvent);
+          $('#graphic').on('click', tooltip);
 
           $(window).off('resize', resizeBody).on('resize', resizeBody);
        }
@@ -232,74 +231,45 @@
           }
        }
 
-       class HoverHelp {
-          // poller = id of polling routine from window.setInterval call
-          // mouse_event = event from last 'mousemove' event (event contains timestamp) (undefined => no mousemove event to be handled)
-          // tooltip_timestamp = time tooltip was created (undefined => no tooltip being shown)
+       function tooltip(event) {
+          // clear existing tooltip on any click, even if it's not to show a new tooltip
+          $('#tooltip').remove();
 
-          static handleEvent(event) {
-             // set up polling routine first time through
-             if (HoverHelp.poller_id === undefined) {
-                HoverHelp.poller_id = window.setInterval(HoverHelp.poller, 500);
-             }
-
-             HoverHelp.mouse_event = undefined;
-             if (event.type == 'mousemove' && !event.ctrlKey && !event.shiftKey && !event.altKey) {
-                HoverHelp.mouse_event = event;
-             }
+          // if event has shift key, etc., this click isn't to show a tooltip; just return
+          if (event.shiftKey || event.ctrlKey || event.altKey || event.metaKey) {
+             return;
           }
 
-          static poller() {
-             if (HoverHelp.mouse_event !== undefined && performance.now() - HoverHelp.mouse_event.timeStamp > 500) {
-                // display new tooltip, set tooltip timestamp
-                const canvas = Graphic_context.renderer.domElement;
-                const bounding_box = canvas.getBoundingClientRect();
-                const x = ( (HoverHelp.mouse_event.clientX - bounding_box.x) / canvas.width) * 2 - 1;
-                const y = -( (HoverHelp.mouse_event.clientY - bounding_box.y) / canvas.height) * 2 + 1;
+          event.preventDefault();
+          event.stopPropagation();
 
-                const objs = Graphic_context.getObjectsAtPoint(x, y);
-                if (objs.length != 0) {
-                   HoverHelp.eraseTooltip();
+          // find where click is and show a new tooltip
+          const canvas = Graphic_context.renderer.domElement;
+          const bounding_box = canvas.getBoundingClientRect();
+          const x = ( (event.clientX - bounding_box.x) / canvas.width) * 2 - 1;
+          const y = -( (event.clientY - bounding_box.y) / canvas.height) * 2 + 1;
 
-                   // create, place tooltip
-                   const first = MathML.sans(objs[0].name);
-                   const others = objs.filter( (_,inx) => inx != 0 )
-                                      .map( (obj) => MathML.sans(obj.name) );
-                   let tooltip;
-                   switch (others.length) {
-                      case 0:  tooltip = $(eval(Template.HTML('single-object_template'))); break;
-                      case 1:  tooltip = $(eval(Template.HTML('double-object_template'))); break;
-                      default:
-                         tooltip = $(eval(Template.HTML('multi-object_template')));
-                         others.forEach( (obj) => {
-                            tooltip.find('ul').append($(`<li>${obj}</li>`));
-                         } )
-                   }
-                   $('#graphic').append(tooltip);
-                   MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'tooltip']);
-                   Menu.setMenuLocations(HoverHelp.mouse_event, tooltip);
-
-                   // set tooltip_timestamp, so that tooltip will be cleared in 10 sec in code below
-                   HoverHelp.tooltip_timestamp = performance.now();
-
-                   // clear mouse_event to keep from displaying tooltip again
-                   HoverHelp.mouse_event = undefined;
-
-                   // run eraseTooltip on mousedown event, so that clicking mouse will clear tooltip
-                   $('#graphic').on('mousedown', HoverHelp.eraseTooltip);
-                }
+          const objs = Graphic_context.getObjectsAtPoint(x, y);
+          if (objs.length != 0) {
+             // create, place tooltip
+             const first = MathML.sans(objs[0].name);
+             const others = objs.filter( (_,inx) => inx != 0 )
+                                .map( (obj) => MathML.sans(obj.name) );
+             let tooltip;
+             if (others.length == 0) {
+                tooltip = $(eval(Template.HTML('single-object_template')));
+             } else if (others.length == 1) {
+                tooltip = $(eval(Template.HTML('double-object_template')));
+             } else {
+                tooltip = $(eval(Template.HTML('multi-object_template')));
+                others.forEach( (obj) => {
+                   tooltip.find('ul').append($(`<li>${obj}</li>`));
+                } )
              }
 
-             // if tooltip is more than 10 sec old, clear it
-             if (performance.now() - HoverHelp.tooltip_timestamp > 10000) {
-                HoverHelp.eraseTooltip();
-             }
-          }
-
-          static eraseTooltip() {
-             $('#graphic').off('mousedown', HoverHelp.eraseTooltip);
-             $('#tooltip').remove();
-             HoverHelp.tooltip_timestamp = undefined;
+             $('#graphic').append(tooltip);
+             MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'tooltip']);
+             Menu.setMenuLocations(event, tooltip);
           }
        }
 

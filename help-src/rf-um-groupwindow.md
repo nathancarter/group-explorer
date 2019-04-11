@@ -79,9 +79,9 @@ In both cases, if you click the link, an interface like the following one
 appears, allowing you to custom-define a naming scheme for the elements of
 the group.
 
-![Group element naming scheme interface](illustration-namescheme.jpg)
+![Group element naming scheme interface](illustration-namescheme.png)
 
-The left column lists the default element names, and you can double-click
+The left column lists the default element names, and you can click
 entries in the right column and type any (plain) text you like. As you can
 see in the image above, the user is typing the word "changing..." in the
 top right cell of the table. When you are done, if you choose OK, your

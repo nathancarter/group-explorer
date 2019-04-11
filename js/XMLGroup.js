@@ -50,6 +50,12 @@ class XMLGroup extends BasicGroup {
       this._XML_generators = XMLGroup._generators_from_xml($xml);
       this.reps = XMLGroup._reps_from_xml($xml);
       this.representations = XMLGroup._representations_from_xml($xml);
+      this.userRepresentations = [];
+      /*
+       * representations and userRepresentations are treated together as a contiguous array,
+       *   and representationIndex is the index of the default representation into that virtual array 
+       *   (representationIndex is an integer and not an object reference so XMLGroup can be easily serialized)
+       */
       this.representationIndex = 0;
       this.cayleyDiagrams = XMLGroup._cayley_diagrams_from_xml($xml);
       this.symmetryObjects = XMLGroup._symmetry_objects_from_xml($xml);
@@ -78,32 +84,55 @@ class XMLGroup extends BasicGroup {
       return group;
    }
 
+   deleteUserRepresentation(userIndex) {
+      const savedRepresentation =
+         (userIndex + this.representations.length == this.representationIndex) ? this.representations[0] : this.representation;
+      this.userRepresentations.splice(userIndex, 1);
+      this.representation = savedRepresentation;
+   }
+   
    get representation() {
-      return this.representations[this.representationIndex];
+      if (this.representationIndex < this.representations.length) {
+         return this.representations[this.representationIndex];
+      } else if (this.representationIndex - this.representations.length < this.userRepresentations.length) {
+         return this.userRepresentations[this.representationIndex - this.representations.length];
+      } else {
+         return this.representations[0];
+      }
+   }
+   
+   set representation(representation) {
+      let inx = this.representations.findIndex( (el) => el == representation );
+      if (inx >= 0) {
+         this.representationIndex = inx;
+      } else {
+         inx = this.userRepresentations.findIndex( (el) => el == representation );
+         if (inx >= 0) {
+            this.representationIndex = inx + this.representations.length;
+         }
+      }
    }
 
    get rep() {
-      return this.reps[this.representationIndex];
+      return (this.representationIndex < this.representations.length) ? this.reps[this.representationIndex] : this.representation;
    }
 
    get labels() {
-      if (this._labels === undefined) {
-         this._labels = Array(this.representations.length)
+      if (this.representationIndex > this.representations.length) {
+         return this.representation.map( (rep) => mathml2text(rep) );
+      } else {
+         if (this._labels === undefined) {
+            this._labels = Array(this.representations.length)
+         }
+         if (this._labels[this.representationIndex] === undefined) {
+            this._labels[this.representationIndex] = this.representation.map( (rep) => mathml2text(rep) );
+         }
+         return this._labels[this.representationIndex];
       }
-      if (this._labels[this.representationIndex] === undefined) {
-         this._labels[this.representationIndex] = this.representation.map( (rep) => mathml2text(rep) );
-      }
-      return this._labels[this.representationIndex];
    }
 
    get longestLabel() {
-      if (this._longestLabels === undefined) {
-         this._longestLabels = Array(this.representations.length)
-      }
-      if (this._longestLabels[this.representationIndex] === undefined) {
-         this._longestLabels[this.representationIndex] = this.labels.reduce( (longest, label) => (label.length > longest.length) ? label : longest, '' );
-      }
-      return this._longestLabels[this.representationIndex];
+      return this.labels.reduce( (longest, label) => (label.length > longest.length) ? label : longest, '' );
    }
 
    get generators() {

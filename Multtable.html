@@ -270,13 +270,21 @@
 
        function displayLabel(event) {
           event.preventDefault();
+
+          // clear existing tooltip on any click, even if it's not to show a new tooltip
+          clearLabels(event);
+
+          // if event has shift key, etc., this click isn't to show a tooltip; just return
+          if (event.shiftKey || event.ctrlKey || event.altKey || event.metaKey) {
+             return;
+          }
+          
           const location = event2columns(event);
           if (location !== undefined) {
              // clear label by clicking on same cell again
              if ($(`#nodeLabel[col='${location.x}'][row='${location.y}']`).length != 0) {
                 return;
              }
-             clearLabels(event);
              const product = group.mult(multtable.elements[location.y], multtable.elements[location.x]);
              const $label = $(`<div id="nodeLabel" col="${location.x}" row="${location.y}">`).html(MathML.sans(group.representation[product]));
              $('#graphic').append($label);
@@ -297,7 +305,15 @@
           get isDragging() { return !this.isIdle && Array.isArray(this._position); }
           get isShiftDragging() { return !this.isIdle && !this.isDragging; }
           get position() { return  this._position; }
-          set position(position) { this._position = position; }
+          set position(position) {
+             this._position = undefined;
+             if (   typeof(position) == 'object'
+                 && (   Array.isArray(position)
+                     || (   (position.x == 0 && position.y != 0)
+                         || (position.x != 0 && position.y == 0) ) ) ) {
+                this._position = position;
+             }
+          }
        }
        const Drag_state = new DragState();
        function dragStart(event) {
@@ -347,8 +363,8 @@
              } else {
                 event.preventDefault();
                 // change cursor to indicate whether row/column can be dropped or not
-                if (   location.x == 0 && Drag_state.position.x == 0
-                    || location.y == 0 && Drag_state.position.y == 0 ) {
+                if (   location.x == 0 && Drag_state.position.x == 0 && location.y != 0
+                    || location.y == 0 && Drag_state.position.y == 0 && location.x != 0) {
                    event.originalEvent.dataTransfer.dropEffect = 'move';
                 } else {
                    event.originalEvent.dataTransfer.dropEffect = 'none';
