@@ -812,6 +812,7 @@ class DisplayDiagram {
          fogLevel : cayleyDiagram.fogLevel,
          labelSize : cayleyDiagram.labelSize,
          arrowheadPlacement : cayleyDiagram.arrowheadPlacement,
+         arrowColors : cayleyDiagram.arrowColors,
          _camera : this.camera.matrix.toArray(),
          highlights : {
             background : cayleyDiagram.nodes.map( n => n.colorHighlight ),
@@ -844,6 +845,8 @@ class DisplayDiagram {
          cayleyDiagram.fogLevel = json.fogLevel;
       if ( json.hasOwnProperty( 'labelSize' ) )
          cayleyDiagram.labelSize = json.labelSize;
+      if ( json.hasOwnProperty( 'arrowColors' ) )
+         cayleyDiagram.arrowColors = json.arrowColors;
       if ( json.hasOwnProperty( 'arrowheadPlacement' ) )
          cayleyDiagram.arrowheadPlacement = json.arrowheadPlacement;
       if ( json.hasOwnProperty( 'strategies' ) )
