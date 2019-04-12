@@ -2253,12 +2253,12 @@ class Diagram3D {
    }
 
    setLineColors() {
-      const arrows = Object.values(
-         this.lines.reduce( (arrow_set, line) => (arrow_set[line.arrow] = line.arrow, arrow_set),
-                            new Array(this.lines.length) ));
-      const colors = Array.from({length: arrows.length},
+      const arrows = this.lines.map( x => x.arrow )
+         .filter( ( v, i, s ) => s.indexOf( v ) === i ); // incl. each only 1x
+      const colors = this.arrowColors
+                  || Array.from({length: arrows.length},
                                 (_, inx) => '#' + new THREE.Color(`hsl(${360*inx/arrows.length}, 100%, 20%)`).getHexString());
-      this.lines.forEach( (line) => { line.color = colors[arrows.findIndex( (arrow) => arrow == line.arrow )] } );
+      this.lines.forEach( (line) => line.color = colors[arrows.indexOf( line.arrow )] );
       if ( this.emitStateChange ) this.emitStateChange();
       return this;
    }
@@ -2776,10 +2776,10 @@ class CayleyDiagram extends Diagram3D {
             const line_style = indices.every(
                (index, strategy_index) => index == 0 || this.strategies[this.strategies.length - strategy_index - 1].layout == CayleyDiagram.LINEAR_LAYOUT
             ) ? Diagram3D.STRAIGHT : Diagram3D.CURVED;
-            const stmt = 'result' +
-                         indices.map( (_,inx) => `[${indices[gen2nest[inx]]}]` ).join('') +
-                         ` = new Diagram3D.Node(${nodes}, undefined, {lineStyle: ${line_style}})`;
-            eval(stmt);
+            var walk = result;
+            for ( var i = 0 ; i < indices.length - 1 ; i++ ) walk = walk[indices[gen2nest[i]]];
+            walk[indices[gen2nest[indices.length-1]]]
+                = new Diagram3D.Node(nodes, undefined, {lineStyle: line_style});
          } else {
             nodes.forEach( (el,inx) => { traverse(el, copyPush(indices, inx)) } );
          }
@@ -3927,6 +3927,7 @@ class DisplayDiagram {
          fogLevel : cayleyDiagram.fogLevel,
          labelSize : cayleyDiagram.labelSize,
          arrowheadPlacement : cayleyDiagram.arrowheadPlacement,
+         arrowColors : cayleyDiagram.arrowColors,
          _camera : this.camera.matrix.toArray(),
          highlights : {
             background : cayleyDiagram.nodes.map( n => n.colorHighlight ),
@@ -3959,6 +3960,8 @@ class DisplayDiagram {
          cayleyDiagram.fogLevel = json.fogLevel;
       if ( json.hasOwnProperty( 'labelSize' ) )
          cayleyDiagram.labelSize = json.labelSize;
+      if ( json.hasOwnProperty( 'arrowColors' ) )
+         cayleyDiagram.arrowColors = json.arrowColors;
       if ( json.hasOwnProperty( 'arrowheadPlacement' ) )
          cayleyDiagram.arrowheadPlacement = json.arrowheadPlacement;
       if ( json.hasOwnProperty( 'strategies' ) )
