@@ -1,10 +1,11 @@
 {
   "name": "group-explorer",
-  "version": "3.0 alpha",
+  "version": "3.0.0-alpha",
   "description": "Group theory visualization application for the web",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "flow": "flow"
   },
   "keywords": [
     "mathematics",
@@ -13,5 +14,9 @@
     "groups"
   ],
   "author": "Ray Ellis and Nathan Carter",
-  "license": "LGPL-3.0"
+  "license": "LGPL-3.0",
+  "devDependencies": {
+    "flow-bin": "^0.97.0",
+    "flow-remove-types": "^1.2.3"
+  }
 }
