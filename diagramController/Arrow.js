@@ -102,6 +102,7 @@ DC.Arrow = class {
          DC.Arrow.enable()
       }
       MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'arrow-control']);
+      emitStateChange();
    }
 
    // disable Add button

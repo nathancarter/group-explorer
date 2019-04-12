@@ -20,17 +20,9 @@
 
 ## Assigned to Nathan
 
-### Help pages
-
 ### Sheets
 
- * Extend the toJSON() and fromJSON() in CayleyDiagram.html to also respect:
-    * generation options table - can be accessed through `get/setStrategies()` in the diagram.
-      It is an array [ [ eltNum, layoutCode, axisCode, nestingLevel ], ... ].
-      If you change this, you must completely rebuild the scene.
-    * arrows list - see the `Lines` field of the `CayleyDiagram`, each of which has a field
-      called `arrow` which is the generator.  After changing anything, call `updateLines()`
-      in the diagram.
+ * Extend the toJSON() and fromJSON() in DisplayDiagram.js to also respect:
     * background color:
       `Graphic_context.renderer.getClearColor().toArray()` and
       `new THREE.Color( that_array[0], that_array[1], that_array[2] )`

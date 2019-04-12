@@ -816,7 +816,10 @@ class DisplayDiagram {
             background : cayleyDiagram.nodes.map( n => n.colorHighlight ),
             ring : cayleyDiagram.nodes.map( n => n.ringHighlight ),
             square : cayleyDiagram.nodes.map( n => n.squareHighlight )
-         }
+         },
+         strategies : cayleyDiagram.getStrategies(),
+         arrows : cayleyDiagram.lines.map( x => x.arrow )
+            .filter( ( v, i, s ) => s.indexOf( v ) === i ) // incl. each only 1x
       };
    }
    fromJSON ( json, cayleyDiagram ) {
@@ -836,6 +839,13 @@ class DisplayDiagram {
          cayleyDiagram.labelSize = json.labelSize;
       if ( json.hasOwnProperty( 'arrowheadPlacement' ) )
          cayleyDiagram.arrowheadPlacement = json.arrowheadPlacement;
+      if ( json.hasOwnProperty( 'strategies' ) )
+         cayleyDiagram.setStrategies( json.strategies );
+      if ( json.hasOwnProperty( 'arrows' ) ) {
+         cayleyDiagram.removeLines();
+         json.arrows.map( x => cayleyDiagram.addLines( x ) );
+         cayleyDiagram.setLineColors();
+      }
       if ( json.hasOwnProperty( '_camera' ) ) {
          this.camera.matrix.fromArray( json._camera );
          this.camera.matrix.decompose(
