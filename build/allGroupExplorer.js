@@ -3914,7 +3914,7 @@ class DisplayDiagram {
 
    // two serialization functions
    toJSON ( cayleyDiagram ) {
-      return {
+      const tmp = {
          groupURL : cayleyDiagram.group.URL,
          highlights : cayleyDiagram.highlights,
          elements : cayleyDiagram.elements,
@@ -3929,10 +3929,16 @@ class DisplayDiagram {
             background : cayleyDiagram.nodes.map( n => n.colorHighlight ),
             ring : cayleyDiagram.nodes.map( n => n.ringHighlight ),
             square : cayleyDiagram.nodes.map( n => n.squareHighlight )
-         }
+         },
+         strategies : cayleyDiagram.getStrategies(),
+         arrows : cayleyDiagram.lines.map( x => x.arrow )
+            .filter( ( v, i, s ) => s.indexOf( v ) === i ) // incl. each only 1x
       };
+      console.log( tmp );
+      return tmp;
    }
    fromJSON ( json, cayleyDiagram ) {
+      console.log( json );
       if ( json.hasOwnProperty( 'highlights' ) )
          cayleyDiagram.highlights = json.highlights;
       if ( json.hasOwnProperty( 'elements' ) )
@@ -3949,6 +3955,13 @@ class DisplayDiagram {
          cayleyDiagram.labelSize = json.labelSize;
       if ( json.hasOwnProperty( 'arrowheadPlacement' ) )
          cayleyDiagram.arrowheadPlacement = json.arrowheadPlacement;
+      if ( json.hasOwnProperty( 'strategies' ) )
+         cayleyDiagram.setStrategies( json.strategies );
+      if ( json.hasOwnProperty( 'arrows' ) ) {
+         cayleyDiagram.removeLines();
+         json.arrows.map( x => cayleyDiagram.addLines( x ) );
+         cayleyDiagram.setLineColors();
+      }
       if ( json.hasOwnProperty( '_camera' ) ) {
          this.camera.matrix.fromArray( json._camera );
          this.camera.matrix.decompose(
@@ -3971,7 +3984,6 @@ class DisplayDiagram {
          } );
    }
 }
-
 
 class Multtable {
    constructor(group) {

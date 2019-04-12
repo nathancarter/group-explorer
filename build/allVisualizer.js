@@ -759,6 +759,7 @@ DC.Generator = class {
       Graphic_context.showGraphic(Cayley_diagram);
       DC.Generator.draw();
       DC.Chunking.updateChunkingSelect();
+      emitStateChange();
    }
 
    // Drag-and-drop generation-table rows to re-order generators
@@ -985,6 +986,7 @@ DC.Arrow = class {
          DC.Arrow.enable()
       }
       MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'arrow-control']);
+      emitStateChange();
    }
 
    // disable Add button
