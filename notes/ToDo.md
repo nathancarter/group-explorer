@@ -33,17 +33,6 @@
     * chunking: the `CayleyDiagram` has an attribute called `chunk` which is the index of the
       subgroup by which to chunk.  Change it then call `updateChunking()`.
  * In ZmnInfo.html:
-    * Create a function `showZnmIsomorphism(n,m)` that pops up a sheet with the following
-      content and a suitable title.  (This works only if n and m are relatively prime.)
-       * Left column: A Cayley Diagram of Z_n x Z_m with generators a of order n and b of order m,
-         under which is text stating exactly that.
-       * Center column: The same Cayley Diagram, now with arrows also added for the element ab,
-         under which is text stating exactly that.
-       * Right column: A Cayley Diagram of Z_{nm} with cyclic arrangement of nodes, under which is
-         text stating that if you unroll the ab cycle from the previous diagram and drop the a and b
-         arrows, this is what you get, which is obviously Z_{nm}.
-    * Replace the "not implemented" text in the page with links to a sheet showing this content
-      for each type of visualizer.
     * Create a function `showNoZnmIsomorphism(n,m)` that pops up a sheet with the following
       content and a suitable title.  (This works only if n and m are not relatively prime.)
        * Left and center columns the same as those produced by `showZnmIsomorphism(n,m)`.
@@ -52,8 +41,6 @@
          Look at it from diagonally above so that we can see multiple rings in perspective.
          The text below it says that untangling the ab arrows from the second column clearly shows
          that the result is not a single cycle of length nm.
-    * Add links at the end of the page that offer to show this type of sheet using any type of
-      visualizer.
  * Make all sheets have a fixed size - say, 10000x7500.
 
 ## GAP's Group Explorer package

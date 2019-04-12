@@ -12,13 +12,14 @@
       </script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=MML_CHTML"></script>
       <script src="./build/allGroupExplorer.js"></script>
+      <script src="./build/allSheets.js"></script>
 
       <script>
        $(window).on('load', load);	// like onload handler in body
 
        function load() {
           Library.loadFromURL()
-                 .then( (group) => formatGroup(group) )
+                 .then( (group) => formatGroup(window.group = group) )
                  .catch( console.error );
        }
 
@@ -26,7 +27,7 @@
           const $rslt = $(document.createDocumentFragment())
              .append(eval(Template.HTML('header')));
 
-          const factors = MathUtils.getFactors(group.order);
+          factors = MathUtils.getFactors(group.order);
           const [m, n, _] =
              factors.reduce( ([fac1, fac2, prev], el) => {
                 if (el >= prev) {
@@ -47,6 +48,114 @@
           }
 
           $('body').append($rslt);
+
+          $( '.show-illustration' ).on( 'click', function ( event ) {
+             event.preventDefault();
+             const m = parseInt( event.target.getAttribute( 'data-m' ) );
+             const n = parseInt( event.target.getAttribute( 'data-n' ) );
+             showZnmIsomorphismSheet( m, n );
+          } );
+          $( '.show-no-illustration' ).on( 'click', function ( event ) {
+             event.preventDefault();
+             const m = parseInt( event.target.getAttribute( 'data-m' ) );
+             const n = parseInt( event.target.getAttribute( 'data-n' ) );
+             showNoZnmIsomorphismSheet( m, n );
+          } );
+       }
+
+       function statement ( m, n, bool ) {
+          return MathML.sans( MathML.sub( '&Zopf;', m * n ) )
+               + ` is ${bool ? '' : 'not '}isomorphic to `
+               + MathML.sans( `<msub><mi>&Zopf;</mi><mn>${m}</mn></msub>`
+                            + '<mo>&times;</mo>'
+                            + `<msub><mi>&Zopf;</mi><mn>${n}</mn></msub>` );
+       }
+
+       function allOffers ( product ) {
+          var result = [ ];
+          for ( var m = 2 ; m <= Math.sqrt( product ) ; m++ ) {
+             if ( product % m == 0 ) {
+                const n = product / m;
+                result.push( `<a href="" class="show-no-illustration" data-m="${m}" data-n="${n}">`
+                           + `Click here</a> to see why ${statement( m, n, false )}.` );
+             }
+          }
+          return '<p>' + result.join( '</p><p>' ) + '</p>';
+       }
+
+       function showZnmIsomorphismSheet ( m, n ) {
+          const Z = ( k ) => `<msub><mi>&#8484;</mi><mn>${k}</mn></msub>`;
+          const prod = ( A, B ) => `<mrow>${A}<mo>&#215;</mo>${B}</mrow>`;
+          const a = group.elementOrders.indexOf( m );
+          const b = group.elementOrders.indexOf( n );
+          const ab = group.mult( a, b );
+          const hmar = 20, vmar = 20, hsep = 20, vsep = 20,
+                W = 300, H = W, hdrH = 50, txtH = 100;
+          CreateNewSheet( [
+             {
+                className : 'TextElement',
+                text : 'Illustration of the isomorphism between '
+                     + mathml2text( prod(Z(m),Z(n)) )
+                     + ' and ' + mathml2text( Z(m*n) ),
+                x : hmar, y : vmar,
+                w : 3*W + 2*hsep, h : hdrH,
+                fontSize : '20pt', alignment : 'center'
+             },
+             {
+                // rectangular CD of Z_m x Z_n with arrows for a,b shown
+                className : 'CDElement', groupURL : group.URL,
+                x : hmar, y : vmar+hdrH+vsep, w : W, h : H,
+                arrows : [ a, b ],
+                arrowColors : [ '#660000', '#006600' ],
+                strategies : [ [ a, 0, 0, 0 ], [ b, 0, 1, 1 ] ]
+             },
+             {
+                // same as previous, plus arrow for ab
+                className : 'CDElement', groupURL : group.URL,
+                x : hmar+hsep+W, y : vmar+hdrH+vsep, w : W, h : H,
+                arrows : [ a, b, ab ],
+                arrowColors : [ '#660000', '#006600', '#000066' ],
+                strategies : [ [ a, 0, 0, 0 ], [ b, 0, 1, 1 ] ]
+             },
+             {
+                // circular CD of Z_mn with arrow for ab shown only
+                className : 'CDElement', groupURL : group.URL,
+                x : hmar+2*hsep+2*W, y : vmar+hdrH+vsep, w : W, h : H,
+                arrows : [ ab ],
+                arrowColors : [ '#000066' ],
+                strategies : [ [ ab, 1, 2, 0 ] ]
+             },
+             {
+                className : 'TextElement',
+                text : `A Cayley diagram of ${mathml2text( prod(Z(m),Z(n)) )}, `
+                     + `with generators of order ${m} and ${n} shown in `
+                     + `red and green, respectively.`,
+                x : hmar, y : vmar+hdrH+H+2*vsep, w : W, h : H,
+                alignment : 'center'
+             },
+             {
+                className : 'TextElement',
+                text : `The same Cayley diagram as on the left, but now `
+                     + `with the product of the red and green generators `
+                     + `also shown, colored blue.`,
+                x : hmar+hsep+W, y : vmar+hdrH+H+2*vsep, w : W, h : H,
+                alignment : 'center'
+             },
+             {
+                className : 'TextElement',
+                text : `The same Cayley diagram as in the middle, but now `
+                     + `with the red and green generators removed.  `
+                     + `The blue generator traverses all ${m*n} nodes, `
+                     + `so we can arrange it in a cycle.`,
+                x : hmar+2*hsep+2*W, y : vmar+hdrH+H+2*vsep, w : W, h : H,
+                alignment : 'center'
+             }
+          ] );
+       }
+
+       function showNoZnmIsomorphismSheet ( m, n ) {
+          alert( 'Not yet implemented.' );
+          // TO DO: pop up a sheet showing Z_${m} x Z_${n} not iso Z_${m*n}
        }
       </script>
    </head>
@@ -61,9 +170,10 @@
             ${MathML.sans('<msub><mi>&Zopf;</mi><mn>m</mn></msub><mo>&times;</mo><msub><mi>&Zopf;</mi><mn>n</mn></msub>')}
             just when ${MathML.sans('<mi>m</mi>')} and ${MathML.sans('<mi>n</mi>')} are relatively prime.
             In this case, because ${m} and ${n} are relatively prime,
-            ${MathML.sans('<msub><mi>&Zopf;</mi><mn>m</mn></msub><mo>&times;</mo><msub><mi>&Zopf;</mi><mn>n</mn></msub>')}
-            is isomorphic to ${MathML.sans('<msub><mi>&Zopf;</mi><mn>mn</mn></msub>')}.</p>
-         <p><a href="#">Click here</a> to see an illustration of why this is true. <i>(Not implemented yet.)</i></p>
+            ${MathML.sans('<msub><mi>&Zopf;</mi><mn>'+m+'</mn></msub><mo>&times;</mo><msub><mi>&Zopf;</mi><mn>'+n+'</mn></msub>')}
+            is isomorphic to ${MathML.sans('<msub><mi>&Zopf;</mi><mn>'+(m*n)+'</mn></msub>')}.</p>
+         <p><a href="" class="show-illustration" data-m="${m}" data-n="${n}">Click here</a> to see
+            an illustration of why ${statement( m, n, true )}.</p>
       </template>
       <template id="non-Z_mn-group-prime">
          <p>A group of the form ${MathML.sans('<msub><mi>&Zopf;</mi><mn>mn</mn></msub>')}
@@ -74,7 +184,9 @@
             ${MathML.sans('<mi>m</mi>')} and ${MathML.sans('<mi>n</mi>')}.</p>
          <p>Thus there is not even a product group
             ${MathML.sans('<msub><mi>&Zopf;</mi><mn>m</mn></msub><mo>&times;</mo><msub><mi>&Zopf;</mi><mn>n</mn></msub>')}
-            to speak of being isomorphic to.</p>
+            to speak of being isomorphic to.  (One of ${MathML.sans('<mi>m</mi>')} or ${MathML.sans('<mi>n</mi>')}
+            would need to be 1, making one factor the trivial group, the the other
+            ${MathML.sans('<msub><mi>&Zopf;</mi><mn>mn</mn></msub>')}.)</p>
       </template>
       <template id="non-Z_mn-group">
          <p>A group of the form ${MathML.sans(MathML.sub('&Zopf;', 'mn'))} is isomorphic to the product group
@@ -83,6 +195,7 @@
             In this case, the factors of ${MathML.sans('<mi>mn</mi>')} are ${facs}, which cannot be divided into
             two non-trivial sets that do not both contain ${factors[0]}.  Thus, there cannot be two relatively prime
             factors of ${MathML.sans('<mi>mn</mi>')} since any non-trivial factors must both be divisible by ${factors[0]}.</p>
+         <p>${allOffers(group.order)}</p>
       </template>
    </body>
 </html>
