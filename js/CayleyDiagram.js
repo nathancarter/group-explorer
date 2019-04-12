@@ -12,8 +12,11 @@ class CayleyDiagram extends Diagram3D {
 
       this.isCayleyDiagram = true;
       this.diagram_name = diagram_name;
-      this.isGenerated = (diagram_name === undefined);
       this._update();
+   }
+
+   get isGenerated () {
+      return this.diagram_name === undefined;
    }
 
    getStrategies() {
@@ -459,7 +462,7 @@ CayleyDiagram.RotatedLayout = class extends CayleyDiagram.CurvedLayout {
       )
 
       const curvedGroup = [];
-      
+
       // scale, rotation, and translate each child
       children.forEach( (child, inx) => {
          const theta = 2*inx*Math.PI/children.length;

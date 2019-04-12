@@ -18,7 +18,6 @@ class Diagram3D {
       this.fogLevel = 0;
       this.labelSize = 1;
       this.arrowheadPlacement = 1;
-      this.isGenerated = false;
 
       if (options !== undefined) {
          for (const opt in options) {
