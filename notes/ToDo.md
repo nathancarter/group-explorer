@@ -23,9 +23,6 @@
 ### Sheets
 
  * Extend the toJSON() and fromJSON() in DisplayDiagram.js to also respect:
-    * background color:
-      `Graphic_context.renderer.getClearColor().toArray()` and
-      `new THREE.Color( that_array[0], that_array[1], that_array[2] )`
     * diagram name: stored as `diagram_name` (`Diagram_name`?) in the `CayleyDiagram` object,
       plus the drop-down selector with id `'#diagram-select'` (then `displayGraphic()`).
       changing the value of `CayleyDiagram.isGenerated` may update the diagram.
@@ -197,6 +194,10 @@ Note that these ideas are contingent upon what feedback we receive from first us
  * In GE2.0, it was possible to toggle a multiplication table between using its left
    column and using its top row as the source points for morphism arrows.  Add that
    feature to GE3.0 as well.
+ * Extend the toJSON() and fromJSON() in DisplayDiagram.js to also respect:
+    * background color:
+      `Graphic_context.renderer.getClearColor().toArray()` and
+      `new THREE.Color( that_array[0], that_array[1], that_array[2] )`
 
 # To-dos not yet linked to a specific release or milestone
 
