@@ -1,8 +1,6 @@
 
 class SSD {
-   static _init() {
-      SSD.subsetsURL = './subsetDisplay/subsets.html';
-   }
+   static subsetsURL = './subsetDisplay/subsets.html';
 
    static clearMenus() {
       $('#subset_page .highlighted').removeClass('highlighted');
@@ -155,8 +153,6 @@ class SSD {
       }
    }
 }
-
-SSD._init();
 
 /*
  * SSD.BasicSubset --
@@ -1172,9 +1168,7 @@ CVC.VIEW_PANEL_URL = 'cayleyViewController/view.html';
 ```javascript
  */
 class VC {
-   static _init() {
-      VC.visualizerLayoutURL = './visualizerFramework/visualizer.html';
-   }
+   static visualizerLayoutURL = './visualizerFramework/visualizer.html';
 
    /*
 ```
@@ -1260,8 +1254,6 @@ class VC {
       } )
    }
 }
-
-VC._init();
 /*
 ```
  */

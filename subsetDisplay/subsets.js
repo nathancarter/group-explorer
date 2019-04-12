@@ -1,8 +1,6 @@
 
 class SSD {
-   static _init() {
-      SSD.subsetsURL = './subsetDisplay/subsets.html';
-   }
+   static subsetsURL = './subsetDisplay/subsets.html';
 
    static clearMenus() {
       $('#subset_page .highlighted').removeClass('highlighted');
@@ -155,5 +153,3 @@ class SSD {
       }
    }
 }
-
-SSD._init();

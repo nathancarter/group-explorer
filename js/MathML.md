@@ -208,19 +208,18 @@ The following items are created during initialization:
 
 ```js
 */
-   static _init() {
-       // Unicode characters for numeric subscripts, superscripts
-       MathML.subscripts =
-           {0: '\u2080', 1: '\u2081', 2: '\u2082', 3: '\u2083', 4: '\u2084',
-            5: '\u2085', 6: '\u2086', 7: '\u2087', 8: '\u2088', 9: '\u2089' };
-       MathML.superscripts =
-           {0: '\u2070', 1: '\u00B9', 2: '\u00B2', 3: '\u00B3', 4: '\u2074',
-            5: '\u2075', 6: '\u2076', 7: '\u2077', 8: '\u2078', 9: '\u2079',
-            '-': '\u207B'};
+   // Unicode characters for numeric subscripts, superscripts
+   static subscripts =
+       {0: '\u2080', 1: '\u2081', 2: '\u2082', 3: '\u2083', 4: '\u2084',
+        5: '\u2085', 6: '\u2086', 7: '\u2087', 8: '\u2088', 9: '\u2089' };
+   static superscripts =
+       {0: '\u2070', 1: '\u00B9', 2: '\u00B2', 3: '\u00B3', 4: '\u2074',
+        5: '\u2075', 6: '\u2076', 7: '\u2077', 8: '\u2078', 9: '\u2079',
+        '-': '\u207B'};
 
-       // XSLT to transform MathML subset into HTML
-       MathML.xsltProcessor = undefined;
-       MathML.MATHML_2_HTML =
+   // XSLT to transform MathML subset into HTML
+   static xsltProcessor = undefined;
+   static MATHML_2_HTML =
 `<?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 <xsl:output method="html"/>
@@ -281,11 +280,7 @@ The following items are created during initialization:
 
 </xsl:stylesheet>
 `;
-   }
-
 }
-
-MathML._init();
 
 /*
 ```

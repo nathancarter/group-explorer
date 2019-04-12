@@ -1,14 +1,12 @@
 
 class Multtable {
+   static COLORATION_RAINBOW = 'Rainbow';
+   static COLORATION_GRAYSCALE = 'Grayscale';
+   static COLORATION_NONE = 'None';
+
    constructor(group) {
       this.group = group;
       this.reset();
-   }
-
-   static _init() {
-      Multtable.COLORATION_RAINBOW = 'Rainbow';
-      Multtable.COLORATION_GRAYSCALE = 'Grayscale';
-      Multtable.COLORATION_NONE = 'None';
    }
 
    reset() {
@@ -119,5 +117,3 @@ class Multtable {
       this.corners = undefined;
    }
 }
-
-Multtable._init();
