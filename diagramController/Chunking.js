@@ -45,7 +45,7 @@ DC.Chunking = class {
       Cayley_diagram.chunk = (strategy_index == -1) ? undefined : strategy_index;
       Graphic_context.updateChunking(Cayley_diagram);
    }
-   
+
    static enable() {
       $('#chunking-fog').hide();
       $('#chunk-select').prop('disabled', false);
@@ -56,8 +56,8 @@ DC.Chunking = class {
       Graphic_context.updateChunking(Cayley_diagram);
 
       const $chunking_fog = $('#chunking-fog');
-      $chunking_fog.css('height', $chunking_fog.parent().css('height'));
-      $chunking_fog.css('width', $chunking_fog.parent().css('width'));
+      $chunking_fog.css('height', '100%');
+      $chunking_fog.css('width', '100%');
       $chunking_fog.show();
 
       $('#chunk-select').prop('disabled', true);

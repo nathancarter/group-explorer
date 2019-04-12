@@ -223,8 +223,8 @@ DC.Generator = class {
 
    static disable() {
       const $generation_fog = $('#generation-fog');
-      $generation_fog.css('height', $generation_fog.parent().css('height'));
-      $generation_fog.css('width', $generation_fog.parent().css('width'));
+      $generation_fog.css('height', '100%');
+      $generation_fog.css('width', '100%');
       $('#generation-fog').show();
    }
 
