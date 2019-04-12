@@ -155,7 +155,7 @@
                 Diagram_name = event.data.json.hasOwnProperty( '_diagram_name' ) ?
                                event.data.json._diagram_name :
                                group.cayleyDiagrams.length > 0 ?
-                               group.cayleyDiagrams[0].name : '';
+                               group.cayleyDiagrams[0].name : undefined;
                 $( '#diagram-select option[value="' + Diagram_name + '"]' )
                    .prop( 'selected', true );
                 Cayley_diagram = new CayleyDiagram(group, Diagram_name);
