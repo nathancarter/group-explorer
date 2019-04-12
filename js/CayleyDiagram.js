@@ -171,10 +171,10 @@ class CayleyDiagram extends Diagram3D {
             const line_style = indices.every(
                (index, strategy_index) => index == 0 || this.strategies[this.strategies.length - strategy_index - 1].layout == CayleyDiagram.LINEAR_LAYOUT
             ) ? Diagram3D.STRAIGHT : Diagram3D.CURVED;
-            const stmt = 'result' +
-                         indices.map( (_,inx) => `[${indices[gen2nest[inx]]}]` ).join('') +
-                         ` = new Diagram3D.Node(${nodes}, undefined, {lineStyle: ${line_style}})`;
-            eval(stmt);
+            var walk = result;
+            for ( var i = 0 ; i < indices.length - 1 ; i++ ) walk = walk[indices[gen2nest[i]]];
+            walk[indices[gen2nest[indices.length-1]]]
+                = new Diagram3D.Node(nodes, undefined, {lineStyle: line_style});
          } else {
             nodes.forEach( (el,inx) => { traverse(el, copyPush(indices, inx)) } );
          }
