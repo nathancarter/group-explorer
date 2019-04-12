@@ -9,12 +9,16 @@ DC.DiagramChoice = class {
          $('#diagram-choices').append(eval(Template.HTML('diagram-select-other-template'))).hide();
          diagram_index = (diagram.name == Diagram_name) ? index : diagram_index;
       } );
-      MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'diagram-choices',
-                         () => $('#diagram-choice')
-                            .html($(`#diagram-choices > li:nth-of-type(${diagram_index+2}`).html())
-                            .attr('index', diagram_index)
-                            .show()
-      ]);
+      MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'diagram-choices', () => {
+         // check to see if anyone changed the diagram index since this MathJax
+         // task was queued; if so, keep their choice, not our old one:
+         const index = $('#diagram-choice').is('[index]') ? // does it have that attr?
+            $('#diagram-choice').attr('index') : diagram_index;
+         $('#diagram-choice')
+            .html($(`#diagram-choices > li:nth-of-type(${index+2}`).html())
+            .attr('index', index)
+            .show();
+      } ]);
    }
 
    /* Display control routines */
