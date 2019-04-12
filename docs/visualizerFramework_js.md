@@ -13,7 +13,9 @@
 ```javascript
  */
 class VC {
-   static visualizerLayoutURL = './visualizerFramework/visualizer.html';
+   static _init() {
+      VC.visualizerLayoutURL = './visualizerFramework/visualizer.html';
+   }
 
    /*
 ```
@@ -99,6 +101,8 @@ class VC {
       } )
    }
 }
+
+VC._init();
 /*
 ```
  */

@@ -5,7 +5,9 @@
  */
 
 class SymmetryObject {
-   static BACKGROUND_COLOR = 0xC8E8C8;
+   static _init() {
+      SymmetryObject.BACKGROUND_COLOR = 0xC8E8C8;
+   }
 
    static generate(group, diagramName) {
       const symmetryObject = group.symmetryObjects.find( (obj) => obj.name == diagramName );
@@ -20,3 +22,6 @@ class SymmetryObject {
       return new Diagram3D(group, nodes, lines, {background: SymmetryObject.BACKGROUND_COLOR});
    }
 }
+
+// initialize static variables
+SymmetryObject._init();

@@ -31,7 +31,9 @@ if (Array.prototype._last === undefined) {
 // simple debug log function
 
 class Log {
-   static debug = false;
+   static init(debug) {
+      Log.debug = (debug === undefined) ? false : debug;
+   }
 
    static log(msg) {
       if (Log.debug) {
@@ -39,6 +41,9 @@ class Log {
       }
    }
 }
+
+// initialize static properties
+Log.init();
 /*
  * bitset as array of (32-bit) ints
  */
@@ -270,18 +275,20 @@ class BitSet {
 // math functions
 
 class MathUtils {
-   static primeList =
-      new BitSet(200, [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41,
-                       43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97,
-                       101, 103, 107, 109, 113, 127, 131, 137, 139, 149,
-                       151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199]);
+   static init() {
+      MathUtils.primeList =
+         new BitSet(200, [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41,
+                          43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97,
+                          101, 103, 107, 109, 113, 127, 131, 137, 139, 149,
+                          151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199]);
 
-   static primePowerList =
-      new BitSet(200, [2, 3, 4, 5, 7, 8, 9, 11, 13, 16, 17, 19, 23, 25, 27,
-                       29, 31, 32, 37, 41, 43, 47, 49, 53, 59, 61, 64, 67,
-                       71, 73, 79, 81, 83, 89, 97, 101, 103, 107, 109, 113,
-                       121, 125, 127, 128, 131, 137, 139, 149, 151, 157, 163,
-                       167, 169, 173, 179, 181, 191, 193, 197, 199]);
+      MathUtils.primePowerList =
+         new BitSet(200, [2, 3, 4, 5, 7, 8, 9, 11, 13, 16, 17, 19, 23, 25, 27,
+                          29, 31, 32, 37, 41, 43, 47, 49, 53, 59, 61, 64, 67,
+                          71, 73, 79, 81, 83, 89, 97, 101, 103, 107, 109, 113,
+                          121, 125, 127, 128, 131, 137, 139, 149, 151, 157, 163,
+                          167, 169, 173, 179, 181, 191, 193, 197, 199]);
+   }
 
    static isPrime(n) {
       return (n < 200) ? MathUtils.primeList.isSet(n) : MathUtils.getFactors(n).length == 1
@@ -308,6 +315,9 @@ class MathUtils {
       return [n];
    }
 }
+
+// initialize static properties
+MathUtils.init();
 
 /*
  * Class holds group defined only by a multiplication table
@@ -1998,18 +2008,19 @@ The following items are created during initialization:
 
 ```js
 */
-   // Unicode characters for numeric subscripts, superscripts
-   static subscripts =
-       {0: '\u2080', 1: '\u2081', 2: '\u2082', 3: '\u2083', 4: '\u2084',
-        5: '\u2085', 6: '\u2086', 7: '\u2087', 8: '\u2088', 9: '\u2089' };
-   static superscripts =
-       {0: '\u2070', 1: '\u00B9', 2: '\u00B2', 3: '\u00B3', 4: '\u2074',
-        5: '\u2075', 6: '\u2076', 7: '\u2077', 8: '\u2078', 9: '\u2079',
-        '-': '\u207B'};
+   static _init() {
+       // Unicode characters for numeric subscripts, superscripts
+       MathML.subscripts =
+           {0: '\u2080', 1: '\u2081', 2: '\u2082', 3: '\u2083', 4: '\u2084',
+            5: '\u2085', 6: '\u2086', 7: '\u2087', 8: '\u2088', 9: '\u2089' };
+       MathML.superscripts =
+           {0: '\u2070', 1: '\u00B9', 2: '\u00B2', 3: '\u00B3', 4: '\u2074',
+            5: '\u2075', 6: '\u2076', 7: '\u2077', 8: '\u2078', 9: '\u2079',
+            '-': '\u207B'};
 
-   // XSLT to transform MathML subset into HTML
-   static xsltProcessor = undefined;
-   static MATHML_2_HTML =
+       // XSLT to transform MathML subset into HTML
+       MathML.xsltProcessor = undefined;
+       MathML.MATHML_2_HTML =
 `<?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 <xsl:output method="html"/>
@@ -2070,7 +2081,11 @@ The following items are created during initialization:
 
 </xsl:stylesheet>
 `;
+   }
+
 }
+
+MathML._init();
 
 /*
 ```
@@ -3078,7 +3093,9 @@ CayleyDiagram.RotatedLayout = class extends CayleyDiagram.CurvedLayout {
  */
 
 class SymmetryObject {
-   static BACKGROUND_COLOR = 0xC8E8C8;
+   static _init() {
+      SymmetryObject.BACKGROUND_COLOR = 0xC8E8C8;
+   }
 
    static generate(group, diagramName) {
       const symmetryObject = group.symmetryObjects.find( (obj) => obj.name == diagramName );
@@ -3093,6 +3110,9 @@ class SymmetryObject {
       return new Diagram3D(group, nodes, lines, {background: SymmetryObject.BACKGROUND_COLOR});
    }
 }
+
+// initialize static variables
+SymmetryObject._init();
 /*
  * Routines to draw 3D ball-and-stick diagrams using three.js
  */
@@ -3975,13 +3995,15 @@ class DisplayDiagram {
 }
 
 class Multtable {
-   static COLORATION_RAINBOW = 'Rainbow';
-   static COLORATION_GRAYSCALE = 'Grayscale';
-   static COLORATION_NONE = 'None';
-
    constructor(group) {
       this.group = group;
       this.reset();
+   }
+
+   static _init() {
+      Multtable.COLORATION_RAINBOW = 'Rainbow';
+      Multtable.COLORATION_GRAYSCALE = 'Grayscale';
+      Multtable.COLORATION_NONE = 'None';
    }
 
    reset() {
@@ -4092,6 +4114,8 @@ class Multtable {
       this.corners = undefined;
    }
 }
+
+Multtable._init();
 
 class DisplayMulttable {
    // height & width, or container
@@ -4424,13 +4448,15 @@ class DisplayMulttable {
 }
 
 class CycleGraph {
-   static SOME_SETTING_NAME = 'its default value';
-
    constructor(group) {
       this.group = group;
       this.layOutElementsAndPaths();
       this.findClosestTwoPositions();
       this.reset();
+   }
+
+   static _init() {
+      CycleGraph.SOME_SETTING_NAME = 'its default value';
    }
 
    // gcd of two natural numbers
@@ -4785,6 +4811,8 @@ class CycleGraph {
       this.highlights = { };
    }
 }
+
+CycleGraph._init();
 
 
 class DisplayCycleGraph {

@@ -1,7 +1,9 @@
 // simple debug log function
 
 class Log {
-   static debug = false;
+   static init(debug) {
+      Log.debug = (debug === undefined) ? false : debug;
+   }
 
    static log(msg) {
       if (Log.debug) {
@@ -9,3 +11,6 @@ class Log {
       }
    }
 }
+
+// initialize static properties
+Log.init();

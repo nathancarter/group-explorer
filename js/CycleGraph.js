@@ -1,12 +1,14 @@
 
 class CycleGraph {
-   static SOME_SETTING_NAME = 'its default value';
-
    constructor(group) {
       this.group = group;
       this.layOutElementsAndPaths();
       this.findClosestTwoPositions();
       this.reset();
+   }
+
+   static _init() {
+      CycleGraph.SOME_SETTING_NAME = 'its default value';
    }
 
    // gcd of two natural numbers
@@ -361,3 +363,5 @@ class CycleGraph {
       this.highlights = { };
    }
 }
+
+CycleGraph._init();
