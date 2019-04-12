@@ -32,7 +32,10 @@ DC.DiagramChoice = class {
       }
    }
 
-   static selectDiagram(index) {
+   static selectDiagram(diagram,andDisplay) {
+      if ( typeof( andDisplay ) == 'undefined' ) andDisplay = true;
+      const index = ( typeof( diagram ) == 'string' ) ?
+         group.cayleyDiagrams.map( x => x.name ).indexOf( diagram ) : diagram;
       if (index == -1) {
          Diagram_name = undefined;
          $('#diagram-choice').html($('#diagram-choices > li:first-of-type').html());
@@ -44,9 +47,9 @@ DC.DiagramChoice = class {
          DC.Generator.disable();
          DC.Chunking.disable();
       }
-      $('#diagram-choice').attr('index',  index);
+      $('#diagram-choice').attr('index', index);
       $('#diagram-choices').hide();
- 
-     displayGraphic();
+
+      if ( andDisplay ) displayGraphic();
    }
 }

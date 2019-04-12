@@ -786,8 +786,8 @@ DC.Generator = class {
 
    static disable() {
       const $generation_fog = $('#generation-fog');
-      $generation_fog.css('height', $generation_fog.parent().css('height'));
-      $generation_fog.css('width', $generation_fog.parent().css('width'));
+      $generation_fog.css('height', '100%');
+      $generation_fog.css('width', '100%');
       $('#generation-fog').show();
    }
 
@@ -845,12 +845,16 @@ DC.DiagramChoice = class {
          $('#diagram-choices').append(eval(Template.HTML('diagram-select-other-template'))).hide();
          diagram_index = (diagram.name == Diagram_name) ? index : diagram_index;
       } );
-      MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'diagram-choices',
-                         () => $('#diagram-choice')
-                            .html($(`#diagram-choices > li:nth-of-type(${diagram_index+2}`).html())
-                            .attr('index', diagram_index)
-                            .show()
-      ]);
+      MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'diagram-choices', () => {
+         // check to see if anyone changed the diagram index since this MathJax
+         // task was queued; if so, keep their choice, not our old one:
+         const index = $('#diagram-choice').is('[index]') ? // does it have that attr?
+            $('#diagram-choice').attr('index') : diagram_index;
+         $('#diagram-choice')
+            .html($(`#diagram-choices > li:nth-of-type(${index+2}`).html())
+            .attr('index', index)
+            .show();
+      } ]);
    }
 
    /* Display control routines */
@@ -864,7 +868,10 @@ DC.DiagramChoice = class {
       }
    }
 
-   static selectDiagram(index) {
+   static selectDiagram(diagram,andDisplay) {
+      if ( typeof( andDisplay ) == 'undefined' ) andDisplay = true;
+      const index = ( typeof( diagram ) == 'string' ) ?
+         group.cayleyDiagrams.map( x => x.name ).indexOf( diagram ) : diagram;
       if (index == -1) {
          Diagram_name = undefined;
          $('#diagram-choice').html($('#diagram-choices > li:first-of-type').html());
@@ -876,10 +883,10 @@ DC.DiagramChoice = class {
          DC.Generator.disable();
          DC.Chunking.disable();
       }
-      $('#diagram-choice').attr('index',  index);
+      $('#diagram-choice').attr('index', index);
       $('#diagram-choices').hide();
- 
-     displayGraphic();
+
+      if ( andDisplay ) displayGraphic();
    }
 }
 /* This class brings together the functions used in managing the "Show these arrows:" arrow-list display and its side effects
@@ -1053,7 +1060,7 @@ DC.Chunking = class {
       Cayley_diagram.chunk = (strategy_index == -1) ? undefined : strategy_index;
       Graphic_context.updateChunking(Cayley_diagram);
    }
-   
+
    static enable() {
       $('#chunking-fog').hide();
       $('#chunk-select').prop('disabled', false);
@@ -1064,8 +1071,8 @@ DC.Chunking = class {
       Graphic_context.updateChunking(Cayley_diagram);
 
       const $chunking_fog = $('#chunking-fog');
-      $chunking_fog.css('height', $chunking_fog.parent().css('height'));
-      $chunking_fog.css('width', $chunking_fog.parent().css('width'));
+      $chunking_fog.css('height', '100%');
+      $chunking_fog.css('width', '100%');
       $chunking_fog.show();
 
       $('#chunk-select').prop('disabled', true);

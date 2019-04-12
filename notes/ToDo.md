@@ -23,9 +23,6 @@
 ### Sheets
 
  * Extend the toJSON() and fromJSON() in DisplayDiagram.js to also respect:
-    * diagram name: stored as `diagram_name` (`Diagram_name`?) in the `CayleyDiagram` object,
-      plus the drop-down selector with id `'#diagram-select'` (then `displayGraphic()`).
-      changing the value of `CayleyDiagram.isGenerated` may update the diagram.
     * node positions: `Cayley_diagram.nodes[i].point.x` (y, z), then update diagram with
       a full redisplay.  You will need to write a redisplay routine for this.  Ray suggests:
        * save the camera position and fog

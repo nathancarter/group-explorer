@@ -151,13 +151,11 @@
           window.addEventListener( 'message', function ( event ) {
              if ( event.data.source == 'sheet' ) {
                 canEmit = false; // don't spam notifications of changes about to happen
-                Graphic_context.fromJSON( event.data.json, Cayley_diagram );
                 Diagram_name = event.data.json.hasOwnProperty( '_diagram_name' ) ?
                                event.data.json._diagram_name :
                                group.cayleyDiagrams.length > 0 ?
                                group.cayleyDiagrams[0].name : undefined;
-                $( '#diagram-select option[value="' + Diagram_name + '"]' )
-                   .prop( 'selected', true );
+                DC.DiagramChoice.selectDiagram( Diagram_name, false );
                 Cayley_diagram = new CayleyDiagram(group, Diagram_name);
                 if ( event.data.json.hasOwnProperty( '_use_fog' ) )
                    $( '#use-fog' ).prop( 'checked', event.data.json._use_fog );

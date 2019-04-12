@@ -2184,7 +2184,6 @@ class Diagram3D {
       this.fogLevel = 0;
       this.labelSize = 1;
       this.arrowheadPlacement = 1;
-      this.isGenerated = false;
 
       if (options !== undefined) {
          for (const opt in options) {
@@ -2618,8 +2617,11 @@ class CayleyDiagram extends Diagram3D {
 
       this.isCayleyDiagram = true;
       this.diagram_name = diagram_name;
-      this.isGenerated = (diagram_name === undefined);
       this._update();
+   }
+
+   get isGenerated () {
+      return this.diagram_name === undefined;
    }
 
    getStrategies() {
@@ -3065,7 +3067,7 @@ CayleyDiagram.RotatedLayout = class extends CayleyDiagram.CurvedLayout {
       )
 
       const curvedGroup = [];
-      
+
       // scale, rotation, and translate each child
       children.forEach( (child, inx) => {
          const theta = 2*inx*Math.PI/children.length;
@@ -3916,6 +3918,7 @@ class DisplayDiagram {
    toJSON ( cayleyDiagram ) {
       const tmp = {
          groupURL : cayleyDiagram.group.URL,
+         _diagram_name : cayleyDiagram.diagram_name,
          highlights : cayleyDiagram.highlights,
          elements : cayleyDiagram.elements,
          zoomLevel : cayleyDiagram.zoomLevel,
@@ -3934,11 +3937,14 @@ class DisplayDiagram {
          arrows : cayleyDiagram.lines.map( x => x.arrow )
             .filter( ( v, i, s ) => s.indexOf( v ) === i ) // incl. each only 1x
       };
-      console.log( tmp );
+      // console.log( 'Sending:', tmp );
       return tmp;
    }
    fromJSON ( json, cayleyDiagram ) {
-      console.log( json );
+      // console.log( 'Received:', json );
+      // no check for has own property, because we want to erase it
+      // if it isn't included in the diagram
+      cayleyDiagram.diagram_name = json._diagram_name;
       if ( json.hasOwnProperty( 'highlights' ) )
          cayleyDiagram.highlights = json.highlights;
       if ( json.hasOwnProperty( 'elements' ) )

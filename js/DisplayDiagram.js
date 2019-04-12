@@ -801,8 +801,9 @@ class DisplayDiagram {
 
    // two serialization functions
    toJSON ( cayleyDiagram ) {
-      return {
+      const tmp = {
          groupURL : cayleyDiagram.group.URL,
+         _diagram_name : cayleyDiagram.diagram_name,
          highlights : cayleyDiagram.highlights,
          elements : cayleyDiagram.elements,
          zoomLevel : cayleyDiagram.zoomLevel,
@@ -821,8 +822,14 @@ class DisplayDiagram {
          arrows : cayleyDiagram.lines.map( x => x.arrow )
             .filter( ( v, i, s ) => s.indexOf( v ) === i ) // incl. each only 1x
       };
+      // console.log( 'Sending:', tmp );
+      return tmp;
    }
    fromJSON ( json, cayleyDiagram ) {
+      // console.log( 'Received:', json );
+      // no check for has own property, because we want to erase it
+      // if it isn't included in the diagram
+      cayleyDiagram.diagram_name = json._diagram_name;
       if ( json.hasOwnProperty( 'highlights' ) )
          cayleyDiagram.highlights = json.highlights;
       if ( json.hasOwnProperty( 'elements' ) )
@@ -868,4 +875,3 @@ class DisplayDiagram {
          } );
    }
 }
-
