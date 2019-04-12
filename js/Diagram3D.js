@@ -87,12 +87,12 @@ class Diagram3D {
    }
 
    setLineColors() {
-      const arrows = Object.values(
-         this.lines.reduce( (arrow_set, line) => (arrow_set[line.arrow] = line.arrow, arrow_set),
-                            new Array(this.lines.length) ));
-      const colors = Array.from({length: arrows.length},
+      const arrows = this.lines.map( x => x.arrow )
+         .filter( ( v, i, s ) => s.indexOf( v ) === i ); // incl. each only 1x
+      const colors = this.arrowColors
+                  || Array.from({length: arrows.length},
                                 (_, inx) => '#' + new THREE.Color(`hsl(${360*inx/arrows.length}, 100%, 20%)`).getHexString());
-      this.lines.forEach( (line) => { line.color = colors[arrows.findIndex( (arrow) => arrow == line.arrow )] } );
+      this.lines.forEach( (line) => line.color = colors[arrows.indexOf( line.arrow )] );
       if ( this.emitStateChange ) this.emitStateChange();
       return this;
    }
