@@ -7,7 +7,7 @@ JS_FILES = js/init.js             js/Log.js            js/BitSet.js        js/Ma
            js/DisplayDiagram.js                                                                  \
            js/Multtable.js        js/DisplayMulttable.js                                         \
            js/CycleGraph.js       js/DisplayCycleGraph.js                                        \
-           Version.md                                                                            \
+           Version.js                                                                            \
 
 SUB_FILES = subsetDisplay/subsets.js           subsetDisplay/BasicSubset.js     \
             subsetDisplay/Subgroup.js          subsetDisplay/Subset.js          \
@@ -47,11 +47,14 @@ all : products docs
 
 clean :
 	rm -f *~ js/*~ subsetDisplay/*~ visualizerFramework/*~ docs/*~
-	rm -f ${PRODUCTS} ${DOCS}
+	rm -f ${PRODUCTS} ${DOCS} Version.js
 
 #################
 
 products : ${PRODUCTS}
+
+Version.js: package.json
+	./versionjs
 
 build/allGroupExplorer.js : ${JS_FILES}
 	${COMBINE} ${JS_FILES} ${COMBINE_OPTS} > build/allGroupExplorer.js
