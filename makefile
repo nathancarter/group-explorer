@@ -2,7 +2,7 @@
 JS_FILES = js/init.js             js/Log.js            js/BitSet.js        js/MathUtils.js       \
            js/BasicGroup.js       js/XMLGroup.js       js/Subgroup.js      js/SubgroupFinder.js  \
            js/IsomorphicGroups.js js/Template.md       js/Library.js       js/MathML.md          \
-           js/Menu.js                                                                            \
+           js/Menu.js             js/ShowGAPCode.js                                              \
            js/Diagram3D.js        js/DiagramDnD.js     js/CayleyDiagram.js js/SymmetryObject.js  \
            js/DisplayDiagram.js                                                                  \
            js/Multtable.js        js/DisplayMulttable.js                                         \

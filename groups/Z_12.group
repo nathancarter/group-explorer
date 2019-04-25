@@ -1,5 +1,7 @@
 <!DOCTYPE groupexplorerml>
 <group>
+    <gapid>12,2</gapid>
+    <gapname>C12</gapname>
     <name text="Z_12"><mrow><msub><mi>&Zopf;</mi><mn>12</mn></msub></mrow></name>
     <definition text="&amp;lt; &lt;i&gt;a&lt;/i&gt; | &lt;i&gt;a&lt;/i&gt;&lt;sup&gt;12&lt;/sup&gt;=1 &amp;gt;">
         <mfenced open="&#x27E8;" close="&#x27E9;" separators=":">

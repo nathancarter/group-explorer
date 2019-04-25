@@ -1,5 +1,7 @@
 <!DOCTYPE groupexplorerml>
 <group>
+    <gapid>12,3</gapid>
+    <gapname>A4</gapname>
     <name text="A_4"><mrow><msub><mi>A</mi><mn>4</mn></msub></mrow></name>
     <definition text="&amp;lt; &lt;i&gt;a&lt;/i&gt;, &lt;i&gt;b&lt;/i&gt; | &lt;i&gt;a&lt;/i&gt;&lt;sup&gt;3&lt;/sup&gt;=&lt;i&gt;b&lt;/i&gt;&lt;sup&gt;2&lt;/sup&gt;=1, &lt;i&gt;aba&lt;/i&gt;=&lt;i&gt;ba&lt;/i&gt;&lt;sup&gt;-1&lt;/sup&gt;&lt;i&gt;b&lt;/i&gt; &amp;gt;">
         <mfenced open="&#x27E8;" close="&#x27E9;" separators=":">

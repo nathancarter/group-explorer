@@ -1,5 +1,7 @@
 <!DOCTYPE groupexplorerml>
 <group>
+    <gapid>168,42</gapid>
+    <gapname>PSL(3,2)</gapname>
     <name text="Cotriangularity-168"><mtext>Cotriangularity-168</mtext></name>
     <definition text="not included"><mtext>not included</mtext></definition>
     <phrase>A 168-element subgroup of S&#x2087;</phrase>

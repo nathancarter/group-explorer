@@ -1,5 +1,7 @@
 <!DOCTYPE groupexplorerml>
 <group>
+    <gapid>384,5602</gapid>
+    <gapname>((((C2 x C2 x C2 x C2) : C2) : C2) : C3) : C2</gapname>
     <name text="Tesseract"><mtext>Tesseract</mtext></name>
     <definition text="not included"><mtext>not included</mtext></definition>
     <phrase>The symmetries of the hypercube</phrase>

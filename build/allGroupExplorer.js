@@ -737,11 +737,13 @@ class XMLGroup extends BasicGroup {
       } else {
          $xml = $(text);
       }
-      
+
       super(XMLGroup._multtable_from_xml($xml));
 
       this.$xml = $xml;
       this.name = $xml.find('name').first().html();
+      this.gapname = $xml.find('gapname').first().html();
+      this.gapid = $xml.find('gapid').first().html();
       this.shortName = $xml.find('name').first().attr('text');
       this.definition = $xml.find('definition').first().html();
       this.phrase = $xml.find('phrase').text();
@@ -753,7 +755,7 @@ class XMLGroup extends BasicGroup {
       this.userRepresentations = [];
       /*
        * representations and userRepresentations are treated together as a contiguous array,
-       *   and representationIndex is the index of the default representation into that virtual array 
+       *   and representationIndex is the index of the default representation into that virtual array
        *   (representationIndex is an integer and not an object reference so XMLGroup can be easily serialized)
        */
       this.representationIndex = 0;
@@ -790,7 +792,7 @@ class XMLGroup extends BasicGroup {
       this.userRepresentations.splice(userIndex, 1);
       this.representation = savedRepresentation;
    }
-   
+
    get representation() {
       if (this.representationIndex < this.representations.length) {
          return this.representations[this.representationIndex];
@@ -800,7 +802,7 @@ class XMLGroup extends BasicGroup {
          return this.representations[0];
       }
    }
-   
+
    set representation(representation) {
       let inx = this.representations.findIndex( (el) => el == representation );
       if (inx >= 0) {
@@ -846,7 +848,7 @@ class XMLGroup extends BasicGroup {
          return this._XML_generators;
       }
    }
-   
+
    // returns short representations as array of arrays of strings (just debugging)
    static _reps_from_xml($xml) {
       return $xml.find('representation')

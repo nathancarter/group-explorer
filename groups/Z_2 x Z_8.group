@@ -1,5 +1,7 @@
 <!DOCTYPE groupexplorerml>
 <group>
+    <gapid>16,5</gapid>
+    <gapname>C8 x C2</gapname>
     <name text="Z_2 x Z_8"><mrow><msub><mi>&Zopf;</mi><mn>2</mn></msub><mo>&times;</mo><msub><mi>&Zopf;</mi><mn>8</mn></msub></mrow></name>
     <definition text="&amp;lt; &lt;i&gt;a&lt;/i&gt;, &lt;i&gt;b&lt;/i&gt; | &lt;i&gt;a&lt;/i&gt;&lt;sup&gt;2&lt;/sup&gt;=&lt;i&gt;b&lt;/i&gt;&lt;sup&gt;8&lt;/sup&gt;=1, &lt;i&gt;ab&lt;/i&gt;=&lt;i&gt;ba&lt;/i&gt; &amp;gt;">
         <mfenced open="&#x27E8;" close="&#x27E9;" separators=":">

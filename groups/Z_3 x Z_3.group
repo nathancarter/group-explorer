@@ -1,5 +1,7 @@
 <!DOCTYPE groupexplorerml>
 <group>
+    <gapid>9,2</gapid>
+    <gapname>C3 x C3</gapname>
     <name text="Z_3 x Z_3"><mrow><msub><mi>&Zopf;</mi><mn>3</mn></msub><mo>&times;</mo><msub><mi>&Zopf;</mi><mn>3</mn></msub></mrow></name>
     <definition text="&amp;lt; &lt;i&gt;a&lt;/i&gt;, &lt;i&gt;b&lt;/i&gt; | &lt;i&gt;a&lt;/i&gt;&lt;sup&gt;3&lt;/sup&gt;=&lt;i&gt;b&lt;/i&gt;&lt;sup&gt;3&lt;/sup&gt;=1, &lt;i&gt;ab&lt;/i&gt;=&lt;i&gt;ba&lt;/i&gt; &amp;gt;">
         <mfenced open="&#x27E8;" close="&#x27E9;" separators=":">

@@ -1,5 +1,7 @@
 <!DOCTYPE groupexplorerml>
 <group>
+    <gapid>14,1</gapid>
+    <gapname>D14</gapname>
     <name text="D_7"><mrow><msub><mi>D</mi><mn>7</mn></msub></mrow></name>
     <definition text="&amp;lt; &lt;i&gt;a&lt;/i&gt;, &lt;i&gt;b&lt;/i&gt; | &lt;i&gt;a&lt;/i&gt;&lt;sup&gt;2&lt;/sup&gt;=&lt;i&gt;b&lt;/i&gt;&lt;sup&gt;7&lt;/sup&gt;=1, &lt;i&gt;bab&lt;/i&gt;=&lt;i&gt;a&lt;/i&gt;&lt;sup&gt;-1&lt;/sup&gt; &amp;gt;">
         <mfenced open="&#x27E8;" close="&#x27E9;" separators=":">
