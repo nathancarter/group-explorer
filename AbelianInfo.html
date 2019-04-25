@@ -32,8 +32,11 @@
              $rslt.append(eval(Template.HTML('non-abelian')));
           }
 
-          $('body').append($rslt);
+          $('body').prepend($rslt);
           MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
+
+          window.group = group;
+          setUpGAPCells();
        }
       </script>
    </head>
@@ -56,5 +59,6 @@
          ${MathML.sans( group.representation[i] + '<mo>=</mo>')}
          ${MathML.sans(group.representation[group.multtable[j][i]])}
       </template>
+      <div class='gapcode' data-built-in-code-type='is abelian'/>
    </body>
 </html>

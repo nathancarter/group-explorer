@@ -70,7 +70,7 @@
              $rslt.find('#no_quotient_group_reason').remove();
           }
 
-          $('body').append($rslt);
+          $('body').prepend($rslt);
           MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
 
           $( '.show-lattice' ).on( 'click', function ( event ) {
@@ -92,6 +92,9 @@
                    index = parseInt( event.target.getAttribute( 'data-index' ) );
              showQuotientSheet( index, type );
           } );
+
+          window.group = group;
+          setUpGAPCells();
        }
 
        function subgroupInfo(index) {
@@ -481,6 +484,7 @@
             some cases a reason why it is not possible right now. Subgroup
             <a href="./help/rf-groupterms/index.html#order-of-a-subgroup">order</a> and
             <a href="./help/rf-groupterms/index.html#index-of-a-subgroup">index</a> are also given.</p>
+         <p class='gapcode' data-built-in-code-type='all subgroups'></p>
          <p>The column entitled "normal" reports whether the subgroup is
             <a href="./help/rf-groupterms/index.html#normal-subgroup">normal</a>
             in ${MathML.sans(group.name)}, and if so, tries to provide a link to
@@ -488,6 +492,7 @@
             short exact sequence (SES) which exhibits the
             <a href="./help/rf-groupterms/index.html#first-isomorphism-theorem">First Isomorphism Theorem</a>
             applied to the subgroup.</p>
+         <p class='gapcode' data-built-in-code-type='is normal'></p>
          <p>The subgroups can also be shown arranged in a
             <a href="./help/rf-groupterms/index.html#lattice-of-subgroups">lattice</a>, each shown as
             highlighted portions of the whole group, connected by the identity (inclusion)
@@ -495,6 +500,7 @@
             <a href="" class="show-lattice" data-type="CDElement">Cayley diagram</a>,
             <a href="" class="show-lattice" data-type="CGElement">cycle graph</a>, or
             <a href="" class="show-lattice" data-type="MTElement">multiplication table</a>.</p>
+         <p class='gapcode' data-built-in-code-type='subgroup lattice'></p>
          <p id="simple">None of the subgroups on the list below is
             <a href="./help/rf-groupterms/index.html#normal-subgroup">normal</a>.
             For this reason, ${MathML.sans(group.name)} is a
@@ -503,6 +509,8 @@
             <a href="./help/rf-groupterms/index.html#normal-subgroup">normal</a>.
             For this reason, ${MathML.sans(group.name)} is not a
             <a href="./help/rf-groupterms/index.html#simple-group">simple</a> group.</p>
+         <p class='gapcode' data-built-in-code-type='is simple'></p>
+         <p></p>
          <table id="subgroup_table">
             <thead>
                <tr>

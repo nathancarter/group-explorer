@@ -43,8 +43,11 @@
                      )))
           }
 
-          $('body').append($rslt);
+          $('body').prepend($rslt);
           MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'conjugacy_list']);
+
+          window.group = group;
+          setUpGAPCells();
        }
       </script>
    </head>
@@ -65,5 +68,6 @@
             <ul id="order_class_list">
             </ul>
       </template>
+      <div class="gapcode" data-built-in-code-type="order classes"/>
    </body>
 </html>

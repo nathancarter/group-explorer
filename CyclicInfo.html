@@ -32,8 +32,11 @@
              $rslt.append(eval(Template.HTML('non-cyclic')));
           }
 
-          $('body').append($rslt);
+          $('body').prepend($rslt);
           MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
+
+          window.group = group;
+          setUpGAPCells();
        }
       </script>
    </head>
@@ -50,5 +53,6 @@
          <p>${MathML.sans(group.name)} is not <a href="./help/rf-groupterms/index.html#cyclic-group">cyclic</a>;
             no element generates the whole group.</p>
       </template>
+      <div class='gapcode' data-built-in-code-type='is cyclic'/>
    </body>
 </html>

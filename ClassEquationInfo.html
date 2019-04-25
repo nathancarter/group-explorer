@@ -49,8 +49,10 @@
              }
           }
           $rslt.append(eval(Template.HTML('trailer')));
-          $('body').append($rslt);
+          $('body').prepend($rslt);
           MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'conjugacy_list']);
+
+          setUpGAPCells();
 
           $( '.show-class-equation-sheet' ).on( 'click', function ( event ) {
              event.preventDefault();
@@ -187,5 +189,6 @@
          <a href="" class="show-class-equation-sheet" data-type="MTElement">multiplication tables</a>,
          or <a href="" class="show-class-equation-sheet" data-type="CGElement">cycle graphs</a>.
       </template>
+      <div class='gapcode' data-built-in-code-type='class equation'/>
    </body>
 </html>

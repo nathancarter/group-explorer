@@ -39,6 +39,7 @@ nav:
         - Group Explorer Terminology: rf-geterms.md
         - Group Info Pages: rf-um-groupwindow.md
         - Group Library: rf-um-mainwindow.md
+        - GAP: rf-um-gap.md
         - Visualizers: rf-um-largewindow.md
         - Cayley Diagram Options: rf-um-cd-options.md
         - Cycle Graph Options: rf-um-cg-options.md

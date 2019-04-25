@@ -62,7 +62,7 @@
              }
           }
 
-          $('body').append($rslt);
+          $('body').prepend($rslt);
           MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
 
           $( '.show-decomposition' ).on( 'click', function ( event ) {
@@ -70,6 +70,8 @@
              const type = event.target.getAttribute( 'data-type' );
              showSolvableDecompositionSheet( type );
           } );
+
+          setUpGAPCells();
        }
 
        function makeGroupRef(group) {
@@ -322,5 +324,6 @@
          <p>You will need to more groups loaded (see <a href="">options window</a> for starters)
             to make this computation possible.</p>
       </template>
+      <div class="gapcode" data-built-in-code-type="is solvable"/>
    </body>
 </html>

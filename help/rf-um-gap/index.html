@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-<title>User Manual - Group Explorer 3.0 Help</title>
+<title>GAP - Group Explorer 3.0 Help</title>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="../w3.css">
@@ -29,7 +29,7 @@ img { border: 1px solid black; }
 <header class="w3-container w3-theme w3-padding" id="myHeader">
   <!--<i onclick="w3_open()" class="fa fa-bars w3-xlarge w3-button w3-theme"></i>-->
   <div class="w3-center">
-  <h1 class="w3-xxxlarge">Group Explorer 3.0 Help: User Manual</h1>
+  <h1 class="w3-xxxlarge">Group Explorer 3.0 Help: GAP</h1>
   </div>
 </header>
 
@@ -55,10 +55,7 @@ img { border: 1px solid black; }
                 <ul>
                 
                     <li><a style="text-decoration: none;"
-                          href="#user-interface">User interface</a></li>
-                
-                    <li><a style="text-decoration: none;"
-                          href="#large-visualizers">Large visualizers</a></li>
+                          href="#gap-groups-algorithms-programming">GAP (Groups, Algorithms, Programming)</a></li>
                 
                 </ul>
 
@@ -106,9 +103,9 @@ img { border: 1px solid black; }
                     
                     
                     
-                        <li><a href="./"
+                        <li><a href="../rf-um-index/"
                                style="text-decoration: none;"
-                               class="current"
+                               class=""
                                >User Manual</a></li>
                     
                     
@@ -123,35 +120,52 @@ img { border: 1px solid black; }
 
                 <h3>Have an idea?</h3>
                 <p><i class="fab fa-github"></i>
-                   <a href='http://github.com/nathancarter/group-explorer/edit/master/help-src/rf-um-index.md'
+                   <a href='http://github.com/nathancarter/group-explorer/edit/master/help-src/rf-um-gap.md'
                     >Edit this page</a></p>
             </div>
         </div>
         <div class="w3-threequarter w3-container">
-            <p>The User Manual is a complete reference of all features in Group Explorer.
-It is the most in-depth help available but is in reference form.</p>
-<h2 id="user-interface">User interface</h2>
+            <h1 id="gap-groups-algorithms-programming"><em>GAP</em> (Groups, Algorithms, Programming)</h1>
+<p><a href="http://www.gap-system.org"><em>GAP</em></a> is a large and powerful programming
+language for computations in abstract algebra and discrete mathematics.  It
+has been around since the 1980s, and continues to have regular releases
+today.</p>
+<p>Throughout the <em>Group Explorer</em> app, you will find buttons labeled &ldquo;Compute
+this in GAP.&rdquo; Clicking such a button will reveal a box containing <em>GAP</em> code
+that does the computation or visualization you&rsquo;re looking at.  This can be
+useful for several purposes.</p>
+<ol>
+<li>If you want to move beyond <em>Group Explorer</em> to something more powerful,
+    <em>GAP</em> is an excellent next step.  These small samples of <em>GAP</em> code
+    can serve as tiny tutorials, showing you how to do short comptuations
+    in <em>GAP.</em></li>
+<li>If you aren&rsquo;t sure what <em>Group Explorer</em> is reporting, and want to see
+    its results more specifically, the <em>GAP</em> output is sometimes a good
+    place to start.  It may contain more technical details than <em>Group
+    Explorer</em> reports.</li>
+<li>If you want to take the results of a computation that <em>Group Explorer</em>
+    has done and manipulate them further, you can do so right on the web,
+    by revealing the <em>GAP</em> code, editing it to extend it as needed, and
+    then clicking &ldquo;Run&rdquo; to see the results.</li>
+<li>If you think there is a mistake in <em>Group Explorer</em> and want to report
+    a bug to us, start by checking whether <em>Group Explorer</em> agrees with
+    <em>GAP.</em>  If it doesn&rsquo;t, definitely
+    <a href="https://github.com/nathancarter/group-explorer/issues">send us a bug report!</a></li>
+</ol>
+<p>The technology we use to include runnable <em>GAP</em> code in <em>Group Explorer</em> is
+the <a href="https://sagecell.sagemath.org"><em>Sage</em> Cell Server</a>.
+<a href="http://www.sagemath.org"><em>Sage</em></a> is a large piece of software for
+computational mathematics that tries to include as many mathematical tools
+as it can, including <em>GAP.</em>  The cell server makes all of Sage (including
+<em>GAP</em>) available for live use on the web.</p>
+<p>To go further with <em>Sage</em> or <em>GAP</em>, consider these options:</p>
 <ul>
-<li><a href="../rf-um-mainwindow/">Main (group library) page</a></li>
-<li><a href="../rf-um-groupwindow/">Group info pages</a></li>
-<li><a href="../rf-um-sheetwindow/">Sheets</a> (plus <a href="../rf-um-morphedit/">editing homomorphisms on a sheet</a>)</li>
-<li><a href="../rf-um-gap/">Code in GAP</a></li>
-</ul>
-<h2 id="large-visualizers">Large visualizers</h2>
-<ul>
-<li><a href="../rf-um-largewindow/">General information on visualizer interfaces</a></li>
-</ul>
-<h3 id="visualizer-types">Visualizer types</h3>
-<ul>
-<li><a href="../rf-um-cd-options/">Cayley diagram interface</a></li>
-<li><a href="../rf-um-cg-options/">Cycle graph interface</a></li>
-<li><a href="../rf-um-mt-options/">Multiplication table interface</a></li>
-<li><a href="../rf-um-os-options/">Symmetry object interface</a></li>
-</ul>
-<h3 id="related-controls">Related controls</h3>
-<ul>
-<li><a href="../rf-um-modelview/">Viewing 3D models</a></li>
-<li><a href="../rf-um-subsetlistbox/">Subsets and subgroups interface</a></li>
+<li><a href="https://cocalc.com/app">CoCalc</a>,
+   a cloud service providing access to <em>Sage</em> (including <em>GAP</em>)</li>
+<li><a href="https://www.gap-system.org/Download/install.html">Instructions for installing <em>GAP</em></a>
+   on your own machine</li>
+<li><a href="https://doc.sagemath.org/html/en/installation/">Instructions for installing <em>Sage</em></a>
+   on your own machine</li>
 </ul>
         </div>
     </div>

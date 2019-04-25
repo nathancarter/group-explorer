@@ -328,6 +328,8 @@
           // notes
           Notes.show();
 
+          setUpGAPCells();
+
           MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
 
           $( '.show-all-visualizers-sheet' ).on( 'click', function ( event ) {
@@ -546,17 +548,20 @@
       <hr>
 
       <h3 id="Basic_facts">Basic facts</h3>
-      <div id="basic-facts" class="indent1">
-         <template id="basicFacts_template">
-            <table>
-               <tr><th align="right">Definition</th>
-                  <td align="left">${MathML.sans(group.definition)}</td>
-               </tr>
-               <tr><th align="right">Order</th>
-                  <td align="left">${group.order}</td>
-               </tr>
-            </table>
-         </template>
+      <div class="indent1">
+         <div id='basic-facts'>
+            <template id="basicFacts_template">
+               <table>
+                  <tr><th align="right">Definition</th>
+                     <td align="left">${MathML.sans(group.definition)}</td>
+                  </tr>
+                  <tr><th align="right">Order</th>
+                     <td align="left">${group.order}</td>
+                  </tr>
+               </table>
+            </template>
+         </div>
+         <div class='gapcode' data-built-in-code-type='create group'/>
       </div>
 
       <h3 id="Views">Views</h3>

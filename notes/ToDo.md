@@ -246,8 +246,6 @@ Note that these ideas are contingent upon what feedback we receive from first us
    separately).  Alternately, the original user can just post that JSON on their
    website/blog, then give you the URL to it, and you can paste the URL into GE, and
    import data that way (which GE will handle by an XHR to the blog/website).
- * Integrate into GE a way to ask, for any computation that's done, a way for
-   the user to ask how you would do the same thing in GAP.
  * One day make OSs full citizens of GE by making a Spins-like game out of them, but low
    pedagogical value, so long into the future.
  * Find out whether Tom Leong might want to make us a nice set of CSS to make the whole
