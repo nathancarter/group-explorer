@@ -7,12 +7,6 @@
 
  * Make test to simulate loading GE from GAP using 'waitForMessage'
 
-### Help system
-
- * Complete the integration (or pass to Nathan if he finishes his stuff first)
-   and then update the help link on the library page to go to the newly created
-   help index page.
-
 ### 3D diagrams and viewing angles
 
  * Eventually, we want to have a camera position be specifiable in the OS/CD diagram
