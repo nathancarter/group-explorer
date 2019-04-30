@@ -97,7 +97,12 @@
          function completeSetup () {
             // Document is assembled, register event handlers
             registerEventHandlers();
-            $sheet = $( '#graphic' );
+            const $container = $( '#graphic' );
+            const W = 10000, H = 7500;
+            $container[0].style.overflowX = 'scroll';
+            $container[0].style.overflowY = 'scroll';
+            $container.html( `<div style="min-width: ${W}; min-height: ${H};"></div>` );
+            $sheet = $( $container[0].childNodes[0] );
             Model = new SheetModel( $sheet[0] );
 
             // Create header from group name and queue MathJax to typeset it
@@ -108,12 +113,18 @@
             $( '#vert-container' ).resizable( {
                handleSelector: '#splitter',
                resizeHeight: false,
-               resizeWidthFrom: 'left',
-               onDrag: resizeGraphic
+               resizeWidthFrom: 'left'
             } );
 
             $sheet.css( { backgroundColor:'#f8f8f8' } )
                   .append( '<canvas id="overlay"></canvas>' );
+            $( '#overlay' ).offset( {
+                left : $sheet.offset().left,
+                top : $sheet.offset().top
+            } );
+            const canvas = $( '#overlay' )[0];
+            canvas.width = $sheet.width();
+            canvas.height = $sheet.height();
             show( '#sheet-control' );
             resizeBody();
 
@@ -156,6 +167,13 @@
                if ( selected && selected.htmlViewElement() )
                   $( selected.htmlViewElement().parentElement ).removeDragAndSizeSelection();
             } );
+         }
+
+         function scrollToTopLeft () { $sheet[0].parentNode.scrollTo( 0, 0 ); }
+         function scrollToShow ( sheetElement ) {
+            $sheet[0].parentNode.scrollTo(
+               Math.max( 0, sheetElement.viewElement.offsetLeft - 50 ),
+               Math.max( 0, sheetElement.viewElement.offsetTop - 50 ) );
          }
 
          function handleSelectionChanged () {
@@ -212,24 +230,6 @@
          function resizeBody() {
             $('body').height(window.innerHeight);
             $('body').width(window.innerWidth);
-            resizeGraphic();
-         }
-
-         /*
-          * Resize the #graphic pane, which means ensuring that the translucent overlay
-          * is the same size as it.
-          */
-         function resizeGraphic () {
-            const $graphic = $( '#graphic' );
-            $( '#overlay' ).offset( {
-                left : $graphic.offset().left,
-                top : $graphic.offset().top
-            } ).width( $graphic.width() ).height( $graphic.height() );
-            const canvas = $( '#overlay' )[0];
-            canvas.width = $graphic.width();
-            canvas.height = $graphic.height();
-            var context = canvas.getContext( '2d' );
-            Model.drawOverlay();
          }
 
          /* Show the desired panel, hide the rest */
@@ -245,9 +245,11 @@
 
          function addRectangle () {
             new RectangleElement( Model );
+            scrollToTopLeft();
          }
          function addText () {
             new TextElement( Model );
+            scrollToTopLeft();
          }
          function connectSelected () {
             new ConnectingElement( Model, Model.selected(),
@@ -289,15 +291,22 @@
                var element = Model.sheetElementFromJSON( copiedItem );
                var wrapper = element.htmlViewElement().parentNode;
                $( wrapper ).addDragAndSizeSelection();
+               scrollToShow( element );
             }
          }
          function moveSelectedUp () {
             var selected = Model.selected();
-            if ( selected ) Model.adjustZUp( selected );
+            if ( selected ) {
+               Model.adjustZUp( selected );
+               scrollToShow( selected );
+            }
          }
          function moveSelectedDown () {
             var selected = Model.selected();
-            if ( selected ) Model.adjustZDown( selected );
+            if ( selected ) {
+               Model.adjustZDown( selected );
+               scrollToShow( selected );
+            }
          }
          function moveSelectedToTop () {
             var selected = Model.selected();
@@ -305,6 +314,7 @@
                 var highestZ = Math.max( ...Model.elements.map( ( e ) => e.zIndex ) );
                 var thatElt = Model.elements.find( ( e ) => e.zIndex == highestZ );
                 Model.adjustZ( selected, thatElt );
+                scrollToShow( selected );
             }
          }
          function moveSelectedToBottom () {
@@ -313,6 +323,7 @@
                 var lowestZ = Math.min( ...Model.elements.map( ( e ) => e.zIndex ) );
                 var thatElt = Model.elements.find( ( e ) => e.zIndex == lowestZ );
                 Model.adjustZ( selected, thatElt );
+                scrollToShow( selected );
             }
          }
          function undo () { Model.undo(); }
@@ -321,11 +332,14 @@
             var vizType = visualizerList.value;
             var groupURL = groupList.value;
             if ( visualizerList.value == 'MT' ) {
-                new MTElement( Model, groupURL );
+               new MTElement( Model, groupURL );
+               scrollToTopLeft();
             } else if ( visualizerList.value == 'CD' ) {
-                new CDElement( Model, groupURL );
+               new CDElement( Model, groupURL );
+               scrollToTopLeft();
             } else if ( visualizerList.value == 'CG' ) {
-                new CGElement( Model, groupURL );
+               new CGElement( Model, groupURL );
+               scrollToTopLeft();
             }
          }
 
@@ -334,10 +348,12 @@
          function loadSheetFromJSON ( json ) {
              json.map( adjustSheetElementPosition );
              Model.fromJSON( json );
+             scrollToTopLeft();
          }
          function addSheetElementFromJSON( json ) {
              adjustSheetElementPosition( json );
-             Model.sheetElementFromJSON( json );
+             var element = Model.sheetElementFromJSON( json );
+             scrollToShow( element );
          }
          // Adjusts y coordinate to take header into account.
          function adjustSheetElementPosition ( elementJSON ) {

@@ -26,7 +26,6 @@
       the `DisplayDiagram` instance
     * chunking: the `CayleyDiagram` has an attribute called `chunk` which is the index of the
       subgroup by which to chunk.  Change it then call `updateChunking()`.
- * Make all sheets have a fixed size - say, 10000x7500.
 
 ## GAP's Group Explorer package
 

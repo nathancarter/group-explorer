@@ -33,8 +33,9 @@ function eventToCellNumber ( event, relativeToThisAncestor ) {
     var container = relativeToThisAncestor || event.target;
     var min = { x : 0, y : 0 },
         max = { x : $( container ).outerWidth(), y : $( container ).outerHeight() },
-        point = { x : event.pageX - container.offsetLeft,
-                  y : event.pageY - container.offsetTop },
+        rect = container.getBoundingClientRect(),
+        point = { x : event.pageX - rect.left,
+                  y : event.pageY - rect.top },
         col = ( point.x < min.x + defaultResizingMargin ) ? 0
             : ( point.x > max.x - defaultResizingMargin ) ? 2 : 1,
         row = ( point.y < min.y + defaultResizingMargin ) ? 0
@@ -219,6 +220,7 @@ class SheetModel {
         if ( !( element instanceof HTMLElement ) )
             throw new Error( 'SheetModel requires an HTMLElement at construction' );
         this.view = element;
+        this.view.style.position = 'relative';
         this.elements = [ ];
         this.history = [ JSON.stringify( this.toJSON() ) ];
         this.historyIndex = 0;

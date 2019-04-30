@@ -16,6 +16,7 @@ class SheetModel {
         if ( !( element instanceof HTMLElement ) )
             throw new Error( 'SheetModel requires an HTMLElement at construction' );
         this.view = element;
+        this.view.style.position = 'relative';
         this.elements = [ ];
         this.history = [ JSON.stringify( this.toJSON() ) ];
         this.historyIndex = 0;
