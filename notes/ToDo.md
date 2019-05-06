@@ -14,19 +14,6 @@
 
 ## Assigned to Nathan
 
-### Sheets
-
- * Extend the toJSON() and fromJSON() in DisplayDiagram.js to also respect:
-    * node positions: `Cayley_diagram.nodes[i].point.x` (y, z), then update diagram with
-      a full redisplay.  You will need to write a redisplay routine for this.  Ray suggests:
-       * save the camera position and fog
-       * redisplay the whole diagram
-       * restore the camera position and fog
-    * node radii: `Cayley_diagram.nodes[i].radius` then call `updateNodeRadius()` in
-      the `DisplayDiagram` instance
-    * chunking: the `CayleyDiagram` has an attribute called `chunk` which is the index of the
-      subgroup by which to chunk.  Change it then call `updateChunking()`.
-
 ## GAP's Group Explorer package
 
  * Support accepting a name in the JSON options

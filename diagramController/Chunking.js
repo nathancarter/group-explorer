@@ -44,6 +44,7 @@ DC.Chunking = class {
       $('#chunk-choice').html($(`#chunk-choices > li:nth-of-type(${strategy_index + 2})`).html());
       Cayley_diagram.chunk = (strategy_index == -1) ? undefined : strategy_index;
       Graphic_context.updateChunking(Cayley_diagram);
+      emitStateChange();
    }
 
    static enable() {
@@ -61,6 +62,7 @@ DC.Chunking = class {
       $chunking_fog.show();
 
       $('#chunk-select').prop('disabled', true);
+      emitStateChange();
    }
 
    static isDisabled() {

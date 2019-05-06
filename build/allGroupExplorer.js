@@ -3525,6 +3525,7 @@ class DisplayDiagram {
       }
       this.updateLines(diagram3D, options.size == "small");
       this.updateArrowheads(diagram3D);
+      this.updateChunking(diagram3D);
       this.render();
 
       img.src = this.renderer.domElement.toDataURL();
@@ -4242,7 +4243,12 @@ class DisplayDiagram {
          },
          strategies : cayleyDiagram.getStrategies(),
          arrows : cayleyDiagram.lines.map( x => x.arrow )
-            .filter( ( v, i, s ) => s.indexOf( v ) === i ) // incl. each only 1x
+            .filter( ( v, i, s ) => s.indexOf( v ) === i ), // incl. each only 1x
+         nodePositions : cayleyDiagram.nodes.map( node => {
+            return { x : node.point.x, y : node.point.y, z : node.point.z };
+         } ),
+         nodeRadii : cayleyDiagram.nodes.map( node => node.radius ),
+         chunkIndex : cayleyDiagram.chunk
       };
       // console.log( 'Sending:', tmp );
       return tmp;
@@ -4297,6 +4303,17 @@ class DisplayDiagram {
          json.highlights.square.map( ( color, index ) => {
             cayleyDiagram.nodes[index].squareHighlight = color;
          } );
+      if ( json.nodePositions )
+         json.nodePositions.map( ( position, index ) => {
+            cayleyDiagram.nodes[index].point.x = position.x;
+            cayleyDiagram.nodes[index].point.y = position.y;
+            cayleyDiagram.nodes[index].point.z = position.z;
+         } );
+      if ( json.nodeRadii )
+         json.nodeRadii.map( ( radius, index ) =>
+            cayleyDiagram.nodes[index].radius = radius );
+      if ( json.hasOwnProperty( 'chunkIndex' ) )
+         cayleyDiagram.chunk = json.chunkIndex;
    }
 }
 

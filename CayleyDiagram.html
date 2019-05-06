@@ -177,12 +177,15 @@
              }
           }, false );
           window.postMessage( 'listener ready', myDomain );
-          var lastCamera = null;
+          var lastKey = null;
           setInterval( function () {
-             const thisCamera = Graphic_context.camera.matrix.toArray();
-             if ( ''+lastCamera != ''+thisCamera ) emitStateChange();
-             lastCamera = thisCamera;
-          }, 500 );
+             const camera = Graphic_context.camera.matrix.toArray();
+             const nodes = Cayley_diagram.nodes.map( n => `${n.point.toArray()}` ).join( ';' );
+             const radii = Cayley_diagram.nodes.map( n => `${n.radaius}` ).join( ',' );
+             const thisKey = `${camera} ${nodes} ${radii}`;
+             if ( lastKey != thisKey ) emitStateChange();
+             lastKey = thisKey;
+          }, 1000 );
        }
 
        function emitStateChange () {
@@ -196,6 +199,7 @@
              source : 'editor',
              json : json
           }, myDomain );
+          // console.log( 'SENT:', JSON.stringify( json, null, 4 ) );
        }
 
        // Draw Cayley diagram in graphic

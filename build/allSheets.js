@@ -851,7 +851,7 @@ class VisualizerElement extends SheetElement {
     constructor ( model, groupURL ) {
         super( model );
         this.groupURL = groupURL;
-        this.vizdisplay = this.makeVisualizerDisplay( { width : 100, height : 100 } );
+        this.vizdisplay = this.makeVisualizerDisplay( { width : 200, height : 200 } );
         var that = this;
         if ( groupURL ) { // may be absent if they will fill it using fromJSON()
             Library.getGroupOrDownload( groupURL )
