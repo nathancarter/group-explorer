@@ -4248,7 +4248,10 @@ class DisplayDiagram {
             return { x : node.point.x, y : node.point.y, z : node.point.z };
          } ),
          nodeRadii : cayleyDiagram.nodes.map( node => node.radius ),
-         chunkIndex : cayleyDiagram.chunk
+         chunkIndex : cayleyDiagram.chunk,
+         arrowsData : cayleyDiagram.lines.map( ( arrow, index ) => {
+            return { style : arrow.style, offset : arrow.offset };
+         } )
       };
       // console.log( 'Sending:', tmp );
       return tmp;
@@ -4314,6 +4317,11 @@ class DisplayDiagram {
             cayleyDiagram.nodes[index].radius = radius );
       if ( json.hasOwnProperty( 'chunkIndex' ) )
          cayleyDiagram.chunk = json.chunkIndex;
+      if ( json.arrowsData )
+         json.arrowsData.map( ( arrow, index ) => {
+            cayleyDiagram.lines[index].style = arrow.style;
+            cayleyDiagram.lines[index].offset = arrow.offset;
+         } );
    }
 }
 

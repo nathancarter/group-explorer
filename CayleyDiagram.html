@@ -182,7 +182,8 @@
              const camera = Graphic_context.camera.matrix.toArray();
              const nodes = Cayley_diagram.nodes.map( n => `${n.point.toArray()}` ).join( ';' );
              const radii = Cayley_diagram.nodes.map( n => `${n.radaius}` ).join( ',' );
-             const thisKey = `${camera} ${nodes} ${radii}`;
+             const arrows = Cayley_diagram.lines.map( a => `${a.style},${a.offset}` ).join( ';' );
+             const thisKey = `${camera} ${nodes} ${radii} ${arrows}`;
              if ( lastKey != thisKey ) emitStateChange();
              lastKey = thisKey;
           }, 1000 );
