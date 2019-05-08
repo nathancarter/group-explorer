@@ -1,22 +1,19 @@
 
 # Group Explorer 3.0
 
-The abstract algebra visualization application *Group Explorer 2.0* has been
-available for Windows, Mac, and Linux, since 2009.  You can [download it
-here](http://groupexplorer.sourceforge.net), but it was last updated in
-2009, and thus won't work on every modern computer.  (Though the Windows
-version has held up remarkably well.)
-
-**The point: We are updating it to run on the web.**
+Group Explorer is visualization software for students and instructors of
+abstract algebra, specifically group theory.  It has been around since 2005
+as a desktop application, but was rewritten in 2019 as a web app.
 
 ## Status
 
-**Alpha**
+**Beta:** We would appreciate any bug reports during summer 2019, so that we
+can have a polished and reliable version ready for students in Fall 2019
+courses.
 
-[Try the alpha version here.](http://nathancarter.github.io/group-explorer/index.html)
+[Try it live here here.](http://nathancarter.github.io/group-explorer/index.html)
 
-Some functionality is not yet implemented and only a little testing has been
-done.  You have been warned.
+![Samples of various group visualizations](images/screenshot-all-visualizers.png)
 
 ## Contributors
 
