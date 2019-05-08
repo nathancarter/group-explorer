@@ -36,7 +36,7 @@ DC.DiagramChoice = class {
       if ( typeof( andDisplay ) == 'undefined' ) andDisplay = true;
       const index = ( typeof( diagram ) == 'string' ) ?
          group.cayleyDiagrams.map( x => x.name ).indexOf( diagram ) : diagram;
-      if (!diagram || index == -1) {
+      if (diagram === undefined || index == -1) {
          Diagram_name = undefined;
          $('#diagram-choice').html($('#diagram-choices > li:first-of-type').html());
          DC.Generator.enable();
