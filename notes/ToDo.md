@@ -16,7 +16,6 @@
 
 ## GAP's Group Explorer package
 
- * Support accepting a name in the JSON options
  * If a name is not provided, use `IsomorphicGroups.find()` to try to find one
  * If you found one, make it a link to the group info page for that group
 
