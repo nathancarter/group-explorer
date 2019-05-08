@@ -296,7 +296,9 @@
                    for (const {klass, pageURL} of HoverHelp.data) {
                       if ($td.hasClass(klass)) {
                          const groupURL = $td.parent().attr('group');
-                         const options = undefined;
+                         const group = Library.map.get(groupURL);
+                         const options = group.cayleyDiagrams.length ?
+                            {diagram:group.cayleyDiagrams[0].name} : {};
                          Library.openWithGroupURL(pageURL, groupURL, options);
                          break;
                       }
