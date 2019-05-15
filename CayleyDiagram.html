@@ -149,7 +149,7 @@
           VC.showPanel('#subset-control');
 
           window.addEventListener( 'message', function ( event ) {
-             if ( event.data.source == 'sheet' ) {
+             if ( event.data.source == 'external' ) {
                 canEmit = false; // don't spam notifications of changes about to happen
                 Diagram_name = event.data.json.hasOwnProperty( '_diagram_name' ) ?
                                event.data.json._diagram_name :
@@ -176,7 +176,13 @@
                 window.postMessage( 'state loaded', myDomain );
              }
           }, false );
+          // let any GE window that spawned this know that we're ready to receive signals
           window.postMessage( 'listener ready', myDomain );
+          // or if any external program is using GE as a service, let it know we're ready, too
+          window.parent.postMessage( 'listener ready', '*' );
+          // the following code emits a state change if any of our view's data has changed
+          // in ways for which we don't currently have event handlers/signals set up.
+          // these include camera position, node position, node radius, and arrow positions.
           var lastKey = null;
           setInterval( function () {
              const camera = Graphic_context.camera.matrix.toArray();

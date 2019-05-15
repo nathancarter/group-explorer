@@ -156,7 +156,7 @@
           resizeBody();
 
           window.addEventListener( 'message', function ( event ) {
-             if ( event.data.source == 'sheet' ) {
+             if ( event.data.source == 'external' ) {
                 canEmit = false; // don't spam notifications of changes about to happen
                 graphicContext.fromJSON( event.data.json, multtable );
                 graphicContext.showLargeGraphic( multtable );
@@ -170,7 +170,10 @@
                 window.postMessage( 'state loaded', myDomain );
              }
           }, false );
+          // let any GE window that spawned this know that we're ready to receive signals
           window.postMessage( 'listener ready', myDomain );
+          // or if any external program is using GE as a service, let it know we're ready, too
+          window.parent.postMessage( 'listener ready', '*' );
        }
 
        function emitStateChange () {
@@ -278,7 +281,7 @@
           if (event.shiftKey || event.ctrlKey || event.altKey || event.metaKey) {
              return;
           }
-          
+
           const location = event2columns(event);
           if (location !== undefined) {
              // clear label by clicking on same cell again

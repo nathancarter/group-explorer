@@ -710,7 +710,7 @@ class VisualizerElement extends SheetElement {
                     const thirdSlash = myURL.indexOf( '/', 8 );
                     const myDomain = myURL.substring( 0, thirdSlash > -1 ? thirdSlash : myURL.length );
                     otherWin.postMessage( {
-                        source : 'sheet',
+                        source : 'external',
                         json : that.toJSON()
                     }, myDomain );
                     otherWinState = 'loading my state';
