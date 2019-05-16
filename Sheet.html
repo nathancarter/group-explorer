@@ -167,6 +167,12 @@
                if ( selected && selected.htmlViewElement() )
                   $( selected.htmlViewElement().parentElement ).removeDragAndSizeSelection();
             } );
+
+            window.addEventListener( 'message', function ( event ) {
+                if ( event.data.type == 'load from json' ) {
+                    loadSheetFromJSON( event.data.json );
+                }
+            }, false );
          }
 
          function scrollToTopLeft () { $sheet[0].parentNode.scrollTo( 0, 0 ); }
