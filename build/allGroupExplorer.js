@@ -786,6 +786,21 @@ class XMLGroup extends BasicGroup {
       return group;
    }
 
+   toJSON () {
+      return {
+         name : this.name,
+         shortName : this.shortName,
+         author : this.author,
+         notes : this.notes,
+         phrase : this.phrase,
+         representations : this.representations,
+         representationIndex : this.representationIndex,
+         cayleyDiagrams : this.cayleyDiagrams,
+         symmetryObjects : this.symmetryObjects,
+         multtable : this.multtable
+      };
+   }
+
    deleteUserRepresentation(userIndex) {
       const savedRepresentation =
          (userIndex + this.representations.length == this.representationIndex) ? this.representations[0] : this.representation;

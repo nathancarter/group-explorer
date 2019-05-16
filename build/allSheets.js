@@ -904,15 +904,27 @@ class VisualizerElement extends SheetElement {
     edit () {
         var that = this;
         setTimeout( function () {
-            var otherWin = that.editWindow =
-                window.open( that.getEditPage() + '?groupURL=' + encodeURIComponent( that.groupURL ) );
+            const myURL = window.location.href;
+            const thirdSlash = myURL.indexOf( '/', 8 );
+            const myDomain = myURL.substring( 0, thirdSlash > -1 ? thirdSlash : myURL.length );
+            var editPageURL = that.getEditPage();
+            editPageURL += that.groupURL ?
+                '?groupURL=' + encodeURIComponent( that.groupURL ) :
+                '?waitForMessage=true';
+            var otherWin = that.editWindow = window.open( editPageURL );
+            if ( !that.groupURL ) {
+                otherWin.addEventListener( 'load', function ( event ) {
+                    otherWin.postMessage( {
+                        type : 'load group',
+                        group : that.group.toJSON()
+                    }, myDomain );
+                } );
+            }
             var otherWinState = 'starting';
             otherWin.addEventListener( 'message', function ( event ) {
                 if ( otherWinState == 'starting' && event.data == 'listener ready' ) {
                     // initially set up the editor to be just like us
-                    const myURL = window.location.href;
-                    const thirdSlash = myURL.indexOf( '/', 8 );
-                    const myDomain = myURL.substring( 0, thirdSlash > -1 ? thirdSlash : myURL.length );
+                    console.log( 'posting external message', that.toJSON() );
                     otherWin.postMessage( {
                         source : 'external',
                         json : that.toJSON()
@@ -962,6 +974,11 @@ class VisualizerElement extends SheetElement {
                 this.vizdisplay.fromJSON( json, this.vizobj );
                 this.rerender();
             }
+        } else if ( json.group ) {
+            this.group = XMLGroup.parseJSON( json.group );
+            this.vizobj = this.makeVisualizerObject( this.group );
+            this.vizdisplay.fromJSON( json, this.vizobj );
+            this.rerender();
         }
     }
     // Generic reply that can be adjusted in subclasses
