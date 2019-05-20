@@ -19,6 +19,8 @@ Used by CayleyDiagram.html, CycleDiagram.html, Multtable.html, SymmetryObject.ht
             <i title="Group Library" class="fa fa-book fa-2x trm-black"></i></a>
          <a href='Sheet.html' target='_blank'>
             <i title="Sheets" class="fa fa-file trm-black" style="font-size:1.5em;vertical-align:10%;"></i></a>
+         <a href='javascript:VC.findGroup()' id='find-group'>
+            <i title="Find This Group" class="fa fa-search trm-black" style="font-size:1.75em;vertical-align:10%;"></i></a>
          <a href='javascript:VC.help()'>
             <i title="Help" class="fa fa-question-circle fa-2x trm-black"></i></a>
          <a href='https://github.com/nathancarter/group-explorer'>

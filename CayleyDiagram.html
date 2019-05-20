@@ -193,6 +193,9 @@
              if ( lastKey != thisKey ) emitStateChange();
              lastKey = thisKey;
           }, 1000 );
+
+          // No need to keep the "find group" icon visible if the group was loaded from a URL
+          if ( group.URL ) $( '#find-group' ).hide();
        }
 
        function emitStateChange () {

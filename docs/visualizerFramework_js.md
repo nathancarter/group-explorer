@@ -87,6 +87,20 @@ class VC {
 
    /*
 ```
+## VC.findGroup()
+```javascript
+   /* Try to find this group in the Library based only on its structure */
+   static findGroup() {
+      var found = IsomorphicGroups.find( group );
+      if ( found ) {
+         window.open( `./GroupInfo.html?groupURL=${encodeURIComponent( found.URL )}` );
+      } else {
+         alert( 'Group Explorer could not find this group in its library.' );
+      }
+   }
+
+   /*
+```
 ## VC.showPanel(panel_name)
 ```javascript
    /* Switch panels by showing desired panel, hiding the rest */
