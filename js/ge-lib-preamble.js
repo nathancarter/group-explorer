@@ -11,9 +11,8 @@
  *
  * If you're reading this file in the Group Explorer repository,
  * know that it is not used here.  It is built here as part of
- * our build process, but then exported to another poject.
- * That project doesn't yet have its own public repository, but
- * when it does, we will put the link to it here.
+ * our build process, but then exported to another poject:
+ * https://github.com/nathancarter/ge-lib
  *
  * If you're reading this file in the ge-lib repository, know
  * that this file should NOT be edited in that repository.  It

@@ -27,6 +27,7 @@ if (Array.prototype._last === undefined) {
       return this[this.length - 1];
    }
 }
+
 // simple debug log function
 
 class Log {
