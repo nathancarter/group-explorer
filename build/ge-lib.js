@@ -1,3 +1,57 @@
+
+/*
+ * This file is compiled by the "make" process in the Group
+ * Explorer project at https://github.com/nathancarter/group-explorer.
+ * The resulting ge-lib.js file is not used by that project
+ * directly, but is just a way for that project to wrapp all of
+ * its most important JavaScript code into one file.  Then a
+ * separate project (called "ge-lib") imports the latest version
+ * of that file, installs several other useful utilities, and
+ * packages it up for use as a node.js module.
+ *
+ * If you're reading this file in the Group Explorer repository,
+ * know that it is not used here.  It is built here as part of
+ * our build process, but then exported to another poject.
+ * That project doesn't yet have its own public repository, but
+ * when it does, we will put the link to it here.
+ *
+ * If you're reading this file in the ge-lib repository, know
+ * that this file should NOT be edited in that repository.  It
+ * is compiled as part of the Group Explorer build process, so
+ * any changes to its content will need to take place by changing
+ * source files in that repository, recompiling ge-lib.js, and
+ * then re-importing it into the ge-lib project's repository.
+ *
+ * The ge-lib.js file is built from four files, in this order:
+ *  1. js/ge-lib-preamble.js
+ *     This declares several global variables that exist in the
+ *     browser when running Group Explorer, without which much of
+ *     its code will not make sense nor run.
+ *  2. build/allGroupExplorer.js
+ *     This is the concatenation of most of the code in the
+ *     Group Explorer application.
+ *  3. groupURLs.js
+ *     This is the list of groups in the Group Explorer library
+ *     on disk, assigned into a global JavaScript variable.
+ *  4. js/ge-lib-endmatter.js
+ *     This file copies into the module.exports object all of the
+ *     Group Explorer classes and functions that should be
+ *     exported by the ge-lib module.  It also tweaks how the
+ *     Library object loads groups, to deal with the fact that
+ *     it is not using the filesystem rather than AJAX requests.
+ */
+
+const LocalStorage = require( 'node-localstorage' ).LocalStorage;
+localStorage = new LocalStorage( './tmp' );
+
+const { JSDOM } = require( 'jsdom' );
+const { window } = new JSDOM();
+const { document } = ( new JSDOM( '' ) ).window;
+global.document = document;
+
+var $ = jQuery = require( 'jquery' )( window );
+
+THREE = require( 'three' );
 // not sure if adding these Array is an altogether good idea, but it's awfully useful
 // at least make the new functions noticable by preceding them with an underscore
 //   Alternatives:  move it?  delete it? turn it into a free-standing function somewhere?
@@ -5488,3 +5542,124 @@ class DisplayCycleGraph {
 const Version = {
    label : 'GE 3.0.0-beta' // string displayed in the upper right-hand corner of the main GE3 web pages
 };
+const urls = [
+   "./groups/A_4.group",
+   "./groups/A_5.group",
+   "./groups/D_10.group",
+   "./groups/D_4 x Z_2.group",
+   "./groups/D_4.group",
+   "./groups/D_5.group",
+   "./groups/D_6.group",
+   "./groups/D_7.group",
+   "./groups/D_8.group",
+   "./groups/D_9.group",
+   "./groups/Fr_20.group",
+   "./groups/G_4,4.group",
+   "./groups/Modular_16.group",
+   "./groups/Q_4 x Z_2.group",
+   "./groups/Q_4.group",
+   "./groups/Q_8.group",
+   "./groups/Quasihedral_16.group",
+   "./groups/S_3 x Z_3.group",
+   "./groups/S_3 x Z_4.group",
+   "./groups/S_3.group",
+   "./groups/S_4.group",
+   "./groups/Trivial.group",
+   "./groups/Twenty-one.group",
+   "./groups/Unnamed1_16.group",
+   "./groups/Unnamed2_16.group",
+   "./groups/V_4.group",
+   "./groups/Z_10.group",
+   "./groups/Z_11.group",
+   "./groups/Z_12.group",
+   "./groups/Z_13.group",
+   "./groups/Z_14.group",
+   "./groups/Z_15.group",
+   "./groups/Z_16.group",
+   "./groups/Z_17.group",
+   "./groups/Z_18.group",
+   "./groups/Z_19.group",
+   "./groups/Z_2 x Z_10.group",
+   "./groups/Z_2 x Z_2 x Z_2 x Z_2.group",
+   "./groups/Z_2 x Z_2 x Z_2 x Z_3.group",
+   "./groups/Z_2 x Z_2 x Z_2.group",
+   "./groups/Z_2 x Z_3 x Z_3 x Z_4.group",
+   "./groups/Z_2 x Z_4 x Z_2.group",
+   "./groups/Z_2 x Z_4.group",
+   "./groups/Z_2 x Z_6.group",
+   "./groups/Z_2 x Z_8.group",
+   "./groups/Z_2.group",
+   "./groups/Z_20.group",
+   "./groups/Z_3 sdp Z_4.group",
+   "./groups/Z_3 x Z_3 sdp Z_2.group",
+   "./groups/Z_3 x Z_3.group",
+   "./groups/Z_3 x Z_6.group",
+   "./groups/Z_3.group",
+   "./groups/Z_4 sdp Z_5.group",
+   "./groups/Z_4 x Z_4.group",
+   "./groups/Z_4.group",
+   "./groups/Z_5.group",
+   "./groups/Z_6.group",
+   "./groups/Z_7.group",
+   "./groups/Z_8.group",
+   "./groups/Z_9.group",
+/*
+   "./groups/168.group",
+   "./groups/Tesseract.group",
+ */
+];
+
+/*
+ * This file gets compiled into ge-lib.js.
+ * It is not intended for use on its own.
+ */
+
+const globalVarsToExport = [
+    // first import all the important classes in the GE global namespace:
+    'Version',
+    'BitSet',
+    'MathUtils',
+    'BasicGroup',
+    'XMLGroup',
+    'Subgroup',
+    'SubgroupFinder',
+    'IsomorphicGroups',
+    'Library',
+    'MathML',
+    'Diagram3D',
+    'Multtable',
+    'CycleGraph',
+    'CayleyDiagram',
+    'SymmetryObject',
+    // and some useful global functions as well:
+    'mathml2text',
+    // and then some things that may be useless outside the browser,
+    // but I'm importing them for the sake of completeness; they are
+    // global classes in the GE namespace, after all, so:
+    'DisplayDiagram',
+    'DisplayMulttable',
+    'DisplayCycleGraph',
+    'Template',
+    'Menu',
+    'DiagramDnD'
+];
+globalVarsToExport.map( name => module.exports[name] = eval( name ) );
+// then expose to the client the list of URLs in our group library
+module.exports.allGroupURLs = urls;
+// then add to the Library class two methods that are specific to
+// running GE from within node.js, which load one or all groups
+// from the local filesystem synchronously.
+// (later we can make these asynchronous if desired.)
+Library.loadFromFilesystem = url => {
+    const group = Library._dataToGroup(
+        String( require( 'fs' ).readFileSync( url ) ), 'xml' );
+    group.URL = url;
+    Library.saveGroup( group,
+        require( 'path' ).basename( url ).replace( '.group', '' ) );
+};
+Library.loadAllFromFilesystem = () => {
+    const before = ( new Date() ).getTime();
+    urls.map( url => Library.loadFromFilesystem( url ) );
+    const elapsed = ( new Date() ).getTime() - before;
+    console.log( `Loaded all groups in ${elapsed/1000}sec.` );
+}

@@ -25,8 +25,13 @@ SUB_FILES = subsetDisplay/subsets.js           subsetDisplay/BasicSubset.js     
 
 SHEET_FILES = js/DragResizeExtension.js		js/SheetModel.js
 
+NODE_JS_FILES = js/ge-lib-preamble.js                   \
+                build/allGroupExplorer.js             \
+                groupURLs.js                          \
+				js/ge-lib-endmatter.js
+
 # PRODUCTS = build/allGroupExplorer.js build/allGroupExplorer.min.js build/allVisualizer.js
-PRODUCTS = build/allGroupExplorer.js build/allVisualizer.js build/allSheets.js
+PRODUCTS = build/allGroupExplorer.js build/allVisualizer.js build/allSheets.js build/ge-lib.js
 
 DOCS =  docs/visualizerExemplar.md              \
         docs/visualizerFramework_css.md         \
@@ -67,6 +72,9 @@ build/allVisualizer.js : ${SUB_FILES}
 
 build/allSheets.js : ${SHEET_FILES}
 	${COMBINE} ${SHEET_FILES} ${COMBINE_OPTS} > build/allSheets.js
+
+build/ge-lib.js : ${NODE_JS_FILES}
+	${COMBINE} ${NODE_JS_FILES} > build/ge-lib.js
 
 #################
 

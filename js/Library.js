@@ -58,9 +58,18 @@ class Library {
    // get base URL from window.location.href
    //   (maybe we should eliminate the origin field, since all the data in localStorage is common origin?)
    static baseURL() {
-      var baseURL = new URL( window.location.href );
-      baseURL = baseURL.origin + baseURL.pathname; // trim off search string
-      baseURL = baseURL.slice( 0, baseURL.lastIndexOf('/') + 1 ); // trim off page
+      var baseURL;
+      if ( typeof window !== "undefined" ) {
+         // if running in the browser, extract the base URL from the window
+         baseURL = new URL( window.location.href );
+         baseURL = baseURL.origin + baseURL.pathname; // trim off search string
+         baseURL = baseURL.slice( 0, baseURL.lastIndexOf('/') + 1 ); // trim off page
+      } else if ( typeof __dirname !== "undefined" ) {
+         // if running in node.js, find the base dir of the repository
+         baseURL = `file://${__dirname}/../`;
+      } else {
+         throw "No window or __dirname defined; cannot locate groups library.";
+      }
       return baseURL;
    }
 
