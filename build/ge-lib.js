@@ -41,7 +41,7 @@
  */
 
 const LocalStorage = require( 'node-localstorage' ).LocalStorage;
-localStorage = new LocalStorage( './tmp' );
+localStorage = new LocalStorage( `${__dirname}/.tmp/` );
 
 const { JSDOM } = require( 'jsdom' );
 const { window } = new JSDOM();
@@ -5659,7 +5659,7 @@ Library.loadFromFilesystem = url => {
     return group;
 };
 Library.loadByName = name =>
-    Library.loadFromFilesystem( `./groups/${name}.group` );
+    Library.loadFromFilesystem( `${__dirname}/../groups/${name}.group` );
 Library.getByName = name => Library.map.get( name );
 Library.loadAllFromFilesystem = () => {
     const before = ( new Date() ).getTime();
@@ -5668,4 +5668,4 @@ Library.loadAllFromFilesystem = () => {
     console.log( `Loaded all groups in ${elapsed/1000}sec.` );
 };
 Library.allGroupNamesInFilesystem = () =>
-    urls.map( url => /^\.\/groups\/(.*)\.group$/.exec( url )[1] );
+    urls.map( url => /\/(.*)\.group$/.exec( url )[1] );

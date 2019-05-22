@@ -41,7 +41,7 @@
  */
 
 const LocalStorage = require( 'node-localstorage' ).LocalStorage;
-localStorage = new LocalStorage( './tmp' );
+localStorage = new LocalStorage( `${__dirname}/.tmp/` );
 
 const { JSDOM } = require( 'jsdom' );
 const { window } = new JSDOM();
