@@ -87,18 +87,25 @@ class XMLGroup extends BasicGroup {
    }
 
    toJSON () {
-      return {
-         name : this.name,
-         shortName : this.shortName,
-         author : this.author,
-         notes : this.notes,
-         phrase : this.phrase,
-         representations : this.representations,
-         representationIndex : this.representationIndex,
-         cayleyDiagrams : this.cayleyDiagrams,
-         symmetryObjects : this.symmetryObjects,
-         multtable : this.multtable
-      };
+      return Object.assign(
+         {
+            name : this.name,
+            gapname : this.gapname,
+            gapid : this.gapid,
+            shortName : this.shortName,
+            definition: this.definition,
+            phrase : this.phrase,
+            notes : this.notes,
+            author : this.author,
+            _XML_generators : this._XML_generators,
+            reps : this.reps,
+            representations : this.representations,
+            userRepresentations : this.userRepresentations,
+            representationIndex : this.representationIndex,
+            cayleyDiagrams : this.cayleyDiagrams,
+            symmetryObjects : this.symmetryObjects,
+         },
+         super.toJSON() );
    }
 
    deleteUserRepresentation(userIndex) {

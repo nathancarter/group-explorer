@@ -98,7 +98,7 @@ class Library {
    // returns Promise to get group from localStorage or, if not there, download it from server
    static getGroupOrDownload(url, baseURL) {
       const groupURL = Library.resolveURL(url, baseURL);
-      const localGroup = Library.map.get(groupURL);
+      const localGroup = Library.getLocalGroup(groupURL);
       return new Promise( (resolve, reject) => {
          if (localGroup === undefined) {
             $.ajax({ url: groupURL,
@@ -137,7 +137,7 @@ class Library {
    //   returns Promise to load group
    static getLatestGroup(url, baseURL) {
       const groupURL = Library.resolveURL(url, baseURL);
-      const localGroup = Library.map.get(groupURL);
+      const localGroup = Library.getLocalGroup(groupURL);
       return new Promise( (resolve, reject) => {
          $.ajax({ url: groupURL,
                   headers: (localGroup === undefined) ? {} : {'if-modified-since': localGroup.lastModifiedOnServer},
@@ -181,7 +181,11 @@ class Library {
 
    // return locally stored copy of group from Library.map/localStorage
    static getLocalGroup(url, baseURL) {
-      return Library.map.get(Library.resolveURL(url, baseURL));
+      const resolvedURL = Library.resolveURL(url, baseURL);
+      const group = Library.map.get(resolvedURL);
+      if (group != undefined) 
+         group.URL = resolvedURL;
+      return group;
    }
 
    // return 'true' if Library.map/localStorage contains no groups

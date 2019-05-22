@@ -430,6 +430,12 @@ class BasicGroup {
       return group;
    }
 
+   toJSON() {
+      return {
+         multtable: this.multtable,
+      };
+   }
+
    findNonAbelianExample() {
       for (let i = 1; i < this.order; i++) {
          for (let j = i; j < this.order; j++) {
@@ -840,18 +846,25 @@ class XMLGroup extends BasicGroup {
    }
 
    toJSON () {
-      return {
-         name : this.name,
-         shortName : this.shortName,
-         author : this.author,
-         notes : this.notes,
-         phrase : this.phrase,
-         representations : this.representations,
-         representationIndex : this.representationIndex,
-         cayleyDiagrams : this.cayleyDiagrams,
-         symmetryObjects : this.symmetryObjects,
-         multtable : this.multtable
-      };
+      return Object.assign(
+         {
+            name : this.name,
+            gapname : this.gapname,
+            gapid : this.gapid,
+            shortName : this.shortName,
+            definition: this.definition,
+            phrase : this.phrase,
+            notes : this.notes,
+            author : this.author,
+            _XML_generators : this._XML_generators,
+            reps : this.reps,
+            representations : this.representations,
+            userRepresentations : this.userRepresentations,
+            representationIndex : this.representationIndex,
+            cayleyDiagrams : this.cayleyDiagrams,
+            symmetryObjects : this.symmetryObjects,
+         },
+         super.toJSON() );
    }
 
    deleteUserRepresentation(userIndex) {
@@ -1730,7 +1743,7 @@ class Library {
    // returns Promise to get group from localStorage or, if not there, download it from server
    static getGroupOrDownload(url, baseURL) {
       const groupURL = Library.resolveURL(url, baseURL);
-      const localGroup = Library.map.get(groupURL);
+      const localGroup = Library.getLocalGroup(groupURL);
       return new Promise( (resolve, reject) => {
          if (localGroup === undefined) {
             $.ajax({ url: groupURL,
@@ -1769,7 +1782,7 @@ class Library {
    //   returns Promise to load group
    static getLatestGroup(url, baseURL) {
       const groupURL = Library.resolveURL(url, baseURL);
-      const localGroup = Library.map.get(groupURL);
+      const localGroup = Library.getLocalGroup(groupURL);
       return new Promise( (resolve, reject) => {
          $.ajax({ url: groupURL,
                   headers: (localGroup === undefined) ? {} : {'if-modified-since': localGroup.lastModifiedOnServer},
@@ -1813,7 +1826,11 @@ class Library {
 
    // return locally stored copy of group from Library.map/localStorage
    static getLocalGroup(url, baseURL) {
-      return Library.map.get(Library.resolveURL(url, baseURL));
+      const resolvedURL = Library.resolveURL(url, baseURL);
+      const group = Library.map.get(resolvedURL);
+      if (group != undefined) 
+         group.URL = resolvedURL;
+      return group;
    }
 
    // return 'true' if Library.map/localStorage contains no groups
@@ -2268,6 +2285,11 @@ const GAPlink = '<a target="_blank" href="help/rf-um-gap">What is GAP?</a>';
  * templates.
  */
 function setUpGAPCells () {
+    if (group.gapid == undefined) {
+       console.error('Unable to set up GAP cell without gapid value in group');
+       return;
+    }
+
     // Import the Sage Cell script and wait until it has loaded.
     // Note that the sequence of calls here is very important;
     // we must create the script element, add it to the document,

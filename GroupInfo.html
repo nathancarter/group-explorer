@@ -187,7 +187,16 @@
           $('#heading').html(eval(Template.HTML('heading_template')));
 
           // Basic facts
-          $('#basic-facts').html(eval(Template.HTML('basicFacts_template')));
+          const basicFacts = [
+             {groupField: 'definition', displayName: 'Definition', formatter: (val) => MathML.sans(val) },
+             {groupField: 'order',      displayName: 'Order',      formatter: (val) => MathML.sans('<mn>' + val.toString() + '</mn>') },
+             {groupField: 'gapid',      displayName: 'GAP ID',     formatter: (val) => MathML.sans('<mtext>' + val + '</mtext>') },
+             {groupField: 'gapname',    displayName: 'GAP name',   formatter: (val) => MathML.sans('<mtext>' + val + '</mtext>') },
+          ];
+          for (const basicFact of basicFacts) {
+             if (group[basicFact.groupField] == undefined) continue;
+             $('#basic-fact-table').append(eval(Template.HTML('basicFact-template')));
+          }
 
           // Views --
           //   Add rows to ViewTable until there are no more Cayley Diagrams (including
@@ -306,7 +315,7 @@
           }
 
           // User-defined naming schemes
-          if (group.userRepresentations.length == 0) {
+          if (group.userRepresentations == undefined || group.userRepresentations.length == 0) {
              $('#no-user-defined-naming-schemes').show();
              $('#user-defined-naming-schemes').hide();
           } else {
@@ -549,19 +558,12 @@
 
       <h3 id="Basic_facts">Basic facts</h3>
       <div class="indent1">
-         <div id='basic-facts'>
-            <template id="basicFacts_template">
-               <table>
-                  <tr><th align="right">Definition</th>
-                     <td align="left">${MathML.sans(group.definition)}</td>
-                  </tr>
-                  <tr><th align="right">Order</th>
-                     <td align="left">${group.order}</td>
-                  </tr>
-               </table>
-            </template>
-         </div>
-         <div class='gapcode' data-built-in-code-type='create group'/>
+         <table id="basic-fact-table">
+         </table>
+         <div class='gapcode' data-built-in-code-type='create group'></div>
+         <template id="basicFact-template">
+            <tr><th align="right">${basicFact.displayName}</th><td align="left">${basicFact.formatter(group[basicFact.groupField])}</td></tr>
+         </template>
       </div>
 
       <h3 id="Views">Views</h3>

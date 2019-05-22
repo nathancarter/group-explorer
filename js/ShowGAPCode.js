@@ -23,6 +23,11 @@ const GAPlink = '<a target="_blank" href="help/rf-um-gap">What is GAP?</a>';
  * templates.
  */
 function setUpGAPCells () {
+    if (group.gapid == undefined) {
+       console.error('Unable to set up GAP cell without gapid value in group');
+       return;
+    }
+
     // Import the Sage Cell script and wait until it has loaded.
     // Note that the sequence of calls here is very important;
     // we must create the script element, add it to the document,
