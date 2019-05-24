@@ -188,10 +188,10 @@
 
           // Basic facts
           const basicFacts = [
-             {groupField: 'definition', displayName: 'Definition', formatter: (val) => MathML.sans(val) },
              {groupField: 'order',      displayName: 'Order',      formatter: (val) => MathML.sans('<mn>' + val.toString() + '</mn>') },
              {groupField: 'gapid',      displayName: 'GAP ID',     formatter: (val) => MathML.sans('<mtext>' + val + '</mtext>') },
              {groupField: 'gapname',    displayName: 'GAP name',   formatter: (val) => MathML.sans('<mtext>' + val + '</mtext>') },
+             {groupField: 'definition', displayName: 'Definition', formatter: (val) => MathML.sans(val) },
           ];
           for (const basicFact of basicFacts) {
              if (group[basicFact.groupField] == undefined) continue;
@@ -315,7 +315,7 @@
           }
 
           // User-defined naming schemes
-          if (group.userRepresentations == undefined || group.userRepresentations.length == 0) {
+          if (group.userRepresentations.length == 0) {
              $('#no-user-defined-naming-schemes').show();
              $('#user-defined-naming-schemes').hide();
           } else {
@@ -562,7 +562,9 @@
          </table>
          <div class='gapcode' data-built-in-code-type='create group'></div>
          <template id="basicFact-template">
-            <tr><th align="right">${basicFact.displayName}</th><td align="left">${basicFact.formatter(group[basicFact.groupField])}</td></tr>
+            <tr><th align="right">${basicFact.displayName}</th>
+               <td align="left">${basicFact.formatter(group[basicFact.groupField])}</td>
+            </tr>
          </template>
       </div>
 

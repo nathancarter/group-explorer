@@ -57,12 +57,6 @@ class BasicGroup {
       return group;
    }
 
-   toJSON() {
-      return {
-         multtable: this.multtable,
-      };
-   }
-
    findNonAbelianExample() {
       for (let i = 1; i < this.order; i++) {
          for (let j = i; j < this.order; j++) {

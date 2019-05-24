@@ -181,11 +181,7 @@ class Library {
 
    // return locally stored copy of group from Library.map/localStorage
    static getLocalGroup(url, baseURL) {
-      const resolvedURL = Library.resolveURL(url, baseURL);
-      const group = Library.map.get(resolvedURL);
-      if (group != undefined) 
-         group.URL = resolvedURL;
-      return group;
+      return Library.map.get(Library.resolveURL(url, baseURL));
    }
 
    // return 'true' if Library.map/localStorage contains no groups

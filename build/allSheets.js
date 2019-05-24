@@ -916,7 +916,7 @@ class VisualizerElement extends SheetElement {
                 otherWin.addEventListener( 'load', function ( event ) {
                     otherWin.postMessage( {
                         type : 'load group',
-                        group : that.group.toJSON()
+                        group : that.group.toBriefJSON()
                     }, myDomain );
                 } );
             }
