@@ -1,6 +1,27 @@
+//@flow
+/*::
+import XMLGroup from './XMLGroup.js';
 
+export type Highlights = {background: Array<color>; border: Array<color>; top: Array<color>};
+
+export default
+*/
 class CycleGraph {
-   constructor(group) {
+/*::
+   static SOME_SETTING_NAME : string;
+   group : XMLGroup;
+   SOME_SETTING_NAME : string;
+   elements : Array<groupElement>;
+   cycles : Array<Array<groupElement>>;
+   positions : Array<{x: number, y: number}>;
+   rings : Array<number>;
+   cyclePaths : any;
+   partIndices : Array<number>;
+   bbox : {left: number, right: number, top: number, bottom: number};
+   closestTwoPositions : number;
+   highlights : Highlights;
+ */   
+   constructor(group /*: XMLGroup */) {
       this.group = group;
       this.layOutElementsAndPaths();
       this.findClosestTwoPositions();
@@ -12,10 +33,10 @@ class CycleGraph {
    }
 
    // gcd of two natural numbers
-   static gcd( n, m ) { return m ? CycleGraph.gcd( m, n % m ) : n; }
+   static gcd(n /*: number */, m /*: number */) /*: number */ { return m ? CycleGraph.gcd( m, n % m ) : n; }
 
    // orbit of an element in the group, but skipping the identity
-   orbitOf( g ) {
+   orbitOf(g /*: groupElement */) /*: Array<groupElement> */ {
       var result = [ 0 ];
       var next;
       while ( next = this.group.mult( result[result.length-1], g ) )
@@ -25,7 +46,7 @@ class CycleGraph {
    }
 
    // element to a power
-   raiseToThe( h, n ) {
+   raiseToThe(h /*: groupElement */, n /*: number */) /*: groupElement */ {
       var result = 0;
       for ( var i = 0 ; i < n ; i++ ) result = this.group.mult( result, h );
       return result;
@@ -34,7 +55,7 @@ class CycleGraph {
    // how soon does the orbit of g intersect the given list of elements?
    // that is, consider the smallest power of g that appears in the array;
    // at what index does it appear?
-   howSoonDoesOrbitIntersect( g, array ) {
+   howSoonDoesOrbitIntersect(g /*: groupElement */, array /*: Array<groupElement> */) /*: number */ {
       var orbit = this.orbitOf( g );
       var power = 0;
       for ( var walk = g ; walk != 0 ; walk = this.group.mult( walk, g ) ) {
@@ -49,7 +70,7 @@ class CycleGraph {
    // to g," meaning the power t such that the orbit [e,h^t,h^2t,...]
    // intersects the orbit [e,g,g^2,...] as early as possible (in the orbit
    // of g).
-   bestPowerRelativeTo( h, g ) {
+   bestPowerRelativeTo(h /*: groupElement */, g /*: groupElement */) /*: number */ {
       var orbit_g = this.orbitOf( g );
       var bestPower = 0;
       var bestIndex = orbit_g.length;
@@ -70,19 +91,19 @@ class CycleGraph {
    }
 
    // ease-in-out curves, one going uphill from (0,0) to (1,1)
-   static easeUp( t ) {
+   static easeUp(t /*: number */) /*: number */ {
       return ( Math.cos( ( 1 - t ) * Math.PI ) + 1 ) / 2;
    }
    // and another going downhill, from (0,1) to (1,0)
-   static easeDown( t ) { return 1 - CycleGraph.easeUp( 1 - t ); }
+   static easeDown(t /*: number */) /*: number */ { return 1 - CycleGraph.easeUp( 1 - t ); }
 
    // generic linear interpolation function
-   static interp( A, B, t ) { return ( 1 - t ) * A + t * B; }
+   static interp(A /*: number */, B /*: number */, t /*: number */) /*: number */ { return ( 1 - t ) * A + t * B; }
 
    // mutating a point in the upper half plane to sit within the arc
    // defined by two given angles alpha and beta, pulled toward the
    // center of that arc with a specific level of gravity, 0<=g<=1.
-   static mutate( x, y, alpha, beta, g ) {
+   static mutate(x /*: number */, y /*: number */, alpha /*: number */, beta /*: number */, g /*: number */) /*: {x: number, y: number} */ {
       var r = Math.sqrt( x*x + y*y );
       var theta = Math.atan2( y, x );
       var theta2 = CycleGraph.interp( alpha, beta, theta/Math.PI );
@@ -108,8 +129,7 @@ class CycleGraph {
          eltsByName.sort( ( a, b ) => {
             var aName = this.group.representations[this.group.representationIndex][a];
             var bName = this.group.representations[this.group.representationIndex][b];
-            aName.length < bName.length ? -1 :
-            aName.length > bName.length ?  1 : 0
+            return aName.length < bName.length ? -1 : (aName.length > bName.length ?  1 : 0);
          } );
       }
       // for ( var i = 0 ; i < this.group.order ; i++ ) console.log( i, this.group.representations[this.group.representationIndex][i] );
@@ -244,7 +264,7 @@ class CycleGraph {
       // plus create paths to be drawn to connect them
       this.positions = [ { x : 0, y : 0 } ]; // identity at origin
       while ( this.positions.length < this.group.order )
-         this.positions.push( null ); // to show we haven't computed them yet
+         (this.positions /*: Array<any> */).push( null ); // to show we haven't computed them yet
       this.rings = [ ];
       while ( this.rings.length < this.group.order ) this.rings.push( 0 );
       this.cyclePaths = [ ];
@@ -273,7 +293,7 @@ class CycleGraph {
                    // console.log( `rings[${curr}] := ${cycleIndex}` );
                    this.positions[curr] = f( this.rings[curr], i, 1 );
                }
-               var path = [ ];
+               var path /*: any */ = [ ];
                const step = 0.02;
                // console.log( `connecting ${this.rings[prev]} to ${this.rings[curr]}` );
                // if ( prev && curr && this.partIndices[prev] != this.partIndices[curr] )
@@ -312,7 +332,7 @@ class CycleGraph {
    // convenience function used to convert a partition of the group
    // into color data for highlighting, used by all three highlight
    // functions, below.
-   _partitionToColorArray( partition, start ) {
+   _partitionToColorArray(partition /*: Array<Array<groupElement>> */, start /*: groupElement */) /*: Array<color> */ {
       var result = Array(this.group.order).fill(undefined);
       if ( typeof( start ) == 'undefined' ) start = 0;
       partition.forEach( ( part, partIndex ) => {
@@ -341,19 +361,19 @@ class CycleGraph {
       }
    }
 
-   highlightByBackground(partition) {
+   highlightByBackground(partition /*: Array<Array<groupElement>> */) {
       if ( !this.highlights ) this.highlights = { };
       this.highlights.background =
          this._partitionToColorArray( partition, 0 );
    }
 
-   highlightByBorder(partition) {
+   highlightByBorder(partition /*: Array<Array<groupElement>> */) {
       if ( !this.highlights ) this.highlights = { };
       this.highlights.border =
          this._partitionToColorArray( partition, 120 );
    }
 
-   highlightByTop(partition) {
+   highlightByTop(partition /*: Array<Array<groupElement>> */) {
       if ( !this.highlights ) this.highlights = { };
       this.highlights.top =
          this._partitionToColorArray( partition, 240 );

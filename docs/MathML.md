@@ -1,1 +1,1 @@
-../js/MathML.md
+../js/MathML.js

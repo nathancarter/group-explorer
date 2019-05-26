@@ -1,4 +1,15 @@
-const urls = [
+// @flow
+
+/*::
+export default
+ */
+class GroupURLs {
+/*::
+   static urls: Array<string>;
+ */
+}
+
+GroupURLs.urls = [
    "./groups/A_4.group",
    "./groups/A_5.group",
    "./groups/D_10.group",
@@ -64,3 +75,5 @@ const urls = [
    "./groups/Tesseract.group",
  */
 ];
+
+var urls = GroupURLs.urls;

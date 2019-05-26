@@ -4,6 +4,8 @@
   "description": "Group theory visualization application for the web",
   "main": "index.js",
   "scripts": {
+    "flow-typed": "flow-typed",
+    "flow": "flow",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -13,5 +15,12 @@
     "groups"
   ],
   "author": "Ray Ellis and Nathan Carter",
-  "license": "LGPL-3.0"
+  "license": "LGPL-3.0",
+  "dependencies": {
+    "jquery": "3.3.1"
+  },
+  "devDependencies": {
+    "flow-bin": "^0.98.1",
+    "flow-typed": "^2.5.2"
+  }
 }

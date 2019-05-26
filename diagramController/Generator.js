@@ -1,13 +1,37 @@
+// @flow
+/*::
+import BitSet from '../js/BitSet.js';
+import CayleyDiagram from '../js/CayleyDiagram.js';
+import type {StrategyArray} from '../js/CayleyDiagram.js';
+import DisplayDiagram from '../js/DisplayDiagram.js';
+import MathML from '../js/MathML.js';
+import Menu from '../js/Menu.js';
+import Template from '../js/Template.js';
+import XMLGroup from '../js/XMLGroup.js';
 
+import DC from './diagram.js';
+
+var emitStateChange : () => void;
+var Cayley_diagram : CayleyDiagram;
+var Graphic_context : DisplayDiagram;
+var group : XMLGroup;
+
+export default
+ */
 DC.Generator = class {
-   static clickHandler(event) {
+/*::
+   static axis_label : Array<[string, string, string]>;
+   static axis_image : Array<[string, string, string]>;
+   static orders : Array<Array<string>>;
+ */
+   static clickHandler(event /*: JQueryEventObject */) {
       event.preventDefault();
 
       // check if disabled
       if (DC.Generator.isDisabled()) {
          return;
       }
-      eval($(event.target.closest('[action]')).attr('action'));
+      eval($($(event.target).closest('[action]')).attr('action'));
       event.stopPropagation();
    }
 
@@ -32,7 +56,7 @@ DC.Generator = class {
       }
    }
 
-   static showGeneratorMenu(event, strategy_index) {
+   static showGeneratorMenu(event /*: JQueryEventObject */, strategy_index /*: number */) {
       DC.clearMenus();
       const $generator_menu = DC.Generator.getGenericMenu();
 
@@ -53,7 +77,8 @@ DC.Generator = class {
       DC.Generator._showMenu(event, $generator_menu);
    }
 
-   static _showMenu(event, $menu) {
+   static _showMenu(_event /*: JQueryEventObject */, $menu /*: JQuery */) {
+      const event = ((_event /*: any */) /*: JQueryMouseEventObject */);
       $menu.css('visibility', 'hidden');
       MathJax.Hub.Queue(['Typeset', MathJax.Hub, $menu[0]],
                         () => {
@@ -62,7 +87,7 @@ DC.Generator = class {
                         });
    }
 
-   static showAxisMenu(event, strategy_index) {
+   static showAxisMenu(event /*: JQueryEventObject */, strategy_index /*: number */) {
       DC.clearMenus();
 
       // previously generated subgroup must have > 2 cosets in this subgroup
@@ -79,7 +104,7 @@ DC.Generator = class {
       DC.Generator._showMenu(event, $layout_menu);
    }
 
-   static showOrderMenu(event, strategy_index) {
+   static showOrderMenu(event /*: JQueryEventObject */, strategy_index /*: number */) {
       DC.clearMenus();
       const $order_menu = DC.Generator.getGenericMenu();
 
@@ -108,7 +133,7 @@ DC.Generator = class {
       return $menu;
    }
 
-   static organizeBy(subgroup_index) {
+   static organizeBy(subgroup_index /*: number */) {
       // get subgroup generators
       const subgroup_generators = group.subgroups[subgroup_index].generators.toArray();
 
@@ -119,20 +144,20 @@ DC.Generator = class {
       }
    }
 
-   static updateGenerator(strategy_index, generator) {
+   static updateGenerator(strategy_index /*: number */, generator /*: number */) {
       const strategies = Cayley_diagram.getStrategies();
       strategies[strategy_index][0] = generator;
       DC.Generator.updateStrategies(strategies);
    }
 
-   static updateAxes(strategy_index, layout, direction) {
+   static updateAxes(strategy_index /*: number */, layout /*: number */, direction /*: number */) {
       const strategies = Cayley_diagram.getStrategies();
       strategies[strategy_index][1] = layout;
       strategies[strategy_index][2] = direction;
       DC.Generator.updateStrategies(strategies);
    }
 
-   static updateOrder(strategy_index, order) {
+   static updateOrder(strategy_index /*: number */, order /*: number */) {
       const strategies = Cayley_diagram.getStrategies();
       const other_strategy = strategies.findIndex( (strategy) => strategy[3] == order );
       strategies[other_strategy][3] = strategies[strategy_index][3];
@@ -140,38 +165,36 @@ DC.Generator = class {
       DC.Generator.updateStrategies(strategies);
    }
 
-   // Removes redundant generators, adds generators required to generate entire group
-   static refineStrategies(strategies) {
+   // Remove redundant generators, check whether there are enough elements to use curved display
+   static refineStrategies(strategies /*: StrategyArray */) {
       const generators_used = new BitSet(group.order);
       let elements_generated = new BitSet(group.order, [0]);
-      strategies.forEach( (strategy, inx) => {
-         if (elements_generated.isSet(strategy[0])) {
-            // mark strategy for deletion by setting generator to 'undefined'
-            strategy[0] = undefined;
-         } else {
+      strategies = strategies.reduce( (nonRedundantStrategies, strategy) => {
+         if (!elements_generated.isSet(strategy[0])) {
             const old_size = elements_generated.popcount();
-            generators_used.set(strategies[inx][0]);
+            generators_used.set(strategy[0]);
             elements_generated = group.closure(generators_used);
             const new_size = elements_generated.popcount();
 
-            // check whether we can still use a curved display
-            if (strategies[inx][1] != 0 && new_size / old_size < 3) {
-               strategies[inx][1] = 0;
+            if (strategy[1] != 0 && new_size / old_size < 3) {
+               strategy[1] = 0;
             }
-         }
-      } )
 
-      // delete marked strategies, fix nesting order
-      strategies = strategies.filter( (strategy) => strategy[0] !== undefined );
+            nonRedundantStrategies.push(strategy);
+         }
+         return nonRedundantStrategies;
+      }, []);
+
+      // fix nesting order
       strategies.slice().sort( (a,b) => a[3] - b[3] ).map( (el,inx) => (el[3] = inx, el) );
 
       // add elements to generate entire group; append to nesting
       if (elements_generated.popcount() != group.order) {
-         // look for new element
-         const new_generator = elements_generated
+         // look for new element -- we know one exists
+         const new_generator = ((elements_generated
             .complement()
             .toArray()
-            .find( (el) => group.closure(generators_used.clone().set(el)).popcount() == group.order );
+            .find( (el) => group.closure(generators_used.clone().set(el)).popcount() == group.order ) /*: any */) /*: groupElement */);
          // among linear layouts, try to find a direction that hasn't been used yet
          const new_direction =
             strategies.reduce( (used_directions, [_, layout, direction, __]) => {
@@ -187,7 +210,7 @@ DC.Generator = class {
       return strategies;
    }
 
-   static updateStrategies(new_strategies) {
+   static updateStrategies(new_strategies /*: StrategyArray */) {
       const strategies = DC.Generator.refineStrategies(new_strategies);
       Cayley_diagram.setStrategies(strategies);
       Cayley_diagram.removeLines();
@@ -200,20 +223,26 @@ DC.Generator = class {
    }
 
    // Drag-and-drop generation-table rows to re-order generators
-   static dragStart(event) {
-      event.originalEvent.dataTransfer.setData('text/plain', event.target.textContent);
+   static dragStart(event /*: JQueryEventObject */) {
+      const dragEvent = ((event.originalEvent /*: any */) /*: DragEvent */);
+      const target = ((event.target /*: any */) /*: HTMLElement */);
+      const dataTransfer = ((dragEvent.dataTransfer /*: any */) /*: DataTransfer */);
+      dataTransfer.setData('text/plain', target.textContent);
    }
 
-   static drop(event) {
+   static drop(event /*: JQueryEventObject */) {
       event.preventDefault();
-      const dest = event.target.textContent;
-      const src = event.originalEvent.dataTransfer.getData('text/plain');
+      const dragEvent = ((event.originalEvent /*: any */) /*: DragEvent */);
+      const target = ((event.target /*: any */) /*: HTMLElement */);
+      const dataTransfer = ((dragEvent.dataTransfer /*: any */) /*: DataTransfer */);
+      const dest = parseInt(target.textContent);
+      const src = parseInt(dataTransfer.getData('text/plain'));
       const strategies = Cayley_diagram.getStrategies()
       strategies.splice(dest-1, 0, strategies.splice(src-1, 1)[0]);
       DC.Generator.updateStrategies(strategies);
    }
 
-   static dragOver(event) {
+   static dragOver(event /*: JQueryEventObject */) {
       event.preventDefault();
    }
 

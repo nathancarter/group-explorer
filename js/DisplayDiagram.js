@@ -1,9 +1,71 @@
+// @flow
 /*
  * Routines to draw 3D ball-and-stick diagrams using three.js
  */
+/*::
+import BitSet from './BitSet.js';
+import CayleyDiagram from './CayleyDiagram.js';
+import Diagram3D from './Diagram3D.js';
+import DiagramDnD from './DiagramDnD.js';
+import GEUtils from './GEUtils.js';
+import Log from './Log.js';
+import MathML from './MathML.js';
 
+export type CayleyDiagramJSON = {
+   groupURL : string,
+   _diagram_name : ?string,
+   highlights : void,
+   elements : void,
+   zoomLevel : number,
+   lineWidth : number,
+   nodeScale : number,
+   fogLevel : number,
+   labelSize : number,
+   arrowheadPlacement : number,
+   arrowColors : Array<any>,
+   _camera : Array<number>,
+   highlights : {
+      background : Array<void | null | color>,
+      ring : Array<void | null | color>,
+      square : Array<void | null | color>,
+   },
+   strategies : Array<[groupElement, number, number, number]>,
+   arrows : Array<number>,
+   nodePositions: Array<{x: float, y: float, z: float}>,
+   nodeRadii: Array<float>,
+   chunkIndex: ?number, 
+   arrowsData: Array<{style: number, offset: float}>,
+};
 
+type Options = {
+   container? : JQuery,
+   trackballControlled? : boolean,
+   width? : number,
+   height? : number,
+   fog? : boolean,
+};
+
+export default
+ */
 class DisplayDiagram {
+/*::
+   static groupNames : Array<string>;
+   static DEFAULT_CANVAS_HEIGHT : number;
+   static DEFAULT_CANVAS_WIDTH : number;
+   static DEFAULT_BACKGROUND : color; 
+   static DEFAULT_NODE_COLOR : color;
+   static DEFAULT_LINE_COLOR : color;
+   static DEFAULT_FOG_COLOR : color;
+   static IOS_LINE_WIDTH : number;
+   static DEFAULT_ARC_OFFSET : number;
+   static LIGHT_POSITIONS : Array<[number, number, number]>;
+
+   scene : THREE.Scene;
+   camera : THREE.PerspectiveCamera;
+   renderer : THREE.WebGLRenderer;
+   camControls : THREE.TrackballControls;
+   lineDnD : DiagramDnD;
+ */
    /*
     * Create three.js objects to display data in container
     *
@@ -12,7 +74,7 @@ class DisplayDiagram {
     * create a renderer, sets the size
     * add the output of the renderer to the container element (a jquery wrapped set)
     */
-   constructor(options) {
+   constructor(options /*: Options */ = {}) {
       Log.log('DisplayDiagram');
 
       if (options === undefined) {
@@ -33,9 +95,10 @@ class DisplayDiagram {
 
       // take canvas dimensions from container (if specified), option, or default
       let width, height;
-      if (options.container !== undefined) {
-         width = options.container.width();
-         height = options.container.height();
+      let container = options.container;
+      if (container != undefined) {
+         width = container.width();
+         height = container.height();
       } else {
          width = (options.width === undefined) ? DisplayDiagram.DEFAULT_CANVAS_WIDTH : options.width;
          height = (options.height === undefined) ? DisplayDiagram.DEFAULT_CANVAS_HEIGHT : options.height;
@@ -46,29 +109,30 @@ class DisplayDiagram {
       this.renderer = new THREE.WebGLRenderer({preserveDrawingBuffer: true, antialias: true});
       this.setSize(width, height);
 
-      if (options.container !== undefined) {
-         options.container.append(this.renderer.domElement);
-      }
-
-      if (options.trackballControlled) {
-         this.camControls = new THREE.TrackballControls(this.camera, options.container[0]);
+      if (container != undefined) {
+         container.append(this.renderer.domElement);
+         if (options.trackballControlled) {
+            this.camControls = new THREE.TrackballControls(this.camera, container[0]);
+         }
       }
    }
 
-   setSize ( w, h ) { this.renderer.setSize( w, h ); }
-   getSize () {
+   setSize(w /*: number */, h /*: number */) {
+      this.renderer.setSize(w, h);
+   }
+   getSize() /*: {w: number, h: number} */ {
        const size = this.renderer.getSize();
-       return { w : size.width, h : size.height };
+       return {w : size.width, h : size.height};
    }
 
    static setDefaults() {
       DisplayDiagram.groupNames = ['lights', 'spheres', 'labels', 'lines', 'arrowheads', 'nodeHighlights', 'chunks']
       DisplayDiagram.DEFAULT_CANVAS_HEIGHT = 50;
       DisplayDiagram.DEFAULT_CANVAS_WIDTH = 50;
-      DisplayDiagram.DEFAULT_BACKGROUND = 0xE8C8C8;  // Cayley diagram background
-      DisplayDiagram.DEFAULT_NODE_COLOR = 0x8C8C8C;  // gray
-      DisplayDiagram.DEFAULT_LINE_COLOR = 0x000000;  // black
-      DisplayDiagram.DEFAULT_FOG_COLOR = 0xA0A0A0;
+      DisplayDiagram.DEFAULT_BACKGROUND = '#E8C8C8';  // Cayley diagram background
+      DisplayDiagram.DEFAULT_NODE_COLOR = '#8C8C8C';  // gray
+      DisplayDiagram.DEFAULT_LINE_COLOR = '#000000';  // black
+      DisplayDiagram.DEFAULT_FOG_COLOR = '#A0A0A0';
       DisplayDiagram.IOS_LINE_WIDTH = 1;
       DisplayDiagram.DEFAULT_ARC_OFFSET = 0.2;
       DisplayDiagram.LIGHT_POSITIONS = [
@@ -82,11 +146,14 @@ class DisplayDiagram {
    // Small graphics don't need high resolution features such as many-faceted spheres, labels, thick lines
    // Removing labels is particularly beneficial, since each label (384 in Tesseract) requires a canvas element
    //   and a context, which often causes loading failure due to resource limitations
-   getImage(diagram3D,options) {
+   getImage(diagram3D /*: Diagram3D */,
+            options /*:: ?: {size?: 'small' | 'large', resetCamera?: boolean} */ = {}
+           ) /*: Image */ {
       // Options parameter:
       // size: "small" or "large", default is "small"
       // resetCamera : true or false, default is true
-      if ( !options ) options = { size : 'small', resetCamera : true };
+      options = {size: (options.hasOwnProperty('size')) ? options.size : 'small',
+                 resetCamera: (options.hasOwnProperty('resetCamera')) ? options.resetCamera : true};
       const img = new Image();
 
       // save diagram for use by DiagramDnD -- not used for thumbnails
@@ -112,7 +179,7 @@ class DisplayDiagram {
    }
 
    // Display diagram
-   showGraphic(diagram3D) {
+   showGraphic(diagram3D /*: Diagram3D */) {
       Log.log('showGraphic');
 
       // save diagram for use by LineDnD
@@ -135,7 +202,7 @@ class DisplayDiagram {
       this.render();
    }
 
-   getGroup(name) {
+   getGroup(name /*: string */) /*: any */ {
       return this.scene.children.find( (el) => el.name == name );
    }
 
@@ -165,7 +232,7 @@ class DisplayDiagram {
     *       and make cubes look flat; look at origina, and adjust camera
     *       distance so that diagram fills field of view
     */
-   setCamera(diagram3D) {
+   setCamera(diagram3D /*: Diagram3D */) {
       Log.log('setCamera');
 
       if (diagram3D.isGenerated) {
@@ -201,16 +268,17 @@ class DisplayDiagram {
       this.camera.lookAt(new THREE.Vector3(0, 0, 0));
    }
 
-   setBackground(diagram3D) {
+   setBackground(diagram3D /*: Diagram3D */) {
       Log.log('setBackground');
 
-      const background = (diagram3D.background === undefined) ?
-                         DisplayDiagram.DEFAULT_BACKGROUND : diagram3D.background;
+      let background = diagram3D.background;
+      if (background == undefined)
+         background = DisplayDiagram.DEFAULT_BACKGROUND;
       this.renderer.setClearColor(background, 1.0);
    }
 
    // Create, arrange lighting
-   updateLights() {
+   updateLights(_diagram3D /*: Diagram3D */) {
       Log.log('updateLights');
 
       const lights = this.getGroup('lights');
@@ -223,29 +291,29 @@ class DisplayDiagram {
    }
 
    // Create a sphere for each node, add to scene as THREE.Group named "spheres"
-   updateNodes(diagram3D, sphere_facets = 20) {
+   updateNodes(diagram3D /*: Diagram3D */, sphere_facets /*: number */ = 20) {
       Log.log('updateNodes');
 
       const spheres = this.getGroup('spheres');
       spheres.remove(...spheres.children);
 
-      const materialsByColor = new Map(),
-            geometriesByRadius = new Map();
+      const materialsByColor /*: Map<string, THREE.MeshPhongMaterial> */ = new Map(),
+            geometriesByRadius /*: Map<number, THREE.SphereGeometry> */ = new Map();
 
-      const default_color = DisplayDiagram.DEFAULT_NODE_COLOR;
+      const default_color = DisplayDiagram.DEFAULT_NODE_COLOR.toString();
       const default_radius = 0.3 / Math.sqrt(diagram3D.nodes.length);
       diagram3D.nodes.forEach( (node) => {
-         const color = (node.color === undefined) ? default_color : node.color;
+         const color = (node.color === undefined) ? default_color : node.color.toString();
          if (!materialsByColor.has(color)) {
             materialsByColor.set(color, new THREE.MeshPhongMaterial({color: node.color}));
          }
-         const material = materialsByColor.get(color);
+         const material = ((materialsByColor.get(color) /*: any */) /*: THREE.MeshPhongMaterial */);
 
          const radius = (node.radius === undefined) ? default_radius : node.radius;
          if (!geometriesByRadius.has(radius)) {
             geometriesByRadius.set(radius, new THREE.SphereGeometry(radius * diagram3D.nodeScale, sphere_facets, sphere_facets));
          }
-         const geometry = geometriesByRadius.get(radius);
+         const geometry = ((geometriesByRadius.get(radius) /*: any */) /*: THREE.SphereGeometry */);
 
          const sphere = new THREE.Mesh(geometry, material);
          sphere.userData = {node: node};
@@ -255,7 +323,7 @@ class DisplayDiagram {
       } )
    }
 
-   updateHighlights(diagram3D) {
+   updateHighlights(diagram3D /*: Diagram3D */) {
       const highlights = this.getGroup('nodeHighlights');
       highlights.remove(...highlights.children);
 
@@ -269,15 +337,16 @@ class DisplayDiagram {
       this.getGroup('spheres').children.forEach( (sphere) => {
          const node = diagram3D.nodes[sphere.userData.node.element];
 
-         // Find sphere's desired color: priority is colorHighlight, color, or default
-         const desiredColor = new THREE.Color(
-            (node.colorHighlight !== undefined) ? node.colorHighlight :
-            ((node.color !== undefined) ? node.color :
-             DisplayDiagram.DEFAULT_NODE_COLOR) );
+         // Find sphere's desired color: priority is colorHighlight, then color, then default
+         let color = node.colorHighlight;
+         if (color === undefined) color = node.color;
+         if (color === undefined) color = DisplayDiagram.DEFAULT_NODE_COLOR;
+         const desiredColor = new THREE.Color(color);
+
          // If sphere is not desired color set material color to desired color
          if (!sphere.material.color.equals(desiredColor)) {
             if (!materialsByColor.has(desiredColor)) {
-               materialsByColor.set(desiredColor, new THREE.MeshPhongMaterial({color: desiredColor}));
+               materialsByColor.set(desiredColor, new THREE.MeshPhongMaterial({color: desiredColor.getHex()}));
             }
             sphere.material = materialsByColor.get(desiredColor);
             sphere.geometry.uvsNeedUpdate = true;
@@ -296,7 +365,7 @@ class DisplayDiagram {
       } );
    }
 
-   _drawRing(node, nodeRadius) {
+   _drawRing(node /*: Diagram3D.Node */, nodeRadius /*: number */) {
       // Expand ring to clear sphere
       const scale = 2.5 * nodeRadius;  // 2.5: experimental computer science in action...
 
@@ -308,7 +377,9 @@ class DisplayDiagram {
       // get context, draw circle
       const context = canvas.getContext('2d');
       context.lineWidth = 0.66 / scale;  // scales to webGl lineWidth = 10
-      context.strokeStyle = node.ringHighlight;
+      const ringHighlight = node.ringHighlight;
+      if (ringHighlight != undefined) 
+         context.strokeStyle = ringHighlight.toString();
       context.beginPath();
       context.arc(canvas.width/2, canvas.height/2, canvas.width/2-6, 0, 2*Math.PI);
       context.stroke();
@@ -329,7 +400,7 @@ class DisplayDiagram {
       this.getGroup('nodeHighlights').add(ring);
    }
 
-   _drawSquare(node, nodeRadius) {
+   _drawSquare(node /*: Diagram3D.Node */, nodeRadius /*: number */) {
       // Expand square to clear ring (which clears sphere)
       const scale = 2.65 * nodeRadius;
 
@@ -341,7 +412,9 @@ class DisplayDiagram {
       // get context, draw square
       const context = canvas.getContext('2d');
       context.lineWidth = 1.2 / scale;  // scales to webGl lineWidth = 10
-      context.strokeStyle = node.squareHighlight;
+      const squareHighlight = node.squareHighlight;
+      if (squareHighlight != undefined) 
+         context.strokeStyle = squareHighlight.toString();
       context.rect(0, 0, canvas.width, canvas.height);
       context.stroke();
 
@@ -362,7 +435,7 @@ class DisplayDiagram {
    }
 
    // Draw labels on sprites positioned at nodes
-   updateLabels(diagram3D) {
+   updateLabels(diagram3D /*: Diagram3D */) {
       Log.log('updateLabels');
 
       const labels = this.getGroup('labels');
@@ -402,7 +475,7 @@ class DisplayDiagram {
          canvas.id = `label_${node.element}`;
          const context = canvas.getContext('2d');
 
-         const textLabel = mathml2text(node.label);
+         const textLabel = MathML.toUnicode(node.label);
          canvas.width =  canvas_width;
          canvas.height = canvas_height;
          // debug -- paint label background
@@ -428,7 +501,7 @@ class DisplayDiagram {
     * Draw lines between nodes
     *   An arc is drawn in the plane specified by the two ends and the center, if one is given, or [0,0,0]
     */
-   updateLines(diagram3D, use_webgl_native_lines) {
+   updateLines(diagram3D /*: Diagram3D */, use_webgl_native_lines /*:: ?: boolean */ = false) {
       Log.log('updateLines');
 
       const lines = diagram3D.lines;
@@ -447,25 +520,23 @@ class DisplayDiagram {
                lineColor = (line.color === undefined) ?
                            DisplayDiagram.DEFAULT_LINE_COLOR : line.color,
                lineWidth = use_webgl_native_lines ? 1 : (isIOS ? DisplayDiagram.IOS_LINE_WIDTH : diagram3D.lineWidth),
-               lineMaterial =
-                  lineWidth <= maxLineWidth ?
-                  new THREE.LineBasicMaterial({color: lineColor, linewidth: lineWidth}) :
-                  new MeshLineMaterial({
-                     color: new THREE.Color(lineColor),
-                     lineWidth: lineWidth,
-                     sizeAttenuation: false,
-                     side: THREE.DoubleSide,
-                     resolution: new THREE.Vector2(window.innerWidth, window.innerHeight),
-                     fog: true,
-                  }),
                geometry = new THREE.Geometry();
 
          geometry.vertices = this._getLineVertices(line)
 
-         let newLine;
-         if (lineWidth == 1) {
+         let newLine
+         if (lineWidth <= maxLineWidth) {
+            const lineMaterial = new THREE.LineBasicMaterial({color: lineColor, linewidth: lineWidth});
             newLine = new THREE.Line(geometry, lineMaterial);
          } else {
+            const lineMaterial = new MeshLineMaterial({
+               color: new THREE.Color(lineColor),
+               lineWidth: lineWidth,
+               sizeAttenuation: false,
+               side: THREE.DoubleSide,
+               resolution: new THREE.Vector2(window.innerWidth, window.innerHeight),
+               fog: true,
+            });
             const meshLine = new MeshLine()
             meshLine.setGeometry(geometry);
             newLine = new THREE.Mesh(meshLine.geometry, lineMaterial);
@@ -475,11 +546,11 @@ class DisplayDiagram {
       } )
    }
 
-   _getLineVertices(line) {
+   _getLineVertices(line /*: Diagram3D.Line */) /*: Array<THREE.Vector3> */ {
       const spheres = this.getGroup('spheres').children,
             vertices = line.vertices;
 
-      if (vertices.length > 2) {
+      if (vertices[0].isPoint) {
          return vertices.map( (vertex) => vertex.point );
       }
 
@@ -520,7 +591,7 @@ class DisplayDiagram {
       return vertices.map( (vertex) => vertex.point );
    }
 
-   _curvePoints(line) {
+   _curvePoints(line /*: Diagram3D.Line */) /*: Array<THREE.Vector3> */ {
       const start_point = line.vertices[0].point,
             end_point = line.vertices[1].point,
             center = this._getCenter(line),
@@ -539,10 +610,10 @@ class DisplayDiagram {
       return points;
    }
 
-   _getCenter(line) {
+   _getCenter(line /*: Diagram3D.Line */) /*: THREE.Vector3 */ {
       const centerOK = (point) => new THREE.Vector3().crossVectors(startPoint.clone().sub(point), endPoint.clone().sub(point)).lengthSq() > 1.e-4;
-      const startNode = line.vertices[0],
-            endNode = line.vertices[1],
+      const startNode = ((line.vertices[0] /*: any */) /*: Diagram3D.Node */),
+            endNode = ((line.vertices[1] /*: any */) /*: Diagram3D.Node */),
             startPoint = startNode.point,
             endPoint = endNode.point;
 
@@ -577,12 +648,12 @@ class DisplayDiagram {
          return line.center;
       }
 
-      console.log("can't find center for line curve!");  // debug
-      line.center = undefined;
+      console.error("can't find center for line curve!");  // debug
+      line.center = new THREE.Vector3();
       return line.center;
    }
 
-   updateArrowheads(diagram3D) {
+   updateArrowheads(diagram3D /*: Diagram3D */) {
       Log.log('updateArrowheads');
 
       const spheres = this.getGroup('spheres').children;
@@ -630,24 +701,30 @@ class DisplayDiagram {
       } )
    }
 
-   updateChunking(diagram3D) {
+   updateChunking(_diagram3D /*: Diagram3D */) {
       Log.log('updateChunking');
+
+      // find new chunk
+      if (!_diagram3D.isCayleyDiagram) {
+         return;
+      }
+
+      const diagram3D /*: CayleyDiagram */ = ((_diagram3D /*: any */) /*: CayleyDiagram */);
+
+      if (diagram3D.chunk === undefined) {
+         return;
+      }
 
       // remove old chunks
       const chunks = this.getGroup('chunks');
       chunks.remove(...chunks.children);
-
-      // find new chunk
-      if (diagram3D.chunk === undefined) {
-         return;
-      }
 
       // utility functions
       const centroid = (points) => points.reduce( (sum, point) => sum.add(point), new THREE.Vector3() ).multiplyScalar(1/points.length);
 
       const getGeometry = () => {
          // get points of subgroup
-         const strategy_index = diagram3D.chunk;
+         const strategy_index = ((diagram3D.chunk /*: any */) /*: number */);
          const chunk_members = diagram3D.strategies[strategy_index].bitset;
          const chunk_points = chunk_members.toArray().map( (el) => diagram3D.nodes[el].point );
          const chunk_size = chunk_points.length;
@@ -666,7 +743,7 @@ class DisplayDiagram {
                                               .reduce( (mem, coset, inx) => {
                                                  coset.toArray().forEach( (el) => mem[el] = inx );
                                                  return mem;
-                                              }, Array.from({length: chunk_size}) );
+                                              }, Array(chunk_size) );
             padding = Math.sqrt(diagram3D.group.elements.reduce( (minsq, i) => {
                return diagram3D.group.elements.reduce( (minsq, j) => {
                   if (coset_membership[i] == coset_membership[j]) {
@@ -685,18 +762,18 @@ class DisplayDiagram {
       const box_geometry = getGeometry();
 
       const box_material = new THREE.MeshBasicMaterial( {
-         color: 0x303030,
+         color: '#303030',
          opacity: 0.2,
          transparent: true,
          side: THREE.DoubleSide,
          depthWrite: false,  // needed to keep from obscuring labels underneath
          depthTest: false,
       } );
-
+      
       let subgroup_name;  // MathML subgroup name, generated first time through
-      const createChunks = (arr, desired, current = diagram3D.strategies.length - 1) => {
+      const createChunks = (arr /*: Tree<Diagram3D.Node> */, desired, current = diagram3D.strategies.length - 1) /*: Array<THREE.Mesh> */ => {
          if (current == desired) {
-            const nodes = arr._flatten();
+            const nodes = GEUtils.flatten/*:: <Diagram3D.Node> */(arr);
             const elements = new BitSet(diagram3D.group.order, nodes.map( (node) => node.element ));
             const points = nodes.map( (node) => node.point );
             const box = new THREE.Mesh(box_geometry, box_material);
@@ -708,10 +785,11 @@ class DisplayDiagram {
             box.position.set(...centroid(points).toArray());
             return [box];
          } else {
+            // arr is an array of Trees at this point, though the logic that ensures this is convoluted
             const boxes = arr.map( (el) => createChunks(el, desired, current-1) );
-            const all_boxes = boxes._flatten();
+            const all_boxes = GEUtils.flatten/*:: <THREE.Mesh> */(boxes);
             const strategy = diagram3D.strategies[current];
-            if (strategy.layout == CayleyDiagram.ROTATED_LAYOUT) {
+            if (strategy.layout == CayleyDiagram.LAYOUT.ROTATED) {
                // find centroid of all boxes
                const center = centroid(all_boxes.map( (box) => box.position ));
                // calculate normalized vector from centroid of all boxes to centroid of boxes[0]
@@ -743,16 +821,16 @@ class DisplayDiagram {
       }
    }
 
-   updateZoomLevel(diagram3D) {
+   updateZoomLevel(diagram3D /*: Diagram3D */) {
       this.camera.zoom = diagram3D.zoomLevel;
       this.camera.updateProjectionMatrix();
    }
 
-   updateLineWidth(diagram3D) {
+   updateLineWidth(diagram3D /*: Diagram3D */) {
       this.updateLines(diagram3D);
    }
 
-   updateNodeRadius(diagram3D) {
+   updateNodeRadius(diagram3D /*: Diagram3D */) {
       this.updateNodes(diagram3D);
       this.updateLabels(diagram3D);
       this.updateArrowheads(diagram3D);
@@ -760,26 +838,26 @@ class DisplayDiagram {
 
    // reduce fog level by increasing 'far' parameter (experimentally determined coefficients :-)
    //   (diagram3D.fogLevel is in [0,1])
-   updateFogLevel(diagram3D) {
+   updateFogLevel(diagram3D /*: Diagram3D */) {
       // distance of furthest point from (0,0,0)
       const squaredRadius = diagram3D.nodes.reduce( (sqrad,nd) => Math.max(sqrad, nd.point.lengthSq()), 0 );
       const sceneRadius = (squaredRadius == 0) ? 1 : Math.sqrt(squaredRadius);  // in case there's only one element
       const cameraDistance = this.camera.position.length();
-      this.scene.fog.color = new THREE.Color(diagram3D.background);
+      this.scene.fog.color = new THREE.Color(diagram3D.background || DisplayDiagram.DEFAULT_BACKGROUND);
       this.scene.fog.near = cameraDistance - sceneRadius - 1;
       this.scene.fog.far = (diagram3D.fogLevel == 0) ? 100 : (cameraDistance + sceneRadius*(5 - 4*diagram3D.fogLevel));
    }
 
-   updateLabelSize(diagram3D) {
+   updateLabelSize(diagram3D /*: Diagram3D */) {
       this.updateLabels(diagram3D);
    }
 
-   updateArrowheadPlacement(diagram3D) {
+   updateArrowheadPlacement(diagram3D /*: Diagram3D */) {
       this.updateArrowheads(diagram3D);
    }
 
    // get objects at point x,y using raycasting
-   getObjectsAtPoint(x, y) {
+   getObjectsAtPoint(x /*: number */, y /*: number */) /*: Array<{name: string}> */ {
       const mouse = new THREE.Vector2(x, y);
       const raycaster = new THREE.Raycaster();
       raycaster.setFromCamera(mouse, this.camera);
@@ -794,18 +872,20 @@ class DisplayDiagram {
 
    // Be able to answer the question of where in the diagram any given element is drawn.
    // We answer in normalized coordinates, [0,1]x[0,1].
-   unitSquarePosition ( element, cayleyDiagram ) {
+   unitSquarePosition(element /*: number */, cayleyDiagram /*: CayleyDiagram */) {
       const point3d = cayleyDiagram.nodes[element].point.clone(),
             point2d = point3d.project( this.camera );
       return { x : point2d.x/2 + 1/2, y : -point2d.y/2 + 1/2 };
    }
 
    // two serialization functions
-   toJSON ( cayleyDiagram ) {
+   toJSON(cayleyDiagram /*: CayleyDiagram */) /*: CayleyDiagramJSON */ {
       const tmp = {
          groupURL : cayleyDiagram.group.URL,
          _diagram_name : cayleyDiagram.diagram_name,
+         // $FlowFixMe: no such field as CayleyDiagram.highlights
          highlights : cayleyDiagram.highlights,
+         // $FlowFixMe: no such field as CayleyDiagram.elements
          elements : cayleyDiagram.elements,
          zoomLevel : cayleyDiagram.zoomLevel,
          lineWidth : cayleyDiagram.lineWidth,
@@ -813,12 +893,13 @@ class DisplayDiagram {
          fogLevel : cayleyDiagram.fogLevel,
          labelSize : cayleyDiagram.labelSize,
          arrowheadPlacement : cayleyDiagram.arrowheadPlacement,
+         // $FlowFixMe: no such field as CayleyDiagram.arrowColors
          arrowColors : cayleyDiagram.arrowColors,
          _camera : this.camera.matrix.toArray(),
          highlights : {
-            background : cayleyDiagram.nodes.map( n => n.colorHighlight ),
-            ring : cayleyDiagram.nodes.map( n => n.ringHighlight ),
-            square : cayleyDiagram.nodes.map( n => n.squareHighlight )
+            background : (cayleyDiagram.nodes.map( n => n.colorHighlight ) /*: Array<void | null | color> */),
+            ring : (cayleyDiagram.nodes.map( n => n.ringHighlight ) /*: Array<void | null | color> */),
+            square : (cayleyDiagram.nodes.map( n => n.squareHighlight ) /*: Array<void | null | color> */)
          },
          strategies : cayleyDiagram.getStrategies(),
          arrows : cayleyDiagram.lines.map( x => x.arrow )
@@ -835,14 +916,17 @@ class DisplayDiagram {
       // console.log( 'Sending:', tmp );
       return tmp;
    }
-   fromJSON ( json, cayleyDiagram ) {
+
+   fromJSON(json /*: CayleyDiagramJSON */, cayleyDiagram /*: CayleyDiagram */) {
       // console.log( 'Received:', json );
       // no check for has own property, because we want to erase it
       // if it isn't included in the diagram
       cayleyDiagram.diagram_name = json._diagram_name;
       if ( json.hasOwnProperty( 'highlights' ) )
+         // $FlowFixMe: no such field as CayleyDiagram.highlights
          cayleyDiagram.highlights = json.highlights;
       if ( json.hasOwnProperty( 'elements' ) )
+         // $FlowFixMe: no such field as CayleyDiagram.elements
          cayleyDiagram.elements = json.elements;
       if ( json.hasOwnProperty( 'zoomLevel' ) )
          cayleyDiagram.zoomLevel = json.zoomLevel;

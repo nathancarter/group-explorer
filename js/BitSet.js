@@ -1,53 +1,70 @@
+// @flow
 /*
  * bitset as array of (32-bit) ints
  */
 
+/*:: 
+import XMLGroup from './XMLGroup.js';
+
+export type BitSetJSON = {
+   len: number,
+   arr : Array<number>,
+};
+
+export default
+ */
 class BitSet {
-   constructor (length, init) {
+/*::
+   len : number;
+   arr : Array<number>;
+ */
+   constructor (length /*: number */, init /*:: ?: Array<groupElement> */ = []) {
       this.len = length;
       this.arr = new Array(length == 0 ? 0 : (((length - 1) >>> 5) + 1));
       this.arr.fill(0);
-      if (init !== undefined) {
-	 for (let i = 0; i < init.length; i++) {
-            this.set(init[i]);
-	 }
+      for (let i = 0; i < init.length; i++) {
+         this.set(init[i]);
       }
    }
 
-   static intersection(a, b) {
+   static parseJSON(jsonObject /*: BitSetJSON */) /*: BitSet */ {
+      return Object.assign(new BitSet(0), jsonObject);
+   }
+
+   static intersection(a /*: BitSet */, b /*: BitSet */) {
       return (a.clone()).intersection(b);
    }
 
-   intersection(other) {
+   intersection(other /*: BitSet */) /*: BitSet */ {
       for (let i = 0; i < this.arr.length; i++) {
          this.arr[i] = this.arr[i] & other.arr[i];
       }
       return this;
    }
 
-   static union(a, b) {
+   static union(a /*: BitSet */, b /*: BitSet */) /*: BitSet */ {
       return (a.clone()).union(b);
    }
 
-   union(other) {
+   union(other /*: BitSet */) /*: BitSet */ {
       for (let i = 0; i < this.arr.length; i++) {
          this.arr[i] = this.arr[i] | other.arr[i];
       }
       return this;
    }
 
-   static difference(a, b) {
+   static difference(a /*: BitSet */, b /*: BitSet */) /*: BitSet */ {
       return (a.clone()).difference(b);
    }
 
-   difference(other) {
+   difference(other /*: BitSet */) /*: BitSet */ {
       for (let i = 0; i < this.arr.length; i++) {
          this.arr[i] = this.arr[i] & (~ other.arr[i]);
       }
       return this;
    }
 
-   complement() {
+   complement() /*: BitSet */ {
       const mask = 0xFFFFFFFF >>> (0x20 - (this.len & 0x1F));
       for (let i = 0; i < this.arr.length; i++) {
          this.arr[i] = (~ this.arr[i]) & mask;
@@ -55,7 +72,7 @@ class BitSet {
       return this;
    }
 
-   clone() {
+   clone() /*: BitSet */ {
       let other = new BitSet(this.len);
       for (let i = 0; i < this.arr.length; i++) {
 	 other.arr[i] = this.arr[i];
@@ -63,33 +80,33 @@ class BitSet {
       return other;
    }
 
-   clearAll() {
+   clearAll() /*: BitSet */ {
       this.arr.fill(0);
       return this;
    }
 
-   setAll() {
+   setAll() /*: BitSet */ {
       this.arr.fill(0xFFFFFFFF);
       this.arr[this.arr.length - 1] = 0xFFFFFFFF >>> (0x20 - (this.len & 0x1F));
       return this;
    }
 
-   get(pos) {
+   get(pos /*: number */) /*: number */ {
       return (this.arr[pos >>> 5] & (1 << (pos & 0x1F))) >>> (pos & 0x1F);
    }
 
    // accept an array too?
-   set(pos) {
+   set(pos /*: number */) /*: BitSet */ {
       this.arr[pos >>> 5] = (this.arr[pos >>> 5] | (1 << (pos & 0x1F))) >>> 0;
       return this;
    }
 
-   clear(pos) {
+   clear(pos /*: number */) /*: BitSet */ {
       this.arr[pos >>> 5] &= ~(1 << (pos & 0x1F));
       return this;
    }
 
-   isEmpty() {
+   isEmpty() /*: boolean */ {
       for (let i = 0; i < this.arr.length - 1; i++) {
 	 if (this.arr[i] != 0) {
 	    return false;
@@ -98,19 +115,19 @@ class BitSet {
       return (this.arr[this.arr.length - 1] & (0xFFFFFFFF >>> (0x20 - (this.len & 0x1F)))) == 0;
    }
 
-   isSet(pos) {
+   isSet(pos /*: number */) /*: boolean */ {
       return (this.arr[pos >>> 5] & (1 << (pos & 0x1F))) !== 0;
    }
 
-   pop() {
+   pop() /*: ?number */ {
       const first = this.first();
-      if (first !== undefined) {
+      if (first != undefined) {
          this.clear(first);
       }
       return first;
    }
 
-   first() {
+   first() /*: ?number */ {
       for (let i = 0; i < this.arr.length; i++) {
          if (this.arr[i] != 0) {
             for (let j = i << 5; j < (i+1) << 5; j++) {
@@ -124,7 +141,7 @@ class BitSet {
       return undefined;
    }
 
-   equals(other) {
+   equals(other /*: BitSet */) /*: boolean */ {
       if (this.len != other.len) {
          return false;
       }
@@ -136,7 +153,7 @@ class BitSet {
       return true;
    }
 
-   popcount() {
+   popcount() /*: number */ {
       let count = 0;
       for (let i = 0; i < this.arr.length; i++) {
 	 let v = this.arr[i];
@@ -148,7 +165,7 @@ class BitSet {
    }
 
    // contains: intersection == other
-   contains(other) {
+   contains(other /*: BitSet */) /*: boolean */ {
       for (let i = 0; i < this.arr.length; i++) {
 	 if (((this.arr[i] & other.arr[i]) >>> 0) != (other.arr[i] >>> 0)) {
 	    return false;
@@ -157,14 +174,14 @@ class BitSet {
       return true;
    }
 
-   add(other) {
+   add(other /*: BitSet */) /*: BitSet */ {
       for (let i = 0; i < this.arr.length; i++) {
 	 this.arr[i] |= other.arr[i];
       };
       return this;
    }
 
-   subtract(other) {
+   subtract(other /*: BitSet */) /*: BitSet */ {
       for (let i = 0; i < this.arr.length; i++) {
 	 this.arr[i] &= ~other.arr[i];
       };
@@ -172,7 +189,7 @@ class BitSet {
       return this;
    }
 
-   toArray() {
+   toArray() /*: Array<number> */ {
       let arr = [];
       for (let i = 0; i < this.len; i++) {
 	 if (this.isSet(i)) {
@@ -182,11 +199,11 @@ class BitSet {
       return arr;
    }
 
-   toString() {
+   toString() /*: string */ {
       return this.toArray().toString();
    }
 
-   toBitString() {
+   toBitString() /*: string */ {
       let str = '';
       for (let i = 0; i < this.len; i++) {
 	 if (i % 5 == 0)
@@ -196,31 +213,15 @@ class BitSet {
       return str;
    }
 
-   toRepString(group) {
+   toRepString(group /*: XMLGroup */) /*: string */ {
       return this.toArray().map(function (el) { return group.rep[el]; }).join(', ');
    }
 
-   *allElements() {
+   *allElements() /*: Generator<number, void, void> */ {
       let inx = 0;
       while (inx++ < this.len) {
          if (this.isSet(inx)) {
             yield inx;
-         }
-      }
-   }
-
-   [Symbol.iterator]() {
-      const ref = this;
-      return {
-         inx: 0,
-         bs: ref,
-         next() {
-            while (this.inx++ < this.bs.len) {
-               if (this.bs.isSet(this.inx)) {
-                  return { value: this.inx }
-               }
-            }
-            return { done: true }
          }
       }
    }

@@ -1,1 +1,1 @@
-../js/Template.md
+../js/Template.js

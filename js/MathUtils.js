@@ -1,7 +1,15 @@
-
+// @flow
 // math functions
+/*::
+import BitSet from './BitSet.js';
 
+export default
+*/
 class MathUtils {
+/*::
+   static primeList : BitSet;
+   static primePowerList : BitSet;
+ */
    static init() {
       MathUtils.primeList =
          new BitSet(200, [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41,
@@ -17,11 +25,11 @@ class MathUtils {
                           167, 169, 173, 179, 181, 191, 193, 197, 199]);
    }
 
-   static isPrime(n) {
+   static isPrime(n /*: number */) /*: boolean */ {
       return (n < 200) ? MathUtils.primeList.isSet(n) : MathUtils.getFactors(n).length == 1
    }
 
-   static isPrimePower(n) {
+   static isPrimePower(n /*: number */) /*: boolean */ {
       if (n < 200) {
          return MathUtils.primePowerList.isSet(n)
       } else {
@@ -30,7 +38,7 @@ class MathUtils {
       }
    }
 
-   static getFactors(n) {
+   static getFactors(n /*: number */) /*: Array<number> */ {
       let lim = Math.ceil(Math.sqrt(n+1));
       for (let i = 2; i < lim; i++) {
          if (n % i == 0) {

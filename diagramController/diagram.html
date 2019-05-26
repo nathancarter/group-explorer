@@ -3,14 +3,14 @@
 <div id="diagram-page">
    <div id="diagram-select" class="faux-select" action="$('#diagram-choices').toggle()">
       <ul id="diagram-choices" class="faux-select-options"></ul>
-      <span id="diagram-choice" class="faux-selection" index="-1">Generate diagram</span>
+      <span id="diagram-choice" class="faux-selection">Generate diagram</span>
       <div class="faux-select-arrow"></div>
    </div>
    <template id="diagram-select-first-template">
-      <li action="DC.DiagramChoice.selectDiagram(-1)">${MathML.sans('<mtext>Generate diagram</mtext>')}</li>
+      <li action="DC.DiagramChoice.selectDiagram()">${MathML.sans('<mtext>Generate diagram</mtext>')}</li>
    </template>
    <template id="diagram-select-other-template">
-      <li action="DC.DiagramChoice.selectDiagram(${index})">${MathML.sans('<mtext>' + diagram.name + '</mtext>')}</li>
+      <li action="DC.DiagramChoice.selectDiagram('${diagram.name}')">${MathML.sans('<mtext>' + diagram.name + '</mtext>')}</li>
    </template>
 
    <div id="generation-control">

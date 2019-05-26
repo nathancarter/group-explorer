@@ -1,5 +1,18 @@
+// @flow
+/*::
+import BasicGroup from './BasicGroup.js';
+import BitSet from './BitSet.js';
+import GEUtils from './GEUtils.js';
+import Library from './Library.js';
+import Subgroup from './Subgroup.js';
+import XMLGroup from './XMLGroup.js';
 
+export default
+*/
 class IsomorphicGroups {
+/*::   
+   static map : Map<number, Array<XMLGroup>>;
+ */
    static init() {
       if (IsomorphicGroups.map !== undefined) {
          return;
@@ -11,13 +24,13 @@ class IsomorphicGroups {
                                           if (!map.has(group.order)) {
                                              map.set(group.order, []);
                                           }
-                                          map.get(group.order).push(group);
+                                          ((map.get(group.order) /*: any */) /*: Array<XMLGroup> */).push(group);
                                           return map;
                                        },
                                        new Map() );
    }
 
-   static findForSubgroup(group, subgroup) {
+   static findForSubgroup(group /*: BasicGroup */, subgroup /*: Subgroup */) /*: ?BasicGroup */ {
       const subgroupAsGroup = group.getSubgroupAsGroup(subgroup);
       const isomorphicGroup = (group.order == subgroup.members.popcount()) ?
                               group :
@@ -25,7 +38,7 @@ class IsomorphicGroups {
       return isomorphicGroup;
    }
 
-   static find(G) {
+   static find(G /*: BasicGroup */) /*: ?XMLGroup */ {
       IsomorphicGroups.init();
 
       // check that groups of the right size are even in the map
@@ -34,16 +47,15 @@ class IsomorphicGroups {
       }
 
       // filter by candidate group properties, isomorphism
-      return IsomorphicGroups.map
-                             .get(G.order)
-                             .filter( H => G.orderClassSizes._equals(H.orderClassSizes) )
-                             // .filter( H => G.subgroupOrders._equals(H.subgroupOrders) )
-                             // .filter( H => G.conjClassSizes._equals(H.conjClassSizes) )
-                             .find( H => IsomorphicGroups.isomorphism(H, G) !== undefined );
+      return ((IsomorphicGroups.map.get(G.order) /*: any */) /*: Array<XMLGroup> */)
+         .filter( H => GEUtils.equals(G.orderClassSizes, H.orderClassSizes) )
+      // .filter( H => GEUtils.equals(G.subgroupOrders, H.subgroupOrders) )
+      // .filter( H => GEUtils.equals(G.conjClassSizes, H.conjClassSizes) )
+         .find( H => IsomorphicGroups.isomorphism(H, G) !== undefined );
    }
 
    // returns isomorphism from G to H, or undefined if none can be found
-   static isomorphism(G, H) {
+   static isomorphism(G /*: BasicGroup */, H /*: BasicGroup */) /*: void | Array<groupElement> */ {
       if (G.order != H.order) {
          return undefined;
       }
@@ -91,7 +103,7 @@ class IsomorphicGroups {
          const g_gens = G_gens.slice();
 
          // create map, add identity
-         const g2h = new Array(G.order);
+         const g2h /*: Array<groupElement> */ = new Array(G.order);
          g2h[0] = 0;
 
          // map generators
@@ -132,7 +144,7 @@ class IsomorphicGroups {
          }
 
          // check that g2h is a mapping
-         if (!g2h.slice().sort( (a,b) => a - b )._equals(G.elements)) {
+         if ( !GEUtils.equals(g2h.slice().sort( (a,b) => a - b ), G.elements) ) {
             continue bigLoop;
          }
 
@@ -158,7 +170,7 @@ class IsomorphicGroups {
    // The most common reason that this might fail is not having sufficient
    // groups loaded into the Library.  You may want to run a call to
    // Library.getAllLocalGroups() first.
-   static findEmbedding ( G, H ) {
+   static findEmbedding(G /*: BasicGroup */, H /*: Subgroup */) /*: null | [BasicGroup, Array<groupElement>] */ {
       const groupH = G.getSubgroupAsGroup( H ),
             libraryH = IsomorphicGroups.find( groupH );
       if ( !libraryH ) return null;
@@ -174,7 +186,7 @@ class IsomorphicGroups {
    // The most common reason for failure would be passing a non-normal subgroup.
    // Alternatively, this might fail without enough groups loaded into the Library.
    // You may want to run a call to Library.getAllLocalGroups() first.
-   static findQuotient ( G, N ) {
+   static findQuotient(G /*: BasicGroup */, N /*: Subgroup */) /*: null | [BasicGroup, Array<groupElement>] */ {
       if ( !G.isNormal( N ) ) return null;
       const groupQ = G.getQuotientGroup( N.members ),
             libraryQ = IsomorphicGroups.find( groupQ );

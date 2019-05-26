@@ -1,5 +1,41 @@
+// @flow
+/*::
+import MathML from '../js/MathML.js';
+import Menu from '../js/Menu.js';
+import Template from '../js/Template.js';
+import XMLGroup from '../js/XMLGroup.js';
 
+import AbstractSubset from './AbstractSubset.js';
+import ConjugacyClasses from './ConjugacyClasses.js';
+import Cosets from './Cosets.js';
+import OrderClasses from './OrderClasses.js';
+import AbstractPartition from './AbstractPartition.js';
+import PartitionSubset from './PartitionSubset.js';
+import Subgroup from './Subgroup.js';
+import SubsetEditor from './SubsetEditor.js';
+import Subset from './Subset.js';
+
+var group : XMLGroup;
+
+export default
+ */
 class SSD {
+/*::
+   static subsetsURL : string;
+   static nextId : number;
+   static nextSubsetIndex : number;
+   static displayList : Array<AbstractSubset>;
+
+   static AbstractSubset : Class<AbstractSubset>;
+   static ConjugacyClasses : Class<ConjugacyClasses>;
+   static Cosets : Class<Cosets>;
+   static OrderClasses : Class<OrderClasses>;
+   static AbstractPartition : Class<AbstractPartition>;
+   static PartitionSubset : Class<PartitionSubset>;
+   static Subgroup : Class<Subgroup>;
+   static SubsetEditor : Class<SubsetEditor>;
+   static Subset : Class<Subset>;
+ */   
    static _init() {
       SSD.subsetsURL = './subsetDisplay/subsets.html';
    }
@@ -11,7 +47,7 @@ class SSD {
    }
 
    /* Load, initialize subset display */
-   static load($subsetWrapper) {
+   static load($subsetWrapper /*: JQuery */) /*: Promise<void> */ {
       return new Promise( (resolve, reject) => {
          $.ajax( { url: SSD.subsetsURL,
                    success: (data) => {
@@ -20,7 +56,7 @@ class SSD {
                       resolve();
                    },
                    error: (_jqXHR, _status, err) => {
-                      reject(`Error loading ${SSD.subsetsURL}: ${err}`);
+                      reject(`Error loading ${SSD.subsetsURL} ${err === undefined ? '' : ': ' + err}`);
                    }
          } )
       } )
@@ -53,13 +89,14 @@ class SSD {
    /*
     * Double-click displays elements in subset
     */
-   static dblClickHandler(event) {
+   static dblClickHandler(_event /*: JQueryEventObject */ ) {
+      const event = ((_event /*: any */) /*: JQueryMouseEventObject */);
       event.preventDefault();
       SSD.clearMenus();
       const $curr = $(event.target).closest('li');
       const id = $curr.attr('id');
       if (id != undefined) {
-         const subset = SSD.displayList[id];
+         const subset = SSD.displayList[parseInt(id)];
          const subsetName = subset.name;
          const subsetElements = subset.elements.toArray().map( (el) => group.representation[el] );
          const $menu = $(eval(Template.HTML('subsetElements_template')));
@@ -82,7 +119,7 @@ class SSD {
    /*
     * Left-click executes "action" attribute in menu item
     */
-   static menuClickHandler(event) {
+   static menuClickHandler(event /*: JQueryEventObject */) {
       event.preventDefault();
       const $curr = $(event.target).closest('[action]');
       if ($curr.attr('action') !== undefined) {
@@ -98,7 +135,9 @@ class SSD {
     *   -- target class (subset_page_header or placeholder)
     *   -- li element id (<subset>.menu)
     */
-   static contextMenuHandler(event) {
+   static contextMenuHandler(_event /*: JQueryEventObject */) {
+      const event = ((_event /*: any */) /*: JQueryMouseEventObject */);
+
       event.preventDefault();
       const $curr = $(event.target).closest('p.subset_page_header, p.placeholder, li[id]');
 
@@ -110,7 +149,7 @@ class SSD {
       const isHeaderMenu = $curr[0].tagName == "P";
       const $menu = isHeaderMenu ?
                     $(eval(Template.HTML('headerMenu_template'))) :
-                    SSD.displayList[$curr[0].id].menu;
+                    SSD.displayList[parseInt($curr[0].id)].menu;
       $menu.on('click', SSD.menuClickHandler);
       $curr.addClass('highlighted').append($menu);
       $menu.css('visibility', 'hidden');
@@ -127,7 +166,8 @@ class SSD {
          });
    }
 
-   static _makeLongLists(id, $menu) {
+   static _makeLongLists(_id /*: string */, $menu /*: JQuery */) {
+      const id = parseInt(_id);
       const classes = ['.intersection', '.union', '.elementwise-product'];
       const operations = ['intersection', 'union', 'elementwiseProduct'];
       const printOps = ['intersection', 'union', 'elementwise product'];

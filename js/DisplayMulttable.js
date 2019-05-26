@@ -1,44 +1,84 @@
+// @flow
+/*::
+import Log from './Log.js';
+import Multtable from './Multtable.js';
 
+export type MulttableJSON = {
+   groupURL : string;
+   separation : number;
+   colors : Array<color>;
+   stride : number;
+   elements : Array<groupElement>;
+   highlights : {
+      background : void | Array<color>;
+      border : void | Array<color | void>;
+      corner : void | Array<color | void>;
+   };
+}
+
+type Options = {
+   container?: JQuery;
+   width?: number;
+   height?: number;
+   size?: string;
+};
+
+export default
+ */
 class DisplayMulttable {
+/*::
+   static DEFAULT_CANVAS_HEIGHT : number;
+   static DEFAULT_CANVAS_WIDTH : number;
+   static ZOOM_STEP : number;
+   static MINIMUM_FONT : number;
+   static BACKGROUND : string;
+   options : Options;
+   canvas : HTMLCanvasElement;
+   context : CanvasRenderingContext2D;
+   zoom : number;
+   translate : {dx: number, dy: number};
+   transform : THREE.Matrix3;
+   multtable : Multtable;
+   permutationLabels : void | Array<void | Array<string>>;
+ */
    // height & width, or container
-   constructor(options) {
+   constructor(options /*: Options */ = {}) {
       Log.log('DisplayMulttable');
 
       DisplayMulttable._setDefaults();
 
-      if (options === undefined) {
-         options = {};
-      }
       this.options = options;
 
       // take canvas dimensions from container (if specified), option, or default
       let width, height;
-      if (options.container !== undefined) {
-         width = options.container.width();
-         height = options.container.height();
+      const container = options.container;
+      if (container !== undefined) {
+         width = container.width();
+         height = container.height();
       } else {
-         width = (options.width === undefined) ? DisplayDiagram.DEFAULT_CANVAS_WIDTH : options.width;
-         height = (options.height === undefined) ? DisplayDiagram.DEFAULT_CANVAS_HEIGHT : options.height;
+         width = (options.width === undefined) ? DisplayMulttable.DEFAULT_CANVAS_WIDTH : options.width;
+         height = (options.height === undefined) ? DisplayMulttable.DEFAULT_CANVAS_HEIGHT : options.height;
       }
 
-      this.canvas = $(`<canvas/>`)[0];
+      this.canvas = (($(`<canvas/>`)[0] /*: any */) /*: HTMLCanvasElement */);  // Narrowing for Flow
       this.setSize( width, height );
       this.context = this.canvas.getContext('2d');
 
-      if (options.container !== undefined) {
-         options.container.append(this.canvas);
+      if (container !== undefined) {
+         container.append(this.canvas);
       }
       this.zoom = 1;  // user-supplied scale factor multiplier
       this.translate = {dx: 0, dy: 0};  // user-supplied translation, in screen coordinates
       this.transform = new THREE.Matrix3();  // current multtable -> screen transformation
    }
 
-   setSize ( w, h ) {
+   setSize (w /*: number */, h /*: number */){
       this.canvas.width = w;
       this.canvas.height = h;
    }
-   getSize () {
-      return { w : this.canvas.width, h : this.canvas.height };
+
+   getSize() /*: {w: number, h: number} */ {
+      return {w : this.canvas.width, h : this.canvas.height};
    }
 
    static _setDefaults() {
@@ -49,9 +89,7 @@ class DisplayMulttable {
       DisplayMulttable.BACKGROUND = '#F0F0F0';
    }
 
-   getImage(multtable,options) {
-      // second parameter optional, defaults to { size : 'small' }
-      if ( !options ) options = { size : 'small' };
+   getImage(multtable /*: Multtable */, options /*:: ?: {size: 'small' | 'large'} */ = {size: 'small'}) /*: Image */ {
       if ( options.size == 'large' )
          this.showLargeGraphic(multtable);
       else
@@ -62,15 +100,15 @@ class DisplayMulttable {
    }
 
    // Small graphic has no grouping, no labels, doesn't change canvas size
-   showSmallGraphic(multtable) {
+   showSmallGraphic(multtable /*: Multtable */) {
       const frac = (inx, max) => Math.round(max * inx / multtable.group.order);
-      const colors = multtable._colors;
+      const colors = multtable.colors;
 
       const width = this.canvas.width;
       const height = this.canvas.height;
       multtable.elements.forEach( (i,inx) => {
          multtable.elements.forEach( (j,jnx) => {
-            this.context.fillStyle = colors[multtable.group.mult(j,i)] || DisplayMulttable.BACKGROUND;
+            this.context.fillStyle = (colors[multtable.group.mult(j,i)] || DisplayMulttable.BACKGROUND).toString();
             this.context.fillRect(frac(inx, width), frac(jnx, height), frac(inx+1, width), frac(jnx+1, height));
          } )
       } )
@@ -89,7 +127,7 @@ class DisplayMulttable {
    //     Write label in center, breaking permutation cycle text if necessary
    //
    // Separation slider maps [0,full scale] => [0, multtable.size]
-   showLargeGraphic(multtable) {
+   showLargeGraphic(multtable /*: Multtable */) {
       if (multtable != this.multtable) {
          this.multtable = multtable;
          this.permutationLabels = (multtable.group.longestLabel[0] == '(') ? Array(multtable.group.order) : undefined;
@@ -121,22 +159,22 @@ class DisplayMulttable {
 
       for (let inx = minX; inx < maxX; inx++) {
          for (let jnx = minY; jnx < maxY; jnx++) {
-            const x = multtable.position(inx);
-            const y = multtable.position(jnx);
+            const x /*: number */ = multtable.position(inx) || 0;
+            const y /*: number */ = multtable.position(jnx) || 0;
 
             const product = multtable.group.mult(multtable.elements[jnx], multtable.elements[inx]);
 
             // color box according to product
-            this.context.fillStyle = multtable.colors[product] || DisplayMulttable.BACKGROUND;
+            this.context.fillStyle = (multtable.colors[product] || DisplayMulttable.BACKGROUND).toString();
             this.context.fillRect(x, y, 1, 1);
 
             // draw borders if cell has border highlighting
-            if (multtable.borders !== undefined && multtable.borders[product] !== undefined) {
+            if (multtable.borders != undefined && multtable.borders[product] != undefined) {
                this._drawBorder(x, y, scale, multtable.borders[product]);
             }
 
             // draw corner if cell has corner highlighting
-            if (multtable.corners !== undefined && multtable.corners[product] !== undefined) {
+            if (multtable.corners !== undefined && multtable.corners[product] != undefined) {
                this._drawCorner(x, y, scale, multtable.corners[product]);
             }
          }
@@ -161,17 +199,17 @@ class DisplayMulttable {
 
       for (let inx = minX; inx < maxX; inx++) {
          for (let jnx = minY; jnx < maxY; jnx++) {
-            const x = multtable.position(inx);
-            const y = multtable.position(jnx);
+            const x = multtable.position(inx) || 0;
+            const y = multtable.position(jnx) || 0;
             const product = multtable.group.mult(multtable.elements[jnx], multtable.elements[inx]);
             this._drawLabel(x, y, product, scale, fontScale);
          }
       }
    }
 
-   _drawBorder(x, y, scale, color) {
+   _drawBorder(x /*: number */, y /*: number */, scale /*: number */, color /*: color */) {
       this.context.beginPath();
-      this.context.strokeStyle = color;
+      this.context.strokeStyle = typeof color == 'number' ? color.toString(16) : color;
       this.context.lineWidth = 2 / scale;
       this.context.moveTo(x, y+1-1/scale);
       this.context.lineTo(x, y);
@@ -189,7 +227,7 @@ class DisplayMulttable {
       this.context.stroke();
    }
 
-   _drawCorner(x, y, scale, color) {
+   _drawCorner(x /*: number */, y /*: number */, scale /*: number */, color /*: color */) {
       this.context.fillStyle = color;
       this.context.beginPath();
       this.context.strokeStyle = 'black';
@@ -199,15 +237,17 @@ class DisplayMulttable {
       this.context.fill();
    }
 
-   _drawLabel(x, y, element, scale, fontScale) {
+   _drawLabel(x /*: number */, y /*: number */, element /*: number */, scale /*: number */, fontScale /*: number */) {
       const width = (text) => (text === undefined) ? 0 : this.context.measureText(text).width;
 
       const label = this.multtable.group.labels[element];
-      if (this.permutationLabels === undefined) {
+      const permutationLabels = this.permutationLabels;
+      if (permutationLabels === undefined) {
          const labelLocation = new THREE.Vector2(x+1/2, y+1/2).applyMatrix3(this.transform);
          this.context.fillText(label, labelLocation.x, labelLocation.y);
       } else {    // break permutations into multiple lines
-         if (this.permutationLabels[element] === undefined) {   // seen this label before?
+         let permutationLabel = permutationLabels[element];
+         if (permutationLabel === undefined) {   // seen this label before?
             const lines = [];
 
             // split whole label into multiple lines if needed
@@ -238,13 +278,13 @@ class DisplayMulttable {
                   }
                }
             }
+
             // store multi-line permutation label so it doesn't have to be calculated again
-            this.permutationLabels[element] = lines;
+            permutationLabels[element] = permutationLabel = lines;
          }
 
          const fontHeight = fontScale * 19 / 14;
          const labelLocation = new THREE.Vector2(x+1/2, y+1/2).applyMatrix3(this.transform);
-         const permutationLabel = this.permutationLabels[element];
          const maxLineWidth = permutationLabel.reduce( (max, line) => Math.max(max, width(line)), 0 );
          let xStart = labelLocation.x - maxLineWidth/2;
          let yStart = labelLocation.y - fontHeight*(permutationLabel.length - 1)/2;
@@ -272,19 +312,19 @@ class DisplayMulttable {
    }
 
    // changing the translation keeps the center of the model centered in the canvas
-   _centeredZoom(dZoom) {
+   _centeredZoom(dZoom /*: number */) {
       this.zoom = this.zoom * (1 + dZoom);
       this.move(this.translate.dx * dZoom, this.translate.dy * dZoom);
    }
 
    // deltaX, deltaY are in screen coordinates
-   move(deltaX, deltaY) {
+   move(deltaX /*: number */, deltaY /*: number */) {
       this.translate.dx += deltaX;
       this.translate.dy += deltaY;
    }
 
    // given screen coordinates, returns element associated with box, or 'undefined'
-   select(screenX, screenY) {
+   select(screenX /*: number */, screenY /*: number */) {
       // compute cycleGraph coordinates from screen coordinates by inverting this.transform
       const mult = new THREE.Vector2(screenX, screenY).applyMatrix3(new THREE.Matrix3().getInverse(this.transform));
       const x = this.multtable.index(mult.x);
@@ -294,18 +334,18 @@ class DisplayMulttable {
 
    // Be able to answer the question of where in the diagram any given element is drawn.
    // We answer in normalized coordinates, [0,1]x[0,1].
-   unitSquarePosition ( element, multtable ) {
+   unitSquarePosition(element /*: number */, multtable /*: Multtable */) {
       const max = multtable.position( multtable.group.order - 1 ) + 1;
       const index = multtable.elements.indexOf( element );
       return { x : 0.5 / max, y : ( multtable.position( index ) + 0.5 ) / max };
    }
 
    // two serialization functions
-   toJSON ( multtable ) {
+   toJSON(multtable /*: Multtable */) /*: MulttableJSON */ {
       return {
          groupURL : multtable.group.URL,
          separation : multtable.separation,
-         colors : multtable._colors,
+         colors : multtable.colors,
          stride : multtable.stride,
          elements : multtable.elements,
          highlights : {
@@ -315,7 +355,7 @@ class DisplayMulttable {
          }
       };
    }
-   fromJSON ( json, multtable ) {
+   fromJSON(json /*: MulttableJSON */, multtable /*: Multtable */) {
       if ( json.separation ) multtable.separation = json.separation;
       if ( json.colors ) multtable._colors = json.colors;
       if ( json.stride ) multtable.stride = json.stride;

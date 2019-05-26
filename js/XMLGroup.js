@@ -1,4 +1,4 @@
-
+// @flow
 /*
  * Class holds group info parsed from xml definition
  *
@@ -17,15 +17,88 @@
  *      paths are {color, points}
  *      point(s) are [x,y,z] arrays
  */
+/*::
+import BasicGroup from './BasicGroup.js';
+import type {BasicGroupJSON} from './BasicGroup.js';
+import MathML from './MathML.js';
 
+type XMLGroup_CayleyDiagram = {name: string, arrows: Array<groupElement>, points: Array<Point>};
+type Point = [float, float, float];
+type Path = {color?: color; points: Array<Point>};
+type Sphere = {radius: float; color?: color; point: Point};
+type Operation = {element: groupElement; degrees: float; point: Point};
+export type XMLSymmetryObject = {name: string; operations: Array<Operation>; spheres: Array<Sphere>; paths: Array<Path>};
+
+export type XMLGroupJSON = {
+   name : mathml,
+   shortName : string,
+   definition : mathml,
+   phrase : string,
+   notes : string,
+   author : string,
+   _XML_generators : Array<Array<groupElement>>,
+   reps : Array<Array<string>>,
+   representations : Array<Array<mathml>>,
+   userRepresentations : Array<Array<string>>,
+   representationIndex : number,
+   cayleyDiagrams : Array<XMLGroup_CayleyDiagram>,
+   symmetryObjects : Array<XMLSymmetryObject>,
+   _labels : Array<Array<string>>,
+
+   lastModifiedOnServer : string,
+   URL : string,
+   CayleyThumbnail : string,
+   rowHTML : string,
+   userNotes : string
+};
+
+export type BriefXMLGroupJSON = {
+   name : mathml,
+   shortName : string,
+   author : string,
+   notes : string,
+   phrase : string,
+   representations : Array<Array<mathml>>,
+   representationIndex : number,
+   cayleyDiagrams : Array<XMLGroup_CayleyDiagram>,
+   symmetryObjects : Array<XMLSymmetryObject>,
+   multtable : Array<Array<groupElement>>
+};
+
+export default
+ */
 class XMLGroup extends BasicGroup {
-   constructor (text) {
+/*::
+   name : string;
+   gapname: string;
+   gapid: string;
+   shortName : string;
+   definition : string;
+   phrase : string;
+   notes : string;
+   author : string;
+   _XML_generators : Array<Array<number>>;
+   reps : Array<Array<string>>;
+   representations : Array<Array<string>>;
+   userRepresentations : Array<Array<string>>;
+   representationIndex : number;
+   cayleyDiagrams : Array<XMLGroup_CayleyDiagram>;
+   symmetryObjects : Array<XMLSymmetryObject>;
+   _labels : Array<Array<string>>;
+
+   lastModifiedOnServer : string;
+   URL : string;
+   CayleyThumbnail : string;
+   rowHTML : string;
+   userNotes : string;
+ */
+   constructor (text /*: void | string */) {
       if (text === undefined) {
          super();
          return;
       }
 
-      let $xml;
+      let $xml /*: JQuery */;
       if (typeof(text) == 'string') {
          // Replacing named entities with values ensure that later fragment parsing succeeds...
          const cleanText = text.replace(/&Zopf;/g, "&#8484;")
@@ -37,13 +110,12 @@ class XMLGroup extends BasicGroup {
       } else {
          $xml = $(text);
       }
-
+      
       super(XMLGroup._multtable_from_xml($xml));
 
-      this.$xml = $xml;
       this.name = $xml.find('name').first().html();
       this.gapname = $xml.find('gapname').first().html();
-      this.gapid = $xml.find('gapid').first().html();
+      this.gapid = $xml.find('gapid').first().html();      
       this.shortName = $xml.find('name').first().attr('text');
       this.definition = $xml.find('definition').first().html();
       this.phrase = $xml.find('phrase').text();
@@ -55,29 +127,30 @@ class XMLGroup extends BasicGroup {
       this.userRepresentations = [];
       /*
        * representations and userRepresentations are treated together as a contiguous array,
-       *   and representationIndex is the index of the default representation into that virtual array
+       *   and representationIndex is the index of the default representation into that virtual array 
        *   (representationIndex is an integer and not an object reference so XMLGroup can be easily serialized)
        */
       this.representationIndex = 0;
       this.cayleyDiagrams = XMLGroup._cayley_diagrams_from_xml($xml);
       this.symmetryObjects = XMLGroup._symmetry_objects_from_xml($xml);
+      this.userNotes = '';
    }
 
-   static parseJSON(jsonObject) {
-      const defaultValues = [
-         {name: 'name', value: '<mrow><mtext>Untitled Group</mtext></mrow>'},
-         {name: 'shortName', value: 'Untitled Group'},
-         {name: 'author', value: ''},
-         {name: 'notes', value: ''},
-         {name: 'phrase', value: ''},
-         {name: 'representationIndex', value: 0},
-         {name: 'cayleyDiagrams', value: []},
-         {name: 'symmetryObjects', value: []},
-      ];
-      const group = BasicGroup.parseJSON(jsonObject, Object.assign(new XMLGroup, jsonObject));
-      for (const {name, value} of defaultValues) {
-         group[name] = (group[name] === undefined) ? value : group[name];
-      }
+   static parseJSON(passedJSON /*: BasicGroupJSON & XMLGroupJSON & any */) /*: XMLGroup */ {
+      const defaults = {
+         name: '<mrow><mtext>Untitled Group</mtext></mrow>',
+         shortName: 'Untitled Group',
+         author: '',
+         notes: '',
+         phrase: '',
+         representationIndex: 0,
+         cayleyDiagrams: [],
+         symmetryObjects: [],
+      };
+      // merge defaults into passed JSON object
+      const jsonObject /*: BasicGroupJSON & XMLGroupJSON & any */ = Object.assign({}, defaults, passedJSON);
+      const group /*: XMLGroup */ =
+            BasicGroup.parseJSON(jsonObject, Object.assign(new XMLGroup, ((jsonObject /*: any */) /*: XMLGroupJSON & any */)));
       if ( group.representations === undefined ) {
          group.representations = [ [ ] ];
          for ( var i = 0 ; i < group.multtable.length ; i++ )
@@ -86,7 +159,7 @@ class XMLGroup extends BasicGroup {
       return group;
    }
 
-   toBriefJSON () {
+   toBriefJSON () /*: BriefXMLGroupJSON */ {
       return {
          name : this.name,
          shortName : this.shortName,
@@ -101,13 +174,13 @@ class XMLGroup extends BasicGroup {
       };
    }
 
-   deleteUserRepresentation(userIndex) {
+   deleteUserRepresentation(userIndex /*: number */) {
       const savedRepresentation =
          (userIndex + this.representations.length == this.representationIndex) ? this.representations[0] : this.representation;
       this.userRepresentations.splice(userIndex, 1);
       this.representation = savedRepresentation;
    }
-
+   
    get representation() {
       if (this.representationIndex < this.representations.length) {
          return this.representations[this.representationIndex];
@@ -117,8 +190,8 @@ class XMLGroup extends BasicGroup {
          return this.representations[0];
       }
    }
-
-   set representation(representation) {
+   
+   set representation(representation /*: Array<string> */) {
       let inx = this.representations.findIndex( (el) => el == representation );
       if (inx >= 0) {
          this.representationIndex = inx;
@@ -136,13 +209,13 @@ class XMLGroup extends BasicGroup {
 
    get labels() {
       if (this.representationIndex > this.representations.length) {
-         return this.representation.map( (rep) => mathml2text(rep) );
+         return this.representation.map( (rep) => MathML.toUnicode(rep) );
       } else {
          if (this._labels === undefined) {
             this._labels = Array(this.representations.length)
          }
          if (this._labels[this.representationIndex] === undefined) {
-            this._labels[this.representationIndex] = this.representation.map( (rep) => mathml2text(rep) );
+            this._labels[this.representationIndex] = this.representation.map( (rep) => MathML.toUnicode(rep) );
          }
          return this._labels[this.representationIndex];
       }
@@ -154,7 +227,7 @@ class XMLGroup extends BasicGroup {
 
    get generators() {
       const calculatedGenerators = super.generators;
-      if (this._XML_generators === undefined) {
+      if (this._XML_generators.length == 0) {
          return calculatedGenerators;
       } else if (calculatedGenerators[0].length < this._XML_generators[0].length) {
          calculatedGenerators.push(...this._XML_generators);
@@ -163,9 +236,9 @@ class XMLGroup extends BasicGroup {
          return this._XML_generators;
       }
    }
-
+   
    // returns short representations as array of arrays of strings (just debugging)
-   static _reps_from_xml($xml) {
+   static _reps_from_xml($xml /*: JQuery */) {
       return $xml.find('representation')
                  .map(function () { return this })
                  .toArray()
@@ -179,7 +252,7 @@ class XMLGroup extends BasicGroup {
    }
 
    // returns representations as array of arrays of innerHTML elements
-   static _representations_from_xml($xml) {
+   static _representations_from_xml($xml /*: JQuery */) {
       return $xml.find('representation')
                  .map(function () { return this })
                  .toArray()
@@ -193,7 +266,7 @@ class XMLGroup extends BasicGroup {
    }
 
    // returns <multtable> in [[],[]] format
-   static _multtable_from_xml($xml) {
+   static _multtable_from_xml($xml /*: JQuery */) {
       return $xml.find('multtable > row')
                  .map(function (_, el) {
                     return [el
@@ -207,27 +280,27 @@ class XMLGroup extends BasicGroup {
    }
 
    // returns generators specified in XML, not those derived in subgroup computation
-   static _generators_from_xml($xml) {
-      const result = $xml.find('generators')
-                         .map(function () {
-                            return [
-                               this.attributes[0].value.split(' ')
-                                   .map(function (el) { return parseInt(el) }) ]
-                         })
-                         .toArray();
-      return result.length == 0 ? undefined : result;
+   static _generators_from_xml($xml /*: JQuery */) {
+      return $xml.find('generators')
+                 .map(function () {
+                    return [
+                       this.attributes[0].value.split(' ')
+                           .map(function (el) { return parseInt(el) }) ]
+                 })
+                 .toArray();
+      
    }
 
    // {name, arrows, points}
    // arrows are element numbers
    // points are [x,y,z] arrays
-   static _cayley_diagrams_from_xml($xml) {
+   static _cayley_diagrams_from_xml($xml /*: JQuery */) /*: Array<XMLGroup_CayleyDiagram> */ {
       let cayleyDiagrams = [];
       $xml.find('cayleydiagram').each(
          (_, cd) => {
             let name, arrows = [], points = [];
             name = $(cd).find('name').text();
-            $(cd).find('arrow').each( (_, ar) => { arrows.push(ar.textContent) } );
+            $(cd).find('arrow').each( (_, ar) => { arrows.push(Number(ar.textContent)) } );
             $(cd).find('point').each( (_, pt) => {
                let x = Number(pt.getAttribute('x')),
                    y = Number(pt.getAttribute('y')),
@@ -240,43 +313,48 @@ class XMLGroup extends BasicGroup {
       return cayleyDiagrams;
    }
 
-   static _symmetry_objects_from_xml($xml) {
+   static _symmetry_objects_from_xml($xml /*: JQuery */) /*: Array<XMLSymmetryObject> */ {
       let getPoint = function(pt) {
          return [Number(pt.getAttribute('x')), Number(pt.getAttribute('y')), Number(pt.getAttribute('z'))];
       };
       let symmetryObjects = [];
       $xml.find('symmetryobject').each(
          (_, so) => {
-            let name = so.getAttribute('name'),
-                operations = [],
-                spheres = [],
-                paths = [];
+            const name = so.getAttribute('name') || '(unnamed)',
+                  operations = [],
+                  spheres = [],
+                  paths = [];
             $(so).find('operation').each(
                (_, op) => {
-                  let element = op.getAttribute('element'),
-                      degrees = op.getAttribute('degrees'),
-                      point = getPoint(op.children[0]);
+                  const element = Number(op.getAttribute('element')),
+                        degrees = Number(op.getAttribute('degrees')),
+                        point = getPoint(op.children[0]);
                   operations.push({element: element, degrees: degrees, point: point});
                }
             );
             $(so).find('sphere').each(
                (_, sp) => {
-                  let radius = Number(sp.getAttribute('radius')),
-                      color = sp.getAttribute('color'),
-                      point = getPoint(sp.children[0]);
-                  spheres.push({radius: radius, color: color, point: point});
+                  const radius = Number(sp.getAttribute('radius')),
+                        color = sp.getAttribute('color'),
+                        point = getPoint(sp.children[0]);
+                  const sphere /*: Sphere */ = {radius: radius, point: point};
+                  if (color != undefined)
+                     sphere.color = color;
+                  spheres.push(sphere);
                }
             );
             $(so).find('path').each(
                (_, pa) => {
-                  let color = pa.getAttribute('color'),
-                      points = [];
+                  const path /*: Path */ = {points: []};
+                  const color = pa.getAttribute('color');
+                  if (color != undefined)
+                     path.color = color;
                   $(pa).find('point').each(
                      (_, pt) => {
-                        points.push(getPoint(pt));
+                        path.points.push(getPoint(pt));
                      }
                   );
-                  paths.push({color: color, points: points});
+                  paths.push(path);
                }
             );
             symmetryObjects.push(

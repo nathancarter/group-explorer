@@ -1,5 +1,21 @@
-SSD.Subset = class Subset extends SSD.BasicSubset {
-   constructor (elements) {
+// @flow
+/*::
+import BitSet from '../js/BitSet.js';
+import MathML from '../js/MathML.js';
+import Template from '../js/Template.js';
+import XMLGroup from '../js/XMLGroup.js';
+
+import SSD from './subsets.js';
+
+var group : XMLGroup;
+
+export default
+ */
+SSD.Subset = class Subset extends SSD.AbstractSubset {
+/*::
+   subsetIndex : number;
+ */
+   constructor(elements /*: void | Array<groupElement> | BitSet */) {
       super();
       
       if (elements === undefined) {
@@ -43,7 +59,7 @@ SSD.Subset = class Subset extends SSD.BasicSubset {
       }
    }
 
-   static nextName() {
+   static nextName() /*: string */ {
       return MathML.sub('S', SSD.nextSubsetIndex);
    }
 }

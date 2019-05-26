@@ -1,13 +1,28 @@
-SSD.Cosets = class Cosets extends SSD.Partition {
-   constructor(subgroup, side) {
+// @flow
+/*::
+import MathML from '../js/MathML.js';
+import XMLGroup from '../js/XMLGroup.js';
+
+import SSD from './subsets.js';
+
+var group : XMLGroup;
+
+export default
+ */
+SSD.Cosets = class Cosets extends SSD.AbstractPartition {
+/*::
+  subgroup : SSD.Subgroup;
+  isLeft : boolean;
+  side : string;
+ */
+   constructor(subgroup /*: SSD.Subgroup */, side /*: string */) {
       super();
 
       this.subgroup = subgroup;
       this.isLeft = side == 'left';
       this.side = side;
 
-      this.subsets = window
-         .group
+      this.subsets = group
          .getCosets(this.subgroup.elements, this.isLeft)
          .map( (coset, inx) => {
             const rep = window.group.representation[coset.first()];
@@ -25,7 +40,7 @@ SSD.Cosets = class Cosets extends SSD.Partition {
    }
 
    destroy() {
-      $(`#partitions li.${this.side}coset${this.subgroupIndex}`).remove();
+      $(`#partitions li.${this.side}coset${this.subgroup.subgroupIndex}`).remove();
       super.destroy();
    }
 }

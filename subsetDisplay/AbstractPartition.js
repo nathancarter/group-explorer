@@ -1,5 +1,19 @@
-SSD.Partition = class Partition {
-   constructor () {
+// @flow
+/*::
+import MathML from '../js/MathML.js';
+
+import SSD from './subsets.js';
+
+export default
+ */
+SSD.AbstractPartition = class AbstractPartition {
+/*::
+  +destroy : () => void;   
+  +name : string;
+   subsets : Array<SSD.PartitionSubset>;
+  +allElementString : string;
+ */   
+   constructor() {
       this.subsets = [];
    }
 

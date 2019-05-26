@@ -1,4 +1,4 @@
-/*
+/* @flow
 # Templates
 
 Most of what appears on the screen in GE3 is dynamic HTML, created at runtime by javascript and formatted by CSS stylesheets. This is often the result of a complex combination of HTML, CSS, and javascript, and it can difficult to read the code behind a web page to understand how the displayed data is derived and how it will appear. Every GE3 web page uses this 'template' pattern (though it may use others, too), making a template from a section of HTML with placeholders in it to represent data values that are to be replaced at runtime. This approach makes it easier to separate the layout of the data from the code that generates it. In GE3 this is done on the client side by javascript using HTML5 template tags and ES6 template literals.
@@ -65,28 +65,33 @@ While this example may seem too simple to provide much justification for introdu
 Since template retrieval is done repeatedly, the actual template retrieval code caches results by template id in a class static variable, as you can see here: [Template.js](../js/Template.js).
 
 ```js
-*/
-
+ */
 /*
  * Caching template fetch --
  *   returns the html of template with id = templateId as a `string literal` for subsequent eval'ing
  *   returns the value undefined if template does not exist
  */
-
+/*::
+export default
+*/
 class Template {
-   static HTML(templateId) {
+/*::
+   static _map : Map<string, ?string>;
+ */
+   static HTML(templateId /*: string */) /*: ?string */ {
 
       Template._map = (Template._map === undefined) ? new Map() : Template._map;
 
-      if (!Template._map.has(templateId)) {
+      let result = Template._map.get(templateId);
+      if (result === undefined) {
          const $template = $(`template[id="${templateId}"]`);
-         Template._map.set(templateId,  ($template.length == 0) ? undefined : '`' + $template.html() + '`');
+         result = ($template.length == 0) ? undefined : '`' + $template.html() + '`';
+         Template._map.set(templateId,  result);
       };
 
-      return Template._map.get(templateId);
+      return result;
    }
 }
-
 /*
 ```
  */

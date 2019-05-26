@@ -1,6 +1,9 @@
-
+// @flow
+/*::
+export default
+*/
 class Menu {
-   static setMenuLocations(event, $menu) {
+   static setMenuLocations(event /*: JQueryMouseEventObject */, $menu /*: JQuery */) {
       const menuBox = $menu[0].getBoundingClientRect();
       const menuHeight = menuBox.height;
       const windowHeight = 0.99*window.innerHeight;
@@ -28,7 +31,7 @@ class Menu {
            .each( (_, subMenu) => Menu.setSubMenuLocation($menu, $(subMenu)) );
    }
 
-   static setSubMenuLocation($menu, $subMenu) {
+   static setSubMenuLocation($menu /*: JQuery */, $subMenu /*: JQuery */) {
       const parentBox = $subMenu.parent()[0].getBoundingClientRect();
       const menuBox = $menu[0].getBoundingClientRect();
       const subMenuBox = $subMenu[0].getBoundingClientRect();

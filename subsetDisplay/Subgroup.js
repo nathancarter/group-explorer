@@ -1,10 +1,29 @@
+// @flow
+/*::
+import BitSet from '../js/BitSet.js';
+import MathML from '../js/MathML.js';
+import Template from '../js/Template.js';
+import SubgroupFinder from '../js/SubgroupFinder.js';
+import XMLGroup from '../js/XMLGroup.js';
 
-SSD.Subgroup = class Subgroup extends SSD.BasicSubset {
-   constructor (subgroupIndex) {
+import SSD from './subsets.js';
+
+var group : XMLGroup;
+
+export default
+ */
+SSD.Subgroup = class Subgroup extends SSD.AbstractSubset {
+/*::
+   subgroupIndex : number;
+  +normalizer : SSD.Subset;
+  +leftCosets : SSD.Cosets;
+  +rightCosets : SSD.Cosets;
+ */   
+   constructor(subgroupIndex /*: number */) {
       super();
 
       this.subgroupIndex = subgroupIndex;
-      this.elements = window.group.subgroups[subgroupIndex].members;
+      this.elements = group.subgroups[subgroupIndex].members;
    }
 
    get name() {
@@ -12,13 +31,13 @@ SSD.Subgroup = class Subgroup extends SSD.BasicSubset {
    }
 
    get displayLine() {
-      const generators = window.group.subgroups[this.subgroupIndex].generators.toArray()
+      const generators = group.subgroups[this.subgroupIndex].generators.toArray()
                                .map( el => group.representation[el] );
       let templateName;
       switch (this.subgroupIndex) {
          case 0:
             templateName = 'firstSubgroup_template';	break;
-         case window.group.subgroups.length - 1:
+         case group.subgroups.length - 1:
             templateName = 'lastSubgroup_template';	break;
          default:
             templateName = 'subgroup_template';	break;
@@ -33,9 +52,9 @@ SSD.Subgroup = class Subgroup extends SSD.BasicSubset {
    }
 
    get normalizer() {
-      new SSD.Subset(
-         new SubgroupFinder(window.group)
-            .findNormalizer(window.group.subgroups[this.subgroupIndex]).members );
+      return new SSD.Subset(
+         new SubgroupFinder(group)
+            .findNormalizer(group.subgroups[this.subgroupIndex]).members );
    }
 
    get leftCosets() {
@@ -47,11 +66,8 @@ SSD.Subgroup = class Subgroup extends SSD.BasicSubset {
    }
 
    static displayAll() {
-      $('#subgroups').html(
-         window.group
-               .subgroups
-               .reduce( (frag, _, inx) => frag.append(new SSD.Subgroup(inx).displayLine),
-                        $(document.createDocumentFragment()) )
-      );
+      $('#subgroups').html('').append(
+         group.subgroups.reduce( (frag, _, inx) => frag.append(new SSD.Subgroup(inx).displayLine),
+                                 $(document.createDocumentFragment()) ));
    }
 }

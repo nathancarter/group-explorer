@@ -1,5 +1,12 @@
+// @flow
+/*::
+import MathML from '../js/MathML.js';
 
-SSD.ConjugacyClasses = class ConjugacyClasses extends SSD.Partition {
+import SSD from './subsets.js';
+
+export default
+ */
+SSD.ConjugacyClasses = class ConjugacyClasses extends SSD.AbstractPartition {
    constructor() {
       super();
 
