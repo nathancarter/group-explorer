@@ -4,10 +4,15 @@ export default
  */
 class GEUtils {
    static equals(a /*: Array<any> */, b /*: Array<any> */) /*: boolean */ {
-      return Array.isArray(a) &&
-         Array.isArray(b) &&
-         a.length == b.length &&
-         a.every( (el, inx) => el == b[inx] );
+      if (Array.isArray(a) && Array.isArray(b) && a.length == b.length) {
+         for (let inx = 0; inx < a.length; inx++) {
+            if (a[inx] != b[inx]) {
+               return false;
+            }
+         }
+         return true;
+      }
+      return false;
    }
 
    static flatten/*:: <T> */(arr /*: Tree<T> */) /*: Array<T> */ {
