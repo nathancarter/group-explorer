@@ -8,15 +8,15 @@ import XMLGroup from './XMLGroup.js';
 
 export type BitSetJSON = {
    len: number,
-   arr : Array<number>,
+   arr: Array<number>
 };
 
 export default
  */
 class BitSet {
 /*::
-   len : number;
-   arr : Array<number>;
+   len: number;
+   arr: Array<number>;
  */
    constructor (length /*: number */, init /*:: ?: Array<groupElement> */ = []) {
       this.len = length;

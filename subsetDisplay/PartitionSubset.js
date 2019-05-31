@@ -6,18 +6,18 @@ import XMLGroup from '../js/XMLGroup.js';
 
 import SSD from './subsets.js';
 
-var group : XMLGroup;
+var group: XMLGroup;
 
 export default
  */
 SSD.PartitionSubset = class PartitionSubset extends SSD.AbstractSubset {
 /*::
-   parent : SSD.AbstractPartition;
-   subIndex : number;
-   elements : BitSet;
-   name : string;
-   partitionClass : string;
-  +elementRepresentations : Array<string>;
+   parent: SSD.AbstractPartition;
+   subIndex: number;
+   elements: BitSet;
+   name: string;
+   partitionClass: string;
+  +elementRepresentations: Array<string>;
  */   
    constructor(parent /*: SSD.AbstractPartition */,
                subIndex /*: number */,

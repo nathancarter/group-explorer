@@ -8,18 +8,18 @@ export default
 */
 class CycleGraph {
 /*::
-   static SOME_SETTING_NAME : string;
-   group : XMLGroup;
-   SOME_SETTING_NAME : string;
-   elements : Array<groupElement>;
-   cycles : Array<Array<groupElement>>;
-   positions : Array<{x: number, y: number}>;
-   rings : Array<number>;
-   cyclePaths : any;
-   partIndices : Array<number>;
-   bbox : {left: number, right: number, top: number, bottom: number};
-   closestTwoPositions : number;
-   highlights : Highlights;
+   static SOME_SETTING_NAME: string;
+   group: XMLGroup;
+   SOME_SETTING_NAME: string;
+   elements: Array<groupElement>;
+   cycles: Array<Array<groupElement>>;
+   positions: Array<{x: number, y: number}>;
+   rings: Array<number>;
+   cyclePaths: any;
+   partIndices: Array<number>;
+   bbox: {left: number, right: number, top: number, bottom: number};
+   closestTwoPositions: number;
+   highlights: Highlights;
  */   
    constructor(group /*: XMLGroup */) {
       this.group = group;
@@ -112,8 +112,8 @@ class CycleGraph {
       var cx = Math.cos( ( alpha + beta ) / 2 ) / 2;
       var cy = Math.sin( ( alpha + beta ) / 2 ) / 2;
       return {
-         x : CycleGraph.interp( x2, cx, g ),
-         y : CycleGraph.interp( y2, cy, g )
+         x: CycleGraph.interp( x2, cx, g ),
+         y: CycleGraph.interp( y2, cy, g )
       };
    }
 
@@ -262,7 +262,7 @@ class CycleGraph {
 
       // assign locations in the plane to each element,
       // plus create paths to be drawn to connect them
-      this.positions = [ { x : 0, y : 0 } ]; // identity at origin
+      this.positions = [ { x: 0, y: 0 } ]; // identity at origin
       while ( this.positions.length < this.group.order )
          (this.positions /*: Array<any> */).push( null ); // to show we haven't computed them yet
       this.rings = [ ];
@@ -303,8 +303,8 @@ class CycleGraph {
                   var ring2 = f( this.rings[curr], i, t );
                   var et = CycleGraph.easeUp( t );
                   path.push( {
-                     x : CycleGraph.interp( ring1.x, ring2.x, et ),
-                     y : CycleGraph.interp( ring1.y, ring2.y, et )
+                     x: CycleGraph.interp( ring1.x, ring2.x, et ),
+                     y: CycleGraph.interp( ring1.y, ring2.y, et )
                   } );
                }
                path.partIndex = partIndex;
@@ -318,7 +318,7 @@ class CycleGraph {
       } );
 
       // enable rescaling to a bounding box of [-1,1]^2
-      this.bbox = { left : 0, right : 0, top : 0, bottom : 0 };
+      this.bbox = { left: 0, right: 0, top: 0, bottom: 0 };
       this.cyclePaths.forEach( points => {
          points.forEach( pos => {
             this.bbox.top = Math.max( this.bbox.top, pos.y );

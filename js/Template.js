@@ -76,7 +76,7 @@ export default
 */
 class Template {
 /*::
-   static _map : Map<string, ?string>;
+   static _map: Map<string, ?string>;
  */
    static HTML(templateId /*: string */) /*: ?string */ {
 

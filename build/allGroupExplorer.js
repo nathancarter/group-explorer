@@ -1,25 +1,42 @@
 // @flow
 /*::
+import Diagram3D from './Diagram3D.js';
+
 export default
  */
 class GEUtils {
    static equals(a /*: Array<any> */, b /*: Array<any> */) /*: boolean */ {
-      return Array.isArray(a) &&
-         Array.isArray(b) &&
-         a.length == b.length &&
-         a.every( (el, inx) => el == b[inx] );
+      if (Array.isArray(a) && Array.isArray(b) && a.length == b.length) {
+         for (let inx = 0; inx < a.length; inx++) {
+            if (a[inx] != b[inx]) {
+               return false;
+            }
+         }
+         return true;
+      }
+      return false;
    }
 
-   static flatten/*:: <T> */(arr /*: Tree<T> */) /*: Array<T> */ {
+   static _flatten(arr /*: Array<any> */) /*: Array<any> */ {
       return arr.reduce(
          (flattened, el) => {
             if (Array.isArray(el)) {
-               flattened.push(...GEUtils.flatten/*:: <T> */(el))
+               flattened.push(...GEUtils._flatten(el))
             } else {
                flattened.push(el)
             }
             return flattened;
          }, [] );
+   }
+
+   static flatten_el(arr /*: ElementTree | Array<Array<groupElement>> */) /*: Array<groupElement> */ {
+      return GEUtils._flatten(arr);
+   }
+   static flatten_nd(arr /*: NodeTree */) /*: Array<Diagram3D.Node> */ {
+      return GEUtils._flatten(arr);
+   }
+   static flatten_msh(arr /*: MeshTree */) /*: Array<THREE.Mesh> */ {
+      return GEUtils._flatten(arr);
    }
 
    static last/*:: <T> */(arr /*: Array<T> */) /*: T */ {
@@ -30,11 +47,11 @@ class GEUtils {
 // simple debug log function
 
 /*::
-   export default
+  export default
  */
 class Log {
 /*::
-   static debug : boolean;
+   static debug: boolean;
  */
    static init(debug /*: ?boolean */) {
       Log.debug = (debug == undefined) ? false : debug;
@@ -67,15 +84,15 @@ import XMLGroup from './XMLGroup.js';
 
 export type BitSetJSON = {
    len: number,
-   arr : Array<number>,
+   arr: Array<number>
 };
 
 export default
  */
 class BitSet {
 /*::
-   len : number;
-   arr : Array<number>;
+   len: number;
+   arr: Array<number>;
  */
    constructor (length /*: number */, init /*:: ?: Array<groupElement> */ = []) {
       this.len = length;
@@ -294,8 +311,8 @@ export default
 */
 class MathUtils {
 /*::
-   static primeList : BitSet;
-   static primePowerList : BitSet;
+   static primeList: BitSet;
+   static primePowerList: BitSet;
  */
    static init() {
       MathUtils.primeList =
@@ -356,8 +373,8 @@ import type {SubgroupJSON} from './Subgroup.js';
 import SubgroupFinder from './SubgroupFinder.js';
 
 export type BasicGroupJSON = {
-   multtable: Array<Array<groupElement>>;
-   _subgroups: Array<SubgroupJSON>;
+   multtable: Array<Array<groupElement>>,
+   _subgroups: Array<SubgroupJSON>
 };
 
 export default
@@ -678,7 +695,7 @@ class BasicGroup {
 
    // returns closure of passed generators as an array of arrays of ...
    // generators may be passed as a bitset, array, or a single element
-   closureArray(generators /*: BitSet | Array<groupElement> | groupElement */) /*: Tree<groupElement> */ {
+   closureArray(generators /*: BitSet | Array<groupElement> | groupElement */) /*: ElementTree */ {
       const deepMultiply = (array , factor , elementsUsed ) =>
             array.map( (el) => {
                if (Array.isArray(el)) {
@@ -726,21 +743,20 @@ class BasicGroup {
       return close(gens, new BitSet(this.order, [0]), []);
    }
 
-   // calculates cosets of the passed group as an array of arrays of group elements
-   // subgroup is passed as an instance of class Subgroup
-   cosetsArray(subgroup /*: Array<groupElement> */, isLeft /*: ?boolean */ = true) /*: Tree<groupElement> */ {
-      const mult = isLeft ? (a,b) => this.multtable[a][b] : (a,b) => this.multtable[b][a];
-      const cosets = [subgroup];
-      const cosetReps = [subgroup[0]];
+   // calculates cosets of the passed group
+   cosetsArray(subgroup /*: Array<groupElement> */, isLeft /*: ?boolean */ = true) /*: Array<Array<groupElement>> */ {
+      const cosets /*: Array<Array<groupElement>> */ = [subgroup];
+      const cosetReps /*: Array<groupElement> */ = [subgroup[0]];
       const todo = new BitSet(this.order, subgroup).complement();
-      for (;;) {
-         const g = todo.pop();
-         if (g == undefined) break;
+
+      for (let _g = todo.pop(); _g != undefined; _g = todo.pop()) {
+         const g = _g;  // to help Flow
          cosetReps.push(g);
-         const newCoset = subgroup.map( (el) => mult(g,el) );
+         const newCoset = subgroup.map( (el) => isLeft ? this.multtable[g][el] : this.multtable[el][g] );
          cosets.push(newCoset);
          todo.subtract(new BitSet(this.order, newCoset));
       }
+
       return cosets;
    }
 }
@@ -754,92 +770,95 @@ class BasicGroup {
  * To turn to JSON:
  *      JSON.stringify(instance)
  * To create from JSON:
- *      Object.setPrototypeOf(JSON.parse(string), XMLGroup.prototype)
- *
- * Cayley diagrams are returned as {name, arrows, points} where
- *      arrows are element numbers
- *      points are [x,y,z] arrays
- *
- * Symmetry objects are returned as {name, operations, spheres, paths} where
- *      operations are {element, degrees, point}
- *      spheres are {radius, color, point}
- *      paths are {color, points}
- *      point(s) are [x,y,z] arrays
+ *      XMLGroup.parseJSON(json)
  */
 /*::
 import BasicGroup from './BasicGroup.js';
 import type {BasicGroupJSON} from './BasicGroup.js';
 import MathML from './MathML.js';
 
-type XMLGroup_CayleyDiagram = {name: string, arrows: Array<groupElement>, points: Array<Point>};
+// Cayley diagram from XML 
+type XMLCayleyDiagram = {
+   name: string,
+   arrows: Array<groupElement>,
+   points: Array<Point>
+};
+
+// Symmetry object from XML
 type Point = [float, float, float];
-type Path = {color?: color; points: Array<Point>};
-type Sphere = {radius: float; color?: color; point: Point};
-type Operation = {element: groupElement; degrees: float; point: Point};
-export type XMLSymmetryObject = {name: string; operations: Array<Operation>; spheres: Array<Sphere>; paths: Array<Path>};
+type Path = {color?: color, points: Array<Point>};
+type Sphere = {radius: float, color?: color, point: Point};
+type Operation = {element: groupElement, degrees: float, point: Point};
+export type XMLSymmetryObject = {
+   name: string,
+   operations: Array<Operation>,
+   spheres: Array<Sphere>,
+   paths: Array<Path>
+};
 
 export type XMLGroupJSON = {
-   name : mathml,
-   shortName : string,
-   definition : mathml,
-   phrase : string,
-   notes : string,
-   author : string,
-   _XML_generators : Array<Array<groupElement>>,
-   reps : Array<Array<string>>,
-   representations : Array<Array<mathml>>,
-   userRepresentations : Array<Array<string>>,
-   representationIndex : number,
-   cayleyDiagrams : Array<XMLGroup_CayleyDiagram>,
-   symmetryObjects : Array<XMLSymmetryObject>,
-   _labels : Array<Array<string>>,
+   name: mathml,
+   shortName: string,
+   definition: mathml,
+   phrase: string,
+   notes: string,
+   author: string,
+   _XML_generators: Array<Array<groupElement>>,
+   reps: Array<Array<string>>,
+   representations: Array<Array<mathml>>,
+   userRepresentations: Array<Array<string>>,
+   representationIndex: number,
+   cayleyDiagrams: Array<XMLCayleyDiagram>,
+   symmetryObjects: Array<XMLSymmetryObject>,
+   _labels: Array<Array<string>>,
 
-   lastModifiedOnServer : string,
-   URL : string,
-   CayleyThumbnail : string,
-   rowHTML : string,
-   userNotes : string
+   // XMLGroup properties set elsewhere
+   lastModifiedOnServer: string,
+   URL: string,
+   CayleyThumbnail: string,
+   rowHTML: string,
+   userNotes: string
 };
 
 export type BriefXMLGroupJSON = {
-   name : mathml,
-   shortName : string,
-   author : string,
-   notes : string,
-   phrase : string,
-   representations : Array<Array<mathml>>,
-   representationIndex : number,
-   cayleyDiagrams : Array<XMLGroup_CayleyDiagram>,
-   symmetryObjects : Array<XMLSymmetryObject>,
-   multtable : Array<Array<groupElement>>
+   name: mathml,
+   shortName: string,
+   author: string,
+   notes: string,
+   phrase: string,
+   representations: Array<Array<mathml>>,
+   representationIndex: number,
+   cayleyDiagrams: Array<XMLCayleyDiagram>,
+   symmetryObjects: Array<XMLSymmetryObject>,
+   multtable: Array<Array<groupElement>>
 };
 
 export default
  */
 class XMLGroup extends BasicGroup {
 /*::
-   name : string;
+   name: string;
    gapname: string;
    gapid: string;
-   shortName : string;
-   definition : string;
-   phrase : string;
-   notes : string;
-   author : string;
-   _XML_generators : Array<Array<number>>;
-   reps : Array<Array<string>>;
-   representations : Array<Array<string>>;
-   userRepresentations : Array<Array<string>>;
-   representationIndex : number;
-   cayleyDiagrams : Array<XMLGroup_CayleyDiagram>;
-   symmetryObjects : Array<XMLSymmetryObject>;
-   _labels : Array<Array<string>>;
+   shortName: string;
+   definition: string;
+   phrase: string;
+   notes: string;
+   author: string;
+   _XML_generators: Array<Array<number>>;
+   reps: Array<Array<string>>;
+   representations: Array<Array<string>>;
+   userRepresentations: Array<Array<string>>;
+   representationIndex: number;
+   cayleyDiagrams: Array<XMLCayleyDiagram>;
+   symmetryObjects: Array<XMLSymmetryObject>;
+   _labels: Array<Array<string>>;
 
-   lastModifiedOnServer : string;
-   URL : string;
-   CayleyThumbnail : string;
-   rowHTML : string;
-   userNotes : string;
+   lastModifiedOnServer: string;
+   URL: string;
+   CayleyThumbnail: string;
+   rowHTML: string;
+   userNotes: string;
  */
    constructor (text /*: void | string */) {
       if (text === undefined) {
@@ -910,16 +929,16 @@ class XMLGroup extends BasicGroup {
 
    toBriefJSON () /*: BriefXMLGroupJSON */ {
       return {
-         name : this.name,
-         shortName : this.shortName,
-         author : this.author,
-         notes : this.notes,
-         phrase : this.phrase,
-         representations : this.representations,
-         representationIndex : this.representationIndex,
-         cayleyDiagrams : this.cayleyDiagrams,
-         symmetryObjects : this.symmetryObjects,
-         multtable : this.multtable
+         name: this.name,
+         shortName: this.shortName,
+         author: this.author,
+         notes: this.notes,
+         phrase: this.phrase,
+         representations: this.representations,
+         representationIndex: this.representationIndex,
+         cayleyDiagrams: this.cayleyDiagrams,
+         symmetryObjects: this.symmetryObjects,
+         multtable: this.multtable
       };
    }
 
@@ -1043,7 +1062,7 @@ class XMLGroup extends BasicGroup {
    // {name, arrows, points}
    // arrows are element numbers
    // points are [x,y,z] arrays
-   static _cayley_diagrams_from_xml($xml /*: JQuery */) /*: Array<XMLGroup_CayleyDiagram> */ {
+   static _cayley_diagrams_from_xml($xml /*: JQuery */) /*: Array<XMLCayleyDiagram> */ {
       let cayleyDiagrams = [];
       $xml.find('cayleydiagram').each(
          (_, cd) => {
@@ -1125,23 +1144,23 @@ import BasicGroup from './BasicGroup.js';
 import XMLGroup from './XMLGroup.js';
 
 export type SubgroupJSON = {
-   generators : BitSetJSON;
-   members : BitSetJSON;
-   _isNormal : boolean;
-   contains : BitSetJSON;
-   containedIn : BitSetJSON;
+   generators: BitSetJSON,
+   members: BitSetJSON,
+   _isNormal: boolean,
+   contains: BitSetJSON,
+   containedIn: BitSetJSON
 };
 
 export default
  */
 class Subgroup {
 /*::
-   group : BasicGroup;
-   generators : BitSet;
-   members : BitSet;
-   _isNormal : boolean;
-   contains : BitSet;
-   containedIn : BitSet;
+   group: BasicGroup;
+   generators: BitSet;
+   members: BitSet;
+   _isNormal: boolean;
+   contains: BitSet;
+   containedIn: BitSet;
  */   
    constructor(group /*: ?BasicGroup */,
                generators /*: Array<number> */ = [],
@@ -1158,7 +1177,7 @@ class Subgroup {
    //   but it creates a circular data structure that can't be serialized in JSON
    //   we skip that reference here, and then re-insert it in BasicGroup.parseJSON
    toJSON() /*: Subgroup */ {
-      const result = Object.assign(new Subgroup, ((this /*: any */) /*: {(key: string) : mixed} */));
+      const result = Object.assign(new Subgroup, ((this /*: any */) /*: {(key: string): mixed} */));
       delete result.group;
       return result;
    }
@@ -1229,8 +1248,8 @@ export default
  */
 class SubgroupFinder {
 /*::
-   group : BasicGroup;
-   z_generators : BitSet;
+   group: BasicGroup;
+   z_generators: BitSet;
  */   
    constructor (group /*: BasicGroup */) {
       this.group = group;
@@ -1479,7 +1498,7 @@ export default
 */
 class IsomorphicGroups {
 /*::   
-   static map : Map<number, Array<XMLGroup>>;
+   static map: Map<number, Array<XMLGroup>>;
  */
    static init() {
       if (IsomorphicGroups.map !== undefined) {
@@ -1742,7 +1761,7 @@ export default
 */
 class Template {
 /*::
-   static _map : Map<string, ?string>;
+   static _map: Map<string, ?string>;
  */
    static HTML(templateId /*: string */) /*: ?string */ {
 
@@ -1796,7 +1815,7 @@ export default
  */
 class Library {
 /*::
-   static map : Map<?string, XMLGroup>;
+   static map: Map<?string, XMLGroup>;
 */
    // initialize Library.map from localStorage
    //   called once after class is defined
@@ -1969,7 +1988,7 @@ class Library {
              * When this page is loaded in an iframe, the parent window can
              * indicate which group to load by passing the full JSON
              * definition of the group in a postMessage() call to this
-             * window, with the format { type : 'load group', group : G },
+             * window, with the format { type: 'load group', group: G },
              * where G is the JSON data in question.
              */
             document.addEventListener( 'message', function ( event /*: MessageEvent */ ) {
@@ -1998,7 +2017,7 @@ class Library {
 
    // utility routine to open web page with "...?groupURL=..." with search string containing groupURL
    //   and options from {a: b, ...} included as '&a=b...',
-   static openWithGroupURL(pageURL /*: string */, groupURL /*: string */, options /*: {[key : string] : string} */ = {}) {
+   static openWithGroupURL(pageURL /*: string */, groupURL /*: string */, options /*: {[key: string]: string} */ = {}) {
       const url = `./${pageURL}?groupURL=${groupURL}` +
                   Object.keys(options).reduce( (url, option) => url + `&${option}=${options[option]}`, '');
       window.open(url);
@@ -2042,21 +2061,21 @@ Nearly all mathematical text in GE is formatted with MathML and rendered into HT
 import XMLGroup from './XMLGroup.js';
 
 declare class XSLTProcessor {
-   importStylesheet(Node) : void;
-   transformToFragment(Node, Document) : any;
+   importStylesheet(Node): void;
+   transformToFragment(Node, Document): any;
 }
 
-var group : XMLGroup;
+var group: XMLGroup;
 
 export default
  */
 class MathML {
 /*::
-   static subscripts : {[key : string] : string};
-   static superscripts : {[key : string] : string};
-   static MATHML_2_HTML : string;
-   static xsltProcessor : XSLTProcessor;
-   static Cache : Map<string, string>;
+   static subscripts: {[key: string]: string};
+   static superscripts: {[key: string]: string};
+   static MATHML_2_HTML: string;
+   static xsltProcessor: XSLTProcessor;
+   static Cache: Map<string, string>;
  */
 /*
 ```
@@ -2330,7 +2349,7 @@ MathML._init();
  */
 // @flow
 /*::
-export default
+  export default
 */
 class Menu {
    static setMenuLocations(event /*: JQueryMouseEventObject */, $menu /*: JQuery */) {
@@ -2714,8 +2733,8 @@ window.CURVED = 1;
 
 window.Point = class Point {
 /*::   
-   point : THREE.Vector3;
-  +isPoint : boolean;
+   point: THREE.Vector3;
+  +isPoint: boolean;
  */
    constructor(point /*: ?PointConstructor */) {
       if (point == undefined) {
@@ -2744,15 +2763,15 @@ window.Point = class Point {
  */
 window.Node = class Node extends window.Point {
 /*::
-   element : groupElement;
-   color : color;
-   label : mathml;
-   radius : ?float;
-   lineStyle : number;
-   colorHighlight : ?color;
-   ringHighlight : ?color;
-   squareHighlight : ?color;
-   curvedGroup : Array<Diagram3D.Node>;
+   element: groupElement;
+   color: color;
+   label: mathml;
+   radius: ?float;
+   lineStyle: number;
+   colorHighlight: ?color;
+   ringHighlight: ?color;
+   squareHighlight: ?color;
+   curvedGroup: Array<Diagram3D.Node>;
  */
    constructor(element /*: groupElement */,
                point /*: ?PointConstructor */,
@@ -2768,22 +2787,22 @@ window.Node = class Node extends window.Point {
       this.squareHighlight = undefined;
       this.isPoint = false;
       for (const opt in options) {
-         (this /*: {[key : string] : mixed} */)[opt] = options[opt];
+         (this /*: {[key: string]: mixed} */)[opt] = options[opt];
       }
    }
 }
 
 window.Line = class Line {
 /*::
-   vertices : Array<Diagram3D.Point>;
-   color : color;
-   arrowhead : boolean;
-   arrow : groupElement;
-   offset : float;
-   style : number;
+   vertices: Array<Diagram3D.Point>;
+   color: color;
+   arrowhead: boolean;
+   arrow: groupElement;
+   offset: float;
+   style: number;
   +length: float;
-   middle : THREE.Vector3;
-   center : THREE.Vector3;
+   middle: THREE.Vector3;
+   center: THREE.Vector3;
  */
    constructor(vertices /*: Array<Diagram3D.Point> */,
                options /*: {color?: color, arrowhead?: boolean} */) {
@@ -2792,7 +2811,7 @@ window.Line = class Line {
       this.style = Diagram3D.STRAIGHT;
       if (options !== undefined) {
          for (const opt in options) {
-            (this /*: {[key : string] : mixed} */)[opt] = options[opt];
+            (this /*: {[key: string]: mixed} */)[opt] = options[opt];
          }
       }
    }
@@ -2815,25 +2834,25 @@ class Diagram3D {
 /*::
    static STRAIGHT: number;
    static CURVED: number;
-   static Point : Class<Diagram3D.Point>;
-   static Node : Class<Diagram3D.Node>;
-   static Line : Class<Diagram3D.Line>;
-   group : XMLGroup;
-   nodes : Array<Diagram3D.Node>;
-   lines : Array<Diagram3D.Line>;
-   _right_multiplication : boolean;
-   node_labels : Array<mathml>;
-   background : ?color;
-   zoomLevel : number;
-   lineWidth : number;
-   nodeScale : number;
-   fogLevel : number;
-   labelSize : number;
-   arrowheadPlacement : number;
-  +emitStateChange : ?() => void;
+   static Point: Class<Diagram3D.Point>;
+   static Node: Class<Diagram3D.Node>;
+   static Line: Class<Diagram3D.Line>;
+   group: XMLGroup;
+   nodes: Array<Diagram3D.Node>;
+   lines: Array<Diagram3D.Line>;
+   _right_multiplication: boolean;
+   node_labels: Array<mathml>;
+   background: ?color;
+   zoomLevel: number;
+   lineWidth: number;
+   nodeScale: number;
+   fogLevel: number;
+   labelSize: number;
+   arrowheadPlacement: number;
+  +emitStateChange: ?() => void;
    arrowColors: Array<color>;
-  +isCayleyDiagram : boolean;
-   isGenerated : boolean;
+  +isCayleyDiagram: boolean;
+   isGenerated: boolean;
  */
    constructor(group /*: XMLGroup */,
                nodes /*: Array<Diagram3D.Node> */ = [],
@@ -2856,7 +2875,7 @@ class Diagram3D {
 
       if (options !== undefined) {
          for (const opt in options) {
-            (this /*: {[key : string] : mixed} */)[opt] = options[opt];
+            (this /*: {[key: string]: mixed} */)[opt] = options[opt];
          }
       }
    }
@@ -2983,7 +3002,7 @@ class Diagram3D {
    }
 
    _setNodeField(field /*: string */, elements /*: Array<groupElement> */, value /*: mixed */) {
-      elements.forEach( (index) => (this.nodes[index] /*: {[key : string] : mixed } */)[field] = value );
+      elements.forEach( (index) => (this.nodes[index] /*: {[key: string]: mixed } */)[field] = value );
    }
 
    highlightByNodeColor(elements /*: Array<Array<groupElement>> */) {
@@ -3054,14 +3073,14 @@ export default
  */
 class DiagramDnD {
 /*::
-   displayDiagram : DisplayDiagram;
-   canvas : HTMLCanvasElement;
-   mouse : THREE.Vector2;
-   raycaster : THREE.Raycaster;
-   event_handler : (JQueryEventObject) => void;
-   repaint_poller : ?number;
-   repaint_request : ?number;
-   object : any;
+   displayDiagram: DisplayDiagram;
+   canvas: HTMLCanvasElement;
+   mouse: THREE.Vector2;
+   raycaster: THREE.Raycaster;
+   event_handler: (JQueryEventObject) => void;
+   repaint_poller: ?number;
+   repaint_request: ?number;
+   object: any;
  */
    constructor(displayDiagram /*: DisplayDiagram */) {
       this.displayDiagram = displayDiagram;
@@ -3245,9 +3264,9 @@ type layout = 0 | 1 | 2;
 type direction = 0 | 1 | 2;
 
 type CayleyDiagramJSON = {
-   groupURL : string;
-   diagram_name : ?string;
-   arrowheadPlacement : number;
+   groupURL: string,
+   diagram_name: ?string,
+   arrowheadPlacement: number
 }
 */
 
@@ -3258,12 +3277,12 @@ type CayleyDiagramJSON = {
 
 window.AbstractLayoutStrategy = class AbstractLayoutStrategy {
 /*::   
-  +doLayout : (children : Array<Array<Diagram3D.Node>> ) => Array<Array<Diagram3D.Node>>;
-   generator : groupElement;
-  +layout : layout;
-   direction : direction;
-   nesting_level : number;
-   bitset : BitSet;
+  +doLayout: (children: Array<Array<Diagram3D.Node>> ) => Array<Array<Diagram3D.Node>>;
+   generator: groupElement;
+  +layout: layout;
+   direction: direction;
+   nesting_level: number;
+   bitset: BitSet;
 */
    constructor(generator /*: groupElement */, direction /*: direction */, nesting_level /*: number */) {
       this.generator = generator;          // element# (not 0)
@@ -3297,7 +3316,7 @@ window.LinearLayout = class LinearLayout extends window.AbstractLayoutStrategy {
 
       // find a child diameter in <direction>, scale so all fit in [0,1] box
       const target_width = 1.4/(3*num_children - 1);  // heuristic
-      const child_width = this.width(GEUtils.flatten/*:: <Diagram3D.Node> */(children), this.direction);
+      const child_width = this.width(GEUtils.flatten_nd(children), this.direction);
       const scale = child_width < target_width ? 1 : target_width / child_width;
 
       // create scale transform
@@ -3319,7 +3338,7 @@ window.LinearLayout = class LinearLayout extends window.AbstractLayoutStrategy {
 
 window.CurvedLayout = class CurvedLayout extends window.AbstractLayoutStrategy {
 /*::   
-   position : (r : number, theta : number) => THREE.Vector3;
+   position: (r: number, theta: number) => THREE.Vector3;
  */
    constructor(generator /*: groupElement */, direction /*: direction */, nesting_level /*: number */) {
       super(generator, direction, nesting_level);
@@ -3378,7 +3397,7 @@ window.CircularLayout = class CircularLayout extends window.CurvedLayout {
 //   so they're distributed around the 0.5*e^i*[0,2*PI] circle centered at [.5,.5]
 window.RotatedLayout = class RotatedLayout extends window.CurvedLayout {
 /*::   
-   rotation : (theta : number) => THREE.Matrix4;
+   rotation: (theta: number) => THREE.Matrix4;
  */
    constructor(generator, direction, nesting_level) {
       super(generator, direction, nesting_level);
@@ -3433,20 +3452,25 @@ window.RotatedLayout = class RotatedLayout extends window.CurvedLayout {
 /*:: export default */
 class CayleyDiagram extends Diagram3D {
 /*::
-   static BACKGROUND_COLOR : color;
-   static NODE_COLOR : color;
-   static LAYOUT : {[key: string]: layout};
-   static DIRECTION : {[key: string]: direction};
-   static AbstractLayoutStrategy : Class<CayleyDiagram.AbstractLayoutStrategy>;
-   static LinearLayout : Class<CayleyDiagram.LinearLayout>;
-   static CurvedLayout : Class<CayleyDiagram.CurvedLayout>;
-   static CircularLayout : Class<CayleyDiagram.CircularLayout>;
-   static RotatedLayout : Class<CayleyDiagram.RotatedLayout>;
+   static BACKGROUND_COLOR: color;
+   static NODE_COLOR: color;
+   static LAYOUT: {[key: string]: layout};
+   static DIRECTION: {[key: string]: direction};
+   static AbstractLayoutStrategy: Class<CayleyDiagram.AbstractLayoutStrategy>;
+   static LinearLayout: Class<CayleyDiagram.LinearLayout>;
+   static CurvedLayout: Class<CayleyDiagram.CurvedLayout>;
+   static CircularLayout: Class<CayleyDiagram.CircularLayout>;
+   static RotatedLayout: Class<CayleyDiagram.RotatedLayout>;
 
-   strategies : Array<CayleyDiagram.AbstractLayoutStrategy>;
-   diagram_name : ?string;
-   ordered_nodes : Tree<Diagram3D.Node>;
-   chunk : ?number;
+   strategies: Array<CayleyDiagram.AbstractLayoutStrategy>;
+   diagram_name: ?string;
+   ordered_nodes: NodeTree;
+   chunk: ?number;
+
+   // fields unused in GE, added for compatibility with JSON methods in DisplayDiagram.js
+   highlights: any;
+   elements: any;
+   arrowColors: any;
  */   
    constructor(group /*: XMLGroup */, diagram_name /*: ?string */) {
       super(group);
@@ -3521,20 +3545,20 @@ class CayleyDiagram extends Diagram3D {
       this.emitStateChange();
    }
 
-   _generateNodes() /*: Tree<groupElement> */ {
+   _generateNodes() /*: ElementTree */ {
       const generators = this.strategies.map( (strategy) => strategy.generator );
 
       const node_list = this.strategies.reduce( (nodes, strategy, inx) => {
          const [newNodes, newBitSet] = this._extendSubgroup(nodes, generators.slice(0, inx+1));
          this.strategies[inx].bitset = newBitSet;
-         return (inx == 0) ? GEUtils.flatten/*:: <groupElement> */(newNodes) : newNodes;
+         return (inx == 0) ? GEUtils.flatten_el(newNodes) : newNodes;
       }, [0] );
 
       this.emitStateChange();
       return node_list;
    }
 
-   _extendSubgroup(H_prev /*: Tree<groupElement> */, generators /*: Array<groupElement> */) /*: [Tree<groupElement>, BitSet] */ {
+   _extendSubgroup(H_prev /*: ElementTree */, generators /*: Array<groupElement> */) /*: [ElementTree, BitSet] */ {
       const deepMultiply = (g, arr) => {
          if (Array.isArray(arr)) {
             return arr.map( (el) => deepMultiply(g, el) );
@@ -3547,7 +3571,7 @@ class CayleyDiagram extends Diagram3D {
 
       const new_generator = generators[generators.length - 1];
       const result = [H_prev];
-      const result_bitset = new BitSet(this.group.order, GEUtils.flatten/*:: <groupElement> */(H_prev));
+      const result_bitset = new BitSet(this.group.order, GEUtils.flatten_el(H_prev));
       Array.from({length: this.group.elementOrders[new_generator]})
            .reduce( (cycle) => (cycle.push(this.group.mult(GEUtils.last(cycle), new_generator)), cycle), [0])
            .forEach( (el) => {
@@ -3572,7 +3596,7 @@ class CayleyDiagram extends Diagram3D {
       return [result, result_bitset];
    }
 
-   _transposeNodes(node_list /*: Tree<groupElement> */) /*: Tree<Diagram3D.Node> */ {
+   _transposeNodes(node_list /*: ElementTree */) /*: NodeTree */ {
       const copyPush = (arr /*: Array<groupElement> */, el /*: groupElement */) /*: Array<groupElement> */ => {
          const result = arr.slice();
          result.push(el);
@@ -3591,7 +3615,7 @@ class CayleyDiagram extends Diagram3D {
                                 Array(transpose_allocations[transpose_index]).fill().map( (_) => makeEmpty(transpose_index + 1) );
 
       // traverse node_list, inserting new Diagram3D.Node into transpose
-      const traverse = (nodes /*: groupElement | Tree<groupElement> */, indices /*: Array<groupElement> */ = []) => {
+      const traverse = (nodes /*: groupElement | ElementTree */, indices /*: Array<groupElement> */ = []) => {
          if (Array.isArray(nodes)) {
             nodes.forEach( (el,inx) => { traverse(el, copyPush(indices, inx)) } );
          } else {
@@ -3606,13 +3630,13 @@ class CayleyDiagram extends Diagram3D {
       }
 
       // now actually do the work
-      const result /*: Tree<Diagram3D.Node> */ = makeEmpty();
+      const result /*: NodeTree */ = makeEmpty();
       traverse(node_list);
 
       return result;
    }
 
-   _layout(nested_nodes /*: Diagram3D.Node | Tree<Diagram3D.Node> */,
+   _layout(nested_nodes /*: Diagram3D.Node | NodeTree */,
            nested_strategies /*: Array<CayleyDiagram.AbstractLayoutStrategy> */ = this.strategies.slice().sort( (a,b) => a.nesting_level - b.nesting_level )) /*: Array<Diagram3D.Node> */ {
 
       if (Array.isArray(nested_nodes)) {
@@ -3620,7 +3644,7 @@ class CayleyDiagram extends Diagram3D {
          const child_results = [...nested_nodes.map( (children) => this._layout(children, nested_strategies) )]
          nested_strategies.push(strategy);
          const layout_results = strategy.doLayout(child_results);
-         return GEUtils.flatten/*:: <Diagram3D.Node> */(layout_results);
+         return GEUtils.flatten_nd(layout_results);
       } else {
          return [nested_nodes];
       }
@@ -3701,9 +3725,9 @@ class CayleyDiagram extends Diagram3D {
 
    toJSON() /*: CayleyDiagramJSON */ {
       return {
-         groupURL : this.group.URL,
-         diagram_name : this.diagram_name,
-         arrowheadPlacement : this.arrowheadPlacement
+         groupURL: this.group.URL,
+         diagram_name: this.diagram_name,
+         arrowheadPlacement: this.arrowheadPlacement
       };
    }
 
@@ -3746,9 +3770,9 @@ export default
  */
 class SymmetryObject {
 /*::
-   static BACKGROUND_COLOR : color;
-   static DEFAULT_SPHERE_COLOR : color;
-   static DEFAULT_PATH_COLOR : color;
+   static BACKGROUND_COLOR: color;
+   static DEFAULT_SPHERE_COLOR: color;
+   static DEFAULT_PATH_COLOR: color;
  */
    static _init() {
       SymmetryObject.BACKGROUND_COLOR = '#C8E8C8';
@@ -3788,59 +3812,59 @@ import Log from './Log.js';
 import MathML from './MathML.js';
 
 export type CayleyDiagramJSON = {
-   groupURL : string,
-   _diagram_name : ?string,
-   highlights : void,
-   elements : void,
-   zoomLevel : number,
-   lineWidth : number,
-   nodeScale : number,
-   fogLevel : number,
-   labelSize : number,
-   arrowheadPlacement : number,
-   arrowColors : Array<any>,
-   _camera : Array<number>,
-   highlights : {
-      background : Array<void | null | color>,
-      ring : Array<void | null | color>,
-      square : Array<void | null | color>,
+   groupURL: string,
+   _diagram_name: ?string,
+   highlights: void,
+   elements: void,
+   zoomLevel: number,
+   lineWidth: number,
+   nodeScale: number,
+   fogLevel: number,
+   labelSize: number,
+   arrowheadPlacement: number,
+   arrowColors: Array<color>,
+   _camera: Array<number>,
+   highlights: {
+      background: Array<void | null | color>,
+      ring: Array<void | null | color>,
+      square: Array<void | null | color>
    },
-   strategies : Array<[groupElement, number, number, number]>,
-   arrows : Array<number>,
+   strategies: Array<[groupElement, number, number, number]>,
+   arrows: Array<number>,
    nodePositions: Array<{x: float, y: float, z: float}>,
    nodeRadii: Array<float>,
    chunkIndex: ?number, 
-   arrowsData: Array<{style: number, offset: float}>,
+   arrowsData: Array<{style: number, offset: float}>
 };
 
 type Options = {
-   container? : JQuery,
-   trackballControlled? : boolean,
-   width? : number,
-   height? : number,
-   fog? : boolean,
+   container?: JQuery,
+   trackballControlled?: boolean,
+   width?: number,
+   height?: number,
+   fog?: boolean
 };
 
 export default
  */
 class DisplayDiagram {
 /*::
-   static groupNames : Array<string>;
-   static DEFAULT_CANVAS_HEIGHT : number;
-   static DEFAULT_CANVAS_WIDTH : number;
-   static DEFAULT_BACKGROUND : color; 
-   static DEFAULT_NODE_COLOR : color;
-   static DEFAULT_LINE_COLOR : color;
-   static DEFAULT_FOG_COLOR : color;
-   static IOS_LINE_WIDTH : number;
-   static DEFAULT_ARC_OFFSET : number;
-   static LIGHT_POSITIONS : Array<[number, number, number]>;
+   static groupNames: Array<string>;
+   static DEFAULT_CANVAS_HEIGHT: number;
+   static DEFAULT_CANVAS_WIDTH: number;
+   static DEFAULT_BACKGROUND: color; 
+   static DEFAULT_NODE_COLOR: color;
+   static DEFAULT_LINE_COLOR: color;
+   static DEFAULT_FOG_COLOR: color;
+   static IOS_LINE_WIDTH: number;
+   static DEFAULT_ARC_OFFSET: number;
+   static LIGHT_POSITIONS: Array<[number, number, number]>;
 
-   scene : THREE.Scene;
-   camera : THREE.PerspectiveCamera;
-   renderer : THREE.WebGLRenderer;
-   camControls : THREE.TrackballControls;
-   lineDnD : DiagramDnD;
+   scene: THREE.Scene;
+   camera: THREE.PerspectiveCamera;
+   renderer: THREE.WebGLRenderer;
+   camControls: THREE.TrackballControls;
+   lineDnD: DiagramDnD;
  */
    /*
     * Create three.js objects to display data in container
@@ -3898,7 +3922,7 @@ class DisplayDiagram {
    }
    getSize() /*: {w: number, h: number} */ {
        const size = this.renderer.getSize();
-       return {w : size.width, h : size.height};
+       return {w: size.width, h: size.height};
    }
 
    static setDefaults() {
@@ -3927,7 +3951,7 @@ class DisplayDiagram {
            ) /*: Image */ {
       // Options parameter:
       // size: "small" or "large", default is "small"
-      // resetCamera : true or false, default is true
+      // resetCamera: true or false, default is true
       options = {size: (options.hasOwnProperty('size')) ? options.size : 'small',
                  resetCamera: (options.hasOwnProperty('resetCamera')) ? options.resetCamera : true};
       const img = new Image();
@@ -4487,13 +4511,13 @@ class DisplayDiagram {
 
       const diagram3D /*: CayleyDiagram */ = ((_diagram3D /*: any */) /*: CayleyDiagram */);
 
-      if (diagram3D.chunk === undefined) {
-         return;
-      }
-
       // remove old chunks
       const chunks = this.getGroup('chunks');
       chunks.remove(...chunks.children);
+
+      if (diagram3D.chunk === undefined) {
+         return;
+      }
 
       // utility functions
       const centroid = (points) => points.reduce( (sum, point) => sum.add(point), new THREE.Vector3() ).multiplyScalar(1/points.length);
@@ -4547,9 +4571,9 @@ class DisplayDiagram {
       } );
       
       let subgroup_name;  // MathML subgroup name, generated first time through
-      const createChunks = (arr /*: Tree<Diagram3D.Node> */, desired, current = diagram3D.strategies.length - 1) /*: Array<THREE.Mesh> */ => {
+      const createChunks = (arr /*: NodeTree */, desired, current = diagram3D.strategies.length - 1) /*: Array<THREE.Mesh> */ => {
          if (current == desired) {
-            const nodes = GEUtils.flatten/*:: <Diagram3D.Node> */(arr);
+            const nodes = GEUtils.flatten_nd(arr);
             const elements = new BitSet(diagram3D.group.order, nodes.map( (node) => node.element ));
             const points = nodes.map( (node) => node.point );
             const box = new THREE.Mesh(box_geometry, box_material);
@@ -4562,8 +4586,8 @@ class DisplayDiagram {
             return [box];
          } else {
             // arr is an array of Trees at this point, though the logic that ensures this is convoluted
-            const boxes = arr.map( (el) => createChunks(el, desired, current-1) );
-            const all_boxes = GEUtils.flatten/*:: <THREE.Mesh> */(boxes);
+            const boxes = ((arr.map( (el) => createChunks(el, desired, current-1) ) /*: any */) /*: Array<Array<THREE.Mesh>> */);
+            const all_boxes = GEUtils.flatten_msh(((boxes /*: any */) /*: MeshTree */));
             const strategy = diagram3D.strategies[current];
             if (strategy.layout == CayleyDiagram.LAYOUT.ROTATED) {
                // find centroid of all boxes
@@ -4651,42 +4675,39 @@ class DisplayDiagram {
    unitSquarePosition(element /*: number */, cayleyDiagram /*: CayleyDiagram */) {
       const point3d = cayleyDiagram.nodes[element].point.clone(),
             point2d = point3d.project( this.camera );
-      return { x : point2d.x/2 + 1/2, y : -point2d.y/2 + 1/2 };
+      return { x: point2d.x/2 + 1/2, y: -point2d.y/2 + 1/2 };
    }
 
    // two serialization functions
    toJSON(cayleyDiagram /*: CayleyDiagram */) /*: CayleyDiagramJSON */ {
       const tmp = {
-         groupURL : cayleyDiagram.group.URL,
-         _diagram_name : cayleyDiagram.diagram_name,
-         // $FlowFixMe: no such field as CayleyDiagram.highlights
-         highlights : cayleyDiagram.highlights,
-         // $FlowFixMe: no such field as CayleyDiagram.elements
-         elements : cayleyDiagram.elements,
-         zoomLevel : cayleyDiagram.zoomLevel,
-         lineWidth : cayleyDiagram.lineWidth,
-         nodeScale : cayleyDiagram.nodeScale,
-         fogLevel : cayleyDiagram.fogLevel,
-         labelSize : cayleyDiagram.labelSize,
-         arrowheadPlacement : cayleyDiagram.arrowheadPlacement,
-         // $FlowFixMe: no such field as CayleyDiagram.arrowColors
-         arrowColors : cayleyDiagram.arrowColors,
-         _camera : this.camera.matrix.toArray(),
-         highlights : {
-            background : (cayleyDiagram.nodes.map( n => n.colorHighlight ) /*: Array<void | null | color> */),
-            ring : (cayleyDiagram.nodes.map( n => n.ringHighlight ) /*: Array<void | null | color> */),
-            square : (cayleyDiagram.nodes.map( n => n.squareHighlight ) /*: Array<void | null | color> */)
+         groupURL: cayleyDiagram.group.URL,
+         _diagram_name: cayleyDiagram.diagram_name,
+         highlights: cayleyDiagram.highlights,
+         elements: cayleyDiagram.elements,
+         zoomLevel: cayleyDiagram.zoomLevel,
+         lineWidth: cayleyDiagram.lineWidth,
+         nodeScale: cayleyDiagram.nodeScale,
+         fogLevel: cayleyDiagram.fogLevel,
+         labelSize: cayleyDiagram.labelSize,
+         arrowheadPlacement: cayleyDiagram.arrowheadPlacement,
+         arrowColors: cayleyDiagram.arrowColors,
+         _camera: this.camera.matrix.toArray(),
+         highlights: {
+            background: (cayleyDiagram.nodes.map( n => n.colorHighlight ) /*: Array<void | null | color> */),
+            ring: (cayleyDiagram.nodes.map( n => n.ringHighlight ) /*: Array<void | null | color> */),
+            square: (cayleyDiagram.nodes.map( n => n.squareHighlight ) /*: Array<void | null | color> */)
          },
-         strategies : cayleyDiagram.getStrategies(),
-         arrows : cayleyDiagram.lines.map( x => x.arrow )
+         strategies: cayleyDiagram.getStrategies(),
+         arrows: cayleyDiagram.lines.map( x => x.arrow )
             .filter( ( v, i, s ) => s.indexOf( v ) === i ), // incl. each only 1x
-         nodePositions : cayleyDiagram.nodes.map( node => {
-            return { x : node.point.x, y : node.point.y, z : node.point.z };
+         nodePositions: cayleyDiagram.nodes.map( node => {
+            return { x: node.point.x, y: node.point.y, z: node.point.z };
          } ),
-         nodeRadii : cayleyDiagram.nodes.map( node => node.radius ),
-         chunkIndex : cayleyDiagram.chunk,
-         arrowsData : cayleyDiagram.lines.map( ( arrow, index ) => {
-            return { style : arrow.style, offset : arrow.offset };
+         nodeRadii: cayleyDiagram.nodes.map( node => node.radius ),
+         chunkIndex: cayleyDiagram.chunk,
+         arrowsData: cayleyDiagram.lines.map( ( arrow, index ) => {
+            return { style: arrow.style, offset: arrow.offset };
          } )
       };
       // console.log( 'Sending:', tmp );
@@ -4699,10 +4720,8 @@ class DisplayDiagram {
       // if it isn't included in the diagram
       cayleyDiagram.diagram_name = json._diagram_name;
       if ( json.hasOwnProperty( 'highlights' ) )
-         // $FlowFixMe: no such field as CayleyDiagram.highlights
          cayleyDiagram.highlights = json.highlights;
       if ( json.hasOwnProperty( 'elements' ) )
-         // $FlowFixMe: no such field as CayleyDiagram.elements
          cayleyDiagram.elements = json.elements;
       if ( json.hasOwnProperty( 'zoomLevel' ) )
          cayleyDiagram.zoomLevel = json.zoomLevel;
@@ -4778,15 +4797,15 @@ class Multtable {
 /*::
    static COLORATIONS: {[key: string]: Coloration};
 
-   group : XMLGroup;
-   elements : Array<groupElement>;
-   separation : number;
-   _coloration : Coloration;
-   _colors : void | Array<string>;
-   stride : number;
-   backgrounds : void | Array<color>;
-   borders : void | Array<color | void>;
-   corners : void | Array<color | void>;
+   group: XMLGroup;
+   elements: Array<groupElement>;
+   separation: number;
+   _coloration: Coloration;
+   _colors: void | Array<string>;
+   stride: number;
+   backgrounds: void | Array<color>;
+   borders: void | Array<color | void>;
+   corners: void | Array<color | void>;
  */   
    constructor(group /*: XMLGroup */) {
       this.group = group;
@@ -4794,8 +4813,8 @@ class Multtable {
    }
 
    reset() {
-      this.elements = GEUtils.flatten/*:: <groupElement> */(
-         this.group.cosetsArray(GEUtils.flatten/*:: <groupElement> */(this.group.closureArray(this.group.generators[0])), false));
+      this.elements = GEUtils.flatten_el(
+         this.group.cosetsArray(GEUtils.flatten_el(this.group.closureArray(this.group.generators[0])), false));
       this.separation = 0;
       this.coloration = Multtable.COLORATIONS.RAINBOW;
       this.stride = this.group.order;
@@ -4803,8 +4822,8 @@ class Multtable {
    }
 
    organizeBySubgroup(subgroup /*: Subgroup */) /*: Multtable */ {
-      this.elements = GEUtils.flatten/*:: <groupElement>*/(
-         this.group.cosetsArray(GEUtils.flatten/*:: <groupElement> */(this.group.closureArray(subgroup.generators)), false));
+      this.elements = GEUtils.flatten_el(
+         this.group.cosetsArray(GEUtils.flatten_el(this.group.closureArray(subgroup.generators)), false) );
       this.stride = subgroup.order;
       return this;
    }
@@ -4924,42 +4943,42 @@ import Log from './Log.js';
 import Multtable from './Multtable.js';
 
 export type MulttableJSON = {
-   groupURL : string;
-   separation : number;
-   colors : Array<color>;
-   stride : number;
-   elements : Array<groupElement>;
-   highlights : {
-      background : void | Array<color>;
-      border : void | Array<color | void>;
-      corner : void | Array<color | void>;
-   };
+   groupURL: string,
+   separation: number,
+   colors: Array<color>,
+   stride: number,
+   elements: Array<groupElement>,
+   highlights: {
+      background: void | Array<color>,
+      border: void | Array<color | void>,
+      corner: void | Array<color | void>
+   }
 }
 
 type Options = {
-   container?: JQuery;
-   width?: number;
-   height?: number;
-   size?: string;
+   container?: JQuery,
+   width?: number,
+   height?: number,
+   size?: string
 };
 
 export default
  */
 class DisplayMulttable {
 /*::
-   static DEFAULT_CANVAS_HEIGHT : number;
-   static DEFAULT_CANVAS_WIDTH : number;
-   static ZOOM_STEP : number;
-   static MINIMUM_FONT : number;
-   static BACKGROUND : string;
-   options : Options;
-   canvas : HTMLCanvasElement;
-   context : CanvasRenderingContext2D;
-   zoom : number;
-   translate : {dx: number, dy: number};
-   transform : THREE.Matrix3;
-   multtable : Multtable;
-   permutationLabels : void | Array<void | Array<string>>;
+   static DEFAULT_CANVAS_HEIGHT: number;
+   static DEFAULT_CANVAS_WIDTH: number;
+   static ZOOM_STEP: number;
+   static MINIMUM_FONT: number;
+   static BACKGROUND: string;
+   options: Options;
+   canvas: HTMLCanvasElement;
+   context: CanvasRenderingContext2D;
+   zoom: number;
+   translate: {dx: number, dy: number};
+   transform: THREE.Matrix3;
+   multtable: Multtable;
+   permutationLabels: void | Array<void | Array<string>>;
  */
    // height & width, or container
    constructor(options /*: Options */ = {}) {
@@ -4998,7 +5017,7 @@ class DisplayMulttable {
    }
 
    getSize() /*: {w: number, h: number} */ {
-      return {w : this.canvas.width, h : this.canvas.height};
+      return {w: this.canvas.width, h: this.canvas.height};
    }
 
    static _setDefaults() {
@@ -5257,21 +5276,21 @@ class DisplayMulttable {
    unitSquarePosition(element /*: number */, multtable /*: Multtable */) {
       const max = multtable.position( multtable.group.order - 1 ) + 1;
       const index = multtable.elements.indexOf( element );
-      return { x : 0.5 / max, y : ( multtable.position( index ) + 0.5 ) / max };
+      return { x: 0.5 / max, y: ( multtable.position( index ) + 0.5 ) / max };
    }
 
    // two serialization functions
    toJSON(multtable /*: Multtable */) /*: MulttableJSON */ {
       return {
-         groupURL : multtable.group.URL,
-         separation : multtable.separation,
-         colors : multtable.colors,
-         stride : multtable.stride,
-         elements : multtable.elements,
-         highlights : {
-            background : multtable.backgrounds,
-            border : multtable.borders,
-            corner : multtable.corners
+         groupURL: multtable.group.URL,
+         separation: multtable.separation,
+         colors: multtable.colors,
+         stride: multtable.stride,
+         elements: multtable.elements,
+         highlights: {
+            background: multtable.backgrounds,
+            border: multtable.borders,
+            corner: multtable.corners
          }
       };
    }
@@ -5298,18 +5317,18 @@ export default
 */
 class CycleGraph {
 /*::
-   static SOME_SETTING_NAME : string;
-   group : XMLGroup;
-   SOME_SETTING_NAME : string;
-   elements : Array<groupElement>;
-   cycles : Array<Array<groupElement>>;
-   positions : Array<{x: number, y: number}>;
-   rings : Array<number>;
-   cyclePaths : any;
-   partIndices : Array<number>;
-   bbox : {left: number, right: number, top: number, bottom: number};
-   closestTwoPositions : number;
-   highlights : Highlights;
+   static SOME_SETTING_NAME: string;
+   group: XMLGroup;
+   SOME_SETTING_NAME: string;
+   elements: Array<groupElement>;
+   cycles: Array<Array<groupElement>>;
+   positions: Array<{x: number, y: number}>;
+   rings: Array<number>;
+   cyclePaths: any;
+   partIndices: Array<number>;
+   bbox: {left: number, right: number, top: number, bottom: number};
+   closestTwoPositions: number;
+   highlights: Highlights;
  */   
    constructor(group /*: XMLGroup */) {
       this.group = group;
@@ -5402,8 +5421,8 @@ class CycleGraph {
       var cx = Math.cos( ( alpha + beta ) / 2 ) / 2;
       var cy = Math.sin( ( alpha + beta ) / 2 ) / 2;
       return {
-         x : CycleGraph.interp( x2, cx, g ),
-         y : CycleGraph.interp( y2, cy, g )
+         x: CycleGraph.interp( x2, cx, g ),
+         y: CycleGraph.interp( y2, cy, g )
       };
    }
 
@@ -5552,7 +5571,7 @@ class CycleGraph {
 
       // assign locations in the plane to each element,
       // plus create paths to be drawn to connect them
-      this.positions = [ { x : 0, y : 0 } ]; // identity at origin
+      this.positions = [ { x: 0, y: 0 } ]; // identity at origin
       while ( this.positions.length < this.group.order )
          (this.positions /*: Array<any> */).push( null ); // to show we haven't computed them yet
       this.rings = [ ];
@@ -5593,8 +5612,8 @@ class CycleGraph {
                   var ring2 = f( this.rings[curr], i, t );
                   var et = CycleGraph.easeUp( t );
                   path.push( {
-                     x : CycleGraph.interp( ring1.x, ring2.x, et ),
-                     y : CycleGraph.interp( ring1.y, ring2.y, et )
+                     x: CycleGraph.interp( ring1.x, ring2.x, et ),
+                     y: CycleGraph.interp( ring1.y, ring2.y, et )
                   } );
                }
                path.partIndex = partIndex;
@@ -5608,7 +5627,7 @@ class CycleGraph {
       } );
 
       // enable rescaling to a bounding box of [-1,1]^2
-      this.bbox = { left : 0, right : 0, top : 0, bottom : 0 };
+      this.bbox = { left: 0, right: 0, top: 0, bottom: 0 };
       this.cyclePaths.forEach( points => {
          points.forEach( pos => {
             this.bbox.top = Math.max( this.bbox.top, pos.y );
@@ -5689,21 +5708,21 @@ export default
  */
 class DisplayCycleGraph {
 /*::
-   static DEFAULT_MIN_CANVAS_HEIGHT : number;
-   static DEFAULT_MIN_CANVAS_WIDTH : number;
-   static DEFAULT_MIN_RADIUS : number; 
-   static DEFAULT_ZOOM_STEP : number;
-   static DEFAULT_CANVAS_WIDTH : number;
-   static DEFAULT_CANVAS_HEIGHT : number;
+   static DEFAULT_MIN_CANVAS_HEIGHT: number;
+   static DEFAULT_MIN_CANVAS_WIDTH: number;
+   static DEFAULT_MIN_RADIUS: number; 
+   static DEFAULT_ZOOM_STEP: number;
+   static DEFAULT_CANVAS_WIDTH: number;
+   static DEFAULT_CANVAS_HEIGHT: number;
 
-   canvas : HTMLCanvasElement;
-   context : CanvasRenderingContext2D;
-   options : Options;
-   zoom : number;
-   translate : {dx: number, dy: number};
-   transform : THREE.Matrix3;
-   cycleGraph : CycleGraph;
-   radius : number;
+   canvas: HTMLCanvasElement;
+   context: CanvasRenderingContext2D;
+   options: Options;
+   zoom: number;
+   translate: {dx: number, dy: number};
+   transform: THREE.Matrix3;
+   cycleGraph: CycleGraph;
+   radius: number;
  */
    constructor(options /*: Options */) {
       Log.log('DisplayCycleGraph');
@@ -5737,7 +5756,7 @@ class DisplayCycleGraph {
       this.canvas.height = h;
    }
    getSize() /*: {w: number, h: number} */ {
-      return { w : this.canvas.width, h : this.canvas.height };
+      return { w: this.canvas.width, h: this.canvas.height };
    }
 
    static _setDefaults() {
@@ -5993,19 +6012,19 @@ class DisplayCycleGraph {
             untranslatedCanvasCoords = virtualCoords.applyMatrix3( this.transform ),
             // so we do the translation manually:
             translatedCanvasCoords = {
-               x : this.transform.elements[6] + untranslatedCanvasCoords.x,
-               y : this.transform.elements[7] + untranslatedCanvasCoords.y
+               x: this.transform.elements[6] + untranslatedCanvasCoords.x,
+               y: this.transform.elements[7] + untranslatedCanvasCoords.y
             };
-      return { x : translatedCanvasCoords.x / this.canvas.width,
-               y : translatedCanvasCoords.y / this.canvas.height };
+      return { x: translatedCanvasCoords.x / this.canvas.width,
+               y: translatedCanvasCoords.y / this.canvas.height };
    }
 
    // two serialization functions
    toJSON(cycleGraph /*: CycleGraph */) /*: CycleGraphJSON */ {
       return {
-         groupURL : cycleGraph.group.URL,
-         highlights : cycleGraph.highlights,
-         elements : cycleGraph.elements
+         groupURL: cycleGraph.group.URL,
+         highlights: cycleGraph.highlights,
+         elements: cycleGraph.elements
       };
    }
    fromJSON(json /*: CycleGraphJSON */, cycleGraph /*: CycleGraph */) {

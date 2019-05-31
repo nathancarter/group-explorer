@@ -15,26 +15,26 @@ import Subgroup from './Subgroup.js';
 import SubsetEditor from './SubsetEditor.js';
 import Subset from './Subset.js';
 
-var group : XMLGroup;
+var group: XMLGroup;
 
 export default
  */
 class SSD {
 /*::
-   static subsetsURL : string;
-   static nextId : number;
-   static nextSubsetIndex : number;
-   static displayList : Array<AbstractSubset>;
+   static subsetsURL: string;
+   static nextId: number;
+   static nextSubsetIndex: number;
+   static displayList: Array<AbstractSubset>;
 
-   static AbstractSubset : Class<AbstractSubset>;
-   static ConjugacyClasses : Class<ConjugacyClasses>;
-   static Cosets : Class<Cosets>;
-   static OrderClasses : Class<OrderClasses>;
-   static AbstractPartition : Class<AbstractPartition>;
-   static PartitionSubset : Class<PartitionSubset>;
-   static Subgroup : Class<Subgroup>;
-   static SubsetEditor : Class<SubsetEditor>;
-   static Subset : Class<Subset>;
+   static AbstractSubset: Class<AbstractSubset>;
+   static ConjugacyClasses: Class<ConjugacyClasses>;
+   static Cosets: Class<Cosets>;
+   static OrderClasses: Class<OrderClasses>;
+   static AbstractPartition: Class<AbstractPartition>;
+   static PartitionSubset: Class<PartitionSubset>;
+   static Subgroup: Class<Subgroup>;
+   static SubsetEditor: Class<SubsetEditor>;
+   static Subset: Class<Subset>;
  */   
    static _init() {
       SSD.subsetsURL = './subsetDisplay/subsets.html';
@@ -107,7 +107,7 @@ class SSD {
                               const [leftmost, rightmost] =
                                  $menu.find('span.mjx-chtml').toArray().reduce( ([l,r],span) => {
                                     const rect = span.getBoundingClientRect();
-                                    return [l < rect.left ? l : rect.left, r > rect.right ? r : rect.right];
+                                    return [l < rect.left ? l: rect.left, r > rect.right ? r: rect.right];
                                  }, [Number.MAX_SAFE_INTEGER, Number.MIN_SAFE_INTEGER] );
                               $menu.css({'width': rightmost - leftmost, 'max-width': ''});
                               Menu.setMenuLocations(event, $menu);

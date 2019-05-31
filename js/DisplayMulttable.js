@@ -4,42 +4,42 @@ import Log from './Log.js';
 import Multtable from './Multtable.js';
 
 export type MulttableJSON = {
-   groupURL : string;
-   separation : number;
-   colors : Array<color>;
-   stride : number;
-   elements : Array<groupElement>;
-   highlights : {
-      background : void | Array<color>;
-      border : void | Array<color | void>;
-      corner : void | Array<color | void>;
-   };
+   groupURL: string,
+   separation: number,
+   colors: Array<color>,
+   stride: number,
+   elements: Array<groupElement>,
+   highlights: {
+      background: void | Array<color>,
+      border: void | Array<color | void>,
+      corner: void | Array<color | void>
+   }
 }
 
 type Options = {
-   container?: JQuery;
-   width?: number;
-   height?: number;
-   size?: string;
+   container?: JQuery,
+   width?: number,
+   height?: number,
+   size?: string
 };
 
 export default
  */
 class DisplayMulttable {
 /*::
-   static DEFAULT_CANVAS_HEIGHT : number;
-   static DEFAULT_CANVAS_WIDTH : number;
-   static ZOOM_STEP : number;
-   static MINIMUM_FONT : number;
-   static BACKGROUND : string;
-   options : Options;
-   canvas : HTMLCanvasElement;
-   context : CanvasRenderingContext2D;
-   zoom : number;
-   translate : {dx: number, dy: number};
-   transform : THREE.Matrix3;
-   multtable : Multtable;
-   permutationLabels : void | Array<void | Array<string>>;
+   static DEFAULT_CANVAS_HEIGHT: number;
+   static DEFAULT_CANVAS_WIDTH: number;
+   static ZOOM_STEP: number;
+   static MINIMUM_FONT: number;
+   static BACKGROUND: string;
+   options: Options;
+   canvas: HTMLCanvasElement;
+   context: CanvasRenderingContext2D;
+   zoom: number;
+   translate: {dx: number, dy: number};
+   transform: THREE.Matrix3;
+   multtable: Multtable;
+   permutationLabels: void | Array<void | Array<string>>;
  */
    // height & width, or container
    constructor(options /*: Options */ = {}) {
@@ -78,7 +78,7 @@ class DisplayMulttable {
    }
 
    getSize() /*: {w: number, h: number} */ {
-      return {w : this.canvas.width, h : this.canvas.height};
+      return {w: this.canvas.width, h: this.canvas.height};
    }
 
    static _setDefaults() {
@@ -337,21 +337,21 @@ class DisplayMulttable {
    unitSquarePosition(element /*: number */, multtable /*: Multtable */) {
       const max = multtable.position( multtable.group.order - 1 ) + 1;
       const index = multtable.elements.indexOf( element );
-      return { x : 0.5 / max, y : ( multtable.position( index ) + 0.5 ) / max };
+      return { x: 0.5 / max, y: ( multtable.position( index ) + 0.5 ) / max };
    }
 
    // two serialization functions
    toJSON(multtable /*: Multtable */) /*: MulttableJSON */ {
       return {
-         groupURL : multtable.group.URL,
-         separation : multtable.separation,
-         colors : multtable.colors,
-         stride : multtable.stride,
-         elements : multtable.elements,
-         highlights : {
-            background : multtable.backgrounds,
-            border : multtable.borders,
-            corner : multtable.corners
+         groupURL: multtable.group.URL,
+         separation: multtable.separation,
+         colors: multtable.colors,
+         stride: multtable.stride,
+         elements: multtable.elements,
+         highlights: {
+            background: multtable.backgrounds,
+            border: multtable.borders,
+            corner: multtable.corners
          }
       };
    }

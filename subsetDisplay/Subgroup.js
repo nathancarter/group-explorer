@@ -8,16 +8,16 @@ import XMLGroup from '../js/XMLGroup.js';
 
 import SSD from './subsets.js';
 
-var group : XMLGroup;
+var group: XMLGroup;
 
 export default
  */
 SSD.Subgroup = class Subgroup extends SSD.AbstractSubset {
 /*::
-   subgroupIndex : number;
-  +normalizer : SSD.Subset;
-  +leftCosets : SSD.Cosets;
-  +rightCosets : SSD.Cosets;
+   subgroupIndex: number;
+  +normalizer: SSD.Subset;
+  +leftCosets: SSD.Cosets;
+  +rightCosets: SSD.Cosets;
  */   
    constructor(subgroupIndex /*: number */) {
       super();

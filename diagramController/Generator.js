@@ -11,18 +11,18 @@ import XMLGroup from '../js/XMLGroup.js';
 
 import DC from './diagram.js';
 
-var emitStateChange : () => void;
-var Cayley_diagram : CayleyDiagram;
-var Graphic_context : DisplayDiagram;
-var group : XMLGroup;
+var emitStateChange: () => void;
+var Cayley_diagram: CayleyDiagram;
+var Graphic_context: DisplayDiagram;
+var group: XMLGroup;
 
 export default
  */
 DC.Generator = class {
 /*::
-   static axis_label : Array<[string, string, string]>;
-   static axis_image : Array<[string, string, string]>;
-   static orders : Array<Array<string>>;
+   static axis_label: Array<[string, string, string]>;
+   static axis_image: Array<[string, string, string]>;
+   static orders: Array<Array<string>>;
  */
    static clickHandler(event /*: JQueryEventObject */) {
       event.preventDefault();

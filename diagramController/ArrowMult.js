@@ -5,8 +5,8 @@ import DisplayDiagram from '../js/DisplayDiagram.js';
 
 import DC from './diagram.js';
 
-var Cayley_diagram : CayleyDiagram;
-var Graphic_context : DisplayDiagram;
+var Cayley_diagram: CayleyDiagram;
+var Graphic_context: DisplayDiagram;
 
 export default
  */

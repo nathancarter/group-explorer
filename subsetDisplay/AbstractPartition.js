@@ -8,10 +8,10 @@ export default
  */
 SSD.AbstractPartition = class AbstractPartition {
 /*::
-  +destroy : () => void;   
-  +name : string;
-   subsets : Array<SSD.PartitionSubset>;
-  +allElementString : string;
+  +destroy: () => void;   
+  +name: string;
+   subsets: Array<SSD.PartitionSubset>;
+  +allElementString: string;
  */   
    constructor() {
       this.subsets = [];

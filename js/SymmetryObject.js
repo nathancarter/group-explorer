@@ -13,9 +13,9 @@ export default
  */
 class SymmetryObject {
 /*::
-   static BACKGROUND_COLOR : color;
-   static DEFAULT_SPHERE_COLOR : color;
-   static DEFAULT_PATH_COLOR : color;
+   static BACKGROUND_COLOR: color;
+   static DEFAULT_SPHERE_COLOR: color;
+   static DEFAULT_PATH_COLOR: color;
  */
    static _init() {
       SymmetryObject.BACKGROUND_COLOR = '#C8E8C8';

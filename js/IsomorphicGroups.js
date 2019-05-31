@@ -11,7 +11,7 @@ export default
 */
 class IsomorphicGroups {
 /*::   
-   static map : Map<number, Array<XMLGroup>>;
+   static map: Map<number, Array<XMLGroup>>;
  */
    static init() {
       if (IsomorphicGroups.map !== undefined) {

@@ -10,12 +10,12 @@ export default
  */
 class DC {
 /*::
-   static DIAGRAM_PANEL_URL : string;
-   static Arrow : Class<Arrow>;
-   static ArrowMult : Class<ArrowMult>;
-   static Chunking : Class<Chunking>;
-   static DiagramChoice : Class<DiagramChoice>;
-   static Generator : Class<Generator>;
+   static DIAGRAM_PANEL_URL: string;
+   static Arrow: Class<Arrow>;
+   static ArrowMult: Class<ArrowMult>;
+   static Chunking: Class<Chunking>;
+   static DiagramChoice: Class<DiagramChoice>;
+   static Generator: Class<Generator>;
  */
    static clearMenus() {
       $('#diagram-page .highlighted').removeClass('highlighted');

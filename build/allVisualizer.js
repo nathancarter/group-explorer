@@ -15,26 +15,26 @@ import Subgroup from './Subgroup.js';
 import SubsetEditor from './SubsetEditor.js';
 import Subset from './Subset.js';
 
-var group : XMLGroup;
+var group: XMLGroup;
 
 export default
  */
 class SSD {
 /*::
-   static subsetsURL : string;
-   static nextId : number;
-   static nextSubsetIndex : number;
-   static displayList : Array<AbstractSubset>;
+   static subsetsURL: string;
+   static nextId: number;
+   static nextSubsetIndex: number;
+   static displayList: Array<AbstractSubset>;
 
-   static AbstractSubset : Class<AbstractSubset>;
-   static ConjugacyClasses : Class<ConjugacyClasses>;
-   static Cosets : Class<Cosets>;
-   static OrderClasses : Class<OrderClasses>;
-   static AbstractPartition : Class<AbstractPartition>;
-   static PartitionSubset : Class<PartitionSubset>;
-   static Subgroup : Class<Subgroup>;
-   static SubsetEditor : Class<SubsetEditor>;
-   static Subset : Class<Subset>;
+   static AbstractSubset: Class<AbstractSubset>;
+   static ConjugacyClasses: Class<ConjugacyClasses>;
+   static Cosets: Class<Cosets>;
+   static OrderClasses: Class<OrderClasses>;
+   static AbstractPartition: Class<AbstractPartition>;
+   static PartitionSubset: Class<PartitionSubset>;
+   static Subgroup: Class<Subgroup>;
+   static SubsetEditor: Class<SubsetEditor>;
+   static Subset: Class<Subset>;
  */   
    static _init() {
       SSD.subsetsURL = './subsetDisplay/subsets.html';
@@ -107,7 +107,7 @@ class SSD {
                               const [leftmost, rightmost] =
                                  $menu.find('span.mjx-chtml').toArray().reduce( ([l,r],span) => {
                                     const rect = span.getBoundingClientRect();
-                                    return [l < rect.left ? l : rect.left, r > rect.right ? r : rect.right];
+                                    return [l < rect.left ? l: rect.left, r > rect.right ? r: rect.right];
                                  }, [Number.MAX_SAFE_INTEGER, Number.MIN_SAFE_INTEGER] );
                               $menu.css({'width': rightmost - leftmost, 'max-width': ''});
                               Menu.setMenuLocations(event, $menu);
@@ -219,17 +219,17 @@ import XMLGroup from '../js/XMLGroup.js';
 
 import SSD from './subsets.js';
 
-var group : XMLGroup;
+var group: XMLGroup;
 
 export default
  */
 SSD.AbstractSubset = class AbstractSubset {
 /*::
-   id : number;
-   elements : BitSet;
-  +name : string;	// implemented in subclass
-  +menu : JQuery;	// implemented in subclass
-  +displayLine : string;// implemented in subclass
+   id: number;
+   elements: BitSet;
+  +name: string;	// implemented in subclass
+  +menu: JQuery;	// implemented in subclass
+  +displayLine: string; // implemented in subclass
  */  
    constructor() {
       this.id = SSD.nextId++;
@@ -287,16 +287,16 @@ import XMLGroup from '../js/XMLGroup.js';
 
 import SSD from './subsets.js';
 
-var group : XMLGroup;
+var group: XMLGroup;
 
 export default
  */
 SSD.Subgroup = class Subgroup extends SSD.AbstractSubset {
 /*::
-   subgroupIndex : number;
-  +normalizer : SSD.Subset;
-  +leftCosets : SSD.Cosets;
-  +rightCosets : SSD.Cosets;
+   subgroupIndex: number;
+  +normalizer: SSD.Subset;
+  +leftCosets: SSD.Cosets;
+  +rightCosets: SSD.Cosets;
  */   
    constructor(subgroupIndex /*: number */) {
       super();
@@ -359,13 +359,13 @@ import XMLGroup from '../js/XMLGroup.js';
 
 import SSD from './subsets.js';
 
-var group : XMLGroup;
+var group: XMLGroup;
 
 export default
  */
 SSD.Subset = class Subset extends SSD.AbstractSubset {
 /*::
-   subsetIndex : number;
+   subsetIndex: number;
  */
    constructor(elements /*: void | Array<groupElement> | BitSet */) {
       super();
@@ -424,7 +424,7 @@ import XMLGroup from '../js/XMLGroup.js';
 
 import SSD from './subsets.js';
 
-var group : XMLGroup;
+var group: XMLGroup;
 
 export default
  */
@@ -501,10 +501,10 @@ export default
  */
 SSD.AbstractPartition = class AbstractPartition {
 /*::
-  +destroy : () => void;   
-  +name : string;
-   subsets : Array<SSD.PartitionSubset>;
-  +allElementString : string;
+  +destroy: () => void;   
+  +name: string;
+   subsets: Array<SSD.PartitionSubset>;
+  +allElementString: string;
  */   
    constructor() {
       this.subsets = [];
@@ -533,18 +533,18 @@ import XMLGroup from '../js/XMLGroup.js';
 
 import SSD from './subsets.js';
 
-var group : XMLGroup;
+var group: XMLGroup;
 
 export default
  */
 SSD.PartitionSubset = class PartitionSubset extends SSD.AbstractSubset {
 /*::
-   parent : SSD.AbstractPartition;
-   subIndex : number;
-   elements : BitSet;
-   name : string;
-   partitionClass : string;
-  +elementRepresentations : Array<string>;
+   parent: SSD.AbstractPartition;
+   subIndex: number;
+   elements: BitSet;
+   name: string;
+   partitionClass: string;
+  +elementRepresentations: Array<string>;
  */   
    constructor(parent /*: SSD.AbstractPartition */,
                subIndex /*: number */,
@@ -590,7 +590,7 @@ import XMLGroup from '../js/XMLGroup.js';
 
 import SSD from './subsets.js';
 
-var group : XMLGroup;
+var group: XMLGroup;
 
 export default
  */
@@ -651,15 +651,15 @@ import XMLGroup from '../js/XMLGroup.js';
 
 import SSD from './subsets.js';
 
-var group : XMLGroup;
+var group: XMLGroup;
 
 export default
  */
 SSD.Cosets = class Cosets extends SSD.AbstractPartition {
 /*::
-  subgroup : SSD.Subgroup;
-  isLeft : boolean;
-  side : string;
+  subgroup: SSD.Subgroup;
+  isLeft: boolean;
+  side: string;
  */
    constructor(subgroup /*: SSD.Subgroup */, side /*: string */) {
       super();
@@ -702,12 +702,12 @@ export default
  */
 class DC {
 /*::
-   static DIAGRAM_PANEL_URL : string;
-   static Arrow : Class<Arrow>;
-   static ArrowMult : Class<ArrowMult>;
-   static Chunking : Class<Chunking>;
-   static DiagramChoice : Class<DiagramChoice>;
-   static Generator : Class<Generator>;
+   static DIAGRAM_PANEL_URL: string;
+   static Arrow: Class<Arrow>;
+   static ArrowMult: Class<ArrowMult>;
+   static Chunking: Class<Chunking>;
+   static DiagramChoice: Class<DiagramChoice>;
+   static Generator: Class<Generator>;
  */
    static clearMenus() {
       $('#diagram-page .highlighted').removeClass('highlighted');
@@ -772,18 +772,18 @@ import XMLGroup from '../js/XMLGroup.js';
 
 import DC from './diagram.js';
 
-var emitStateChange : () => void;
-var Cayley_diagram : CayleyDiagram;
-var Graphic_context : DisplayDiagram;
-var group : XMLGroup;
+var emitStateChange: () => void;
+var Cayley_diagram: CayleyDiagram;
+var Graphic_context: DisplayDiagram;
+var group: XMLGroup;
 
 export default
  */
 DC.Generator = class {
 /*::
-   static axis_label : Array<[string, string, string]>;
-   static axis_image : Array<[string, string, string]>;
-   static orders : Array<Array<string>>;
+   static axis_label: Array<[string, string, string]>;
+   static axis_image: Array<[string, string, string]>;
+   static orders: Array<Array<string>>;
  */
    static clickHandler(event /*: JQueryEventObject */) {
       event.preventDefault();
@@ -1068,9 +1068,9 @@ import XMLGroup from '../js/XMLGroup.js';
 
 import DC from './diagram.js';
 
-var displayGraphic : () => void;
-var group : XMLGroup;
-var Diagram_name : ?string;
+var displayGraphic: () => void;
+var group: XMLGroup;
+var Diagram_name: ?string;
 
 export default
  */
@@ -1138,10 +1138,10 @@ import DisplayDiagram from '../js/DisplayDiagram.js';
 
 import DC from './diagram.js';
 
-var emitStateChange : () => void;
-var group : XMLGroup;
-var Cayley_diagram : CayleyDiagram;
-var Graphic_context : DisplayDiagram;
+var emitStateChange: () => void;
+var group: XMLGroup;
+var Cayley_diagram: CayleyDiagram;
+var Graphic_context: DisplayDiagram;
 
 export default
  */
@@ -1257,8 +1257,8 @@ import DisplayDiagram from '../js/DisplayDiagram.js';
 
 import DC from './diagram.js';
 
-var Cayley_diagram : CayleyDiagram;
-var Graphic_context : DisplayDiagram;
+var Cayley_diagram: CayleyDiagram;
+var Graphic_context: DisplayDiagram;
 
 export default
  */
@@ -1278,17 +1278,18 @@ import XMLGroup from '../js/XMLGroup.js';
 
 import DC from './diagram.js';
 
-var group : XMLGroup;
-var Cayley_diagram : CayleyDiagram;
-var Graphic_context : DisplayDiagram;
+var group: XMLGroup;
+var Cayley_diagram: CayleyDiagram;
+var Graphic_context: DisplayDiagram;
+var Diagram_name: string;
 
 export default
  */
 DC.Chunking = class {
    static updateChunkingSelect() {
       // check that first generator is innermost, second is middle, etc.
-      if (   Cayley_diagram.strategies.every( (strategy, inx) => strategy.nesting_level == inx )
-          && $('#diagram-choice').attr('index') == '-1' ) {
+      if (   Diagram_name === undefined
+          && Cayley_diagram.strategies.every( (strategy, inx) => strategy.nesting_level == inx ) ) {
          DC.Chunking.enable();
       } else {
          DC.Chunking.disable();
@@ -1359,15 +1360,15 @@ DC.Chunking = class {
 import CayleyDiagram from '../js/CayleyDiagram.js';
 import DisplayDiagram from '../js/DisplayDiagram.js';
 
-var Cayley_diagram : CayleyDiagram;
-var Graphic_context : DisplayDiagram;
-var emitStateChange : () => void;
+var Cayley_diagram: CayleyDiagram;
+var Graphic_context: DisplayDiagram;
+var emitStateChange: () => void;
 
 export default
  */
 class CVC {
 /*::
-   static VIEW_PANEL_URL : string;
+   static VIEW_PANEL_URL: string;
  */   
    static load($viewWrapper /*: JQuery */) /*: Promise<void> */ {
       return new Promise( (resolve, reject) => {
@@ -1462,7 +1463,7 @@ CVC.VIEW_PANEL_URL = 'cayleyViewController/view.html';
 import XMLGroup from '../js/XMLGroup.js';
 import IsomorphicGroups from '../js/IsomorphicGroups.js';
 
-var group : XMLGroup;
+var group: XMLGroup;
 
 var HELP_PAGE: string;
 
@@ -1470,7 +1471,7 @@ export default
  */
 class VC {
 /*::
-   static visualizerLayoutURL : string;
+   static visualizerLayoutURL: string;
  */   
    static _init() {
       VC.visualizerLayoutURL = './visualizerFramework/visualizer.html';

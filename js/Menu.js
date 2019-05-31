@@ -1,6 +1,6 @@
 // @flow
 /*::
-export default
+  export default
 */
 class Menu {
    static setMenuLocations(event /*: JQueryMouseEventObject */, $menu /*: JQuery */) {

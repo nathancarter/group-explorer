@@ -13,15 +13,15 @@ class Multtable {
 /*::
    static COLORATIONS: {[key: string]: Coloration};
 
-   group : XMLGroup;
-   elements : Array<groupElement>;
-   separation : number;
-   _coloration : Coloration;
-   _colors : void | Array<string>;
-   stride : number;
-   backgrounds : void | Array<color>;
-   borders : void | Array<color | void>;
-   corners : void | Array<color | void>;
+   group: XMLGroup;
+   elements: Array<groupElement>;
+   separation: number;
+   _coloration: Coloration;
+   _colors: void | Array<string>;
+   stride: number;
+   backgrounds: void | Array<color>;
+   borders: void | Array<color | void>;
+   corners: void | Array<color | void>;
  */   
    constructor(group /*: XMLGroup */) {
       this.group = group;
@@ -29,8 +29,8 @@ class Multtable {
    }
 
    reset() {
-      this.elements = GEUtils.flatten/*:: <groupElement> */(
-         this.group.cosetsArray(GEUtils.flatten/*:: <groupElement> */(this.group.closureArray(this.group.generators[0])), false));
+      this.elements = GEUtils.flatten_el(
+         this.group.cosetsArray(GEUtils.flatten_el(this.group.closureArray(this.group.generators[0])), false));
       this.separation = 0;
       this.coloration = Multtable.COLORATIONS.RAINBOW;
       this.stride = this.group.order;
@@ -38,8 +38,8 @@ class Multtable {
    }
 
    organizeBySubgroup(subgroup /*: Subgroup */) /*: Multtable */ {
-      this.elements = GEUtils.flatten/*:: <groupElement>*/(
-         this.group.cosetsArray(GEUtils.flatten/*:: <groupElement> */(this.group.closureArray(subgroup.generators)), false));
+      this.elements = GEUtils.flatten_el(
+         this.group.cosetsArray(GEUtils.flatten_el(this.group.closureArray(subgroup.generators)), false) );
       this.stride = subgroup.order;
       return this;
    }

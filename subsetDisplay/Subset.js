@@ -7,13 +7,13 @@ import XMLGroup from '../js/XMLGroup.js';
 
 import SSD from './subsets.js';
 
-var group : XMLGroup;
+var group: XMLGroup;
 
 export default
  */
 SSD.Subset = class Subset extends SSD.AbstractSubset {
 /*::
-   subsetIndex : number;
+   subsetIndex: number;
  */
    constructor(elements /*: void | Array<groupElement> | BitSet */) {
       super();

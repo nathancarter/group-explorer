@@ -14,8 +14,8 @@ window.CURVED = 1;
 
 window.Point = class Point {
 /*::   
-   point : THREE.Vector3;
-  +isPoint : boolean;
+   point: THREE.Vector3;
+  +isPoint: boolean;
  */
    constructor(point /*: ?PointConstructor */) {
       if (point == undefined) {
@@ -44,15 +44,15 @@ window.Point = class Point {
  */
 window.Node = class Node extends window.Point {
 /*::
-   element : groupElement;
-   color : color;
-   label : mathml;
-   radius : ?float;
-   lineStyle : number;
-   colorHighlight : ?color;
-   ringHighlight : ?color;
-   squareHighlight : ?color;
-   curvedGroup : Array<Diagram3D.Node>;
+   element: groupElement;
+   color: color;
+   label: mathml;
+   radius: ?float;
+   lineStyle: number;
+   colorHighlight: ?color;
+   ringHighlight: ?color;
+   squareHighlight: ?color;
+   curvedGroup: Array<Diagram3D.Node>;
  */
    constructor(element /*: groupElement */,
                point /*: ?PointConstructor */,
@@ -68,22 +68,22 @@ window.Node = class Node extends window.Point {
       this.squareHighlight = undefined;
       this.isPoint = false;
       for (const opt in options) {
-         (this /*: {[key : string] : mixed} */)[opt] = options[opt];
+         (this /*: {[key: string]: mixed} */)[opt] = options[opt];
       }
    }
 }
 
 window.Line = class Line {
 /*::
-   vertices : Array<Diagram3D.Point>;
-   color : color;
-   arrowhead : boolean;
-   arrow : groupElement;
-   offset : float;
-   style : number;
+   vertices: Array<Diagram3D.Point>;
+   color: color;
+   arrowhead: boolean;
+   arrow: groupElement;
+   offset: float;
+   style: number;
   +length: float;
-   middle : THREE.Vector3;
-   center : THREE.Vector3;
+   middle: THREE.Vector3;
+   center: THREE.Vector3;
  */
    constructor(vertices /*: Array<Diagram3D.Point> */,
                options /*: {color?: color, arrowhead?: boolean} */) {
@@ -92,7 +92,7 @@ window.Line = class Line {
       this.style = Diagram3D.STRAIGHT;
       if (options !== undefined) {
          for (const opt in options) {
-            (this /*: {[key : string] : mixed} */)[opt] = options[opt];
+            (this /*: {[key: string]: mixed} */)[opt] = options[opt];
          }
       }
    }
@@ -115,25 +115,25 @@ class Diagram3D {
 /*::
    static STRAIGHT: number;
    static CURVED: number;
-   static Point : Class<Diagram3D.Point>;
-   static Node : Class<Diagram3D.Node>;
-   static Line : Class<Diagram3D.Line>;
-   group : XMLGroup;
-   nodes : Array<Diagram3D.Node>;
-   lines : Array<Diagram3D.Line>;
-   _right_multiplication : boolean;
-   node_labels : Array<mathml>;
-   background : ?color;
-   zoomLevel : number;
-   lineWidth : number;
-   nodeScale : number;
-   fogLevel : number;
-   labelSize : number;
-   arrowheadPlacement : number;
-  +emitStateChange : ?() => void;
+   static Point: Class<Diagram3D.Point>;
+   static Node: Class<Diagram3D.Node>;
+   static Line: Class<Diagram3D.Line>;
+   group: XMLGroup;
+   nodes: Array<Diagram3D.Node>;
+   lines: Array<Diagram3D.Line>;
+   _right_multiplication: boolean;
+   node_labels: Array<mathml>;
+   background: ?color;
+   zoomLevel: number;
+   lineWidth: number;
+   nodeScale: number;
+   fogLevel: number;
+   labelSize: number;
+   arrowheadPlacement: number;
+  +emitStateChange: ?() => void;
    arrowColors: Array<color>;
-  +isCayleyDiagram : boolean;
-   isGenerated : boolean;
+  +isCayleyDiagram: boolean;
+   isGenerated: boolean;
  */
    constructor(group /*: XMLGroup */,
                nodes /*: Array<Diagram3D.Node> */ = [],
@@ -156,7 +156,7 @@ class Diagram3D {
 
       if (options !== undefined) {
          for (const opt in options) {
-            (this /*: {[key : string] : mixed} */)[opt] = options[opt];
+            (this /*: {[key: string]: mixed} */)[opt] = options[opt];
          }
       }
    }
@@ -283,7 +283,7 @@ class Diagram3D {
    }
 
    _setNodeField(field /*: string */, elements /*: Array<groupElement> */, value /*: mixed */) {
-      elements.forEach( (index) => (this.nodes[index] /*: {[key : string] : mixed } */)[field] = value );
+      elements.forEach( (index) => (this.nodes[index] /*: {[key: string]: mixed } */)[field] = value );
    }
 
    highlightByNodeColor(elements /*: Array<Array<groupElement>> */) {

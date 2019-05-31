@@ -5,15 +5,15 @@ import XMLGroup from '../js/XMLGroup.js';
 
 import SSD from './subsets.js';
 
-var group : XMLGroup;
+var group: XMLGroup;
 
 export default
  */
 SSD.Cosets = class Cosets extends SSD.AbstractPartition {
 /*::
-  subgroup : SSD.Subgroup;
-  isLeft : boolean;
-  side : string;
+  subgroup: SSD.Subgroup;
+  isLeft: boolean;
+  side: string;
  */
    constructor(subgroup /*: SSD.Subgroup */, side /*: string */) {
       super();

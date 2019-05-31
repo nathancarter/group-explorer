@@ -19,21 +19,21 @@ Nearly all mathematical text in GE is formatted with MathML and rendered into HT
 import XMLGroup from './XMLGroup.js';
 
 declare class XSLTProcessor {
-   importStylesheet(Node) : void;
-   transformToFragment(Node, Document) : any;
+   importStylesheet(Node): void;
+   transformToFragment(Node, Document): any;
 }
 
-var group : XMLGroup;
+var group: XMLGroup;
 
 export default
  */
 class MathML {
 /*::
-   static subscripts : {[key : string] : string};
-   static superscripts : {[key : string] : string};
-   static MATHML_2_HTML : string;
-   static xsltProcessor : XSLTProcessor;
-   static Cache : Map<string, string>;
+   static subscripts: {[key: string]: string};
+   static superscripts: {[key: string]: string};
+   static MATHML_2_HTML: string;
+   static xsltProcessor: XSLTProcessor;
+   static Cache: Map<string, string>;
  */
 /*
 ```

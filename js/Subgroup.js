@@ -9,23 +9,23 @@ import BasicGroup from './BasicGroup.js';
 import XMLGroup from './XMLGroup.js';
 
 export type SubgroupJSON = {
-   generators : BitSetJSON;
-   members : BitSetJSON;
-   _isNormal : boolean;
-   contains : BitSetJSON;
-   containedIn : BitSetJSON;
+   generators: BitSetJSON,
+   members: BitSetJSON,
+   _isNormal: boolean,
+   contains: BitSetJSON,
+   containedIn: BitSetJSON
 };
 
 export default
  */
 class Subgroup {
 /*::
-   group : BasicGroup;
-   generators : BitSet;
-   members : BitSet;
-   _isNormal : boolean;
-   contains : BitSet;
-   containedIn : BitSet;
+   group: BasicGroup;
+   generators: BitSet;
+   members: BitSet;
+   _isNormal: boolean;
+   contains: BitSet;
+   containedIn: BitSet;
  */   
    constructor(group /*: ?BasicGroup */,
                generators /*: Array<number> */ = [],
@@ -42,7 +42,7 @@ class Subgroup {
    //   but it creates a circular data structure that can't be serialized in JSON
    //   we skip that reference here, and then re-insert it in BasicGroup.parseJSON
    toJSON() /*: Subgroup */ {
-      const result = Object.assign(new Subgroup, ((this /*: any */) /*: {(key: string) : mixed} */));
+      const result = Object.assign(new Subgroup, ((this /*: any */) /*: {(key: string): mixed} */));
       delete result.group;
       return result;
    }

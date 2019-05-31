@@ -5,9 +5,9 @@ import XMLGroup from '../js/XMLGroup.js';
 
 import DC from './diagram.js';
 
-var displayGraphic : () => void;
-var group : XMLGroup;
-var Diagram_name : ?string;
+var displayGraphic: () => void;
+var group: XMLGroup;
+var Diagram_name: ?string;
 
 export default
  */

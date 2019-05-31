@@ -3,15 +3,15 @@
 import CayleyDiagram from '../js/CayleyDiagram.js';
 import DisplayDiagram from '../js/DisplayDiagram.js';
 
-var Cayley_diagram : CayleyDiagram;
-var Graphic_context : DisplayDiagram;
-var emitStateChange : () => void;
+var Cayley_diagram: CayleyDiagram;
+var Graphic_context: DisplayDiagram;
+var emitStateChange: () => void;
 
 export default
  */
 class CVC {
 /*::
-   static VIEW_PANEL_URL : string;
+   static VIEW_PANEL_URL: string;
  */   
    static load($viewWrapper /*: JQuery */) /*: Promise<void> */ {
       return new Promise( (resolve, reject) => {

@@ -12,8 +12,8 @@ export default
  */
 class SubgroupFinder {
 /*::
-   group : BasicGroup;
-   z_generators : BitSet;
+   group: BasicGroup;
+   z_generators: BitSet;
  */   
    constructor (group /*: BasicGroup */) {
       this.group = group;

@@ -7,8 +7,8 @@ export default
 */
 class MathUtils {
 /*::
-   static primeList : BitSet;
-   static primePowerList : BitSet;
+   static primeList: BitSet;
+   static primePowerList: BitSet;
  */
    static init() {
       MathUtils.primeList =

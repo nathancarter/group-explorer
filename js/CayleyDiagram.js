@@ -12,9 +12,9 @@ type layout = 0 | 1 | 2;
 type direction = 0 | 1 | 2;
 
 type CayleyDiagramJSON = {
-   groupURL : string;
-   diagram_name : ?string;
-   arrowheadPlacement : number;
+   groupURL: string,
+   diagram_name: ?string,
+   arrowheadPlacement: number
 }
 */
 
@@ -25,12 +25,12 @@ type CayleyDiagramJSON = {
 
 window.AbstractLayoutStrategy = class AbstractLayoutStrategy {
 /*::   
-  +doLayout : (children : Array<Array<Diagram3D.Node>> ) => Array<Array<Diagram3D.Node>>;
-   generator : groupElement;
-  +layout : layout;
-   direction : direction;
-   nesting_level : number;
-   bitset : BitSet;
+  +doLayout: (children: Array<Array<Diagram3D.Node>> ) => Array<Array<Diagram3D.Node>>;
+   generator: groupElement;
+  +layout: layout;
+   direction: direction;
+   nesting_level: number;
+   bitset: BitSet;
 */
    constructor(generator /*: groupElement */, direction /*: direction */, nesting_level /*: number */) {
       this.generator = generator;          // element# (not 0)
@@ -64,7 +64,7 @@ window.LinearLayout = class LinearLayout extends window.AbstractLayoutStrategy {
 
       // find a child diameter in <direction>, scale so all fit in [0,1] box
       const target_width = 1.4/(3*num_children - 1);  // heuristic
-      const child_width = this.width(GEUtils.flatten/*:: <Diagram3D.Node> */(children), this.direction);
+      const child_width = this.width(GEUtils.flatten_nd(children), this.direction);
       const scale = child_width < target_width ? 1 : target_width / child_width;
 
       // create scale transform
@@ -86,7 +86,7 @@ window.LinearLayout = class LinearLayout extends window.AbstractLayoutStrategy {
 
 window.CurvedLayout = class CurvedLayout extends window.AbstractLayoutStrategy {
 /*::   
-   position : (r : number, theta : number) => THREE.Vector3;
+   position: (r: number, theta: number) => THREE.Vector3;
  */
    constructor(generator /*: groupElement */, direction /*: direction */, nesting_level /*: number */) {
       super(generator, direction, nesting_level);
@@ -145,7 +145,7 @@ window.CircularLayout = class CircularLayout extends window.CurvedLayout {
 //   so they're distributed around the 0.5*e^i*[0,2*PI] circle centered at [.5,.5]
 window.RotatedLayout = class RotatedLayout extends window.CurvedLayout {
 /*::   
-   rotation : (theta : number) => THREE.Matrix4;
+   rotation: (theta: number) => THREE.Matrix4;
  */
    constructor(generator, direction, nesting_level) {
       super(generator, direction, nesting_level);
@@ -200,20 +200,25 @@ window.RotatedLayout = class RotatedLayout extends window.CurvedLayout {
 /*:: export default */
 class CayleyDiagram extends Diagram3D {
 /*::
-   static BACKGROUND_COLOR : color;
-   static NODE_COLOR : color;
-   static LAYOUT : {[key: string]: layout};
-   static DIRECTION : {[key: string]: direction};
-   static AbstractLayoutStrategy : Class<CayleyDiagram.AbstractLayoutStrategy>;
-   static LinearLayout : Class<CayleyDiagram.LinearLayout>;
-   static CurvedLayout : Class<CayleyDiagram.CurvedLayout>;
-   static CircularLayout : Class<CayleyDiagram.CircularLayout>;
-   static RotatedLayout : Class<CayleyDiagram.RotatedLayout>;
+   static BACKGROUND_COLOR: color;
+   static NODE_COLOR: color;
+   static LAYOUT: {[key: string]: layout};
+   static DIRECTION: {[key: string]: direction};
+   static AbstractLayoutStrategy: Class<CayleyDiagram.AbstractLayoutStrategy>;
+   static LinearLayout: Class<CayleyDiagram.LinearLayout>;
+   static CurvedLayout: Class<CayleyDiagram.CurvedLayout>;
+   static CircularLayout: Class<CayleyDiagram.CircularLayout>;
+   static RotatedLayout: Class<CayleyDiagram.RotatedLayout>;
 
-   strategies : Array<CayleyDiagram.AbstractLayoutStrategy>;
-   diagram_name : ?string;
-   ordered_nodes : Tree<Diagram3D.Node>;
-   chunk : ?number;
+   strategies: Array<CayleyDiagram.AbstractLayoutStrategy>;
+   diagram_name: ?string;
+   ordered_nodes: NodeTree;
+   chunk: ?number;
+
+   // fields unused in GE, added for compatibility with JSON methods in DisplayDiagram.js
+   highlights: any;
+   elements: any;
+   arrowColors: any;
  */   
    constructor(group /*: XMLGroup */, diagram_name /*: ?string */) {
       super(group);
@@ -288,20 +293,20 @@ class CayleyDiagram extends Diagram3D {
       this.emitStateChange();
    }
 
-   _generateNodes() /*: Tree<groupElement> */ {
+   _generateNodes() /*: ElementTree */ {
       const generators = this.strategies.map( (strategy) => strategy.generator );
 
       const node_list = this.strategies.reduce( (nodes, strategy, inx) => {
          const [newNodes, newBitSet] = this._extendSubgroup(nodes, generators.slice(0, inx+1));
          this.strategies[inx].bitset = newBitSet;
-         return (inx == 0) ? GEUtils.flatten/*:: <groupElement> */(newNodes) : newNodes;
+         return (inx == 0) ? GEUtils.flatten_el(newNodes) : newNodes;
       }, [0] );
 
       this.emitStateChange();
       return node_list;
    }
 
-   _extendSubgroup(H_prev /*: Tree<groupElement> */, generators /*: Array<groupElement> */) /*: [Tree<groupElement>, BitSet] */ {
+   _extendSubgroup(H_prev /*: ElementTree */, generators /*: Array<groupElement> */) /*: [ElementTree, BitSet] */ {
       const deepMultiply = (g, arr) => {
          if (Array.isArray(arr)) {
             return arr.map( (el) => deepMultiply(g, el) );
@@ -314,7 +319,7 @@ class CayleyDiagram extends Diagram3D {
 
       const new_generator = generators[generators.length - 1];
       const result = [H_prev];
-      const result_bitset = new BitSet(this.group.order, GEUtils.flatten/*:: <groupElement> */(H_prev));
+      const result_bitset = new BitSet(this.group.order, GEUtils.flatten_el(H_prev));
       Array.from({length: this.group.elementOrders[new_generator]})
            .reduce( (cycle) => (cycle.push(this.group.mult(GEUtils.last(cycle), new_generator)), cycle), [0])
            .forEach( (el) => {
@@ -339,7 +344,7 @@ class CayleyDiagram extends Diagram3D {
       return [result, result_bitset];
    }
 
-   _transposeNodes(node_list /*: Tree<groupElement> */) /*: Tree<Diagram3D.Node> */ {
+   _transposeNodes(node_list /*: ElementTree */) /*: NodeTree */ {
       const copyPush = (arr /*: Array<groupElement> */, el /*: groupElement */) /*: Array<groupElement> */ => {
          const result = arr.slice();
          result.push(el);
@@ -358,7 +363,7 @@ class CayleyDiagram extends Diagram3D {
                                 Array(transpose_allocations[transpose_index]).fill().map( (_) => makeEmpty(transpose_index + 1) );
 
       // traverse node_list, inserting new Diagram3D.Node into transpose
-      const traverse = (nodes /*: groupElement | Tree<groupElement> */, indices /*: Array<groupElement> */ = []) => {
+      const traverse = (nodes /*: groupElement | ElementTree */, indices /*: Array<groupElement> */ = []) => {
          if (Array.isArray(nodes)) {
             nodes.forEach( (el,inx) => { traverse(el, copyPush(indices, inx)) } );
          } else {
@@ -373,13 +378,13 @@ class CayleyDiagram extends Diagram3D {
       }
 
       // now actually do the work
-      const result /*: Tree<Diagram3D.Node> */ = makeEmpty();
+      const result /*: NodeTree */ = makeEmpty();
       traverse(node_list);
 
       return result;
    }
 
-   _layout(nested_nodes /*: Diagram3D.Node | Tree<Diagram3D.Node> */,
+   _layout(nested_nodes /*: Diagram3D.Node | NodeTree */,
            nested_strategies /*: Array<CayleyDiagram.AbstractLayoutStrategy> */ = this.strategies.slice().sort( (a,b) => a.nesting_level - b.nesting_level )) /*: Array<Diagram3D.Node> */ {
 
       if (Array.isArray(nested_nodes)) {
@@ -387,7 +392,7 @@ class CayleyDiagram extends Diagram3D {
          const child_results = [...nested_nodes.map( (children) => this._layout(children, nested_strategies) )]
          nested_strategies.push(strategy);
          const layout_results = strategy.doLayout(child_results);
-         return GEUtils.flatten/*:: <Diagram3D.Node> */(layout_results);
+         return GEUtils.flatten_nd(layout_results);
       } else {
          return [nested_nodes];
       }
@@ -468,9 +473,9 @@ class CayleyDiagram extends Diagram3D {
 
    toJSON() /*: CayleyDiagramJSON */ {
       return {
-         groupURL : this.group.URL,
-         diagram_name : this.diagram_name,
-         arrowheadPlacement : this.arrowheadPlacement
+         groupURL: this.group.URL,
+         diagram_name: this.diagram_name,
+         arrowheadPlacement: this.arrowheadPlacement
       };
    }
 

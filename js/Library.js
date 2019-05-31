@@ -33,7 +33,7 @@ export default
  */
 class Library {
 /*::
-   static map : Map<?string, XMLGroup>;
+   static map: Map<?string, XMLGroup>;
 */
    // initialize Library.map from localStorage
    //   called once after class is defined
@@ -206,7 +206,7 @@ class Library {
              * When this page is loaded in an iframe, the parent window can
              * indicate which group to load by passing the full JSON
              * definition of the group in a postMessage() call to this
-             * window, with the format { type : 'load group', group : G },
+             * window, with the format { type: 'load group', group: G },
              * where G is the JSON data in question.
              */
             document.addEventListener( 'message', function ( event /*: MessageEvent */ ) {
@@ -235,7 +235,7 @@ class Library {
 
    // utility routine to open web page with "...?groupURL=..." with search string containing groupURL
    //   and options from {a: b, ...} included as '&a=b...',
-   static openWithGroupURL(pageURL /*: string */, groupURL /*: string */, options /*: {[key : string] : string} */ = {}) {
+   static openWithGroupURL(pageURL /*: string */, groupURL /*: string */, options /*: {[key: string]: string} */ = {}) {
       const url = `./${pageURL}?groupURL=${groupURL}` +
                   Object.keys(options).reduce( (url, option) => url + `&${option}=${options[option]}`, '');
       window.open(url);

@@ -8,17 +8,18 @@ import XMLGroup from '../js/XMLGroup.js';
 
 import DC from './diagram.js';
 
-var group : XMLGroup;
-var Cayley_diagram : CayleyDiagram;
-var Graphic_context : DisplayDiagram;
+var group: XMLGroup;
+var Cayley_diagram: CayleyDiagram;
+var Graphic_context: DisplayDiagram;
+var Diagram_name: string;
 
 export default
  */
 DC.Chunking = class {
    static updateChunkingSelect() {
       // check that first generator is innermost, second is middle, etc.
-      if (   Cayley_diagram.strategies.every( (strategy, inx) => strategy.nesting_level == inx )
-          && $('#diagram-choice').attr('index') == '-1' ) {
+      if (   Diagram_name === undefined
+          && Cayley_diagram.strategies.every( (strategy, inx) => strategy.nesting_level == inx ) ) {
          DC.Chunking.enable();
       } else {
          DC.Chunking.disable();

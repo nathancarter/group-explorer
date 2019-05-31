@@ -2,11 +2,11 @@
 // simple debug log function
 
 /*::
-   export default
+  export default
  */
 class Log {
 /*::
-   static debug : boolean;
+   static debug: boolean;
  */
    static init(debug /*: ?boolean */) {
       Log.debug = (debug == undefined) ? false : debug;

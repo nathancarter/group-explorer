@@ -20,17 +20,17 @@ import XMLGroup from '../js/XMLGroup.js';
 
 import SSD from './subsets.js';
 
-var group : XMLGroup;
+var group: XMLGroup;
 
 export default
  */
 SSD.AbstractSubset = class AbstractSubset {
 /*::
-   id : number;
-   elements : BitSet;
-  +name : string;	// implemented in subclass
-  +menu : JQuery;	// implemented in subclass
-  +displayLine : string;// implemented in subclass
+   id: number;
+   elements: BitSet;
+  +name: string;	// implemented in subclass
+  +menu: JQuery;	// implemented in subclass
+  +displayLine: string; // implemented in subclass
  */  
    constructor() {
       this.id = SSD.nextId++;

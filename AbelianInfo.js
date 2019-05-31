@@ -9,13 +9,18 @@ import Template from './js/Template.js';
 
 $(window).on('load', load);	// like onload handler in body
 
+var group /*: XMLGroup */;
+
 function load() {
    Library.loadFromURL()
-      .then( (group) => formatGroup(group) )
+      .then( (_group) => {
+         group = _group;
+         formatGroup(group)
+      } )
       .catch( console.error );
 }
 
-function formatGroup(group) {
+function formatGroup(group /*: XMLGroup */) {
    const $rslt = $(document.createDocumentFragment())
          .append(eval(Template.HTML('header')));
    const nonAbelianExample = group.nonAbelianExample;
@@ -29,6 +34,5 @@ function formatGroup(group) {
    $('body').prepend($rslt);
    MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
 
-   window.group = group;
    setUpGAPCells();
 }

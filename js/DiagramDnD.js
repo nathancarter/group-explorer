@@ -11,14 +11,14 @@ export default
  */
 class DiagramDnD {
 /*::
-   displayDiagram : DisplayDiagram;
-   canvas : HTMLCanvasElement;
-   mouse : THREE.Vector2;
-   raycaster : THREE.Raycaster;
-   event_handler : (JQueryEventObject) => void;
-   repaint_poller : ?number;
-   repaint_request : ?number;
-   object : any;
+   displayDiagram: DisplayDiagram;
+   canvas: HTMLCanvasElement;
+   mouse: THREE.Vector2;
+   raycaster: THREE.Raycaster;
+   event_handler: (JQueryEventObject) => void;
+   repaint_poller: ?number;
+   repaint_request: ?number;
+   object: any;
  */
    constructor(displayDiagram /*: DisplayDiagram */) {
       this.displayDiagram = displayDiagram;

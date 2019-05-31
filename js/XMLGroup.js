@@ -5,92 +5,95 @@
  * To turn to JSON:
  *      JSON.stringify(instance)
  * To create from JSON:
- *      Object.setPrototypeOf(JSON.parse(string), XMLGroup.prototype)
- *
- * Cayley diagrams are returned as {name, arrows, points} where
- *      arrows are element numbers
- *      points are [x,y,z] arrays
- *
- * Symmetry objects are returned as {name, operations, spheres, paths} where
- *      operations are {element, degrees, point}
- *      spheres are {radius, color, point}
- *      paths are {color, points}
- *      point(s) are [x,y,z] arrays
+ *      XMLGroup.parseJSON(json)
  */
 /*::
 import BasicGroup from './BasicGroup.js';
 import type {BasicGroupJSON} from './BasicGroup.js';
 import MathML from './MathML.js';
 
-type XMLGroup_CayleyDiagram = {name: string, arrows: Array<groupElement>, points: Array<Point>};
+// Cayley diagram from XML 
+type XMLCayleyDiagram = {
+   name: string,
+   arrows: Array<groupElement>,
+   points: Array<Point>
+};
+
+// Symmetry object from XML
 type Point = [float, float, float];
-type Path = {color?: color; points: Array<Point>};
-type Sphere = {radius: float; color?: color; point: Point};
-type Operation = {element: groupElement; degrees: float; point: Point};
-export type XMLSymmetryObject = {name: string; operations: Array<Operation>; spheres: Array<Sphere>; paths: Array<Path>};
+type Path = {color?: color, points: Array<Point>};
+type Sphere = {radius: float, color?: color, point: Point};
+type Operation = {element: groupElement, degrees: float, point: Point};
+export type XMLSymmetryObject = {
+   name: string,
+   operations: Array<Operation>,
+   spheres: Array<Sphere>,
+   paths: Array<Path>
+};
 
 export type XMLGroupJSON = {
-   name : mathml,
-   shortName : string,
-   definition : mathml,
-   phrase : string,
-   notes : string,
-   author : string,
-   _XML_generators : Array<Array<groupElement>>,
-   reps : Array<Array<string>>,
-   representations : Array<Array<mathml>>,
-   userRepresentations : Array<Array<string>>,
-   representationIndex : number,
-   cayleyDiagrams : Array<XMLGroup_CayleyDiagram>,
-   symmetryObjects : Array<XMLSymmetryObject>,
-   _labels : Array<Array<string>>,
+   name: mathml,
+   shortName: string,
+   definition: mathml,
+   phrase: string,
+   notes: string,
+   author: string,
+   _XML_generators: Array<Array<groupElement>>,
+   reps: Array<Array<string>>,
+   representations: Array<Array<mathml>>,
+   userRepresentations: Array<Array<string>>,
+   representationIndex: number,
+   cayleyDiagrams: Array<XMLCayleyDiagram>,
+   symmetryObjects: Array<XMLSymmetryObject>,
+   _labels: Array<Array<string>>,
 
-   lastModifiedOnServer : string,
-   URL : string,
-   CayleyThumbnail : string,
-   rowHTML : string,
-   userNotes : string
+   // XMLGroup properties set elsewhere
+   lastModifiedOnServer: string,
+   URL: string,
+   CayleyThumbnail: string,
+   rowHTML: string,
+   userNotes: string
 };
 
 export type BriefXMLGroupJSON = {
-   name : mathml,
-   shortName : string,
-   author : string,
-   notes : string,
-   phrase : string,
-   representations : Array<Array<mathml>>,
-   representationIndex : number,
-   cayleyDiagrams : Array<XMLGroup_CayleyDiagram>,
-   symmetryObjects : Array<XMLSymmetryObject>,
-   multtable : Array<Array<groupElement>>
+   name: mathml,
+   shortName: string,
+   author: string,
+   notes: string,
+   phrase: string,
+   representations: Array<Array<mathml>>,
+   representationIndex: number,
+   cayleyDiagrams: Array<XMLCayleyDiagram>,
+   symmetryObjects: Array<XMLSymmetryObject>,
+   multtable: Array<Array<groupElement>>
 };
 
 export default
  */
 class XMLGroup extends BasicGroup {
 /*::
-   name : string;
+   name: string;
    gapname: string;
    gapid: string;
-   shortName : string;
-   definition : string;
-   phrase : string;
-   notes : string;
-   author : string;
-   _XML_generators : Array<Array<number>>;
-   reps : Array<Array<string>>;
-   representations : Array<Array<string>>;
-   userRepresentations : Array<Array<string>>;
-   representationIndex : number;
-   cayleyDiagrams : Array<XMLGroup_CayleyDiagram>;
-   symmetryObjects : Array<XMLSymmetryObject>;
-   _labels : Array<Array<string>>;
+   shortName: string;
+   definition: string;
+   phrase: string;
+   notes: string;
+   author: string;
+   _XML_generators: Array<Array<number>>;
+   reps: Array<Array<string>>;
+   representations: Array<Array<string>>;
+   userRepresentations: Array<Array<string>>;
+   representationIndex: number;
+   cayleyDiagrams: Array<XMLCayleyDiagram>;
+   symmetryObjects: Array<XMLSymmetryObject>;
+   _labels: Array<Array<string>>;
 
-   lastModifiedOnServer : string;
-   URL : string;
-   CayleyThumbnail : string;
-   rowHTML : string;
-   userNotes : string;
+   lastModifiedOnServer: string;
+   URL: string;
+   CayleyThumbnail: string;
+   rowHTML: string;
+   userNotes: string;
  */
    constructor (text /*: void | string */) {
       if (text === undefined) {
@@ -161,16 +164,16 @@ class XMLGroup extends BasicGroup {
 
    toBriefJSON () /*: BriefXMLGroupJSON */ {
       return {
-         name : this.name,
-         shortName : this.shortName,
-         author : this.author,
-         notes : this.notes,
-         phrase : this.phrase,
-         representations : this.representations,
-         representationIndex : this.representationIndex,
-         cayleyDiagrams : this.cayleyDiagrams,
-         symmetryObjects : this.symmetryObjects,
-         multtable : this.multtable
+         name: this.name,
+         shortName: this.shortName,
+         author: this.author,
+         notes: this.notes,
+         phrase: this.phrase,
+         representations: this.representations,
+         representationIndex: this.representationIndex,
+         cayleyDiagrams: this.cayleyDiagrams,
+         symmetryObjects: this.symmetryObjects,
+         multtable: this.multtable
       };
    }
 
@@ -294,7 +297,7 @@ class XMLGroup extends BasicGroup {
    // {name, arrows, points}
    // arrows are element numbers
    // points are [x,y,z] arrays
-   static _cayley_diagrams_from_xml($xml /*: JQuery */) /*: Array<XMLGroup_CayleyDiagram> */ {
+   static _cayley_diagrams_from_xml($xml /*: JQuery */) /*: Array<XMLCayleyDiagram> */ {
       let cayleyDiagrams = [];
       $xml.find('cayleydiagram').each(
          (_, cd) => {

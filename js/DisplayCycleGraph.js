@@ -12,21 +12,21 @@ export default
  */
 class DisplayCycleGraph {
 /*::
-   static DEFAULT_MIN_CANVAS_HEIGHT : number;
-   static DEFAULT_MIN_CANVAS_WIDTH : number;
-   static DEFAULT_MIN_RADIUS : number; 
-   static DEFAULT_ZOOM_STEP : number;
-   static DEFAULT_CANVAS_WIDTH : number;
-   static DEFAULT_CANVAS_HEIGHT : number;
+   static DEFAULT_MIN_CANVAS_HEIGHT: number;
+   static DEFAULT_MIN_CANVAS_WIDTH: number;
+   static DEFAULT_MIN_RADIUS: number; 
+   static DEFAULT_ZOOM_STEP: number;
+   static DEFAULT_CANVAS_WIDTH: number;
+   static DEFAULT_CANVAS_HEIGHT: number;
 
-   canvas : HTMLCanvasElement;
-   context : CanvasRenderingContext2D;
-   options : Options;
-   zoom : number;
-   translate : {dx: number, dy: number};
-   transform : THREE.Matrix3;
-   cycleGraph : CycleGraph;
-   radius : number;
+   canvas: HTMLCanvasElement;
+   context: CanvasRenderingContext2D;
+   options: Options;
+   zoom: number;
+   translate: {dx: number, dy: number};
+   transform: THREE.Matrix3;
+   cycleGraph: CycleGraph;
+   radius: number;
  */
    constructor(options /*: Options */) {
       Log.log('DisplayCycleGraph');
@@ -60,7 +60,7 @@ class DisplayCycleGraph {
       this.canvas.height = h;
    }
    getSize() /*: {w: number, h: number} */ {
-      return { w : this.canvas.width, h : this.canvas.height };
+      return { w: this.canvas.width, h: this.canvas.height };
    }
 
    static _setDefaults() {
@@ -316,19 +316,19 @@ class DisplayCycleGraph {
             untranslatedCanvasCoords = virtualCoords.applyMatrix3( this.transform ),
             // so we do the translation manually:
             translatedCanvasCoords = {
-               x : this.transform.elements[6] + untranslatedCanvasCoords.x,
-               y : this.transform.elements[7] + untranslatedCanvasCoords.y
+               x: this.transform.elements[6] + untranslatedCanvasCoords.x,
+               y: this.transform.elements[7] + untranslatedCanvasCoords.y
             };
-      return { x : translatedCanvasCoords.x / this.canvas.width,
-               y : translatedCanvasCoords.y / this.canvas.height };
+      return { x: translatedCanvasCoords.x / this.canvas.width,
+               y: translatedCanvasCoords.y / this.canvas.height };
    }
 
    // two serialization functions
    toJSON(cycleGraph /*: CycleGraph */) /*: CycleGraphJSON */ {
       return {
-         groupURL : cycleGraph.group.URL,
-         highlights : cycleGraph.highlights,
-         elements : cycleGraph.elements
+         groupURL: cycleGraph.group.URL,
+         highlights: cycleGraph.highlights,
+         elements: cycleGraph.elements
       };
    }
    fromJSON(json /*: CycleGraphJSON */, cycleGraph /*: CycleGraph */) {

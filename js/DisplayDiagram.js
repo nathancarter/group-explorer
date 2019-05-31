@@ -12,59 +12,59 @@ import Log from './Log.js';
 import MathML from './MathML.js';
 
 export type CayleyDiagramJSON = {
-   groupURL : string,
-   _diagram_name : ?string,
-   highlights : void,
-   elements : void,
-   zoomLevel : number,
-   lineWidth : number,
-   nodeScale : number,
-   fogLevel : number,
-   labelSize : number,
-   arrowheadPlacement : number,
-   arrowColors : Array<any>,
-   _camera : Array<number>,
-   highlights : {
-      background : Array<void | null | color>,
-      ring : Array<void | null | color>,
-      square : Array<void | null | color>,
+   groupURL: string,
+   _diagram_name: ?string,
+   highlights: void,
+   elements: void,
+   zoomLevel: number,
+   lineWidth: number,
+   nodeScale: number,
+   fogLevel: number,
+   labelSize: number,
+   arrowheadPlacement: number,
+   arrowColors: Array<color>,
+   _camera: Array<number>,
+   highlights: {
+      background: Array<void | null | color>,
+      ring: Array<void | null | color>,
+      square: Array<void | null | color>
    },
-   strategies : Array<[groupElement, number, number, number]>,
-   arrows : Array<number>,
+   strategies: Array<[groupElement, number, number, number]>,
+   arrows: Array<number>,
    nodePositions: Array<{x: float, y: float, z: float}>,
    nodeRadii: Array<float>,
    chunkIndex: ?number, 
-   arrowsData: Array<{style: number, offset: float}>,
+   arrowsData: Array<{style: number, offset: float}>
 };
 
 type Options = {
-   container? : JQuery,
-   trackballControlled? : boolean,
-   width? : number,
-   height? : number,
-   fog? : boolean,
+   container?: JQuery,
+   trackballControlled?: boolean,
+   width?: number,
+   height?: number,
+   fog?: boolean
 };
 
 export default
  */
 class DisplayDiagram {
 /*::
-   static groupNames : Array<string>;
-   static DEFAULT_CANVAS_HEIGHT : number;
-   static DEFAULT_CANVAS_WIDTH : number;
-   static DEFAULT_BACKGROUND : color; 
-   static DEFAULT_NODE_COLOR : color;
-   static DEFAULT_LINE_COLOR : color;
-   static DEFAULT_FOG_COLOR : color;
-   static IOS_LINE_WIDTH : number;
-   static DEFAULT_ARC_OFFSET : number;
-   static LIGHT_POSITIONS : Array<[number, number, number]>;
+   static groupNames: Array<string>;
+   static DEFAULT_CANVAS_HEIGHT: number;
+   static DEFAULT_CANVAS_WIDTH: number;
+   static DEFAULT_BACKGROUND: color; 
+   static DEFAULT_NODE_COLOR: color;
+   static DEFAULT_LINE_COLOR: color;
+   static DEFAULT_FOG_COLOR: color;
+   static IOS_LINE_WIDTH: number;
+   static DEFAULT_ARC_OFFSET: number;
+   static LIGHT_POSITIONS: Array<[number, number, number]>;
 
-   scene : THREE.Scene;
-   camera : THREE.PerspectiveCamera;
-   renderer : THREE.WebGLRenderer;
-   camControls : THREE.TrackballControls;
-   lineDnD : DiagramDnD;
+   scene: THREE.Scene;
+   camera: THREE.PerspectiveCamera;
+   renderer: THREE.WebGLRenderer;
+   camControls: THREE.TrackballControls;
+   lineDnD: DiagramDnD;
  */
    /*
     * Create three.js objects to display data in container
@@ -122,7 +122,7 @@ class DisplayDiagram {
    }
    getSize() /*: {w: number, h: number} */ {
        const size = this.renderer.getSize();
-       return {w : size.width, h : size.height};
+       return {w: size.width, h: size.height};
    }
 
    static setDefaults() {
@@ -151,7 +151,7 @@ class DisplayDiagram {
            ) /*: Image */ {
       // Options parameter:
       // size: "small" or "large", default is "small"
-      // resetCamera : true or false, default is true
+      // resetCamera: true or false, default is true
       options = {size: (options.hasOwnProperty('size')) ? options.size : 'small',
                  resetCamera: (options.hasOwnProperty('resetCamera')) ? options.resetCamera : true};
       const img = new Image();
@@ -711,13 +711,13 @@ class DisplayDiagram {
 
       const diagram3D /*: CayleyDiagram */ = ((_diagram3D /*: any */) /*: CayleyDiagram */);
 
-      if (diagram3D.chunk === undefined) {
-         return;
-      }
-
       // remove old chunks
       const chunks = this.getGroup('chunks');
       chunks.remove(...chunks.children);
+
+      if (diagram3D.chunk === undefined) {
+         return;
+      }
 
       // utility functions
       const centroid = (points) => points.reduce( (sum, point) => sum.add(point), new THREE.Vector3() ).multiplyScalar(1/points.length);
@@ -771,9 +771,9 @@ class DisplayDiagram {
       } );
       
       let subgroup_name;  // MathML subgroup name, generated first time through
-      const createChunks = (arr /*: Tree<Diagram3D.Node> */, desired, current = diagram3D.strategies.length - 1) /*: Array<THREE.Mesh> */ => {
+      const createChunks = (arr /*: NodeTree */, desired, current = diagram3D.strategies.length - 1) /*: Array<THREE.Mesh> */ => {
          if (current == desired) {
-            const nodes = GEUtils.flatten/*:: <Diagram3D.Node> */(arr);
+            const nodes = GEUtils.flatten_nd(arr);
             const elements = new BitSet(diagram3D.group.order, nodes.map( (node) => node.element ));
             const points = nodes.map( (node) => node.point );
             const box = new THREE.Mesh(box_geometry, box_material);
@@ -786,8 +786,8 @@ class DisplayDiagram {
             return [box];
          } else {
             // arr is an array of Trees at this point, though the logic that ensures this is convoluted
-            const boxes = arr.map( (el) => createChunks(el, desired, current-1) );
-            const all_boxes = GEUtils.flatten/*:: <THREE.Mesh> */(boxes);
+            const boxes = ((arr.map( (el) => createChunks(el, desired, current-1) ) /*: any */) /*: Array<Array<THREE.Mesh>> */);
+            const all_boxes = GEUtils.flatten_msh(((boxes /*: any */) /*: MeshTree */));
             const strategy = diagram3D.strategies[current];
             if (strategy.layout == CayleyDiagram.LAYOUT.ROTATED) {
                // find centroid of all boxes
@@ -875,42 +875,39 @@ class DisplayDiagram {
    unitSquarePosition(element /*: number */, cayleyDiagram /*: CayleyDiagram */) {
       const point3d = cayleyDiagram.nodes[element].point.clone(),
             point2d = point3d.project( this.camera );
-      return { x : point2d.x/2 + 1/2, y : -point2d.y/2 + 1/2 };
+      return { x: point2d.x/2 + 1/2, y: -point2d.y/2 + 1/2 };
    }
 
    // two serialization functions
    toJSON(cayleyDiagram /*: CayleyDiagram */) /*: CayleyDiagramJSON */ {
       const tmp = {
-         groupURL : cayleyDiagram.group.URL,
-         _diagram_name : cayleyDiagram.diagram_name,
-         // $FlowFixMe: no such field as CayleyDiagram.highlights
-         highlights : cayleyDiagram.highlights,
-         // $FlowFixMe: no such field as CayleyDiagram.elements
-         elements : cayleyDiagram.elements,
-         zoomLevel : cayleyDiagram.zoomLevel,
-         lineWidth : cayleyDiagram.lineWidth,
-         nodeScale : cayleyDiagram.nodeScale,
-         fogLevel : cayleyDiagram.fogLevel,
-         labelSize : cayleyDiagram.labelSize,
-         arrowheadPlacement : cayleyDiagram.arrowheadPlacement,
-         // $FlowFixMe: no such field as CayleyDiagram.arrowColors
-         arrowColors : cayleyDiagram.arrowColors,
-         _camera : this.camera.matrix.toArray(),
-         highlights : {
-            background : (cayleyDiagram.nodes.map( n => n.colorHighlight ) /*: Array<void | null | color> */),
-            ring : (cayleyDiagram.nodes.map( n => n.ringHighlight ) /*: Array<void | null | color> */),
-            square : (cayleyDiagram.nodes.map( n => n.squareHighlight ) /*: Array<void | null | color> */)
+         groupURL: cayleyDiagram.group.URL,
+         _diagram_name: cayleyDiagram.diagram_name,
+         highlights: cayleyDiagram.highlights,
+         elements: cayleyDiagram.elements,
+         zoomLevel: cayleyDiagram.zoomLevel,
+         lineWidth: cayleyDiagram.lineWidth,
+         nodeScale: cayleyDiagram.nodeScale,
+         fogLevel: cayleyDiagram.fogLevel,
+         labelSize: cayleyDiagram.labelSize,
+         arrowheadPlacement: cayleyDiagram.arrowheadPlacement,
+         arrowColors: cayleyDiagram.arrowColors,
+         _camera: this.camera.matrix.toArray(),
+         highlights: {
+            background: (cayleyDiagram.nodes.map( n => n.colorHighlight ) /*: Array<void | null | color> */),
+            ring: (cayleyDiagram.nodes.map( n => n.ringHighlight ) /*: Array<void | null | color> */),
+            square: (cayleyDiagram.nodes.map( n => n.squareHighlight ) /*: Array<void | null | color> */)
          },
-         strategies : cayleyDiagram.getStrategies(),
-         arrows : cayleyDiagram.lines.map( x => x.arrow )
+         strategies: cayleyDiagram.getStrategies(),
+         arrows: cayleyDiagram.lines.map( x => x.arrow )
             .filter( ( v, i, s ) => s.indexOf( v ) === i ), // incl. each only 1x
-         nodePositions : cayleyDiagram.nodes.map( node => {
-            return { x : node.point.x, y : node.point.y, z : node.point.z };
+         nodePositions: cayleyDiagram.nodes.map( node => {
+            return { x: node.point.x, y: node.point.y, z: node.point.z };
          } ),
-         nodeRadii : cayleyDiagram.nodes.map( node => node.radius ),
-         chunkIndex : cayleyDiagram.chunk,
-         arrowsData : cayleyDiagram.lines.map( ( arrow, index ) => {
-            return { style : arrow.style, offset : arrow.offset };
+         nodeRadii: cayleyDiagram.nodes.map( node => node.radius ),
+         chunkIndex: cayleyDiagram.chunk,
+         arrowsData: cayleyDiagram.lines.map( ( arrow, index ) => {
+            return { style: arrow.style, offset: arrow.offset };
          } )
       };
       // console.log( 'Sending:', tmp );
@@ -923,10 +920,8 @@ class DisplayDiagram {
       // if it isn't included in the diagram
       cayleyDiagram.diagram_name = json._diagram_name;
       if ( json.hasOwnProperty( 'highlights' ) )
-         // $FlowFixMe: no such field as CayleyDiagram.highlights
          cayleyDiagram.highlights = json.highlights;
       if ( json.hasOwnProperty( 'elements' ) )
-         // $FlowFixMe: no such field as CayleyDiagram.elements
          cayleyDiagram.elements = json.elements;
       if ( json.hasOwnProperty( 'zoomLevel' ) )
          cayleyDiagram.zoomLevel = json.zoomLevel;

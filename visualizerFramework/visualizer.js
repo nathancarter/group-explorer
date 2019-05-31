@@ -16,7 +16,7 @@
 import XMLGroup from '../js/XMLGroup.js';
 import IsomorphicGroups from '../js/IsomorphicGroups.js';
 
-var group : XMLGroup;
+var group: XMLGroup;
 
 var HELP_PAGE: string;
 
@@ -24,7 +24,7 @@ export default
  */
 class VC {
 /*::
-   static visualizerLayoutURL : string;
+   static visualizerLayoutURL: string;
  */   
    static _init() {
       VC.visualizerLayoutURL = './visualizerFramework/visualizer.html';
