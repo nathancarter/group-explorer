@@ -66,7 +66,7 @@ class SheetModel {
         // Ensure all Sheet Elements have their HTML element in the view
         this.elements.map( function ( sheetElt ) { that.buildWrapperFor( sheetElt ); } );
         // Update any overlay drawing that may need to be done.
-        this.drawOverlay();
+        setTimeout( () => this.drawOverlay(), 0 );
         // While we're here, if anything changed since the last time we were here,
         // record it on the undo/redo stack.
         if ( this.undoRedoActive ) {
