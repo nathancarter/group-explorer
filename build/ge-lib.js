@@ -3942,29 +3942,28 @@ class DisplayDiagram {
 
       lines.forEach( (line) => {
          const vertices = line.vertices,
-               lineColor = (line.color === undefined) ?
-                           DisplayDiagram.DEFAULT_LINE_COLOR : line.color,
-               lineWidth = use_webgl_native_lines ? 1 : (isIOS ? DisplayDiagram.IOS_LINE_WIDTH : diagram3D.lineWidth),
-               lineMaterial =
-                  lineWidth <= maxLineWidth ?
-                  new THREE.LineBasicMaterial({color: lineColor, linewidth: lineWidth}) :
-                  new MeshLineMaterial({
-                     color: new THREE.Color(lineColor),
-                     lineWidth: lineWidth,
-                     sizeAttenuation: false,
-                     side: THREE.DoubleSide,
-                     resolution: new THREE.Vector2(window.innerWidth, window.innerHeight),
-                     fog: true,
-                  }),
+               lineColor = (line.color === undefined) ? DisplayDiagram.DEFAULT_LINE_COLOR : line.color,
+               lineWidth = use_webgl_native_lines ? 1
+                              : (isIOS ? DisplayDiagram.IOS_LINE_WIDTH
+                                 : (this.getSize().w < 400 ? 1 : diagram3D.lineWidth)),
                geometry = new THREE.Geometry();
-
-         geometry.vertices = this._getLineVertices(line)
+               
+         geometry.vertices = this._getLineVertices(line);
 
          let newLine;
-         if (lineWidth == 1) {
+         if (lineWidth <= maxLineWidth) {
+            const lineMaterial = new THREE.LineBasicMaterial({color: lineColor, linewidth: lineWidth});
             newLine = new THREE.Line(geometry, lineMaterial);
          } else {
-            const meshLine = new MeshLine()
+            const lineMaterial = new MeshLineMaterial({
+               color: new THREE.Color(lineColor),
+               lineWidth: lineWidth,
+               sizeAttenuation: false,
+               side: THREE.DoubleSide,
+               resolution: new THREE.Vector2(window.innerWidth, window.innerHeight),
+               fog: true,
+            });
+            const meshLine = new MeshLine();
             meshLine.setGeometry(geometry);
             newLine = new THREE.Mesh(meshLine.geometry, lineMaterial);
          }
