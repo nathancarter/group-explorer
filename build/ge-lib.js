@@ -2700,7 +2700,7 @@ class Diagram3D {
    }
 
    highlightByNodeColor(elements) {
-      this._setNodeField('colorHighlight', group.elements, undefined);
+      this._setNodeField('colorHighlight', this.group.elements, undefined);
       elements.forEach( (els, colorIndex) => {
          const hue = 360 * colorIndex / elements.length;
          const color = `hsl(${hue}, 53%, 30%)`;
@@ -2710,7 +2710,7 @@ class Diagram3D {
    }
 
    highlightByRingAroundNode(elements) {
-      this._setNodeField('ringHighlight', group.elements, undefined);
+      this._setNodeField('ringHighlight', this.group.elements, undefined);
       if (elements.length == 1) {
          this._setNodeField('ringHighlight', elements[0], 'hsl(120, 53%, 30%)');
       } else {
@@ -2724,7 +2724,7 @@ class Diagram3D {
    }
 
    highlightBySquareAroundNode(elements) {
-      this._setNodeField('squareHighlight', group.elements, undefined);
+      this._setNodeField('squareHighlight', this.group.elements, undefined);
       if (elements.length == 1) {
          this._setNodeField('squareHighlight', elements[0], 'hsl(240, 53%, 30%)');
       } else {
@@ -2738,9 +2738,9 @@ class Diagram3D {
    }
 
    clearHighlights() {
-      this._setNodeField('colorHighlight', group.elements, undefined);
-      this._setNodeField('ringHighlight', group.elements, undefined);
-      this._setNodeField('squareHighlight', group.elements, undefined);
+      this._setNodeField('colorHighlight', this.group.elements, undefined);
+      this._setNodeField('ringHighlight', this.group.elements, undefined);
+      this._setNodeField('squareHighlight', this.group.elements, undefined);
       if ( this.emitStateChange ) this.emitStateChange();
    }
 }
@@ -5669,3 +5669,64 @@ Library.loadAllFromFilesystem = () => {
 };
 Library.allGroupNamesInFilesystem = () =>
     urls.map( url => /\/(.*)\.group$/.exec( url )[1] );
+
+// mathml2text can't function in Node.js at the moment,
+// so we create the following simple alternative
+module.exports.mathml2text = ( mathml ) => {
+    var match, stack = [ ];
+    const attrDict = ( tag, text ) => {
+        var result = { };
+        result.tag = tag;
+        if ( text ) text.trim().split( /\s/ ).map( pair => {
+            const halves = pair.split( '=' );
+            if ( halves.length != 2 ) return;
+            result[halves[0]] = halves[1].substring( 1, halves[1].length - 1 );
+        } );
+        return result;
+    }
+    while ( mathml.length > 0 ) {
+        // console.log( stack );
+        if ( match = /^<([a-zA-Z]+)( [^>]*)?\/>/.exec( mathml ) ) {
+            if ( match[1] == 'mspace' ) {
+                stack.push( ' ' );
+            } else {
+                throw `Stuck at: ${match[0]}`;
+            }
+            mathml = mathml.substring( match[0].length );
+        } else if ( match = /^<([a-zA-Z]+)( [^>]*)?>/.exec( mathml ) ) {
+            stack.push( attrDict( match[1], match[2] ) );
+            mathml = mathml.substring( match[0].length );
+        } else if ( match = /^<\/([a-zA-Z]+)>/.exec( mathml ) ) {
+            const operator = match[1]; // assume well-formed XML
+            var operands = [ ];
+            var attrs;
+            while ( stack.length > 0 ) {
+                var next = stack.pop();
+                if ( next.hasOwnProperty( 'tag' ) ) { attrs = next; break; }
+                operands.unshift( next );
+            }
+            if ( operator == 'mo' || operator == 'mrow'
+              || operator == 'mi' || operator == 'mn' ) {
+                stack.push( operands.join( '' ) );
+            } else if ( operator == 'mfenced' ) {
+                stack.push( attrs.open + operands.join( ',' ) + attrs.close );
+            } else if ( operator == 'msup' ) {
+                stack.push( operands.join( '^' ) );
+            } else if ( operator == 'msub' ) {
+                stack.push( operands.join( '_' ) );
+            } else {
+                stack.push( `${operator}(${operands})` );
+            }
+            mathml = mathml.substring( match[0].length );
+        } else {
+            const text = mathml.indexOf( '<' ) > -1 ?
+                mathml.substring( 0, mathml.indexOf( '<' ) ) : mathml;
+            stack.push( text );
+            mathml = mathml.substring( text.length );
+            if ( text.length == 0 ) {
+                throw `Stuck at: ${mathml}`
+            }
+        }
+    }
+    return stack.pop();
+}

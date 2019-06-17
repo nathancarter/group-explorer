@@ -924,7 +924,6 @@ class VisualizerElement extends SheetElement {
             otherWin.addEventListener( 'message', function ( event ) {
                 if ( otherWinState == 'starting' && event.data == 'listener ready' ) {
                     // initially set up the editor to be just like us
-                    console.log( 'posting external message', that.toJSON() );
                     otherWin.postMessage( {
                         source : 'external',
                         json : that.toJSON()
@@ -946,7 +945,7 @@ class VisualizerElement extends SheetElement {
             }, false );
         }, 10 );
     }
-    // serialization just needs to take into account text, size, and color
+    // serialization just needs to delegate to the inner visualizer object
     toJSON () {
         var result = super.toJSON();
         result.className = this.getClassName();
@@ -1293,7 +1292,7 @@ class MorphismElement extends ConnectingElement {
             throw "Both parameters to MorphismElement constructor must be VisualizerElements";
         super.setEndpoints( from, to );
     }
-    // Update toJSON() just to handle our class correctly.  We will extend this later.
+    // Update toJSON() just to handle our class correctly.
     toJSON () {
         var result = super.toJSON();
         result.className = 'MorphismElement';
