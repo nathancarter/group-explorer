@@ -22,6 +22,7 @@ class SheetModel {
         this.historyIndex = 0;
         this.undoRedoActive = true;
         this.maxHistorySize = 250;
+        this.syncQueued = false;  // flag indicates sync has already been queued to run
     }
 
     // Add a Sheet Element to the model.
@@ -36,9 +37,11 @@ class SheetModel {
         this.elements.push( element );
         // ensure the new element has the highest z-index of all elements in the model
         element.zIndex = maxIndex + 1;
-        // update view very soon
-        var that = this;
-        setTimeout( function () { that.sync(); }, 0 );
+        // update view very soon (unless it's already been queued to run)
+        if (!this.syncQueued) {
+           this.syncQueued = true;
+           setTimeout( () => this.sync(), 0 );
+        }
     }
 
     // Find the currently selected element and return it as a SheetElement instance,
@@ -51,6 +54,7 @@ class SheetModel {
     // Ensure that the children of the view are precisely the set of DIVs placed there
     // by wrapping each SheetElement's htmlViewElement() in a DIV.
     sync () {
+        this.syncQueued = false;  // clear flag so sync can be queued to run if needed
         var that = this;
         // Delete any elements that don't belong
         Array.from( this.view.childNodes ).map( function ( htmlElt ) {
@@ -62,7 +66,7 @@ class SheetModel {
         // Ensure all Sheet Elements have their HTML element in the view
         this.elements.map( function ( sheetElt ) { that.buildWrapperFor( sheetElt ); } );
         // Update any overlay drawing that may need to be done.
-        this.drawOverlay();
+        setTimeout( () => this.drawOverlay(), 0 );
         // While we're here, if anything changed since the last time we were here,
         // record it on the undo/redo stack.
         if ( this.undoRedoActive ) {
@@ -712,7 +716,7 @@ class VisualizerElement extends SheetElement {
                 otherWin.addEventListener( 'load', function ( event ) {
                     otherWin.postMessage( {
                         type : 'load group',
-                        group : that.group.toJSON()
+                        group : that.group.toBriefJSON()
                     }, myDomain );
                 } );
             }

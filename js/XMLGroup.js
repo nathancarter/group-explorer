@@ -86,7 +86,7 @@ class XMLGroup extends BasicGroup {
       return group;
    }
 
-   toJSON () {
+   toBriefJSON () {
       return {
          name : this.name,
          shortName : this.shortName,

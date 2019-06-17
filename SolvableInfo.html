@@ -233,7 +233,7 @@
                    x : L+index*W+index*hgap+bottomShift, y : T+H+vgap,
                    w : W, h : H,
                    highlights : {
-                       background : elementOrder.map( ( elt, idx ) => idx ? notred : red )
+                       background : entry.quotientByPrevious.elements.map( ( elt, idx ) => idx ? notred : red )
                    }
                 } );
                 const quotientIndex = sheetElementsAsJSON.length - 1;

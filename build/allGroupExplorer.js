@@ -786,7 +786,7 @@ class XMLGroup extends BasicGroup {
       return group;
    }
 
-   toJSON () {
+   toBriefJSON () {
       return {
          name : this.name,
          shortName : this.shortName,
@@ -1677,7 +1677,7 @@ class Library {
    // returns Promise to get group from localStorage or, if not there, download it from server
    static getGroupOrDownload(url, baseURL) {
       const groupURL = Library.resolveURL(url, baseURL);
-      const localGroup = Library.map.get(groupURL);
+      const localGroup = Library.getLocalGroup(groupURL);
       return new Promise( (resolve, reject) => {
          if (localGroup === undefined) {
             $.ajax({ url: groupURL,
@@ -1716,7 +1716,7 @@ class Library {
    //   returns Promise to load group
    static getLatestGroup(url, baseURL) {
       const groupURL = Library.resolveURL(url, baseURL);
-      const localGroup = Library.map.get(groupURL);
+      const localGroup = Library.getLocalGroup(groupURL);
       return new Promise( (resolve, reject) => {
          $.ajax({ url: groupURL,
                   headers: (localGroup === undefined) ? {} : {'if-modified-since': localGroup.lastModifiedOnServer},
@@ -3889,29 +3889,28 @@ class DisplayDiagram {
 
       lines.forEach( (line) => {
          const vertices = line.vertices,
-               lineColor = (line.color === undefined) ?
-                           DisplayDiagram.DEFAULT_LINE_COLOR : line.color,
-               lineWidth = use_webgl_native_lines ? 1 : (isIOS ? DisplayDiagram.IOS_LINE_WIDTH : diagram3D.lineWidth),
-               lineMaterial =
-                  lineWidth <= maxLineWidth ?
-                  new THREE.LineBasicMaterial({color: lineColor, linewidth: lineWidth}) :
-                  new MeshLineMaterial({
-                     color: new THREE.Color(lineColor),
-                     lineWidth: lineWidth,
-                     sizeAttenuation: false,
-                     side: THREE.DoubleSide,
-                     resolution: new THREE.Vector2(window.innerWidth, window.innerHeight),
-                     fog: true,
-                  }),
+               lineColor = (line.color === undefined) ? DisplayDiagram.DEFAULT_LINE_COLOR : line.color,
+               lineWidth = use_webgl_native_lines ? 1
+                              : (isIOS ? DisplayDiagram.IOS_LINE_WIDTH
+                                 : (this.getSize().w < 400 ? 1 : diagram3D.lineWidth)),
                geometry = new THREE.Geometry();
-
-         geometry.vertices = this._getLineVertices(line)
+               
+         geometry.vertices = this._getLineVertices(line);
 
          let newLine;
-         if (lineWidth == 1) {
+         if (lineWidth <= maxLineWidth) {
+            const lineMaterial = new THREE.LineBasicMaterial({color: lineColor, linewidth: lineWidth});
             newLine = new THREE.Line(geometry, lineMaterial);
          } else {
-            const meshLine = new MeshLine()
+            const lineMaterial = new MeshLineMaterial({
+               color: new THREE.Color(lineColor),
+               lineWidth: lineWidth,
+               sizeAttenuation: false,
+               side: THREE.DoubleSide,
+               resolution: new THREE.Vector2(window.innerWidth, window.innerHeight),
+               fog: true,
+            });
+            const meshLine = new MeshLine();
             meshLine.setGeometry(geometry);
             newLine = new THREE.Mesh(meshLine.geometry, lineMaterial);
          }
