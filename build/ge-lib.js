@@ -3733,13 +3733,13 @@ class DisplayDiagram {
       const default_color = DisplayDiagram.DEFAULT_NODE_COLOR;
       const default_radius = 0.3 / Math.sqrt(diagram3D.nodes.length);
       diagram3D.nodes.forEach( (node) => {
-         const color = (node.color === undefined) ? default_color : node.color;
+         const color = (node.color == undefined) ? default_color : node.color;
          if (!materialsByColor.has(color)) {
             materialsByColor.set(color, new THREE.MeshPhongMaterial({color: node.color}));
          }
          const material = materialsByColor.get(color);
 
-         const radius = (node.radius === undefined) ? default_radius : node.radius;
+         const radius = (node.radius == undefined) ? default_radius : node.radius;
          if (!geometriesByRadius.has(radius)) {
             geometriesByRadius.set(radius, new THREE.SphereGeometry(radius * diagram3D.nodeScale, sphere_facets, sphere_facets));
          }
@@ -3769,8 +3769,8 @@ class DisplayDiagram {
 
          // Find sphere's desired color: priority is colorHighlight, color, or default
          const desiredColor = new THREE.Color(
-            (node.colorHighlight !== undefined) ? node.colorHighlight :
-            ((node.color !== undefined) ? node.color :
+            (node.colorHighlight != undefined) ? node.colorHighlight :
+            ((node.color != undefined) ? node.color :
              DisplayDiagram.DEFAULT_NODE_COLOR) );
          // If sphere is not desired color set material color to desired color
          if (!sphere.material.color.equals(desiredColor)) {
@@ -3783,12 +3783,12 @@ class DisplayDiagram {
          }
 
          // if node has ring, draw it
-         if (node.ringHighlight !== undefined) {
+         if (node.ringHighlight != undefined) {
             this._drawRing(node, sphere.geometry.parameters.radius);
          }
 
          // if node has square, draw it
-         if (node.squareHighlight !== undefined) {
+         if (node.squareHighlight != undefined) {
             this._drawSquare(node, sphere.geometry.parameters.radius);
          }
       } );
