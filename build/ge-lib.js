@@ -5352,6 +5352,7 @@ class DisplayCycleGraph {
 
       // draw all the paths first, because they're behind the vertices
       this.context.lineWidth = 1/scale;
+      this.context.strokeStyle = '#000';
       cycleGraph.cyclePaths.forEach( points => {
          var isDrawing = true; // was the last
          this.context.beginPath();
