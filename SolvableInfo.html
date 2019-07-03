@@ -1,5 +1,6 @@
 <html>
    <head>
+      <link rel="icon" type="image/png" href="./images/favicon.png"></link>
       <link rel="stylesheet" href="./style/fonts.css" type="text/css">
 
       <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
@@ -13,7 +14,6 @@
       <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=MML_CHTML"></script>
       <script src="./build/allGroupExplorer.js"></script>
       <script src="./build/allSheets.js"></script>
-      <script src="./groupURLs.js"></script>
       <script src="./SolvableInfo.js"></script>
    </head>
 
@@ -35,9 +35,9 @@
 
          <p>You can see a diagram of all the groups in the solvable decomposition,
             including quotient maps, by
-            <a href="" class="show-decomposition" data-type="CDElement">Cayley diagram</a>,
-            <a href="" class="show-decomposition" data-type="CGElement">cycle graph</a>, or
-            <a href="" class="show-decomposition" data-type="MTElement">multiplication table</a>.
+            <a href="javascript:showSolvableDecompositionSheet('CDElement')">Cayley diagram</a>,
+            <a href="javascript:showSolvableDecompositionSheet('CGElement')">cycle graph</a>, or
+            <a href="javascript:showSolvableDecompositionSheet('MTElement')">multiplication table</a>.
          </p>
       </template>
       <template id="decomposition_element">

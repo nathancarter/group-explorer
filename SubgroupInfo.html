@@ -1,5 +1,6 @@
 <html>
    <head>
+      <link rel="icon" type="image/png" href="./images/favicon.png"></link>
       <link rel="stylesheet" href="./style/fonts.css" type="text/css">
       <style>
        table {
@@ -32,7 +33,6 @@
       <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/95/three.js"></script>
       <script src="./build/allGroupExplorer.js"></script>
       <script src="./build/allSheets.js"></script>
-      <script src="./groupURLs.js"></script>
       <script src="./SubgroupInfo.js"></script>
    </head>
 
@@ -58,9 +58,9 @@
             <a href="./help/rf-groupterms/index.html#lattice-of-subgroups">lattice</a>, each shown as
             highlighted portions of the whole group, connected by the identity (inclusion)
             homomorphism. You may see that lattice by
-            <a href="" class="show-lattice" data-type="CDElement">Cayley diagram</a>,
-            <a href="" class="show-lattice" data-type="CGElement">cycle graph</a>, or
-            <a href="" class="show-lattice" data-type="MTElement">multiplication table</a>.</p>
+            <a href="javascript:showSubgroupLattice('CDElement')">Cayley diagram</a>,
+            <a href="javascript:showSubgroupLattice('CGElement')">cycle graph</a>, or
+            <a href="javascript:showSubgroupLattice('MTElement')">multiplication table</a>, or
          <p class='gapcode' data-built-in-code-type='subgroup lattice'></p>
          <p id="simple">None of the subgroups on the list below is
             <a href="./help/rf-groupterms/index.html#normal-subgroup">normal</a>.
@@ -120,9 +120,9 @@
          <li>It is
             <a href="./help/rf-groupterms/index.html#isomorphism-isomorphic">isomorphic</a> to
             ${MathML.sans(isomorphicGroup.name)}, and you can see the embedding by
-            <a href="" class="show-embedding" data-type="CDElement" data-index="${index}">Cayley diagram</a>,
-            <a href="" class="show-embedding" data-type="CGElement" data-index="${index}">cycle graph</a>, or
-            <a href="" class="show-embedding" data-type="MTElement" data-index="${index}">multiplication table</a>.
+            <a href="javascript:showEmbeddingSheet(${index}, 'CDElement')">Cayley diagram</a>,
+            <a href="javascript:showEmbeddingSheet(${index}, 'CGElement')">cycle graph</a>,
+            <a href="javascript:showEmbeddingSheet(${index}, 'MTElement')">multiplication table</a>,
          </li>
       </template>
       <template id="no_isomorphism_template">
@@ -135,9 +135,9 @@
             exhibiting the
             <a href="./help/rf-groupterms/index.html#quotient-group">quotient group</a>,
             isomorphic to ${MathML.sans(isomorphicGroup.name)}, by
-            <a href="" class="show-quotient" data-type="CDElement" data-index="${index}">Cayley diagram</a>,
-            <a href="" class="show-quotient" data-type="CGElement" data-index="${index}">cycle graph</a>, or
-            <a href="" class="show-quotient" data-type="MTElement" data-index="${index}">multiplication table</a>.
+            <a href="javascript:showQuotientSheet(${index}, 'CDElement')">Cayley diagram</a>,
+            <a href="javascript:showQuotientSheet(${index}, 'CGElement')">cycle graph</a>,
+            <a href="javascript:showQuotientSheet(${index}, 'MTElement')">multiplication table</a>,
          </li>
       </template>
       <template id="no_quotient_group_template">
