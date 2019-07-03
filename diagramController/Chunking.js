@@ -1,9 +1,27 @@
+// @flow
+/*::
+import CayleyDiagram from '../js/CayleyDiagram.js';
+import DisplayDiagram from '../js/DisplayDiagram.js';
+import GEUtils from '../js/GEUtils.js';
+import Template from '../js/Template.js';
+import XMLGroup from '../js/XMLGroup.js';
 
+import DC from './diagram.js';
+
+// globals implemented in CayleyDiagram.js
+var group: XMLGroup;
+var Cayley_diagram: CayleyDiagram;
+var Graphic_context: DisplayDiagram;
+var Diagram_name: string;
+var emitStateChange: () => void;
+
+export default
+ */
 DC.Chunking = class {
    static updateChunkingSelect() {
       // check that first generator is innermost, second is middle, etc.
-      if (   Cayley_diagram.strategies.every( (strategy, inx) => strategy.nesting_level == inx )
-          && $('#diagram-choice').attr('index') == '-1' ) {
+      if (   Diagram_name === undefined
+          && Cayley_diagram.strategies.every( (strategy, inx) => strategy.nesting_level == inx ) ) {
          DC.Chunking.enable();
       } else {
          DC.Chunking.disable();
@@ -14,7 +32,7 @@ DC.Chunking = class {
       const generators = [];
       // generate option for each strategy in Cayley diagram
       Cayley_diagram.strategies.forEach( (strategy, strategy_index) => {
-         if (strategy != Cayley_diagram.strategies._last()) {
+         if (strategy != GEUtils.last(Cayley_diagram.strategies)) {
             // find matching subgroup for chunking option
             const subgroup_index = group.subgroups.findIndex( (subgroup) => strategy.bitset.equals(subgroup.members) );
             generators.push(group.representation[strategy.generator]);
@@ -27,7 +45,7 @@ DC.Chunking = class {
       ]);
    }
 
-   static clickHandler(event) {
+   static clickHandler(event /*: JQueryEventObject */) {
       event.preventDefault();
 
       if (!DC.Chunking.isDisabled()) {
@@ -39,7 +57,7 @@ DC.Chunking = class {
       }
    }
 
-   static selectChunk(strategy_index) {
+   static selectChunk(strategy_index /*: number */) {
       $('#chunk-choices').hide();
       $('#chunk-choice').html($(`#chunk-choices > li:nth-of-type(${strategy_index + 2})`).html());
       Cayley_diagram.chunk = (strategy_index == -1) ? undefined : strategy_index;
@@ -65,7 +83,7 @@ DC.Chunking = class {
       emitStateChange();
    }
 
-   static isDisabled() {
+   static isDisabled() /*: boolean */ {
       return $('#chunk-select').prop('disabled');
    }
 }

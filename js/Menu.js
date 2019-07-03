@@ -1,6 +1,9 @@
-
+// @flow
+/*::
+  export default
+*/
 class Menu {
-   static setMenuLocations(event, $menu) {
+   static setMenuLocations(event /*: JQueryMouseEventObject */, $menu /*: JQuery */) {
       const menuBox = $menu[0].getBoundingClientRect();
       const menuHeight = menuBox.height;
       const windowHeight = 0.99*window.innerHeight;
@@ -15,7 +18,7 @@ class Menu {
 
       // set left edge location so menu doesn't disappear to the right
       const menuWidth = menuBox.width;
-      const windowWidth = window.innerWidth;
+      const windowWidth /*: float */ = window.innerWidth;
       if (event.clientX + menuWidth > windowWidth) {
          $menu.css({left: windowWidth - menuWidth});
       } else {
@@ -28,7 +31,7 @@ class Menu {
            .each( (_, subMenu) => Menu.setSubMenuLocation($menu, $(subMenu)) );
    }
 
-   static setSubMenuLocation($menu, $subMenu) {
+   static setSubMenuLocation($menu /*: JQuery */, $subMenu /*: JQuery */) {
       const parentBox = $subMenu.parent()[0].getBoundingClientRect();
       const menuBox = $menu[0].getBoundingClientRect();
       const subMenuBox = $subMenu[0].getBoundingClientRect();
@@ -42,7 +45,7 @@ class Menu {
          $subMenu.css({top: 0, height: windowHeight, 'overflow-y': 'auto'})
       }
 
-      const windowWidth = window.innerWidth;
+      const windowWidth /*: float */ = window.innerWidth;
       const rightRoom = windowWidth - (menuBox.right + subMenuBox.width);
       const leftRoom = menuBox.left - subMenuBox.width;
       const overlap = (subMenuBox.width - $subMenu.width())/2;
@@ -51,7 +54,7 @@ class Menu {
       } else if (leftRoom > 0) {
          $subMenu.css({left: menuBox.left - subMenuBox.width + overlap});
       } else if (rightRoom > leftRoom) {
-         $subMenu.css({left: window.width - subMenuBox.width});
+         $subMenu.css({left: windowWidth - subMenuBox.width});
       } else {
          $subMenu.css({left: 0});
       }

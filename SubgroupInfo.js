@@ -1,10 +1,42 @@
+// @flow
+
+/*::
+import BasicGroup from './js/BasicGroup.js';
+import CayleyDiagram from './js/CayleyDiagram.js';
+import DisplayDiagram from './js/DisplayDiagram.js';
+import IsomorphicGroups from './js/IsomorphicGroups.js';
+import Library from './js/Library.js';
+import MathML from './js/MathML.js';
+import MathUtils from './js/MathUtils.js';
+import setUpGAPCells from './js/ShowGAPCode.js';
+import Subgroup from './js/Subgroup.js';
+import Template from './js/Template.js';
+import XMLGroup from './js/XMLGroup.js';
+
+import {CreateNewSheet} from './js/SheetModel.js';
+import type {
+   JSONType,
+   SheetElementJSON,
+   RectangleElementJSON,
+   TextElementJSON,
+   VisualizerType,
+   VisualizerElementJSON,
+   ConnectingElementJSON,
+   MorphismElementJSON
+} from './js/SheetModel.js';
+
+type DecoratedSubgroup = Subgroup & {_tierIndex?: number, _used?: boolean};
+
+ */
+
 // Global variables
-var group;	// group for which subgroups are being displayed
+var group		/*: XMLGroup */,	// group for which subgroups are being displayed
+    graphicContext	/*: DisplayDiagram */;
 
 $(window).on('load', load);	// like onload handler in body
 
 function load() {
-   window.graphicContext = new DisplayDiagram( { width : 50, height : 50, fog : false } );
+   graphicContext = new DisplayDiagram( { width : 50, height : 50, fog : false } );
    Library.loadFromURL()
           .then( (_group) => {
              group = _group;
@@ -36,31 +68,10 @@ function displayGroup() {
    $('body').prepend($rslt);
    MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
 
-   $( '.show-lattice' ).on( 'click', function ( event ) {
-      event.preventDefault();
-      const type = event.target.getAttribute( 'data-type' );
-      showSubgroupLattice( type );
-   } );
-
-   $( '.show-embedding' ).on( 'click', function ( event ) {
-      event.preventDefault();
-      const type = event.target.getAttribute( 'data-type' ),
-            index = parseInt( event.target.getAttribute( 'data-index' ) );
-      showEmbeddingSheet( index, type );
-   } );
-
-   $( '.show-quotient' ).on( 'click', function ( event ) {
-      event.preventDefault();
-      const type = event.target.getAttribute( 'data-type' ),
-            index = parseInt( event.target.getAttribute( 'data-index' ) );
-      showQuotientSheet( index, type );
-   } );
-
-   window.group = group;
    setUpGAPCells();
 }
 
-function subgroupInfo(index) {
+function subgroupInfo(index /*: number */) {
    const subgroup = group.subgroups[index];
    const subgroupOrder = subgroup.members.popcount();
    const optionalDescription = shortDescription(subgroup);
@@ -68,13 +79,16 @@ function subgroupInfo(index) {
 
    const $row = $(eval(Template.HTML('data_row_template')));
 
-   let isomorphicGroup = IsomorphicGroups.findForSubgroup(group, subgroup);
-   if (isomorphicGroup === undefined) {
+   let isomorphicGroup = IsomorphicGroups.findForSubgroup(group, subgroup)
+   if (isomorphicGroup == undefined) {
       $row.find('ul').append(eval(Template.HTML('no_isomorphism_template')));
    } else {
-      const img = window.graphicContext.getImage( new CayleyDiagram(isomorphicGroup) );
+      // FIXME -- get CayleyDiagram to build for unnamed BasicGroup
+      if (!isomorphicGroup.hasOwnProperty('name'))
+          console.error('trying to build CayleyDiagram for unnamed BasicGroup in SubgroupInfo');
+      const img = graphicContext.getImage( new CayleyDiagram(((isomorphicGroup /*: any */) /*: XMLGroup */)) );
       img.height = img.width = 50;
-      $row.find('.image').html(img);
+      $row.find('.image').html('').append(img);
       $row.find('ul').append(eval(Template.HTML('isomorphism_template')));
    }
 
@@ -96,7 +110,7 @@ function subgroupInfo(index) {
    return $row;
 }
 
-function shortDescription(subgroup) {
+function shortDescription(subgroup /*: Subgroup */) {
    let rslt = '';
 
    const elements = subgroup.members.toArray();
@@ -107,21 +121,21 @@ function shortDescription(subgroup) {
       if (MathUtils.isPrimePower(group.order)) {
          const prime = MathUtils.getFactors(group.order)[0];
          rslt += `a <a href="./help/rf-groupterms/index.html#p-subgroup">
-                  ${prime}-group</a>, `;
+                         ${prime}-group</a>, `;
       }
    } else {
       // get first non-one element,
       // find prime for group,
       // test all other elements for even divisibility
-      const subgroupElementOrders = elements.map( el => group.elementOrders[el] );
+      const subgroupElementOrders /*: Array<number> */ = elements.map( el => group.elementOrders[el] );
       const prime = MathUtils.getFactors(subgroupElementOrders[1])[0];
       if (subgroupElementOrders.every(el => el == 1 || el % prime == 0)) {
          if (group.order / subgroup.members.popcount() % prime != 0) {
             rslt = `, a <a href="./help/rf-groupterms/index.html#sylow-p-subgroup">
-                 Sylow ${prime}-subgroup</a>, `;
+                        Sylow ${prime}-subgroup</a>, `;
          } else {
             rslt = `, a <a href="./help/rf-groupterms/index.html#p-subgroup">
-                 ${prime}-subgroup</a>, `;
+                        ${prime}-subgroup</a>, `;
          }
       }
    };
@@ -129,18 +143,18 @@ function shortDescription(subgroup) {
    return rslt;
 }
 
-function highlightSubgroup ( H ) {
-   return Array( group.order ).fill( '' ).map( ( e, i ) =>
+function highlightSubgroup ( H /*: Subgroup */ ) {
+   return Array( group.order ).fill( '' ).map( ( e /*: color */, i ) =>
       H.members.isSet( i ) ? 'hsl(0, 100%, 80%)' : e );
 }
-function showSubgroupLattice ( type ) {
+function showSubgroupLattice ( type /*: VisualizerType */ ) {
    // Handy function
-   function subset ( H, K ) { return K.members.contains( H.members ); }
+   function subset ( H /*: Subgroup */, K /*: Subgroup */ ) /*: boolean */ { return K.members.contains( H.members ); }
    // Let's tier the group's subgroups by order.
-   var subgroupTiers = [ ];
+   var subgroupTiers /*: Array<Array<DecoratedSubgroup>> */ = [ ];
    for ( var i = 0 ; i < group.subgroups.length ; i++ ) {
-      const sgp = group.subgroups[i];
-      var existingTier = subgroupTiers.find( ( tier ) => tier[0].order == sgp.order );
+      const sgp /*: DecoratedSubgroup */ = group.subgroups[i];
+      var existingTier /*: Array<DecoratedSubgroup> */ = (subgroupTiers.find( ( tier ) => tier[0].order == sgp.order ) /*: any */);
       if ( existingTier )
          existingTier.push( sgp );
       else
@@ -159,7 +173,7 @@ function showSubgroupLattice ( type ) {
    // We now compute a series of paths from {e} to G, passing through as many subgroups
    // as possible, so we can form chains that should be vertically arranged.
    // As we place subgroups in a chain, we remove them from placement in other chains.
-   function pathsUpFrom ( H ) {
+   function pathsUpFrom ( H /*: DecoratedSubgroup */) /*: Array<Array<null | DecoratedSubgroup>> */ {
       H._used = true;
       // This is a recursive walk through the graph, turning it into a tree.
       if ( H._tierIndex == subgroupTiers.length - 1 ) {
@@ -168,15 +182,18 @@ function showSubgroupLattice ( type ) {
          return [ [ H ] ];
       } else {
          // Find the tier containing the next subgroup we can walk to.
-         var result = [ ];
-         var initialSegment = [ H ];
+         var result /*: Array<Array<null | DecoratedSubgroup>> */ = [ ];
+         var initialSegment /*: Array<null | DecoratedSubgroup> */ = [ H ];
          for ( var tierIdx = H._tierIndex + 1 ; tierIdx < subgroupTiers.length ; tierIdx++ ) {
-            subgroupTiers[tierIdx].filter( K => subset( H, K ) && !K._used ).map( K => {
-               pathsUpFrom( K ).map( path => {
-                  result.push( initialSegment.concat( path ) );
-                  initialSegment[0] = null;
+            subgroupTiers[tierIdx]
+               .filter( (K /*: DecoratedSubgroup */) => subset( H, K ) && !K._used )
+               .map( (K) => {
+                  pathsUpFrom( K )
+                     .map( (path /*: Array<null | DecoratedSubgroup> */) => {
+                        result.push( initialSegment.concat( path ) );
+                        initialSegment[0] = null;
+                     } );
                } );
-            } );
             initialSegment.push( null );
          }
          if ( initialSegment[0] != null ) result.push( initialSegment );
@@ -192,7 +209,7 @@ function showSubgroupLattice ( type ) {
          hMargin = Math.ceil( cellWidth * 0.1 ),
          vMargin = hMargin + ( cellHeight - cellWidth ) / 2,
          latticeTop = 100, latticeLeft = 50;
-   function subgroupPosition ( H ) {
+   function subgroupPosition ( H  /*: Subgroup */ ) /*: {x: number, y: number} */ {
       var x, y;
       if ( ( H.order == 1 ) || ( H.order == group.order ) ) {
          x = chains.length * cellWidth / 2 - cellWidth / 2;
@@ -208,7 +225,7 @@ function showSubgroupLattice ( type ) {
    }
    // Build a sheet with subgroups shown at those locations.
    var sheetElementsAsJSON = [ ];
-   group.subgroups.map( H => {
+   group.subgroups.map( (H /*: Subgroup */) => {
       const pos = subgroupPosition( H );
       sheetElementsAsJSON.push( {
          className : type, groupURL : group.URL,
@@ -218,7 +235,7 @@ function showSubgroupLattice ( type ) {
       } );
    } );
    // Connect every pair of subgroups that don't have an intermediate connection.
-   function existsIntermediateSubgroup ( H, K ) {
+   function existsIntermediateSubgroup ( H /*: Subgroup */, K /*: Subgroup */ ) /*: boolean */ {
       for ( var i = 0 ; i < group.subgroups.length ; i++ ) {
          const considerMe = group.subgroups[i];
          if ( ( H != considerMe ) && ( K != considerMe )
@@ -227,7 +244,7 @@ function showSubgroupLattice ( type ) {
       }
       return false;
    }
-   group.subgroups.map( ( H, i ) => {
+   group.subgroups.map( ( H /*: Subgroup */, i /*: number */ ) => {
       group.subgroups.map( ( K, j ) => {
          if ( ( H != K ) && subset( H, K ) && !existsIntermediateSubgroup( H, K ) ) {
             sheetElementsAsJSON.push( {
@@ -239,7 +256,7 @@ function showSubgroupLattice ( type ) {
    // Add a title.
    sheetElementsAsJSON.push( {
       className : 'TextElement',
-      text : `Subgroup Lattice for the Group ${mathml2text( group.name )}`,
+      text : `Subgroup Lattice for the Group ${MathML.toUnicode( group.name )}`,
       x : latticeLeft, y : latticeTop / 2,
       w : hSize * cellWidth, h : latticeTop / 2,
       fontSize : '20pt', alignment : 'center'
@@ -248,15 +265,15 @@ function showSubgroupLattice ( type ) {
    CreateNewSheet( sheetElementsAsJSON );
 }
 
-function showEmbeddingSheet ( indexOfH, type ) {
+function showEmbeddingSheet ( indexOfH /*: number */, type /*: VisualizerType */ ) {
    const H = group.subgroups[indexOfH],
-         [ libraryH, embedding ] = IsomorphicGroups.findEmbedding( group, H );
+         [ libraryH, embedding ] = ((IsomorphicGroups.findEmbedding( group, H ) /*: any */) /*: [XMLGroup, Array<groupElement>] */);
    CreateNewSheet( [
       {
          className : 'TextElement',
-         text : `Embedding ${mathml2text( libraryH.name )} as `
-              + mathml2text( `<msub><mi>H</mi><mn>${indexOfH}</mn></msub>` )
-              + ` in ${mathml2text( group.name )}`,
+         text : `Embedding ${MathML.toUnicode( libraryH.name )} as `
+              + MathML.toUnicode( `<msub><mi>H</mi><mn>${indexOfH}</mn></msub>` )
+              + ` in ${MathML.toUnicode( group.name )}`,
          x : 50, y : 50, w : 500, h : 40,
          fontSize : '20pt', alignment : 'center'
       },
@@ -277,7 +294,7 @@ function showEmbeddingSheet ( indexOfH, type ) {
       },
       {
          className : 'MorphismElement',
-         fromIndex : 1, toIndex : 2, name : mathml2text( '<mi>e</mi>' ),
+         fromIndex : 1, toIndex : 2, name : MathML.toUnicode( '<mi>e</mi>' ),
          definingPairs : libraryH.generators[0].map( gen =>
             [ gen, embedding[gen] ] ),
          showManyArrows : true, showInjSurj : true
@@ -285,10 +302,10 @@ function showEmbeddingSheet ( indexOfH, type ) {
    ] );
 }
 
-function showQuotientSheet ( indexOfN, type ) {
+function showQuotientSheet ( indexOfN /*: number */, type /*: VisualizerType */) {
    const N = group.subgroups[indexOfN],
-         [ libraryQ, quotientMap ] = IsomorphicGroups.findQuotient( group, N ),
-         [ libraryN, embedding ] = IsomorphicGroups.findEmbedding( group, N ),
+         [ libraryQ, quotientMap ] = ((IsomorphicGroups.findQuotient( group, N ) /*: any */) /*: [XMLGroup, Array<groupElement>] */),
+         [ libraryN, embedding ] = ((IsomorphicGroups.findEmbedding( group, N ) /*: any */) /*: [XMLGroup, Array<groupElement>] */),
          L = 25, T = 150, W = 120, H = W, gap = 100;
    function shrink ( order, x, y, w, h ) {
       const factor = 0.5 * ( 1 + order / group.order ),
@@ -322,15 +339,15 @@ function showQuotientSheet ( indexOfN, type ) {
          className : 'TextElement',
          x : L, y : T-100, w : 5*W+4*gap, h : 50,
          text : 'Short Exact Sequence showing '
-              + mathml2text( group.name ) + ' / '
-              + mathml2text( libraryN.name ) + ' &cong; '
-              + mathml2text( libraryQ.name ),
+              + MathML.toUnicode( group.name ) + ' / '
+              + MathML.toUnicode( libraryN.name ) + ' &cong; '
+              + MathML.toUnicode( libraryQ.name ),
          fontSize : '20pt', alignment : 'center'
       },
       {
          className : 'TextElement',
          x : L, y : T-50, w : W, h : 50,
-         text : mathml2text( '<msub><mi>Z</mi><mn>1</mn></msub>' ),
+         text : MathML.toUnicode( '<msub><mi>Z</mi><mn>1</mn></msub>' ),
          alignment : 'center'
       },
       {
@@ -341,7 +358,7 @@ function showQuotientSheet ( indexOfN, type ) {
       {
          className : 'TextElement',
          x : L+W+gap, y : T-50, w : W, h : 50,
-         text : mathml2text( libraryN.name ), alignment : 'center'
+         text : MathML.toUnicode( libraryN.name ), alignment : 'center'
       },
       {
          className : type, groupURL : libraryN.URL,
@@ -351,7 +368,7 @@ function showQuotientSheet ( indexOfN, type ) {
       {
          className : 'TextElement',
          x : L+2*W+2*gap, y : T-50, w : W, h : 50,
-         text : mathml2text( group.name ), alignment : 'center'
+         text : MathML.toUnicode( group.name ), alignment : 'center'
       },
       {
          className : type, groupURL : group.URL,
@@ -361,7 +378,7 @@ function showQuotientSheet ( indexOfN, type ) {
       {
          className : 'TextElement',
          x : L+3*W+3*gap, y : T-50, w : W, h : 50,
-         text : mathml2text( libraryQ.name ), alignment : 'center'
+         text : MathML.toUnicode( libraryQ.name ), alignment : 'center'
       },
       {
          className : type, groupURL : libraryQ.URL,
@@ -371,7 +388,7 @@ function showQuotientSheet ( indexOfN, type ) {
       {
          className : 'TextElement',
          x : L+4*W+4*gap, y : T-50, w : W, h : 50,
-         text : mathml2text( '<msub><mi>Z</mi><mn>1</mn></msub>' ),
+         text : MathML.toUnicode( '<msub><mi>Z</mi><mn>1</mn></msub>' ),
          alignment : 'center'
       },
       {
@@ -382,32 +399,32 @@ function showQuotientSheet ( indexOfN, type ) {
       {
          className : 'TextElement',
          x : L+W+gap, y : T+H+25, w : W, h : 50,
-         text : mathml2text(
-             '<mrow>'
-           + '<mi>Im</mi><mfenced open="(" close=")"><mi>id</mi></mfenced>'
-           + '<mo>=</mo>'
-           + '<mi>Ker</mi><mfenced open="(" close=")"><mi>e</mi></mfenced>'
-           + '</mrow>' ), alignment : 'center'
+         text : MathML.toUnicode(
+            '<mrow>'
+            + '<mi>Im</mi><mfenced open="(" close=")"><mi>id</mi></mfenced>'
+            + '<mo>=</mo>'
+            + '<mi>Ker</mi><mfenced open="(" close=")"><mi>e</mi></mfenced>'
+            + '</mrow>' ), alignment : 'center'
       },
       {
          className : 'TextElement',
          x : L+2*W+2*gap, y : T+H+25, w : W, h : 50,
-         text : mathml2text(
-             '<mrow>'
-           + '<mi>Im</mi><mfenced open="(" close=")"><mi>e</mi></mfenced>'
-           + '<mo>=</mo>'
-           + '<mi>Ker</mi><mfenced open="(" close=")"><mi>q</mi></mfenced>'
-           + '</mrow>' ), alignment : 'center'
+         text : MathML.toUnicode(
+            '<mrow>'
+            + '<mi>Im</mi><mfenced open="(" close=")"><mi>e</mi></mfenced>'
+            + '<mo>=</mo>'
+            + '<mi>Ker</mi><mfenced open="(" close=")"><mi>q</mi></mfenced>'
+            + '</mrow>' ), alignment : 'center'
       },
       {
          className : 'TextElement',
          x : L+3*W+3*gap, y : T+H+25, w : W, h : 50,
-         text : mathml2text(
-             '<mrow>'
-           + '<mi>Im</mi><mfenced open="(" close=")"><mi>q</mi></mfenced>'
-           + '<mo>=</mo>'
-           + '<mi>Ker</mi><mfenced open="(" close=")"><mi>z</mi></mfenced>'
-           + '</mrow>' ), alignment : 'center'
+         text : MathML.toUnicode(
+            '<mrow>'
+            + '<mi>Im</mi><mfenced open="(" close=")"><mi>q</mi></mfenced>'
+            + '<mo>=</mo>'
+            + '<mi>Ker</mi><mfenced open="(" close=")"><mi>z</mi></mfenced>'
+            + '</mrow>' ), alignment : 'center'
       },
       {
          className : 'MorphismElement', name : 'id',

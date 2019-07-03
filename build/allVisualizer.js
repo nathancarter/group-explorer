@@ -1,5 +1,41 @@
+// @flow
+/*::
+import MathML from '../js/MathML.js';
+import Menu from '../js/Menu.js';
+import Template from '../js/Template.js';
+import XMLGroup from '../js/XMLGroup.js';
 
+import AbstractSubset from './AbstractSubset.js';
+import ConjugacyClasses from './ConjugacyClasses.js';
+import Cosets from './Cosets.js';
+import OrderClasses from './OrderClasses.js';
+import AbstractPartition from './AbstractPartition.js';
+import PartitionSubset from './PartitionSubset.js';
+import Subgroup from './Subgroup.js';
+import SubsetEditor from './SubsetEditor.js';
+import Subset from './Subset.js';
+
+var group: XMLGroup;
+
+export default
+ */
 class SSD {
+/*::
+   static subsetsURL: string;
+   static nextId: number;
+   static nextSubsetIndex: number;
+   static displayList: Array<AbstractSubset>;
+
+   static AbstractSubset: Class<AbstractSubset>;
+   static ConjugacyClasses: Class<ConjugacyClasses>;
+   static Cosets: Class<Cosets>;
+   static OrderClasses: Class<OrderClasses>;
+   static AbstractPartition: Class<AbstractPartition>;
+   static PartitionSubset: Class<PartitionSubset>;
+   static Subgroup: Class<Subgroup>;
+   static SubsetEditor: Class<SubsetEditor>;
+   static Subset: Class<Subset>;
+ */
    static _init() {
       SSD.subsetsURL = './subsetDisplay/subsets.html';
    }
@@ -11,16 +47,16 @@ class SSD {
    }
 
    /* Load, initialize subset display */
-   static load($subsetWrapper) {
+   static load($subsetWrapper /*: JQuery */) /*: Promise<void> */ {
       return new Promise( (resolve, reject) => {
          $.ajax( { url: SSD.subsetsURL,
-                   success: (data) => {
+                   success: (data /*: string */) => {
                       $subsetWrapper.html(data);
                       SSD.setup_subset_page();
                       resolve();
                    },
                    error: (_jqXHR, _status, err) => {
-                      reject(`Error loading ${SSD.subsetsURL}: ${err}`);
+                      reject(`Error loading ${SSD.subsetsURL} ${err === undefined ? '' : ': ' + err}`);
                    }
          } )
       } )
@@ -53,36 +89,38 @@ class SSD {
    /*
     * Double-click displays elements in subset
     */
-   static dblClickHandler(event) {
+   static dblClickHandler(_event /*: JQueryEventObject */ ) {
+      const event = ((_event /*: any */) /*: JQueryMouseEventObject */);
       event.preventDefault();
       SSD.clearMenus();
       const $curr = $(event.target).closest('li');
       const id = $curr.attr('id');
       if (id != undefined) {
-         const subset = SSD.displayList[id];
+         const subset = SSD.displayList[parseInt(id)];
          const subsetName = subset.name;
          const subsetElements = subset.elements.toArray().map( (el) => group.representation[el] );
          const $menu = $(eval(Template.HTML('subsetElements_template')));
          $curr.addClass('highlighted').append($menu);
          event.stopPropagation();
-         MathJax.Hub.Queue(['Typeset', MathJax.Hub, $menu[0]],
-                           () => {
-                              const [leftmost, rightmost] =
-                                 $menu.find('span.mjx-chtml').toArray().reduce( ([l,r],span) => {
-                                    const rect = span.getBoundingClientRect();
-                                    return [l < rect.left ? l : rect.left, r > rect.right ? r : rect.right];
-                                 }, [Number.MAX_SAFE_INTEGER, Number.MIN_SAFE_INTEGER] );
-                              $menu.css({'width': rightmost - leftmost, 'max-width': ''});
-                              Menu.setMenuLocations(event, $menu);
-                              $menu.css('visibility', 'visible');
-                           });
+         const follow = () => {
+            const bounds /*: Array<ClientRect> */ =
+                  $menu.find('span.mjx-chtml').map( (_, span) => span.getBoundingClientRect() ).toArray();
+            const extrema /*: {leftmost: number, rightmost: number} */ =
+                  bounds.reduce( (lr /*: {leftmost: number, rightmost: number} */, rect /*: ClientRect */) => {
+                     return {leftmost: Math.min(lr.leftmost, rect.left), rightmost: Math.max(lr.rightmost, rect.right)}
+                  }, {leftmost: Number.MAX_SAFE_INTEGER, rightmost: Number.MIN_SAFE_INTEGER} );
+            $menu.css({'width': extrema.rightmost - extrema.leftmost, 'max-width': ''});
+            Menu.setMenuLocations(event, $menu);
+            $menu.css('visibility', 'visible');
+         };
+         MathJax.Hub.Queue(['Typeset', MathJax.Hub, $menu[0]], follow);
       }
    }
 
    /*
     * Left-click executes "action" attribute in menu item
     */
-   static menuClickHandler(event) {
+   static menuClickHandler(event /*: JQueryEventObject */) {
       event.preventDefault();
       const $curr = $(event.target).closest('[action]');
       if ($curr.attr('action') !== undefined) {
@@ -98,7 +136,9 @@ class SSD {
     *   -- target class (subset_page_header or placeholder)
     *   -- li element id (<subset>.menu)
     */
-   static contextMenuHandler(event) {
+   static contextMenuHandler(_event /*: JQueryEventObject */) {
+      const event = ((_event /*: any */) /*: JQueryMouseEventObject */);
+
       event.preventDefault();
       const $curr = $(event.target).closest('p.subset_page_header, p.placeholder, li[id]');
 
@@ -106,28 +146,28 @@ class SSD {
       if ($curr.length == 0) return;
 
       SSD.clearMenus();
-      
+
       const isHeaderMenu = $curr[0].tagName == "P";
       const $menu = isHeaderMenu ?
                     $(eval(Template.HTML('headerMenu_template'))) :
-                    SSD.displayList[$curr[0].id].menu;
+                    SSD.displayList[parseInt($curr[0].id)].menu;
       $menu.on('click', SSD.menuClickHandler);
       $curr.addClass('highlighted').append($menu);
       $menu.css('visibility', 'hidden');
       event.stopPropagation();
 
-      MathJax.Hub.Queue(
-         ['Typeset', MathJax.Hub, $menu[0]],
-         () => {
-            if (!isHeaderMenu) {
-               SSD._makeLongLists($curr[0].id, $menu);
-            }
-            Menu.setMenuLocations(event, $menu);
-            $menu.css('visibility', 'visible');
-         });
+      const follow = () => {
+         if (!isHeaderMenu) {
+            SSD._makeLongLists($curr[0].id, $menu);
+         }
+         Menu.setMenuLocations(event, $menu);
+         $menu.css('visibility', 'visible');
+      };
+      MathJax.Hub.Queue(['Typeset', MathJax.Hub, $menu[0]], follow);
    }
 
-   static _makeLongLists(id, $menu) {
+   static _makeLongLists(_id /*: string */, $menu /*: JQuery */) {
+      const id = parseInt(_id);
       const classes = ['.intersection', '.union', '.elementwise-product'];
       const operations = ['intersection', 'union', 'elementwiseProduct'];
       const printOps = ['intersection', 'union', 'elementwise product'];
@@ -138,7 +178,7 @@ class SSD {
          let frag = '';
          for (let otherId = 0; otherId < group.subgroups.length; otherId++) {
             if (id != otherId) {
-               frag += 
+               frag +=
                   `<li action="SSD.displayList[${id}].${operation}(SSD.displayList[${otherId}])">` +
                   `the ${printOp} of ${node} with ${MathML.sans(SSD.displayList[otherId].name)}</li>`;
             }
@@ -146,7 +186,7 @@ class SSD {
          for (let otherId = group.subgroups.length; otherId < SSD.displayList.length; otherId++) {
             if (id != otherId && SSD.displayList[otherId] !== undefined) {
                const otherName = $(`#${otherId}`).children()[1].outerHTML;
-               frag += 
+               frag +=
                   `<li action="SSD.displayList[${id}].${operation}(SSD.displayList[${otherId}])">` +
                   `the ${printOp} of ${node} with ${otherName}</li>`;
             }
@@ -157,9 +197,9 @@ class SSD {
 }
 
 SSD._init();
-
+// @flow
 /*
- * SSD.BasicSubset --
+ * SSD.AbstractSubset --
  *   Direct superclass of SSD.Subgroup, SSD.Subset, and SSD.Partition
  *   Assigns an id to every element displayed in the subsetDisplay,
  *     and adds it to SSD.displayList
@@ -171,16 +211,32 @@ SSD._init();
  *     displayLine - line for this subset in display (e.g., "H₁ = < f > is a subgroup of order 2.")
  *     menu - context menu brought up by this element in display
  *
- *   (BasicSubset would be an abstract superclass in another language.)
+ *   (AbstractSubset would be an abstract superclass in another language.)
  */
+/*::
+import BitSet from '../js/BitSet.js';
+import XMLGroup from '../js/XMLGroup.js';
 
-SSD.BasicSubset = class BasicSubset {
-   constructor () {
+import SSD from './subsets.js';
+
+var group: XMLGroup;
+
+export default
+ */
+SSD.AbstractSubset = class AbstractSubset {
+/*::
+   id: number;
+   elements: BitSet;
+  +name: string;	// implemented in subclass
+  +menu: JQuery;	// implemented in subclass
+  +displayLine: string; // implemented in subclass
+ */  
+   constructor() {
       this.id = SSD.nextId++;
       SSD.displayList[this.id] = this;
    }
 
-   get closure() {
+   get closure() /*: SSD.Subset */ {
       return new SSD.Subset(group.closure(this.elements));
    }
 
@@ -195,15 +251,15 @@ SSD.BasicSubset = class BasicSubset {
     * Operations that create new SSD.Subsets by performing
     *   union, intersection, and elementwise product on this set
     */
-   union(other) {
+   union(other /*: SSD.AbstractSubset */) /* SSD.Subset */ {
       return new SSD.Subset(BitSet.union(this.elements, other.elements));
    }
 
-   intersection(other) {
+   intersection(other /*: SSD.AbstractSubset */) /*: SSD.Subset */ {
       return new SSD.Subset(BitSet.intersection(this.elements, other.elements));
    }
 
-   elementwiseProduct(other) {
+   elementwiseProduct(other /*: SSD.AbstractSubset */) /*: SSD.Subset */{
       const newElements = new BitSet(group.order);
       for (let i = 0; i < this.elements.len; i++) {
          if (this.elements.isSet(i)) {
@@ -217,17 +273,36 @@ SSD.BasicSubset = class BasicSubset {
       return new SSD.Subset(newElements);      
    }
 
-   get elementString() {
+   get elementString() /*: string */ {
       return '[' + this.elements.toString() + ']';
    }
 }
+// @flow
+/*::
+import BitSet from '../js/BitSet.js';
+import MathML from '../js/MathML.js';
+import Template from '../js/Template.js';
+import SubgroupFinder from '../js/SubgroupFinder.js';
+import XMLGroup from '../js/XMLGroup.js';
 
-SSD.Subgroup = class Subgroup extends SSD.BasicSubset {
-   constructor (subgroupIndex) {
+import SSD from './subsets.js';
+
+var group: XMLGroup;
+
+export default
+ */
+SSD.Subgroup = class Subgroup extends SSD.AbstractSubset {
+/*::
+   subgroupIndex: number;
+  +normalizer: SSD.Subset;
+  +leftCosets: SSD.Cosets;
+  +rightCosets: SSD.Cosets;
+ */
+   constructor(subgroupIndex /*: number */) {
       super();
 
       this.subgroupIndex = subgroupIndex;
-      this.elements = window.group.subgroups[subgroupIndex].members;
+      this.elements = group.subgroups[subgroupIndex].members;
    }
 
    get name() {
@@ -235,13 +310,13 @@ SSD.Subgroup = class Subgroup extends SSD.BasicSubset {
    }
 
    get displayLine() {
-      const generators = window.group.subgroups[this.subgroupIndex].generators.toArray()
+      const generators = group.subgroups[this.subgroupIndex].generators.toArray()
                                .map( el => group.representation[el] );
       let templateName;
       switch (this.subgroupIndex) {
          case 0:
             templateName = 'firstSubgroup_template';	break;
-         case window.group.subgroups.length - 1:
+         case group.subgroups.length - 1:
             templateName = 'lastSubgroup_template';	break;
          default:
             templateName = 'subgroup_template';	break;
@@ -256,9 +331,9 @@ SSD.Subgroup = class Subgroup extends SSD.BasicSubset {
    }
 
    get normalizer() {
-      new SSD.Subset(
-         new SubgroupFinder(window.group)
-            .findNormalizer(window.group.subgroups[this.subgroupIndex]).members );
+      return new SSD.Subset(
+         new SubgroupFinder(group)
+            .findNormalizer(group.subgroups[this.subgroupIndex]).members );
    }
 
    get leftCosets() {
@@ -270,18 +345,31 @@ SSD.Subgroup = class Subgroup extends SSD.BasicSubset {
    }
 
    static displayAll() {
-      $('#subgroups').html(
-         window.group
-               .subgroups
-               .reduce( (frag, _, inx) => frag.append(new SSD.Subgroup(inx).displayLine),
-                        $(document.createDocumentFragment()) )
-      );
+      $('#subgroups').html('').append(
+         group.subgroups.reduce( (frag, _, inx) => frag.append(new SSD.Subgroup(inx).displayLine),
+                                 $(document.createDocumentFragment()) ));
    }
 }
-SSD.Subset = class Subset extends SSD.BasicSubset {
-   constructor (elements) {
+// @flow
+/*::
+import BitSet from '../js/BitSet.js';
+import MathML from '../js/MathML.js';
+import Template from '../js/Template.js';
+import XMLGroup from '../js/XMLGroup.js';
+
+import SSD from './subsets.js';
+
+var group: XMLGroup;
+
+export default
+ */
+SSD.Subset = class Subset extends SSD.AbstractSubset {
+/*::
+   subsetIndex: number;
+ */
+   constructor(elements /*: void | Array<groupElement> | BitSet */) {
       super();
-      
+
       if (elements === undefined) {
          this.elements = new BitSet(group.order);
       } else if (Array.isArray(elements)) {
@@ -294,16 +382,16 @@ SSD.Subset = class Subset extends SSD.BasicSubset {
       $('#subsets').append(this.displayLine).show();
    }
 
-   get name() {
+   get name() /*: mathml */ {
       return MathML.sub('S', this.subsetIndex);
    }
 
-   get displayLine() {
+   get displayLine() /*: html */ {
       const numElements = this.elements.popcount();
       let items = this.elements
                       .toArray()
                       .slice(0, 3)
-                      .map( (el) => window.group.representation[el] );
+                      .map( (el) => group.representation[el] );
        if (numElements > 3) {
          items.push('<mtext>...</mtext>');
       }
@@ -323,13 +411,25 @@ SSD.Subset = class Subset extends SSD.BasicSubset {
       }
    }
 
-   static nextName() {
+   static nextName() /*: string */ {
       return MathML.sub('S', SSD.nextSubsetIndex);
    }
 }
+// @flow
+/*::
+import BitSet from '../js/BitSet.js';
+import MathML from '../js/MathML.js';
+import Template from '../js/Template.js';
+import XMLGroup from '../js/XMLGroup.js';
 
+import SSD from './subsets.js';
+
+var group: XMLGroup;
+
+export default
+ */
 SSD.SubsetEditor = class SubsetEditor {
-   static open(displayId) {
+   static open(displayId /*: number */) {
       const subset = displayId === undefined ? undefined : SSD.displayList[displayId];
       const elements = subset === undefined ? new BitSet(group.order) : subset.elements;
       const setName = subset === undefined ? SSD.Subset.nextName() : subset.name;
@@ -338,16 +438,21 @@ SSD.SubsetEditor = class SubsetEditor {
       $subsetEditor.find('.ssedit_setName').html(setName);
       $subsetEditor.find('#ssedit_cancel_button').on('click', SSD.SubsetEditor.close);
       $subsetEditor.find('#ssedit_ok_button').on('click', SSD.SubsetEditor.accept);
-      $subsetEditor.find('.ssedit_panel_container').on('dragover', (ev) => ev.preventDefault());
+      $subsetEditor.find('.ssedit_panel_container').on('dragover', (ev /*: JQueryEventObject */) => ev.preventDefault());
       $subsetEditor.find('#ssedit_elementsIn_container').on('drop', SSD.SubsetEditor.addElement);
       $subsetEditor.find('#ssedit_elementsNotIn_container').on('drop', SSD.SubsetEditor.removeElement);
-      
+
       for (const el of group.elements) {
          const elementHTML =
-            `<li element=${el} draggable="true">${MathML.sans(window.group.representation[el])}</li>`;
+            `<li element=${el} draggable="true">${MathML.sans(group.representation[el])}</li>`;
          const listName = elements.isSet(el) ? 'elementsIn' : 'elementsNotIn';
          $(elementHTML).appendTo($subsetEditor.find(`#${listName}`))
-                       .on('dragstart', (ev) => ev.originalEvent.dataTransfer.setData("text", el));
+                       .on('dragstart', (event /*: JQueryEventObject */) => {
+                          const dragEvent = ((event.originalEvent /*: any */) /*: DragEvent */);
+                          if (dragEvent.dataTransfer != undefined) {
+                             dragEvent.dataTransfer.setData("text", el.toString());
+                          }
+                       });
       }
 
       MathJax.Hub.Queue(['Typeset', MathJax.Hub, "subset_editor"]);
@@ -368,20 +473,40 @@ SSD.SubsetEditor = class SubsetEditor {
       $('#subset_editor').remove();
    }
 
-   static addElement(ev) {
-      ev.preventDefault();
-      const element = ev.originalEvent.dataTransfer.getData("text");
-      $(`#elementsNotIn li[element=${element}]`).detach().appendTo($(`#elementsIn`));
+   static addElement(event /*: JQueryEventObject */) {
+      event.preventDefault();
+      const dragEvent = ((event.originalEvent /*: any */) /*: DragEvent */);
+      if (dragEvent != undefined && dragEvent.dataTransfer != undefined) {
+         const element = dragEvent.dataTransfer.getData("text");
+         $(`#elementsNotIn li[element=${element}]`).detach().appendTo($(`#elementsIn`));
+      }
    }
 
-   static removeElement(ev) {
-      ev.preventDefault();
-      const element = ev.originalEvent.dataTransfer.getData("text");
-      $(`#elementsIn li[element=${element}]`).detach().appendTo($(`#elementsNotIn`));
+   static removeElement(event /*: JQueryEventObject */) {
+      event.preventDefault();
+      const dragEvent = ((event.originalEvent /*: any */) /*: DragEvent */);
+      if (dragEvent != undefined && dragEvent.dataTransfer != undefined) {
+         const element = dragEvent.dataTransfer.getData("text");
+         $(`#elementsIn li[element=${element}]`).detach().appendTo($(`#elementsNotIn`));
+      }
    }
 }
-SSD.Partition = class Partition {
-   constructor () {
+// @flow
+/*::
+import MathML from '../js/MathML.js';
+
+import SSD from './subsets.js';
+
+export default
+ */
+SSD.AbstractPartition = class AbstractPartition {
+/*::
+  +destroy: () => void;   
+  +name: string;
+   subsets: Array<SSD.PartitionSubset>;
+  +allElementString: string;
+ */   
+   constructor() {
       this.subsets = [];
    }
 
@@ -400,8 +525,32 @@ SSD.Partition = class Partition {
       return '[[' + this.subsets.map( (el) => el.elements.toString() ).join('],[') + ']]';
    }
 }
-SSD.PartitionSubset = class PartitionSubset extends SSD.BasicSubset {
-   constructor(parent, subIndex, elements, name, partitionClass) {
+// @flow
+/*::
+import BitSet from '../js/BitSet.js';
+import Template from '../js/Template.js';
+import XMLGroup from '../js/XMLGroup.js';
+
+import SSD from './subsets.js';
+
+var group: XMLGroup;
+
+export default
+ */
+SSD.PartitionSubset = class PartitionSubset extends SSD.AbstractSubset {
+/*::
+   parent: SSD.AbstractPartition;
+   subIndex: number;
+   elements: BitSet;
+   name: string;
+   partitionClass: string;
+  +elementRepresentations: Array<string>;
+ */
+   constructor(parent /*: SSD.AbstractPartition */,
+               subIndex /*: number */,
+               elements /*: BitSet */,
+               name /*: string */,
+               partitionClass /*: string */) {
       super();
 
       this.parent = parent;
@@ -430,18 +579,28 @@ SSD.PartitionSubset = class PartitionSubset extends SSD.BasicSubset {
       return $menu;
    }
 
-   get displayLine() {
+   get displayLine() /*: html */ {
       return eval(Template.HTML(this.partitionClass + '_template'));
    }
 }
-SSD.OrderClasses = class OrderClasses extends SSD.Partition {
+// @flow
+/*::
+import MathML from '../js/MathML.js';
+import XMLGroup from '../js/XMLGroup.js';
+
+import SSD from './subsets.js';
+
+var group: XMLGroup;
+
+export default
+ */
+SSD.OrderClasses = class OrderClasses extends SSD.AbstractPartition {
    constructor() {
       super();
 
-      this.subsets = window
-         .group
+      this.subsets = group
          .orderClasses
-         .filter( (orderClass) => orderClass != undefined )
+         .filter( (orderClass) => orderClass.popcount() != 0 )
          .map( (orderClass, inx) => 
             new SSD.PartitionSubset(this, inx, orderClass, MathML.sub('OC', inx), 'orderClass')
          );
@@ -453,19 +612,29 @@ SSD.OrderClasses = class OrderClasses extends SSD.Partition {
                       .show();
    }
 
-   destroy($curr) {
+   destroy() {
       $('#partitions li.orderClass').remove();
       super.destroy();
    }
 }
+// @flow
+/*::
+import MathML from '../js/MathML.js';
+import XMLGroup from '../js/XMLGroup.js';
 
-SSD.ConjugacyClasses = class ConjugacyClasses extends SSD.Partition {
+import SSD from './subsets.js';
+
+var group: XMLGroup;
+
+export default
+ */
+SSD.ConjugacyClasses = class ConjugacyClasses extends SSD.AbstractPartition {
    constructor() {
       super();
 
-      this.subsets = window.group.conjugacyClasses.map( (conjugacyClass, inx) => 
+      this.subsets = group.conjugacyClasses.map( (conjugacyClass, inx) =>
          new SSD.PartitionSubset(this, inx, conjugacyClass, MathML.sub('CC', inx), 'conjugacyClass') );
-      
+
       $('#partitions_placeholder').hide();
       $('#partitions').append(
          this.subsets.reduce( ($frag, subset) => $frag.append(subset.displayLine),
@@ -478,19 +647,34 @@ SSD.ConjugacyClasses = class ConjugacyClasses extends SSD.Partition {
       super.destroy();
    }
 }
-SSD.Cosets = class Cosets extends SSD.Partition {
-   constructor(subgroup, side) {
+// @flow
+/*::
+import MathML from '../js/MathML.js';
+import XMLGroup from '../js/XMLGroup.js';
+
+import SSD from './subsets.js';
+
+var group: XMLGroup;
+
+export default
+ */
+SSD.Cosets = class Cosets extends SSD.AbstractPartition {
+/*::
+  subgroup: SSD.Subgroup;
+  isLeft: boolean;
+  side: string;
+ */
+   constructor(subgroup /*: SSD.Subgroup */, side /*: string */) {
       super();
 
       this.subgroup = subgroup;
       this.isLeft = side == 'left';
       this.side = side;
 
-      this.subsets = window
-         .group
+      this.subsets = group
          .getCosets(this.subgroup.elements, this.isLeft)
          .map( (coset, inx) => {
-            const rep = window.group.representation[coset.first()];
+            const rep = group.representation[((coset.first() /*: any */) /*: groupElement */)];
             const name = this.isLeft ?
                          MathML.sans(rep) + MathML.sans(this.subgroup.name) :
                          MathML.sans(this.subgroup.name) + MathML.sans(rep);
@@ -505,12 +689,29 @@ SSD.Cosets = class Cosets extends SSD.Partition {
    }
 
    destroy() {
-      $(`#partitions li.${this.side}coset${this.subgroupIndex}`).remove();
+      $(`#partitions li.${this.side}coset${this.subgroup.subgroupIndex}`).remove();
       super.destroy();
    }
 }
+// @flow
+/*::
+import Arrow from './Arrow.js';
+import ArrowMult from './ArrowMult.js';
+import Chunking from './Chunking.js';
+import DiagramChoice from './DiagramChoice.js';
+import Generator from './Generator.js';
 
+export default
+ */
 class DC {
+/*::
+   static DIAGRAM_PANEL_URL: string;
+   static Arrow: Class<Arrow>;
+   static ArrowMult: Class<ArrowMult>;
+   static Chunking: Class<Chunking>;
+   static DiagramChoice: Class<DiagramChoice>;
+   static Generator: Class<Generator>;
+ */
    static clearMenus() {
       $('#diagram-page .highlighted').removeClass('highlighted');
       $('#diagram-page .menu:visible').remove();
@@ -520,16 +721,16 @@ class DC {
    }
 
    /* Load, initialize diagram control */
-   static load($diagramWrapper) {
+   static load($diagramWrapper /*: JQuery */) /*: Promise<void> */ {
       return new Promise( (resolve, reject) => {
          $.ajax( { url: DC.DIAGRAM_PANEL_URL,
-                   success: (data) => {
+                   success: (data /*: string */) => {
                       $diagramWrapper.html(data);
                       DC.setupDiagramPage();
                       resolve();
                    },
                    error: (_jqXHR, _status, err) => {
-                      reject(`Error loading ${DC.DIAGRAM_PANEL_URL}: ${err}`);
+                      reject(`Error loading ${DC.DIAGRAM_PANEL_URL} ${err === undefined ? '' : ': ' + err}`);
                    }
          } )
       } )
@@ -561,16 +762,40 @@ class DC {
 }
 
 DC.DIAGRAM_PANEL_URL = 'diagramController/diagram.html';
+// @flow
+/*::
+import BitSet from '../js/BitSet.js';
+import CayleyDiagram from '../js/CayleyDiagram.js';
+import type {layout, direction, StrategyArray} from '../js/CayleyDiagram.js';
+import DisplayDiagram from '../js/DisplayDiagram.js';
+import MathML from '../js/MathML.js';
+import Menu from '../js/Menu.js';
+import Template from '../js/Template.js';
+import XMLGroup from '../js/XMLGroup.js';
 
+import DC from './diagram.js';
+
+var emitStateChange: () => void;
+var Cayley_diagram: CayleyDiagram;
+var Graphic_context: DisplayDiagram;
+var group: XMLGroup;
+
+export default
+ */
 DC.Generator = class {
-   static clickHandler(event) {
+/*::
+   static axis_label: Array<[string, string, string]>;
+   static axis_image: Array<[string, string, string]>;
+   static orders: Array<Array<string>>;
+ */
+   static clickHandler(event /*: JQueryEventObject */) {
       event.preventDefault();
 
       // check if disabled
       if (DC.Generator.isDisabled()) {
          return;
       }
-      eval($(event.target.closest('[action]')).attr('action'));
+      eval($($(event.target).closest('[action]')).attr('action'));
       event.stopPropagation();
    }
 
@@ -595,7 +820,7 @@ DC.Generator = class {
       }
    }
 
-   static showGeneratorMenu(event, strategy_index) {
+   static showGeneratorMenu(event /*: JQueryEventObject */, strategy_index /*: number */) {
       DC.clearMenus();
       const $generator_menu = DC.Generator.getGenericMenu();
 
@@ -613,19 +838,19 @@ DC.Generator = class {
 
       $('#generation-table').append($generator_menu);
       MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'generation-list']);
-      DC.Generator._showMenu(event, $generator_menu);
+      DC.Generator._typesetMenu(event, $generator_menu);
    }
 
-   static _showMenu(event, $menu) {
+   static _typesetMenu(_event /*: JQueryEventObject */, $menu /*: JQuery */) {
+      const event = ((_event /*: any */) /*: JQueryMouseEventObject */);
       $menu.css('visibility', 'hidden');
-      MathJax.Hub.Queue(['Typeset', MathJax.Hub, $menu[0]],
-                        () => {
-                           Menu.setMenuLocations(event, $menu);
-                           $menu.css('visibility', 'visible');
-                        });
+      const showMenu = () => { Menu.setMenuLocations(event, $menu);
+                               $menu.css('visibility', 'visible');
+                             };
+      MathJax.Hub.Queue(['Typeset', MathJax.Hub, $menu[0]], showMenu);
    }
 
-   static showAxisMenu(event, strategy_index) {
+   static showAxisMenu(event /*: JQueryEventObject */, strategy_index /*: number */) {
       DC.clearMenus();
 
       // previously generated subgroup must have > 2 cosets in this subgroup
@@ -639,10 +864,10 @@ DC.Generator = class {
                              .prepend($(eval(Template.HTML('axis-menu-template'))));
 
       $('#generation-table').append($layout_menu);
-      DC.Generator._showMenu(event, $layout_menu);
+      DC.Generator._typesetMenu(event, $layout_menu);
    }
 
-   static showOrderMenu(event, strategy_index) {
+   static showOrderMenu(event /*: JQueryEventObject */, strategy_index /*: number */) {
       DC.clearMenus();
       const $order_menu = DC.Generator.getGenericMenu();
 
@@ -652,7 +877,7 @@ DC.Generator = class {
                        (_,order) => $(eval(Template.HTML('order-menu-item-template')))));
 
       $('#generation-table').append($order_menu);
-      DC.Generator._showMenu(event, $order_menu);
+      DC.Generator._typesetMenu(event, $order_menu);
    }
 
    static getGenericMenu() {
@@ -671,7 +896,7 @@ DC.Generator = class {
       return $menu;
    }
 
-   static organizeBy(subgroup_index) {
+   static organizeBy(subgroup_index /*: number */) {
       // get subgroup generators
       const subgroup_generators = group.subgroups[subgroup_index].generators.toArray();
 
@@ -682,20 +907,20 @@ DC.Generator = class {
       }
    }
 
-   static updateGenerator(strategy_index, generator) {
+   static updateGenerator(strategy_index /*: number */, generator /*: number */) {
       const strategies = Cayley_diagram.getStrategies();
       strategies[strategy_index][0] = generator;
       DC.Generator.updateStrategies(strategies);
    }
 
-   static updateAxes(strategy_index, layout, direction) {
+   static updateAxes(strategy_index /*: number */, layout /*: layout */, direction /*: direction */) {
       const strategies = Cayley_diagram.getStrategies();
       strategies[strategy_index][1] = layout;
       strategies[strategy_index][2] = direction;
       DC.Generator.updateStrategies(strategies);
    }
 
-   static updateOrder(strategy_index, order) {
+   static updateOrder(strategy_index /*: number */, order /*: number */) {
       const strategies = Cayley_diagram.getStrategies();
       const other_strategy = strategies.findIndex( (strategy) => strategy[3] == order );
       strategies[other_strategy][3] = strategies[strategy_index][3];
@@ -703,54 +928,53 @@ DC.Generator = class {
       DC.Generator.updateStrategies(strategies);
    }
 
-   // Removes redundant generators, adds generators required to generate entire group
-   static refineStrategies(strategies) {
+   // Remove redundant generators, check whether there are enough elements to use curved display
+   static refineStrategies(strategies /*: StrategyArray */) {
       const generators_used = new BitSet(group.order);
       let elements_generated = new BitSet(group.order, [0]);
-      strategies.forEach( (strategy, inx) => {
-         if (elements_generated.isSet(strategy[0])) {
-            // mark strategy for deletion by setting generator to 'undefined'
-            strategy[0] = undefined;
-         } else {
+      strategies = strategies.reduce( (nonRedundantStrategies, strategy) => {
+         if (!elements_generated.isSet(strategy[0])) {
             const old_size = elements_generated.popcount();
-            generators_used.set(strategies[inx][0]);
+            generators_used.set(strategy[0]);
             elements_generated = group.closure(generators_used);
             const new_size = elements_generated.popcount();
 
-            // check whether we can still use a curved display
-            if (strategies[inx][1] != 0 && new_size / old_size < 3) {
-               strategies[inx][1] = 0;
+            if (strategy[1] != 0 && new_size / old_size < 3) {
+               strategy[1] = 0;
             }
-         }
-      } )
 
-      // delete marked strategies, fix nesting order
-      strategies = strategies.filter( (strategy) => strategy[0] !== undefined );
+            nonRedundantStrategies.push(strategy);
+         }
+         return nonRedundantStrategies;
+      }, []);
+
+      // fix nesting order
       strategies.slice().sort( (a,b) => a[3] - b[3] ).map( (el,inx) => (el[3] = inx, el) );
 
       // add elements to generate entire group; append to nesting
       if (elements_generated.popcount() != group.order) {
-         // look for new element
-         const new_generator = elements_generated
+         // look for new element -- we know one exists
+         const new_generator = ((elements_generated
             .complement()
             .toArray()
-            .find( (el) => group.closure(generators_used.clone().set(el)).popcount() == group.order );
+            .find( (el) => group.closure(generators_used.clone().set(el)).popcount() == group.order ) /*: any */) /*: groupElement */);
          // among linear layouts, try to find a direction that hasn't been used yet
-         const new_direction =
-            strategies.reduce( (used_directions, [_, layout, direction, __]) => {
+         const unused_direction =
+            strategies.reduce( (unused_directions, [_, layout, direction, __]) => {
                if (layout == 0) {
-                  used_directions[direction] = true;
+                  unused_directions.clear(direction);
                }
-               return used_directions;
-            }, new Array(3).fill(false) )
-                      .findIndex( (used) => !used );
-         strategies.push([new_generator, 0, (new_direction == -1) ? 0 : new_direction, strategies.length]);
+               return unused_directions;
+            }, new BitSet(3).setAll() )
+               .first();
+         const new_direction = (unused_direction == undefined) ? 0 : unused_direction;
+         strategies.push([new_generator, 0, ((new_direction /*: any */) /*: direction */), strategies.length]);
       }
 
       return strategies;
    }
 
-   static updateStrategies(new_strategies) {
+   static updateStrategies(new_strategies /*: StrategyArray */) {
       const strategies = DC.Generator.refineStrategies(new_strategies);
       Cayley_diagram.setStrategies(strategies);
       Cayley_diagram.removeLines();
@@ -763,20 +987,26 @@ DC.Generator = class {
    }
 
    // Drag-and-drop generation-table rows to re-order generators
-   static dragStart(event) {
-      event.originalEvent.dataTransfer.setData('text/plain', event.target.textContent);
+   static dragStart(event /*: JQueryEventObject */) {
+      const dragEvent = ((event.originalEvent /*: any */) /*: DragEvent */);
+      const target = ((event.target /*: any */) /*: HTMLElement */);
+      const dataTransfer = ((dragEvent.dataTransfer /*: any */) /*: DataTransfer */);
+      dataTransfer.setData('text/plain', target.textContent);
    }
 
-   static drop(event) {
+   static drop(event /*: JQueryEventObject */) {
       event.preventDefault();
-      const dest = event.target.textContent;
-      const src = event.originalEvent.dataTransfer.getData('text/plain');
+      const dragEvent = ((event.originalEvent /*: any */) /*: DragEvent */);
+      const target = ((event.target /*: any */) /*: HTMLElement */);
+      const dataTransfer = ((dragEvent.dataTransfer /*: any */) /*: DataTransfer */);
+      const dest = parseInt(target.textContent);
+      const src = parseInt(dataTransfer.getData('text/plain'));
       const strategies = Cayley_diagram.getStrategies()
       strategies.splice(dest-1, 0, strategies.splice(src-1, 1)[0]);
       DC.Generator.updateStrategies(strategies);
    }
 
-   static dragOver(event) {
+   static dragOver(event /*: JQueryEventObject */) {
       event.preventDefault();
    }
 
@@ -834,32 +1064,39 @@ DC.Generator.orders = [
     MathML.sans('<mtext>second outermost</mtext>'),
     MathML.sans('<mtext>outermost</mtext>')]
 ];
+// @flow
+/*::
+import Template from '../js/Template.js';
+import XMLGroup from '../js/XMLGroup.js';
 
+import DC from './diagram.js';
+
+var displayGraphic: () => void;
+var group: XMLGroup;
+var Diagram_name: ?string;
+
+export default
+ */
 DC.DiagramChoice = class {
-
    /* Populate diagram select element, show selected diagram */
    static setupDiagramSelect() {
-      let diagram_index = -1;
       $('#diagram-choices').html(eval(Template.HTML('diagram-select-first-template'))).hide();
       group.cayleyDiagrams.forEach( (diagram, index) => {
          $('#diagram-choices').append(eval(Template.HTML('diagram-select-other-template'))).hide();
-         diagram_index = (diagram.name == Diagram_name) ? index : diagram_index;
       } );
-      const before = $('#diagram-choice').attr('index');
-      MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'diagram-choices', () => {
-         // check to see if anyone changed the diagram index since this MathJax
-         // task was queued; if so, keep their choice, not our old one:
-         const after = $('#diagram-choice').attr('index');
-         const index = before != after ? after : diagram_index;
-         $('#diagram-choice')
-            .html($(`#diagram-choices > li:nth-of-type(${index+2}`).html())
-            .attr('index', index)
-            .show();
-      } ]);
+      MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'diagram-choices'], () => DC.DiagramChoice._showChoice());
+   }
+
+   static _showChoice() {
+      $('#diagram-choices').hide();
+      const index = group.cayleyDiagrams.findIndex( (cd) => cd.name == Diagram_name );
+      $('#diagram-choice')
+         .html($(`#diagram-choices > li:nth-of-type(${index+2}`).html())
+         .show();
    }
 
    /* Display control routines */
-   static clickHandler(event) {
+   static clickHandler(event /*: JQueryEventObject */) {
       event.preventDefault();
 
       const $curr = $(event.target).closest('[action]');
@@ -869,27 +1106,16 @@ DC.DiagramChoice = class {
       }
    }
 
-   static selectDiagram(diagram,andDisplay) {
-      if ( typeof( andDisplay ) == 'undefined' ) andDisplay = true;
-      const index = ( typeof( diagram ) == 'string' ) ?
-         group.cayleyDiagrams.map( x => x.name ).indexOf( diagram ) : diagram;
-      if (diagram === undefined || index == -1) {
-         Diagram_name = undefined;
-         $('#diagram-choice').html($('#diagram-choices > li:first-of-type').html());
-         DC.Generator.enable();
-         DC.Chunking.enable();
-      } else {
-         Diagram_name = group.cayleyDiagrams[index].name;
-         $('#diagram-choice').html($(`#diagram-choices > li:nth-of-type(${index+2})`).html());
-         DC.Generator.disable();
-         DC.Chunking.disable();
-      }
-      $('#diagram-choice').attr('index', index);
-      $('#diagram-choices').hide();
+   static selectDiagram(diagram /*: ?string */, andDisplay /*:: ?: boolean */ = true) {
+      Diagram_name = (diagram == undefined) ? undefined : diagram;
+      DC.Generator.enable();
+      DC.Chunking.enable();
+      DC.DiagramChoice._showChoice();
 
       if ( andDisplay ) displayGraphic();
    }
 }
+// @flow
 /* This class brings together the functions used in managing the "Show these arrows:" arrow-list display and its side effects
 
    The central actions here are to add and remove arrows from the arrow-list display and the Cayley diagram
@@ -902,6 +1128,24 @@ DC.DiagramChoice = class {
 
    All of these events are fielded by a single event handler, Arrow.clickHandler(), which
  */
+/*::
+import MathML from '../js/MathML.js';
+import Template from '../js/Template.js';
+import Menu from '../js/Menu.js';
+import XMLGroup from '../js/XMLGroup.js';
+import CayleyDiagram from '../js/CayleyDiagram.js';
+import DisplayDiagram from '../js/DisplayDiagram.js';
+
+import DC from './diagram.js';
+
+// globals implemented in CayleyDiagram.js
+var group: XMLGroup;
+var Cayley_diagram: CayleyDiagram;
+var Graphic_context: DisplayDiagram;
+var emitStateChange: () => void;
+
+export default
+ */
 DC.Arrow = class {
    // actions:  show menu; select from menu; select from list; remove
    // utility function add_arrow_list_item(element) to add arrow to list (called from initialization, select from menu)
@@ -909,16 +1153,16 @@ DC.Arrow = class {
 
    // arrow-control click handler
    //   find closest element with action and execute action
-   static clickHandler(event) {
+   static clickHandler(event /*: JQueryEventObject */) {
       event.stopPropagation();
-      eval($(event.target.closest('[action]')).attr('action'));
+      eval($(event.target).closest('[action]').attr('action'));
    }
 
    // Row selected in arrow-list:
    //   clear all highlights
    //   highlight row (find arrow-list item w/ arrow = ${element})
    //   enable remove button
-   static selectArrow(element) {
+   static selectArrow(element /*: number */) {
       $('#arrow-list li').removeClass('highlighted');
       $(`#arrow-list li[arrow=${element}]`).addClass('highlighted');
       $('#remove-arrow-button').attr('action', `DC.Arrow.removeArrow(${element})`);
@@ -926,15 +1170,15 @@ DC.Arrow = class {
    }
 
    // returns all arrows displayed in arrow-list as an array
-   static getAllArrows() {
-      return $('#arrow-list li').toArray().map( (list_item) => list_item.getAttribute('arrow') );
+   static getAllArrows() /*: Array<number> */ {
+      return $('#arrow-list li').toArray().map( (list_item /*: HTMLLIElement */) => parseInt(list_item.getAttribute('arrow')) );
    }
 
    // Add button clicked:
    //   Clear (hidden) menu
    //   Populate menu (for each element not in arrow-list)
    //   Position, expose menu
-   static showArrowMenu(event) {
+   static showArrowMenu(event /*: JQueryMouseEventObject */) {
       DC.clearMenus();
       const $menu = $(eval(Template.HTML('arrow-menu-template')));
       group.elements.forEach( (element) => {
@@ -953,7 +1197,7 @@ DC.Arrow = class {
    //   Hide menu
    //   Add lines to Cayley_diagram
    //   Update lines, arrowheads in graphic, arrow-list
-   static addArrow(element) {
+   static addArrow(element /*: number */) {
       DC.clearMenus();
       Cayley_diagram.addLines(element);
       DC.Arrow.updateArrows();
@@ -964,7 +1208,7 @@ DC.Arrow = class {
    //   Disable remove button
    //   Remove line from Cayley_diagram
    //   Update lines in graphic, arrow-list
-   static removeArrow(element) {
+   static removeArrow(element /*: number */) {
       $('#remove-arrow-button').prop('disabled', true);
       Cayley_diagram.removeLines(element);
       DC.Arrow.updateArrows()
@@ -982,7 +1226,9 @@ DC.Arrow = class {
       // ES6 introduces a Set, but does not provide any way to change the notion of equality among set members
       // Here we work around that by joining a generator value from the line.arrow attribute ("27") and a color ("#99FFC1")
       //   into a unique string ("27#99FFC1") in the Set, then partitioning the string back into an element and a color part
-      const arrow_hashes = new Set(Cayley_diagram.lines.map( (line) => line.arrow + line.color ));
+      const arrow_hashes = new Set(Cayley_diagram.lines.map(
+         (line) => '' + ((line.arrow /*: any */) /*: groupElement */) + ( ((line.color /*: any */) /*: color */) ).toString()
+      ));
       arrow_hashes.forEach( (hash) => {
          const element = hash.slice(0,-7);
          const color = hash.slice(-7);
@@ -1007,19 +1253,48 @@ DC.Arrow = class {
       $('#add-arrow-button').prop('disabled', true);
    }
 }
+// @flow
+/*::
+import CayleyDiagram from '../js/CayleyDiagram.js';
+import DisplayDiagram from '../js/DisplayDiagram.js';
 
-DC.ArrowMult = class {
-   static setMult(rightOrLeft) {
+import DC from './diagram.js';
+
+var Cayley_diagram: CayleyDiagram;
+var Graphic_context: DisplayDiagram;
+
+export default
+ */
+DC.ArrowMult = class ArrowMult {
+   static setMult(rightOrLeft /*: string */) {
       Cayley_diagram.right_multiplication = (rightOrLeft == 'right');
       Graphic_context.showGraphic(Cayley_diagram);
    }
 }
+// @flow
+/*::
+import CayleyDiagram from '../js/CayleyDiagram.js';
+import DisplayDiagram from '../js/DisplayDiagram.js';
+import GEUtils from '../js/GEUtils.js';
+import Template from '../js/Template.js';
+import XMLGroup from '../js/XMLGroup.js';
 
+import DC from './diagram.js';
+
+// globals implemented in CayleyDiagram.js
+var group: XMLGroup;
+var Cayley_diagram: CayleyDiagram;
+var Graphic_context: DisplayDiagram;
+var Diagram_name: string;
+var emitStateChange: () => void;
+
+export default
+ */
 DC.Chunking = class {
    static updateChunkingSelect() {
       // check that first generator is innermost, second is middle, etc.
-      if (   Cayley_diagram.strategies.every( (strategy, inx) => strategy.nesting_level == inx )
-          && $('#diagram-choice').attr('index') == '-1' ) {
+      if (   Diagram_name === undefined
+          && Cayley_diagram.strategies.every( (strategy, inx) => strategy.nesting_level == inx ) ) {
          DC.Chunking.enable();
       } else {
          DC.Chunking.disable();
@@ -1030,7 +1305,7 @@ DC.Chunking = class {
       const generators = [];
       // generate option for each strategy in Cayley diagram
       Cayley_diagram.strategies.forEach( (strategy, strategy_index) => {
-         if (strategy != Cayley_diagram.strategies._last()) {
+         if (strategy != GEUtils.last(Cayley_diagram.strategies)) {
             // find matching subgroup for chunking option
             const subgroup_index = group.subgroups.findIndex( (subgroup) => strategy.bitset.equals(subgroup.members) );
             generators.push(group.representation[strategy.generator]);
@@ -1043,7 +1318,7 @@ DC.Chunking = class {
       ]);
    }
 
-   static clickHandler(event) {
+   static clickHandler(event /*: JQueryEventObject */) {
       event.preventDefault();
 
       if (!DC.Chunking.isDisabled()) {
@@ -1055,7 +1330,7 @@ DC.Chunking = class {
       }
    }
 
-   static selectChunk(strategy_index) {
+   static selectChunk(strategy_index /*: number */) {
       $('#chunk-choices').hide();
       $('#chunk-choice').html($(`#chunk-choices > li:nth-of-type(${strategy_index + 2})`).html());
       Cayley_diagram.chunk = (strategy_index == -1) ? undefined : strategy_index;
@@ -1081,21 +1356,36 @@ DC.Chunking = class {
       emitStateChange();
    }
 
-   static isDisabled() {
+   static isDisabled() /*: boolean */ {
       return $('#chunk-select').prop('disabled');
    }
 }
+// @flow
+/*::
+import CayleyDiagram from '../js/CayleyDiagram.js';
+import DisplayDiagram from '../js/DisplayDiagram.js';
+
+// globals implemented in CayleyDiagram.js
+var Cayley_diagram: CayleyDiagram;
+var Graphic_context: DisplayDiagram;
+var emitStateChange: () => void;
+
+export default
+ */
 class CVC {
-   static load($viewWrapper) {
+/*::
+   static VIEW_PANEL_URL: string;
+ */
+   static load($viewWrapper /*: JQuery */) /*: Promise<void> */ {
       return new Promise( (resolve, reject) => {
          $.ajax( { url: CVC.VIEW_PANEL_URL,
-                   success: (data) => {
+                   success: (data /*: html */) => {
                       $viewWrapper.html(data);
                       CVC.setupViewPage();
                       resolve();
                    },
                    error: (_jqXHR, _status, err) => {
-                      reject(`Error loading ${CVC.VIEW_PANEL_URL}: ${err}`);
+                      reject(`Error loading ${CVC.VIEW_PANEL_URL} ${err === undefined ? '' : ': ' + err}`);
                    }
          } )
       } )
@@ -1114,7 +1404,7 @@ class CVC {
 
    /* Slider handlers */
    static setZoomLevel() {
-      Cayley_diagram.zoomLevel = Math.exp( $('#zoom-level')[0].valueAsNumber/10 );
+      Cayley_diagram.zoomLevel = Math.exp( Number($('#zoom-level').val())/10 );
       Graphic_context.updateZoomLevel(Cayley_diagram);
       emitStateChange();
    }
@@ -1125,7 +1415,7 @@ class CVC {
     *   2 -> [4,15] by 4*exp(0.07*(slider-2)) heuristic, using THREE.js mesh line
     */
    static setLineThickness() {
-      const slider_value = $('#line-thickness')[0].valueAsNumber;
+      const slider_value = Number($('#line-thickness').val());
       const lineWidth = (slider_value == 1) ? 1 : 4*Math.exp(0.0734*(slider_value-2));
       Cayley_diagram.lineWidth = lineWidth;
       Graphic_context.updateLineWidth(Cayley_diagram);
@@ -1133,34 +1423,33 @@ class CVC {
    }
 
    static setNodeRadius() {
-      Cayley_diagram.nodeScale = Math.exp( $('#node-radius')[0].valueAsNumber/10 );
+      Cayley_diagram.nodeScale = Math.exp( Number($('#node-radius').val())/10 );
       Graphic_context.updateNodeRadius(Cayley_diagram);
       Graphic_context.updateLabels(Cayley_diagram);
       emitStateChange();
    }
 
    static setFogLevel() {
-      Cayley_diagram.fogLevel = $('#use-fog')[0].checked ? $('#fog-level')[0].valueAsNumber/10 : 0;
+      Cayley_diagram.fogLevel = $('#use-fog').is(':checked') ? Number($('#fog-level').val())/10 : 0;
       Graphic_context.updateFogLevel(Cayley_diagram);
       emitStateChange();
    }
 
    static setLabelSize() {
-      Cayley_diagram.labelSize = $('#show-labels')[0].checked ?
-                                 Math.exp( $('#label-size')[0].valueAsNumber/10 ) : 0;
+      Cayley_diagram.labelSize = $('#show-labels').is(':checked') ? Math.exp( Number($('#label-size').val())/10 ) : 0;
       Graphic_context.updateLabelSize(Cayley_diagram);
       emitStateChange();
    }
 
    static setArrowheadPlacement() {
-      Cayley_diagram.arrowheadPlacement = $('#arrowhead-placement')[0].valueAsNumber/20;
+      Cayley_diagram.arrowheadPlacement = Number($('#arrowhead-placement').val())/20;
       Graphic_context.updateArrowheadPlacement(Cayley_diagram);
       emitStateChange();
    }
 }
 
 CVC.VIEW_PANEL_URL = 'cayleyViewController/view.html';
-
+// @flow
 /*
 # Visualizer framework javascript
 
@@ -1174,7 +1463,20 @@ CVC.VIEW_PANEL_URL = 'cayleyViewController/view.html';
 
 ```javascript
  */
+/*::
+import XMLGroup from '../js/XMLGroup.js';
+import IsomorphicGroups from '../js/IsomorphicGroups.js';
+
+var group: XMLGroup;
+
+var HELP_PAGE: string;
+
+export default
+ */
 class VC {
+/*::
+   static visualizerLayoutURL: string;
+ */
    static _init() {
       VC.visualizerLayoutURL = './visualizerFramework/visualizer.html';
    }
@@ -1189,10 +1491,10 @@ class VC {
     *
     * It returns the just-started ajax load as an ES6 Promise
     */
-   static load() {
+   static load() /*: Promise<void> */ {
       return new Promise( (resolve, reject) => {
          $.ajax( { url: VC.visualizerLayoutURL,
-                   success: (data) => {
+                   success: (data /*: string */) => {
                       // The current body element contains visualizer-specific layout
                       // Detach it and save it for insertion into the visualizer framework below
                       const $customCode = $('body').children().detach();
@@ -1210,7 +1512,7 @@ class VC {
                       resolve();
                    },
                    error: (_jqXHR, _status, err) => {
-                      reject(`Error loading ${VC.visualizerLayoutURL}: ${err}`);
+                      reject(`Error loading ${VC.visualizerLayoutURL} ${err === undefined ? '' : ': ' + err}`);
                    }
          } );
       } )
@@ -1253,7 +1555,7 @@ class VC {
 ```javascript
    /* Try to find this group in the Library based only on its structure */
    static findGroup() {
-      var found = IsomorphicGroups.find( group );
+      const found = IsomorphicGroups.find( group );
       if ( found ) {
          window.open( `./GroupInfo.html?groupURL=${encodeURIComponent( found.URL )}` );
       } else {
@@ -1266,7 +1568,7 @@ class VC {
 ## VC.showPanel(panel_name)
 ```javascript
    /* Switch panels by showing desired panel, hiding the rest */
-   static showPanel(panel_name) {
+   static showPanel(panel_name /*: string */) {
       $('#vert-container > .fill-vert').each( (_, control) => {
          const control_name = '#' + $(control).attr('id');
          if (control_name == panel_name) {

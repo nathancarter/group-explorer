@@ -1,4 +1,4 @@
-
+//@flow
 /*
  * This file adds an extension to jQuery for making elements movable and resizable,
  * by clicking and dragging with the mouse.
@@ -12,8 +12,19 @@
  * GUIs (top NS, bottom NS, left EW, right EW, top right NESW, etc.).
  */
 
+/*::
+export type JQueryDnD = JQuery & {
+   draggableAndSizable: () => void,
+   removeDragAndSizeSelection: () => void,
+   addDragAndSizeSelection: () => void,
+   pauseDragAndResize: () => void,
+   unpauseDragAndResize: () => void
+};
+
+*/
 // Set the distance from the edge of the element that counts as the resizing area.
-const defaultResizingMargin = 10;
+/*:: export */
+const DEFAULT_RESIZING_MARGIN /*: number */ = 10;
 
 // Use the following class to mark an element the user has selected for dragging
 // or resizing.  The user cannot drag or resize an element they have not first
@@ -21,7 +32,8 @@ const defaultResizingMargin = 10;
 // and controls without triggering a move/resize event by accident.
 // The client should typically assign this some style to make it obvious that the
 // element has been selected, such as "border: 2px dotted #aaf;".
-const selectedForDraggingClass = 'selected-for-moving-and-sizing';
+/*:: export */
+const SELECTED_FOR_DRAGGING_CLASS /*: string */ = 'selected-for-moving-and-sizing';
 
 // For temporarily pausing this feature.
 const pausedDragSelectClass = 'move-and-size-on-pause';
@@ -36,10 +48,10 @@ function eventToCellNumber ( event, relativeToThisAncestor ) {
         rect = container.getBoundingClientRect(),
         point = { x : event.pageX - rect.left,
                   y : event.pageY - rect.top },
-        col = ( point.x < min.x + defaultResizingMargin ) ? 0
-            : ( point.x > max.x - defaultResizingMargin ) ? 2 : 1,
-        row = ( point.y < min.y + defaultResizingMargin ) ? 0
-            : ( point.y > max.y - defaultResizingMargin ) ? 2 : 1;
+        col = ( point.x < min.x + DEFAULT_RESIZING_MARGIN ) ? 0
+            : ( point.x > max.x - DEFAULT_RESIZING_MARGIN ) ? 2 : 1,
+        row = ( point.y < min.y + DEFAULT_RESIZING_MARGIN ) ? 0
+            : ( point.y > max.y - DEFAULT_RESIZING_MARGIN ) ? 2 : 1;
     return col + 3 * row;
 }
 
@@ -61,7 +73,7 @@ $.fn.draggableAndSizable = function () {
         if ( $element.hasClass( pausedDragSelectClass ) ) return;
         if ( $element[0].dragData.firstX == $element[0].dragData.lastX
           && $element[0].dragData.firstY == $element[0].dragData.lastY ) {
-            if ( $element.hasClass( selectedForDraggingClass ) ) {
+            if ( $element.hasClass( SELECTED_FOR_DRAGGING_CLASS ) ) {
                 $element.removeDragAndSizeSelection();
             } else {
                 $element.addDragAndSizeSelection();
@@ -79,7 +91,7 @@ $.fn.draggableAndSizable = function () {
     // to indicate which kind of move or resize would happen if the usre clicked.
     $element.on( "mousemove", function ( event ) {
         if ( $element.hasClass( pausedDragSelectClass ) ) return;
-        if ( !$element.hasClass( selectedForDraggingClass ) ) {
+        if ( !$element.hasClass( SELECTED_FOR_DRAGGING_CLASS ) ) {
             $element.css( { cursor : 'default' } );
             return;
         }
@@ -99,7 +111,7 @@ $.fn.draggableAndSizable = function () {
     // We also install in the parent element mouse handlers for continuing/ending the drag.
     $element.on( "mousedown", function ( event ) {
         if ( $element.hasClass( pausedDragSelectClass ) ) return;
-        if ( !$element.hasClass( selectedForDraggingClass ) ) return;
+        if ( !$element.hasClass( SELECTED_FOR_DRAGGING_CLASS ) ) return;
         $element[0].dragData.type = eventToCellNumber( event, $element[0] );
         $element[0].dragData.firstX = event.pageX;
         $element[0].dragData.firstY = event.pageY;
@@ -114,8 +126,8 @@ $.fn.draggableAndSizable = function () {
     // check to be sure the user isn't dragging the item off screen where it would become
     // inaccessible for later selection/dragging/etc.
     function positionIsOkay ( left, top, right, bottom ) {
-        return ( right - left >= 3 * defaultResizingMargin )
-            && ( bottom - top >= 3 * defaultResizingMargin )
+        return ( right - left >= 3 * DEFAULT_RESIZING_MARGIN )
+            && ( bottom - top >= 3 * DEFAULT_RESIZING_MARGIN )
             && ( left >= $element.parent().offset().left )
             && ( top >= $element.parent().offset().top )
             && ( right <= $element.parent().offset().left + $element.parent().width() )
@@ -186,12 +198,12 @@ $.fn.draggableAndSizable = function () {
 $.fn.removeDragAndSizeSelection = function () {
     if ( this.hasClass( pausedDragSelectClass ) ) return;
     if ( this[0] ) this[0].dragData = { };
-    this.removeClass( selectedForDraggingClass );
+    this.removeClass( SELECTED_FOR_DRAGGING_CLASS );
     if ( this[0] ) this[0].dispatchEvent( new CustomEvent( 'deselected', { bubbles : true } ) );
 }
 $.fn.addDragAndSizeSelection = function () {
-    $( '.'+selectedForDraggingClass ).removeDragAndSizeSelection();
-    this.addClass( selectedForDraggingClass );
+    (($( '.'+SELECTED_FOR_DRAGGING_CLASS ) /*: any */) /*: JQueryDnD */).removeDragAndSizeSelection();
+    this.addClass( SELECTED_FOR_DRAGGING_CLASS );
     if ( this[0] ) this[0].dispatchEvent( new CustomEvent( 'selected', { bubbles : true } ) );
 }
 

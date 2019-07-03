@@ -1,4 +1,4 @@
-
+// @flow
 /*
 # Visualizer framework javascript
 
@@ -12,7 +12,20 @@
 
 ```javascript
  */
+/*::
+import XMLGroup from '../js/XMLGroup.js';
+import IsomorphicGroups from '../js/IsomorphicGroups.js';
+
+var group: XMLGroup;
+
+var HELP_PAGE: string;
+
+export default
+ */
 class VC {
+/*::
+   static visualizerLayoutURL: string;
+ */
    static _init() {
       VC.visualizerLayoutURL = './visualizerFramework/visualizer.html';
    }
@@ -27,10 +40,10 @@ class VC {
     *
     * It returns the just-started ajax load as an ES6 Promise
     */
-   static load() {
+   static load() /*: Promise<void> */ {
       return new Promise( (resolve, reject) => {
          $.ajax( { url: VC.visualizerLayoutURL,
-                   success: (data) => {
+                   success: (data /*: string */) => {
                       // The current body element contains visualizer-specific layout
                       // Detach it and save it for insertion into the visualizer framework below
                       const $customCode = $('body').children().detach();
@@ -48,7 +61,7 @@ class VC {
                       resolve();
                    },
                    error: (_jqXHR, _status, err) => {
-                      reject(`Error loading ${VC.visualizerLayoutURL}: ${err}`);
+                      reject(`Error loading ${VC.visualizerLayoutURL} ${err === undefined ? '' : ': ' + err}`);
                    }
          } );
       } )
@@ -91,7 +104,7 @@ class VC {
 ```javascript
    /* Try to find this group in the Library based only on its structure */
    static findGroup() {
-      var found = IsomorphicGroups.find( group );
+      const found = IsomorphicGroups.find( group );
       if ( found ) {
          window.open( `./GroupInfo.html?groupURL=${encodeURIComponent( found.URL )}` );
       } else {
@@ -104,7 +117,7 @@ class VC {
 ## VC.showPanel(panel_name)
 ```javascript
    /* Switch panels by showing desired panel, hiding the rest */
-   static showPanel(panel_name) {
+   static showPanel(panel_name /*: string */) {
       $('#vert-container > .fill-vert').each( (_, control) => {
          const control_name = '#' + $(control).attr('id');
          if (control_name == panel_name) {

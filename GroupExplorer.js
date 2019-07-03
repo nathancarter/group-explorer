@@ -1,7 +1,23 @@
+// @flow
+/*::
+import CayleyDiagram from './js/CayleyDiagram.js';
+import CycleGraph from './js/CycleGraph.js';
+import DisplayCycleGraph from './js/DisplayCycleGraph.js';
+import DisplayDiagram from './js/DisplayDiagram.js';
+import DisplayMulttable from './js/DisplayMulttable.js';
+import GroupURLs from './GroupURLs.js';
+import Library from './js/Library.js';
+import Menu from './js/Menu.js';
+import Multtable from './js/Multtable.js';
+import SymmetryObject from './js/SymmetryObject.js';
+import Template from './js/Template.js';
+import XMLGroup from './js/XMLGroup.js';
+ */
+
 // Global variables
-var graphicContext;	// hidden scratchpad, re-used to reduce WebGL contexts
-var multtableContext;
-var cycleGraphContext;
+var graphicContext /*: DisplayDiagram */;	// hidden scratchpad, re-used to reduce WebGL contexts
+var multtableContext /*: DisplayMulttable */;
+var cycleGraphContext /*: DisplayCycleGraph */;
 
 // Static event managers (setup after document is available)
 $(function() {
@@ -16,9 +32,9 @@ $(window).on('load', readLibrary);	// like onload handler in body
 
 // Load group library from urls
 function readLibrary() {
-   window.graphicContext = new DisplayDiagram({width: 50, height: 50, fog: false});
-   window.multtableContext = new DisplayMulttable({height: 32, width: 32});
-   window.cycleGraphContext = new DisplayCycleGraph({height: 32, width: 32});
+   graphicContext = new DisplayDiagram({width: 50, height: 50, fog: false});
+   multtableContext = new DisplayMulttable({height: 32, width: 32});
+   cycleGraphContext = new DisplayCycleGraph({height: 32, width: 32});
 
    // create mathjax style element from localStorage (needed to display locally stored definitions)
    const styleHTML = localStorage.getItem('mathjax_stylesheet');
@@ -28,10 +44,10 @@ function readLibrary() {
 
    // only read in a few groups if URL specifies 'debug' (for impatient programmers)
    const urlDebug = new URL(window.location.href).searchParams.get('debug');
-   const resolvedURLs = urls.map( (url) => Library.resolveURL(url) );
-   const urlsToDisplay = (urlDebug == undefined) ?
-                         Array.from(new Set(resolvedURLs.concat(Library.getAllLocalURLs()))) :
-                         resolvedURLs.slice(0, (urlDebug || 10));
+   const resolvedURLs = GroupURLs.urls.map( (url) => Library.resolveURL(url) );
+   const urlsToDisplay /*: Array<string> */ =
+         (urlDebug == undefined) ? Array.from(new Set(resolvedURLs.concat(Library.getAllLocalURLs())))
+                                 : resolvedURLs.slice(0, (parseInt(urlDebug) || 10));
 
    // display locally stored group defintions
    for (const url of urlsToDisplay) {
@@ -53,7 +69,7 @@ function finish(urlsToDisplay) {
       columnSort( 1, true );
 
       // store stylesheet in localStorage
-      const mathjaxStylesheet = $('style').toArray().filter( (s) => s.textContent.trim().startsWith('.mjx-chtml') )[0];
+      const mathjaxStylesheet = ($('style').toArray() /*: Array<HTMLStyleElement> */).filter( (s) => s.textContent.trim().startsWith('.mjx-chtml') )[0];
       if (mathjaxStylesheet != undefined) {
          localStorage.setItem('mathjax_stylesheet',mathjaxStylesheet.outerHTML);
       }
@@ -69,7 +85,7 @@ function finish(urlsToDisplay) {
       Library.getLatestGroup(url)
              .then( (group) => {
                 // if we already have the latest group in the Library, just check to see if we're done
-                if (localGroup == group && localGroup.CayleyThumbnail != undefined && localGroup.rowHTML != undefined) {
+                if (localGroup && localGroup == group && localGroup.CayleyThumbnail != undefined && localGroup.rowHTML != undefined) {
                    if ( urlIndex == urlsToDisplay.length ) {
                       exit();
                    } else {
@@ -80,24 +96,25 @@ function finish(urlsToDisplay) {
                    const row = displayGroup(group)[0];
                    $('#ScratchTable').append(row);
 
+                   const afterTypesetting = () => {
+                      // remove un-needed spans from mathjax output
+                      $(row).find('span.MathJax_Preview, span.MJX_Assistive_MathML, script[type="math/mml"]').remove();
+                      const $cayleyDiagram = $(row).find('td.cayleyDiagram img').detach();
+                      group.rowHTML = row.outerHTML;
+                      $(row).find('td.cayleyDiagram').append($cayleyDiagram);
+                      $(row).detach().appendTo('#GroupTable tbody');
+                      Library.saveGroup(group);
+                      if ( urlIndex == urlsToDisplay.length ) {
+                         exit();
+                      } else {
+                         const pct = ( urlIndex * 100 / urlsToDisplay.length ) | 0;
+                         $( '#loadingMessage i' ).html( `Loading groups (${pct}%)...` );
+                         loadNextURL(urlIndex);
+                      }
+                   };
                    // typeset this row
-                   MathJax.Hub.Queue(
-                      ['Typeset', MathJax.Hub, 'ScratchTable', () => {
-                         // remove un-needed spans from mathjax output
-                         $(row).find('span.MathJax_Preview, span.MJX_Assistive_MathML, script[type="math/mml"]').remove();
-                         const $cayleyDiagram = $(row).find('td.cayleyDiagram img').detach();
-                         group.rowHTML = row.outerHTML;
-                         $(row).find('td.cayleyDiagram').append($cayleyDiagram);
-                         $(row).detach().appendTo('#GroupTable tbody');
-                         Library.saveGroup(group);
-                         if ( urlIndex == urlsToDisplay.length ) {
-                            exit();
-                         } else {
-                            const pct = ( urlIndex * 100 / urlsToDisplay.length ) | 0;
-                            $( '#loadingMessage i' ).html( `Loading groups (${pct}%)...` );
-                            loadNextURL(urlIndex);
-                         }
-                      }] );
+                   MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'ScratchTable'],
+                                     afterTypesetting);
                 } } )
              .catch( console.error );
    }
@@ -122,29 +139,29 @@ function displayGroup(group) {
       const img = graphicContext.getImage(graphicData);
       group.CayleyThumbnail = img.src;
       img.height = img.width = 32;
-      $row.find("td.cayleyDiagram").html(img);
+      $row.find("td.cayleyDiagram").empty().append(img);
    }
 
    // draw Multtable
    {
       const graphicData = new Multtable(group);
       const img = multtableContext.getImage(graphicData);
-      $row.find("td.multiplicationTable").html(img);
+      $row.find("td.multiplicationTable").empty().append(img);
    }
 
    // draw Symmetry Object
-   if (group.symmetryObjects.length != 0) {
+   if (symmetryTitle != undefined) {
       const graphicData = SymmetryObject.generate(group, symmetryTitle);
       const img = graphicContext.getImage(graphicData);
       img.height = img.width = 32;
-      $row.find("td.symmetryObject").html(img);
+      $row.find("td.symmetryObject").empty().append(img);
    }
 
    // draw Cycle Graph
    {
       const graphicData = new CycleGraph( group );
       const img = cycleGraphContext.getImage( graphicData );
-      $row.find("td.cycleGraph").html(img);
+      $row.find("td.cycleGraph").empty().append(img);
    }
 
    return $row;
@@ -160,16 +177,14 @@ function columnSort(columnIndex, makeSortUp = ! $($('th')[columnIndex]).hasClass
    $($('th')[columnIndex]).removeClass('sort-none')
                           .addClass(makeSortUp ? 'sort-up' : 'sort-down');
 
-   const getCellValue = (tr, idx) => tr.children[idx].textContent;
+   const getCellValue = (tr, idx) /*: string */ => tr.children[idx].textContent;
 
    const compareFunction =
       (idx, asc) =>
-         (a, b) =>
-            ((v1, v2) => v1 !== '' &&
-                       v2 !== '' &&
-                       !isNaN(v1) &&
-                       !isNaN(v2) ? v1 - v2 : v1.toString().localeCompare(v2)
-            )(getCellValue(asc ? a : b, idx), getCellValue(asc ? b : a, idx));
+         (a /*: HTMLTableCellElement */, b /*: HTMLTableCellElement */) =>
+         ((v1, v2) => (!isNaN(v1) && !isNaN(v2)) ? Number(v1) - Number(v2) : v1.toString().localeCompare(v2))(
+            getCellValue(asc ? a : b, idx), getCellValue(asc ? b : a, idx)
+         );
 
    $('#GroupTable tbody').find('tr:nth-child(n+1)')
                          .sort(compareFunction(columnIndex, makeSortUp))
@@ -177,11 +192,17 @@ function columnSort(columnIndex, makeSortUp = ! $($('th')[columnIndex]).hasClass
 }
 
 class HoverHelp {
+/*::
+   static pollerID : IntervalID;
+   static mouse_event : void | (JQueryMouseEventObject & {tooltip_shown: boolean, timeStamp: number});
+   static data : Array<{klass: string, pageURL: string, background: string, tooltip: string}>;
+ */
    // pollerID = id of polling routine from window.setInterval call
    // mouse_event = event from last 'mousemove' event (event contains timestamp) (undefined => no mousemove event to be handled)
-   // tooltip_timestamp = time tooltip was created (undefined => no tooltip being shown)
 
-   static eventHandler(event) {
+   static eventHandler(_event /*: JQueryEventObject */) {
+      const event = ((_event /*: any */) /*: JQueryMouseEventObject & {tooltip_shown: boolean, timeStamp: number} */);
+
       if (event.ctrlKey || event.shiftKey || event.altKey) {
          return;
       }
@@ -202,16 +223,17 @@ class HoverHelp {
             for (const {klass, pageURL} of HoverHelp.data) {
                if ($td.hasClass(klass)) {
                   const groupURL = $td.parent().attr('group');
-                  const group = Library.map.get(groupURL);
-                  const options = group.cayleyDiagrams.length ?
-                     {diagram:group.cayleyDiagrams[0].name} : {};
+                  const group = ((Library.map.get(groupURL) /*: any */) /*: XMLGroup */);
+                  const options = (group.cayleyDiagrams.length != 0) ?
+                        {diagram:group.cayleyDiagrams[0].name} : {};
                   Library.openWithGroupURL(pageURL, groupURL, options);
                   break;
                }
             }
          }
       } else if (event.type == 'mousemove') {
-         const $old_td = (HoverHelp.mouse_event === undefined) ? undefined : $(HoverHelp.mouse_event.target).closest('td');
+         const mouse_event = HoverHelp.mouse_event;
+         const $old_td = (mouse_event == undefined) ? undefined : $(mouse_event.target).closest('td');
          const $new_td = $(event.target).closest('td');
          if ($old_td === undefined || $old_td[0] != $new_td[0]) {
             if ($old_td !== undefined) {
@@ -247,26 +269,27 @@ class HoverHelp {
    }
 
    static poller() {
-      if (   HoverHelp.mouse_event !== undefined
-          && !HoverHelp.mouse_event.tooltip_shown
-          && $(HoverHelp.mouse_event.target).closest('td') !== undefined
-          && performance.now() - HoverHelp.mouse_event.timeStamp > 500) {
-         const $td = $(HoverHelp.mouse_event.target).closest('td');
+      const mouse_event = HoverHelp.mouse_event;
+      if (   mouse_event !== undefined
+          && !mouse_event.tooltip_shown
+          && $(mouse_event.target).closest('td') !== undefined
+          && performance.now() - mouse_event.timeStamp > 500) {
+         const $td = $(mouse_event.target).closest('td');
          for (const {klass, tooltip} of HoverHelp.data) {
             if ($td.hasClass(klass)) {
                const $tooltip = $('<div id="tooltip" class="menu">')
                   .attr('timestamp', performance.now())
                   .text(tooltip)
                   .appendTo($td);
-               Menu.setMenuLocations(HoverHelp.mouse_event, $tooltip);
-               HoverHelp.mouse_event.tooltip_shown = true;
+               Menu.setMenuLocations(mouse_event, $tooltip);
+               mouse_event.tooltip_shown = true;
                break;
             }
          }
       }
 
       // if tooltip is more than 10 sec old, clear it
-      if ($('#tooltip')[0] !== undefined && performance.now() - $('#tooltip').attr('timestamp') > 10000) {
+      if ($('#tooltip')[0] !== undefined && performance.now() - parseInt($('#tooltip').attr('timestamp')) > 10000) {
          $('#tooltip').remove()
       }
    }

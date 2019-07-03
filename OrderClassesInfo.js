@@ -1,20 +1,36 @@
+// @flow
+
+/*::
+import Library from './js/Library.js';
+import MathML from './js/MathML.js';
+import setUpGAPCells from './js/ShowGAPCode.js';
+import Template from './js/Template.js';
+import XMLGroup from './js/XMLGroup.js';
+ */
+
+var group /*: XMLGroup */;
+
 $(window).on('load', load);	// like onload handler in body
 
 function load() {
    Library.loadFromURL()
-          .then( (group) => formatGroup(group) )
+          .then( (_group) => {
+              group = _group;
+              formatGroup();
+          } )
           .catch( console.error );
 }
 
-function formatGroup(group) {
-   const numOrderClasses = group.orderClasses.reduce( count => count + 1, 0);
+function formatGroup() {
+   const nonEmptyOrderClasses = group.orderClasses.filter( (bitset) => bitset.popcount() != 0 );
+   const numOrderClasses = nonEmptyOrderClasses.length;
    let $rslt = $(document.createDocumentFragment())
       .append(eval(Template.HTML('header')));
    if (numOrderClasses == 1) {
       $rslt.append(eval(Template.HTML('single')));
    } else {
       $rslt.append(eval(Template.HTML('multiple')));
-      group.orderClasses.forEach( (members, order) =>
+      nonEmptyOrderClasses.forEach( (members, order) =>
          $rslt.find('#order_class_list')
               .append($('<li>').html(
                  MathML.sans('<mtext>Elements of order ' + order + ' :&nbsp;</mtext>') +
@@ -25,6 +41,5 @@ function formatGroup(group) {
    $('body').prepend($rslt);
    MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'conjugacy_list']);
 
-   window.group = group;
    setUpGAPCells();
 }

@@ -1,3 +1,4 @@
+// @flow
 /* This class brings together the functions used in managing the "Show these arrows:" arrow-list display and its side effects
 
    The central actions here are to add and remove arrows from the arrow-list display and the Cayley diagram
@@ -10,6 +11,24 @@
 
    All of these events are fielded by a single event handler, Arrow.clickHandler(), which
  */
+/*::
+import MathML from '../js/MathML.js';
+import Template from '../js/Template.js';
+import Menu from '../js/Menu.js';
+import XMLGroup from '../js/XMLGroup.js';
+import CayleyDiagram from '../js/CayleyDiagram.js';
+import DisplayDiagram from '../js/DisplayDiagram.js';
+
+import DC from './diagram.js';
+
+// globals implemented in CayleyDiagram.js
+var group: XMLGroup;
+var Cayley_diagram: CayleyDiagram;
+var Graphic_context: DisplayDiagram;
+var emitStateChange: () => void;
+
+export default
+ */
 DC.Arrow = class {
    // actions:  show menu; select from menu; select from list; remove
    // utility function add_arrow_list_item(element) to add arrow to list (called from initialization, select from menu)
@@ -17,16 +36,16 @@ DC.Arrow = class {
 
    // arrow-control click handler
    //   find closest element with action and execute action
-   static clickHandler(event) {
+   static clickHandler(event /*: JQueryEventObject */) {
       event.stopPropagation();
-      eval($(event.target.closest('[action]')).attr('action'));
+      eval($(event.target).closest('[action]').attr('action'));
    }
 
    // Row selected in arrow-list:
    //   clear all highlights
    //   highlight row (find arrow-list item w/ arrow = ${element})
    //   enable remove button
-   static selectArrow(element) {
+   static selectArrow(element /*: number */) {
       $('#arrow-list li').removeClass('highlighted');
       $(`#arrow-list li[arrow=${element}]`).addClass('highlighted');
       $('#remove-arrow-button').attr('action', `DC.Arrow.removeArrow(${element})`);
@@ -34,15 +53,15 @@ DC.Arrow = class {
    }
 
    // returns all arrows displayed in arrow-list as an array
-   static getAllArrows() {
-      return $('#arrow-list li').toArray().map( (list_item) => list_item.getAttribute('arrow') );
+   static getAllArrows() /*: Array<number> */ {
+      return $('#arrow-list li').toArray().map( (list_item /*: HTMLLIElement */) => parseInt(list_item.getAttribute('arrow')) );
    }
 
    // Add button clicked:
    //   Clear (hidden) menu
    //   Populate menu (for each element not in arrow-list)
    //   Position, expose menu
-   static showArrowMenu(event) {
+   static showArrowMenu(event /*: JQueryMouseEventObject */) {
       DC.clearMenus();
       const $menu = $(eval(Template.HTML('arrow-menu-template')));
       group.elements.forEach( (element) => {
@@ -61,7 +80,7 @@ DC.Arrow = class {
    //   Hide menu
    //   Add lines to Cayley_diagram
    //   Update lines, arrowheads in graphic, arrow-list
-   static addArrow(element) {
+   static addArrow(element /*: number */) {
       DC.clearMenus();
       Cayley_diagram.addLines(element);
       DC.Arrow.updateArrows();
@@ -72,7 +91,7 @@ DC.Arrow = class {
    //   Disable remove button
    //   Remove line from Cayley_diagram
    //   Update lines in graphic, arrow-list
-   static removeArrow(element) {
+   static removeArrow(element /*: number */) {
       $('#remove-arrow-button').prop('disabled', true);
       Cayley_diagram.removeLines(element);
       DC.Arrow.updateArrows()
@@ -90,7 +109,9 @@ DC.Arrow = class {
       // ES6 introduces a Set, but does not provide any way to change the notion of equality among set members
       // Here we work around that by joining a generator value from the line.arrow attribute ("27") and a color ("#99FFC1")
       //   into a unique string ("27#99FFC1") in the Set, then partitioning the string back into an element and a color part
-      const arrow_hashes = new Set(Cayley_diagram.lines.map( (line) => line.arrow + line.color ));
+      const arrow_hashes = new Set(Cayley_diagram.lines.map(
+         (line) => '' + ((line.arrow /*: any */) /*: groupElement */) + ( ((line.color /*: any */) /*: color */) ).toString()
+      ));
       arrow_hashes.forEach( (hash) => {
          const element = hash.slice(0,-7);
          const color = hash.slice(-7);

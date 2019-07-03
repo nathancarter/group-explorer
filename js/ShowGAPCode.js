@@ -1,4 +1,4 @@
-
+//@flow
 /*
  * The functions in this script file define how Group Explorer
  * displays and lets users interact with GAP code throughout
@@ -22,6 +22,14 @@ const GAPlink = '<a target="_blank" href="help/rf-um-gap">What is GAP?</a>';
  * the work of setting up the page, including such things as instantiating
  * templates.
  */
+/*::
+import XMLGroup from './XMLGroup.js';
+
+var group: XMLGroup;
+var sagecell: any;
+
+export default
+*/
 function setUpGAPCells () {
     // Import the Sage Cell script and wait until it has loaded.
     // Note that the sequence of calls here is very important;
@@ -39,7 +47,7 @@ function setUpGAPCells () {
             // Create a button for revealing the GAP code in the block
             // and place it before the block.
             const $button = $( `<input type="button"/>` );
-            $button.get(0).value = showtext;
+            (($button.get(0) /*: any */) /*: HTMLInputElement */).value = showtext;
             $button.css( { margin : '5px 0px 0px 10px' } );
             const $div = $( '<div></div>' );
             $div.append( $button );
@@ -48,12 +56,12 @@ function setUpGAPCells () {
             // to show the code and/or hide it again.
             $block.hide();
             $button.on( 'click', event => {
-                if ( $button.get(0).value == showtext ) {
+                if ( (($button.get(0) /*: any */) /*: HTMLInputElement */).value == showtext ) {
                     $block.show();
-                    $button.get(0).value = hidetext;
+                    (($button.get(0) /*: any */) /*: HTMLInputElement */).value = hidetext;
                 } else {
                     $block.hide();
-                    $button.get(0).value = showtext;
+                    (($button.get(0) /*: any */) /*: HTMLInputElement */).value = showtext;
                 }
             } );
             // For each .gapcode element, do any pre-processing necessary
@@ -145,13 +153,15 @@ function prepareGAPCodeBlock ( elt ) {
     }
     // fill the DIV with text, removing indentation that was here only for
     // making the code look pretty in this file
-    function setCode ( code ) {
+    function setCode ( code /*: string */ ) {
         const lines = code.split( '\n' );
         while ( /^\s*$/.test( lines[0] ) ) lines.shift();
         while ( /^\s*$/.test( lines[lines.length-1] ) ) lines.pop();
-        const indents = lines.map( line =>
-            /\S/.test( line ) ? /\S/.exec( line ).index : null
-        ).filter( x => x !== null );
+        const indents = lines.reduce( (indents, line) => {
+            if ( /\S/.test( line ) )
+                indents.push( ((/\S/.exec( line ) /*: any */) /*: RegExp$matchResult */).index );
+            return indents;
+        }, [] );
         const minIndent = indents.reduce( ( a, b ) => Math.min( a, b ) );
         elt.textContent =
             lines.map( line => line.substr( minIndent ) ).join( '\n' );
@@ -178,6 +188,7 @@ function prepareGAPCodeBlock ( elt ) {
     //     console.log( strs.join( '\n' ) );
     // };
     const goal = elt.dataset.builtInCodeType;
+    let code = '';
     if ( goal == 'create group' ) {
         setCode( `
             # In GAP's Small Groups library, of all the groups
@@ -186,7 +197,7 @@ function prepareGAPCodeBlock ( elt ) {
         ` );
         elt.dataset.purpose = 'creating this group';
     } else if ( goal == 'is abelian' ) {
-        var code = `
+        code = `
             # Create the group:
             ${G} := ${gpdef};;
 
@@ -211,7 +222,7 @@ function prepareGAPCodeBlock ( elt ) {
         ` );
         elt.dataset.purpose = 'computing the numbers in a class equation';
     } else if ( goal == 'is cyclic' ) {
-        var code = `
+        code = `
             # Create the group:
             ${G} := ${gpdef};;
 
@@ -258,7 +269,7 @@ function prepareGAPCodeBlock ( elt ) {
         ` );
         elt.dataset.purpose = 'getting the lattice of subgroups of a group';
     } else if ( goal == 'is simple' ) {
-        var code = `
+        code = `
             # Create the group:
             ${G} := ${gpdef};;
 

@@ -1,5 +1,22 @@
+// @flow
+/*::
+import Arrow from './Arrow.js';
+import ArrowMult from './ArrowMult.js';
+import Chunking from './Chunking.js';
+import DiagramChoice from './DiagramChoice.js';
+import Generator from './Generator.js';
 
+export default
+ */
 class DC {
+/*::
+   static DIAGRAM_PANEL_URL: string;
+   static Arrow: Class<Arrow>;
+   static ArrowMult: Class<ArrowMult>;
+   static Chunking: Class<Chunking>;
+   static DiagramChoice: Class<DiagramChoice>;
+   static Generator: Class<Generator>;
+ */
    static clearMenus() {
       $('#diagram-page .highlighted').removeClass('highlighted');
       $('#diagram-page .menu:visible').remove();
@@ -9,16 +26,16 @@ class DC {
    }
 
    /* Load, initialize diagram control */
-   static load($diagramWrapper) {
+   static load($diagramWrapper /*: JQuery */) /*: Promise<void> */ {
       return new Promise( (resolve, reject) => {
          $.ajax( { url: DC.DIAGRAM_PANEL_URL,
-                   success: (data) => {
+                   success: (data /*: string */) => {
                       $diagramWrapper.html(data);
                       DC.setupDiagramPage();
                       resolve();
                    },
                    error: (_jqXHR, _status, err) => {
-                      reject(`Error loading ${DC.DIAGRAM_PANEL_URL}: ${err}`);
+                      reject(`Error loading ${DC.DIAGRAM_PANEL_URL} ${err === undefined ? '' : ': ' + err}`);
                    }
          } )
       } )

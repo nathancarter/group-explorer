@@ -1,4 +1,4 @@
-
+//@flow
 /*
  * A Sheet Model is a data structure somewhat in the sense of the model-view paradigm,
  * in that it stores all the data for a sheet, but does not own the on-screen HTML
@@ -8,13 +8,133 @@
  * construction time into which it is in charge of syncing its data.  It will ask its
  * contained Sheet Elements to create and destroy HTML element in that view as needed.
  */
-class SheetModel {
+/*::
+import BasicGroup from './BasicGroup.js';
+import type {BasicGroupJSON} from './BasicGroup.js';
+import CayleyDiagram from './CayleyDiagram.js';
+import type {StrategyArray} from './CayleyDiagram.js';
+import CycleGraph from './CycleGraph.js';
+import DisplayCycleGraph from './DisplayCycleGraph.js';
+import type {CycleGraphJSON} from './DisplayCycleGraph.js';
+import DisplayDiagram from './DisplayDiagram.js';
+import type {CayleyDiagramJSON} from './DisplayDiagram.js';
+import DisplayMulttable from './DisplayMulttable.js';
+import type {MulttableJSON} from './DisplayMulttable.js';
+import Library from './Library.js';
+import MathML from './MathML.js';
+import Multtable from './Multtable.js';
+import XMLGroup from './XMLGroup.js';
+import type {XMLGroupJSON, BriefXMLGroupJSON} from './XMLGroup.js';
 
+// From DragResizeExtension.js -- awkward to extend existing class in Flow
+import {SELECTED_FOR_DRAGGING_CLASS, DEFAULT_RESIZING_MARGIN} from './DragResizeExtension.js';
+import type {JQueryDnD} from './DragResizeExtension.js';
+
+type Obj = {[key: string]: any};
+
+type _SheetElementJSON = {
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    z: number
+};
+export type SheetElementJSON = {className: 'SheetElement'} & _SheetElementJSON & Obj;
+
+type _RectangleElementJSON = {
+    color: color
+};
+export type RectangleElementJSON = {className: 'RectangleElement'} & _RectangleElementJSON & $Rest<_SheetElementJSON, {}> & Obj;
+
+export type TextAlignment = 'left' | 'center' | 'right';
+type _TextElementJSON = {
+    text: string,
+    fontSize?: string,
+    fontColor?: color,
+    alignment?: TextAlignment
+};
+export type TextElementJSON = {className: 'TextElement'} & _TextElementJSON & $Rest<_SheetElementJSON, {}> & Obj;
+
+export type VisualizerType = 'CDElement' | 'MTElement' | 'CGElement';
+type _VisualizerElementJSON = {
+    groupURL: string,
+    group?: XMLGroupJSON & BasicGroupJSON,
+    elements?: Array<groupElement>,
+    highlights?: {background?: Array<null | void | color>}
+};
+export type VisualizerElementJSON = {className: VisualizerType} & _VisualizerElementJSON & $Rest<_SheetElementJSON, {}> & Obj;
+
+interface VizDisplay<VizObjType, VizDispJSON> {
+   getSize(): {w: number, h: number};
+   setSize(w: number, h: number): void;
+   getImage(diagram3D: VizObjType, options: Obj): Image;
+   toJSON(VizObjType): VizDispJSON;
+   fromJSON(any, VizObjType): void;
+   unitSquarePosition(groupElement, VizObjType): {x: number, y: number};
+};
+
+type _ConnectingElementJSON = {
+   fromIndex: number,
+   toIndex: number,
+   color?: color,
+   thickness?: number,
+   useArrowhead?: boolean,
+   arrowheadSize?: number
+};
+export type ConnectingElementJSON = {className: 'ConnectingElement'} & _ConnectingElementJSON & $Rest<_SheetElementJSON, {}> & Obj;
+
+type _MorphismElementJSON = {
+   name: string,
+   showManyArrows?: boolean,
+   showDomAndCod?: boolean,
+   showInjSurj?: boolean,
+   showDefiningPairs?: boolean,
+   arrowMargin?: number,
+   definingPairs: Array<[groupElement, groupElement]>
+}
+export type MorphismElementJSON = {className: 'MorphismElement'} & _MorphismElementJSON & $Rest<_SheetElementJSON, {}> & $Rest<_ConnectingElementJSON, {}> & Obj;
+
+export type JSONType =
+   SheetElementJSON | RectangleElementJSON | TextElementJSON | VisualizerElementJSON | ConnectingElementJSON | MorphismElementJSON;
+
+type Coordinate = {x: float, y: float};
+
+// message formats
+export type MSG_listenerReady = 'listener ready';  // sent by visualizers on load complete to SheetModel, others
+export type MSG_stateLoaded = 'state loaded';  // sent by visualizers on model received to SheetModel
+
+export type MSG_loadFromJSON = {  // sent by ??? to create new Sheet.js using loadSheetFromJSON global function
+   type: 'load from json',
+   json: Array<JSONType>
+};
+export type MSG_loadGroup = {  // sent by parent window (or Sheet) to any page using Library and 'waitForMessage' in URL
+   type: 'load group',
+   group: BriefXMLGroupJSON
+};
+export type MSG_external<VizType: MulttableJSON | CayleyDiagramJSON | CycleGraphJSON>  = {  // sent by SheetModel to visualizers to update them
+   source: 'external',
+   json: VizType
+};
+export type MSG_editor<VizType: MulttableJSON | CayleyDiagramJSON | CycleGraphJSON> = {  // sent by visualizers to SheetModel to update it
+   source: 'editor',
+   json: VizType
+};
+
+export
+*/
+class SheetModel {
+/*::
+    view: HTMLElement;
+    elements: Array<SheetElement>;
+    history: Array<string>;
+    historyIndex: number;
+    undoRedoActive: boolean;
+    maxHistorySize: number;
+    syncQueued: boolean;  // flag indicates sync is queued to run
+  */
     // The constructor takes an on-screen HTML element in which to place the
     // representation of sheet elements.
-    constructor ( element ) {
-        if ( !( element instanceof HTMLElement ) )
-            throw new Error( 'SheetModel requires an HTMLElement at construction' );
+    constructor ( element /*: HTMLElement */ ) {
         this.view = element;
         this.view.style.position = 'relative';
         this.elements = [ ];
@@ -22,12 +142,12 @@ class SheetModel {
         this.historyIndex = 0;
         this.undoRedoActive = true;
         this.maxHistorySize = 250;
-        this.syncQueued = false;  // flag indicates sync has already been queued to run
+        this.syncQueued = false;  // flag indicates sync is queued to run
     }
 
     // Add a Sheet Element to the model.
     // Don't call this directly; just construct the element with the model as parameter.
-    addElement ( element ) {
+    addElement ( element /*: SheetElement */ ) /*: void */ {
         if ( !( element instanceof SheetElement ) )
             throw new Error( 'SheetModel.addElement accepts only SheetElements' );
         // get current max z-index so we can use it below
@@ -37,35 +157,41 @@ class SheetModel {
         this.elements.push( element );
         // ensure the new element has the highest z-index of all elements in the model
         element.zIndex = maxIndex + 1;
-        // update view very soon (unless it's already been queued to run)
-        if (!this.syncQueued) {
-           this.syncQueued = true;
-           setTimeout( () => this.sync(), 0 );
-        }
+        // update view very soon
+        this.queueSync( 0 );
     }
 
     // Find the currently selected element and return it as a SheetElement instance,
     // or undefined if there is none.
-    selected () {
-        return this.elements.find( ( sheetElt ) =>
-            $( sheetElt.htmlViewElement().parentElement ).hasClass( selectedForDraggingClass ) );
+    selected () /*: ?SheetElement */ {
+       return this.elements.find( ( sheetElt ) => {
+          const parentElement = sheetElt.htmlViewElement().parentElement;
+          return parentElement && $( parentElement ).hasClass( SELECTED_FOR_DRAGGING_CLASS );
+       } )
     }
 
+    // runs sync when this task is completed
+    queueSync( delay /*: number */ ) {
+       if (!this.syncQueued) {
+          this.syncQueued = true;
+          setTimeout( () => this.sync(), delay );
+       }
+    }
     // Ensure that the children of the view are precisely the set of DIVs placed there
     // by wrapping each SheetElement's htmlViewElement() in a DIV.
     sync () {
-        this.syncQueued = false;  // clear flag so sync can be queued to run if needed
+        this.syncQueued = false;  // clear flag so sync can be queued to run again
         var that = this;
         // Delete any elements that don't belong
-        Array.from( this.view.childNodes ).map( function ( htmlElt ) {
+        Array.from( ((this.view.childNodes /*: any */) /*: NodeList<HTMLElement> */) ).map( function ( htmlElt /*: HTMLElement */ ) {
             if ( htmlElt.id == 'overlay' ) return;
             if ( !that.elements.find( ( sheetElt ) => htmlElt.childNodes[0] == sheetElt.htmlViewElement() ) ) {
-                htmlElt.parentElement.removeChild( htmlElt );
+               ((htmlElt.parentElement /*: any */) /*: HTMLElement */).removeChild( htmlElt );
             }
         } );
         // Ensure all Sheet Elements have their HTML element in the view
         this.elements.map( function ( sheetElt ) { that.buildWrapperFor( sheetElt ); } );
-        // Update any overlay drawing that may need to be done.
+        // Schedule any overlay drawing that may need to be done.
         setTimeout( () => this.drawOverlay(), 0 );
         // While we're here, if anything changed since the last time we were here,
         // record it on the undo/redo stack.
@@ -96,30 +222,30 @@ class SheetModel {
         this.view.dispatchEvent( new CustomEvent( 'synced', { bubbles : true } ) );
     }
     // Helper function used by sync() to create wrapper DIVs
-    buildWrapperFor ( sheetElt ) {
+    buildWrapperFor ( sheetElt /*: SheetElement */ ) {
         var htmlElt = sheetElt.htmlViewElement();
         if ( !htmlElt.parentElement || htmlElt.parentElement.parentElement != this.view ) {
             var wrapper = $( '<div></div>' )[0];
             wrapper.appendChild( htmlElt );
-            $( wrapper ).draggableAndSizable();
+            (( $( wrapper ) /*: any */) /*: JQueryDnD */).draggableAndSizable();
             $( wrapper ).css( {
                 position : 'absolute',
-                padding : `${defaultResizingMargin}px`,
+                padding : `${DEFAULT_RESIZING_MARGIN}px`,
                 "z-index" : sheetElt.zIndex
             } );
             this.view.appendChild( wrapper );
         }
     }
     // Since sync() tracks the undo/redo stack, we can implement undo/redo methods.
-    canUndo () { return this.historyIndex > 0; }
-    canRedo () { return this.historyIndex < this.history.length - 1; }
+    canUndo () /*: boolean */ { return this.historyIndex > 0; }
+    canRedo () /*: boolean */ { return this.historyIndex < this.history.length - 1; }
     undo () {
         if ( this.canUndo() )
-            this.fromJSON( JSON.parse( this.history[--this.historyIndex] ), true );
+            this.fromJSON( (JSON.parse( this.history[--this.historyIndex] ) /*: Array<SheetElementJSON> */), true );
     }
     redo () {
         if ( this.canRedo() )
-            this.fromJSON( JSON.parse( this.history[++this.historyIndex] ), true );
+            this.fromJSON( (JSON.parse( this.history[++this.historyIndex] ) /*: Array<SheetElementJSON> */), true );
     }
 
     // Save the state of this entire sheet by creating an array of the JSON states of the
@@ -127,7 +253,7 @@ class SheetModel {
     // First, sort elements so that all ConnectingElements are at the end, so that they
     // can mention the indices of their endpoints, and deserializing will know what those
     // indices mean.
-    toJSON () {
+    toJSON () /*: Array<SheetElementJSON> */ {
         this.elements.sort( function ( a, b ) {
             return ( a instanceof ConnectingElement ) ?
                    ( ( b instanceof ConnectingElement ) ? 0 : 1 ) :
@@ -140,7 +266,7 @@ class SheetModel {
     // with a sync call.  Requires JSON in the format produced by toJSON(), above.
     // The optional second argument is for internal use, and lets us navigate the
     // undo/redo stack without corrupting it.
-    fromJSON ( json, isPartOfUndoOrRedo ) {
+    fromJSON ( json /*: Array<SheetElementJSON> */, isPartOfUndoOrRedo /*:: ?: boolean */ = false ) {
         var that = this;
         this.undoRedoActive = false;
         // each call to sheetElementFromJSON() adds to the elements array,
@@ -151,30 +277,30 @@ class SheetModel {
             this.history = [ JSON.stringify( json ) ];
             this.historyIndex = 0;
         }
-        this.sync();
+        this.queueSync( 0 );
         this.undoRedoActive = true;
     }
     // Helper function to the one above:
-    sheetElementFromJSON ( json ) {
+    sheetElementFromJSON ( json /*: SheetElementJSON */ ) /*: SheetElement */ {
         if ( !/^[a-zA-Z_][a-zA-Z_0-9]*$/.test( json.className ) )
             throw new Error( `Invalid class name: ${json.className}` );
-        var ctor = eval( json.className );
-        var result = new ctor( this );
+        var ctor /*: typeof SheetElement */ = eval( json.className );
+        var result /*: SheetElement */ = new ctor( this );
         this.buildWrapperFor( result );
         result.fromJSON( json );
         return result;
     }
 
     // Do the rectangles of these two sheet elements intersect?
-    intersect ( elt1, elt2 ) {
-        var $elt1 = $( elt1.htmlViewElement().parentElement ),
-            $elt2 = $( elt2.htmlViewElement().parentElement ),
-            rect1 = { left : $elt1.offset().left, top : $elt1.offset().top,
-                      right : $elt1.offset().left + $elt1.width(),
-                      bottom : $elt1.offset().top + $elt1.height () },
-            rect2 = { left : $elt2.offset().left, top : $elt2.offset().top,
-                      right : $elt2.offset().left + $elt2.width(),
-                      bottom : $elt2.offset().top + $elt2.height () };
+    intersect ( elt1 /*: SheetElement */, elt2 /*: SheetElement */ ) /*: boolean */ {
+        const $elt1 = $( elt1.htmlViewElement().parentElement ),
+              $elt2 = $( elt2.htmlViewElement().parentElement ),
+              rect1 = { left : $elt1.offset().left, top : $elt1.offset().top,
+                        right : $elt1.offset().left + $elt1.width(),
+                        bottom : $elt1.offset().top + $elt1.height () },
+              rect2 = { left : $elt2.offset().left, top : $elt2.offset().top,
+                        right : $elt2.offset().left + $elt2.width(),
+                        bottom : $elt2.offset().top + $elt2.height () };
         return !(
             ( rect1.right < rect2.left ) ||
             ( rect1.left > rect2.right ) ||
@@ -187,7 +313,7 @@ class SheetModel {
     // z-index of the second ("to"), and shifts all the z-indices between those two
     // values by one step in the direction of "from"'s original z-index, to preserve
     // uniqueness.
-    adjustZ ( from, to ) {
+    adjustZ ( from /*: SheetElement */, to /*: SheetElement */ ) {
         var min = Math.min( from.zIndex, to.zIndex ),
             max = Math.max( from.zIndex, to.zIndex ),
             adj = ( from.zIndex > to.zIndex ) ? 1 : -1;
@@ -205,39 +331,39 @@ class SheetModel {
     // This function finds the nearest element below the given one and calls adjustZ()
     // to move the top one below the bottom one.  Only cares about elements with which
     // the given one actually interesct()s on screen.
-    adjustZDown ( element ) {
-        var highestBelow = null;
-        var that = this;
-        this.elements.map( function ( other ) {
-            if ( that.intersect( element, other )
-              && ( other.zIndex < element.zIndex )
-              && ( ( highestBelow == null ) || ( other.zIndex > highestBelow.zIndex ) ) )
-                highestBelow = other;
-        } );
+    adjustZDown ( element /*: SheetElement */ ) {
+        const highestBelow = this.elements.reduce/*:: <SheetElement | null> */(
+            (highest, other) => {
+                const otherIsHighest =
+                      (other.zIndex < element.zIndex)
+                      && ( (highest == null) || (other.zIndex > highest.zIndex) )
+                      && this.intersect(element, other);
+                return otherIsHighest ? other : highest;
+            }, null );
         if ( highestBelow ) this.adjustZ( element, highestBelow );
     }
     // Same as previous, but upwards instead.
-    adjustZUp ( element ) {
-        var lowestAbove = null;
-        var that = this;
-        this.elements.map( function ( other ) {
-            if ( that.intersect( element, other )
-              && ( other.zIndex > element.zIndex )
-              && ( ( lowestAbove == null ) || ( other.zIndex < lowestAbove.zIndex ) ) )
-                lowestAbove = other;
-        } );
+    adjustZUp ( element /*: SheetElement */ ) {
+        const lowestAbove = this.elements.reduce/*:: <SheetElement | null> */(
+            (lowest, other) => {
+                const otherIsLowest =
+                      (other.zIndex > element.zIndex)
+                      && ( (lowest == null) || (other.zIndex < lowest.zIndex) )
+                      && this.intersect(element, other);
+                return otherIsLowest ? other : lowest;
+            }, null );
         if ( lowestAbove ) this.adjustZ( element, lowestAbove );
     }
 
     // If any SheetElements want to draw on the overlay, they do so here.
     drawOverlay () {
         const $view = $( this.view );
-        const canvas = $view.find( 'canvas' )[0];
+        const canvas = (($view.find( 'canvas' )[0] /*: any */) /*: HTMLCanvasElement */);
         canvas.width = $view.width();
         canvas.height = $view.height();
         const context = canvas.getContext( '2d' );
         this.elements.map( function ( element ) {
-            if ( element.drawOverlay ) element.drawOverlay( canvas, context );
+           if ( element.drawOverlay ) element.drawOverlay( canvas, context );
         } );
     }
 }
@@ -246,13 +372,16 @@ class SheetModel {
  * We also make a global convenience function for popping up a sheet in a new tab,
  * and building it from a big bolus of JSON.
  */
-function CreateNewSheet ( json ) {
+/*::
+export
+*/
+function CreateNewSheet ( json /*: Array<JSONType> */ ) {
     var sheet = window.open( './Sheet.html' );
     sheet.addEventListener( 'load', function () {
         // Sheet.html has loaded, but its own load handlers may still need to fire, so:
         setTimeout( function () {
             // The following line relies upon a global function defined in Sheet.html.
-            sheet.loadSheetFromJSON( json );
+           ((sheet /*: any */) /*: {loadSheetFromJSON: Function} */).loadSheetFromJSON( json );
         }, 100 );
     } );
 }
@@ -266,11 +395,23 @@ function CreateNewSheet ( json ) {
  * It can compute, if requested, an HTML element representing itself, for inclusion
  * in the view of its parent SheetModel.
  */
+/*:: export */
 class SheetElement {
-
+/*::
+    model: SheetModel;
+    zIndex: number;
+   +drawOverlay: (HTMLCanvasElement, CanvasRenderingContext2D) => void;
+    events: {[key: string]: Set<Function>};
+    viewElement: HTMLElement;
+    editElement: HTMLElement;
+    buttons: JQuery;  // JQuery for SheetElement buttons
+    zBeforeEdit: string;
+    bgBeforeEdit: color;
+    _extra_json: Obj;
+ */
     // The parameter must be a SheetModel that will contain this.
     // This function notifies the model that this object has been added to it.
-    constructor ( model ) {
+    constructor ( model /*: SheetModel */ ) {
         if ( !( model instanceof SheetModel ) )
             throw new Error( 'SheetElements must be constructed with a SheetModel' );
         this.model = model;
@@ -280,19 +421,19 @@ class SheetElement {
 
     // By default, a sheet element is always ready to have its JSON recorded.
     // But subclasses that have asynchronous initialization to do can override this.
-    isReady () { return true; }
+    isReady () /*: boolean */ { return true; }
 
     // This object can create (and later return) an HTML element representing itself.
     // This function does that, delegating the creation work to a createHtmlViewElement()
     // function that subclasses can override without having to reimplement the
     // caching behavior implemented here.
-    htmlViewElement () {
+    htmlViewElement () /*: HTMLElement */ {
         if ( !this.hasOwnProperty( 'viewElement' ) ) {
             this.viewElement = this.createHtmlViewElement();
             this.viewElement.setAttribute( 'title', 'Double-click to edit' );
             var that = this;
             $( this.viewElement ).on( 'dblclick', function () {
-                window.getSelection().empty();
+                (window.getSelection() /*: Selection */).empty();
                 that.edit();
                 return false;
             } );
@@ -305,14 +446,14 @@ class SheetElement {
     // See above for explanation of this function.
     // It should be called only by htmlViewElement(), never by the client.
     // Thus it is called but once per SheetElement instance.
-    createHtmlViewElement () {
+    createHtmlViewElement () /*: HTMLElement */ {
         // This is a stub implementation that subclasses should override.
         return $( '<div></div>' )[0];
     }
 
     // Parallel structure to htmlViewElement(), but now for the editing controls of the
     // element rather than its standard view.
-    htmlEditElement () {
+    htmlEditElement () /*: HTMLElement */ {
         if ( !this.hasOwnProperty( 'editElement' ) )
             this.editElement = this.createHtmlEditElement();
         return this.editElement;
@@ -320,7 +461,7 @@ class SheetElement {
 
     // Parallel structure to createHtmlViewElement(), but now for the editing controls of the
     // element rather than its standard view.
-    createHtmlEditElement () {
+    createHtmlEditElement () /*: HTMLElement */ {
         // This is a stub implementation that subclasses should override.
         return $( '<div></div>' )[0];
     }
@@ -328,10 +469,9 @@ class SheetElement {
     // Removes this element from the model and its HTML element from the model's view
     remove () {
         this.emit( 'delete' ); // right before being deleted
-        var index = this.model.elements.indexOf( this );
+        const index = this.model.elements.indexOf( this );
         this.model.elements.splice( index, 1 );
-        var wrapper = this.htmlViewElement().parentElement;
-        wrapper.parentElement.removeChild( wrapper );
+        $(this.htmlViewElement()).remove();
         this.model.sync();
     }
 
@@ -340,7 +480,7 @@ class SheetElement {
         var viewer = this.htmlViewElement();
         var editor = this.htmlEditElement();
         if ( editor.parentElement != viewer.parentElement )
-            viewer.parentElement.appendChild( editor );
+            $( viewer.parentElement ).append( editor );
         if ( !this.buttons ) {
             $( editor ).append(
                 this.buttons = $(
@@ -363,7 +503,7 @@ class SheetElement {
     showEditControls () {
         $( this.htmlViewElement() ).hide();
         $( this.htmlEditElement() ).show();
-        var $wrapper = $( this.htmlViewElement().parentElement );
+        const $wrapper = (($( this.htmlViewElement().parentElement ) /*: any */) /*: JQueryDnD */);
         $wrapper.removeDragAndSizeSelection();
         $wrapper.pauseDragAndResize();
         this.zBeforeEdit = $wrapper.css( 'z-index' );
@@ -376,7 +516,7 @@ class SheetElement {
     showViewControls () {
         $( this.htmlViewElement() ).show();
         $( this.htmlEditElement() ).hide();
-        var $wrapper = $( this.htmlViewElement().parentElement );
+        const $wrapper = (($( this.htmlViewElement().parentElement ) /*: any */) /*: JQueryDnD */);
         $wrapper.unpauseDragAndResize();
         if ( this.hasOwnProperty( 'zBeforeEdit' ) ) {
             $wrapper.css( 'z-index', this.zBeforeEdit );
@@ -398,7 +538,7 @@ class SheetElement {
 
     // Handy utility for subclasses: Ensures the wrapper node is just the right
     // size for the stuff you've put in the view.
-    fitWrapperToView () {
+    fitWrapperToView () /*: void */ {
         var view = $( this.htmlViewElement() );
         if ( !view[0].parentElement ) return;
         $( view[0].parentElement ).width( view.width() ).height( view.height() );
@@ -407,21 +547,21 @@ class SheetElement {
     // Subclasses should override this to create an actual object representing the
     // instance.  Always include the class name.  Always start with this object
     // and then alter/extend.
-    toJSON () {
-        var $wrapper = $( this.htmlViewElement().parentElement );
-        var result = {
+    toJSON () /*: SheetElementJSON */ {
+        const $wrapper = $( this.htmlViewElement().parentElement );
+        const result = {
             className : 'SheetElement',
             x : $wrapper.offset().left,
             y : $wrapper.offset().top,
             w : $wrapper.width(),
             h : $wrapper.height(),
-            z : $wrapper.css( 'z-index' )
+            z : parseInt($wrapper.css( 'z-index' ))
         };
         // View-based data may be stored in the _extra_json object.
         // For example, the state of UI components can go there.  It's foreign data,
         // from the point of view of the model, so we separate it, but respect it.
         if ( this._extra_json )
-            for ( var key in this._extra_json )
+            for ( const key in this._extra_json )
                 if ( this._extra_json.hasOwnProperty( key ) )
                     result[key] = this._extra_json[key];
         return result;
@@ -430,8 +570,8 @@ class SheetElement {
     // this instance is equal to json.className, and then extracts all relevant data
     // from the parameter to re-establish the saved state.  Again, subclasses should
     // override and can feel free to call this method as part of their work.
-    fromJSON ( json ) {
-        var $wrapper = $( this.htmlViewElement().parentElement );
+    fromJSON ( json /*: SheetElementJSON */ ) {
+        const $wrapper = $( this.htmlViewElement().parentElement );
         $wrapper.offset( { left : json.x, top : json.y } )
                 .width( json.w ).height( json.h )
                 .css( { "z-index" : json.z } );
@@ -448,40 +588,44 @@ class SheetElement {
     }
 
     // SheetElements are also event emitters
-    _eventsForName ( eventName ) {
+    _eventsForName ( eventName /*: string */ ) /*: Set<Function> */ {
         if ( !this.events.hasOwnProperty( eventName ) )
             this.events[eventName] = new Set();
         return this.events[eventName];
     }
-    on ( eventName, handler ) {
+    on ( eventName /*: string */, handler /*: () => void */ ) {
         this._eventsForName( eventName ).add( handler );
     }
-    off ( eventName, handler ) {
+    off ( eventName /*: string */, handler /*: () => void */ ) {
         this._eventsForName( eventName ).delete( handler );
     }
-    emit ( eventName, ...args ) {
+    emit ( eventName /*: string */, ...args /*: Array<mixed> */  ) {
         var that = this;
-        this._eventsForName( eventName ).forEach( function ( handler ) {
+        this._eventsForName( eventName ).forEach( function ( handler /*: () => void */ ) {
             handler.apply( that, args );
         } );
     }
 
     // Subclasses should override this to make a human-readable description:
-    toString () { return "A sheet element"; }
+    toString () /*: string */ { return "A sheet element"; }
 }
 
 /*
  * Simplest SheetElement subclass: a colored rectangle.
  */
+/*:: export */
 class RectangleElement extends SheetElement {
+/*::
+    color: color;
+ */
     // only defining feature: background color
-    constructor ( model ) {
+    constructor ( model /*: SheetModel */ ) {
         super( model );
         this.color = '#dddddd';
         this.update();
     }
     // just represented by a div that fills its container and starts at size 100x100
-    createHtmlViewElement () {
+    createHtmlViewElement () /*: HTMLElement */ {
         var result = $( '<div></div>' )[0];
         $( result ).css( {
             height: '100%',
@@ -492,11 +636,11 @@ class RectangleElement extends SheetElement {
         return result;
     }
     // when editing, use a color-type input
-    createHtmlEditElement () {
+    createHtmlEditElement () /*: HTMLElement */ {
         var result = $( '<div>'
-                      + 'Background color: '
-                      + `<input type="color" class="color-input" value="${this.color}"/>`
-                      + '</div>' )[0];
+                        + 'Background color: '
+                        + `<input type="color" class="color-input" value="${this.color}"/>`
+                        + '</div>' )[0];
         $( result ).css( {
             minWidth : '100px',
             minHeight : '100px'
@@ -511,21 +655,21 @@ class RectangleElement extends SheetElement {
     }
     // implement abstract methods save/loadEdits()
     saveEdits () {
-        this.color = $( this.htmlEditElement() ).find( '.color-input' )[0].value;
+        this.color = $( this.htmlEditElement() ).find( '.color-input' ).val().toString();
         this.update();
         this.model.sync();
     }
     loadEdits () {
-        $( this.htmlEditElement() ).find( '.color-input' )[0].value = this.color;
+        $( this.htmlEditElement() ).find( '.color-input' ).val(this.color);
     }
     // serialization just needs to take color into account
-    toJSON () {
-        var result = super.toJSON();
+    toJSON () /*: RectangleElementJSON */ {
+        var result /*: SheetElementJSON */ = super.toJSON();
         result.className = 'RectangleElement';
         result.color = this.color;
         return result;
     }
-    fromJSON ( json ) {
+    fromJSON ( json /*: RectangleElementJSON */ ) {
         super.fromJSON( json );
         this.color = json.color;
         this.update();
@@ -540,9 +684,16 @@ class RectangleElement extends SheetElement {
 /*
  * SheetElement subclass for showing text
  */
+/*:: export */
 class TextElement extends SheetElement {
+/*::
+    text: string;
+    fontSize: string;
+    fontColor: color;
+    alignment: TextAlignment;
+ */
     // three defining features: text, font size, font color
-    constructor ( model ) {
+    constructor ( model /*: SheetModel */ ) {
         super( model );
         this.text = 'Text';
         this.fontSize = '12pt';
@@ -551,16 +702,16 @@ class TextElement extends SheetElement {
         this.update();
     }
     // helper function to produce inner HTML from the above defining attributes
-    innerHTML () {
-        var simplified = this.text || '';
+    innerHTML () /*: html */ {
+        let simplified = this.text || '';
         const style = `style="margin: 0; text-align: ${this.alignment || 'left'}"`;
         simplified = `<p ${style}>` + simplified.replace( RegExp( '\n', 'g' ), `</p><p ${style}>` ) + '</p>';
         return `<div style="font-size: ${this.fontSize}; color: ${this.fontColor};">`
              + simplified + '</div>';
     }
     // represented by a span with the given font styles and text content
-    createHtmlViewElement () {
-        var result = $( this.innerHTML() )[0];
+    createHtmlViewElement () /*: HTMLElement */ {
+        const result = $( this.innerHTML() )[0];
         $( result ).css( {
             "-webkit-touch-callout" : "none",
             "-khtml-user-select": "none",
@@ -571,7 +722,7 @@ class TextElement extends SheetElement {
         return result;
     }
     // when editing, use one input for each defining feature
-    createHtmlEditElement () {
+    createHtmlEditElement () /*: HTMLElement */ {
         var that = this;
         function isSelected ( align ) {
             return that.alignment == align ? ' selected' : '';
@@ -599,21 +750,21 @@ class TextElement extends SheetElement {
     }
     // implement abstract methods save/loadEdits()
     saveEdits () {
-        this.text = $( this.htmlEditElement() ).find( '.text-input' )[0].value;
-        this.fontSize = $( this.htmlEditElement() ).find( '.size-input' )[0].value + 'pt';
-        this.fontColor = $( this.htmlEditElement() ).find( '.color-input' )[0].value;
-        this.alignment = $( this.htmlEditElement() ).find( '.align-input' ).val();
+        this.text = $( this.htmlEditElement() ).find( '.text-input' ).val().toString();
+        this.fontSize = parseInt($( this.htmlEditElement() ).find( '.size-input' ).val()).toString() + 'pt';
+        this.fontColor = $( this.htmlEditElement() ).find( '.color-input' ).val().toString();
+        this.alignment = (( $( this.htmlEditElement() ).find( '.align-input' ).val() /*: any */) /*: TextAlignment */);
         this.update();
         this.model.sync();
     }
     loadEdits () {
-        $( this.htmlEditElement() ).find( '.text-input' )[0].value = this.text;
-        $( this.htmlEditElement() ).find( '.size-input' )[0].value = parseInt( this.fontSize );
-        $( this.htmlEditElement() ).find( '.color-input' )[0].value = this.fontColor;
+        $( this.htmlEditElement() ).find( '.text-input' ).val( this.text );
+        $( this.htmlEditElement() ).find( '.size-input' ).val( parseInt( this.fontSize ).toString() );
+        $( this.htmlEditElement() ).find( '.color-input' ).val( this.fontColor );
         $( this.htmlEditElement() ).find( '.align-input' ).val( this.alignment );
     }
     // serialization just needs to take into account text, size, and color
-    toJSON () {
+    toJSON () /*: TextElementJSON */ {
         var result = super.toJSON();
         result.className = 'TextElement';
         result.text = this.text;
@@ -622,7 +773,7 @@ class TextElement extends SheetElement {
         result.alignment = this.alignment;
         return result;
     }
-    fromJSON ( json ) {
+    fromJSON ( json /*: TextElementJSON */ ) {
         super.fromJSON( json );
         this.text = json.text;
         if ( json.fontSize ) this.fontSize = json.fontSize;
@@ -631,7 +782,7 @@ class TextElement extends SheetElement {
         this.update();
     }
     // Give description with sample text
-    toString () {
+    toString () /*: string */ {
         var text = this.text;
         if ( text.length > 20 ) text = text.substring( 0, 20 ) + '...';
         return `Text box "${text}"`;
@@ -641,14 +792,23 @@ class TextElement extends SheetElement {
 /*
  * SheetElement subclass for showing a visualizer for a group
  */
-class VisualizerElement extends SheetElement {
+/*:: export */
+class VisualizerElement/*:: < VizObjType, VizDispJSON: Obj, VizDispType: VizDisplay<VizObjType, VizDispJSON> > */ extends SheetElement {
+/*::
+    group: XMLGroup;
+    groupURL: string;
+    vizdisplay: VizDispType;
+    vizobj: VizObjType;
+    editWindow: typeof window;
+    ignoresAspectRatio: boolean;
+ */
     // abstract functions that must be overridden in subclasses:
-    makeVisualizerObject ( group ) { }
-    makeVisualizerDisplay ( options ) { }
-    getEditPage () { }
-    getClassName () { }
+   makeVisualizerObject ( group /*: XMLGroup */ ) /*: VizObjType */ { return ((1 /*: any */) /*: VizObjType */) };
+    makeVisualizerDisplay ( options /*: Obj */ ) /*: VizDispType */ { return ((1 /*: any */) /*: VizDispType */) }
+    getEditPage () /*: string */ { return ''; }
+    getClassName() /*: string */ { return ''; }
     // constructor
-    constructor ( model, groupURL ) {
+    constructor ( model /*: SheetModel */, groupURL /*: string */ ) {
         super( model );
         this.groupURL = groupURL;
         this.vizdisplay = this.makeVisualizerDisplay( { width : 200, height : 200 } );
@@ -662,17 +822,17 @@ class VisualizerElement extends SheetElement {
                    .catch( function ( error ) { console.log( error ); } );
         }
         // when a resize happens, build a new image, but only if a resize actually happened
-        this.on( 'resize', function () {
-            var $wrapper = $( that.htmlViewElement().parentElement );
-            var w = $wrapper.width(), h = $wrapper.height();
-            var lastSize = that.vizdisplay.getSize();
+       this.on( 'resize', function () {
+            const $wrapper = $( that.htmlViewElement().parentElement );
+            const w = $wrapper.width(), h = $wrapper.height();
+            const lastSize = that.vizdisplay.getSize();
             if ( w == 0 || h == 0 ) return;
             if ( lastSize.w == w && lastSize.h == h ) return;
             that.vizdisplay.setSize( $wrapper.width(), $wrapper.height() );
             that.rerender();
         } );
     }
-    // not ready unless teh group has been loaded
+    // not ready unless the group has been loaded
     isReady () { return !!this.vizobj; }
     // how to create an image of the visualizer
     render () {
@@ -704,30 +864,33 @@ class VisualizerElement extends SheetElement {
     edit () {
         var that = this;
         setTimeout( function () {
-            const myURL = window.location.href;
-            const thirdSlash = myURL.indexOf( '/', 8 );
-            const myDomain = myURL.substring( 0, thirdSlash > -1 ? thirdSlash : myURL.length );
-            var editPageURL = that.getEditPage();
+            const myURL /*: string */ = window.location.href;
+            const thirdSlash /*: number */ = myURL.indexOf( '/', 8 );
+            const myDomain /*: string */ = myURL.substring( 0, thirdSlash > -1 ? thirdSlash : myURL.length );
+            let editPageURL = that.getEditPage();
             editPageURL += that.groupURL ?
                 '?groupURL=' + encodeURIComponent( that.groupURL ) :
                 '?waitForMessage=true';
-            var otherWin = that.editWindow = window.open( editPageURL );
+           const otherWin = that.editWindow = window.open( editPageURL );
             if ( !that.groupURL ) {
-                otherWin.addEventListener( 'load', function ( event ) {
-                    otherWin.postMessage( {
+                otherWin.addEventListener( 'load', function ( event /*: ProgressEvent */ ) {
+                    const msg /*: MSG_loadGroup */ = {
                         type : 'load group',
                         group : that.group.toBriefJSON()
-                    }, myDomain );
+                    };
+                    otherWin.postMessage( msg, myDomain );
                 } );
             }
             var otherWinState = 'starting';
-            otherWin.addEventListener( 'message', function ( event ) {
+            otherWin.addEventListener( 'message', function ( event /*: MessageEvent */ ) {
                 if ( otherWinState == 'starting' && event.data == 'listener ready' ) {
                     // initially set up the editor to be just like us
-                    otherWin.postMessage( {
+                    console.log( 'posting external message', that.toJSON() );
+                    const msg /*: MSG_external<MulttableJSON | CayleyDiagramJSON | CycleGraphJSON> */ =  {
                         source : 'external',
                         json : that.toJSON()
-                    }, myDomain );
+                    };
+                    otherWin.postMessage( msg, myDomain );
                     otherWinState = 'loading my state';
                     return;
                 }
@@ -737,26 +900,27 @@ class VisualizerElement extends SheetElement {
                 }
                 if ( otherWinState == 'ready' ) {
                     // but when the editor changes, update us to be just like it
-                    if ( event.data.source == 'editor' ) {
-                        that.fromJSON( event.data.json );
+                    if (event.data != undefined && event.data.source == 'editor') {
+                       const event_data = ((event.data /*: any */) /*: MSG_editor<VizDispJSON> */);
+                        that.fromJSON( event_data.json );
                         that.model.sync();
                     }
                 }
             }, false );
         }, 10 );
     }
-    // serialization just needs to delegate to the inner visualizer object
-    toJSON () {
-        var result = super.toJSON();
-        result.className = this.getClassName();
+    // serialization just needs to take into account text, size, and color
+    toJSON () /*: VisualizerElementJSON */ {
+        const result /*: VisualizerElementJSON */ = super.toJSON();
+        result.className = ((this.getClassName() /*: any */) /*: VisualizerType */);
         if ( this.vizobj ) {
-            var key, inner = this.vizdisplay.toJSON( this.vizobj );
-            for ( key in inner )
+            const inner = this.vizdisplay.toJSON( this.vizobj );
+            for ( const key in inner )
                 if ( inner.hasOwnProperty( key ) ) result[key] = inner[key];
         }
         return result;
     }
-    fromJSON ( json ) {
+    fromJSON ( json /*: VisualizerElementJSON */ ) {
         super.fromJSON( json );
         var that = this;
         if ( json.groupURL ) {
@@ -781,7 +945,7 @@ class VisualizerElement extends SheetElement {
         }
     }
     // Generic reply that can be adjusted in subclasses
-    toString () {
+    toString () /*: string */ {
         const groupname = this.vizobj ? this.group.name : 'a group';
         return `Visualization for ${groupname}`;
     }
@@ -790,8 +954,8 @@ class VisualizerElement extends SheetElement {
     // to answer this question for us.  We permit subclasses to say whether they
     // stretch to fill their rectangle, or stay square-shaped, leaving unused
     // regions on sides (or top and bottom) to fill out their aspect ratio.
-    unitSquarePosition ( element ) {
-        var result = this.vizdisplay.unitSquarePosition( element, this.vizobj );
+    unitSquarePosition ( element /*: groupElement */ ) /*: Coordinate */ {
+        let result = this.vizdisplay.unitSquarePosition( element, this.vizobj );
         if ( this.ignoresAspectRatio ) {
             const $wrapper = $( this.htmlViewElement().parentElement ),
                   w = $wrapper.width(),
@@ -808,13 +972,14 @@ class VisualizerElement extends SheetElement {
 /*
  * SheetElement subclass for showing the multiplication table of a group
  */
-class MTElement extends VisualizerElement {
-    constructor ( model, groupURL ) {
+/*:: export */
+class MTElement extends VisualizerElement/*:: <Multtable, MulttableJSON, DisplayMulttable> */ {
+    constructor ( model /*: SheetModel */, groupURL /*: string */ ) {
         super( model, groupURL );
         this.ignoresAspectRatio = true;
     }
-    makeVisualizerObject ( group ) { return new Multtable( group ); }
-    makeVisualizerDisplay ( options ) { return new DisplayMulttable( options ); }
+    makeVisualizerObject ( group /*: XMLGroup */ ) { return new Multtable( group ); }
+    makeVisualizerDisplay ( options /*: Obj */ ) { return new DisplayMulttable( options ); }
     getEditPage () { return './Multtable.html'; }
     getClassName () { return 'MTElement'; }
     toString () {
@@ -825,9 +990,10 @@ class MTElement extends VisualizerElement {
 /*
  * SheetElement subclass for showing the cycle graph of a group
  */
-class CGElement extends VisualizerElement {
-    constructor ( model, groupURL ) {
-        super( model, groupURL );
+/*:: export */
+class CGElement extends VisualizerElement/*:: <CycleGraph, CycleGraphJSON, DisplayCycleGraph> */ {
+    constructor ( model /*: SheetModel */, groupURL /*: string */ ) {
+        super( model, groupURL  );
         // The following hack is because the CG has to realize that its canvas size
         // has changed before it will give us accurate values for unitSquarePosition().
         // So drawing overlays with multiple arrows immediately can get some endpoints
@@ -837,8 +1003,8 @@ class CGElement extends VisualizerElement {
             setTimeout( function () { that.model.drawOverlay() }, 1 );
         } );
     }
-    makeVisualizerObject ( group ) { return new CycleGraph( group ); }
-    makeVisualizerDisplay ( options ) { return new DisplayCycleGraph( options ); }
+    makeVisualizerObject ( group /*: XMLGroup */ ) { return new CycleGraph( group ); }
+    makeVisualizerDisplay ( options /*: Obj */ ) { return new DisplayCycleGraph( options ); }
     getEditPage () { return './CycleDiagram.html'; }
     getClassName () { return 'CGElement'; }
     toString () {
@@ -849,13 +1015,14 @@ class CGElement extends VisualizerElement {
 /*
  * SheetElement subclass for showing the Cayley diagram of a group
  */
-class CDElement extends VisualizerElement {
-    makeVisualizerObject ( group ) {
+/*:: export */
+class CDElement extends VisualizerElement/*:: <CayleyDiagram, CayleyDiagramJSON, DisplayDiagram> */ {
+    makeVisualizerObject ( group /*: XMLGroup */ ) {
         return group.cayleyDiagrams.length > 0 ?
                new CayleyDiagram( group, group.cayleyDiagrams[0].name ) :
                new CayleyDiagram( group );
     }
-    makeVisualizerDisplay ( options ) { return new DisplayDiagram( options ); }
+    makeVisualizerDisplay ( options /*: Obj */ ) { return new DisplayDiagram( options ); }
     getEditPage () { return './CayleyDiagram.html'; }
     getClassName () { return 'CDElement'; }
     toString () {
@@ -866,9 +1033,20 @@ class CDElement extends VisualizerElement {
 /*
  * SheetElement subclass for connecting two other SheetElements
  */
-class ConnectingElement extends SheetElement {
+/*:: export */
+class ConnectingElement/*:: <TerminalType: SheetElement> */ extends SheetElement {
+/*::
+    color: color;
+    thickness: number;
+    useArrowhead: boolean;
+    arrowheadSize: number;
+    from: TerminalType;
+    to: TerminalType;
+    boundReposition: () => void;
+    boundRemove: () => void;
+ */
     // Must be constructed with two sheet elements to be connected
-    constructor ( model, from, to ) {
+    constructor ( model /*: SheetModel */, from /*: TerminalType */, to /*: TerminalType */ ) {
         super( model );
         if ( from && to ) this.setEndpoints( from, to );
         this.color = '#000000';
@@ -877,7 +1055,7 @@ class ConnectingElement extends SheetElement {
         this.arrowheadSize = 10;
     }
     // Function to store both endpoints.
-    setEndpoints ( from, to ) {
+    setEndpoints ( from /*: TerminalType */, to /*: TerminalType */ ) {
         if ( !( from instanceof SheetElement ) || !( to instanceof SheetElement ) )
             throw "Both parameters to ConnectingElement constructor must be SheetElements";
         this.from = from;
@@ -916,12 +1094,12 @@ class ConnectingElement extends SheetElement {
     }
     // In toJSON(), report the indices of the endpoints.
     // This will be supported by the model, which sorts ConnectingElement instances last.
-    toJSON () {
-        var result = super.toJSON();
+    toJSON () /*: ConnectingElementJSON */ {
+        var result /*: ConnectingElementJSON */ = super.toJSON();
         result.className = 'ConnectingElement';
         result.fromIndex = this.model.elements.indexOf( this.from );
         result.toIndex = this.model.elements.indexOf( this.to );
-        result.color = this.color;
+        // result.color = this.color;
         result.thickness = this.thickness;
         result.useArrowhead = this.useArrowhead;
         return result;
@@ -929,15 +1107,15 @@ class ConnectingElement extends SheetElement {
     // In fromJSON(), you're given the indices, and you can look them up in the
     // model's list of elements, which is built one element at a time, so that later ones
     // can reference earlier ones.
-    fromJSON ( json ) {
+    fromJSON ( json /*: ConnectingElementJSON */ ) {
         super.fromJSON( json );
         if ( json.color ) this.color = json.color;
         if ( json.thickness ) this.thickness = json.thickness;
-        if ( json.hasOwnProperty( 'useArrowhead' ) ) this.useArrowhead = json.useArrowhead;
+        if ( json.useArrowhead ) this.useArrowhead = json.useArrowhead;
         if ( json.arrowheadSize ) this.arrowheadSize = json.arrowheadSize;
         this.setEndpoints(
-            this.model.elements[json.fromIndex],
-            this.model.elements[json.toIndex]
+            ((this.model.elements[json.fromIndex] /*: any */) /*: TerminalType */),
+            ((this.model.elements[json.toIndex] /*: any */) /*: TerminalType */)
         );
     }
     // Convenience function for internal use
@@ -959,12 +1137,12 @@ class ConnectingElement extends SheetElement {
               min = {
                   x : Math.min( fromCenter.x, toCenter.x ) - this.margin(),
                   y : Math.min( fromCenter.y, toCenter.y ) - this.margin(),
-                  z : Math.min( $fromWrapper.css( 'z-index' ), $toWrapper.css( 'z-index' ) )
+                  z : Math.min( parseInt($fromWrapper.css( 'z-index' )), parseInt($toWrapper.css( 'z-index' )) )
               },
               max = {
                   x : Math.max( fromCenter.x, toCenter.x ) + this.margin(),
                   y : Math.max( fromCenter.y, toCenter.y ) + this.margin(),
-                  z : Math.max( $fromWrapper.css( 'z-index' ), $toWrapper.css( 'z-index' ) )
+                  z : Math.max( parseInt($fromWrapper.css( 'z-index' )), parseInt($toWrapper.css( 'z-index' )) )
               };
         $( this.htmlViewElement().parentElement )
             .offset( { left : min.x, top : min.y } )
@@ -978,8 +1156,8 @@ class ConnectingElement extends SheetElement {
     }
     // How to draw my connecting line.
     drawConnectingLine () {
-        var canvas = this.htmlViewElement();
-        var $wrapper = $( canvas.parentElement );
+        const canvas = ((this.htmlViewElement() /*: any */) /*: HTMLCanvasElement */);
+        const $wrapper = $( canvas.parentElement );
         $( canvas ).width( $wrapper.width() ).height( $wrapper.height() );
         canvas.width = $wrapper.width();
         canvas.height = $wrapper.height();
@@ -1023,9 +1201,9 @@ class ConnectingElement extends SheetElement {
     }
     // This is shown as a canvas, which we will draw a diagonal line on whenenver
     // this element is repositioned/resized.
-    createHtmlViewElement () { return $( '<canvas></canvas>' )[0]; }
+    createHtmlViewElement () /*: HTMLCanvasElement */ { return (($( '<canvas></canvas>' )[0] /*: any */) /*: HTMLCanvasElement */); }
     // when editing, use one input for each defining feature
-    createHtmlEditElement () {
+    createHtmlEditElement () /*: HTMLElement */ {
         return $(
             '<div style="min-width: 200px; border: 1px solid black;">'
           + '<p>Line color:</p>'
@@ -1038,15 +1216,15 @@ class ConnectingElement extends SheetElement {
     }
     // implement abstract methods save/loadEdits()
     saveEdits () {
-        this.thickness = $( this.htmlEditElement() ).find( '.size-input' )[0].value;
-        this.color = $( this.htmlEditElement() ).find( '.color-input' )[0].value;
-        this.useArrowhead = $( this.htmlEditElement() ).find( '.arrow-input' ).prop( 'checked' );
+        this.thickness = parseInt($( this.htmlEditElement() ).find( '.size-input' ).val());
+        this.color = $( this.htmlEditElement() ).find( '.color-input' ).val().toString();
+        this.useArrowhead = $( this.htmlEditElement() ).find( '.arrow-input' ).is( ':checked' );
         this.reposition();
         this.model.sync();
     }
     loadEdits () {
-        $( this.htmlEditElement() ).find( '.size-input' )[0].value = parseInt( this.thickness );
-        $( this.htmlEditElement() ).find( '.color-input' )[0].value = this.color;
+        $( this.htmlEditElement() ).find( '.size-input' ).val(this.thickness.toString());
+        $( this.htmlEditElement() ).find( '.color-input' ).val(this.color);
         $( this.htmlEditElement() ).find( '.arrow-input' ).prop( 'checked', this.useArrowhead );
     }
     toString () {
@@ -1057,21 +1235,33 @@ class ConnectingElement extends SheetElement {
 /*
  * SheetElement representing a homomorphism from one group to another
  */
-class MorphismElement extends ConnectingElement {
+/*:: export */
+class MorphismElement extends ConnectingElement/*:: < VisualizerElement<any, any, any> > */ {
+/*::
+    name: string;
+    showManyArrows: boolean;
+    showDomAndCod: boolean;
+    showInjSurj: boolean;
+    showDefiningPairs: boolean;
+    arrowMargin: number;
+    definingPairs: Array<[groupElement, groupElement]>;
+    _map: Array<groupElement>;  // codomainGroupElement = _map[domainGroupElement];
+ */
     // Constructor just assigns an unused name.
-    constructor ( model, from, to ) {
+    constructor ( model /*: SheetModel */, from /*: VisualizerElement<any, any, any> */, to /*: VisualizerElement<any, any, any> */ ) {
         super( model, from, to );
         this.name = this.getUnusedName();
+        this.showManyArrows = false;
         this.showDomAndCod = false;
         this.showInjSurj = false;
         this.showDefiningPairs = false;
         this.arrowMargin = 3;
         this.definingPairs = [ ];
         if ( from && to && from.group && to.group )
-            this._map = this.getFullMap( this.definingPairs );
+            this._map = ((this.getFullMap( this.definingPairs ) /*: any */) /*: Array<groupElement> */);
     }
     // Find the simplest mathy name for this morphism that's not yet used on its sheet.
-    getUnusedName () {
+    getUnusedName () /*: string */ {
         const names = [ 'f', 'g', 'h' ];
         for ( var i = 1 ; true ; i++ ) {
             const suffix = ( i > 1 ) ? `${i}` : '';
@@ -1083,17 +1273,17 @@ class MorphismElement extends ConnectingElement {
                 } ).length == 0 ) return maybeThis;
             }
         }
+        return '';  // Keep Flow happy...
     }
     // You can only set endpoints on a morphism if they're both pictures of groups.
     // (You can't connect, say, text to something with a morphism.)
-    setEndpoints ( from, to ) {
-        if ( !( from instanceof VisualizerElement )
-          || !( to instanceof VisualizerElement ) )
+    setEndpoints ( from /*: SheetElement */, to /*: SheetElement */ ) {
+        if ( !( from instanceof VisualizerElement ) || !( to instanceof VisualizerElement ) )
             throw "Both parameters to MorphismElement constructor must be VisualizerElements";
         super.setEndpoints( from, to );
     }
-    // Update toJSON() just to handle our class correctly.
-    toJSON () {
+    // Update toJSON() just to handle our class correctly.  We will extend this later.
+    toJSON () /*: MorphismElementJSON */ {
         var result = super.toJSON();
         result.className = 'MorphismElement';
         result.name = this.name;
@@ -1106,17 +1296,17 @@ class MorphismElement extends ConnectingElement {
         return result;
     }
     // Corresponding fromJSON()
-    fromJSON ( json ) {
+    fromJSON ( json /*: MorphismElementJSON */ ) {
         super.fromJSON( json );
         this.name = json.name;
-        if ( json.hasOwnProperty( 'showManyArrows' ) ) this.showManyArrows = json.showManyArrows;
-        if ( json.hasOwnProperty( 'showDomAndCod' ) ) this.showDomAndCod = json.showDomAndCod;
-        if ( json.hasOwnProperty( 'showInjSurj' ) ) this.showInjSurj = json.showInjSurj;
-        if ( json.hasOwnProperty( 'showDefiningPairs' ) ) this.showDefiningPairs = json.showDefiningPairs;
+        this.showManyArrows = (json.showManyArrows == true);
+        this.showDomAndCod  = (json.showDomAndCod == true);
+        this.showInjSurj =  (json.showInjSurj == true);
+        this.showDefiningPairs = (json.showDefiningPairs == true);
         if ( json.hasOwnProperty( 'definingPairs' ) ) this.definingPairs = json.definingPairs;
-        if ( json.hasOwnProperty( 'arrowMargin' ) ) this.arrowMargin = json.arrowMargin;
+        if ( json.arrowMargin ) this.arrowMargin = json.arrowMargin;
         if ( this.from && this.to && this.from.group && this.to.group )
-            this._map = this.getFullMap( this.definingPairs );
+            this._map = ((this.getFullMap( this.definingPairs ) /*: any */) /*: Array<groupElement> */);
     }
     // Override drawConnectingLine to do nothing for morphisms.
     drawConnectingLine () { }
@@ -1124,7 +1314,8 @@ class MorphismElement extends ConnectingElement {
     // (each of which is a point with .x and .y fields) from the box with corners
     // corner1 and corner2 (same data format).  The corners can come in either order.
     // This assumes that start is inside the box.
-    static pointWhereLineExitsBox ( start, stop, corner1, corner2 ) {
+    static pointWhereLineExitsBox ( start /*: Coordinate */, stop /*: Coordinate */,
+                                    corner1 /*: Coordinate */, corner2 /*: Coordinate */ ) /*: Coordinate */ {
         // Let v be the vector from start point to stop point.
         const v = { x : stop.x - start.x, y : stop.y - start.y };
         // Extend each box side to be a line, not just a line segment, and find
@@ -1141,7 +1332,8 @@ class MorphismElement extends ConnectingElement {
     }
     // Auxiliary function for drawing an arrow from A to B with arrowhead of size S
     // and margin of m pixels.
-    static drawArrow ( A, B, S, m, context ) {
+    static drawArrow ( A /*: Coordinate */, B /*: Coordinate */, S /*: number */, m /*: number */,
+                       context /*: CanvasRenderingContext2D */) {
         const dir = { x : B.x - A.x, y : B.y - A.y },
               len = Math.sqrt( Math.pow( dir.x, 2 ) + Math.pow( dir.y, 2 ) ),
               unit = { x : ( len > 0 ? dir.x / len : 0 ),
@@ -1160,7 +1352,7 @@ class MorphismElement extends ConnectingElement {
     // Auxiliary function for writing text at a certain place.
     // Takes an array of text lines and draws them with a background box, one per line,
     // centered in each line, with the box centered at the given coordinates.
-    static drawTextLines ( lines, x, y, context ) {
+    static drawTextLines ( lines /*: Array<string> */, x /*: float */, y /*: float */, context /*: CanvasRenderingContext2D */ ) {
         context.font = '12pt Arial';
         const approxLineHeight = 1.4 * context.measureText( 'M' ).width,
               margin = approxLineHeight / 2,
@@ -1181,7 +1373,7 @@ class MorphismElement extends ConnectingElement {
     }
     // Morphism overlays are the arrow with whatever corresponding text
     // the user has asked us to include.
-    drawOverlay ( canvas, context ) {
+    drawOverlay ( canvas /*: HTMLCanvasElement */, context /*: CanvasRenderingContext2D */ ) {
         if ( $( this.htmlViewElement() ).is( ':hidden' ) ) return;
         if ( !this.from || !this.to ) return; // may still be initializing
         const $fromWrapper = $( this.from.htmlViewElement().parentElement ),
@@ -1205,7 +1397,7 @@ class MorphismElement extends ConnectingElement {
         context.strokeStyle = '#000000';
         if ( this.showManyArrows && this.from.group && this.to.group ) {
             if ( !this._map )
-                this._map = this.getFullMap( this.definingPairs );
+                this._map = ((this.getFullMap( this.definingPairs ) /*: any */) /*: Array<groupElement> */);
             for ( var domelt = 0 ; domelt < this.from.group.order ; domelt++ ) {
                 const domeltUnitCoords = this.from.unitSquarePosition( domelt ),
                       domeltRealCoords = {
@@ -1243,7 +1435,7 @@ class MorphismElement extends ConnectingElement {
         context.restore();
     }
     // when editing, use one input for each defining feature
-    createHtmlEditElement () {
+    createHtmlEditElement () /*: HTMLElement */ {
         var html =
             '<div style="min-width: 200px; border: 1px solid black; padding: 0.5em;">'
           + '<p>Morphism name:'
@@ -1257,7 +1449,7 @@ class MorphismElement extends ConnectingElement {
           + '<p><input type="checkbox" class="arrows-input" '
           + ( this.showManyArrows ? 'checked' : '' ) + '/> Draw multiple arrows</p>'
           + '<p>Arrows margin: '
-          + `<input type="range" min="0" max="20" class="margin-input" value="${this.arrowsMargin}"/></p>`
+          + `<input type="range" min="0" max="20" class="margin-input" value="${this.arrowMargin}"/></p>`
           + '<hr/>'
           + '<p>Define the homomorphism here:</p>'
           + '<center><table border=1 cellspacing=0>'
@@ -1288,12 +1480,12 @@ class MorphismElement extends ConnectingElement {
               + '<p>Feel free to close this window when you\'re done with its content.</p>'
               + '<table border=1 cellspacing=0>'
               + '<tr><th>This element</th><th>Maps to this</th></tr>';
-            const f = that.getFullMap( that.definingPairs );
+            const f = ((that.getFullMap( that.definingPairs ) /*: any */) /*: Array<groupElement> */);
             for ( var i = 0 ; i < that.from.group.order ; i++ )
                 html += `<tr><td>${that._drep( i )}</td>`
                       + `<td>${that._crep( f[i] )}</td></tr>`;
             html += '</table></center>';
-            var newWindow = window.open();
+            var newWindow = window.open( '' );
             newWindow.document.write( html );
             newWindow.document.close();
         } );
@@ -1302,35 +1494,34 @@ class MorphismElement extends ConnectingElement {
     // implement abstract methods save/loadEdits()
     saveEdits () {
         var $edit = $( this.htmlEditElement() );
-        var maybeNewName = $edit.find( '.name-input' )[0].value;
+        var maybeNewName = $edit.find( '.name-input' ).val().toString();
         var that = this;
         this.model.elements.map( function ( element ) {
             if ( ( element != that ) && ( element instanceof MorphismElement )
-              && ( element.name == maybeNewName ) ) {
+                 && ( maybeNewName != undefined ) && ( element.name == maybeNewName ) ) {
                 alert( `Cannot rename the morphism to ${maybeNewName}.  That name is in use.` );
                 maybeNewName = null;
             }
         } );
         if ( maybeNewName !== null ) this.name = maybeNewName;
-        this.showDomAndCod = $edit.find( '.domcod-input' ).prop( 'checked' );
-        this.showManyArrows = $edit.find( '.arrows-input' ).prop( 'checked' );
-        this.showDefiningPairs = $edit.find( '.pairs-input' ).prop( 'checked' );
-        this.showInjSurj = $edit.find( '.injsurj-input' ).prop( 'checked' );
-        this.arrowMargin = $edit.find( '.margin-input' ).val();
-        this._map = this.getFullMap( this.definingPairs );
+        this.showDomAndCod = $edit.find( '.domcod-input' ).is( ':checked' );
+        this.showManyArrows = $edit.find( '.arrows-input' ).is( ':checked' );
+        this.showDefiningPairs = $edit.find( '.pairs-input' ).is( ':checked' );
+        this.showInjSurj = $edit.find( '.injsurj-input' ).is( ':checked' );
+        this.arrowMargin = parseInt($edit.find( '.margin-input' ).val());
+        this._map = ((this.getFullMap( this.definingPairs ) /*: any */) /*: Array<groupElement> */);
         this.reposition();
         this.model.sync();
     }
     loadEdits () {
         var $edit = $( this.htmlEditElement() );
-        $edit.find( '.name-input' )[0].value = this.name;
+        $edit.find( '.name-input' ).val( this.name );
         $edit.find( '.domcod-input' ).prop( 'checked', this.showDomAndCod );
         $edit.find( '.arrows-input' ).prop( 'checked', this.showManyArrows );
         $edit.find( '.pairs-input' ).prop( 'checked', this.showDefiningPairs );
         $edit.find( '.injsurj-input' ).prop( 'checked', this.showInjSurj );
         $edit.find( '.margin-input' ).val( this.arrowMargin );
         this.fillTableWithPairs();
-        $edit[0].definingPairsCopy = this.definingPairs.slice();
     }
     fillTableWithPairs () {
         var $note = $( this.htmlEditElement() ).find( '#emptyMorphismNote' );
@@ -1345,7 +1536,7 @@ class MorphismElement extends ConnectingElement {
                   + `<td><button class="removePairButton" name="${index}">`
                   + `Remove</button></tr>`
                 ).find( `.removePairButton[name="${index}"]` )[0];
-                $( newButton ).on( 'click', function ( event ) {
+                $( newButton ).on( 'click', function ( event /*: JQueryEventObject */ ) {
                     that.definingPairs.splice( index, 1 );
                     that.fillTableWithPairs();
                 } );
@@ -1359,7 +1550,7 @@ class MorphismElement extends ConnectingElement {
     // It is a function of this.definingPairs, as described below.
     fillDomainDropDown () {
         // which elements of the domain are in the subgroup generated by the pairs in the table?
-        var domSubgroup = this.definingPairs.map( function ( pair ) { return pair[0]; } );
+        var domSubgroup /*: Array<groupElement> */ = this.definingPairs.map( function ( pair ) { return pair[0]; } );
         const origLen = domSubgroup.length, D = this.from.group;
         for ( var i = 0 ; i < domSubgroup.length ; i++ ) {
             for ( var j = 0 ; j < origLen ; j++ ) {
@@ -1396,7 +1587,8 @@ class MorphismElement extends ConnectingElement {
         // now we must ask which elements of the codomain could domElt feasibly map to
         var validMapTargets = [ ];
         const D = this.from.group, C = this.to.group;
-        var extension = this.definingPairs.slice();
+        const extension /*: Array<[groupElement, groupElement]> */ = this.definingPairs.slice();
+        // $FlowFixMe: 'placeholder' will be replaced in a few lines
         extension.push( 'placeholder' );
         for ( var i = 0 ; i < C.order ; i++ ) {
             // just for speed:
@@ -1408,12 +1600,12 @@ class MorphismElement extends ConnectingElement {
         }
         // that list will always have something in it, because the identity is always an option
     }
-    toString () {
+    toString () /*: string */ {
         return `Morphism ${this.name} from ${this.from.toString()} to ${this.to.toString()}`;
     }
     // Provide a static method for checking whether two sheet elements are connected,
     // in one direction.  (To check both directions, call twice.)
-    static existsMorphismBetween ( A, B ) {
+    static existsMorphismBetween ( A /*: SheetElement */, B /*: SheetElement */ ) /*: boolean */ {
         for ( var i = 0 ; i < A.model.elements.length ; i++ ) {
             const elt = A.model.elements[i];
             if ( ( elt instanceof MorphismElement ) && ( elt.from == A ) && ( elt.to == B ) )
@@ -1429,15 +1621,15 @@ class MorphismElement extends ConnectingElement {
     // di->ci.  Note that while a1,...,ak is a set (all unique) b1,...,bk may not be
     // (repeats are allowed).
     // The result is returned in the form [ [a1,...,ak], [b1,...,bk] ].
-    expandMap ( partialMap ) {
+    expandMap ( partialMap /*: Array<[groupElement, groupElement]> */ ) /*: [ Array<groupElement>, Array<groupElement> ] */ {
         // handle base case which would otherwise fail as a corner case below
         if ( partialMap.length == 0 ) return [ [ 0 ], [ 0 ] ];
         // get domain and codomain groups easily accessible
         const D = this.from.group, C = this.to.group;
         // generate how the homomorphism behaves on the subgroup of the domain
         // generated by all the left hand sides of the pairs in partialMap
-        var domSubgroup = partialMap.map( function ( pair ) { return pair[0]; } );
-        var codSubgroup = partialMap.map( function ( pair ) { return pair[1]; } );
+        var domSubgroup /*: Array<groupElement> */ = partialMap.map( function ( pair ) { return pair[0]; } );
+        var codSubgroup /*: Array<groupElement> */ = partialMap.map( function ( pair ) { return pair[1]; } );
         for ( var i = 0 ; i < domSubgroup.length ; i++ ) {
             for ( var j = 0 ; j < partialMap.length ; j++ ) {
                 const maybeNewElt = D.mult( domSubgroup[i], partialMap[j][0] );
@@ -1462,12 +1654,12 @@ class MorphismElement extends ConnectingElement {
     // an example such homomorphism (the first one we found in a recursive search).
     // The result array is such that result[domainElement] = itsImage,
     // with result.length == domain order.
-    getFullMap ( partialMap ) {
+    getFullMap ( partialMap /*: Array<[groupElement, groupElement]> */ ) /*: null | Array<groupElement> */ {
         // get domain and codomain groups easily accessible
         const D = this.from.group, C = this.to.group;
         // we'll need a way to verify that a given map is a homomorphism.
         // this assumes the given map is such that f[domElt]=its image.
-        function isAHomomorphism ( f ) {
+        function isAHomomorphism ( f /*: Array<groupElement> */ ) /*: boolean */ {
             for ( var i = 0 ; i < D.order ; i++ )
                 for ( var j = 0 ; j < C.order ; j++ )
                     if ( f[D.mult( i, j )] != C.mult( f[i], f[j] ) )
@@ -1476,7 +1668,7 @@ class MorphismElement extends ConnectingElement {
         }
         // to get maps of the form [[d1,d2,...],[c1,c2,...]] into the form described
         // above, we'll use this conversion routine
-        function changeMapFormat ( domElts, codElts ) {
+        function changeMapFormat ( domElts /*: Array<groupElement> */, codElts /*: Array<groupElement> */ ) /*: Array<groupElement> */ {
             var result = Array( D.order ).fill( NaN );
             domElts.map( function ( domElt, index ) {
                 result[domElt] = codElts[index];
@@ -1494,7 +1686,7 @@ class MorphismElement extends ConnectingElement {
         }
         // extend the domSubgroup[i] -> codSubgroup[j] map to the entire domain
         // by mapping everything else to the identity.
-        const allDomainElts = Array( D.order ).fill( 0 ).map( ( e, i ) => i );
+        const allDomainElts /*: Array<number> */ = Array.from({length: D.order}, (_, i) => i);
         // find some element of the domain whose image is not yet determined
         const next = allDomainElts.filter(
             ( e ) => subgroups[0].indexOf( e ) == -1 )[0];
@@ -1513,20 +1705,24 @@ class MorphismElement extends ConnectingElement {
     }
     // Is the morphism in this element injective?
     // Callers should ensure that this._map is up-to-date before calling.
-    isInjective () {
+    isInjective () /*: boolean */ {
         for ( var i = this._map.length - 1 ; i > 0 ; i-- )
             if ( this._map.indexOf( this._map[i] ) < i ) return false;
         return true;
     }
     // Is the morphism in this element surjective?
     // Callers should ensure that this._map is up-to-date before calling.
-    isSurjective () {
+    isSurjective () /*: boolean */ {
         for ( var i = 0 ; i < this.to.group.order ; i++ )
             if ( this._map.indexOf( i ) == -1 ) return false;
         return true;
     }
     // Convenience functions for getting the representations of elements in the
     // domain or codomain.
-    _drep ( elt ) { return mathml2text( this.from.group.representation[elt] ); }
-    _crep ( elt ) { return mathml2text( this.to.group.representation[elt] ); }
+    _drep ( elt /*: groupElement */ ) /*: string */ {
+        return MathML.toUnicode( this.from.group.representation[elt] );
+    }
+    _crep ( elt /*: groupElement */ ) /*: string */ {
+        return MathML.toUnicode( this.to.group.representation[elt] );
+    }
 }

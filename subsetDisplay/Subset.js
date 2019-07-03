@@ -1,7 +1,23 @@
-SSD.Subset = class Subset extends SSD.BasicSubset {
-   constructor (elements) {
+// @flow
+/*::
+import BitSet from '../js/BitSet.js';
+import MathML from '../js/MathML.js';
+import Template from '../js/Template.js';
+import XMLGroup from '../js/XMLGroup.js';
+
+import SSD from './subsets.js';
+
+var group: XMLGroup;
+
+export default
+ */
+SSD.Subset = class Subset extends SSD.AbstractSubset {
+/*::
+   subsetIndex: number;
+ */
+   constructor(elements /*: void | Array<groupElement> | BitSet */) {
       super();
-      
+
       if (elements === undefined) {
          this.elements = new BitSet(group.order);
       } else if (Array.isArray(elements)) {
@@ -14,16 +30,16 @@ SSD.Subset = class Subset extends SSD.BasicSubset {
       $('#subsets').append(this.displayLine).show();
    }
 
-   get name() {
+   get name() /*: mathml */ {
       return MathML.sub('S', this.subsetIndex);
    }
 
-   get displayLine() {
+   get displayLine() /*: html */ {
       const numElements = this.elements.popcount();
       let items = this.elements
                       .toArray()
                       .slice(0, 3)
-                      .map( (el) => window.group.representation[el] );
+                      .map( (el) => group.representation[el] );
        if (numElements > 3) {
          items.push('<mtext>...</mtext>');
       }
@@ -43,7 +59,7 @@ SSD.Subset = class Subset extends SSD.BasicSubset {
       }
    }
 
-   static nextName() {
+   static nextName() /*: string */ {
       return MathML.sub('S', SSD.nextSubsetIndex);
    }
 }

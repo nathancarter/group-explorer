@@ -1,11 +1,21 @@
-SSD.OrderClasses = class OrderClasses extends SSD.Partition {
+// @flow
+/*::
+import MathML from '../js/MathML.js';
+import XMLGroup from '../js/XMLGroup.js';
+
+import SSD from './subsets.js';
+
+var group: XMLGroup;
+
+export default
+ */
+SSD.OrderClasses = class OrderClasses extends SSD.AbstractPartition {
    constructor() {
       super();
 
-      this.subsets = window
-         .group
+      this.subsets = group
          .orderClasses
-         .filter( (orderClass) => orderClass != undefined )
+         .filter( (orderClass) => orderClass.popcount() != 0 )
          .map( (orderClass, inx) => 
             new SSD.PartitionSubset(this, inx, orderClass, MathML.sub('OC', inx), 'orderClass')
          );
@@ -17,7 +27,7 @@ SSD.OrderClasses = class OrderClasses extends SSD.Partition {
                       .show();
    }
 
-   destroy($curr) {
+   destroy() {
       $('#partitions li.orderClass').remove();
       super.destroy();
    }

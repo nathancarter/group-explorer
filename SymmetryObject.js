@@ -1,8 +1,24 @@
+// @flow
+
+/*::
+import Diagram3D from './js/Diagram3D.js';
+import DisplayDiagram from './js/DisplayDiagram.js';
+import Library from './js/Library.js';
+import MathML from './js/MathML.js';
+import MathUtils from './js/MathUtils.js';
+import Menu from './js/Menu.js';
+import SymmetryObject from './js/SymmetryObject.js';
+import Template from './js/Template.js';
+import XMLGroup from './js/XMLGroup.js';
+
+import VC from './visualizerFramework/visualizer.js';
+ */
+
 /* Global variables */
-var group,		// group about which information will be displayed
-    diagramName,		// name of Cayley diagram, or undefined if generated
-    graphicData,		// data being displayed in large diagram
-    graphicContext;	// graphic context for large diagram
+var group		/*: XMLGroup */,	// group about which information will be displayed
+    diagramName		/*: string */,		// name of SymmetryObject, guaranteed to be non-empty
+    graphicData		/*: Diagram3D */,	// data being displayed in large diagram
+    graphicContext	/*: DisplayDiagram */;	// graphic context for large diagram
 const HELP_PAGE = 'help/rf-um-os-options/index.html';
 
 /* Initial entry to javascript, called once after document load */
@@ -33,34 +49,37 @@ function load() {
    // When group and framework are loaded, insert subset_page and complete rest of setup
    Promise.all([groupLoad, bodyLoad])
           .then( () => {
-             diagramName = getDiagramName();
+             setDiagramName();
              if (diagramName != undefined) {
                 completeSetup();
              }} )
           .catch( console.error );
 }
 
-/* Get diagramName from URL (undefined => error, no symmetry group) */
-function getDiagramName() {
-   let name = new URL(window.location.href).searchParams.get('diagram');
-
-   // Check that this group has a symmetry object at all
+/* Set diagramName from URL (undefined => error, no symmetry group) */
+function setDiagramName() {
+   // Check that this group has a symmetry object
    if (group.symmetryObjects.length == 0) {
-      alert(`The group ${mathml2text(group.name)} has no symmetry objects.`);
-      name = undefined;
+      // If not, leave diagramName undefined and alert user
+      alert(`The group ${MathML.toUnicode(group.name)} has no symmetry objects.`);
    } else {
-      // Check that name matches some symmetryObject
-      if (!group.symmetryObjects.some( (symmetryObject) => symmetryObject.name == name )) {
-         if (name != null) {
-            // If a name is passed but there is no matching symmetryObject, alert user
-            alert(`The group ${mathml2text(group.name)} has no symmetry object named ${name}. ` +
-                  `Using ${group.symmetryObject[0].name} instead.`);
+      // If so, use the diagram name from the URL search string
+      const urlDiagramName = new URL(window.location.href).searchParams.get('diagram');
+      // unless it is empty
+      if (urlDiagramName == undefined) {
+         diagramName = group.symmetryObjects[0].name;
+      } else {
+         // or it does not match one of the symmetryObjects
+         if (!group.symmetryObjects.some( (symmetryObject) => symmetryObject.name == urlDiagramName )) {
+            // Name is passed but there is no matching symmetryObject -- alert user and continue
+            alert(`The group ${MathML.toUnicode(group.name)} has no symmetry object named ${urlDiagramName}. ` +
+                  `Using ${group.symmetryObjects[0].name} instead.`);
+            diagramName = group.symmetryObjects[0].name;
+         } else {
+            diagramName = urlDiagramName;
          }
-         // Name doesn't match any symmetry object, default to first symmetryObject
-         name = group.symmetryObjects[0].name;
       }
    }
-   return name;
 }
 
 /* Now that group has loaded, complete the setup */
@@ -83,7 +102,7 @@ function completeSetup() {
    graphicContext = new DisplayDiagram({container: $('#graphic'), trackballControlled: true});
    displaySymmetryObject();
 
-   $('#vert-container').resizable({
+   (($('#vert-container') /*: any */) /*: JQuery & {resizable: Function} */).resizable({
       handleSelector: '#splitter',
       resizeHeight: false,
       resizeWidthFrom: 'left',
@@ -122,7 +141,7 @@ function resizeGraphic() {
 }
 
 /* Change diagram */
-function diagramClickHandler(event) {
+function diagramClickHandler(event /*: JQueryEventObject */) {
    const $curr = $(event.target).closest('[action]');
    if ($curr.length == 0) {
       $('#diagram-choices').hide();
@@ -131,7 +150,7 @@ function diagramClickHandler(event) {
    }
 }
 
-function set_diagram_name(index) {
+function set_diagram_name(index /*: number */) {
    diagramName = group.symmetryObjects[index].name;
    $('#diagram-choice').html($(`#diagram-choices > li:nth-of-type(${index+1})`).html());
    $('#diagram-choices').hide();
@@ -140,7 +159,7 @@ function set_diagram_name(index) {
 
 /* Slider handlers */
 function set_zoom_level() {
-   graphicData.zoomLevel = Math.exp( $('#zoom-level')[0].valueAsNumber/10 );
+   graphicData.zoomLevel = Math.exp( parseInt($('#zoom-level').val())/10 );
    graphicContext.updateZoomLevel(graphicData);
 }
 
@@ -150,18 +169,18 @@ function set_zoom_level() {
  *   2 -> [4,15] by 4*exp(0.07*(slider-2)) heuristic, using THREE.js mesh line
  */
 function set_line_thickness() {
-   const slider_value = $('#line-thickness')[0].valueAsNumber;
+   const slider_value = parseInt($('#line-thickness').val());
    const lineWidth = (slider_value == 1) ? 1 : 4*Math.exp(0.0734*(slider_value-2));
    graphicData.lineWidth = lineWidth;
    graphicContext.updateLineWidth(graphicData);
 }
 
 function set_node_radius() {
-   graphicData.nodeScale = Math.exp( $('#node-radius')[0].valueAsNumber/10 );
+   graphicData.nodeScale = Math.exp( parseInt($('#node-radius').val())/10 );
    graphicContext.updateNodeRadius(graphicData);
 }
 
 function set_fog_level() {
-   graphicData.fogLevel = $('#use-fog')[0].checked ? $('#fog-level')[0].valueAsNumber/10 : 0;
+   graphicData.fogLevel = $('#use-fog').is(':checked') ? parseInt($('#fog-level').val())/10 : 0;
    graphicContext.updateFogLevel(graphicData);
 }

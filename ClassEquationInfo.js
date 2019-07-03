@@ -1,29 +1,53 @@
+// @flow
+
+/*::
+import GEUtils from './js/GEUtils.js';
+import Library from './js/Library.js';
+import MathML from './js/MathML.js';
+import setUpGAPCells from './js/ShowGAPCode.js';
+import Template from './js/Template.js';
+import XMLGroup from './js/XMLGroup.js';
+
+import {CreateNewSheet} from './js/SheetModel.js';
+import type {
+   JSONType,
+   SheetElementJSON,
+   RectangleElementJSON,
+   TextElementJSON,
+   VisualizerType,
+   VisualizerElementJSON,
+   ConnectingElementJSON,
+   MorphismElementJSON
+} from './js/SheetModel.js';
+ */
+
+var group /*: XMLGroup */;
+
 $(window).on('load', load);	// like onload handler in body
 
-let group;
 function load() {
    Library.loadFromURL()
           .then( (_group) => {
-             group = _group;
-             formatGroup();
+              group = _group;
+              formatGroup();
           } )
           .catch( console.error );
 }
 
 function formatGroup() {
    const $rslt = $(document.createDocumentFragment())
-      .append(eval(Template.HTML('header')));
+         .append(eval(Template.HTML('header')));
    if (group.isAbelian) {
       $rslt.append(eval(Template.HTML('abelian')));
    } else {
       $rslt.append(eval(Template.HTML('non-abelian')));
       for (const conjugacyClass of group.conjugacyClasses) {
          $rslt.find('#conjugacy_list')
-              .append($('<li>').html(
-                 MathML.csList(conjugacyClass
-                    .toArray()
-                    .map( (el) => group.representation[el] )
-                 )))
+            .append($('<li>').html(
+               MathML.csList(conjugacyClass
+                             .toArray()
+                             .map( (el) => group.representation[el] )
+                            )))
       }
    }
    $rslt.append(eval(Template.HTML('trailer')));
@@ -32,38 +56,35 @@ function formatGroup() {
 
    setUpGAPCells();
 
-   $( '.show-class-equation-sheet' ).on( 'click', function ( event ) {
+   $( '.show-class-equation-sheet' ).on( 'click', function ( event /*: JQueryEventObject */ ) {
       event.preventDefault();
-      const type = event.target.getAttribute( 'data-type' );
-      showAsSheet( type );
+      const target = ((event.target /*: any */) /*: HTMLElement */);
+      const type = target.getAttribute( 'data-type' );
+      showAsSheet( ((type /*: any */) /*: VisualizerType */) );
    } );
 }
 
-function formatClassEquation(group) {
-   let classEquation;
+function formatClassEquation(group /*: XMLGroup */) /*: string */ {
+   let classEquation /*: string */ ;
    if (   group.order > 5
-       && group.conjugacyClasses.every(function (el) { return el.popcount() == 1; })) {
+          && group.conjugacyClasses.every(function (el) { return el.popcount() == 1; })) {
       classEquation =
          eval('`' + '1 + 1 + ... (${group.order} times) ... + 1 = ${group.order}' + '`');
    } else {
       classEquation =
          group.conjugacyClasses
-              .map(function (el) { return el.popcount(); })
-              .join(' + ') +
+         .map(function (el) { return el.popcount(); })
+         .join(' + ') +
          ' = ' + group.order;
    }
    return classEquation;
 }
 
-function fromRainbow ( index ) {
-   return `hsl(${Math.floor( index * 360 / group.conjugacyClasses.length )}, 100%, 80%)`;
+function addHighlights ( i /*: number */, array /*: ?Array<null | void | color> */ ) /*: Array<null | void | color> */ {
+    if ( !array ) array = (Array( group.order ).fill('') /*: Array<null | void | string> */);
+   return array.map( ( e, j ) => group.conjugacyClasses[i].isSet( j ) ? GEUtils.fromRainbow( i / group.conjugacyClasses.length ) : e );
 }
-function addHighlights ( i, array ) {
-   if ( !array ) array = Array( group.order ).fill( '' );
-   return array.map( ( e, j ) =>
-      group.conjugacyClasses[i].isSet( j ) ? fromRainbow( i ) : e );
-}
-function showAsSheet ( type ) { // type must be one of MTElement, CGElement, CDElement
+function showAsSheet ( type /*: VisualizerType*/ ) {
    const n = group.conjugacyClasses.length;
    // If the group is abelian, it may have an equation like
    // 1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1=17, which we want to abbreviate
@@ -74,13 +95,13 @@ function showAsSheet ( type ) { // type must be one of MTElement, CGElement, CDE
       {
          className : 'TextElement',
          x : 50, y : 50, w : 150*fakeN+100, h : 50,
-         text : `Class Equation for the Group ${mathml2text(group.name)}`,
+         text : `Class Equation for the Group ${MathML.toUnicode(group.name)}`,
          fontSize : '20pt', alignment : 'center'
       }
    ];
    for ( var i = 0 ; i < fakeN ; i++ ) {
       const fakeIndex = ( fakeN == n ) ? i :
-                        ( i < 3 ) ? i : ( i == 3 ) ? -1 : n - 1;
+            ( i < 3 ) ? i : ( i == 3 ) ? -1 : n - 1;
       if ( fakeIndex == -1 ) { // draw the ellipses
          sheetElementsAsJSON.push( {
             className : 'TextElement',
@@ -135,7 +156,7 @@ function showAsSheet ( type ) { // type must be one of MTElement, CGElement, CDE
    sheetElementsAsJSON.push( {
       className : type, groupURL : group.URL,
       x : 50 + 150*fakeN, y : 150, w : 100, h : 100,
-      highlights : { background : highlights }
+      highlights : { background : ((highlights /*: any */) /*: Array<null | void | color> */) }
    } );
    // Show it:
    CreateNewSheet( sheetElementsAsJSON );

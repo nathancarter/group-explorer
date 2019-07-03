@@ -1,8 +1,34 @@
+// @flow
+/*::
+import Log from './Log.js';
+import CycleGraph from './CycleGraph.js';
+import type {Highlights} from './CycleGraph.js';
 
+type Options = {width?: number, height?: number, container?: JQuery};
 
+export type CycleGraphJSON = {groupURL: string, highlights: Highlights, elements: Array<groupElement>}
+
+export default
+ */
 class DisplayCycleGraph {
+/*::
+   static DEFAULT_MIN_CANVAS_HEIGHT: number;
+   static DEFAULT_MIN_CANVAS_WIDTH: number;
+   static DEFAULT_MIN_RADIUS: number; 
+   static DEFAULT_ZOOM_STEP: number;
+   static DEFAULT_CANVAS_WIDTH: number;
+   static DEFAULT_CANVAS_HEIGHT: number;
 
-   constructor(options) {
+   canvas: HTMLCanvasElement;
+   context: CanvasRenderingContext2D;
+   options: Options;
+   zoom: number;
+   translate: {dx: number, dy: number};
+   transform: THREE.Matrix3;
+   cycleGraph: CycleGraph;
+   radius: number;
+ */
+   constructor(options /*: Options */) {
       Log.log('DisplayCycleGraph');
 
       DisplayCycleGraph._setDefaults();
@@ -11,31 +37,30 @@ class DisplayCycleGraph {
          options = {};
       }
 
+      this.canvas = (($(`<canvas/>`)[0] /*: any */) /*: HTMLCanvasElement */);
       let width = (options.width === undefined) ? DisplayCycleGraph.DEFAULT_CANVAS_WIDTH : options.width;
       let height = (options.height === undefined) ? DisplayCycleGraph.DEFAULT_CANVAS_HEIGHT : options.height;
-      if (options.container !== undefined) {
+      const container = options.container;
+      if (container != undefined) {
          // take canvas dimensions from container (if specified), option, or default
-         width = options.container.width();
-         height = options.container.height();
+         width = container.width();
+         height = container.height();
+         container.append(this.canvas);
       }
-      this.canvas = $(`<canvas/>`)[0];
       this.setSize( width, height );
       this.context = this.canvas.getContext('2d');
       this.options = options;
-      if ( options.container !== undefined) {
-         options.container.append(this.canvas);
-      }
       this.zoom = 1;  // user-supplied scale factor multiplier
       this.translate = {dx: 0, dy: 0};  // user-supplied translation, in screen coordinates
       this.transform = new THREE.Matrix3();  // current cycleGraph -> screen transformation
    }
 
-   setSize ( w, h ) {
+   setSize(w /*: number */, h /*: number */) {
       this.canvas.width = w;
       this.canvas.height = h;
    }
-   getSize () {
-      return { w : this.canvas.width, h : this.canvas.height };
+   getSize() /*: {w: number, h: number} */ {
+      return { w: this.canvas.width, h: this.canvas.height };
    }
 
    static _setDefaults() {
@@ -45,8 +70,11 @@ class DisplayCycleGraph {
       DisplayCycleGraph.DEFAULT_ZOOM_STEP = 0.1;  // zoom in/zoom out step
    }
 
-   getImage(cycleGraph,large) { // second parameter optional, defaults to small
-      if ( large )
+   getImage(cycleGraph /*: CycleGraph */, options /*:: ?: {size?: 'small' | 'large'} */ = {} ) /*: Image */ {
+      // Options parameter:
+      // size: "small" or "large", default is "small"
+      options = {size: (options.hasOwnProperty('size')) ? options.size : 'small'};
+      if ( options.size == 'large' )
          this.showLargeGraphic(cycleGraph);
       else
          this.showSmallGraphic(cycleGraph);
@@ -60,7 +88,7 @@ class DisplayCycleGraph {
    // It passes an optional second parameter to that routine, so that
    // it hides all element names, thus making the vertices in the graph
    // much smaller, and thus the image itself much smaller as well.
-   showSmallGraphic(cycleGraph) {
+   showSmallGraphic(cycleGraph /*: CycleGraph */) {
       this.showLargeGraphic( cycleGraph, true );
    }
 
@@ -71,7 +99,7 @@ class DisplayCycleGraph {
    // The second parameter, which defaults to true, says whether to omit
    // the names inside the elements.  (False == normal behavior, true
    // == a smaller graphic in the end, useful for thumbnails.)
-   showLargeGraphic(cycleGraph, hideNames = false) {
+   showLargeGraphic(cycleGraph /*: CycleGraph */, hideNames /*: boolean */ = false) {
       // save the cycle graph for use by other members of this object
       this.cycleGraph = cycleGraph;
 
@@ -134,7 +162,7 @@ class DisplayCycleGraph {
       cycleGraph.cyclePaths.forEach( points => {
          var isDrawing = true; // was the last
          this.context.beginPath();
-         points.forEach( ( point, index ) => {
+         points.pts.forEach( ( point, index ) => {
             // is the current point in the view?
             var pointVisible = point.x > pre_image.minX && point.x < pre_image.maxX
                             && point.y > pre_image.minY && point.y < pre_image.maxY;
@@ -147,8 +175,8 @@ class DisplayCycleGraph {
                 this.context.lineTo( point.x, point.y );
             } else if ( pointVisible ) {
                 // the previous point was out of view but this one is in view; draw it,
-                // but you can't assume taht we already did lineTo() the last point.
-                var prev = points[index-1];
+                // but you can't assume that we already did lineTo() the last point.
+                var prev = points.pts[index-1];
                 this.context.moveTo( prev.x, prev.y );
                 this.context.lineTo( point.x, point.y );
             }
@@ -170,7 +198,7 @@ class DisplayCycleGraph {
          this.context.arc( pos.x, pos.y, this.radius, 0, 2 * Math.PI );
          if ( cycleGraph.highlights && cycleGraph.highlights.background
            && cycleGraph.highlights.background[elt] ) {
-            this.context.fillStyle = cycleGraph.highlights.background[elt];
+            this.context.fillStyle = cycleGraph.highlights.background[elt].toString();
          } else {
             this.context.fillStyle = '#fff';
          }
@@ -182,7 +210,7 @@ class DisplayCycleGraph {
            && cycleGraph.highlights.top[elt] ) {
             this.context.beginPath();
             this.context.arc( pos.x, pos.y, this.radius, -3*Math.PI/4, -Math.PI/4 );
-            this.context.fillStyle = cycleGraph.highlights.top[elt];
+            this.context.fillStyle = cycleGraph.highlights.top[elt].toString();
             this.context.fill();
          }
 
@@ -193,7 +221,7 @@ class DisplayCycleGraph {
          this.context.arc( pos.x, pos.y, this.radius, 0, 2 * Math.PI );
          if ( cycleGraph.highlights && cycleGraph.highlights.border
            && cycleGraph.highlights.border[elt] ) {
-            this.context.strokeStyle = cycleGraph.highlights.border[elt];
+            this.context.strokeStyle = cycleGraph.highlights.border[elt].toString();
             this.context.lineWidth = 5/scale;
          } else {
             this.context.strokeStyle = '#000';
@@ -261,20 +289,20 @@ class DisplayCycleGraph {
    }
 
    // changing the translation keeps the center of the model centered in the canvas
-   _centeredZoom(dZoom) {
+   _centeredZoom(dZoom /*: float */) {
       this.zoom = this.zoom * (1 + dZoom);
       this.move(this.translate.dx * dZoom, this.translate.dy * dZoom);
    }
 
    // deltaX, deltaY are in screen coordinates
-   move(deltaX, deltaY) {
+   move(deltaX /*: float */, deltaY /*: float */) {
       this.translate.dx += deltaX;
       this.translate.dy += deltaY;
    }
 
    // given screen coordinates, returns element associated with node,
    //   or 'undefined' if not within one radius
-   select(screenX, screenY) {
+   select(screenX /*: number */, screenY /*: number */) /*: void | groupElement */ {
       // compute cycleGraph coordinates from screen coordinates by inverting this.transform
       const cg_coords = new THREE.Vector2(screenX, screenY).applyMatrix3(new THREE.Matrix3().getInverse(this.transform));
       const index = this.cycleGraph.positions.findIndex( (pos) =>
@@ -285,29 +313,29 @@ class DisplayCycleGraph {
 
    // Be able to answer the question of where in the diagram any given element is drawn.
    // We answer in normalized coordinates, [0,1]x[0,1].
-   unitSquarePosition ( element, cycleGraph ) {
+   unitSquarePosition(element /*: groupElement */, cycleGraph /*: CycleGraph */) /*: {x: float, y: float} */ {
       const virtualCoords = new THREE.Vector3( cycleGraph.positions[element].x,
                                                cycleGraph.positions[element].y, 0 ),
             // multiplying a transform by a vector does not translate it, unfortunately:
             untranslatedCanvasCoords = virtualCoords.applyMatrix3( this.transform ),
             // so we do the translation manually:
             translatedCanvasCoords = {
-               x : this.transform.elements[6] + untranslatedCanvasCoords.x,
-               y : this.transform.elements[7] + untranslatedCanvasCoords.y
+               x: this.transform.elements[6] + untranslatedCanvasCoords.x,
+               y: this.transform.elements[7] + untranslatedCanvasCoords.y
             };
-      return { x : translatedCanvasCoords.x / this.canvas.width,
-               y : translatedCanvasCoords.y / this.canvas.height };
+      return { x: translatedCanvasCoords.x / this.canvas.width,
+               y: translatedCanvasCoords.y / this.canvas.height };
    }
 
    // two serialization functions
-   toJSON ( cycleGraph ) {
+   toJSON(cycleGraph /*: CycleGraph */) /*: CycleGraphJSON */ {
       return {
-         groupURL : cycleGraph.group.URL,
-         highlights : cycleGraph.highlights,
-         elements : cycleGraph.elements
+         groupURL: cycleGraph.group.URL,
+         highlights: cycleGraph.highlights,
+         elements: cycleGraph.elements
       };
    }
-   fromJSON ( json, cycleGraph ) {
+   fromJSON(json /*: CycleGraphJSON */, cycleGraph /*: CycleGraph */) {
       cycleGraph.highlights = json.highlights;
       cycleGraph.elements = json.elements;
    }

@@ -1,5 +1,29 @@
-SSD.PartitionSubset = class PartitionSubset extends SSD.BasicSubset {
-   constructor(parent, subIndex, elements, name, partitionClass) {
+// @flow
+/*::
+import BitSet from '../js/BitSet.js';
+import Template from '../js/Template.js';
+import XMLGroup from '../js/XMLGroup.js';
+
+import SSD from './subsets.js';
+
+var group: XMLGroup;
+
+export default
+ */
+SSD.PartitionSubset = class PartitionSubset extends SSD.AbstractSubset {
+/*::
+   parent: SSD.AbstractPartition;
+   subIndex: number;
+   elements: BitSet;
+   name: string;
+   partitionClass: string;
+  +elementRepresentations: Array<string>;
+ */
+   constructor(parent /*: SSD.AbstractPartition */,
+               subIndex /*: number */,
+               elements /*: BitSet */,
+               name /*: string */,
+               partitionClass /*: string */) {
       super();
 
       this.parent = parent;
@@ -28,7 +52,7 @@ SSD.PartitionSubset = class PartitionSubset extends SSD.BasicSubset {
       return $menu;
    }
 
-   get displayLine() {
+   get displayLine() /*: html */ {
       return eval(Template.HTML(this.partitionClass + '_template'));
    }
 }

@@ -1,9 +1,21 @@
+// @flow
 /*
  * Function returns subgroups of group as array of BitSets
  */
+/*::
+import MathUtils from './MathUtils.js';
+import BasicGroup from './BasicGroup.js';
+import BitSet from './BitSet.js';
+import Subgroup from './Subgroup.js';
 
+export default
+ */
 class SubgroupFinder {
-   constructor (group) {
+/*::
+   group: BasicGroup;
+   z_generators: BitSet;
+ */
+   constructor (group /*: BasicGroup */) {
       this.group = group;
       this.z_generators = new BitSet(group.order);
       for (let i = 1; i < group.order; i++) {
@@ -13,7 +25,7 @@ class SubgroupFinder {
       }
    }
 
-   static getSubgroups(group) {
+   static getSubgroups(group /*: BasicGroup */) /*: [Array<Subgroup>, boolean] */ {
       let allSubgroups,
           isSolvable = true,
           subGroupFinder = new SubgroupFinder(group);
@@ -36,7 +48,8 @@ class SubgroupFinder {
          isSolvable = false;
          // take generators from the next-smallest subgroup, add an element not in that group, and minimize generators
          const new_subgroup = new Subgroup(group, last_subgroup_found.generators.toArray()).setAllMembers();
-         const new_element = BitSet.difference(new_subgroup.members, last_subgroup_found.members).first();
+         const new_element =
+               ((BitSet.difference(new_subgroup.members, last_subgroup_found.members).first() /*: any */) /*: groupElement */);
          subGroupFinder.minimizeGenerators(new_subgroup, new_element);
          allSubgroups.push(new_subgroup);
       }
@@ -50,7 +63,7 @@ class SubgroupFinder {
    // contains/containedIn are fields in the Sugroup object
    // of BitSets of indexes into the group.subgroups array
    // indicating subgroups immediately contained by/containing this subgroup
-   static addSubgroupLattice(subgroups) {
+   static addSubgroupLattice(subgroups /*: Array<Subgroup> */) {
       const numSubgroups = subgroups.length;
 
       // initialize contains, containedIn fields
@@ -86,7 +99,7 @@ class SubgroupFinder {
    }
 
 
-   findAllSubgroups() {
+   findAllSubgroups() /*: Array<Subgroup> */ {
       const subgroups = [];
 
       let currLayer = [new Subgroup(this.group, [0], [0])];  // 0-th layer is trivial group
@@ -106,7 +119,7 @@ class SubgroupFinder {
       Cyclic extension algorithm from
       "Fundamental Algorithms for Permutation Groups" by Greg Butler (1991)
     */
-   findNextLayer(currLayer) {
+   findNextLayer(currLayer /*: Array<Subgroup> */) /*: Array<Subgroup> */ {
       const nextLayer = [];
 
       for (let i = 0; i < currLayer.length; i++) {
@@ -116,13 +129,13 @@ class SubgroupFinder {
             this.z_generators,
             BitSet.difference(normalizer.members, currSubgroup.members));
          for (let j = 0; j < nextLayer.length; j++) {
-            if (nextLayer[j].members.contains(currSubgroup.members)) {
-               todo.subtract(nextLayer[j].members);
+            const nextSubgroup /*: Subgroup */ = nextLayer[j];
+            if (nextSubgroup.members.contains(currSubgroup.members)) {
+               todo.subtract(nextSubgroup.members);
             }
          }
 
-         while (! todo.isEmpty()) {
-            const g = todo.pop();
+         for (let g = todo.pop(); g != undefined; g = todo.pop()) {
             if (! BitSet.intersection(this.group.elementPrimePowers[g],
                                       currSubgroup.members)
                         .isEmpty()) {
@@ -155,12 +168,11 @@ class SubgroupFinder {
       end if
       end while
     */
-   findNormalizer(subgroup) {
+   findNormalizer(subgroup /*: Subgroup */) /*: Subgroup */ {
       let normalizer = subgroup.clone(),
           todo = new BitSet(this.group.order).setAll().subtract(subgroup.members);
 
-      while (! todo.isEmpty()) {
-         let g = todo.pop();
+      for (let g = todo.pop(); g != undefined; g = todo.pop()) {
          if (this.normalizes(subgroup, g)) {
             this.extendSubgroup(normalizer, g);
             todo.subtract(normalizer.members);
@@ -176,7 +188,7 @@ class SubgroupFinder {
       return normalizer;
    }
 
-   normalizes(subgroup, g) {
+   normalizes(subgroup /*: Subgroup */, g /*: number */) /*: boolean */{
       const mult = (a,b) => this.group.multtable[a][b];
       const g_inverse = this.group.inverses[g];
       for (let i = 0; i < this.group.order; i++) {
@@ -189,7 +201,7 @@ class SubgroupFinder {
       return true;
    }
 
-   extendSubgroup(subgroup, normalizer) {
+   extendSubgroup(subgroup /*: Subgroup */, normalizer /*: number */) {
       const todo = this.group.elementPowers[normalizer];
       for (let i = 0; i < subgroup.members.len; i++) {
          if (subgroup.members.isSet(i)) {
@@ -202,7 +214,7 @@ class SubgroupFinder {
       }
    }
 
-   minimizeGenerators(subgroup, extension) {
+   minimizeGenerators(subgroup /*: Subgroup */, extension /*: number */) {
       // 1) find an element that will generate what extension and an existing generator do now
       const generators = subgroup.generators.toArray();
       for (let i = 0; i < generators.length; i++) {

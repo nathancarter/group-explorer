@@ -1,14 +1,29 @@
+// @flow
+/*::
+import CayleyDiagram from '../js/CayleyDiagram.js';
+import DisplayDiagram from '../js/DisplayDiagram.js';
+
+// globals implemented in CayleyDiagram.js
+var Cayley_diagram: CayleyDiagram;
+var Graphic_context: DisplayDiagram;
+var emitStateChange: () => void;
+
+export default
+ */
 class CVC {
-   static load($viewWrapper) {
+/*::
+   static VIEW_PANEL_URL: string;
+ */
+   static load($viewWrapper /*: JQuery */) /*: Promise<void> */ {
       return new Promise( (resolve, reject) => {
          $.ajax( { url: CVC.VIEW_PANEL_URL,
-                   success: (data) => {
+                   success: (data /*: html */) => {
                       $viewWrapper.html(data);
                       CVC.setupViewPage();
                       resolve();
                    },
                    error: (_jqXHR, _status, err) => {
-                      reject(`Error loading ${CVC.VIEW_PANEL_URL}: ${err}`);
+                      reject(`Error loading ${CVC.VIEW_PANEL_URL} ${err === undefined ? '' : ': ' + err}`);
                    }
          } )
       } )
@@ -27,7 +42,7 @@ class CVC {
 
    /* Slider handlers */
    static setZoomLevel() {
-      Cayley_diagram.zoomLevel = Math.exp( $('#zoom-level')[0].valueAsNumber/10 );
+      Cayley_diagram.zoomLevel = Math.exp( Number($('#zoom-level').val())/10 );
       Graphic_context.updateZoomLevel(Cayley_diagram);
       emitStateChange();
    }
@@ -38,7 +53,7 @@ class CVC {
     *   2 -> [4,15] by 4*exp(0.07*(slider-2)) heuristic, using THREE.js mesh line
     */
    static setLineThickness() {
-      const slider_value = $('#line-thickness')[0].valueAsNumber;
+      const slider_value = Number($('#line-thickness').val());
       const lineWidth = (slider_value == 1) ? 1 : 4*Math.exp(0.0734*(slider_value-2));
       Cayley_diagram.lineWidth = lineWidth;
       Graphic_context.updateLineWidth(Cayley_diagram);
@@ -46,27 +61,26 @@ class CVC {
    }
 
    static setNodeRadius() {
-      Cayley_diagram.nodeScale = Math.exp( $('#node-radius')[0].valueAsNumber/10 );
+      Cayley_diagram.nodeScale = Math.exp( Number($('#node-radius').val())/10 );
       Graphic_context.updateNodeRadius(Cayley_diagram);
       Graphic_context.updateLabels(Cayley_diagram);
       emitStateChange();
    }
 
    static setFogLevel() {
-      Cayley_diagram.fogLevel = $('#use-fog')[0].checked ? $('#fog-level')[0].valueAsNumber/10 : 0;
+      Cayley_diagram.fogLevel = $('#use-fog').is(':checked') ? Number($('#fog-level').val())/10 : 0;
       Graphic_context.updateFogLevel(Cayley_diagram);
       emitStateChange();
    }
 
    static setLabelSize() {
-      Cayley_diagram.labelSize = $('#show-labels')[0].checked ?
-                                 Math.exp( $('#label-size')[0].valueAsNumber/10 ) : 0;
+      Cayley_diagram.labelSize = $('#show-labels').is(':checked') ? Math.exp( Number($('#label-size').val())/10 ) : 0;
       Graphic_context.updateLabelSize(Cayley_diagram);
       emitStateChange();
    }
 
    static setArrowheadPlacement() {
-      Cayley_diagram.arrowheadPlacement = $('#arrowhead-placement')[0].valueAsNumber/20;
+      Cayley_diagram.arrowheadPlacement = Number($('#arrowhead-placement').val())/20;
       Graphic_context.updateArrowheadPlacement(Cayley_diagram);
       emitStateChange();
    }

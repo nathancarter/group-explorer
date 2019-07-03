@@ -1,6 +1,6 @@
-
+// @flow
 /*
- * SSD.BasicSubset --
+ * SSD.AbstractSubset --
  *   Direct superclass of SSD.Subgroup, SSD.Subset, and SSD.Partition
  *   Assigns an id to every element displayed in the subsetDisplay,
  *     and adds it to SSD.displayList
@@ -12,16 +12,32 @@
  *     displayLine - line for this subset in display (e.g., "H₁ = < f > is a subgroup of order 2.")
  *     menu - context menu brought up by this element in display
  *
- *   (BasicSubset would be an abstract superclass in another language.)
+ *   (AbstractSubset would be an abstract superclass in another language.)
  */
+/*::
+import BitSet from '../js/BitSet.js';
+import XMLGroup from '../js/XMLGroup.js';
 
-SSD.BasicSubset = class BasicSubset {
-   constructor () {
+import SSD from './subsets.js';
+
+var group: XMLGroup;
+
+export default
+ */
+SSD.AbstractSubset = class AbstractSubset {
+/*::
+   id: number;
+   elements: BitSet;
+  +name: string;	// implemented in subclass
+  +menu: JQuery;	// implemented in subclass
+  +displayLine: string; // implemented in subclass
+ */  
+   constructor() {
       this.id = SSD.nextId++;
       SSD.displayList[this.id] = this;
    }
 
-   get closure() {
+   get closure() /*: SSD.Subset */ {
       return new SSD.Subset(group.closure(this.elements));
    }
 
@@ -36,15 +52,15 @@ SSD.BasicSubset = class BasicSubset {
     * Operations that create new SSD.Subsets by performing
     *   union, intersection, and elementwise product on this set
     */
-   union(other) {
+   union(other /*: SSD.AbstractSubset */) /* SSD.Subset */ {
       return new SSD.Subset(BitSet.union(this.elements, other.elements));
    }
 
-   intersection(other) {
+   intersection(other /*: SSD.AbstractSubset */) /*: SSD.Subset */ {
       return new SSD.Subset(BitSet.intersection(this.elements, other.elements));
    }
 
-   elementwiseProduct(other) {
+   elementwiseProduct(other /*: SSD.AbstractSubset */) /*: SSD.Subset */{
       const newElements = new BitSet(group.order);
       for (let i = 0; i < this.elements.len; i++) {
          if (this.elements.isSet(i)) {
@@ -58,7 +74,7 @@ SSD.BasicSubset = class BasicSubset {
       return new SSD.Subset(newElements);      
    }
 
-   get elementString() {
+   get elementString() /*: string */ {
       return '[' + this.elements.toString() + ']';
    }
 }
