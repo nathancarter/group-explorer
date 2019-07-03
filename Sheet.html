@@ -10,44 +10,45 @@
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css">
 
       <style>
-         #view-control {
-            background: #E2E2E2;
-            display: none;
-         }
-         .selected-for-moving-and-sizing {
-            border: 2px dotted #aaf;
-         }
-         .button-row {
-            margin: 5px;
-         }
-         #graphic {
-            -webkit-touch-callout : none;
-            -khtml-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-         }
-         #overlay {
-            pointer-events: none;
-            background-color: rgba(0,0,0,0);
-            position: absolute;
-            z-index: 999999;
-         }
+       #view-control {
+          background: #E2E2E2;
+          display: none;
+       }
+       .selected-for-moving-and-sizing {
+          border: 2px dotted #aaf;
+       }
+       .button-row {
+          margin: 5px;
+       }
+       #graphic {
+          -webkit-touch-callout : none;
+          -khtml-user-select: none;
+          -moz-user-select: none;
+          -ms-user-select: none;
+          user-select: none;
+       }
+       #overlay {
+          pointer-events: none;
+          background-color: rgba(0,0,0,0);
+          position: absolute;
+          z-index: 999999;
+       }
 
-         .narrow-control { width: 31%; }
-         .normal-control { width: 47%; }
-         .wide-control { width: 65%; }
-         .huge-control { width: 96%; }
+       .narrow-control { width: 31%; }
+       .normal-control { width: 47%; }
+       .wide-control { width: 65%; }
+       .huge-control { width: 96%; }
 
-         #sheet-control {
-             z-index: 999999999;
-             background-color: white;
-         }
-         #splitter {
-             z-index: 999999999;
-         }
+       #sheet-control {
+          z-index: 999999999;
+          background-color: white;
+       }
+       #splitter {
+          z-index: 999999999;
+       }
       </style>
 
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
       <script type="text/x-mathjax-config">
        MathJax.Hub.Config({
           CommonHTML: {
@@ -57,14 +58,12 @@
        });
       </script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=MML_CHTML"></script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
       <script src="https://cdn.jsdelivr.net/npm/jquery-resizable-dom@0.32.0/dist/jquery-resizable.js"></script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/95/three.js"></script>
       <script src="https://cdn.jsdelivr.net/npm/three.meshline@1.2.0/src/THREE.MeshLine.js"></script>
       <script src="./build/allGroupExplorer.js"></script>
       <script src="./build/allVisualizer.js"></script>
       <script src="./build/allSheets.js"></script>
-      <script src="./groupURLs.js"></script>
       <script src="./Sheet.js"></script>
    </head>
 
