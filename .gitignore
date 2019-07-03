@@ -2,5 +2,5 @@
 *.swp
 #*
 *~
-experiments/
-help-old/
+node_modules/
+package-lock.json
