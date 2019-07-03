@@ -1,17 +1,17 @@
 
-JS_FILES = js/init.js             js/Log.js            js/BitSet.js        js/MathUtils.js       \
+JS_FILES = js/GEUtils.js          js/Log.js            js/BitSet.js        js/MathUtils.js       \
            js/BasicGroup.js       js/XMLGroup.js       js/Subgroup.js      js/SubgroupFinder.js  \
-           js/IsomorphicGroups.js js/Template.md       js/Library.js       js/MathML.md          \
-           js/Menu.js             js/ShowGAPCode.js                                              \
+           js/IsomorphicGroups.js js/Template.js       GroupURLs.js        js/Library.js         \
+           js/MathML.js           js/Menu.js             js/ShowGAPCode.js                       \
            js/Diagram3D.js        js/DiagramDnD.js     js/CayleyDiagram.js js/SymmetryObject.js  \
            js/DisplayDiagram.js                                                                  \
            js/Multtable.js        js/DisplayMulttable.js                                         \
            js/CycleGraph.js       js/DisplayCycleGraph.js                                        \
            Version.js                                                                            \
 
-SUB_FILES = subsetDisplay/subsets.js           subsetDisplay/BasicSubset.js     \
+SUB_FILES = subsetDisplay/subsets.js           subsetDisplay/AbstractSubset.js  \
             subsetDisplay/Subgroup.js          subsetDisplay/Subset.js          \
-            subsetDisplay/SubsetEditor.js      subsetDisplay/Partition.js       \
+            subsetDisplay/SubsetEditor.js      subsetDisplay/AbstractPartition.js \
             subsetDisplay/PartitionSubset.js   subsetDisplay/OrderClasses.js    \
             subsetDisplay/ConjugacyClasses.js  subsetDisplay/Cosets.js          \
 										\
@@ -25,10 +25,10 @@ SUB_FILES = subsetDisplay/subsets.js           subsetDisplay/BasicSubset.js     
 
 SHEET_FILES = js/DragResizeExtension.js		js/SheetModel.js
 
-NODE_JS_FILES = js/ge-lib-preamble.js                   \
+NODE_JS_FILES = js/ge-lib-preamble.js                 \
                 build/allGroupExplorer.js             \
-                groupURLs.js                          \
-				js/ge-lib-endmatter.js
+                GroupURLs.js                          \
+		js/ge-lib-endmatter.js
 
 # PRODUCTS = build/allGroupExplorer.js build/allGroupExplorer.min.js build/allVisualizer.js
 PRODUCTS = build/allGroupExplorer.js build/allVisualizer.js build/allSheets.js build/ge-lib.js
