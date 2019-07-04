@@ -3580,7 +3580,7 @@ class CayleyDiagram extends Diagram3D {
    strategies: Array<CayleyDiagram.AbstractLayoutStrategy>;
    diagram_name: ?string;
    ordered_nodes: NodeTree;
-   chunk: ?number;
+   chunk: number;  // chunking group.subgroups index; 0 (trivial subgroup) => no chunking
 
    // fields unused in GE, added for compatibility with JSON methods in DisplayDiagram.js
    elements: any;
@@ -3591,6 +3591,7 @@ class CayleyDiagram extends Diagram3D {
       this.background = CayleyDiagram.BACKGROUND_COLOR;
       this.strategies = [];
 
+      this.chunk = 0;
       this.isCayleyDiagram = true;
       this.diagram_name = diagram_name;
       this.isGenerated = (diagram_name === undefined);
@@ -4634,7 +4635,7 @@ class DisplayDiagram {
       chunks.remove(...chunks.children);
 
       // find new chunk
-      if (!diagram3D.isCayleyDiagram || diagram3D.chunk == undefined) {
+      if (!diagram3D.isCayleyDiagram || diagram3D.chunk == 0) {
          return;
       }
 
@@ -4644,8 +4645,8 @@ class DisplayDiagram {
 
       const getGeometry = () => {
          // get points of subgroup
-         const strategy_index = ((diagram3D.chunk /*: any */) /*: number */),
-               chunk_members = diagram3D.strategies[strategy_index].bitset,
+         const subgroup_index = diagram3D.chunk,
+               chunk_members = diagram3D.group.subgroups[subgroup_index].members,
                chunk_points = chunk_members.toArray().map( (el) => diagram3D.nodes[el].point ),
                chunk_size = chunk_points.length;
 
@@ -4731,7 +4732,8 @@ class DisplayDiagram {
          }
       }
 
-      chunks.add(...createChunks(diagram3D.ordered_nodes, diagram3D.chunk));
+      const last_strategy = diagram3D.strategies.findIndex( (strategy) => strategy.bitset.equals(diagram3D.group.subgroups[diagram3D.chunk].members) );
+      chunks.add(...createChunks(diagram3D.ordered_nodes, last_strategy));
    }
 
    // Render graphics, recursing to animate if a TrackballControl is present
@@ -4892,8 +4894,7 @@ class DisplayDiagram {
       if ( json.nodeRadii )
          json.nodeRadii.map( ( radius, index ) =>
             cayleyDiagram.nodes[index].radius = radius );
-      if ( json.hasOwnProperty( 'chunkIndex' ) )
-         cayleyDiagram.chunk = json.chunkIndex;
+      cayleyDiagram.chunk = json.chunkIndex || 0;
       if ( json.arrowsData )
          json.arrowsData.map( ( arrow, index ) => {
             cayleyDiagram.lines[index].style = arrow.style;

@@ -214,7 +214,7 @@ class CayleyDiagram extends Diagram3D {
    strategies: Array<CayleyDiagram.AbstractLayoutStrategy>;
    diagram_name: ?string;
    ordered_nodes: NodeTree;
-   chunk: ?number;
+   chunk: number;  // chunking group.subgroups index; 0 (trivial subgroup) => no chunking
 
    // fields unused in GE, added for compatibility with JSON methods in DisplayDiagram.js
    elements: any;
@@ -225,6 +225,7 @@ class CayleyDiagram extends Diagram3D {
       this.background = CayleyDiagram.BACKGROUND_COLOR;
       this.strategies = [];
 
+      this.chunk = 0;
       this.isCayleyDiagram = true;
       this.diagram_name = diagram_name;
       this.isGenerated = (diagram_name === undefined);

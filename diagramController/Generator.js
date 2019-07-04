@@ -216,9 +216,9 @@ DC.Generator = class {
       Cayley_diagram.removeLines();
       DC.Arrow.getAllArrows().forEach( (arrow) => Cayley_diagram.addLines(arrow) );
       Cayley_diagram.setLineColors();
-      Graphic_context.showGraphic(Cayley_diagram);
       DC.Generator.draw();
       DC.Chunking.updateChunkingSelect();
+      Graphic_context.showGraphic(Cayley_diagram);
       emitStateChange();
    }
 

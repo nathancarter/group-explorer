@@ -33,16 +33,16 @@ DC.Chunking = class {
       // generate option for each strategy in Cayley diagram
       Cayley_diagram.strategies.forEach( (strategy, strategy_index) => {
          if (strategy != GEUtils.last(Cayley_diagram.strategies)) {
+            generators.push(group.representation[strategy.generator]);
             // find matching subgroup for chunking option
             const subgroup_index = group.subgroups.findIndex( (subgroup) => strategy.bitset.equals(subgroup.members) );
-            generators.push(group.representation[strategy.generator]);
             $('#chunk-choices').append(eval(Template.HTML('chunk-select-other-template')));
          }
       } );
       $('#chunk-choices').append(eval(Template.HTML('chunk-select-last-template')));
-      MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'chunk-choices',
-                         () => $('#chunk-choice').html($('#chunk-choices > li:first-of-type').html())
-      ]);
+      MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'chunk-choices'],
+                        () => DC.Chunking.selectChunk(Cayley_diagram.chunk)
+                       );
    }
 
    static clickHandler(event /*: JQueryEventObject */) {
@@ -57,10 +57,12 @@ DC.Chunking = class {
       }
    }
 
-   static selectChunk(strategy_index /*: number */) {
+   static selectChunk(subgroup_index /*: number */) {
       $('#chunk-choices').hide();
+      const strategy_index =
+            Cayley_diagram.strategies.findIndex( (strategy) => strategy.bitset.equals(group.subgroups[subgroup_index].members) );
       $('#chunk-choice').html($(`#chunk-choices > li:nth-of-type(${strategy_index + 2})`).html());
-      Cayley_diagram.chunk = (strategy_index == -1) ? undefined : strategy_index;
+      Cayley_diagram.chunk = (strategy_index == -1) ? 0 : subgroup_index;
       Graphic_context.updateChunking(Cayley_diagram);
       emitStateChange();
    }
@@ -71,7 +73,7 @@ DC.Chunking = class {
    }
 
    static disable() {
-      Cayley_diagram.chunk = undefined;
+      Cayley_diagram.chunk = 0;
       Graphic_context.updateChunking(Cayley_diagram);
 
       const $chunking_fog = $('#chunking-fog');
