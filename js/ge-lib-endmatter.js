@@ -50,7 +50,7 @@ Library.loadFromFilesystem = url => {
 };
 Library.loadByName = name =>
     Library.loadFromFilesystem( `${__dirname}/../groups/${name}.group` );
-Library.getByName = name => Library.map.get( name );
+Library.getByName = name => Library.map[name];
 Library.loadAllFromFilesystem = () => {
     const before = ( new Date() ).getTime();
     urls.map( url => Library.loadFromFilesystem( url ) );

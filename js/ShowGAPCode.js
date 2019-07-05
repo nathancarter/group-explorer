@@ -176,6 +176,7 @@ function prepareGAPCodeBlock ( elt ) {
     const gpdef = `SmallGroup( ${ord}, ${idx} )`;
     // window.DUMP = function () {
     //     var strs = [ ];
+    //  ******* out of date -- see Library.js ********
     //     [...Library.map.keys()].sort().map( ( key ) => {
     //         const G = Library.map.get( key );
     //         const Gname = toIdent( G.shortName );

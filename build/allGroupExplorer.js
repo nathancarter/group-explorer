@@ -1892,33 +1892,39 @@ var urls = GroupURLs.urls;
 /*::
 import BasicGroup from './BasicGroup.js';
 import Log from './Log.js';
+import type {MSG_loadGroup} from './SheetModel.js';
 import XMLGroup from './XMLGroup.js';
-import type {BriefXMLGroupJSON} from './XMLGroup.js';
+import type {XMLGroupJSON, BriefXMLGroupJSON} from './XMLGroup.js';
 
-type Message3 = {
-   type: 'load group',
-   group: BriefXMLGroupJSON
+type StoredLibraryValue = {
+   rev: number,
+   object: XMLGroup
 };
-
+   
 export default
  */
 class Library {
 /*::
-   static map: Map<?string, XMLGroup>;
+   static map: {[key: string]: XMLGroup};
+   static revision: number;
 */
    // initialize Library.map from localStorage
    //   called once after class is defined
-   static _initializeGroupMap() {
-      Library.map = new Map();
+   static __initializeLibrary(rev /*: number */ = 0) {
+      Library.revision = rev;
+      Library.map = {};
       const numGroups = localStorage.length;
       for (let inx = 0; inx < numGroups; inx++) {
          const key = localStorage.key(inx);
          if (key != undefined && key.startsWith('http')) {
             const value = localStorage.getItem(key);
             if (value != undefined) {
-               const group = Library._dataToGroup(value);
-               if (group != undefined) {
-                  Library.map.set(key, group);
+               const {rev: revision, object: groupJSON} = JSON.parse(value);
+               if (revision == Library.revision) {
+                  const group = Library._dataToGroup(groupJSON, 'json');
+                  if (group != undefined) {
+                     Library.map[key] = group;
+                  }
                }
             }
          }
@@ -1956,19 +1962,19 @@ class Library {
          const key = localStorage.key(inx);
          if (key != undefined && key.startsWith('http')) {
             localStorage.removeItem(key);
-            Library.map.delete(key);
+            delete Library.map[key];
          }
       }
    }
 
    // return array of groups from Library.map/localStorage (no server contact)
    static getAllLocalGroups() /*: Array<XMLGroup> */ {
-      return Array.from(Library.map.values());
+      return ((Object.values(Library.map) /*: any */) /*: Array<XMLGroup> */);
    }
 
    // return array of group URLs from Library.map/localStorage
    static getAllLocalURLs() /*: Array<string> */ {
-      return Array.from(Library.map.keys()).reduce( (defined, el) => (el != undefined ? defined.push(el) : defined, defined), []);
+      return Object.getOwnPropertyNames(Library.map);
    }
 
    // returns Promise to get group from localStorage or, if not there, download it from server
@@ -2057,12 +2063,12 @@ class Library {
 
    // return locally stored copy of group from Library.map/localStorage
    static getLocalGroup(url /*: string */, baseURL /*: void | string */) /*: void | XMLGroup */ {
-      return Library.map.get(Library.resolveURL(url, baseURL));
+      return Library.map[Library.resolveURL(url, baseURL)];
    }
 
    // return 'true' if Library.map/localStorage contains no groups
    static isEmpty() /*: boolean */ {
-      return Library.map.size == 0;
+      return Object.keys(Library.map).length == 0;
    }
 
    // get groupURL from page invocation and return promise for resolution from cache or download
@@ -2086,12 +2092,12 @@ class Library {
                   console.error(event.data);
                   reject('unknown message received in Library.js');
                }
-               const event_data = ((event.data /*: any */) /*: Message3 */);
+               const event_data = ((event.data /*: any */) /*: MSG_loadGroup */);
                try {
                   if (typeof event_data.group == 'string') {
                      const group = Library._dataToGroup(event_data.group, 'json');
                      if (group != undefined) {
-                        Library.map.set(group.shortName, group);
+                        Library.map[group.shortName] = group;
                         resolve(group);
                      }
                   }
@@ -2127,12 +2133,17 @@ class Library {
    // serializes and stores group definition in Library.map/localStorage
    //   throws exception if storage quota is exceeded
    static saveGroup(group /*: XMLGroup */, key /*: string */ = group.URL) {
-      localStorage.setItem(key, JSON.stringify(group));
-      Library.map.set(key, group);
+      Library.map[key] = group;
+      try {
+         const value /*: StoredLibraryValue */ = {rev: Library.revision, object: group};
+         localStorage.setItem(key, JSON.stringify(value));
+      } catch (err) {
+         Log.err(err);
+      }
    }
 }
 
-Library._initializeGroupMap();
+Library.__initializeLibrary(1);
 /* @flow
 # MathML utilities
 
@@ -2692,6 +2703,7 @@ function prepareGAPCodeBlock ( elt ) {
     const gpdef = `SmallGroup( ${ord}, ${idx} )`;
     // window.DUMP = function () {
     //     var strs = [ ];
+    //  ******* out of date -- see Library.js ********
     //     [...Library.map.keys()].sort().map( ( key ) => {
     //         const G = Library.map.get( key );
     //         const Gname = toIdent( G.shortName );
