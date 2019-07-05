@@ -12,13 +12,6 @@ declare type mathml = string;
 declare type groupElement = number;
 declare type color = string;
 
-// Shared Message types
-/*
-
-type Msg = CayleyDiagramJSON_lite from js/CayleyDiagram.js
-
-*/
-
 // Window, as used in GE3
 declare class Window {
     parent: Window;
