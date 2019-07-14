@@ -32,5 +32,6 @@ declare class Window {
     setTimeout(fn: () => void, delay: number): number;
     clearInterval(number): void;
     getSelection(): Selection;
+    ontouchstart?: Function;
 }
 declare var window: Window;
