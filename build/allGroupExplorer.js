@@ -2143,7 +2143,7 @@ class Library {
    }
 }
 
-Library.__initializeLibrary(1);
+Library.__initializeLibrary(2);
 /* @flow
 # MathML utilities
 
@@ -2464,7 +2464,7 @@ These functions are deprecated in favor of their MathML equivalents. They are re
   export default
 */
 class Menu {
-   static setMenuLocations(event /*: JQueryMouseEventObject */, $menu /*: JQuery */) {
+   static setMenuLocations(event /*: {clientX: number, clientY: number} */, $menu /*: JQuery */) {
       const menuBox = $menu[0].getBoundingClientRect();
       const menuHeight = menuBox.height;
       const windowHeight = 0.99*window.innerHeight;
