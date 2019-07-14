@@ -7,6 +7,7 @@ import DisplayDiagram from './js/DisplayDiagram.js';
 import DisplayMulttable from './js/DisplayMulttable.js';
 import GroupURLs from './GroupURLs.js';
 import Library from './js/Library.js';
+import Log from './js/Log.js';
 import Menu from './js/Menu.js';
 import Multtable from './js/Multtable.js';
 import SymmetryObject from './js/SymmetryObject.js';
@@ -19,16 +20,14 @@ var graphicContext /*: DisplayDiagram */;	// hidden scratchpad, re-used to reduc
 var multtableContext /*: DisplayMulttable */;
 var cycleGraphContext /*: DisplayCycleGraph */;
 
-// Static event managers (setup after document is available)
-$(function() {
-   $('#GroupTableHeaders th:nth-child(1)').on('click', () => columnSort(0));
-   $('#GroupTableHeaders th:nth-child(2)').on('click', () => columnSort(1));
-   $('#GroupTable tbody').on('click', HoverHelp.eventHandler)
-                         .on('mousemove', HoverHelp.eventHandler)
-                         .on('mouseleave', HoverHelp.eventHandler);
-});
-$(window).on('load', readLibrary);	// like onload handler in body
+$(window).on('load', readLibrary);
 
+// Static event managers (setup after document is available)
+function registerEventHandlers() {
+   $('#GroupTableHeaders th:nth-child(1)').on('click', columnSort);
+   $('#GroupTableHeaders th:nth-child(2)').on('click', columnSort);
+   HoverHelp.init();
+};
 
 // Load group library from urls
 function readLibrary() {
@@ -55,7 +54,7 @@ function readLibrary() {
       if (g != undefined && g.CayleyThumbnail != undefined && g.rowHTML != undefined) {
          const $img = $('<img>').attr('src', g.CayleyThumbnail).attr('height', 32).attr('width', 32);
          const $row = $(g.rowHTML);
-         $row.find('td.cayleyDiagram').append($img);
+         $row.find('td.cayleyDiagram a').empty().append($img);
          $('#GroupTable tbody').append($row);
       }
    }
@@ -65,17 +64,17 @@ function readLibrary() {
 
 function finish(urlsToDisplay) {
    const exit = () => {
+      registerEventHandlers();   
       $( '#loadingMessage' ).hide();
-      columnSort( 1, true );
+      $('#GroupTableHeaders th:nth-child(2)').triggerHandler('click');
 
       // store stylesheet in localStorage
       const mathjaxStylesheet = ($('style').toArray() /*: Array<HTMLStyleElement> */).filter( (s) => s.textContent.trim().startsWith('.mjx-chtml') )[0];
       if (mathjaxStylesheet != undefined) {
-         localStorage.setItem('mathjax_stylesheet',mathjaxStylesheet.outerHTML);
+         localStorage.setItem('mathjax_stylesheet', mathjaxStylesheet.outerHTML);
       }
    };
 
-   columnSort(1, true);
    $( '#loadingMessage' ).show();
 
    // check that the locally stored definitions currently displayed are the latest; refresh if not
@@ -101,7 +100,7 @@ function finish(urlsToDisplay) {
                       $(row).find('span.MathJax_Preview, span.MJX_Assistive_MathML, script[type="math/mml"]').remove();
                       const $cayleyDiagram = $(row).find('td.cayleyDiagram img').detach();
                       group.rowHTML = row.outerHTML;
-                      $(row).find('td.cayleyDiagram').append($cayleyDiagram);
+                      $(row).find('td.cayleyDiagram a div').empty().append($cayleyDiagram);
                       $(row).detach().appendTo('#GroupTable tbody');
                       Library.saveGroup(group);
                       if ( urlIndex == urlsToDisplay.length ) {
@@ -139,37 +138,45 @@ function displayGroup(group) {
       const img = graphicContext.getImage(graphicData);
       group.CayleyThumbnail = img.src;
       img.height = img.width = 32;
-      $row.find("td.cayleyDiagram").empty().append(img);
+      $row.find("td.cayleyDiagram a div").html(img.outerHTML);
    }
 
    // draw Multtable
    {
       const graphicData = new Multtable(group);
       const img = multtableContext.getImage(graphicData);
-      $row.find("td.multiplicationTable").empty().append(img);
+      $row.find("td.multiplicationTable a div").html(img.outerHTML);
    }
 
    // draw Symmetry Object
-   if (symmetryTitle != undefined) {
+   if (symmetryTitle == undefined) {
+      $row.find("td.symmetryObject").html('none').removeClass('symmetryObject').addClass('noDiagram').removeAttr('title');
+   } else {
       const graphicData = SymmetryObject.generate(group, symmetryTitle);
       const img = graphicContext.getImage(graphicData);
       img.height = img.width = 32;
-      $row.find("td.symmetryObject").empty().append(img);
+      $row.find("td.symmetryObject a div").html(img.outerHTML);
    }
 
    // draw Cycle Graph
    {
       const graphicData = new CycleGraph( group );
       const img = cycleGraphContext.getImage( graphicData );
-      $row.find("td.cycleGraph").empty().append(img);
+      $row.find("td.cycleGraph a div").html(img.outerHTML);
    }
 
    return $row;
 }
 
 // callback to sort table on column value, invoked by clicking on column head
-function columnSort(columnIndex, makeSortUp = ! $($('th')[columnIndex]).hasClass('sort-up')) {
-   for (let i = 0; i < 2; i++) {
+function columnSort(click /*: JQueryEventObject */) {
+   const SORTABLE_COLUMNS = [0, 1];
+   const columnIndex = 
+         $(click.currentTarget).parent().children().toArray().findIndex( (child) => child == click.currentTarget );
+   if (SORTABLE_COLUMNS.findIndex( (sortable) => sortable == columnIndex ) == -1) return;
+   const makeSortUp = !$($('th')[columnIndex]).hasClass('sort-up');
+
+   for (let i of SORTABLE_COLUMNS) {
       $($('th')[i]).removeClass('sort-down')
                    .removeClass('sort-up')
                    .addClass('sort-none');
@@ -191,116 +198,74 @@ function columnSort(columnIndex, makeSortUp = ! $($('th')[columnIndex]).hasClass
                          .each((_,tr) => $('#GroupTable tbody').append(tr))
 }
 
+
+
 class HoverHelp {
-/*::
-   static pollerID : IntervalID;
-   static mouse_event : void | (JQueryMouseEventObject & {tooltip_shown: boolean, timeStamp: number});
-   static data : Array<{klass: string, pageURL: string, background: string, tooltip: string}>;
- */
-   // pollerID = id of polling routine from window.setInterval call
-   // mouse_event = event from last 'mousemove' event (event contains timestamp) (undefined => no mousemove event to be handled)
+   static init() {
+      if (window.hasOwnProperty('ontouchstart')) {
+         $('#GroupTable tbody').on('touchstart touchmove touchend', HoverHelp.tapHandler);
+      } else {
+         $('#GroupTable tbody').on('mousemove mouseleave', HoverHelp.mouseHandler);
+      }
+   }
 
-   static eventHandler(_event /*: JQueryEventObject */) {
-      const event = ((_event /*: any */) /*: JQueryMouseEventObject & {tooltip_shown: boolean, timeStamp: number} */);
+   static mouseHandler(event /*: JQueryEventObject */) {
+      const mouseEvent /*: MouseEvent */ = (event /*: any */);
 
-      if (event.ctrlKey || event.shiftKey || event.altKey) {
+      if (mouseEvent.ctrlKey || mouseEvent.shiftKey || mouseEvent.altKey) {
          return;
       }
 
-      if (event.type == 'click') {
-         // clear background, mouse_event, tooltip
-         if (HoverHelp.mouse_event != undefined) {
-            $(HoverHelp.mouse_event.target).closest('td')
-                                           .css('background-color', '#FFFFFF')
-                                           .css('cursor', 'default');
-         }
-         HoverHelp.mouse_event = undefined;
-         $('#tooltip').remove();
+      const cell /*: HTMLElement */ = ($(document.elementFromPoint(mouseEvent.pageX, mouseEvent.pageY)).closest('td')[0] /*: any */);
+      const highlighted /*: ?HTMLElement */ = ($('.highlighted')[0] /*: any */);
 
-         // get td, class
-         const $td = $(event.target).closest('td');
-         if ($td.text() != 'none') {
-            for (const {klass, pageURL} of HoverHelp.data) {
-               if ($td.hasClass(klass)) {
-                  const groupURL = $td.parent().attr('group');
-                  const group = Library.map[groupURL];
-                  const options = (group.cayleyDiagrams.length != 0) ?
-                        {diagram:group.cayleyDiagrams[0].name} : {};
-                  Library.openWithGroupURL(pageURL, groupURL, options);
-                  break;
-               }
+      switch (mouseEvent.type) {
+      case 'mousemove':
+         if (highlighted != cell) {
+            $('.highlighted').removeClass('highlighted');
+            if ($(cell).find('a[title]').length == 1) {
+               $(cell).addClass('highlighted');
             }
          }
-      } else if (event.type == 'mousemove') {
-         const mouse_event = HoverHelp.mouse_event;
-         const $old_td = (mouse_event == undefined) ? undefined : $(mouse_event.target).closest('td');
-         const $new_td = $(event.target).closest('td');
-         if ($old_td === undefined || $old_td[0] != $new_td[0]) {
-            if ($old_td !== undefined) {
-               $old_td.css('background-color', '#FFFFFF')
-                      .css('cursor', 'default');
-            }
-            for (const {klass, background} of HoverHelp.data) {
-               if ($new_td.hasClass(klass) && $new_td.text() != 'none') {
-                  $new_td.css('background-color', background)
-                         .css('cursor', 'pointer');
-                  break;
-               }
-            }
-            event.tooltip_shown = false;
-            $('#tooltip').remove();
-         } else {
-            event.tooltip_shown = (HoverHelp.mouse_event === undefined) ? false : HoverHelp.mouse_event.tooltip_shown;
-         }
-         if ($new_td.text() != 'none') {
-            HoverHelp.mouse_event = event;
-         }
-      } else if (event.type = 'mouseleave') {
-         // clear background
-         if (HoverHelp.mouse_event != undefined) {
-            $(HoverHelp.mouse_event.target).closest('td')
-                                           .css('background-color', '#FFFFFF')
-                                           .css('cursor', 'default');
-         }
-         // clear mouse_event, tooltip
-         HoverHelp.mouse_event = undefined;
-         $('#tooltip').remove();
+         break;
+
+      case 'mouseleave':
+         $('.highlighted').removeClass('highlighted');
+         break;
       }
    }
 
-   static poller() {
-      const mouse_event = HoverHelp.mouse_event;
-      if (   mouse_event !== undefined
-          && !mouse_event.tooltip_shown
-          && $(mouse_event.target).closest('td') !== undefined
-          && performance.now() - mouse_event.timeStamp > 500) {
-         const $td = $(mouse_event.target).closest('td');
-         for (const {klass, tooltip} of HoverHelp.data) {
-            if ($td.hasClass(klass)) {
-               const $tooltip = $('<div id="tooltip" class="menu">')
-                  .attr('timestamp', performance.now())
-                  .text(tooltip)
-                  .appendTo($td);
-               Menu.setMenuLocations(mouse_event, $tooltip);
-               mouse_event.tooltip_shown = true;
-               break;
-            }
-         }
+   static tapHandler(event /*: JQueryEventObject */) {
+      const touchEvent /*: TouchEvent */ = (event.originalEvent /*: any */);
+
+      // skip keyed events
+      if (touchEvent.altKey || touchEvent.ctrlKey || touchEvent.metaKey || touchEvent.shiftKey) {
+         return;
       }
 
-      // if tooltip is more than 10 sec old, clear it
-      if ($('#tooltip')[0] !== undefined && performance.now() - parseInt($('#tooltip').attr('timestamp')) > 10000) {
-         $('#tooltip').remove()
+      // skip multi-touches
+      if (touchEvent.touches.length > 1 || touchEvent.changedTouches.length > 1) {
+         return;
+      }
+
+      const touch /*: Touch */ = (touchEvent.changedTouches.item(0) /*: any */);
+      const cell /*: HTMLElement */ = ($(document.elementFromPoint(touch.pageX, touch.pageY)).closest('td')[0] /*: any */);
+      const highlighted /*: ?HTMLElement */ = ($('.highlighted')[0] /*: any */);
+      
+      switch (event.type) {
+      case 'touchstart':
+      case 'touchmove':
+         if (highlighted != cell) {
+            $('.highlighted').removeClass('highlighted');
+            if ($(cell).find('a[title]').length == 1) {
+               $(cell).addClass('highlighted');
+            }
+         }
+         break;
+
+      case 'touchend':
+         $('.highlighted').removeClass('highlighted');
+         break;
       }
    }
 }
-
-HoverHelp.data = [
-   {klass: 'groupName', pageURL: 'GroupInfo.html', background: '#F2F2F2', tooltip: 'Open Group Info page'},
-   {klass: 'definition', pageURL: 'GroupInfo.html', background: '#F2F2F2', tooltip: 'Open Group Info page'},
-   {klass: 'cayleyDiagram', pageURL: 'CayleyDiagram.html', background: '#F7EDED', tooltip: 'Open Cayley Diagram visualizer'},
-   {klass: 'multiplicationTable', pageURL: 'Multtable.html', background: '#F2FFD6', tooltip: 'Open Multiplication Table visualizer'},
-   {klass: 'symmetryObject', pageURL: 'SymmetryObject.html', background: '#EDF7ED', tooltip: 'Open Symmetry Object visualizer'},
-   {klass: 'cycleGraph', pageURL: 'CycleDiagram.html', background: '#EDEDF7', tooltip: 'Open Cycle Graph Visualizer'},
-]
-HoverHelp.pollerID = setInterval(HoverHelp.poller, 500);
