@@ -3,7 +3,7 @@
   export default
 */
 class Menu {
-   static setMenuLocations(event /*: JQueryMouseEventObject */, $menu /*: JQuery */) {
+   static setMenuLocations(event /*: {clientX: number, clientY: number} */, $menu /*: JQuery */) {
       const menuBox = $menu[0].getBoundingClientRect();
       const menuHeight = menuBox.height;
       const windowHeight = 0.99*window.innerHeight;
