@@ -3,7 +3,7 @@
 
 There are several problems with running GE3 on a mobile device:
 
-* Gestures are different, and much more limited
+* Gestures on a touch-sensitive tablet are different from those with a mouse. They are more limited in some ways -- not so many mouse buttons to use -- though there are lots of fingers.  Moreover, well established patterns of use have not emerged yet. See the [Mobile Gesture Mapping](#Tentative-mobile-gesture-mapping) below for the proposed desktop-to-mobile mappings and their development status.
 * Local storage is somewhat smaller
 * Computing power is expected to be reduced
 
@@ -108,37 +108,37 @@ From https://api.jquerymobile.com/category/events/ :
    
 ### Tentative mobile gesture mapping
 
-| Page | Function | Desktop | Mobile Gesture |
-| ---- | -------- | ------- | -------------- |
-| Group Explorer | follow link | click | tap |
-| &nbsp; | highlight background | mouseover | N/A |
-| &nbsp; | display tooltip | hover | tap-hold |
-| &nbsp; | &nbsp; | &nbsp; | &nbsp; |
-| Group Info | follow link | click | one-finger tap |
-| &nbsp; | &nbsp; | &nbsp; | &nbsp; |
-| 3D visualizer | display tooltip | hover* | tap-hold |
-| &nbsp; | zoom | wheel | two-finger spread |
-| &nbsp; | re-center | right-click | two-finger tap |
-| &nbsp; | rotate** | dnd | one-finger dnd |
-| &nbsp; | move | right-click dnd | two-finger dnd |
-| &nbsp; | &nbsp; | &nbsp; | &nbsp; |
-| 2D visualizer | display tooltip | click | one-finger tap |
-| &nbsp; | zoom | wheel | two-finger spread |
-| &nbsp; | re-center | right-click | two-finger tap |
-| &nbsp; | move | dnd | one-finger dnd |
-| (Multtable only) | swap rows | shift-click | two-finger dnd |
-| &nbsp; | &nbsp; | &nbsp; | &nbsp; |
-| Visualizer panel | select option | click | one-finger tap |
-| &nbsp; | display menu | right-click | one-finger tap |
-| &nbsp; | show elements | dbl-click | two-finger tap (dbl-tap?) |
-| &nbsp; | subset editor dnd | dnd | one-finger dnd |
-
-\* Cayley diagram only.  (Maybe make all visualizers use click gesture for tooltips?)<br>
-\*\* re-curve line in Cayley diagram if drag started on a line
+| Page | Function | Desktop | Mobile Gesture | Status |
+| ---- | -------- | ------- | -------------- | ------ |
+| Group Explorer | follow link | click | tap | completed |						
+| &nbsp; | highlight background | mouseover | light tap-hold | completed |
+| &nbsp; | display tooltip | hover | double-tap | completed |
+| &nbsp; | context menu | right click | tap-hold | completed |
+| &nbsp; | &nbsp; | &nbsp; | &nbsp; | &nbsp; |
+| Group Info | follow link | click | one-finger tap | working |
+| &nbsp; | &nbsp; | &nbsp; | &nbsp; | &nbsp; |
+| 3D visualizer | display/clear tooltip | click | one-finger tap | working |
+| &nbsp; | zoom | wheel | two-finger spread | working |
+| &nbsp; | re-center | right-click | two-finger tap | not started |
+| &nbsp; | rotate* | dnd | one-finger dnd | partial -- no line re-curve |
+| &nbsp; | move | right-click dnd | two-finger dnd | working |
+| &nbsp; | &nbsp; | &nbsp; | &nbsp; | &nbsp; |
+| 2D visualizer | display tooltip | click | one-finger tap | working |
+| &nbsp; | zoom | wheel | two-finger spread | not started |
+| &nbsp; | re-center | right-click | two-finger tap | not started |
+| &nbsp; | move | dnd | one-finger dnd | sort of works |
+| (Multtable only) | swap rows | shift-click | two-finger dnd | not started |
+| &nbsp; | &nbsp; | &nbsp; | &nbsp; | &nbsp; |
+| Visualizer panel | select option | click | one-finger tap | not started |
+| &nbsp; | display menu | right-click | one-finger tap | not started |
+| &nbsp; | show elements | dbl-click | two-finger tap  | not started |
+| &nbsp; | subset editor dnd | dnd | one-finger dnd | not started |
+                                                                        
+\* re-curve line in Cayley diagram if drag started on a line
 
 ## Local storage
 
-Local storage is generally limited to 10M on desktops, 5M on mobile devices. Currently about 3.8M of storage is used for the 60 groups in the 'standard' library, including pre-computed graphics. If this proves to be a problem we can 1) implement an LRU policy, or 2) re-create some of the currently cached graphics instead of caching them.
+Local storage is generally limited to 10M on desktops, 5M on mobile devices. Currently about 3.5M of storage is used for the 60 groups in the 'standard' library, including pre-computed graphics. Currently, if you attempt to load more groups than fit in local storage (e.g., you try to load Tesseract on a mobile device) groups that would exceed the limit will not be stored, though they will be displayed. If this proves to be a problem we should probably investigate another storage technique, like IndexedDB.
 
 ## Computing power
 
