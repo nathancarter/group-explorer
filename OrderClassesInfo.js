@@ -22,20 +22,22 @@ function load() {
 }
 
 function formatGroup() {
-   const nonEmptyOrderClasses = group.orderClasses.filter( (bitset) => bitset.popcount() != 0 );
-   const numOrderClasses = nonEmptyOrderClasses.length;
    let $rslt = $(document.createDocumentFragment())
       .append(eval(Template.HTML('header')));
+   const numOrderClasses = group.orderClasses.reduce( (num, bitset) => bitset.popcount() != 0 ? num+1 : num, 0);
    if (numOrderClasses == 1) {
       $rslt.append(eval(Template.HTML('single')));
    } else {
       $rslt.append(eval(Template.HTML('multiple')));
-      nonEmptyOrderClasses.forEach( (members, order) =>
-         $rslt.find('#order_class_list')
-              .append($('<li>').html(
-                 MathML.sans('<mtext>Elements of order ' + order + ' :&nbsp;</mtext>') +
-                 MathML.csList(members.toArray().map( (el) => group.representation[el] ))
-              )))
+      group.orderClasses.forEach( (members, order) => {
+         if (members.popcount() != 0) {
+            $rslt.find('#order_class_list')
+               .append($('<li>').html(
+                    `Elements of order ${order}:&nbsp;` +
+                     MathML.csList(members.toArray().map( (el) => group.representation[el] ))
+               ))
+         }
+      } )
    }
 
    $('body').prepend($rslt);
