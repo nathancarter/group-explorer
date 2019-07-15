@@ -54,7 +54,7 @@ function readLibrary() {
       if (g != undefined && g.CayleyThumbnail != undefined && g.rowHTML != undefined) {
          const $img = $('<img>').attr('src', g.CayleyThumbnail).attr('height', 32).attr('width', 32);
          const $row = $(g.rowHTML);
-         $row.find('td.cayleyDiagram a').empty().append($img);
+         $row.find('td.cayleyDiagram a div').empty().append($img);
          $('#GroupTable tbody').append($row);
       }
    }
@@ -201,32 +201,35 @@ function columnSort(click /*: JQueryEventObject */) {
 
 
 class HoverHelp {
+/*::
+   static tipState: ?{name: 'Start_1' | 'End_1' | 'Start_2' | 'End_2', timeStamp: number};
+ */
    static init() {
       if (window.hasOwnProperty('ontouchstart')) {
-         $('#GroupTable tbody').on('touchstart touchmove touchend', HoverHelp.tapHandler);
+         $('body')[0].addEventListener('touchstart', HoverHelp.tipRemover, true);
+         $('#GroupTable tbody').on('touchstart touchmove touchend click', HoverHelp.tipHandler);
+         $('#GroupTable tbody').on('touchstart touchmove touchend', HoverHelp.highlightHandler);
       } else {
          $('#GroupTable tbody').on('mousemove mouseleave', HoverHelp.mouseHandler);
       }
    }
 
    static mouseHandler(event /*: JQueryEventObject */) {
-      const mouseEvent /*: MouseEvent */ = (event /*: any */);
+      const mouseEvent /*: MouseEvent */ = (event.originalEvent /*: any */);
 
       if (mouseEvent.ctrlKey || mouseEvent.shiftKey || mouseEvent.altKey) {
          return;
       }
 
-      const cell /*: HTMLElement */ = ($(document.elementFromPoint(mouseEvent.pageX, mouseEvent.pageY)).closest('td')[0] /*: any */);
-      const highlighted /*: ?HTMLElement */ = ($('.highlighted')[0] /*: any */);
-
       switch (mouseEvent.type) {
-      case 'mousemove':
-         if (highlighted != cell) {
+      case 'mousemove': {
+         const $cell /*: JQuery */ = $(document.elementFromPoint(mouseEvent.clientX, mouseEvent.clientY)).closest('td');
+         if (!$cell.hasClass('highlighted')) {
             $('.highlighted').removeClass('highlighted');
-            if ($(cell).find('a[title]').length == 1) {
-               $(cell).addClass('highlighted');
+            if ($cell.find('a[title]').length == 1) {
+               $cell.addClass('highlighted');
             }
-         }
+         } }
          break;
 
       case 'mouseleave':
@@ -235,7 +238,103 @@ class HoverHelp {
       }
    }
 
-   static tapHandler(event /*: JQueryEventObject */) {
+   // if there's a tooltip displayed, remove it and prevent anything else from happening
+   static tipRemover(touchEvent /*: TouchEvent */) {
+      if ($('#tooltip').length != 0) {
+         $('#tooltip').remove();
+         const touch /*: Touch */ = (touchEvent.changedTouches[0] /*: any */);
+         if ($(document.elementFromPoint(touch.clientX, touch.clientY)).closest('#GroupTable tbody').length == 0) {
+            HoverHelp.tipState = null;
+         } else {
+            touchEvent.stopPropagation();
+            touchEvent.preventDefault();
+         }
+      }
+   }
+
+   static tipHandler(event /*: JQueryEventObject */) {
+      const touchEvent /*: TouchEvent */ = (event.originalEvent /*: any */);
+      const mouseEvent /*: MouseEvent */ = (event.originalEvent /*: any */);
+
+      // skip keyed events
+      if (touchEvent.altKey || touchEvent.ctrlKey || touchEvent.metaKey || touchEvent.shiftKey) {
+         return;
+      }
+
+      // skip multi-touches
+      if (event.type == 'touchstart' || event.type == 'touchmove' || event.type == 'touchend') {
+         if (touchEvent.touches.length > 1 || touchEvent.changedTouches.length > 1) {
+            return;
+         }
+      }
+
+      // check dead cells
+      let tooltip /*: ?string */ = null;
+      if (event.type == 'touchstart' || event.type == 'touchmove' || event.type == 'touchend') {
+         const touch /*: Touch */ = (touchEvent.changedTouches[0] /*: any */);
+         const $cell /*: JQuery */ = $(document.elementFromPoint(touch.clientX, touch.clientY)).closest('td');
+         tooltip = $cell.find('a[title]').attr('title');
+      }
+      const tipState = HoverHelp.tipState;
+      
+      switch (event.type) {
+      case 'click':
+         if (tipState != undefined && tipState.name == 'End_2') {
+            event.preventDefault();
+         }
+         HoverHelp.tipState = null;
+         break;
+
+      case 'touchstart':
+         if (tooltip == undefined) {
+            HoverHelp.tipState = null;
+         } else {
+            if (tipState == undefined) {
+               HoverHelp.tipState = {name: 'Start_1', timeStamp: touchEvent.timeStamp};
+            } else if (tipState.name == 'End_1') {
+               HoverHelp.tipState = {name: 'Start_2', timeStamp: tipState.timeStamp};
+            } else {
+               HoverHelp.tipState = null;
+            }
+         }
+         break;
+
+      case 'touchmove':
+         HoverHelp.tipState = null;
+         break;
+
+      case 'touchend':
+         if (tipState == undefined || tipState.name != 'End_2') {
+            if (tooltip == undefined) {
+               HoverHelp.tipState = null;
+            } else {
+               if (tipState != undefined) {
+                  if (tipState.name == 'Start_1') {
+                     HoverHelp.tipState = {name: 'End_1', timeStamp: tipState.timeStamp};
+                  } else if (tipState.name == 'Start_2') {
+                     if (touchEvent.timeStamp - tipState.timeStamp < 1000) {
+                        event.preventDefault();
+                        const touch /*: Touch */ = (touchEvent.changedTouches[0] /*: any */);
+                        const $cell /*: JQuery */ = $(document.elementFromPoint(touch.clientX, touch.clientY)).closest('td');
+                        const $tooltip = $('<div id="tooltip" class="menu">')
+                              .text(tooltip)
+                              .appendTo($cell);
+                        Menu.setMenuLocations(touch, $tooltip);
+                        HoverHelp.tipState = {name: 'End_2', timeStamp: performance.now()};
+                     } else {
+                        HoverHelp.tipState = null;
+                     }
+                  } else {
+                     HoverHelp.tipState = null;
+                  }
+               }
+            }
+         }
+         break;
+      }
+   }
+
+   static highlightHandler(event /*: JQueryEventObject */) {
       const touchEvent /*: TouchEvent */ = (event.originalEvent /*: any */);
 
       // skip keyed events
@@ -248,19 +347,17 @@ class HoverHelp {
          return;
       }
 
-      const touch /*: Touch */ = (touchEvent.changedTouches.item(0) /*: any */);
-      const cell /*: HTMLElement */ = ($(document.elementFromPoint(touch.pageX, touch.pageY)).closest('td')[0] /*: any */);
-      const highlighted /*: ?HTMLElement */ = ($('.highlighted')[0] /*: any */);
-      
       switch (event.type) {
       case 'touchstart':
-      case 'touchmove':
-         if (highlighted != cell) {
+      case 'touchmove': {
+         const touch /*: Touch */ = (touchEvent.changedTouches[0] /*: any */);
+         const $cell /*: JQuery */ = $(document.elementFromPoint(touch.clientX, touch.clientY)).closest('td');
+         if (!$cell.hasClass('highlighted')) {
             $('.highlighted').removeClass('highlighted');
-            if ($(cell).find('a[title]').length == 1) {
-               $(cell).addClass('highlighted');
+            if ($cell.find('a[title]').length == 1) {
+               $cell.addClass('highlighted');
             }
-         }
+         } }
          break;
 
       case 'touchend':
