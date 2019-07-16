@@ -25,7 +25,7 @@ DC.DiagramChoice = class {
       $('#diagram-choices').hide();
       const index = group.cayleyDiagrams.findIndex( (cd) => cd.name == Diagram_name );
       $('#diagram-choice')
-         .html($(`#diagram-choices > li:nth-of-type(${index+2}`).html())
+         .html($(`#diagram-choices > li:nth-of-type(${index+2})`).html())
          .show();
    }
 
