@@ -14,6 +14,7 @@ import PartitionSubset from './PartitionSubset.js';
 import Subgroup from './Subgroup.js';
 import SubsetEditor from './SubsetEditor.js';
 import Subset from './Subset.js';
+import SubsetMenu from './SubsetMenu.js';
 
 var group: XMLGroup;
 
@@ -35,6 +36,7 @@ class SSD {
    static Subgroup: Class<Subgroup>;
    static SubsetEditor: Class<SubsetEditor>;
    static Subset: Class<Subset>;
+   static SubsetMenu: Class<SubsetMenu>;
  */
    static _init() {
       SSD.subsetsURL = './subsetDisplay/subsets.html';
@@ -68,15 +70,6 @@ class SSD {
       SSD.nextSubsetIndex = 0;
       SSD.displayList = [];
 
-      // clear displayed menus, highlighting
-      SSD.clearMenus();
-
-      // Register event handlers
-      $(window).off('click', SSD.clearMenus).on('click', SSD.clearMenus)
-               .off('contextmenu', SSD.clearMenus).on('contextmenu', SSD.clearMenus);
-      $('#subset_page').off('contextmenu', SSD.contextMenuHandler).on('contextmenu', SSD.contextMenuHandler)
-                       .off('dblclick', SSD.dblClickHandler).on('dblclick', SSD.dblClickHandler);
-
       // clear out displayed lists; show '(None)' placeholders
       $('ul.subset_page_content li').remove();
       $('p.placeholder').show();
@@ -84,116 +77,9 @@ class SSD {
       // Display all subgroups
       SSD.Subgroup.displayAll();
       MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'subset_page']);
-   }
 
-   /*
-    * Double-click displays elements in subset
-    */
-   static dblClickHandler(_event /*: JQueryEventObject */ ) {
-      const event = ((_event /*: any */) /*: JQueryMouseEventObject */);
-      event.preventDefault();
-      SSD.clearMenus();
-      const $curr = $(event.target).closest('li');
-      const id = $curr.attr('id');
-      if (id != undefined) {
-         const subset = SSD.displayList[parseInt(id)];
-         const subsetName = subset.name;
-         const subsetElements = subset.elements.toArray().map( (el) => group.representation[el] );
-         const $menu = $(eval(Template.HTML('subsetElements_template')));
-         $curr.addClass('highlighted').append($menu);
-         event.stopPropagation();
-         const follow = () => {
-            const bounds /*: Array<ClientRect> */ =
-                  $menu.find('span.mjx-chtml').map( (_, span) => span.getBoundingClientRect() ).toArray();
-            const extrema /*: {leftmost: number, rightmost: number} */ =
-                  bounds.reduce( (lr /*: {leftmost: number, rightmost: number} */, rect /*: ClientRect */) => {
-                     return {leftmost: Math.min(lr.leftmost, rect.left), rightmost: Math.max(lr.rightmost, rect.right)}
-                  }, {leftmost: Number.MAX_SAFE_INTEGER, rightmost: Number.MIN_SAFE_INTEGER} );
-            $menu.css({'width': extrema.rightmost - extrema.leftmost, 'max-width': ''});
-            Menu.setMenuLocations(event, $menu);
-            $menu.css('visibility', 'visible');
-         };
-         MathJax.Hub.Queue(['Typeset', MathJax.Hub, $menu[0]], follow);
-      }
-   }
-
-   /*
-    * Left-click executes "action" attribute in menu item
-    */
-   static menuClickHandler(event /*: JQueryEventObject */) {
-      event.preventDefault();
-      const $curr = $(event.target).closest('[action]');
-      if ($curr.attr('action') !== undefined) {
-         eval($curr.attr('action'));
-         SSD.clearMenus();
-         event.stopPropagation();
-         MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'subset_page']);
-      }
-   }
-
-   /*
-    * Right-click displays context menu according to
-    *   -- target class (subset_page_header or placeholder)
-    *   -- li element id (<subset>.menu)
-    */
-   static contextMenuHandler(_event /*: JQueryEventObject */) {
-      const event = ((_event /*: any */) /*: JQueryMouseEventObject */);
-
-      event.preventDefault();
-      const $curr = $(event.target).closest('p.subset_page_header, p.placeholder, li[id]');
-
-      // unrecognized event
-      if ($curr.length == 0) return;
-
-      SSD.clearMenus();
-
-      const isHeaderMenu = $curr[0].tagName == "P";
-      const $menu = isHeaderMenu ?
-                    $(eval(Template.HTML('headerMenu_template'))) :
-                    SSD.displayList[parseInt($curr[0].id)].menu;
-      $menu.on('click', SSD.menuClickHandler);
-      $curr.addClass('highlighted').append($menu);
-      $menu.css('visibility', 'hidden');
-      event.stopPropagation();
-
-      const follow = () => {
-         if (!isHeaderMenu) {
-            SSD._makeLongLists($curr[0].id, $menu);
-         }
-         Menu.setMenuLocations(event, $menu);
-         $menu.css('visibility', 'visible');
-      };
-      MathJax.Hub.Queue(['Typeset', MathJax.Hub, $menu[0]], follow);
-   }
-
-   static _makeLongLists(_id /*: string */, $menu /*: JQuery */) {
-      const id = parseInt(_id);
-      const classes = ['.intersection', '.union', '.elementwise-product'];
-      const operations = ['intersection', 'union', 'elementwiseProduct'];
-      const printOps = ['intersection', 'union', 'elementwise product'];
-      const node = MathML.sans(SSD.displayList[id].name);
-      for (let inx = 0; inx < classes.length; inx++) {
-         const operation = operations[inx];
-         const printOp = printOps[inx];
-         let frag = '';
-         for (let otherId = 0; otherId < group.subgroups.length; otherId++) {
-            if (id != otherId) {
-               frag +=
-                  `<li action="SSD.displayList[${id}].${operation}(SSD.displayList[${otherId}])">` +
-                  `the ${printOp} of ${node} with ${MathML.sans(SSD.displayList[otherId].name)}</li>`;
-            }
-         }
-         for (let otherId = group.subgroups.length; otherId < SSD.displayList.length; otherId++) {
-            if (id != otherId && SSD.displayList[otherId] !== undefined) {
-               const otherName = $(`#${otherId}`).children()[1].outerHTML;
-               frag +=
-                  `<li action="SSD.displayList[${id}].${operation}(SSD.displayList[${otherId}])">` +
-                  `the ${printOp} of ${node} with ${otherName}</li>`;
-            }
-         }
-         $menu.find(classes[inx]).html(frag);
-      }
-   }
+      // set up event listeners for menus
+      SSD.SubsetMenu.init();   }
 }
 
 SSD._init();
@@ -695,6 +581,253 @@ SSD.Cosets = class Cosets extends SSD.AbstractPartition {
 }
 // @flow
 /*::
+import MathML from '../js/MathML.js';
+import Menu from '../js/Menu.js';
+import Template from '../js/Template.js';
+import XMLGroup from '../js/XMLGroup.js';
+
+import SSD from './subsets.js';
+
+var group: XMLGroup;
+
+export default
+ */
+SSD.SubsetMenu = class {
+/*::
+   static lastEntry: {menuElement: ?HTMLElement, timeStamp: number};
+ */
+   static init() {
+      SSD.clearMenus();
+      $('#header').on('click', SSD.clearMenus);
+      $('#vert-container').on('click', SSD.clearMenus);  // don't know why IOS/iPad needs to break it up like this...
+      SSD.SubsetMenu.lastEntry = {menuElement: undefined, timeStamp: 0};
+      const subsetPage = $('#subset_page')[0];
+      if (window.hasOwnProperty('ontouchstart')) {   // touch device?
+         // register touchstart, touchmove, touchend events on subset page
+         subsetPage.addEventListener('touchstart', SSD.SubsetMenu.touchHandler);
+         subsetPage.addEventListener('touchmove', SSD.SubsetMenu.touchHandler);
+         subsetPage.addEventListener('touchend', SSD.SubsetMenu.touchHandler);
+      } else {
+         // register contextmenu, dblclick
+         subsetPage.addEventListener('contextmenu', SSD.SubsetMenu.mouseHandler);
+         subsetPage.addEventListener('dblclick', SSD.SubsetMenu.mouseHandler);
+     }
+   }
+
+   /*
+    * Mouse right-click or touchscreen tap displays menu according to
+    *   -- target class (subset_page_header or placeholder)
+    *   -- li element id (<subset>.menu)
+    *
+    * Mouse double-click or touchscreen tap-hold displays elements in subset
+    *   Following mouse click or touchscreen tap anywhere clears element display
+    */
+   static mouseHandler(mouseEvent /*: MouseEvent */) {
+      switch (mouseEvent.type) {
+      case 'dblclick':
+         SSD.SubsetMenu.displayElements(mouseEvent, mouseEvent);
+         break;
+
+      case 'contextmenu':
+         SSD_Menu.postMenu(mouseEvent, mouseEvent);
+         break;
+      }
+   }
+
+   static touchHandler(touchEvent /*: TouchEvent */) {
+      // just skip modified events, multi-touches
+      if (   touchEvent.altKey || touchEvent.ctrlKey || touchEvent.metaKey || touchEvent.shiftKey
+          || touchEvent.touches.length > 1 || touchEvent.changedTouches.length > 1) {
+         return;
+      }
+
+      switch (touchEvent.type) {
+
+         // reset lastEntry
+      case 'touchstart': {
+         const touch /*: Touch */ = (touchEvent.changedTouches[0] /*: any */);
+         const $target = $(document.elementFromPoint(touch.clientX, touch.clientY));
+         const $menuHead = $target.closest('p.subset_page_header, p.placeholder, li[id]');
+         SSD.SubsetMenu.lastEntry = {menuElement: $menuHead[0], timeStamp: touchEvent.timeStamp};
+         touchEvent.stopPropagation(); }
+         break;
+
+         // update lastEntry, if needed
+      case 'touchmove': {
+         const touch /*: Touch */ = (touchEvent.changedTouches[0] /*: any */);
+         const $target = $(document.elementFromPoint(touch.clientX, touch.clientY));
+         const $menuHead = $target.closest('p.subset_page_header, p.placeholder, li[id]');
+         if ($menuHead[0] != SSD.SubsetMenu.lastEntry.menuElement) {
+            SSD.SubsetMenu.lastEntry = {menuElement: $menuHead[0], timeStamp: touchEvent.timeStamp};
+         } }
+         break;
+
+         //   if there are menus, just use this tap to clear them
+         //   otherwise, if interval is short, post menu; else popup elements display
+      case 'touchend':
+         if ($('#subset_page .menu:visible, #subset_page .elements').length != 0) {
+            SSD.clearMenus();
+         } else {
+            const touch /*: Touch */ = (touchEvent.changedTouches[0] /*: any */);
+            const $target = $(document.elementFromPoint(touch.clientX, touch.clientY));
+            const $menuHead = $target.closest('p.subset_page_header, p.placeholder, li[id]');
+            if ($menuHead[0] != SSD.SubsetMenu.lastEntry.menuElement) {  // did this event enter a new menuHead?
+               SSD.SubsetMenu.lastEntry = {menuElement: $menuHead[0], timeStamp: touchEvent.timeStamp};
+            }
+            if (touchEvent.timeStamp - SSD.SubsetMenu.lastEntry.timeStamp < 500) {  // short touch?
+               const menuObject = SSD_Menu.postMenu(touchEvent, touch);
+            } else {
+               SSD.SubsetMenu.displayElements(touchEvent, touch);
+            }
+         }
+         break;
+      }
+   }
+
+   static displayElements(event /*: Event */, location /*: {clientX: number, clientY: number} */) {
+      event.preventDefault();
+      SSD.clearMenus();
+      const $curr = $(document.elementFromPoint(location.clientX, location.clientY)).closest('li');
+      const id = $curr.attr('id');
+      if (id != undefined) {
+         const subset = SSD.displayList[parseInt(id)];
+         const subsetName = subset.name;
+         const subsetElements = subset.elements.toArray().map( (el) => group.representation[el] );
+         const $menu = $(eval(Template.HTML('subsetElements_template')));
+         $curr.addClass('highlighted').append($menu);
+         event.stopPropagation();
+         const follow = () => {
+            const bounds /*: Array<ClientRect> */ =
+                  $menu.find('span.mjx-chtml').map( (_, span) => span.getBoundingClientRect() ).toArray();
+            const extrema /*: {leftmost: number, rightmost: number} */ =
+                  bounds.reduce( (lr /*: {leftmost: number, rightmost: number} */, rect /*: ClientRect */) => {
+                     return {leftmost: Math.min(lr.leftmost, rect.left), rightmost: Math.max(lr.rightmost, rect.right)}
+                  }, {leftmost: Number.MAX_SAFE_INTEGER, rightmost: Number.MIN_SAFE_INTEGER} );
+            $menu.css({'width': extrema.rightmost - extrema.leftmost, 'max-width': ''});
+            Menu.setMenuLocations(location, $menu);
+            $menu.css('visibility', 'visible');
+         };
+         MathJax.Hub.Queue(['Typeset', MathJax.Hub, $menu[0]], follow);
+      }
+   }
+}
+
+class SSD_Menu {
+/*::
+   menuList: HTMLElement;
+   subMenu: ?SSD_Menu;
+ */
+   constructor(menuList /*: HTMLElement */) {
+      this.menuList = menuList;
+      this.subMenu = null;
+      $(menuList).css('visibility', 'visible');
+      menuList.addEventListener('click', this.clickHandler);
+      menuList.addEventListener('touchstart', this.touchHandler);
+      menuList.addEventListener('touchend', this.touchHandler);
+   }
+
+   // Captures touchstart, touchend events to keep them from propagating to the subset_page event handler
+   //   (let touchmove through to allow scrolling)
+   touchHandler(touchEvent /*: TouchEvent */) {
+      touchEvent.stopPropagation();
+   }
+
+   /* Handles click events on this.menuList, and stops their propagation to the subset_page event handler
+    *   -- if there's a subMenu being displayed, just close it
+    *   -- if the list item under this click has an action attribute, eval it
+    *   -- if the list item under this click has a ul, open it as a subMenu
+    */
+   clickHandler(mouseEvent /*: MouseEvent */) {
+      mouseEvent.stopPropagation();
+      mouseEvent.preventDefault();
+      if (this.subMenu) {        // is there's a submenu open, just close it
+         this.subMenu.close();
+         this.subMenu = null;
+      } else {
+         const $menuListItem = $(document.elementFromPoint(mouseEvent.clientX, mouseEvent.clientY)).closest('li');
+         if ($menuListItem.attr('action') == undefined) {
+            this.subMenu = new SSD_Menu($menuListItem.find('> ul')[0]);
+         } else {
+            eval($menuListItem.attr('action'));
+            SSD.clearMenus();
+            MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'subset_page']);
+         }
+      }
+   }
+
+   // Closes this menu's subMenu, if it exists, then removes this menu's event listeners and hides itself
+   close() {
+      if (this.subMenu) {
+         this.subMenu.close();
+      }
+      this.menuList.removeEventListener('click', this.clickHandler);
+      this.menuList.removeEventListener('touchend', this.touchHandler);
+      this.menuList.removeEventListener('touchstart', this.touchHandler);
+      $(this.menuList).css('visibility', 'hidden');
+   }
+
+   // Create entire menu tree for subset/header under this event, and display its first level
+   static postMenu(event /*: Event */, location /*: {clientX: number, clientY: number} */) {
+      event.preventDefault();
+
+      const $curr = $(event.target).closest('p.subset_page_header, p.placeholder, li[id]');
+
+      // unrecognized event
+      if ($curr.length == 0) return;
+
+      SSD.clearMenus();
+
+      const isHeaderMenu = $curr[0].tagName == "P";
+      const $menu = isHeaderMenu ?
+                    $(eval(Template.HTML('headerMenu_template'))) :
+                    SSD.displayList[parseInt($curr[0].id)].menu;
+      new SSD_Menu($menu[0]);
+      $curr.addClass('highlighted').append($menu);
+      $menu.css('visibility', 'hidden');
+      event.stopPropagation();
+
+      const follow = () => {
+         if (!isHeaderMenu) {
+            this.makeLongLists($curr[0].id, $menu);
+         }
+         Menu.setMenuLocations(location, $menu);
+         $menu.css('visibility', 'visible');
+      };
+      MathJax.Hub.Queue(['Typeset', MathJax.Hub, $menu[0]], follow);
+   }
+
+   // Create the intersection, union, and elementwise product subMenus
+   static makeLongLists(_id /*: string */, $menu /*: JQuery */) {
+      const id = parseInt(_id);
+      const classes = ['.intersection', '.union', '.elementwise-product'];
+      const operations = ['intersection', 'union', 'elementwiseProduct'];
+      const printOps = ['intersection', 'union', 'elementwise product'];
+      const node = MathML.sans(SSD.displayList[id].name);
+      for (let inx = 0; inx < classes.length; inx++) {
+         const operation = operations[inx];
+         const printOp = printOps[inx];
+         let frag = '';
+         for (let otherId = 0; otherId < group.subgroups.length; otherId++) {
+            if (id != otherId) {
+               frag +=
+                  `<li action="SSD.displayList[${id}].${operation}(SSD.displayList[${otherId}])">` +
+                  `the ${printOp} of ${node} with ${MathML.sans(SSD.displayList[otherId].name)}</li>`;
+            }
+         }
+         for (let otherId = group.subgroups.length; otherId < SSD.displayList.length; otherId++) {
+            if (id != otherId && SSD.displayList[otherId] !== undefined) {
+               const otherName = $(`#${otherId}`).children()[1].outerHTML;
+               frag +=
+                  `<li action="SSD.displayList[${id}].${operation}(SSD.displayList[${otherId}])">` +
+                  `the ${printOp} of ${node} with ${otherName}</li>`;
+            }
+         }
+         $menu.find(classes[inx]).html(frag);
+      }
+   }
+}
+// @flow
+/*::
 import Arrow from './Arrow.js';
 import ArrowMult from './ArrowMult.js';
 import Chunking from './Chunking.js';
@@ -737,16 +870,15 @@ class DC {
    }
 
    static setupDiagramPage() {
-      $(window).off('click', DC.clearMenus).on('click', DC.clearMenus)
-               .off('contextmenu', DC.clearMenus).on('contextmenu', DC.clearMenus);
-
       DC.DiagramChoice.setupDiagramSelect();
+      $('#header').on('click', DC.clearMenus);
+      $('#vert-container').on('click', DC.clearMenus);
+
       $('#diagram-select').off('click', DC.DiagramChoice.clickHandler).on('click', DC.DiagramChoice.clickHandler);
 
       $('#arrow-control').off('click', DC.Arrow.clickHandler).on('click', DC.Arrow.clickHandler);
 
       $('#generation-control').off('click', DC.Generator.clickHandler).on('click', DC.Generator.clickHandler);
-      $('#generation-control').off('contextmenu', DC.Generator.clickHandler).on('contextmenu', DC.Generator.clickHandler);
       $('#generation-table').off('dragstart', DC.Generator.dragStart).on('dragstart', DC.Generator.dragStart);
       $('#generation-table').off('drop', DC.Generator.drop).on('drop', DC.Generator.drop);
       $('#generation-table').off('dragover', DC.Generator.dragOver).on('dragover', DC.Generator.dragOver);
@@ -762,6 +894,7 @@ class DC {
 }
 
 DC.DIAGRAM_PANEL_URL = 'diagramController/diagram.html';
+
 // @flow
 /*::
 import BitSet from '../js/BitSet.js';
