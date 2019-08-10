@@ -279,4 +279,4 @@ class Library {
    }
 }
 
-Library.__initializeLibrary(1);
+Library.__initializeLibrary(2);
