@@ -18,8 +18,14 @@
           border-collapse: collapse;
           vertical-align: middle;
        }
+       #PageHeader {
+          border: 1px solid white;
+          border-bottom: none;
+          padding: 8px;
+          padding-top: 0;
+       }
        .diagramHeader {
-          width: 100px;
+          min-width: 100px;
        }
        .groupName {
           font-size: large;
@@ -27,14 +33,53 @@
        .groupOrder {
           text-align: center;
        }
-       .cayleyDiagram, .multiplicationTable, .symmetryObject, .cycleGraph {
+       .cayleyDiagram, .multiplicationTable, .symmetryObject, .noDiagram, .cycleGraph {
           text-align: center;
        }
+
        a:link {
           color: black;
        }
        a:hover {
           color: -webkit-link;
+       }
+
+       #GroupTable td a {
+          display: block;
+       }
+
+       #GroupTable tbody {
+          -webkit-user-select: none;                  /* prevents cut-and-paste */
+          -webkit-tap-highlight-color: transparent;   /* prevents anchor highlight on tap */
+          -webkit-touch-callout: none;                /* prevents default tap-hold menu */
+       }
+
+       tr.highlighted {
+          background-color: hsl(0, 0%, 96%);
+       }
+
+       td.groupName.emphasized,
+       td.definition.emphasized {
+          background-color: hsl(0, 0%, 85%);
+       }
+       td.cayleyDiagram.emphasized {
+          background-color: hsl(0, 38%, 90%);
+       }
+       td.multiplicationTable.emphasized {
+          background-color: hsl(79, 100%, 93%);
+       }
+       td.symmetryObject.emphasized {
+          background-color: hsl(120, 38%, 90%);
+       }
+       td.cycleGraph.emphasized {
+          background-color: hsl(240, 38%, 90%);
+       }
+       td.noDiagram.emphasized {
+          background-color: white;
+       }
+
+       td a:link, td a:hover, td a:visited {
+          color: black;
        }
 
        .sort-up:after,
@@ -64,19 +109,8 @@
        }
 
        #tooltip {
-          background-color: #FFFFD6;		/* light yellow (matches subset display) */
-          border: 1px solid #CFCFCF;		/* ~silver */
-          box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);	/* gray mist */
-          color: #000000;
-          font-size: medium;
-          font-style: normal;
-          font-weight: normal;
-          padding: 1em;
-          position: fixed;
-          z-index: 1;
-          white-space: nowrap;
-          list-style-type: none;
-          visibility: visible;
+          background-color: black;
+          color: white;
        }
       </style>
 
@@ -94,37 +128,38 @@
       <script src="./GroupExplorer.js"></script>
    </head>
    <body>
-      <!-- <h2 align="center">Group Explorer</h2> -->
-      <div style='text-align: center;'>
-         <img style='border: 1px solid black;' src='images/logo.png'/>
-      </div>
-      <br>
-      <div class="top-right-menu">
-         <div>
-            <a href='index.html'>
-               <i title="Project Home" class="fa fa-home fa-2x trm-blue"></i></a>
-            <!--
-               <a href='GroupExplorer.html'>
-                  <i title="Group Library" class="fa fa-book fa-2x trm-blue"></i></a>
-            -->
-               <a href='Sheet.html' target='_blank'>
-                  <i title="Sheets" class="fa fa-file trm-blue" style="font-size:1.5em;vertical-align:10%;"></i></a>
-               <a href='help/index.html'>
-                  <i title="Help" class="fa fa-question-circle fa-2x trm-blue"></i></a>
-               <a href='https://github.com/nathancarter/group-explorer'>
-                  <i title="Source on GitHub" class="fa fa-github fa-2x trm-blue"></i></a>
-         </div>
-         <div id="version" style="float: right; font-size: small; color: #2196f3;"></div>
-         <script>document.getElementById('version').textContent = Version.label</script>
-      </div>
-
       <table id="ScratchTable" style="width: 100%; display: none"></table>
 
       <table id="GroupTable" style="width: 100%;">
          <thead>
+            <tr>
+               <th id="PageHeader" colspan="7">
+                  <div style="text-align: center; display: inline-block">
+                     <img style="border: 1px solid black;" src="images/logo.png"/>
+                  </div>
+                  <div class="top-right-menu" style="position: relative; float: right; margin-top: 0">
+                     <div>
+                        <a href="index.html">
+                           <i title="Project Home" class="fa fa-home fa-2x trm-blue"></i></a>
+                        <!--
+                             <a href="GroupExplorer.html">
+                             <i title="Group Library" class="fa fa-book fa-2x trm-blue"></i></a>
+                        -->
+                           <a href="Sheet.html" target="_blank">
+                              <i title="Sheets" class="fa fa-file trm-blue" style="font-size:1.5em;vertical-align:10%;"></i></a>
+                           <a href="help/index.html">
+                              <i title="Help" class="fa fa-question-circle fa-2x trm-blue"></i></a>
+                           <a href="https://github.com/nathancarter/group-explorer">
+                              <i title="Source on GitHub" class="fa fa-github fa-2x trm-blue"></i></a>
+                     </div>
+                     <div id="version" style="float: right; font-size: small; color: #2196f3;"></div>
+                     <script>document.getElementById("version").textContent = Version.label</script>
+                  </div>
+               </th>
+            </tr>
             <tr id="GroupTableHeaders" height="32px">
-               <th class="sort-none">Name</th>
-               <th class="sort-none"><a href="help/rf-groupterms/index.html#order-of-a-group">Order</a></th>
+               <th class="sortable sort-none">Name</th>
+               <th class="sortable sort-down"><a href="help/rf-groupterms/index.html#order-of-a-group">Order</a></th>
                <th><a href="help/rf-groupterms/index.html#definition-of-a-group-via-generators-and-relations">Definition</a></th>
                <th class="diagramHeader"><a href="help/rf-groupterms/index.html#cayley-diagrams">Cayley diagram</a></th>
                <th class="diagramHeader"><a href="help/rf-groupterms/index.html#multiplication-table">Multiplication table</a></th>
@@ -132,7 +167,7 @@
                <th class="diagramHeader"><a href="help/rf-groupterms/index.html#cycle-graph">Cycle graph</a></th>
             </tr>
             <tr id="loadingMessage" class="hidden">
-               <th colspan=7>
+               <th colspan="7">
                   <center><i class="slowflash">Loading groups...</i></center>
                </th>
             </tr>
@@ -144,16 +179,28 @@
       <template id="row_template">
          <tr group="${group.URL}">
             <td class="groupName">
-               ${ (group.nameHTML === undefined) ? MathML.sans(group.name) : group.nameHTML }
+               <a href="GroupInfo.html?groupURL=${group.URL}" title="Open Group Info page">
+                  <div>${MathML.sans(group.name)}</div>
+               </a>
             </td>
-            <td class="groupOrder">${ group.order }</td>
+            <td class="groupOrder noDiagram">${ group.order }</td>
             <td class="definition">
-               ${ (group.definitionHTML === undefined) ? MathML.sans(group.definition) : group.definitionHTML }
+               <a href="GroupInfo.html?groupURL=${group.URL}" title="Open Group Info page">
+                  <div>${MathML.sans(group.definition)}</div>
+               </a>
             </td>
-            <td class="cayleyDiagram"></td>
-            <td class="multiplicationTable"></td>
-            <td class="symmetryObject">none</td>
-            <td class="cycleGraph"></td>
+            <td class="cayleyDiagram">
+               <a href="CayleyDiagram.html?groupURL=${group.URL}" title="Open Cayley Diagram visualizer"><div></div></a>
+            </td>
+            <td class="multiplicationTable">
+               <a href="Multtable.html?groupURL=${group.URL}" title="Open Multiplication Table visualizer"><div></div></a>
+            </td>
+            <td class="symmetryObject">
+               <a href="SymmetryObject.html?groupURL=${group.URL}" title="Open Symmetry Object visualizer"><div></div></a>
+            </td>
+            <td class="cycleGraph">
+               <a href="CycleDiagram.html?groupURL=${group.URL}" title="Open Cycle Graph visualizer"><div></div></a>
+            </td>
          </tr>
       </template>
    </body>
