@@ -14,6 +14,8 @@ import VC from './visualizerFramework/visualizer.js';
 import SSD from './subsetDisplay/subsets.js';
 
 import type {MSG_listenerReady, MSG_stateLoaded, MSG_external, MSG_editor} from './js/SheetModel.js';
+
+declare type rowXcol = {row: number, col: number};
  */
 
 /* Global variables */
@@ -30,27 +32,22 @@ $(window).one('load', load);
 
 /* Register static event managers (called after document is assembled) */
 function registerCallbacks() {
-   $(window).off('resize', resizeBody).on('resize', resizeBody);
-   $(window).off('click', clearLabels).on('click', clearLabels);
-   $(window).off('wheel', clearLabels).on('wheel', clearLabels);
-   $(window).off('contextMenu', clearLabels).on('contextMenu', clearLabels);
+   // window-wide default actions
+   window.addEventListener('resize', resizeBody);
+   window.addEventListener('click', cleanWindow);
+   window.addEventListener('contextmenu', (mouseEvent /*: MouseEvent */) => {
+      cleanWindow();
+      mouseEvent.preventDefault();
+   });
 
-   // mouse events in large graphic
-   $('#graphic > canvas').off('click', displayLabel).on('click', displayLabel);
-   $('#graphic > canvas').off('click', displayLabel).on('click', displayLabel);
-   $('#graphic > canvas').off('wheel', zoom).on('wheel', zoom);
-   $('#graphic > canvas').off('contextmenu', zoom2fit).on('contextmenu', zoom2fit);
+   // Large graphic events
+   LargeGraphic.init();
 
-   // drag-and-drop in large graphic
-   $('#graphic > canvas').attr('draggable', 'true');
-   $('#graphic > canvas').off('dragstart', dragStart).on('dragstart', dragStart);
-   $('#graphic > canvas').off('drop', drop).on('drop', drop);
-   $('#graphic > canvas').off('dragover', dragOver).on('dragover', dragOver);
-
-   $('#subset-button').on('click', () => VC.showPanel('#subset-control') );
-   $('#table-button').on('click', () => VC.showPanel('#table-control') );
-   $(window).off('click', organizationClickHandler).on('click', organizationClickHandler);
-   $('#separation-slider').off('input', separation).on('input', separation);
+   // Control panel events
+   $('#subset-button')[0].addEventListener('click', () => VC.showPanel('#subset-control') );
+   $('#table-button')[0].addEventListener('click', () => VC.showPanel('#table-control') );
+   $('#organization-select')[0].addEventListener('click', organizationClickHandler);
+   $('#separation-slider')[0].addEventListener('input', separation);
 }
 
 /* Load the static components of the page */
@@ -90,8 +87,11 @@ function completeSetup() {
       const option /*: html */ =  eval(Template.HTML('organization-choice-template'));
       $('#organization-choices').append(option);
    }
-   MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'organization-choices',
-                      () => $('#organization-choice').html($('#organization-choices > li:first-of-type').html())]);
+   MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'organization-choices'],
+                     () => {
+                        $('#organization-choice').html($('#organization-choices > li:first-of-type').html());
+                        $('#organization-choices').hide();
+                     });
 
    // Draw Multtable in graphic
    multtable = new Multtable(group);
@@ -116,6 +116,7 @@ function completeSetup() {
    window.addEventListener( 'message', function ( event /*: MessageEvent */ ) {
       const event_data /*: MSG_external<MulttableJSON> */ = (event.data /*: any */);
       if (typeof event_data == 'undefined' || event_data.source != 'external') {
+// FIXME
          console.error('unknown message received in Multtable.js:');
          console.error(event.data);
          return;
@@ -155,12 +156,13 @@ function emitStateChange () {
 }
 
 /* Find subgroup index (the "value" attribute of the option selected) and display multtable accordingly */
-function organizationClickHandler(event /*: JQueryEventObject */) {
+function organizationClickHandler(event /*: MouseEvent */) {
    const $curr = $(event.target).closest('[action]');
    if ($curr.length == 0) {
       $('#organization-choices').hide();
    } else {
       eval($curr.attr('action'));
+      event.stopPropagation();
    }
 }
 
@@ -206,191 +208,11 @@ function resizeGraphic() {
    graphicContext.showLargeGraphic(multtable);
 }
 
-/*
- * Large graphic mouse events
- *   Mouse wheel -- zoom in/out
- *   Right click -- zoom to fit
- *   Left click -- display/clear label
- *   Drag-and-drop -- move entire table
- *   Shift drag-and-drop -- move row/column
- */
-let Last_display_time = performance.now();
-function zoom(event /*: JQueryEventObject */) {
-   event.preventDefault();
-   (((event.originalEvent /*: any */) /*: WheelEvent */).deltaY < 0) ? graphicContext.zoomIn() : graphicContext.zoomOut();
-   if (performance.now() - Last_display_time > 100) {
-      resizeGraphic();
-      Last_display_time = performance.now();
-   }
-}
-
-function zoom2fit(event /*: JQueryEventObject */) {
-   event.preventDefault();
-   graphicContext.reset();
-   resizeGraphic();
-}
-
-function event2columns(_event /*: JQueryEventObject */) {
-   const bounding_rectangle = $('#graphic')[0].getBoundingClientRect();
-   const event /*: JQueryMouseEventObject */ = (_event /*: any */);
-   const clickX = event.clientX - bounding_rectangle.left;
-   const clickY = event.clientY - bounding_rectangle.top;
-   return graphicContext.select(clickX, clickY);
-}
-
-function displayLabel(_event /*: JQueryEventObject */) {
-   _event.preventDefault();
-
-   // clear existing tooltip on any click, even if it's not to show a new tooltip
-   clearLabels();
-
-   const location = event2columns(_event);
-
-   const event /*: JQueryMouseEventObject */ = (_event /*: any */);
-
-   // if event has shift key, etc., this click isn't to show a tooltip; just return
-   if (event.shiftKey || event.ctrlKey || event.altKey || event.metaKey) {
-      return;
-   }
-
-   if (location !== undefined) {
-      // clear label by clicking on same cell again
-      if ($(`#nodeLabel[col='${location.x}'][row='${location.y}']`).length != 0) {
-         return;
-      }
-      const product = group.mult(multtable.elements[location.y], multtable.elements[location.x]);
-      const $label = $(`<div id="nodeLabel" col="${location.x}" row="${location.y}">`).html(MathML.sans(group.representation[product]));
-      $('#graphic').append($label);
-      Menu.setMenuLocations(event, $label);
-      MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'nodeLabel']);
-      event.stopPropagation();
-   }
-}
-
-function clearLabels() {
+function cleanWindow() {
    $('#nodeLabel').remove();
-}
-
-// Drag-and-drop in large diagram
-class DragState {
-/*::
-  _position : void /* when idle *-/ |
-              [number, number] /* when dragging entire image *-/ |
-              {x: number, y: number} /* when shift-dragging one column or row *-/;
- */
-   constructor() { this._position = undefined; }
-   get isIdle() { return typeof(this._position) != 'object'; }
-   get isDragging() { return !this.isIdle && Array.isArray(this._position); }
-   get isShiftDragging() { return !this.isIdle && !this.isDragging; }
-   get position() { return  this._position; }
-   set position(position) {
-      this._position = undefined;
-      if (   typeof(position) == 'object'
-          && (   Array.isArray(position)
-              || (   (position.x == 0 && position.y != 0)
-                  || (position.x != 0 && position.y == 0) ) ) ) {
-         this._position = position;
-      }
-   }
-}
-const Drag_state = new DragState();
-function dragStart(_event /*: JQueryEventObject */) {
-   const event /*: JQueryMouseEventObject */ = (_event /*: any */),
-         dragEvent /*: DragEvent */ = (event.originalEvent /*: any */),
-         dataTransfer /*: DataTransfer */ = (dragEvent.dataTransfer /*: any */);
-
-   clearLabels();
-
-   if (event.shiftKey) {
-      Drag_state.position = event2columns(_event);
-      if (!Drag_state.isShiftDragging) {
-         event.preventDefault();
-         return;
-      }
-
-      // set image to 1-pixel blank
-      dataTransfer.setDragImage($('#blank')[0], 0, 0);
-   } else {
-      Drag_state.position = [dragEvent.clientX, dragEvent.clientY];
-      if (!Drag_state.isDragging) {
-         event.preventDefault();
-         return;
-      }
-
-      // Built-in dnd image drag doesn't work too well on Chrome/Linux
-      //   Workaround is to explicitly make img from screen image and drag that
-      if (navigator.appVersion.indexOf('Chrome') != -1 && navigator.appVersion.indexOf('Linux') != -1) {
-         const canvas = graphicContext.canvas;
-         const drag_width = canvas.width/3;
-         const drag_height = canvas.height/3;
-         // note that top value is negative -- Chrome will still drag it even though it's not visible
-         const image = $(`<img id="hidden-image" src="${graphicContext.canvas.toDataURL()}"
-                style="position: absolute; top: -${drag_height}; width: ${drag_width};">`)[0];
-         $('#graphic').append(image);
-         dataTransfer.setDragImage(image, drag_width/2, drag_height/2);
-      }
-   }
-   // dataTransfer must be set in event for Firefox to fire a dragstart event
-   // (this seems to be a well-known bug -- see https://bugzilla.mozilla.org/show_bug.cgi?id=1352852
-   //   or https://stackoverflow.com/questions/19055264/why-doesnt-html5-drag-and-drop-work-in-firefox)
-   dataTransfer.setData('text', 'anything');
-}
-
-function dragOver(_event /*: JQueryEventObject */) {
-   const event /*: JQueryMouseEventObject */ = (_event /*: any */),
-         dragEvent /*: DragEvent */ = (event.originalEvent /*: any */),
-         dataTransfer /*: DataTransfer */ = (dragEvent.dataTransfer /*: any */);
-
-   if (Drag_state.isDragging && !event.shiftKey) {
-      event.preventDefault();
-   } else if (Drag_state.isShiftDragging && event.shiftKey) {
-      const location = event2columns(_event);
-      if (location === undefined) {
-         Drag_state.position = undefined;
-      } else {
-         event.preventDefault();
-         // change cursor to indicate whether row/column can be dropped or not
-         const position /*: {x: number, y: number} */ = (Drag_state.position /*: any */);
-         if (   location.x == 0 && position.x == 0 && location.y != 0
-             || location.y == 0 && position.y == 0 && location.x != 0) {
-            dataTransfer.dropEffect = 'move';
-         } else {
-            dataTransfer.dropEffect = 'none';
-         }
-      }
-   }
-}
-
-function drop(_event /*: JQueryEventObject */) {
-   const event /*: JQueryMouseEventObject */ = (_event /*: any */),
-         dragEvent /*: DragEvent */ = (event.originalEvent /*: any */),
-         dataTransfer /*: DataTransfer */ = (dragEvent.dataTransfer /*: any */);
-
-   event.preventDefault();
-   if (Drag_state.isDragging && !event.shiftKey) {
-      const position /*: [number, number] */ = (Drag_state.position /*: any */);
-      graphicContext.move(dragEvent.clientX - position[0],
-                          dragEvent.clientY - position[1]);
-   } else if (Drag_state.isShiftDragging && event.shiftKey) {
-      const location = event2columns(_event);
-      if (location !== undefined) {
-         // swap two multtable elements
-         const swap = (el1, el2) => {
-            const tmp = multtable.elements[el1];
-            multtable.elements[el1] = multtable.elements[el2];
-            multtable.elements[el2] = tmp;
-         }
-         const position /*: {x: number, y: number} */ = (Drag_state.position /*: any */);
-         if (location.x == 0 && position.x == 0 && location.y != 0) {
-            swap(position.y, location.y);
-         } else if (location.y == 0 && position.y == 0 && location.x != 0) {
-            swap(position.x, location.x);
-         }
-         emitStateChange();
-      }
-   }
-   Drag_state.position = undefined;
-   resizeGraphic();
+   $('#drag-image').remove();
+   $('#organization-choices').hide();
+   SSD.clearMenus();
 }
 
 /* Highlighting routines */
@@ -416,4 +238,368 @@ function clearHighlights() {
    multtable.clearHighlights();
    emitStateChange();
    graphicContext.showLargeGraphic(multtable);
+}
+/*
+ * Large graphic mouse events
+ *   display/clear label -- click / tap
+ *   zoom in/out -- wheel / two-finger pinch-spread
+ *   move graph -- drag-and-drop / two-finger drag
+ *   recenter, reset zoom -- right click / two-finger tap
+ *   move row/column -- Shift drag-and-drop / one-finger drag
+ */
+class LargeGraphic {
+/*::
+  static lastEvent: ?Event;
+ */
+   static init() {
+      LargeGraphic.lastEvent = null;
+
+      const graphic = $('#graphic')[0];
+      if (window.ontouchstart === undefined) {  // determine whether device supports touch events
+         ['click', 'wheel', 'contextmenu', 'mousedown', 'mousemove', 'mouseup']
+            .forEach( (eventType) => graphic.addEventListener(eventType, LargeGraphic.mouseHandler) );
+      } else {
+         ['touchstart', 'touchmove', 'touchend']
+            .forEach( (eventType) => graphic.addEventListener(eventType, LargeGraphic.touchHandler) );
+      }
+   }
+
+   // Event handler for mouse-only platform
+   static mouseHandler(mouseEvent /*: MouseEvent */) {
+      // skip modified events, except for mouseXXX with shiftKey down
+      if (   mouseEvent.ctrlKey || mouseEvent.altKey || mouseEvent.metaKey
+          || (mouseEvent.shiftKey && !mouseEvent.type.startsWith('mouse')) ) {
+         return;
+      };
+
+      const lastEvent /*: MouseEvent */ = (LargeGraphic.lastEvent /*: any */);
+
+      const syntheticType = (mouseEvent.shiftKey ? 'shift-' : '') + mouseEvent.type;
+
+      switch (syntheticType) {
+      case 'click':
+         if (LargeGraphic.lastEvent == null) {
+            LargeGraphic.displayNewLabel(mouseEvent);
+         } else {
+            cleanWindow();
+         }
+         LargeGraphic.lastEvent = null;
+         mouseEvent.stopPropagation();
+         break;
+
+      case 'contextmenu':
+         LargeGraphic.zoom2fit();
+         LargeGraphic.lastEvent = null;
+         mouseEvent.preventDefault();
+         break;
+
+      case 'wheel':
+         cleanWindow();
+         (((mouseEvent /*: any */) /*: WheelEvent */).deltaY < 0) ? graphicContext.zoomIn() : graphicContext.zoomOut();
+         graphicContext.showLargeGraphic(multtable);
+         break;
+
+      case 'mousedown':
+         LargeGraphic.lastEvent = mouseEvent;
+         break;
+
+      case 'shift-mousedown':
+         if (LargeGraphic.dragStart(mouseEvent)) {
+            LargeGraphic.lastEvent = mouseEvent;
+         } else {
+            LargeGraphic.lastEvent = null;
+         }
+         break;
+
+      case 'mousemove':
+         if (lastEvent != undefined && !lastEvent.shiftKey) {
+            LargeGraphic.mouseMove(lastEvent, mouseEvent);
+            LargeGraphic.lastEvent = mouseEvent;
+         } else {
+            LargeGraphic.lastEvent = null;
+         }
+         mouseEvent.preventDefault();
+         break;
+
+      case 'shift-mousemove':
+         if (lastEvent != undefined && lastEvent.shiftKey) {
+            LargeGraphic.dragOver(mouseEvent);
+            LargeGraphic.lastEvent = mouseEvent;
+         } else {
+            LargeGraphic.lastEvent = null;
+         }
+         mouseEvent.preventDefault();
+         break;
+
+      case 'mouseup':
+         if (lastEvent != undefined && !lastEvent.shiftKey && lastEvent.type == 'mousemove') {
+            LargeGraphic.mouseMove(lastEvent, mouseEvent); // leave last event there so ensuing 'click' event won't display tooltip
+            LargeGraphic.lastEvent = mouseEvent;
+         } else {
+            LargeGraphic.lastEvent = null;
+         }
+         mouseEvent.stopPropagation();
+         mouseEvent.preventDefault();
+         break;
+
+      case 'shift-mouseup':
+         if (lastEvent != undefined && lastEvent.shiftKey && lastEvent.type == 'mousemove') {
+               LargeGraphic.dragEnd(mouseEvent);
+         }
+         LargeGraphic.lastEvent = null;
+         mouseEvent.stopPropagation();
+         mouseEvent.preventDefault();
+         break;
+
+      default:
+         console.error(`LargeGraphic.mouseHandler unknown event ${syntheticType}`);
+      }
+   }
+
+   // Event handler for platforms that support touch events
+   static touchHandler(touchEvent /*: TouchEvent */) {
+      // skip modified events
+      if (touchEvent.shiftKey || touchEvent.ctrlKey || touchEvent.altKey || touchEvent.metaKey) {
+         return;
+      };
+
+      const touches = LargeGraphic.touches(touchEvent);
+      const touchCount = touches.length;
+
+      // only accept one- and two-finger touches
+      if (!(touchCount == 1 || touchCount == 2)) {
+         return;
+      }
+
+      const lastEvent /*: TouchEvent */ = (LargeGraphic.lastEvent /*: any */);
+
+      // start over -- somehow switched from one-touch to two-touch dnd in midstream
+      if (lastEvent != null && touchEvent.type != 'touchstart' && LargeGraphic.touches(lastEvent).length != touchCount) {
+         return;
+      }
+
+      const syntheticType = touchEvent.type + ((touchCount == 2) ? '_2' : '');
+      switch (syntheticType) {
+      case 'touchstart':
+      case 'touchstart_2':
+         LargeGraphic.lastEvent = touchEvent;
+         break;
+
+      case 'touchmove':
+         if (lastEvent != undefined) {
+            if (lastEvent.type == 'touchstart' && touchEvent.timeStamp - lastEvent.timeStamp < 350) {
+               // too soon to tell if this is a click or a drag -- don't do anything, wait for next event
+            } else {
+               if (lastEvent.type == 'touchstart') {
+                  LargeGraphic.dragStart(touches[0]);
+               } else {
+                  LargeGraphic.dragOver(touches[0]);
+               }
+               LargeGraphic.lastEvent = touchEvent;
+            }
+         }
+         touchEvent.preventDefault();
+         break;
+
+      case 'touchmove_2':
+         if (lastEvent != undefined) {
+            LargeGraphic.touchZoomAndMove(lastEvent, touchEvent);
+            LargeGraphic.lastEvent = touchEvent;
+            touchEvent.preventDefault();
+         }            
+         break;
+
+      case 'touchend':
+         if (lastEvent != undefined) {
+            if (lastEvent.type == 'touchstart' && touchEvent.timeStamp - lastEvent.timeStamp < 350) {
+               if (LargeGraphic.displayNewLabel(touches[0])) {
+                  touchEvent.preventDefault();  // prevent this from turning into a click event and clearing all labels
+               }
+            } else {
+               LargeGraphic.dragEnd(touches[0]);
+            }
+         }
+         LargeGraphic.lastEvent = null;
+         break;
+
+      case 'touchend_2':
+         if (lastEvent != undefined) {
+            if (lastEvent.type == 'touchstart' && touchEvent.timeStamp - lastEvent.timeStamp < 350) {
+               LargeGraphic.zoom2fit();               
+            } else {
+               LargeGraphic.touchZoomAndMove(lastEvent, touchEvent);
+            }
+         }
+         LargeGraphic.lastEvent = null; 
+         touchEvent.stopPropagation();
+         touchEvent.preventDefault();
+         break;
+
+      default:
+         console.error(`LargeGraphic.touchHandler unknown event ${syntheticType}`);
+      }
+   }
+
+   static loc2rowXcol(event /*: eventLocation */) /*: ?rowXcol */ {
+      const bounding_rectangle = $('#graphic')[0].getBoundingClientRect();
+      const canvasX = event.clientX - bounding_rectangle.left;
+      const canvasY = event.clientY - bounding_rectangle.top;
+      return graphicContext.xy2rowXcol(canvasX, canvasY);
+   }
+
+   static displayNewLabel(loc /*: eventLocation */) /*: ?HTMLElement */ {
+      const rowXcol = LargeGraphic.loc2rowXcol(loc);
+      const hasLabel = rowXcol && $(`#nodeLabel[row='${rowXcol.row}'][col='${rowXcol.col}']`).length != 0;
+      cleanWindow();
+      if (rowXcol == undefined || hasLabel) {
+         return null;
+      } else {
+         const element = group.mult(multtable.elements[rowXcol.row], multtable.elements[rowXcol.col]);
+         const $label = $(`<div id="nodeLabel" row="${rowXcol.row}" col="${rowXcol.col}">`)
+                           .html(MathML.sans(group.representation[element]));
+         $('#graphic').append($label);
+         Menu.setMenuLocations(loc, $label);
+         MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'nodeLabel']);
+         return $label[0];
+      }
+   }
+
+   static touches(touchEvent /*: TouchEvent */) /*: Array<Touch> */ {
+      if (touchEvent.type == 'touchend') {
+         const result = Array.from(touchEvent.changedTouches);
+         result.push(...Array.from(touchEvent.touches));
+         return result;
+      } else {
+         return Array.from(touchEvent.touches);
+      }
+   }
+
+   static centroidAndDiameter(touchArray /*: Array<Touch> */) /*: [eventLocation, float] */ {
+      const centroid = {clientX: (touchArray[0].clientX + touchArray[1].clientX)/2, 
+                        clientY: (touchArray[0].clientY + touchArray[1].clientY)/2 },
+            dx = touchArray[0].clientX - touchArray[1].clientX,
+            dy = touchArray[0].clientY - touchArray[1].clientY,
+            diameter = Math.sqrt(dx*dx + dy*dy);
+      return [centroid, diameter];
+   }
+
+   static touchZoomAndMove(start /*: TouchEvent */, end /*: TouchEvent */) {
+      cleanWindow();
+      const [startCentroid, startDiameter] = LargeGraphic.centroidAndDiameter(LargeGraphic.touches(start)),
+            [endCentroid, endDiameter] = LargeGraphic.centroidAndDiameter(LargeGraphic.touches(end)),
+            zoomFactor = endDiameter / startDiameter;
+      graphicContext
+         .zoom(endDiameter / startDiameter)
+         .move(endCentroid.clientX - startCentroid.clientX, endCentroid.clientY - startCentroid.clientY);
+      graphicContext.showLargeGraphic(multtable);
+   }
+
+   static mouseMove(start /*: MouseEvent */, end /*: MouseEvent */) {
+      cleanWindow();
+      graphicContext.move(end.clientX - start.clientX, end.clientY - start.clientY);
+      graphicContext.showLargeGraphic(multtable);
+   }
+
+   static zoom2fit() {
+      cleanWindow();
+      graphicContext.reset();
+      graphicContext.showLargeGraphic(multtable);
+   }
+
+   static dragStart(loc /*: eventLocation */) /*: ?HTMLElement */ {
+      const rowXcol = LargeGraphic.loc2rowXcol(loc);  // row, column of event location
+
+      if (rowXcol == undefined) {
+         return null;
+      }
+
+      $('#drag-image').remove();
+      
+      const canvas = graphicContext.canvas;
+
+      // find width of a single cell, and width of the entire table
+      // make these the width and height of the img, bounded by canvas size
+      const cellSize = graphicContext.transform.elements[0];  // [0] is the scale in the transform matrix
+      const tableSize = multtable.size * cellSize;
+
+      let width, height, swapping, start;
+      if (rowXcol.row == 0 && rowXcol.col != 0) {  // dragging column?
+         [swapping, start, width, height] = ['col', rowXcol.col, cellSize, tableSize];
+      } else if (rowXcol.col == 0 && rowXcol.row != 0) {  // dragging row?
+         [swapping, start, width, height] = ['row', rowXcol.row, tableSize, cellSize];
+      } else {
+         return null;
+      }
+      
+      // upper left corner of clicked cell in canvas-relative coordinates
+      const position = new THREE.Vector3(rowXcol.col, rowXcol.row, 1).applyMatrix3(graphicContext.transform);
+
+      const style =
+            'position: absolute; ' +
+            `width: ${width}; height: ${height}; ` +
+            'object-fit: none; ' +
+            `object-position: -${position.x.toFixed(0)}px -${position.y.toFixed(0)}px; ` +
+            'opacity: 0.75; ' +
+            '';
+
+      const image = $(`<img id="drag-image" src="${graphicContext.canvas.toDataURL()}" swapping="${swapping}" start="${start}" style="${style}">`)[0];
+      $('#graphic').append(image);
+      LargeGraphic.dragOver(loc);
+
+      return image;
+   }
+
+   static dragOver(loc /*: eventLocation */) {
+      const rowXcol = LargeGraphic.loc2rowXcol(loc);
+
+      // must be on first row / column to display drag image
+      const swapping = $('#drag-image').attr('swapping');
+      if (   rowXcol != undefined
+          && (   (swapping == 'row' && rowXcol.col == 0 && rowXcol.row != 0)
+              || (swapping == 'col' && rowXcol.row == 0 && rowXcol.col != 0) ) ) {
+         $('#drag-image').show()
+                         .css('top', `${loc.clientY}`)
+                         .css('left', `${loc.clientX}`);
+      } else {
+         $('#drag-image').hide();
+      }
+   }
+
+   static dragEnd(loc /*: eventLocation */) {
+      const cleanup = () => ($('#drag-image').remove(), undefined);
+      
+      /* don't swap if
+       *   there's no drag image
+       *   loc isn't over the table
+       *   loc isn't in the 1st row / column
+       *   loc is in the original row / column (so there's no swap to be done)
+       */
+      const $dragImage = $('#drag-image');
+      if ($dragImage.length == 0)
+         return cleanup();
+
+      const rowXcol = LargeGraphic.loc2rowXcol(loc);
+      if (rowXcol == undefined)
+         return cleanup();
+
+      const swapping = $dragImage.attr('swapping');
+      const start = parseInt($dragImage.attr('start'));
+      $dragImage.remove();
+      if (   (swapping == 'row' && (rowXcol.col != 0 || rowXcol.row == 0 || rowXcol.row == start))
+          || (swapping == 'col' && (rowXcol.row != 0 || rowXcol.col == 0 || rowXcol.col == start)) )
+         return cleanup();
+
+      if (swapping == 'row') {
+         // $FlowFixMe: Flow doesn't seem to understand this sort of deconstructing
+         [multtable.elements[rowXcol.row], multtable.elements[start]] = [multtable.elements[start], multtable.elements[rowXcol.row]];
+      } else {
+         // $FlowFixMe: Flow doesn't seem to understand this sort of deconstructing
+         [multtable.elements[rowXcol.col], multtable.elements[start]] = [multtable.elements[start], multtable.elements[rowXcol.col]];
+      }
+
+      graphicContext.showLargeGraphic(multtable);
+      emitStateChange();
+
+      return cleanup();
+   }
 }
