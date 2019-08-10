@@ -25,25 +25,19 @@ const HELP_PAGE = 'help/rf-um-cg-options/index.html';
 const myDomain = new URL(window.location.href).origin;
 
 /* Initial entry to javascript, called once after document load */
-$(window).on('load', load);
+$(window).one('load', load);
 
 // Static event managers (called after document is assembled)
 function registerCallbacks() {
-   $(window).off('resize', resizeBody).on('resize', resizeBody);
-   $(window).off('click', clearLabels).on('click', clearLabels);
-   $(window).off('wheel', clearLabels).on('wheel', clearLabels);
-   $(window).off('contextMenu', clearLabels).on('contextMenu', clearLabels);
+   // window-wide event listeners
+   window.addEventListener('resize', resizeBody);
+   window.addEventListener('click', clearAllLabels);
+   window.addEventListener('contextmenu', (mouseEvent /*: MouseEvent */) => {
+      clearAllLabels();
+      mouseEvent.preventDefault();
+   });
 
-   // mouse events in large graphic
-   $('#graphic > canvas').off('click', displayLabel).on('click', displayLabel);
-   $('#graphic > canvas').off('wheel', zoom).on('wheel', zoom);
-   $('#graphic > canvas').off('contextmenu', zoom2fit).on('contextmenu', zoom2fit);
-
-   // drag-and-drop in large graphic
-   $('#graphic > canvas').attr('draggable', 'true');
-   $('#graphic > canvas').off('dragstart', dragstart).on('dragstart', dragstart);
-   $('#graphic > canvas').off('drop', drop).on('drop', drop);
-   $('#graphic > canvas').off('dragover', dragover).on('dragover', dragover);
+   LargeGraphic.init();
 }
 
 function load() {
@@ -142,90 +136,201 @@ function resizeGraphic() {
    graphicContext.showLargeGraphic(cyclegraph);
 }
 
+function clearAllLabels() {
+   $('#nodeLabel').remove();
+   SSD.clearMenus();
+}
+
 
 /*
  * Large graphic mouse events
- *   Mouse wheel -- zoom in/out
- *   Right click -- zoom to fit
- *   Left click -- display label
- *   Drag-and-drop -- move cycle graph
+ *   display/clear label -- click / tap
+ *   zoom in/out -- wheel / two-finger pinch-spread
+ *   move graph -- drag-and-drop / two-finger drag
+ *   recenter, reset zoom -- right click / two-finger tap
  */
-let Last_display_time = performance.now();
-function zoom(event /*: JQueryEventObject */) {
-   event.preventDefault();
-   (((event.originalEvent /*: any */) /*: WheelEvent */).deltaY < 0) ? graphicContext.zoomIn() : graphicContext.zoomOut();
-   if (performance.now() - Last_display_time > 100) {
-      resizeGraphic();
-      Last_display_time = performance.now();
+class LargeGraphic {
+/*::
+  static lastEvent: ?Event;
+ */
+   static init() {
+      LargeGraphic.lastEvent = null;
+
+      const canvas = $('#graphic > canvas')[0];
+      if (window.ontouchstart === undefined) {  // determine whether device supports touch events
+         ['click', 'wheel', 'contextmenu', 'mousedown', 'mousemove', 'mouseup']
+            .forEach( (eventType) => canvas.addEventListener(eventType, LargeGraphic.mouseHandler) );
+      } else {
+         ['click', 'touchstart', 'touchmove', 'touchend']
+            .forEach( (eventType) => canvas.addEventListener(eventType, LargeGraphic.touchHandler) );
+      }
    }
-}
 
-function zoom2fit(event /*: JQueryEventObject */) {
-   event.preventDefault();
-   graphicContext.reset();
-   resizeGraphic();
-}
+   // Event handler for mouse-only platform
+   static mouseHandler(mouseEvent /*: MouseEvent */) {
+      // skip modified events
+      if (mouseEvent.shiftKey || mouseEvent.ctrlKey || mouseEvent.altKey || mouseEvent.metaKey) {
+         return;
+      };
 
-function displayLabel(_event /*: JQueryEventObject */) {
-   const bounding_rectangle = $('#graphic')[0].getBoundingClientRect();
-   const event = ((_event /*: any */) /*: JQueryMouseEventObject */);
-   event.preventDefault();
-   clearLabels(_event);
-   const clickX = event.clientX - bounding_rectangle.left;
-   const clickY = event.clientY - bounding_rectangle.top;
-   const element = graphicContext.select(clickX, clickY);
-   if (element !== undefined) {
-      const $label = $('<div id="nodeLabel">').html(MathML.sans(group.representation[element]));
-      $('#graphic').append($label);
-      Menu.setMenuLocations(event, $label);
-      MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'nodeLabel']);
-      event.stopPropagation();
+      const lastEvent /*: MouseEvent */ = (LargeGraphic.lastEvent /*: any */);
+
+      switch (mouseEvent.type) {
+      case 'click':
+         clearAllLabels();
+         if (LargeGraphic.lastEvent == null) {
+            LargeGraphic.displayLabel(mouseEvent);
+         }
+         LargeGraphic.lastEvent = null;
+         mouseEvent.stopPropagation();
+         break;
+
+      case 'contextmenu':
+         LargeGraphic.zoom2fit();
+         LargeGraphic.lastEvent = null;
+         mouseEvent.preventDefault();
+         break;
+
+      case 'wheel':
+         clearAllLabels();
+         (((mouseEvent /*: any */) /*: WheelEvent */).deltaY < 0) ? graphicContext.zoomIn() : graphicContext.zoomOut();
+         graphicContext.showLargeGraphic(cyclegraph);
+         break;
+
+      case 'mousedown':
+         LargeGraphic.lastEvent = mouseEvent;
+         break;
+
+      case 'mousemove':
+         if (lastEvent != undefined) {
+            LargeGraphic.mouseMove(lastEvent, mouseEvent);
+            LargeGraphic.lastEvent = mouseEvent;
+            mouseEvent.preventDefault();
+         }
+         break;
+
+      case 'mouseup':
+         if (lastEvent != undefined) {
+            LargeGraphic.mouseMove(lastEvent, mouseEvent);
+            if (lastEvent.type == 'mousedown') {
+               LargeGraphic.lastEvent = null;
+            }
+         }
+         mouseEvent.stopPropagation();
+         mouseEvent.preventDefault();
+      }
    }
-}
 
-function clearLabels(event /*: JQueryEventObject */) {
-   $('#nodeLabel').remove();
-}
+   // Event handler for platform that supports touch events
+   static touchHandler(event /*: TouchEvent | MouseEvent */) {
+      // skip modified events
+      if (event.shiftKey || event.ctrlKey || event.altKey || event.metaKey) {
+         return;
+      };
 
-// Start drag-and-drop CycleGraph in large diagram
-let Drag_start = undefined;
-function dragstart(_event /*: JQueryEventObject */) {
-   const event = ((_event /*: any */) /*: JQueryMouseEventObject */),
-         dragEvent = ((event.originalEvent /*: any */) /*: DragEvent */),
-         dataTransfer = ((dragEvent.dataTransfer /*: any */) /*: DataTransfer */);
+      // everything here but clicks
+      const touchEvent /*: TouchEvent */ = (event /*: any */);
 
-   // Built-in dnd image drag doesn't work too well on Chrome/Linux
-   //   Workaround is to explicitly make img from screen image and drag that
-   if (navigator.appVersion.indexOf('Chrome') != -1 && navigator.appVersion.indexOf('Linux') != -1) {
-      const canvas = graphicContext.canvas;
-      const drag_width = canvas.width/3;
-      const drag_height = canvas.height/3;
-      // note that top value is negative -- Chrome will still drag it even though it's not visible
-      const image = $(`<img id="hidden-image" src="${graphicContext.canvas.toDataURL()}"
-                             style="position: absolute; top: -${drag_height}; width: ${drag_width};">`)[0];
-      $('#graphic').append(image);
-      dataTransfer.setDragImage(image, drag_width/2, drag_height/2);
+      // only accept two-finger touches
+      if (event.type.startsWith('touch')) {
+         const touchCount = (touchEvent.type == 'touchend')
+               ? (touchEvent.changedTouches.length + touchEvent.touches.length)
+               : touchEvent.touches.length;
+         if (touchCount != 2) {
+            return;
+         }
+      }
+
+      const lastEvent /*: TouchEvent */ = (LargeGraphic.lastEvent /*: any */);
+
+      switch (event.type) {
+      case 'click':
+         clearAllLabels();
+         LargeGraphic.displayLabel( ((event /*: any */) /*: MouseEvent */) );
+         LargeGraphic.lastEvent = null;
+         event.stopPropagation();
+         break;
+
+      case 'touchstart':
+         LargeGraphic.lastEvent = touchEvent;
+         break;
+
+      case 'touchmove':
+         if (lastEvent != undefined) {
+            LargeGraphic.touchZoomAndMove(lastEvent, touchEvent);
+            LargeGraphic.lastEvent = touchEvent;
+            event.preventDefault();
+         }
+         break;
+
+      case 'touchend':
+         if (lastEvent != undefined) {
+            if (lastEvent.type == 'touchstart' && touchEvent.timeStamp - lastEvent.timeStamp < 350) {
+               LargeGraphic.zoom2fit();               
+            } else {
+               LargeGraphic.touchZoomAndMove(lastEvent, touchEvent);
+            }
+            LargeGraphic.lastEvent = null; 
+         }
+         touchEvent.stopPropagation();
+         touchEvent.preventDefault();
+      }
    }
-   dataTransfer.setData('text/plain', 'anything');  // needed for Firefox (!?)
-   Drag_start = [dragEvent.clientX, dragEvent.clientY];
-}
 
-function drop(_event /*: JQueryEventObject */) {
-   const event = ((_event /*: any */) /*: JQueryMouseEventObject */),
-         dragEvent = ((event.originalEvent /*: any */) /*: DragEvent */);
-
-   event.preventDefault();
-   if (Drag_start !== undefined) {
-      graphicContext.move(dragEvent.clientX - Drag_start[0],
-                          dragEvent.clientY - Drag_start[1] );
-      Drag_start = undefined;
+   static displayLabel(event /*: eventLocation */) {
+      const bounding_rectangle = $('#graphic')[0].getBoundingClientRect();
+      const clickX = event.clientX - bounding_rectangle.left;
+      const clickY = event.clientY - bounding_rectangle.top;
+      const element = graphicContext.select(clickX, clickY);
+      if (element !== undefined) {
+         const $label = $('<div id="nodeLabel">').html(MathML.sans(group.representation[element]));
+         $('#graphic').append($label);
+         Menu.setMenuLocations(event, $label);
+         MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'nodeLabel']);
+      }
    }
-   $('#hidden-image').remove();
-   resizeGraphic();
-}
 
-function dragover(event /*: JQueryEventObject */) {
-   event.preventDefault();
+   static touches(touchEvent /*: TouchEvent */) /*: Array<Touch> */ {
+      if (touchEvent.type == 'touchend') {
+         const result = Array.from(touchEvent.changedTouches);
+         result.push(...Array.from(touchEvent.touches));
+         return result;
+      } else {
+         return Array.from(touchEvent.touches);
+      }
+   }
+
+   static centroidAndDiameter(touchArray /*: Array<Touch> */) /*: [eventLocation, float] */ {
+      const centroid = {clientX: (touchArray[0].clientX + touchArray[1].clientX)/2, 
+                        clientY: (touchArray[0].clientY + touchArray[1].clientY)/2 },
+            dx = touchArray[0].clientX - touchArray[1].clientX,
+            dy = touchArray[0].clientY - touchArray[1].clientY,
+            diameter = Math.sqrt(dx*dx + dy*dy);
+      return [centroid, diameter];
+   }
+
+   static touchZoomAndMove(start /*: TouchEvent */, end /*: TouchEvent */) {
+      clearAllLabels();
+      const [startCentroid, startDiameter] = LargeGraphic.centroidAndDiameter(LargeGraphic.touches(start)),
+            [endCentroid, endDiameter] = LargeGraphic.centroidAndDiameter(LargeGraphic.touches(end)),
+            zoomFactor = endDiameter / startDiameter;
+      graphicContext
+         .zoom(endDiameter / startDiameter)
+         .move(endCentroid.clientX - startCentroid.clientX, endCentroid.clientY - startCentroid.clientY);
+      graphicContext.showLargeGraphic(cyclegraph);
+   }
+
+   static mouseMove(start /*: MouseEvent */, end /*: MouseEvent */) {
+      clearAllLabels();
+      graphicContext.move(end.clientX - start.clientX, end.clientY - start.clientY);
+      graphicContext.showLargeGraphic(cyclegraph);
+   }
+
+   static zoom2fit() {
+      clearAllLabels();
+      graphicContext.reset();
+      graphicContext.showLargeGraphic(cyclegraph);
+   }
 }
 
 
