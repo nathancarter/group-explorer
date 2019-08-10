@@ -77,6 +77,7 @@ function displayStatic() {
                            : group.cayleyDiagrams[inx].name;
          const graphicData = new CayleyDiagram(group, diagramName);
          const img = graphicContext.getImage(graphicData);
+         $(img).attr('title', `${diagramName == undefined ? 'Generated' : diagramName} Cayley diagram visualizer link`);
          $row.children(':nth-child(1)')
              .addClass('programLink')
              .text(diagramName === undefined ? '' : diagramName)
@@ -89,6 +90,7 @@ function displayStatic() {
          const graphicData = new CycleGraph(group);
          cycleGraphContext = new DisplayCycleGraph({height: 100, width: 100});
          const img = cycleGraphContext.getImage(graphicData);
+         $(img).attr('title', 'Cycle graph visualizer link');
          $row.children(':nth-child(2)')
              .addClass('programLink')
              .text('')
@@ -100,6 +102,7 @@ function displayStatic() {
          const graphicData = new Multtable(group);
          multtableContext = new DisplayMulttable({height: 100, width: 100});
          const img = multtableContext.getImage(graphicData);
+         $(img).attr('title', 'Multiplication table visualizer link');
          $row.children(':nth-child(3)')
              .addClass('programLink')
              .text('')
@@ -111,6 +114,7 @@ function displayStatic() {
          const objectName  = group.symmetryObjects[inx].name;
          const graphicData = SymmetryObject.generate(group, objectName);
          const img = graphicContext.getImage(graphicData);
+         $(img).attr('title', `${objectName} symmetry object visualizer link`);
          $row.children(':nth-child(4)')
              .addClass('programLink')
              .text(objectName)
