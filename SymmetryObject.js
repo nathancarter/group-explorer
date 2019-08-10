@@ -26,13 +26,15 @@ $(window).one('load', load);
 
 /* Register static event managers (called after document is assembled) */
 function registerCallbacks() {
-   $('#zoom-level').off('input', set_zoom_level).on('input', set_zoom_level);
-   $('#line-thickness').off('input', set_line_thickness).on('input', set_line_thickness);
-   $('#node-radius').off('input', set_node_radius).on('input', set_node_radius);
-   $('#fog-level').off('input', set_fog_level).on('input', set_fog_level);
-   $('#use-fog').off('input', set_fog_level).on('input', set_fog_level);
-   $(window).off('click', diagramClickHandler).on('click', diagramClickHandler);
-   $(window).off('resize', resizeBody).on('resize', resizeBody);
+   window.addEventListener('resize', resizeBody);
+   window.addEventListener('click', cleanWindow);
+
+   $('#diagram-select')[0].addEventListener('click', diagramClickHandler);
+   $('#zoom-level')[0].addEventListener('input', set_zoom_level);
+   $('#line-thickness')[0].addEventListener('input', set_line_thickness);
+   $('#node-radius')[0].addEventListener('input', set_node_radius);
+   $('#use-fog')[0].addEventListener('input', set_fog_level);
+   $('#fog-level')[0].addEventListener('input', set_fog_level);
 }
 
 /* Load the static components of the page */
@@ -140,13 +142,18 @@ function resizeGraphic() {
    }
 }
 
+function cleanWindow() {
+   $('#diagram-choices').hide();
+}
+
 /* Change diagram */
-function diagramClickHandler(event /*: JQueryEventObject */) {
+function diagramClickHandler(event /*: MouseEvent */) {
    const $curr = $(event.target).closest('[action]');
    if ($curr.length == 0) {
       $('#diagram-choices').hide();
    } else {
       eval($curr.attr('action'));
+      event.stopPropagation();
    }
 }
 
