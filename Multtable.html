@@ -22,6 +22,12 @@
 
        #graphic {
           overflow-x: hidden;
+          -webkit-user-drag: none;      /* prevents default drag behavior */
+          -webkit-user-select: none;    /* prevents confusing cut-and-paste attempt in graphic */
+       }
+
+       #drag-image {
+          -webkit-user-drag: none;      /* prevents annoying default drag behavior */
        }
 
        #nodeLabel {
