@@ -7,6 +7,7 @@ import DisplayDiagram from './js/DisplayDiagram.js';
 import DisplayMulttable from './js/DisplayMulttable.js';
 import GroupURLs from './GroupURLs.js';
 import Library from './js/Library.js';
+import Log from './js/Log.js';
 import Menu from './js/Menu.js';
 import Multtable from './js/Multtable.js';
 import SymmetryObject from './js/SymmetryObject.js';
@@ -19,16 +20,13 @@ var graphicContext /*: DisplayDiagram */;	// hidden scratchpad, re-used to reduc
 var multtableContext /*: DisplayMulttable */;
 var cycleGraphContext /*: DisplayCycleGraph */;
 
-// Static event managers (setup after document is available)
-$(function() {
-   $('#GroupTableHeaders th:nth-child(1)').on('click', () => columnSort(0));
-   $('#GroupTableHeaders th:nth-child(2)').on('click', () => columnSort(1));
-   $('#GroupTable tbody').on('click', HoverHelp.eventHandler)
-                         .on('mousemove', HoverHelp.eventHandler)
-                         .on('mouseleave', HoverHelp.eventHandler);
-});
-$(window).on('load', readLibrary);	// like onload handler in body
+$(window).on('load', readLibrary);
 
+// Static event managers (setup after document is available)
+function registerEventHandlers() {
+   $('#GroupTableHeaders th.sortable').on('click', columnSort);
+   HoverHelp.init();
+};
 
 // Load group library from urls
 function readLibrary() {
@@ -55,7 +53,7 @@ function readLibrary() {
       if (g != undefined && g.CayleyThumbnail != undefined && g.rowHTML != undefined) {
          const $img = $('<img>').attr('src', g.CayleyThumbnail).attr('height', 32).attr('width', 32);
          const $row = $(g.rowHTML);
-         $row.find('td.cayleyDiagram').append($img);
+         $row.find('td.cayleyDiagram a div').empty().append($img);
          $('#GroupTable tbody').append($row);
       }
    }
@@ -65,17 +63,17 @@ function readLibrary() {
 
 function finish(urlsToDisplay) {
    const exit = () => {
+      registerEventHandlers();   
       $( '#loadingMessage' ).hide();
-      columnSort( 1, true );
+      $('#GroupTableHeaders th.sort-down').triggerHandler('click');
 
       // store stylesheet in localStorage
       const mathjaxStylesheet = ($('style').toArray() /*: Array<HTMLStyleElement> */).filter( (s) => s.textContent.trim().startsWith('.mjx-chtml') )[0];
       if (mathjaxStylesheet != undefined) {
-         localStorage.setItem('mathjax_stylesheet',mathjaxStylesheet.outerHTML);
+         localStorage.setItem('mathjax_stylesheet', mathjaxStylesheet.outerHTML);
       }
    };
 
-   columnSort(1, true);
    $( '#loadingMessage' ).show();
 
    // check that the locally stored definitions currently displayed are the latest; refresh if not
@@ -101,7 +99,7 @@ function finish(urlsToDisplay) {
                       $(row).find('span.MathJax_Preview, span.MJX_Assistive_MathML, script[type="math/mml"]').remove();
                       const $cayleyDiagram = $(row).find('td.cayleyDiagram img').detach();
                       group.rowHTML = row.outerHTML;
-                      $(row).find('td.cayleyDiagram').append($cayleyDiagram);
+                      $(row).find('td.cayleyDiagram a div').empty().append($cayleyDiagram);
                       $(row).detach().appendTo('#GroupTable tbody');
                       Library.saveGroup(group);
                       if ( urlIndex == urlsToDisplay.length ) {
@@ -139,43 +137,50 @@ function displayGroup(group) {
       const img = graphicContext.getImage(graphicData);
       group.CayleyThumbnail = img.src;
       img.height = img.width = 32;
-      $row.find("td.cayleyDiagram").empty().append(img);
+      $row.find("td.cayleyDiagram a div").html(img.outerHTML);
    }
 
    // draw Multtable
    {
       const graphicData = new Multtable(group);
       const img = multtableContext.getImage(graphicData);
-      $row.find("td.multiplicationTable").empty().append(img);
+      $row.find("td.multiplicationTable a div").html(img.outerHTML);
    }
 
    // draw Symmetry Object
-   if (symmetryTitle != undefined) {
+   if (symmetryTitle == undefined) {
+      $row.find("td.symmetryObject").html('none').addClass('noDiagram').removeAttr('title');
+   } else {
       const graphicData = SymmetryObject.generate(group, symmetryTitle);
       const img = graphicContext.getImage(graphicData);
       img.height = img.width = 32;
-      $row.find("td.symmetryObject").empty().append(img);
+      $row.find("td.symmetryObject a div").html(img.outerHTML);
    }
 
    // draw Cycle Graph
    {
       const graphicData = new CycleGraph( group );
       const img = cycleGraphContext.getImage( graphicData );
-      $row.find("td.cycleGraph").empty().append(img);
+      $row.find("td.cycleGraph a div").html(img.outerHTML);
    }
 
    return $row;
 }
 
 // callback to sort table on column value, invoked by clicking on column head
-function columnSort(columnIndex, makeSortUp = ! $($('th')[columnIndex]).hasClass('sort-up')) {
-   for (let i = 0; i < 2; i++) {
-      $($('th')[i]).removeClass('sort-down')
+function columnSort(event /*: JQueryEventObject */) {
+   const column = event.currentTarget;
+   const columnIndex = $('#GroupTableHeaders th.sortable').toArray().findIndex( (th) => th == column );
+   if (columnIndex == -1) {
+      console.error(`unknown event in columnSort`);
+      return;
+   }
+   const makeSortUp = !$(column).hasClass('sort-up');
+   $('th.sortable').removeClass('sort-down')
                    .removeClass('sort-up')
                    .addClass('sort-none');
-   }
-   $($('th')[columnIndex]).removeClass('sort-none')
-                          .addClass(makeSortUp ? 'sort-up' : 'sort-down');
+   $(column).removeClass('sort-none')
+          .addClass(makeSortUp ? 'sort-up' : 'sort-down');
 
    const getCellValue = (tr, idx) /*: string */ => tr.children[idx].textContent;
 
@@ -191,116 +196,155 @@ function columnSort(columnIndex, makeSortUp = ! $($('th')[columnIndex]).hasClass
                          .each((_,tr) => $('#GroupTable tbody').append(tr))
 }
 
+
 class HoverHelp {
 /*::
-   static pollerID : IntervalID;
-   static mouse_event : void | (JQueryMouseEventObject & {tooltip_shown: boolean, timeStamp: number});
-   static data : Array<{klass: string, pageURL: string, background: string, tooltip: string}>;
+   static lastEntry: ?{cell: HTMLElement, timeStamp: number}
  */
-   // pollerID = id of polling routine from window.setInterval call
-   // mouse_event = event from last 'mousemove' event (event contains timestamp) (undefined => no mousemove event to be handled)
+   static init() {
+      const tbody = $('#GroupTable tbody')[0];
+      if (window.hasOwnProperty('ontouchstart')) {
+         $('#GroupTable')[0].addEventListener('click', HoverHelp.clickHandler);  // tap anywhere in table to clear tooltip
 
-   static eventHandler(_event /*: JQueryEventObject */) {
-      const event = ((_event /*: any */) /*: JQueryMouseEventObject & {tooltip_shown: boolean, timeStamp: number} */);
+         // set up touch event listeners
+//         ['click', 'touchstart', 'touchmove', 'touchend'].forEach( (event) => tbody.addEventListener(event, (ev /*: Event */) => console.log(`sniffer: ${ev.type}`)) );
+         
+         ['touchstart', 'touchmove', 'touchend'].forEach( (event) => tbody.addEventListener(event, HoverHelp.highlightHandler) );
+         ['touchstart', 'touchmove', 'touchend'].forEach( (event) => tbody.addEventListener(event, HoverHelp.tipHandler) );
+      } else {
+         tbody.addEventListener('mousemove', HoverHelp.highlightHandler);
+         tbody.addEventListener('mouseleave', HoverHelp.clearHighlighting);
+      }         
+   }
 
-      if (event.ctrlKey || event.shiftKey || event.altKey) {
+   static clickHandler(clickEvent /*: MouseEvent */) {
+      // skip modified events
+      if (clickEvent.altKey || clickEvent.ctrlKey || clickEvent.metaKey || clickEvent.shiftKey) {
          return;
       }
 
-      if (event.type == 'click') {
-         // clear background, mouse_event, tooltip
-         if (HoverHelp.mouse_event != undefined) {
-            $(HoverHelp.mouse_event.target).closest('td')
-                                           .css('background-color', '#FFFFFF')
-                                           .css('cursor', 'default');
+      const $tooltip = $('#tooltip');
+      if ($tooltip.length > 0) {
+         $tooltip.remove();
+      } else {
+         const $link = $(document.elementFromPoint(clickEvent.clientX, clickEvent.clientY)).closest('td').find('a[title]');
+         if ($link.length != 0) {
+            window.open($link.attr('href'));
          }
-         HoverHelp.mouse_event = undefined;
-         $('#tooltip').remove();
+      }
 
-         // get td, class
-         const $td = $(event.target).closest('td');
-         if ($td.text() != 'none') {
-            for (const {klass, pageURL} of HoverHelp.data) {
-               if ($td.hasClass(klass)) {
-                  const groupURL = $td.parent().attr('group');
-                  const group = Library.map[groupURL];
-                  const options = (group.cayleyDiagrams.length != 0) ?
-                        {diagram:group.cayleyDiagrams[0].name} : {};
-                  Library.openWithGroupURL(pageURL, groupURL, options);
-                  break;
+      clickEvent.preventDefault();
+      HoverHelp.lastEntry = null;
+   }
+
+   static tipHandler(touchEvent /*: TouchEvent */) {
+      // skip modified events, multi-touches
+      if (   touchEvent.altKey || touchEvent.ctrlKey || touchEvent.metaKey || touchEvent.shiftKey
+          || touchEvent.touches.length > 1 || touchEvent.changedTouches.length > 1) {
+         return;
+      }
+
+      const lastEntry = HoverHelp.lastEntry;
+      const touch /*: Touch */ = (touchEvent.changedTouches[0] /*: any */);
+      const $cell /*: JQuery */ = $(document.elementFromPoint(touch.clientX, touch.clientY)).closest('td');
+      const $tooltip = $('#tooltip');
+      
+      switch (touchEvent.type) {
+      case 'touchstart':
+         if ($tooltip.length != 0) {
+            $tooltip.remove();
+            HoverHelp.clearHighlighting();
+            touchEvent.preventDefault();
+         }
+         HoverHelp.lastEntry = {cell: $cell[0], timeStamp: touchEvent.timeStamp};
+         break;
+
+      case 'touchmove':
+         if (lastEntry == undefined) {
+            HoverHelp.lastEntry = {cell: $cell[0], timeStamp: touchEvent.timeStamp};            
+         } else if (lastEntry.cell != $cell[0]) {
+            $tooltip.remove();
+            HoverHelp.lastEntry = {cell: $cell[0], timeStamp: touchEvent.timeStamp};
+         } else if (   $cell.find('#tooltip').length == 0
+                    && !$cell.hasClass('noDiagram')
+                    && touchEvent.timeStamp - lastEntry.timeStamp > 350) {
+            $tooltip.remove();
+            const $newTip = HoverHelp.getTooltip($cell);
+            if ($newTip) {
+               Menu.setMenuLocations(touch, $newTip);
+            }
+         }
+         touchEvent.preventDefault();  // prevents scrolling while user moves around display showing highlighting, tooltips
+         break;
+
+         case 'touchend':
+         if (lastEntry != undefined) {
+            if (lastEntry.cell != $cell[0]) {
+               $tooltip.remove();
+            } else if (   $cell.find('#tooltip').length == 0
+                       && !$cell.hasClass('noDiagram')
+                       && touchEvent.timeStamp - lastEntry.timeStamp > 350) {
+               $tooltip.remove();
+               const $newTip = HoverHelp.getTooltip($cell);
+               if ($newTip) {
+                  Menu.setMenuLocations(touch, $newTip);
                }
             }
          }
-      } else if (event.type == 'mousemove') {
-         const mouse_event = HoverHelp.mouse_event;
-         const $old_td = (mouse_event == undefined) ? undefined : $(mouse_event.target).closest('td');
-         const $new_td = $(event.target).closest('td');
-         if ($old_td === undefined || $old_td[0] != $new_td[0]) {
-            if ($old_td !== undefined) {
-               $old_td.css('background-color', '#FFFFFF')
-                      .css('cursor', 'default');
-            }
-            for (const {klass, background} of HoverHelp.data) {
-               if ($new_td.hasClass(klass) && $new_td.text() != 'none') {
-                  $new_td.css('background-color', background)
-                         .css('cursor', 'pointer');
-                  break;
-               }
-            }
-            event.tooltip_shown = false;
-            $('#tooltip').remove();
-         } else {
-            event.tooltip_shown = (HoverHelp.mouse_event === undefined) ? false : HoverHelp.mouse_event.tooltip_shown;
-         }
-         if ($new_td.text() != 'none') {
-            HoverHelp.mouse_event = event;
-         }
-      } else if (event.type = 'mouseleave') {
-         // clear background
-         if (HoverHelp.mouse_event != undefined) {
-            $(HoverHelp.mouse_event.target).closest('td')
-                                           .css('background-color', '#FFFFFF')
-                                           .css('cursor', 'default');
-         }
-         // clear mouse_event, tooltip
-         HoverHelp.mouse_event = undefined;
-         $('#tooltip').remove();
+         HoverHelp.lastEntry = null;
+         break;
       }
    }
 
-   static poller() {
-      const mouse_event = HoverHelp.mouse_event;
-      if (   mouse_event !== undefined
-          && !mouse_event.tooltip_shown
-          && $(mouse_event.target).closest('td') !== undefined
-          && performance.now() - mouse_event.timeStamp > 500) {
-         const $td = $(mouse_event.target).closest('td');
-         for (const {klass, tooltip} of HoverHelp.data) {
-            if ($td.hasClass(klass)) {
-               const $tooltip = $('<div id="tooltip" class="menu">')
-                  .attr('timestamp', performance.now())
-                  .text(tooltip)
-                  .appendTo($td);
-               Menu.setMenuLocations(mouse_event, $tooltip);
-               mouse_event.tooltip_shown = true;
-               break;
-            }
+   static getTooltip($cell /*: JQuery */) /*: ?JQuery */ {
+      const $anchor = $cell.find('a[title]');
+      if ($anchor.length == 0) {
+         console.error("can't find anchor in td");
+         return null;
+      }
+      const tooltipText = $anchor.attr('title');
+      const $newTip = $('<div id="tooltip" class="menu">')
+            .text(tooltipText)
+            .appendTo($cell);
+      return $newTip;
+   }
+
+   static highlightHandler(event /*: MouseEvent | TouchEvent */) {
+      // skip modified events, multi-touches
+      if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) {
+         return;
+      }
+      if (event.type.startsWith('touch')) {
+         const touchEvent /*: TouchEvent */ = (event /*: any */);
+         if (touchEvent.touches.length > 1 || touchEvent.changedTouches.length > 1) {
+            return;
          }
       }
 
-      // if tooltip is more than 10 sec old, clear it
-      if ($('#tooltip')[0] !== undefined && performance.now() - parseInt($('#tooltip').attr('timestamp')) > 10000) {
-         $('#tooltip').remove()
+      switch (event.type) {
+      case 'touchstart':
+      case 'touchmove':
+      case 'mousemove': {
+         const xy /*: {clientX: number, clientY: number} */ =
+               event.type.startsWith('touch')
+               ? ((event /*: any */) /*: TouchEvent */).touches[0]
+               : ((event /*: any */) /*: MouseEvent */);
+         const $cell = $(document.elementFromPoint(xy.clientX, xy.clientY)).closest('td');
+         if (!$cell.hasClass('emphasized')) {
+            HoverHelp.clearHighlighting();
+            $cell.closest('tr').addClass('highlighted');  // set this element's row's class to 'highlighted'
+            $cell.addClass('emphasized');  // set this element's class to 'emphasized'
+         } }
+         break;
+
+      case 'touchend':
+         HoverHelp.clearHighlighting();
+         break;
       }
+   }
+
+   static clearHighlighting() {
+      $('#GroupTable > tbody > tr.highlighted').removeClass('highlighted');
+      $('#GroupTable > tbody td.emphasized').removeClass('emphasized');
    }
 }
-
-HoverHelp.data = [
-   {klass: 'groupName', pageURL: 'GroupInfo.html', background: '#F2F2F2', tooltip: 'Open Group Info page'},
-   {klass: 'definition', pageURL: 'GroupInfo.html', background: '#F2F2F2', tooltip: 'Open Group Info page'},
-   {klass: 'cayleyDiagram', pageURL: 'CayleyDiagram.html', background: '#F7EDED', tooltip: 'Open Cayley Diagram visualizer'},
-   {klass: 'multiplicationTable', pageURL: 'Multtable.html', background: '#F2FFD6', tooltip: 'Open Multiplication Table visualizer'},
-   {klass: 'symmetryObject', pageURL: 'SymmetryObject.html', background: '#EDF7ED', tooltip: 'Open Symmetry Object visualizer'},
-   {klass: 'cycleGraph', pageURL: 'CycleDiagram.html', background: '#EDEDF7', tooltip: 'Open Cycle Graph Visualizer'},
-]
-HoverHelp.pollerID = setInterval(HoverHelp.poller, 500);
