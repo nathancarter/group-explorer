@@ -22,7 +22,7 @@ class DisplayCycleGraph {
    canvas: HTMLCanvasElement;
    context: CanvasRenderingContext2D;
    options: Options;
-   zoom: number;
+   zoomFactor: number;
    translate: {dx: number, dy: number};
    transform: THREE.Matrix3;
    cycleGraph: CycleGraph;
@@ -50,7 +50,7 @@ class DisplayCycleGraph {
       this.setSize( width, height );
       this.context = this.canvas.getContext('2d');
       this.options = options;
-      this.zoom = 1;  // user-supplied scale factor multiplier
+      this.zoomFactor = 1;  // user-supplied scale factor multiplier
       this.translate = {dx: 0, dy: 0};  // user-supplied translation, in screen coordinates
       this.transform = new THREE.Matrix3();  // current cycleGraph -> screen transformation
    }
@@ -127,7 +127,7 @@ class DisplayCycleGraph {
       const raw_scale = Math.min(this.canvas.width / (bbox.right - bbox.left + 2 * margin),
                                  this.canvas.height / (bbox.top - bbox.bottom + 2 * margin) );
       // scale with zoom
-      let scale = this.zoom * raw_scale;
+      let scale = this.zoomFactor * raw_scale;
 
       // translate center of scaled bbox to center of canvas
       let x_translate = (this.canvas.width - scale*(bbox.right + bbox.left))/2;
@@ -137,7 +137,7 @@ class DisplayCycleGraph {
       if (this.cycleGraph.group.order == 1) {
          const sideLength = Math.min(this.canvas.width, this.canvas.height);
          this.radius = sideLength / 10;
-         scale = this.zoom * sideLength / (sideLength + 4 * this.radius);
+         scale = this.zoomFactor * sideLength / (sideLength + 4 * this.radius);
          x_translate = this.canvas.width / 2;
          y_translate = this.canvas.height / 2;
       }
@@ -274,7 +274,7 @@ class DisplayCycleGraph {
 
    // interface for zoom-to-fit GUI command
    reset() {
-      this.zoom = 1;
+      this.zoomFactor = 1;
       this.translate = {dx: 0, dy: 0};
    }
 
@@ -288,9 +288,14 @@ class DisplayCycleGraph {
       this._centeredZoom(1/(1 + DisplayCycleGraph.DEFAULT_ZOOM_STEP) - 1);
    }
 
+   zoom(factor /*: number */) {
+      this._centeredZoom(factor -  1);
+      return this;
+   }
+
    // changing the translation keeps the center of the model centered in the canvas
    _centeredZoom(dZoom /*: float */) {
-      this.zoom = this.zoom * (1 + dZoom);
+      this.zoomFactor = this.zoomFactor * (1 + dZoom);
       this.move(this.translate.dx * dZoom, this.translate.dy * dZoom);
    }
 
@@ -298,6 +303,7 @@ class DisplayCycleGraph {
    move(deltaX /*: float */, deltaY /*: float */) {
       this.translate.dx += deltaX;
       this.translate.dy += deltaY;
+      return this;
    }
 
    // given screen coordinates, returns element associated with node,

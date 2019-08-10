@@ -36,7 +36,7 @@ class DisplayMulttable {
    options: Options;
    canvas: HTMLCanvasElement;
    context: CanvasRenderingContext2D;
-   zoom: number;
+   zoomFactor: number;
    translate: {dx: number, dy: number};
    transform: THREE.Matrix3;
    multtable: Multtable;
@@ -68,7 +68,7 @@ class DisplayMulttable {
       if (container !== undefined) {
          container.append(this.canvas);
       }
-      this.zoom = 1;  // user-supplied scale factor multiplier
+      this.zoomFactor = 1;  // user-supplied scale factor multiplier
       this.translate = {dx: 0, dy: 0};  // user-supplied translation, in screen coordinates
       this.transform = new THREE.Matrix3();  // current multtable -> screen transformation
    }
@@ -140,7 +140,7 @@ class DisplayMulttable {
       this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
       // set up scaling, translation from multtable units to screen pixels
-      const scale = this.zoom * Math.min(this.canvas.width / multtable.size, this.canvas.height / multtable.size, 200);
+      const scale = this.zoomFactor * Math.min(this.canvas.width / multtable.size, this.canvas.height / multtable.size, 200);
 
       // translate center of scaled multtable to center of canvas
       let x_translate = (this.canvas.width - scale*multtable.size)/2;
@@ -297,7 +297,7 @@ class DisplayMulttable {
 
    // interface for zoom-to-fit GUI command
    reset() {
-      this.zoom = 1;
+      this.zoomFactor = 1;
       this.translate = {dx: 0, dy: 0};
    }
 
@@ -311,9 +311,14 @@ class DisplayMulttable {
       this._centeredZoom(1/(1 + DisplayMulttable.ZOOM_STEP) - 1);
    }
 
+   zoom(factor /*: number */) {
+      this._centeredZoom(factor -  1);
+      return this;
+   }
+
    // changing the translation keeps the center of the model centered in the canvas
    _centeredZoom(dZoom /*: number */) {
-      this.zoom = this.zoom * (1 + dZoom);
+      this.zoomFactor = this.zoomFactor * (1 + dZoom);
       this.move(this.translate.dx * dZoom, this.translate.dy * dZoom);
    }
 
@@ -321,15 +326,16 @@ class DisplayMulttable {
    move(deltaX /*: number */, deltaY /*: number */) {
       this.translate.dx += deltaX;
       this.translate.dy += deltaY;
+      return this;
    }
 
-   // given screen coordinates, returns element associated with box, or 'undefined'
-   select(screenX /*: number */, screenY /*: number */) {
-      // compute cycleGraph coordinates from screen coordinates by inverting this.transform
-      const mult = new THREE.Vector2(screenX, screenY).applyMatrix3(new THREE.Matrix3().getInverse(this.transform));
+   // Compute Multtable 0-based row, column from canvas-relative screen coordinates by inverting this.transform
+   //   returns null if point is outside Multtable
+   xy2rowXcol(canvasX /*: number */, canvasY /*: number */) /*: ?{row: number, col: number} */ {
+      const mult = new THREE.Vector2(canvasX, canvasY).applyMatrix3(new THREE.Matrix3().getInverse(this.transform));
       const x = this.multtable.index(mult.x);
       const y = this.multtable.index(mult.y);
-      return (x === undefined || y === undefined) ? undefined : {x: x, y: y};
+      return (x == undefined || y == undefined) ? null : {col: x, row: y};
    }
 
    // Be able to answer the question of where in the diagram any given element is drawn.
