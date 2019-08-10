@@ -14,6 +14,7 @@ import PartitionSubset from './PartitionSubset.js';
 import Subgroup from './Subgroup.js';
 import SubsetEditor from './SubsetEditor.js';
 import Subset from './Subset.js';
+import SubsetMenu from './SubsetMenu.js';
 
 var group: XMLGroup;
 
@@ -35,6 +36,7 @@ class SSD {
    static Subgroup: Class<Subgroup>;
    static SubsetEditor: Class<SubsetEditor>;
    static Subset: Class<Subset>;
+   static SubsetMenu: Class<SubsetMenu>;
  */
    static _init() {
       SSD.subsetsURL = './subsetDisplay/subsets.html';
@@ -68,15 +70,6 @@ class SSD {
       SSD.nextSubsetIndex = 0;
       SSD.displayList = [];
 
-      // clear displayed menus, highlighting
-      SSD.clearMenus();
-
-      // Register event handlers
-      $(window).off('click', SSD.clearMenus).on('click', SSD.clearMenus)
-               .off('contextmenu', SSD.clearMenus).on('contextmenu', SSD.clearMenus);
-      $('#subset_page').off('contextmenu', SSD.contextMenuHandler).on('contextmenu', SSD.contextMenuHandler)
-                       .off('dblclick', SSD.dblClickHandler).on('dblclick', SSD.dblClickHandler);
-
       // clear out displayed lists; show '(None)' placeholders
       $('ul.subset_page_content li').remove();
       $('p.placeholder').show();
@@ -84,116 +77,9 @@ class SSD {
       // Display all subgroups
       SSD.Subgroup.displayAll();
       MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'subset_page']);
-   }
 
-   /*
-    * Double-click displays elements in subset
-    */
-   static dblClickHandler(_event /*: JQueryEventObject */ ) {
-      const event = ((_event /*: any */) /*: JQueryMouseEventObject */);
-      event.preventDefault();
-      SSD.clearMenus();
-      const $curr = $(event.target).closest('li');
-      const id = $curr.attr('id');
-      if (id != undefined) {
-         const subset = SSD.displayList[parseInt(id)];
-         const subsetName = subset.name;
-         const subsetElements = subset.elements.toArray().map( (el) => group.representation[el] );
-         const $menu = $(eval(Template.HTML('subsetElements_template')));
-         $curr.addClass('highlighted').append($menu);
-         event.stopPropagation();
-         const follow = () => {
-            const bounds /*: Array<ClientRect> */ =
-                  $menu.find('span.mjx-chtml').map( (_, span) => span.getBoundingClientRect() ).toArray();
-            const extrema /*: {leftmost: number, rightmost: number} */ =
-                  bounds.reduce( (lr /*: {leftmost: number, rightmost: number} */, rect /*: ClientRect */) => {
-                     return {leftmost: Math.min(lr.leftmost, rect.left), rightmost: Math.max(lr.rightmost, rect.right)}
-                  }, {leftmost: Number.MAX_SAFE_INTEGER, rightmost: Number.MIN_SAFE_INTEGER} );
-            $menu.css({'width': extrema.rightmost - extrema.leftmost, 'max-width': ''});
-            Menu.setMenuLocations(event, $menu);
-            $menu.css('visibility', 'visible');
-         };
-         MathJax.Hub.Queue(['Typeset', MathJax.Hub, $menu[0]], follow);
-      }
-   }
-
-   /*
-    * Left-click executes "action" attribute in menu item
-    */
-   static menuClickHandler(event /*: JQueryEventObject */) {
-      event.preventDefault();
-      const $curr = $(event.target).closest('[action]');
-      if ($curr.attr('action') !== undefined) {
-         eval($curr.attr('action'));
-         SSD.clearMenus();
-         event.stopPropagation();
-         MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'subset_page']);
-      }
-   }
-
-   /*
-    * Right-click displays context menu according to
-    *   -- target class (subset_page_header or placeholder)
-    *   -- li element id (<subset>.menu)
-    */
-   static contextMenuHandler(_event /*: JQueryEventObject */) {
-      const event = ((_event /*: any */) /*: JQueryMouseEventObject */);
-
-      event.preventDefault();
-      const $curr = $(event.target).closest('p.subset_page_header, p.placeholder, li[id]');
-
-      // unrecognized event
-      if ($curr.length == 0) return;
-
-      SSD.clearMenus();
-
-      const isHeaderMenu = $curr[0].tagName == "P";
-      const $menu = isHeaderMenu ?
-                    $(eval(Template.HTML('headerMenu_template'))) :
-                    SSD.displayList[parseInt($curr[0].id)].menu;
-      $menu.on('click', SSD.menuClickHandler);
-      $curr.addClass('highlighted').append($menu);
-      $menu.css('visibility', 'hidden');
-      event.stopPropagation();
-
-      const follow = () => {
-         if (!isHeaderMenu) {
-            SSD._makeLongLists($curr[0].id, $menu);
-         }
-         Menu.setMenuLocations(event, $menu);
-         $menu.css('visibility', 'visible');
-      };
-      MathJax.Hub.Queue(['Typeset', MathJax.Hub, $menu[0]], follow);
-   }
-
-   static _makeLongLists(_id /*: string */, $menu /*: JQuery */) {
-      const id = parseInt(_id);
-      const classes = ['.intersection', '.union', '.elementwise-product'];
-      const operations = ['intersection', 'union', 'elementwiseProduct'];
-      const printOps = ['intersection', 'union', 'elementwise product'];
-      const node = MathML.sans(SSD.displayList[id].name);
-      for (let inx = 0; inx < classes.length; inx++) {
-         const operation = operations[inx];
-         const printOp = printOps[inx];
-         let frag = '';
-         for (let otherId = 0; otherId < group.subgroups.length; otherId++) {
-            if (id != otherId) {
-               frag +=
-                  `<li action="SSD.displayList[${id}].${operation}(SSD.displayList[${otherId}])">` +
-                  `the ${printOp} of ${node} with ${MathML.sans(SSD.displayList[otherId].name)}</li>`;
-            }
-         }
-         for (let otherId = group.subgroups.length; otherId < SSD.displayList.length; otherId++) {
-            if (id != otherId && SSD.displayList[otherId] !== undefined) {
-               const otherName = $(`#${otherId}`).children()[1].outerHTML;
-               frag +=
-                  `<li action="SSD.displayList[${id}].${operation}(SSD.displayList[${otherId}])">` +
-                  `the ${printOp} of ${node} with ${otherName}</li>`;
-            }
-         }
-         $menu.find(classes[inx]).html(frag);
-      }
-   }
+      // set up event listeners for menus
+      SSD.SubsetMenu.init();   }
 }
 
 SSD._init();

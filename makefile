@@ -14,6 +14,7 @@ SUB_FILES = subsetDisplay/subsets.js           subsetDisplay/AbstractSubset.js  
             subsetDisplay/SubsetEditor.js      subsetDisplay/AbstractPartition.js \
             subsetDisplay/PartitionSubset.js   subsetDisplay/OrderClasses.js    \
             subsetDisplay/ConjugacyClasses.js  subsetDisplay/Cosets.js          \
+            subsetDisplay/SubsetMenu.js                                         \
 										\
             diagramController/diagram.js       diagramController/Generator.js   \
             diagramController/DiagramChoice.js diagramController/Arrow.js       \

@@ -10,6 +10,10 @@ sub, sup {
 ul {
    list-style-type: none;
 }
+#subset_page {
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
 
 p.subset_page_header {
    font-size: 24px;
