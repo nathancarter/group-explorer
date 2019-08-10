@@ -1,4 +1,8 @@
 
+#diagram-control {
+    -webkit-user-select: none;  /* prevents cut-and-paste */
+}
+
 .fog {
     position: absolute;
     left: 0;
