@@ -11,6 +11,7 @@ declare type html = string;
 declare type mathml = string;
 declare type groupElement = number;
 declare type color = string;
+declare type eventLocation = {clientX: number, clientY: number};
 
 // Window, as used in GE3
 declare class Window {
@@ -32,5 +33,6 @@ declare class Window {
     setTimeout(fn: () => void, delay: number): number;
     clearInterval(number): void;
     getSelection(): Selection;
+    ontouchstart?: Function;
 }
 declare var window: Window;
