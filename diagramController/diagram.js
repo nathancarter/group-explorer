@@ -42,16 +42,15 @@ class DC {
    }
 
    static setupDiagramPage() {
-      $(window).off('click', DC.clearMenus).on('click', DC.clearMenus)
-               .off('contextmenu', DC.clearMenus).on('contextmenu', DC.clearMenus);
-
       DC.DiagramChoice.setupDiagramSelect();
+      $('#header').on('click', DC.clearMenus);
+      $('#vert-container').on('click', DC.clearMenus);
+
       $('#diagram-select').off('click', DC.DiagramChoice.clickHandler).on('click', DC.DiagramChoice.clickHandler);
 
       $('#arrow-control').off('click', DC.Arrow.clickHandler).on('click', DC.Arrow.clickHandler);
 
       $('#generation-control').off('click', DC.Generator.clickHandler).on('click', DC.Generator.clickHandler);
-      $('#generation-control').off('contextmenu', DC.Generator.clickHandler).on('contextmenu', DC.Generator.clickHandler);
       $('#generation-table').off('dragstart', DC.Generator.dragStart).on('dragstart', DC.Generator.dragStart);
       $('#generation-table').off('drop', DC.Generator.drop).on('drop', DC.Generator.drop);
       $('#generation-table').off('dragover', DC.Generator.dragOver).on('dragover', DC.Generator.dragOver);
@@ -67,3 +66,4 @@ class DC {
 }
 
 DC.DIAGRAM_PANEL_URL = 'diagramController/diagram.html';
+
