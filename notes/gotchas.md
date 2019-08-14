@@ -33,3 +33,44 @@ Rather than having MathJax re-generate a phrase every time you use it, you can c
 In the interest of saving space you really only need to copy part of the generated HTML, the top &lt;span&gt; with class `mjx-chtml` and its sub-span with class `mjx-math`. A problem came up doing this, though: mixing the partial HTML copy with new MathML for MathJax to process confuses MathJax. The workaround in GroupExplorer is to stage the new MathML in a hidden scratch area and process it there, then copy it to the normal visible area on completion.
 
 Firefox (65.0.1) seems to ignore the size of a parent flex container if it's expressed as %. Since the container is going to be flexed anyhow, the workaround here is just to give it some value to work from.
+
+Mouse-driven and touch-driven displays have some conceptual differences between the way primitive pointer actions (mouseup/mousedown, touchstart/touchend) synthesize events like click and dblclick. 
+Click:
+  On a mouse-only machine a clicking a mouse button causes the event sequence "mousedown mouseup click"
+    even if the mouse moves while depressed
+    even if it's depressed for a long time
+    even if you call event.preventDefault() on all the mouse* events
+    (unless the mousedown occurs over a draggable element)
+  On the iPad a tapping causes the event sequence "touchstart touchend click"
+    only if they are in rapid succession
+    only if they are close to each other
+    only if event.preventDefault() is not called on either event
+Double click:
+  On a mouse-only machine a double-click causes the event sequence "mousedown mouseup click mousedown mouseup click dblclick"
+    unless the mouse moves
+    unless the clicks are sustained
+    unless the interval between the clicks is too long
+    even if you call event.preventDefault() on all the events
+  On the iPad a double-tap never produces a dblclick event -- you have to implement that yourself
+    it causes the event sequence "touchstart touchend touchstart touchend" if the taps are in rapid succession
+    otherwise it just looks like two separate taps (see above)
+
+On an iPad the following bug
+   <head>
+      <script>
+       function register() {
+          document.getElementById('body').addEventListener('click', () => alert('click'));
+          // uncomment the line below and the body listener works as expected
+          // document.getElementById('inner').addEventListener('click', () => undefined);
+       }
+      </script>
+   </head>
+   <body id="body" onload="register()">
+      <div id="inner" style="height: 100%"></div>
+   </body>
+can be worked around by putting a wrapper immediately inside the body element:
+   <body onload="register()">
+      <div id="body">
+        <div id="inner" style="height: 100%"></div>
+      </div>
+   </body>
