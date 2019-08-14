@@ -14,7 +14,7 @@ declare type color = string;
 declare type eventLocation = {clientX: number, clientY: number};
 
 // Window, as used in GE3
-declare class Window {
+declare class Window extends EventTarget {
     parent: Window;
     location: Location;
     innerHeight: number;
@@ -22,10 +22,6 @@ declare class Window {
     document: Document;
     navigator: {userAgent: string};
     open(url: string): Window;
-    addEventListener(type: MouseEventTypes, listener: MouseEventHandler, useCapture: ?boolean): void;
-    addEventListener(type: WheelEventTypes, listener: WheelEventHandler, useCapture: ?boolean): void;
-    addEventListener(type: MessageEventTypes, listener: MessageEventHandler, useCapture: ?boolean): void;
-    addEventListener(type: ProgressEventTypes, listener: ProgressEventHandler, useCapture: ?boolean): void;
     requestAnimationFrame(callback: (timestamp: number) => void): void;
     postMessage(message: any, targetOrigin: string): void;
     setInterval(fn: () => void, interval: number): number;
