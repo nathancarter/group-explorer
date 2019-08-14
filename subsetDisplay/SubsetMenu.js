@@ -16,9 +16,6 @@ SSD.SubsetMenu = class {
    static lastEntry: {menuElement: ?HTMLElement, timeStamp: number};
  */
    static init() {
-      SSD.clearMenus();
-      $('#header').on('click', SSD.clearMenus);
-      $('#vert-container').on('click', SSD.clearMenus);  // don't know why IOS/iPad needs to break it up like this...
       SSD.SubsetMenu.lastEntry = {menuElement: undefined, timeStamp: 0};
       const subsetPage = $('#subset_page')[0];
       if (window.hasOwnProperty('ontouchstart')) {   // touch device?
@@ -85,7 +82,7 @@ SSD.SubsetMenu = class {
          //   otherwise, if interval is short, post menu; else popup elements display
       case 'touchend':
          if ($('#subset_page .menu:visible, #subset_page .elements').length != 0) {
-            SSD.clearMenus();
+            $('#bodyDouble').click();
          } else {
             const touch /*: Touch */ = (touchEvent.changedTouches[0] /*: any */);
             const $target = $(document.elementFromPoint(touch.clientX, touch.clientY));
@@ -105,7 +102,7 @@ SSD.SubsetMenu = class {
 
    static displayElements(event /*: Event */, location /*: {clientX: number, clientY: number} */) {
       event.preventDefault();
-      SSD.clearMenus();
+      $('#bodyDouble').click();
       const $curr = $(document.elementFromPoint(location.clientX, location.clientY)).closest('li');
       const id = $curr.attr('id');
       if (id != undefined) {
@@ -194,7 +191,7 @@ class SSD_Menu {
       // unrecognized event
       if ($curr.length == 0) return;
 
-      SSD.clearMenus();
+      $('#bodyDouble').click();
 
       const isHeaderMenu = $curr[0].tagName == "P";
       const $menu = isHeaderMenu ?

@@ -24,17 +24,20 @@ DC.Generator = class {
    static axis_image: Array<[string, string, string]>;
    static orders: Array<Array<string>>;
  */
-   static clickHandler(event /*: JQueryEventObject */) {
-      event.preventDefault();
+   static clickHandler(clickEvent /*: MouseEvent */) {
+      clickEvent.preventDefault();
 
       // check if disabled
       if (DC.Generator.isDisabled()) {
          return;
       }
-      eval($($(event.target).closest('[action]')).attr('action'));
-      event.stopPropagation();
+      eval($($(clickEvent.target).closest('[action]')).attr('action'));
+      clickEvent.stopPropagation();
    }
 
+   /*
+    * Draw Generator table
+    */
    static draw() {
       if (DC.Generator.isDisabled()) {
          return;
@@ -56,7 +59,10 @@ DC.Generator = class {
       }
    }
 
-   static showGeneratorMenu(event /*: JQueryEventObject */, strategy_index /*: number */) {
+   /*
+    * Show option menus for the columns of the Generator table
+    */
+   static showGeneratorMenu(eventLocation /*: eventLocation */, strategy_index /*: number */) {
       DC.clearMenus();
       const $generator_menu = DC.Generator.getGenericMenu();
 
@@ -73,20 +79,18 @@ DC.Generator = class {
       );
 
       $('#generation-table').append($generator_menu);
-      MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'generation-list']);
-      DC.Generator._typesetMenu(event, $generator_menu);
+      DC.Generator._typesetMenu(eventLocation, $generator_menu);
    }
 
-   static _typesetMenu(_event /*: JQueryEventObject */, $menu /*: JQuery */) {
-      const event = ((_event /*: any */) /*: JQueryMouseEventObject */);
+   static _typesetMenu(eventLocation /*: eventLocation */, $menu /*: JQuery */) {
       $menu.css('visibility', 'hidden');
-      const showMenu = () => { Menu.setMenuLocations(event, $menu);
+      const showMenu = () => { Menu.setMenuLocations(eventLocation, $menu);
                                $menu.css('visibility', 'visible');
                              };
       MathJax.Hub.Queue(['Typeset', MathJax.Hub, $menu[0]], showMenu);
    }
 
-   static showAxisMenu(event /*: JQueryEventObject */, strategy_index /*: number */) {
+   static showAxisMenu(eventLocation /*: eventLocation */, strategy_index /*: number */) {
       DC.clearMenus();
 
       // previously generated subgroup must have > 2 cosets in this subgroup
@@ -100,10 +104,10 @@ DC.Generator = class {
                              .prepend($(eval(Template.HTML('axis-menu-template'))));
 
       $('#generation-table').append($layout_menu);
-      DC.Generator._typesetMenu(event, $layout_menu);
+      DC.Generator._typesetMenu(eventLocation, $layout_menu);
    }
 
-   static showOrderMenu(event /*: JQueryEventObject */, strategy_index /*: number */) {
+   static showOrderMenu(eventLocation /*: eventLocation */, strategy_index /*: number */) {
       DC.clearMenus();
       const $order_menu = DC.Generator.getGenericMenu();
 
@@ -113,7 +117,7 @@ DC.Generator = class {
                        (_,order) => $(eval(Template.HTML('order-menu-item-template')))));
 
       $('#generation-table').append($order_menu);
-      DC.Generator._typesetMenu(event, $order_menu);
+      DC.Generator._typesetMenu(eventLocation, $order_menu);
    }
 
    static getGenericMenu() {
@@ -143,6 +147,9 @@ DC.Generator = class {
       }
    }
 
+   /*
+    * Perform actions directed by option menus
+    */
    static updateGenerator(strategy_index /*: number */, generator /*: number */) {
       const strategies = Cayley_diagram.getStrategies();
       strategies[strategy_index][0] = generator;
@@ -222,19 +229,19 @@ DC.Generator = class {
       emitStateChange();
    }
 
-   // Drag-and-drop generation-table rows to re-order generators
-   static dragStart(event /*: JQueryEventObject */) {
-      const dragEvent = ((event.originalEvent /*: any */) /*: DragEvent */);
-      const target = ((event.target /*: any */) /*: HTMLElement */);
-      const dataTransfer = ((dragEvent.dataTransfer /*: any */) /*: DataTransfer */);
+   /*
+    * Drag-and-drop generation-table rows to re-order generators
+    */
+   static dragStart(dragstartEvent /*: DragEvent */) {
+      const target = ((dragstartEvent.target /*: any */) /*: HTMLElement */);
+      const dataTransfer = ((dragstartEvent.dataTransfer /*: any */) /*: DataTransfer */);
       dataTransfer.setData('text/plain', target.textContent);
    }
 
-   static drop(event /*: JQueryEventObject */) {
-      event.preventDefault();
-      const dragEvent = ((event.originalEvent /*: any */) /*: DragEvent */);
-      const target = ((event.target /*: any */) /*: HTMLElement */);
-      const dataTransfer = ((dragEvent.dataTransfer /*: any */) /*: DataTransfer */);
+   static drop(dropEvent /*: DragEvent */) {
+      dropEvent.preventDefault();
+      const target = ((dropEvent.target /*: any */) /*: HTMLElement */);
+      const dataTransfer = ((dropEvent.dataTransfer /*: any */) /*: DataTransfer */);
       const dest = parseInt(target.textContent);
       const src = parseInt(dataTransfer.getData('text/plain'));
       const strategies = Cayley_diagram.getStrategies()
@@ -242,10 +249,13 @@ DC.Generator = class {
       DC.Generator.updateStrategies(strategies);
    }
 
-   static dragOver(event /*: JQueryEventObject */) {
-      event.preventDefault();
+   static dragOver(dragoverEvent /*: DragEvent */) {
+         dragoverEvent.preventDefault();
    }
 
+   /*
+    * Enable/Disable user input to Generator
+    */
    static enable() {
       $('#generation-fog').hide();
    }

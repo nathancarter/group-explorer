@@ -2,7 +2,7 @@
 
 Used by CayleyDiagram.html, CycleDiagram.html, Multtable.html, SymmetryObject.html, and Sheet.html
 ```html
-<body class="vert">
+<body><div id="bodyDouble" class="vert">
    <div id="header" class="horiz"></div>
    <div id="horiz-container" class="horiz">
       <div id="graphic"></div>
@@ -33,5 +33,5 @@ Used by CayleyDiagram.html, CycleDiagram.html, Multtable.html, SymmetryObject.ht
       <div id="version" style="float: right; font-size: small"></div>
       <script>document.getElementById('version').textContent = Version.label</script>
    </div>
-</body>
+</div></body>
 ```

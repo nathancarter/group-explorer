@@ -28,13 +28,13 @@ const HELP_PAGE = 'help/rf-um-mt-options/index.html';
 const myDomain = new URL(window.location.href).origin;
 
 /* Initial entry to javascript, called once after document load */
-$(window).one('load', load);
+window.addEventListener('load', load, {once: true});
 
 /* Register static event managers (called after document is assembled) */
 function registerCallbacks() {
    // window-wide default actions
    window.addEventListener('resize', resizeBody);
-   window.addEventListener('click', cleanWindow);
+   $('#bodyDouble')[0].addEventListener('click', cleanWindow);
    window.addEventListener('contextmenu', (mouseEvent /*: MouseEvent */) => {
       cleanWindow();
       mouseEvent.preventDefault();
@@ -166,6 +166,14 @@ function organizationClickHandler(event /*: MouseEvent */) {
    }
 }
 
+function toggleOrganizationChoices() {
+   const hidingChoices = $('#organization-choices').css('display') == 'none';
+   cleanWindow();
+   if (hidingChoices) {
+      $('#organization-choices').show();
+   }
+}
+
 /* Display multtable grouped by group.subgroups[subgroupIndex]
  *   (Note that the group itself is group.subgroups[group.subgroups.length - 1] */
 function organizeBySubgroup(subgroupIndex /*: number */) {
@@ -196,8 +204,8 @@ function chooseColoration(coloration /*: 'Rainbow' | 'Grayscale' | 'None' */) {
 
 // Resize the body, including the graphic
 function resizeBody() {
-   $('body').height(window.innerHeight);
-   $('body').width(window.innerWidth);
+   $('#bodyDouble').height(window.innerHeight);
+   $('#bodyDouble').width(window.innerWidth);
 
    resizeGraphic();
 }
@@ -274,6 +282,7 @@ class LargeGraphic {
 
       const lastEvent /*: MouseEvent */ = (LargeGraphic.lastEvent /*: any */);
 
+      // create artificial event type like 'shift-mousedown' to branch on
       const syntheticType = (mouseEvent.shiftKey ? 'shift-' : '') + mouseEvent.type;
 
       switch (syntheticType) {
@@ -513,7 +522,7 @@ class LargeGraphic {
          return null;
       }
 
-      $('#drag-image').remove();
+      cleanWindow();
       
       const canvas = graphicContext.canvas;
 

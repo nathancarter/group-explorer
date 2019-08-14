@@ -22,12 +22,12 @@ var group		/*: XMLGroup */,	// group about which information will be displayed
 const HELP_PAGE = 'help/rf-um-os-options/index.html';
 
 /* Initial entry to javascript, called once after document load */
-$(window).one('load', load);
+window.addEventListener('load', load, {once: true});
 
 /* Register static event managers (called after document is assembled) */
 function registerCallbacks() {
    window.addEventListener('resize', resizeBody);
-   window.addEventListener('click', cleanWindow);
+   $('#bodyDouble')[0].addEventListener('click', cleanWindow);
 
    $('#diagram-select')[0].addEventListener('click', diagramClickHandler);
    $('#zoom-level')[0].addEventListener('input', set_zoom_level);
@@ -114,8 +114,8 @@ function completeSetup() {
 
 // Resize the body, including the graphic
 function resizeBody() {
-   $('body').height(window.innerHeight);
-   $('body').width(window.innerWidth);
+   $('#bodyDouble').height(window.innerHeight);
+   $('#bodyDouble').width(window.innerWidth);
 
    resizeGraphic();
 };

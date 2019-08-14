@@ -1,6 +1,7 @@
 
 #diagram-control {
-    -webkit-user-select: none;  /* prevents cut-and-paste */
+    -webkit-user-select: none;                   /* prevents cut-and-paste */
+    -webkit-tap-highlight-color: transparent;    /* prevents highlight/flash when item is selected */
 }
 
 .fog {

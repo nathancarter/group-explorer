@@ -45,14 +45,13 @@ DC.Chunking = class {
                        );
    }
 
-   static clickHandler(event /*: JQueryEventObject */) {
-      event.preventDefault();
-
+   static clickHandler(clickEvent /*: MouseEvent */) {
       if (!DC.Chunking.isDisabled()) {
-         const $curr = $(event.target).closest('[action]');
+         const $curr = $(clickEvent.target).closest('[action]');
+         $('#bodyDouble').click();
          if ($curr != undefined) {
             eval($curr.attr('action'));
-            event.stopPropagation();
+            clickEvent.stopPropagation();
          }
       }
    }

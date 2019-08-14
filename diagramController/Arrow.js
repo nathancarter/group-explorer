@@ -36,9 +36,13 @@ DC.Arrow = class {
 
    // arrow-control click handler
    //   find closest element with action and execute action
-   static clickHandler(event /*: JQueryEventObject */) {
-      event.stopPropagation();
-      eval($(event.target).closest('[action]').attr('action'));
+   static clickHandler(clickEvent /*: MouseEvent */) {
+      const action = $(clickEvent.target).closest('[action]').attr('action');
+      if (action != undefined) {
+         $('#bodyDouble').click();
+         clickEvent.stopPropagation();
+         eval(action);
+      }
    }
 
    // Row selected in arrow-list:

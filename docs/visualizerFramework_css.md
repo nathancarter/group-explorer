@@ -13,7 +13,7 @@
 }
 
 /* Make the web page to fill the window */
-body {
+body, #bodyDouble {
    margin: 0;
    overflow: hidden;
    height: 100%;

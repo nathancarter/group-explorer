@@ -597,9 +597,6 @@ SSD.SubsetMenu = class {
    static lastEntry: {menuElement: ?HTMLElement, timeStamp: number};
  */
    static init() {
-      SSD.clearMenus();
-      $('#header').on('click', SSD.clearMenus);
-      $('#vert-container').on('click', SSD.clearMenus);  // don't know why IOS/iPad needs to break it up like this...
       SSD.SubsetMenu.lastEntry = {menuElement: undefined, timeStamp: 0};
       const subsetPage = $('#subset_page')[0];
       if (window.hasOwnProperty('ontouchstart')) {   // touch device?
@@ -666,7 +663,7 @@ SSD.SubsetMenu = class {
          //   otherwise, if interval is short, post menu; else popup elements display
       case 'touchend':
          if ($('#subset_page .menu:visible, #subset_page .elements').length != 0) {
-            SSD.clearMenus();
+            $('#bodyDouble').click();
          } else {
             const touch /*: Touch */ = (touchEvent.changedTouches[0] /*: any */);
             const $target = $(document.elementFromPoint(touch.clientX, touch.clientY));
@@ -686,7 +683,7 @@ SSD.SubsetMenu = class {
 
    static displayElements(event /*: Event */, location /*: {clientX: number, clientY: number} */) {
       event.preventDefault();
-      SSD.clearMenus();
+      $('#bodyDouble').click();
       const $curr = $(document.elementFromPoint(location.clientX, location.clientY)).closest('li');
       const id = $curr.attr('id');
       if (id != undefined) {
@@ -775,7 +772,7 @@ class SSD_Menu {
       // unrecognized event
       if ($curr.length == 0) return;
 
-      SSD.clearMenus();
+      $('#bodyDouble').click();
 
       const isHeaderMenu = $curr[0].tagName == "P";
       const $menu = isHeaderMenu ?
@@ -871,19 +868,17 @@ class DC {
 
    static setupDiagramPage() {
       DC.DiagramChoice.setupDiagramSelect();
-      $('#header').on('click', DC.clearMenus);
-      $('#vert-container').on('click', DC.clearMenus);
 
-      $('#diagram-select').off('click', DC.DiagramChoice.clickHandler).on('click', DC.DiagramChoice.clickHandler);
+      $('#diagram-select')[0].addEventListener('click', DC.DiagramChoice.clickHandler);
 
-      $('#arrow-control').off('click', DC.Arrow.clickHandler).on('click', DC.Arrow.clickHandler);
+      $('#generation-control')[0].addEventListener('click', DC.Generator.clickHandler);
+      $('#generation-table')[0].addEventListener('dragstart', DC.Generator.dragStart);
+      $('#generation-table')[0].addEventListener('drop', DC.Generator.drop);
+      $('#generation-table')[0].addEventListener('dragover', DC.Generator.dragOver);
 
-      $('#generation-control').off('click', DC.Generator.clickHandler).on('click', DC.Generator.clickHandler);
-      $('#generation-table').off('dragstart', DC.Generator.dragStart).on('dragstart', DC.Generator.dragStart);
-      $('#generation-table').off('drop', DC.Generator.drop).on('drop', DC.Generator.drop);
-      $('#generation-table').off('dragover', DC.Generator.dragOver).on('dragover', DC.Generator.dragOver);
+      $('#arrow-control')[0].addEventListener('click', DC.Arrow.clickHandler);
 
-      $('#chunk-select').off('click', DC.Chunking.clickHandler).on('click', DC.Chunking.clickHandler);
+      $('#chunk-select')[0].addEventListener('click', DC.Chunking.clickHandler);
    }
 
    static update() {
@@ -921,17 +916,20 @@ DC.Generator = class {
    static axis_image: Array<[string, string, string]>;
    static orders: Array<Array<string>>;
  */
-   static clickHandler(event /*: JQueryEventObject */) {
-      event.preventDefault();
+   static clickHandler(clickEvent /*: MouseEvent */) {
+      clickEvent.preventDefault();
 
       // check if disabled
       if (DC.Generator.isDisabled()) {
          return;
       }
-      eval($($(event.target).closest('[action]')).attr('action'));
-      event.stopPropagation();
+      eval($($(clickEvent.target).closest('[action]')).attr('action'));
+      clickEvent.stopPropagation();
    }
 
+   /*
+    * Draw Generator table
+    */
    static draw() {
       if (DC.Generator.isDisabled()) {
          return;
@@ -953,7 +951,10 @@ DC.Generator = class {
       }
    }
 
-   static showGeneratorMenu(event /*: JQueryEventObject */, strategy_index /*: number */) {
+   /*
+    * Show option menus for the columns of the Generator table
+    */
+   static showGeneratorMenu(eventLocation /*: eventLocation */, strategy_index /*: number */) {
       DC.clearMenus();
       const $generator_menu = DC.Generator.getGenericMenu();
 
@@ -970,20 +971,18 @@ DC.Generator = class {
       );
 
       $('#generation-table').append($generator_menu);
-      MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'generation-list']);
-      DC.Generator._typesetMenu(event, $generator_menu);
+      DC.Generator._typesetMenu(eventLocation, $generator_menu);
    }
 
-   static _typesetMenu(_event /*: JQueryEventObject */, $menu /*: JQuery */) {
-      const event = ((_event /*: any */) /*: JQueryMouseEventObject */);
+   static _typesetMenu(eventLocation /*: eventLocation */, $menu /*: JQuery */) {
       $menu.css('visibility', 'hidden');
-      const showMenu = () => { Menu.setMenuLocations(event, $menu);
+      const showMenu = () => { Menu.setMenuLocations(eventLocation, $menu);
                                $menu.css('visibility', 'visible');
                              };
       MathJax.Hub.Queue(['Typeset', MathJax.Hub, $menu[0]], showMenu);
    }
 
-   static showAxisMenu(event /*: JQueryEventObject */, strategy_index /*: number */) {
+   static showAxisMenu(eventLocation /*: eventLocation */, strategy_index /*: number */) {
       DC.clearMenus();
 
       // previously generated subgroup must have > 2 cosets in this subgroup
@@ -997,10 +996,10 @@ DC.Generator = class {
                              .prepend($(eval(Template.HTML('axis-menu-template'))));
 
       $('#generation-table').append($layout_menu);
-      DC.Generator._typesetMenu(event, $layout_menu);
+      DC.Generator._typesetMenu(eventLocation, $layout_menu);
    }
 
-   static showOrderMenu(event /*: JQueryEventObject */, strategy_index /*: number */) {
+   static showOrderMenu(eventLocation /*: eventLocation */, strategy_index /*: number */) {
       DC.clearMenus();
       const $order_menu = DC.Generator.getGenericMenu();
 
@@ -1010,7 +1009,7 @@ DC.Generator = class {
                        (_,order) => $(eval(Template.HTML('order-menu-item-template')))));
 
       $('#generation-table').append($order_menu);
-      DC.Generator._typesetMenu(event, $order_menu);
+      DC.Generator._typesetMenu(eventLocation, $order_menu);
    }
 
    static getGenericMenu() {
@@ -1040,6 +1039,9 @@ DC.Generator = class {
       }
    }
 
+   /*
+    * Perform actions directed by option menus
+    */
    static updateGenerator(strategy_index /*: number */, generator /*: number */) {
       const strategies = Cayley_diagram.getStrategies();
       strategies[strategy_index][0] = generator;
@@ -1119,19 +1121,19 @@ DC.Generator = class {
       emitStateChange();
    }
 
-   // Drag-and-drop generation-table rows to re-order generators
-   static dragStart(event /*: JQueryEventObject */) {
-      const dragEvent = ((event.originalEvent /*: any */) /*: DragEvent */);
-      const target = ((event.target /*: any */) /*: HTMLElement */);
-      const dataTransfer = ((dragEvent.dataTransfer /*: any */) /*: DataTransfer */);
+   /*
+    * Drag-and-drop generation-table rows to re-order generators
+    */
+   static dragStart(dragstartEvent /*: DragEvent */) {
+      const target = ((dragstartEvent.target /*: any */) /*: HTMLElement */);
+      const dataTransfer = ((dragstartEvent.dataTransfer /*: any */) /*: DataTransfer */);
       dataTransfer.setData('text/plain', target.textContent);
    }
 
-   static drop(event /*: JQueryEventObject */) {
-      event.preventDefault();
-      const dragEvent = ((event.originalEvent /*: any */) /*: DragEvent */);
-      const target = ((event.target /*: any */) /*: HTMLElement */);
-      const dataTransfer = ((dragEvent.dataTransfer /*: any */) /*: DataTransfer */);
+   static drop(dropEvent /*: DragEvent */) {
+      dropEvent.preventDefault();
+      const target = ((dropEvent.target /*: any */) /*: HTMLElement */);
+      const dataTransfer = ((dropEvent.dataTransfer /*: any */) /*: DataTransfer */);
       const dest = parseInt(target.textContent);
       const src = parseInt(dataTransfer.getData('text/plain'));
       const strategies = Cayley_diagram.getStrategies()
@@ -1139,10 +1141,13 @@ DC.Generator = class {
       DC.Generator.updateStrategies(strategies);
    }
 
-   static dragOver(event /*: JQueryEventObject */) {
-      event.preventDefault();
+   static dragOver(dragoverEvent /*: DragEvent */) {
+         dragoverEvent.preventDefault();
    }
 
+   /*
+    * Enable/Disable user input to Generator
+    */
    static enable() {
       $('#generation-fog').hide();
    }
@@ -1229,13 +1234,12 @@ DC.DiagramChoice = class {
    }
 
    /* Display control routines */
-   static clickHandler(event /*: JQueryEventObject */) {
-      event.preventDefault();
-
-      const $curr = $(event.target).closest('[action]');
+   static clickHandler(clickEvent /*: MouseEvent */) {
+      const $curr = $(clickEvent.target).closest('[action]');
+      $('#bodyDouble').click();
       if ($curr != undefined) {
          eval($curr.attr('action'));
-         event.stopPropagation();
+         clickEvent.stopPropagation();
       }
    }
 
@@ -1286,9 +1290,13 @@ DC.Arrow = class {
 
    // arrow-control click handler
    //   find closest element with action and execute action
-   static clickHandler(event /*: JQueryEventObject */) {
-      event.stopPropagation();
-      eval($(event.target).closest('[action]').attr('action'));
+   static clickHandler(clickEvent /*: MouseEvent */) {
+      const action = $(clickEvent.target).closest('[action]').attr('action');
+      if (action != undefined) {
+         $('#bodyDouble').click();
+         clickEvent.stopPropagation();
+         eval(action);
+      }
    }
 
    // Row selected in arrow-list:
@@ -1451,14 +1459,13 @@ DC.Chunking = class {
                        );
    }
 
-   static clickHandler(event /*: JQueryEventObject */) {
-      event.preventDefault();
-
+   static clickHandler(clickEvent /*: MouseEvent */) {
       if (!DC.Chunking.isDisabled()) {
-         const $curr = $(event.target).closest('[action]');
+         const $curr = $(clickEvent.target).closest('[action]');
+         $('#bodyDouble').click();
          if ($curr != undefined) {
             eval($curr.attr('action'));
-            event.stopPropagation();
+            clickEvent.stopPropagation();
          }
       }
    }

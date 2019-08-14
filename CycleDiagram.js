@@ -25,15 +25,15 @@ const HELP_PAGE = 'help/rf-um-cg-options/index.html';
 const myDomain = new URL(window.location.href).origin;
 
 /* Initial entry to javascript, called once after document load */
-$(window).one('load', load);
+window.addEventListener('load', load, {once: true});
 
 // Static event managers (called after document is assembled)
 function registerCallbacks() {
    // window-wide event listeners
    window.addEventListener('resize', resizeBody);
-   window.addEventListener('click', clearAllLabels);
+   $('#bodyDouble')[0].addEventListener('click', cleanWindow);
    window.addEventListener('contextmenu', (mouseEvent /*: MouseEvent */) => {
-      clearAllLabels();
+      cleanWindow();
       mouseEvent.preventDefault();
    });
 
@@ -124,8 +124,8 @@ function emitStateChange () {
 
 // Resize the body, including the graphic
 function resizeBody() {
-   $('body').height(window.innerHeight);
-   $('body').width(window.innerWidth);
+   $('#bodyDouble').height(window.innerHeight);
+   $('#bodyDouble').width(window.innerWidth);
 
    resizeGraphic();
 };
@@ -136,7 +136,7 @@ function resizeGraphic() {
    graphicContext.showLargeGraphic(cyclegraph);
 }
 
-function clearAllLabels() {
+function cleanWindow() {
    $('#nodeLabel').remove();
    SSD.clearMenus();
 }
@@ -177,7 +177,7 @@ class LargeGraphic {
 
       switch (mouseEvent.type) {
       case 'click':
-         clearAllLabels();
+         cleanWindow();
          if (LargeGraphic.lastEvent == null) {
             LargeGraphic.displayLabel(mouseEvent);
          }
@@ -192,7 +192,7 @@ class LargeGraphic {
          break;
 
       case 'wheel':
-         clearAllLabels();
+         cleanWindow();
          (((mouseEvent /*: any */) /*: WheelEvent */).deltaY < 0) ? graphicContext.zoomIn() : graphicContext.zoomOut();
          graphicContext.showLargeGraphic(cyclegraph);
          break;
@@ -245,7 +245,7 @@ class LargeGraphic {
 
       switch (event.type) {
       case 'click':
-         clearAllLabels();
+         cleanWindow();
          LargeGraphic.displayLabel( ((event /*: any */) /*: MouseEvent */) );
          LargeGraphic.lastEvent = null;
          event.stopPropagation();
@@ -282,7 +282,7 @@ class LargeGraphic {
       const clickX = event.clientX - bounding_rectangle.left;
       const clickY = event.clientY - bounding_rectangle.top;
       const element = graphicContext.select(clickX, clickY);
-      if (element !== undefined) {
+      if (element != undefined) {
          const $label = $('<div id="nodeLabel">').html(MathML.sans(group.representation[element]));
          $('#graphic').append($label);
          Menu.setMenuLocations(event, $label);
@@ -310,7 +310,7 @@ class LargeGraphic {
    }
 
    static touchZoomAndMove(start /*: TouchEvent */, end /*: TouchEvent */) {
-      clearAllLabels();
+      cleanWindow();
       const [startCentroid, startDiameter] = LargeGraphic.centroidAndDiameter(LargeGraphic.touches(start)),
             [endCentroid, endDiameter] = LargeGraphic.centroidAndDiameter(LargeGraphic.touches(end)),
             zoomFactor = endDiameter / startDiameter;
@@ -321,13 +321,13 @@ class LargeGraphic {
    }
 
    static mouseMove(start /*: MouseEvent */, end /*: MouseEvent */) {
-      clearAllLabels();
+      cleanWindow();
       graphicContext.move(end.clientX - start.clientX, end.clientY - start.clientY);
       graphicContext.showLargeGraphic(cyclegraph);
    }
 
    static zoom2fit() {
-      clearAllLabels();
+      cleanWindow();
       graphicContext.reset();
       graphicContext.showLargeGraphic(cyclegraph);
    }

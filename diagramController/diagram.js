@@ -43,19 +43,17 @@ class DC {
 
    static setupDiagramPage() {
       DC.DiagramChoice.setupDiagramSelect();
-      $('#header').on('click', DC.clearMenus);
-      $('#vert-container').on('click', DC.clearMenus);
 
-      $('#diagram-select').off('click', DC.DiagramChoice.clickHandler).on('click', DC.DiagramChoice.clickHandler);
+      $('#diagram-select')[0].addEventListener('click', DC.DiagramChoice.clickHandler);
 
-      $('#arrow-control').off('click', DC.Arrow.clickHandler).on('click', DC.Arrow.clickHandler);
+      $('#generation-control')[0].addEventListener('click', DC.Generator.clickHandler);
+      $('#generation-table')[0].addEventListener('dragstart', DC.Generator.dragStart);
+      $('#generation-table')[0].addEventListener('drop', DC.Generator.drop);
+      $('#generation-table')[0].addEventListener('dragover', DC.Generator.dragOver);
 
-      $('#generation-control').off('click', DC.Generator.clickHandler).on('click', DC.Generator.clickHandler);
-      $('#generation-table').off('dragstart', DC.Generator.dragStart).on('dragstart', DC.Generator.dragStart);
-      $('#generation-table').off('drop', DC.Generator.drop).on('drop', DC.Generator.drop);
-      $('#generation-table').off('dragover', DC.Generator.dragOver).on('dragover', DC.Generator.dragOver);
+      $('#arrow-control')[0].addEventListener('click', DC.Arrow.clickHandler);
 
-      $('#chunk-select').off('click', DC.Chunking.clickHandler).on('click', DC.Chunking.clickHandler);
+      $('#chunk-select')[0].addEventListener('click', DC.Chunking.clickHandler);
    }
 
    static update() {

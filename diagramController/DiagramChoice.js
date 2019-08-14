@@ -30,13 +30,12 @@ DC.DiagramChoice = class {
    }
 
    /* Display control routines */
-   static clickHandler(event /*: JQueryEventObject */) {
-      event.preventDefault();
-
-      const $curr = $(event.target).closest('[action]');
+   static clickHandler(clickEvent /*: MouseEvent */) {
+      const $curr = $(clickEvent.target).closest('[action]');
+      $('#bodyDouble').click();
       if ($curr != undefined) {
          eval($curr.attr('action'));
-         event.stopPropagation();
+         clickEvent.stopPropagation();
       }
    }
 
