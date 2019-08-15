@@ -6,6 +6,7 @@ import CayleyDiagram from './js/CayleyDiagram.js';
 import DisplayDiagram from './js/DisplayDiagram.js';
 import IsomorphicGroups from './js/IsomorphicGroups.js';
 import Library from './js/Library.js';
+import Log from './js/Log.js';
 import MathML from './js/MathML.js';
 import MathUtils from './js/MathUtils.js';
 import setUpGAPCells from './js/ShowGAPCode.js';
@@ -42,7 +43,7 @@ function load() {
              group = _group;
              displayGroup()
           } )
-          .catch( console.error );
+          .catch( Log.err );
 }
 
 function displayGroup() {
@@ -85,7 +86,7 @@ function subgroupInfo(index /*: number */) {
    } else {
       // FIXME -- get CayleyDiagram to build for unnamed BasicGroup
       if (!isomorphicGroup.hasOwnProperty('name'))
-          console.error('trying to build CayleyDiagram for unnamed BasicGroup in SubgroupInfo');
+          Log.err('trying to build CayleyDiagram for unnamed BasicGroup in SubgroupInfo');
       const img = graphicContext.getImage( new CayleyDiagram(((isomorphicGroup /*: any */) /*: XMLGroup */)) );
       img.height = img.width = 50;
       $row.find('.image').html('').append(img);

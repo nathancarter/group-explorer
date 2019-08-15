@@ -44,7 +44,7 @@ class DisplayMulttable {
  */
    // height & width, or container
    constructor(options /*: Options */ = {}) {
-      Log.log('DisplayMulttable');
+      Log.debug('DisplayMulttable');
 
       DisplayMulttable._setDefaults();
 

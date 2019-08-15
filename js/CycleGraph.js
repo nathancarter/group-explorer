@@ -142,7 +142,7 @@ class CycleGraph {
             return aName.length < bName.length ? -1 : (aName.length > bName.length ?  1 : 0);
          } );
       }
-      // for ( var i = 0 ; i < this.group.order ; i++ ) console.log( i, this.group.representations[this.group.representationIndex][i] );
+      // for ( var i = 0 ; i < this.group.order ; i++ ) Log.debug( i, this.group.representations[this.group.representationIndex][i] );
 
       // compute a list of cycles
       var cycles /*: Array<Array<groupElement>> */ = [ ];
@@ -169,7 +169,7 @@ class CycleGraph {
          // continue iff there's stuff left in the notYetPlaced array
       }
       this.cycles = cycles;
-      // console.log( 'cycle', JSON.stringify( cycles ) );
+      // Log.debug( 'cycle', JSON.stringify( cycles ) );
 
       // partition the cycles, forming a list of lists.
       // begin with all cycles in their own part of the partition,
@@ -205,7 +205,7 @@ class CycleGraph {
             }
          }
       }
-      // console.log( 'partition', JSON.stringify( partition ) );
+      // Log.debug( 'partition', JSON.stringify( partition ) );
       // sanity check:
       // partition.forEach( ( part, i ) => {
       //    partition.forEach( ( otherPart, j ) => {
@@ -215,9 +215,9 @@ class CycleGraph {
       //             const inSamePart = ( i == j );
       //             const commonElt = cycle.find( ( x ) => otherCycle.indexOf( x ) > -1 );
       //             if ( !inSamePart && typeof( commonElt ) != 'undefined' ) {
-      //                console.error( `Cycle ${ii} in part ${i} is ${cycle} `
-      //                             + `and cycle ${jj} in part ${j} is ${otherCycle} `
-      //                             + `and they share ${commonElt}.` );
+      //                Log.err( `Cycle ${ii} in part ${i} is ${cycle} `
+      //                       + `and cycle ${jj} in part ${j} is ${otherCycle} `
+      //                       + `and they share ${commonElt}.` );
       //             }
       //          } );
       //       } );
@@ -252,7 +252,7 @@ class CycleGraph {
       } else { // handle degenerate case
          var cumsums = [ 0, Math.PI ];
       }
-      // console.log( 'cumsums', cumsums );
+      // Log.debug( 'cumsums', cumsums );
 
       // rotate things so that the largest partition is hanging
       // straight downwards
@@ -268,7 +268,7 @@ class CycleGraph {
          ( cumsums[maxPartIndex] + cumsums[maxPartIndex+1] ) / 2;
       var diff = -1 / 2 * Math.PI - maxPartCenter;
       cumsums = cumsums.map( angle => angle + diff );
-      // console.log( 'angle-ified', cumsums );
+      // Log.debug( 'angle-ified', cumsums );
 
       // assign locations in the plane to each element,
       // plus create paths to be drawn to connect them
@@ -298,14 +298,14 @@ class CycleGraph {
                if ( !this.positions[curr] ) {
                    this.partIndices[curr] = partIndex;
                    this.rings[curr] = cycleIndex;
-                   // console.log( `rings[${curr}] := ${cycleIndex}` );
+                   // Log.debug( `rings[${curr}] := ${cycleIndex}` );
                    this.positions[curr] = f( this.rings[curr], i, 1 );
                }
                var path /*: Path */ = {pts: []};
                const step = 0.02;
-               // console.log( `connecting ${this.rings[prev]} to ${this.rings[curr]}` );
+               // Log.debug( `connecting ${this.rings[prev]} to ${this.rings[curr]}` );
                // if ( prev && curr && this.partIndices[prev] != this.partIndices[curr] )
-               //    console.error( `index[${prev}]=${this.partIndices[prev]}!=${this.partIndices[curr]}=index[${curr}]` );
+               //    Log.err( `index[${prev}]=${this.partIndices[prev]}!=${this.partIndices[curr]}=index[${curr}]` );
                for ( var t = 0 ; t <= 1+step/2 ; t += step ) {
                   var ring1 = f( this.rings[prev], i, t );
                   var ring2 = f( this.rings[curr], i, t );

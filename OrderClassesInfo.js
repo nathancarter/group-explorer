@@ -2,6 +2,7 @@
 
 /*::
 import Library from './js/Library.js';
+import Log from './js/Log.js';
 import MathML from './js/MathML.js';
 import setUpGAPCells from './js/ShowGAPCode.js';
 import Template from './js/Template.js';
@@ -18,7 +19,7 @@ function load() {
               group = _group;
               formatGroup();
           } )
-          .catch( console.error );
+          .catch( Log.err );
 }
 
 function formatGroup() {

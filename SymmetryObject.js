@@ -4,6 +4,7 @@
 import Diagram3D from './js/Diagram3D.js';
 import DisplayDiagram from './js/DisplayDiagram.js';
 import Library from './js/Library.js';
+import Log from './js/Log.js';
 import MathML from './js/MathML.js';
 import MathUtils from './js/MathUtils.js';
 import Menu from './js/Menu.js';
@@ -43,7 +44,7 @@ function load() {
    const groupLoad = Library
       .loadFromURL()
       .then( (_group) => group = _group )
-      .catch( console.error );
+      .catch( Log.err );
 
    // Promise to load visualizer framework around visualizer-specific code in this file
    const bodyLoad = VC.load();
@@ -55,7 +56,7 @@ function load() {
              if (diagramName != undefined) {
                 completeSetup();
              }} )
-          .catch( console.error );
+          .catch( Log.err );
 }
 
 /* Set diagramName from URL (undefined => error, no symmetry group) */

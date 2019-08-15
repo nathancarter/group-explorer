@@ -21,6 +21,7 @@ import type {CayleyDiagramJSON} from './DisplayDiagram.js';
 import DisplayMulttable from './DisplayMulttable.js';
 import type {MulttableJSON} from './DisplayMulttable.js';
 import Library from './Library.js';
+import Log from './Log.js';
 import MathML from './MathML.js';
 import Multtable from './Multtable.js';
 import XMLGroup from './XMLGroup.js';
@@ -819,7 +820,7 @@ class VisualizerElement/*:: < VizObjType, VizDispJSON: Obj, VizDispType: VizDisp
                        that.vizobj = that.makeVisualizerObject( that.group = group );
                        that.rerender();
                    } )
-                   .catch( function ( error ) { console.log( error ); } );
+                   .catch( Log.err )
         }
         // when a resize happens, build a new image, but only if a resize actually happened
        this.on( 'resize', function () {
@@ -885,7 +886,7 @@ class VisualizerElement/*:: < VizObjType, VizDispJSON: Obj, VizDispType: VizDisp
             otherWin.addEventListener( 'message', function ( event /*: MessageEvent */ ) {
                 if ( otherWinState == 'starting' && event.data == 'listener ready' ) {
                     // initially set up the editor to be just like us
-                    console.log( 'posting external message', that.toJSON() );
+                    Log.debug( 'posting external message', that.toJSON() );
                     const msg /*: MSG_external<MulttableJSON | CayleyDiagramJSON | CycleGraphJSON> */ =  {
                         source : 'external',
                         json : that.toJSON()
@@ -932,7 +933,7 @@ class VisualizerElement/*:: < VizObjType, VizDispJSON: Obj, VizDispType: VizDisp
                            that.vizdisplay.fromJSON( json, that.vizobj );
                            that.rerender();
                        } )
-                       .catch( function ( error ) { console.log( error ); } );
+                       .catch( Log.err );
             } else {
                 this.vizdisplay.fromJSON( json, this.vizobj );
                 this.rerender();

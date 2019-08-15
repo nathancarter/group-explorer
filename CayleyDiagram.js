@@ -6,6 +6,7 @@ import DisplayDiagram from './js/DisplayDiagram.js';
 import type {CayleyDiagramJSON} from './js/DisplayDiagram.js';
 import GEUtils from './js/GEUtils.js';
 import Library from './js/Library.js';
+import Log from './js/Log.js';
 import MathML from './js/MathML.js';
 import Menu from './js/Menu.js';
 import Template from './js/Template.js';
@@ -58,7 +59,7 @@ function load() {
              group = _group;
              setDiagramName();
          } )
-         .catch( console.error );
+         .catch( Log.err );
 
    // Promise to load visualizer framework around visualizer-specific code in this file
    const body_load = VC.load();
@@ -69,7 +70,7 @@ function load() {
              // Preload MathML cache for subsetDisplay, diagramControl
              MathML.preload().then( loadPanels )
            )
-      .catch( console.error );
+      .catch( Log.err );
 }
 
 function loadPanels() {
@@ -78,7 +79,7 @@ function loadPanels() {
    const diagram_controller_load = DC.load($('#diagram-control'));
    Promise.all([subset_display_load, view_controller_load, diagram_controller_load])
           .then(completeSetup)
-          .catch( console.error );
+          .catch( Log.err );
 }
 
 /* Set Diagram_name from URL (undefined => use generated Cayley diagram) */
@@ -115,8 +116,8 @@ function completeSetup() {
    window.addEventListener( 'message', function ( event /*: MessageEvent */) {
       const event_data /*: MSG_external<CayleyDiagramJSON> */ = (event.data /*: any */);
       if (typeof event_data == 'undefined' || event_data.source != 'external') {
-         console.error('unknown message received in CayleyDiagram.js:');
-         console.error(event.data);
+         Log.warn('unknown message received in CayleyDiagram.js:');
+         Log.warn(event.data);
          return;
       }
       const jsonData /*: AugmentedCayleyDiagramJSON */ = (event_data.json /*: any */);
@@ -189,7 +190,7 @@ function emitStateChange () {
          json: json
       };
       window.postMessage( msg, myDomain );
-   // console.log( 'SENT:', JSON.stringify( json, null, 4 ) );
+      // Log.debug('SENT:', JSON.stringify( json, null, 4 ) );
    }
 }
 
@@ -341,7 +342,7 @@ class Tooltip {
          break;
 
       default:
-         console.warn(`Tooltip handler -- unexpected event ${event.type}`);
+         Log.warn('Tooltip handler -- unexpected event %s', event.type);
       }
    }
 }

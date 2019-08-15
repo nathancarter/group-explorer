@@ -29,7 +29,7 @@ class DisplayCycleGraph {
    radius: number;
  */
    constructor(options /*: Options */) {
-      Log.log('DisplayCycleGraph');
+      Log.debug('DisplayCycleGraph');
 
       DisplayCycleGraph._setDefaults();
 

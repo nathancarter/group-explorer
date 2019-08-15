@@ -114,7 +114,7 @@ function finish(urlsToDisplay) {
                    MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'ScratchTable'],
                                      afterTypesetting);
                 } } )
-             .catch( console.error );
+             .catch( Log.err );
    }
    loadNextURL(0);
 }
@@ -172,7 +172,7 @@ function columnSort(event /*: JQueryEventObject */) {
    const column = event.currentTarget;
    const columnIndex = $('#GroupTableHeaders th.sortable').toArray().findIndex( (th) => th == column );
    if (columnIndex == -1) {
-      console.error(`unknown event in columnSort`);
+      Log.err(`unknown event in columnSort`);
       return;
    }
    const makeSortUp = !$(column).hasClass('sort-up');
@@ -207,8 +207,6 @@ class HoverHelp {
          $('#GroupTable')[0].addEventListener('click', HoverHelp.clickHandler);  // tap anywhere in table to clear tooltip
 
          // set up touch event listeners
-//         ['click', 'touchstart', 'touchmove', 'touchend'].forEach( (event) => tbody.addEventListener(event, (ev /*: Event */) => console.log(`sniffer: ${ev.type}`)) );
-         
          ['touchstart', 'touchmove', 'touchend'].forEach( (event) => tbody.addEventListener(event, HoverHelp.highlightHandler) );
          ['touchstart', 'touchmove', 'touchend'].forEach( (event) => tbody.addEventListener(event, HoverHelp.tipHandler) );
       } else {
@@ -299,7 +297,7 @@ class HoverHelp {
    static getTooltip($cell /*: JQuery */) /*: ?JQuery */ {
       const $anchor = $cell.find('a[title]');
       if ($anchor.length == 0) {
-         console.error("can't find anchor in td");
+         Log.err("tooltip can't find anchor in td");
          return null;
       }
       const tooltipText = $anchor.attr('title');

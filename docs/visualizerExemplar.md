@@ -98,7 +98,7 @@ Invokes [VC.load()](visualizerFramework_js.md#vc-load-) to wrap visualizer frame
           const groupLoad = Library
              .loadFromURL()
              .then( (_group) => group = _group )
-             .catch( console.error );
+             .catch( Log.err );
 
           // Create a Promise to load visualizer framework around visualizer-specific code in this file
           const bodyLoad = VC.load();
@@ -106,7 +106,7 @@ Invokes [VC.load()](visualizerFramework_js.md#vc-load-) to wrap visualizer frame
           // When group and framework are loaded, insert subset_page and complete rest of the setup
           Promise.all([groupLoad, bodyLoad])
                  .then( () => SSD.load($('#subset-control')).then(completeSetup) )
-                 .catch( console.error );
+                 .catch( Log.err );
        }
 
        /*

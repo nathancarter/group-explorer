@@ -19,7 +19,7 @@ function load() {
               group = _group;
               formatGroup();
           } )
-          .catch( console.error );
+          .catch( Log.err );
 }
 
 function formatGroup() {

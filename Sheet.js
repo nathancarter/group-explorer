@@ -2,6 +2,7 @@
 
 /*::
 import GroupURLs from './GroupURLs.js';
+import Log from './js/Log.js';
 import {
    SheetModel,
    SheetElement,
@@ -58,7 +59,7 @@ function load() {
          $('.top-right-menu > a[href="Sheet.html"]').hide();  // hide top-right-menu Sheets icon
          completeSetup();
       } )
-      .catch( console.error );
+      .catch( Log.err );
 }
 /* Now that all the static HTML is loaded, complete the setup */
 function completeSetup () {
@@ -143,8 +144,8 @@ function completeSetup () {
       const event_data /*: MSG_loadFromJSON */ = (event.data /*: any */);
       const i = event_data.type == 'load from json';
       if (typeof event.data != 'undefined' || event_data.type != 'load from json') {
-         console.error('unknown message received in Sheet.js:');
-         console.error(event.data);
+         Log.warn('unknown message received in Sheet.js:');
+         Log.warn(event.data);
          return;
       }
       loadSheetFromJSON( event_data.json );

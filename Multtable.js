@@ -4,6 +4,7 @@
 import DisplayMulttable from './js/DisplayMulttable.js';
 import type {MulttableJSON} from './js/DisplayMulttable.js';
 import Library from './js/Library.js';
+import Log from './js/Log.js';
 import MathML from './js/MathML.js';
 import Menu from './js/Menu.js';
 import Multtable from './js/Multtable.js';
@@ -56,7 +57,7 @@ function load() {
    const groupLoad = Library
       .loadFromURL()
       .then( (_group) => group = _group )
-      .catch( console.error );
+      .catch( Log.err );
 
    // Promise to load visualizer framework around visualizer-specific code in this file
    const bodyLoad = VC.load();
@@ -70,7 +71,7 @@ function load() {
                 SSD.load($('#subset-control')).then(completeSetup)
              )
           )
-          .catch( console.error );
+          .catch( Log.err );
 }
 
 /* Now that subsetDisplay is loaded, complete the setup */
@@ -116,9 +117,8 @@ function completeSetup() {
    window.addEventListener( 'message', function ( event /*: MessageEvent */ ) {
       const event_data /*: MSG_external<MulttableJSON> */ = (event.data /*: any */);
       if (typeof event_data == 'undefined' || event_data.source != 'external') {
-// FIXME
-         console.error('unknown message received in Multtable.js:');
-         console.error(event.data);
+         Log.warn('unknown message received in Multtable.js:');
+         Log.warn(event.data);
          return;
       }
       canEmit = false; // don't spam notifications of changes about to happen
@@ -361,7 +361,7 @@ class LargeGraphic {
          break;
 
       default:
-         console.error(`LargeGraphic.mouseHandler unknown event ${syntheticType}`);
+         Log.warn('LargeGraphic.mouseHandler unknown event %s', syntheticType);
       }
    }
 
@@ -445,7 +445,7 @@ class LargeGraphic {
          break;
 
       default:
-         console.error(`LargeGraphic.touchHandler unknown event ${syntheticType}`);
+         Log.warn('LargeGraphic.touchHandler unknown event %s', syntheticType);
       }
    }
 

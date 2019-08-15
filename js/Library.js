@@ -190,7 +190,7 @@ class Library {
             if (localGroup === undefined) {
                reject(msg);
             } else {
-               console.error(msg);
+               Log.err(msg);
                resolve(localGroup);
             }
          }
@@ -224,8 +224,8 @@ class Library {
              */
             document.addEventListener( 'message', function ( event /*: MessageEvent */ ) {
                if (typeof event.data == undefined || ((event.data /*: any */) /*: Obj */).type != 'load group') {
-                  console.error('unknown message received in Library.js:');
-                  console.error(event.data);
+                  Log.err('unknown message received in Library.js:');
+                  Log.err(event.data);
                   reject('unknown message received in Library.js');
                }
                const event_data = ((event.data /*: any */) /*: MSG_loadGroup */);

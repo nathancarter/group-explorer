@@ -58,37 +58,79 @@ class GEUtils {
       return `hsl(${Math.round(360*hue)}, ${Math.round(100*saturation)}%, ${Math.round(100*lightness)}%)`
    }
 }
-// @flow
-// simple debug log function
+/* @flow
+## Multi-level Logging
 
+The routines in this class perform simple logging and error reporting functions using console info/warn/error messages and the browser alert. Messages will be logged/alerted if they are at or higher than the current log level. There are five log levels defined: 'debug', 'info', 'warn', 'err', and 'none'. The default log level is 'warn' and the default alert level is 'err'. The log level may be set from the URL, thus:
+  <br>&nbsp;&nbsp;&nbsp;&nbsp;http://localhost:8080/group-explorer/Multtable.html?groupURL=./groups/D_4.group&<b>log=info&alert=warn</b>
+<br>And it may be set by invoking `Log.setLogLevel(string)` or `Log.setAlertLevel(string)` at the debug console. 
+
+```js
+ */
 /*::
+  type logLevel = 'debug' | 'info' | 'warn' | 'err' | 'none';
+
   export default
  */
 class Log {
 /*::
-   static debug: boolean;
+   static logLevels: {[key: logLevel]: number};
+   static logFunctions: Array<(Array<any>) => void>;
+   static logLevel: number;
+   static alertLevel: number;
  */
-   static init(debug /*:: ?: boolean */ = false) {
-      Log.debug = debug;
+   static init() {
+      const DEFAULT_LOG_LEVEL = 'warn';
+      const DEFAULT_ALERT_LEVEL = 'err';
+      Log.logLevels = {debug: 0, info: 1, warn: 2, err: 3, none: 4};
+      Log.logFunctions = [console.log, console.info, console.warn, console.error];
+      Log.setLogLevel(new URL(window.location.href).searchParams.get('log') || DEFAULT_LOG_LEVEL);
+      Log.setAlertLevel(new URL(window.location.href).searchParams.get('alert') || DEFAULT_ALERT_LEVEL);
    }
 
-   static log(msg /*: string */) {
-      if (Log.debug) {
-         console.log(msg);
+   static setLogLevel(level /*: string */) {
+      if (Log.logLevels.hasOwnProperty(level)) {
+         Log.logLevel = Log.logLevels[((level /*: any */) /*: logLevel */)];
       }
    }
 
-   static err(msg /*: string */) {
-      if (Log.debug) {
-         console.error(msg);
-      } else {
-         alert(msg);
+   static setAlertLevel(level /*: string */) {
+      if (Log.logLevels.hasOwnProperty(level)) {
+         Log.alertLevel = Log.logLevels[((level /*: any */) /*: logLevel */)];
       }
+   }
+
+   static _log(thisLevel /*: number */, args /*: Array<any> */) {
+      if (thisLevel >= Log.logLevel) {
+         Log.logFunctions[thisLevel](...args);
+      }
+      if (thisLevel >= Log.alertLevel) {
+         alert(args);
+      }
+   }
+
+   static debug(...args /*: Array<mixed> */) {
+      Log._log(Log.logLevels['debug'], args);
+   }
+
+   static info(...args /*: Array<mixed> */) {
+      Log._log(Log.logLevels['info'], args);
+   }
+
+   static warn(...args /*: Array<mixed> */) {
+      Log._log(Log.logLevels['warn'], args);
+   }
+
+   static err(...args /*: Array<mixed> */) {
+      Log._log(Log.logLevels['err'], args);
    }
 }
 
-// initialize static properties
-Log.init();
+// initialize static properties on window load
+window.addEventListener('load', Log.init, {once: true});
+/*
+```
+ */
 // @flow
 /*
  * bitset as array of (32-bit) ints
@@ -2054,7 +2096,7 @@ class Library {
             if (localGroup === undefined) {
                reject(msg);
             } else {
-               console.error(msg);
+               Log.err(msg);
                resolve(localGroup);
             }
          }
@@ -2088,8 +2130,8 @@ class Library {
              */
             document.addEventListener( 'message', function ( event /*: MessageEvent */ ) {
                if (typeof event.data == undefined || ((event.data /*: any */) /*: Obj */).type != 'load group') {
-                  console.error('unknown message received in Library.js:');
-                  console.error(event.data);
+                  Log.err('unknown message received in Library.js:');
+                  Log.err(event.data);
                   reject('unknown message received in Library.js');
                }
                const event_data = ((event.data /*: any */) /*: MSG_loadGroup */);
@@ -2551,6 +2593,7 @@ const GAPlink = '<a target="_blank" href="help/rf-um-gap">What is GAP?</a>';
  */
 /*::
 import XMLGroup from './XMLGroup.js';
+import Log from './Log.js';
 
 var group: XMLGroup;
 var sagecell: any;
@@ -2713,7 +2756,7 @@ function prepareGAPCodeBlock ( elt ) {
     //         strs.push( `tmp := SmallGroup( tmp[1], tmp[2] );;` );
     //         strs.push( `Print( "    <gapname>", StructureDescription( tmp ), "</gapname>\\n" );;` );
     //     } );
-    //     console.log( strs.join( '\n' ) );
+    //     Log.debug( strs.join( '\n' ) );
     // };
     const goal = elt.dataset.builtInCodeType;
     let code = '';
@@ -2838,7 +2881,7 @@ function prepareGAPCodeBlock ( elt ) {
         setCode( code );
         elt.dataset.purpose = 'computing group properties';
     } else {
-        console.log( 'Would not prepare this:', elt );
+        Log.info( 'Would not prepare this:', elt );
     }
 }
 // @flow
@@ -4004,7 +4047,7 @@ class DisplayDiagram {
     * add the output of the renderer to the container element (a jquery wrapped set)
     */
    constructor(options /*: Options */ = {}) {
-      Log.log('DisplayDiagram');
+      Log.debug('DisplayDiagram');
 
       if (options === undefined) {
          options = {};
@@ -4109,7 +4152,7 @@ class DisplayDiagram {
 
    // Display diagram
    showGraphic(diagram3D /*: Diagram3D */) {
-      Log.log('showGraphic');
+      Log.debug('showGraphic');
 
       // save diagram for use by LineDnD
       if (this.camControls !== undefined && diagram3D.isCayleyDiagram) {
@@ -4162,7 +4205,7 @@ class DisplayDiagram {
     *       distance so that diagram fills field of view
     */
    setCamera(diagram3D /*: Diagram3D */) {
-      Log.log('setCamera');
+      Log.debug('setCamera');
 
       if (diagram3D.isGenerated) {
          if (diagram3D.nodes.every( (node) => node.point.x == 0.0 )) {
@@ -4198,7 +4241,7 @@ class DisplayDiagram {
    }
 
    setBackground(diagram3D /*: Diagram3D */) {
-      Log.log('setBackground');
+      Log.debug('setBackground');
 
       let background = diagram3D.background;
       if (background == undefined)
@@ -4208,7 +4251,7 @@ class DisplayDiagram {
 
    // Create, arrange lighting
    updateLights(_diagram3D /*: Diagram3D */) {
-      Log.log('updateLights');
+      Log.debug('updateLights');
 
       const lights = this.getGroup('lights');
       lights.remove(...lights.children);
@@ -4221,7 +4264,7 @@ class DisplayDiagram {
 
    // Create a sphere for each node, add to scene as THREE.Group named "spheres"
    updateNodes(diagram3D /*: Diagram3D */, sphere_facets /*: number */ = 20) {
-      Log.log('updateNodes');
+      Log.debug('updateNodes');
 
       const spheres = this.getGroup('spheres');
       spheres.remove(...spheres.children);
@@ -4369,7 +4412,7 @@ class DisplayDiagram {
 
    // Draw labels on sprites positioned at nodes
    updateLabels(diagram3D /*: Diagram3D */) {
-      Log.log('updateLabels');
+      Log.debug('updateLabels');
 
       const labels = this.getGroup('labels');
       labels.remove(...labels.children);
@@ -4435,7 +4478,7 @@ class DisplayDiagram {
     *   An arc is drawn in the plane specified by the two ends and the center, if one is given, or [0,0,0]
     */
    updateLines(diagram3D /*: Diagram3D */, use_webgl_native_lines /*:: ?: boolean */ = false) {
-      Log.log('updateLines');
+      Log.debug('updateLines');
 
       const lines = diagram3D.lines;
       const spheres = this.getGroup('spheres').children;
@@ -4584,13 +4627,13 @@ class DisplayDiagram {
          return line.center;
       }
 
-      console.error("can't find center for line curve!");  // debug
+      Log.warn("can't find center for line curve!");
       line.center = new THREE.Vector3();
       return line.center;
    }
 
    updateArrowheads(diagram3D /*: Diagram3D */) {
-      Log.log('updateArrowheads');
+      Log.debug('updateArrowheads');
 
       const spheres = ((this.getGroup('spheres').children /*: any */) /*: Array<THREE.Mesh> */);
       const lines = this.getGroup('lines').children;
@@ -4638,7 +4681,7 @@ class DisplayDiagram {
    }
 
    updateChunking(_diagram3D /*: Diagram3D */) {
-      Log.log('updateChunking');
+      Log.debug('updateChunking');
 
       const diagram3D /*: CayleyDiagram */ = ((_diagram3D /*: any */) /*: CayleyDiagram */);
 
@@ -4845,12 +4888,12 @@ class DisplayDiagram {
             return { style: arrow.style, offset: arrow.offset };
          } )
       };
-      // console.log( 'Sending:', tmp );
+      // Log.debug( 'Sending:', tmp );
       return tmp;
    }
 
    fromJSON(json /*: CayleyDiagramJSON */, cayleyDiagram /*: CayleyDiagram */) {
-      // console.log( 'Received:', json );
+      // Log.debug( 'Received:', json );
       // no check for has own property, because we want to erase it
       // if it isn't included in the diagram
       cayleyDiagram.diagram_name = json._diagram_name;
@@ -5098,7 +5141,7 @@ class DisplayMulttable {
  */
    // height & width, or container
    constructor(options /*: Options */ = {}) {
-      Log.log('DisplayMulttable');
+      Log.debug('DisplayMulttable');
 
       DisplayMulttable._setDefaults();
 
@@ -5572,7 +5615,7 @@ class CycleGraph {
             return aName.length < bName.length ? -1 : (aName.length > bName.length ?  1 : 0);
          } );
       }
-      // for ( var i = 0 ; i < this.group.order ; i++ ) console.log( i, this.group.representations[this.group.representationIndex][i] );
+      // for ( var i = 0 ; i < this.group.order ; i++ ) Log.debug( i, this.group.representations[this.group.representationIndex][i] );
 
       // compute a list of cycles
       var cycles /*: Array<Array<groupElement>> */ = [ ];
@@ -5599,7 +5642,7 @@ class CycleGraph {
          // continue iff there's stuff left in the notYetPlaced array
       }
       this.cycles = cycles;
-      // console.log( 'cycle', JSON.stringify( cycles ) );
+      // Log.debug( 'cycle', JSON.stringify( cycles ) );
 
       // partition the cycles, forming a list of lists.
       // begin with all cycles in their own part of the partition,
@@ -5635,7 +5678,7 @@ class CycleGraph {
             }
          }
       }
-      // console.log( 'partition', JSON.stringify( partition ) );
+      // Log.debug( 'partition', JSON.stringify( partition ) );
       // sanity check:
       // partition.forEach( ( part, i ) => {
       //    partition.forEach( ( otherPart, j ) => {
@@ -5645,9 +5688,9 @@ class CycleGraph {
       //             const inSamePart = ( i == j );
       //             const commonElt = cycle.find( ( x ) => otherCycle.indexOf( x ) > -1 );
       //             if ( !inSamePart && typeof( commonElt ) != 'undefined' ) {
-      //                console.error( `Cycle ${ii} in part ${i} is ${cycle} `
-      //                             + `and cycle ${jj} in part ${j} is ${otherCycle} `
-      //                             + `and they share ${commonElt}.` );
+      //                Log.err( `Cycle ${ii} in part ${i} is ${cycle} `
+      //                       + `and cycle ${jj} in part ${j} is ${otherCycle} `
+      //                       + `and they share ${commonElt}.` );
       //             }
       //          } );
       //       } );
@@ -5682,7 +5725,7 @@ class CycleGraph {
       } else { // handle degenerate case
          var cumsums = [ 0, Math.PI ];
       }
-      // console.log( 'cumsums', cumsums );
+      // Log.debug( 'cumsums', cumsums );
 
       // rotate things so that the largest partition is hanging
       // straight downwards
@@ -5698,7 +5741,7 @@ class CycleGraph {
          ( cumsums[maxPartIndex] + cumsums[maxPartIndex+1] ) / 2;
       var diff = -1 / 2 * Math.PI - maxPartCenter;
       cumsums = cumsums.map( angle => angle + diff );
-      // console.log( 'angle-ified', cumsums );
+      // Log.debug( 'angle-ified', cumsums );
 
       // assign locations in the plane to each element,
       // plus create paths to be drawn to connect them
@@ -5728,14 +5771,14 @@ class CycleGraph {
                if ( !this.positions[curr] ) {
                    this.partIndices[curr] = partIndex;
                    this.rings[curr] = cycleIndex;
-                   // console.log( `rings[${curr}] := ${cycleIndex}` );
+                   // Log.debug( `rings[${curr}] := ${cycleIndex}` );
                    this.positions[curr] = f( this.rings[curr], i, 1 );
                }
                var path /*: Path */ = {pts: []};
                const step = 0.02;
-               // console.log( `connecting ${this.rings[prev]} to ${this.rings[curr]}` );
+               // Log.debug( `connecting ${this.rings[prev]} to ${this.rings[curr]}` );
                // if ( prev && curr && this.partIndices[prev] != this.partIndices[curr] )
-               //    console.error( `index[${prev}]=${this.partIndices[prev]}!=${this.partIndices[curr]}=index[${curr}]` );
+               //    Log.err( `index[${prev}]=${this.partIndices[prev]}!=${this.partIndices[curr]}=index[${curr}]` );
                for ( var t = 0 ; t <= 1+step/2 ; t += step ) {
                   var ring1 = f( this.rings[prev], i, t );
                   var ring2 = f( this.rings[curr], i, t );
@@ -5854,7 +5897,7 @@ class DisplayCycleGraph {
    radius: number;
  */
    constructor(options /*: Options */) {
-      Log.log('DisplayCycleGraph');
+      Log.debug('DisplayCycleGraph');
 
       DisplayCycleGraph._setDefaults();
 

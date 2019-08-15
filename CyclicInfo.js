@@ -3,6 +3,7 @@
 /*::
 import Template from './js/Template.js';
 import Library from './js/Library.js';
+import Log from './js/Log.js';
 import setUpGAPCells from './js/ShowGAPCode.js';
 import XMLGroup from './js/XMLGroup.js';
  */
@@ -17,7 +18,7 @@ function load() {
          group = _group;
          formatGroup()
       } )
-      .catch( console.error );
+      .catch( Log.err );
 }
 
 function formatGroup() {

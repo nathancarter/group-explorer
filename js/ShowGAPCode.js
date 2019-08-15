@@ -24,6 +24,7 @@ const GAPlink = '<a target="_blank" href="help/rf-um-gap">What is GAP?</a>';
  */
 /*::
 import XMLGroup from './XMLGroup.js';
+import Log from './Log.js';
 
 var group: XMLGroup;
 var sagecell: any;
@@ -186,7 +187,7 @@ function prepareGAPCodeBlock ( elt ) {
     //         strs.push( `tmp := SmallGroup( tmp[1], tmp[2] );;` );
     //         strs.push( `Print( "    <gapname>", StructureDescription( tmp ), "</gapname>\\n" );;` );
     //     } );
-    //     console.log( strs.join( '\n' ) );
+    //     Log.debug( strs.join( '\n' ) );
     // };
     const goal = elt.dataset.builtInCodeType;
     let code = '';
@@ -311,6 +312,6 @@ function prepareGAPCodeBlock ( elt ) {
         setCode( code );
         elt.dataset.purpose = 'computing group properties';
     } else {
-        console.log( 'Would not prepare this:', elt );
+        Log.info( 'Would not prepare this:', elt );
     }
 }

@@ -6,6 +6,7 @@ import BitSet from './js/BitSet.js';
 import CayleyDiagram from './js/CayleyDiagram.js';
 import IsomorphicGroups from './js/IsomorphicGroups.js';
 import Library from './js/Library.js';
+import Log from './js/Log.js';
 import MathML from './js/MathML.js';
 import setUpGAPCells from './js/ShowGAPCode.js';
 import Template from './js/Template.js';
@@ -55,7 +56,7 @@ function load() {
              group = _group;
              formatGroup()
           } )
-          .catch( console.error );
+          .catch( Log.err );
 }
 
 function formatGroup() {
@@ -189,9 +190,9 @@ function getDetailedSolvableDecomposition ( G /*: BasicGroup */) /*: ?Array<Basi
       return D;
    }
    const shortName = ((G /*: any */) /*: {shortName: ?string} */).shortName || '(unnamed)';
-   console.error( `Warning!  The group ${shortName} was not solvable, `
-                + 'but this function checked G.isSolvable at the outset!  '
-                + 'Something is wrong.' );
+   Log.warn( `Warning!  The group ${shortName} was not solvable, `
+           + 'but this function checked G.isSolvable at the outset!  '
+           + 'Something is wrong.' );
    return null;
 }
 
@@ -237,7 +238,7 @@ function showSolvableDecompositionSheet ( type /*: VisualizerType */ ) {
       const elementOrder = entry.group.getCosets( subgroupBitSet )
                                 .map( coset => coset.toArray() )
                                 .reduce( ( list1 /*: Array<groupElement> */, list2 /*: Array<groupElement> */ ) => list1.concat( list2 ), [ ] );
-      console.log( elementOrder );
+      Log.debug( elementOrder );
       const highlight = elementOrder.map( ( elt, index ) =>
          subgroupBitSet.get( index ) ? red : notred );
       sheetElementsAsJSON.push( {

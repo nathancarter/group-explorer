@@ -5,6 +5,7 @@ import BasicGroup from './js/BasicGroup.js';
 import type {StrategyArray, layout, direction} from './js/CayleyDiagram.js';
 import IsomorphicGroups from './js/IsomorphicGroups.js';
 import Library from './js/Library.js';
+import Log from './js/Log.js';
 import MathUtils from './js/MathUtils.js';
 import MathML from './js/MathML.js';
 import {CreateNewSheet} from './js/SheetModel.js';
@@ -22,7 +23,7 @@ function load() {
               group = _group;
               formatGroup();
           } )
-          .catch( console.error );
+          .catch( Log.err );
 }
 
 function formatGroup() {

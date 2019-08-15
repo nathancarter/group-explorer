@@ -5,6 +5,7 @@ import CycleGraph from './js/CycleGraph.js';
 import DisplayCycleGraph from './js/DisplayCycleGraph.js';
 import type {CycleGraphJSON} from './js/DisplayCycleGraph.js';
 import Library from './js/Library.js';
+import Log from './js/Log.js';
 import MathML from './js/MathML.js';
 import Menu from './js/Menu.js';
 import XMLGroup from './js/XMLGroup.js';
@@ -45,7 +46,7 @@ function load() {
    const groupLoad = Library
       .loadFromURL()
       .then( (_group) => group = _group )
-      .catch( console.error );
+      .catch( Log.err );
 
    // Promise to load visualizer framework around visualizer-specific code in this file
    const bodyLoad = VC.load();
@@ -59,7 +60,7 @@ function load() {
                 SSD.load($('#subset-control')).then(completeSetup)
              )
           )
-          .catch( console.error );
+          .catch( Log.err );
 }
 
 
@@ -90,8 +91,8 @@ function completeSetup() {
    window.addEventListener( 'message', function (event /*: MessageEvent */) {
       const event_data /*: MSG_external<CycleGraphJSON> */ = (event.data /*: any */);
       if (typeof event.data == 'undefined' || ((event.data /*: any */) /*: Obj */).source != 'external') {
-         console.error('unknown message received in CycleDiagram.js:');
-         console.error(event.data);
+         Log.warn('unknown message received in CycleDiagram.js:');
+         Log.warn(event.data);
          return;
       }
       canEmit = false; // don't spam notifications of changes about to happen

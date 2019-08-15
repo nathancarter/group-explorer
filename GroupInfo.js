@@ -6,6 +6,7 @@ import DisplayCycleGraph from './js/DisplayCycleGraph.js';
 import DisplayDiagram from './js/DisplayDiagram.js';
 import DisplayMulttable from './js/DisplayMulttable.js';
 import Library from './js/Library.js';
+import Log from './js/Log.js';
 import MathML from './js/MathML.js';
 import MathUtils from './js/MathUtils.js';
 import Menu from './js/Menu.js';
@@ -38,7 +39,7 @@ function load() {
              displayStatic();
              displayDynamic();
           } )
-          .catch( console.error );
+          .catch( Log.err );
 }
 
 // displays group information that is independent of the representation
