@@ -222,16 +222,19 @@ class HoverHelp {
       }
 
       const $tooltip = $('#tooltip');
+      const $clickedElement = $(document.elementFromPoint(clickEvent.clientX, clickEvent.clientY));
       if ($tooltip.length > 0) {
          $tooltip.remove();
       } else {
-         const $link = $(document.elementFromPoint(clickEvent.clientX, clickEvent.clientY)).closest('td').find('a[title]');
+         const $link = $clickedElement.closest('td').find('a[title]');
          if ($link.length != 0) {
             window.open($link.attr('href'));
          }
       }
 
-      clickEvent.preventDefault();
+      if ($clickedElement.closest('div.top-right-menu').length == 0) {
+         clickEvent.preventDefault();      // let click event propagate to the top-right-menu
+      }
       HoverHelp.lastEntry = null;
    }
 
