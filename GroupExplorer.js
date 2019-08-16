@@ -62,33 +62,35 @@ function readLibrary() {
 }
 
 function finish(urlsToDisplay) {
-   const exit = () => {
-      registerEventHandlers();   
-      $( '#loadingMessage' ).hide();
-      $('#GroupTableHeaders th.sort-down').triggerHandler('click');
+   const exitOrUpdateMessage = () => {
+      if (++urlsCompleted == urlsToDisplay.length) {
+         registerEventHandlers();   
+         $( '#loadingMessage' ).hide();
+         $('#GroupTableHeaders th.sort-down').triggerHandler('click');
 
-      // store stylesheet in localStorage
-      const mathjaxStylesheet = ($('style').toArray() /*: Array<HTMLStyleElement> */).filter( (s) => s.textContent.trim().startsWith('.mjx-chtml') )[0];
-      if (mathjaxStylesheet != undefined) {
-         localStorage.setItem('mathjax_stylesheet', mathjaxStylesheet.outerHTML);
+         // store stylesheet in localStorage
+         const mathjaxStylesheet = ($('style').toArray() /*: Array<HTMLStyleElement> */)
+                                              .filter( (s) => s.textContent.trim().startsWith('.mjx-chtml') )[0];
+         if (mathjaxStylesheet != undefined) {
+            localStorage.setItem('mathjax_stylesheet', mathjaxStylesheet.outerHTML);
+         }
+      } else {
+         const pct = ( urlsCompleted * 100 / urlsToDisplay.length ) | 0;
+         $( '#loadingMessage i' ).html( `Loading groups (${pct}%)...` );
       }
    };
 
    $( '#loadingMessage' ).show();
 
+   let urlsCompleted = 0;
    // check that the locally stored definitions currently displayed are the latest; refresh if not
-   const loadNextURL = (urlIndex) => {
-      const url = urlsToDisplay[urlIndex++];
+   urlsToDisplay.forEach( (url) => {
       const localGroup = Library.getLocalGroup(url);
       Library.getLatestGroup(url)
              .then( (group) => {
                 // if we already have the latest group in the Library, just check to see if we're done
                 if (localGroup && localGroup == group && localGroup.CayleyThumbnail != undefined && localGroup.rowHTML != undefined) {
-                   if ( urlIndex == urlsToDisplay.length ) {
-                      exit();
-                   } else {
-                      loadNextURL(urlIndex);
-                   }
+                   exitOrUpdateMessage();
                 } else {
                    // format new group
                    const row = displayGroup(group)[0];
@@ -102,21 +104,17 @@ function finish(urlsToDisplay) {
                       $(row).find('td.cayleyDiagram a div').empty().append($cayleyDiagram);
                       $(row).detach().appendTo('#GroupTable tbody');
                       Library.saveGroup(group);
-                      if ( urlIndex == urlsToDisplay.length ) {
-                         exit();
-                      } else {
-                         const pct = ( urlIndex * 100 / urlsToDisplay.length ) | 0;
-                         $( '#loadingMessage i' ).html( `Loading groups (${pct}%)...` );
-                         loadNextURL(urlIndex);
-                      }
+                      exitOrUpdateMessage();
                    };
                    // typeset this row
-                   MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'ScratchTable'],
+                   MathJax.Hub.Queue(['Typeset', MathJax.Hub, $(`#ScratchTable > tr[group="${url}"]`)[0]],
                                      afterTypesetting);
                 } } )
-             .catch( Log.err );
-   }
-   loadNextURL(0);
+             .catch( (err) => {
+                Log.err(err);
+                exitOrUpdateMessage();
+             } );
+   } );
 }
 
 // add row to table that displays this name, order, etc. of group
