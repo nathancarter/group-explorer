@@ -78,14 +78,17 @@ class Log {
    static logFunctions: Array<(Array<any>) => void>;
    static logLevel: number;
    static alertLevel: number;
+   static alertsRemaining: number;
  */
    static init() {
       const DEFAULT_LOG_LEVEL = 'warn';
       const DEFAULT_ALERT_LEVEL = 'err';
+      const MAX_ALERT_COUNT = 3;
       Log.logLevels = {debug: 0, info: 1, warn: 2, err: 3, none: 4};
       Log.logFunctions = [console.log, console.info, console.warn, console.error];
       Log.setLogLevel(new URL(window.location.href).searchParams.get('log') || DEFAULT_LOG_LEVEL);
       Log.setAlertLevel(new URL(window.location.href).searchParams.get('alert') || DEFAULT_ALERT_LEVEL);
+      Log.alertsRemaining = MAX_ALERT_COUNT;  // number of alerts remaining before we quit showing them
    }
 
    static setLogLevel(level /*: string */) {
@@ -104,7 +107,7 @@ class Log {
       if (thisLevel >= Log.logLevel) {
          Log.logFunctions[thisLevel](...args);
       }
-      if (thisLevel >= Log.alertLevel) {
+      if (thisLevel >= Log.alertLevel && Log.alertsRemaining-- > 0) {
          alert(args);
       }
    }
