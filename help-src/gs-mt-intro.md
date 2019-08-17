@@ -25,8 +25,8 @@ a bad example with a good one.
 The backgrounds of the cells in this multiplication table are colored based
 on whether they are in a particular 2-element subgroup. This does not look
 as helpful in a multiplication table as it does in a [cycle
-graph](rf-groupterms.md#cyclegraph) or [Cayley
-diagram](rf-groupterms.md#cayleydiagram), because each element appears
+graph](rf-groupterms.md#cycle-graph) or [Cayley
+diagram](rf-groupterms.md#cayley-diagrams), because each element appears
 multiple times in a multiplication table.
 
 ### Good example
@@ -40,7 +40,7 @@ group operation in this example respects the cosets nicely--in fact, by
 considering each block of like-colored neighbors as one big cell, one can
 see the multiplication table of the [quotient
 group](rf-groupterms.md#quotient)! The subgroup in question is therefore
-[normal](rf-groupterms.md#normalsubgroup).
+[normal](rf-groupterms.md#normal-subgroup).
 
 ### Exercise
 

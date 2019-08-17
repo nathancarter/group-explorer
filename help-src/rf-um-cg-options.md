@@ -12,15 +12,18 @@ specifics for large views of cycle graphs.
 
 ## Magnification
 
-You can zoom in and out of cycle graphs with your mouse wheel.
+You can move the cycle graph around by clicking it and dragging [two-finger drag];
+you can zoom in and out of cycle graphs with your mouse wheel [pinch open/close].
 
 The center of zooming is always the center of the view, so if you wish to
 zoom around a different center, first click and drag to move that point to
 the center of the view, then you can zoom in and out centered on that point.
+[On a touch device just touch the screen with two fingers and simultaneously
+drag and pinch to translate and magnify the graph with one gesture.]
 
-To restore the default magnification level (which fits the whole cycle graph
-into the view), right-click (control click on Mac) anywhere in the cycle
-graph.
+To restore the default magnification level (which re-centers the graph and fits it
+into the view), right-click anywhere in the cycle graph [control click on Mac,
+two-finger tap on touch device].
 
 ## Related interfaces
 

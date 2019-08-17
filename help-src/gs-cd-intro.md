@@ -7,7 +7,7 @@ group as acting on itself.
 If you have not yet encountered the multiplication table
 [visualizer](rf-geterms.md#visualizers), start with these help pages:
 
- * [The definition of a Cayley diagram](rf-groupterms.md#cayleydiagram)
+ * [The definition of a Cayley diagram](rf-groupterms.md#cayley-diagrams)
  * [The documentation on the Cayley diagram interface in
    *Group Explorer*](rf-um-cd-options.md)
 
@@ -21,7 +21,7 @@ following two useful properties.
  * Each element in the group is represented by a unique item in the visualizer.
  * Full information about the group structure is immediately visible in the diagram.
 
-[Cycle graphs](rf-groupterms.md#cyclegraph) also satisfy the first of these
+[Cycle graphs](rf-groupterms.md#cycle-graph) also satisfy the first of these
 requirements but not the second. [Multiplication
 tables](rf-groupterms.md#multtable) satisfy the second but not the first.
 

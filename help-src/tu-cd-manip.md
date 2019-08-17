@@ -8,7 +8,7 @@ manipulations you might want to perform on a Cayley diagram as you
 investigate that group.
 
 For more introductory information on Cayley diagrams, refer to [the
-definition of a Cayley diagram](rf-groupterms.md#cayleydiagram) or [a quick
+definition of a Cayley diagram](rf-groupterms.md#cayley-diagrams) or [a quick
 introduction to Cayley diagrams](gs-cd-intro.md). For more complete
 information on the Cayley diagram interface, refer to [the relevant section
 of the user manual](rf-um-cd-options.md).

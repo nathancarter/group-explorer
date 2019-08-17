@@ -10,7 +10,7 @@ symmetry](rf-groupterms.md#objects-of-symmetry) are three-dimensional views.
 The "Zoom level" slider determines how large the three-dimensional object
 will seem. It operates just like the zoom on a camera, with the left end
 being "zoomed out" and the right end being "zoomed in."  You can also zoom
-in and out with your mouse wheel.
+in and out with your mouse wheel [pinch open/close].
 
 The "Line thickness" slider determines how strongly the lines in the
 three-dimensional scene are drawn. The left end is faint lines, the right

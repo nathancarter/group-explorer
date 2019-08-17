@@ -18,7 +18,7 @@ the top row and left column determine the contents of the rest of the table.
 *Group Explorer* fills it out using the group operation.)
 
 To move an element from one point to another in the top row, shift-click on
-the element's cell in the table and drag your mouse to the new position
+the element's cell in the table and drag [one-finger drag] it to the new position
 (left or right in the top row). To move an element in the left column, the
 procedure is the same, except vertical. Note that the top row and left
 column will stay synchronized, so no matter which one you reorder, both will
@@ -30,14 +30,18 @@ below](#organization-by-subgroup).
 
 ## Magnification
 
-You can zoom in and out of multiplication tables with your mouse wheel.
+You can move the multiplication table around by clicking it and dragging [two-finger drag];
+you can zoom in and out with your mouse wheel [pinch open/close].
 
 The center of zooming is always the center of the view, so if you wish to
 zoom around a different center, first click and drag to move that point to
 the center of the view, then you can zoom in and out centered on that point.
+[On a touch device just touch the screen with two fingers and simultaneously
+drag and pinch to translate and magnify the table with one gesture.]
 
-To restore the default magnification level (which fits the whole table into
-the view), right-click (control click on Mac) anywhere in the table.
+To restore the default magnification level (which re-centers the table and fits it
+into the view), right-click anywhere in the table [control click on Mac,
+tow-finger tap on touch device].
 
 ## The Table tab
 

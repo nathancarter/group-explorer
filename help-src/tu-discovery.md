@@ -28,7 +28,7 @@ For instance, click the "tell me more" link to the right of the class
 equation in the group info page you opened. You will find all of the
 following.
 
- * A link to [the definition of "class equation."](rf-groupterms.md#classequation)
+ * A link to [the definition of "class equation."](rf-groupterms.md#class-equation)
  * An explanation of why your group has the class equation it does.
  * Three links to different ways to visualize the class equation.
    As is an example, the class equation for \(D_5\) shown using

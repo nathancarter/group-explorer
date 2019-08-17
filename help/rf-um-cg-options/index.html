@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="../w3-theme-blue.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 <script type="text/x-mathjax-config">
     MathJax.Hub.Config( { TeX: { extensions: [ "color.js" ] } } );
@@ -17,7 +18,6 @@
 </script>
   <link href="../w3.css" rel="stylesheet">
   <link href="../w3-theme-blue.css" rel="stylesheet">
-  <script src="../js/jquery-2.1.1.min.js" defer></script>
   <script src="../ge-citations.js" defer></script>
   <script src="../search/main.js" defer></script>
 <style>
@@ -138,13 +138,16 @@ about it in general <a href="../rf-um-largewindow/">here</a>. This page covers t
 specifics for large views of cycle graphs.</p>
 <p><img alt="A large view of a cycle graph" src="../illustration-cgwindow.png" /></p>
 <h2 id="magnification">Magnification</h2>
-<p>You can zoom in and out of cycle graphs with your mouse wheel.</p>
+<p>You can move the cycle graph around by clicking it and dragging [two-finger drag];
+you can zoom in and out of cycle graphs with your mouse wheel [pinch open/close].</p>
 <p>The center of zooming is always the center of the view, so if you wish to
 zoom around a different center, first click and drag to move that point to
-the center of the view, then you can zoom in and out centered on that point.</p>
-<p>To restore the default magnification level (which fits the whole cycle graph
-into the view), right-click (control click on Mac) anywhere in the cycle
-graph.</p>
+the center of the view, then you can zoom in and out centered on that point.
+[On a touch device just touch the screen with two fingers and simultaneously
+drag and pinch to translate and magnify the graph with one gesture.]</p>
+<p>To restore the default magnification level (which re-centers the graph and fits it
+into the view), right-click anywhere in the cycle graph [control click on Mac,
+two-finger tap on touch device].</p>
 <h2 id="related-interfaces">Related interfaces</h2>
 <p>The controls in the right side of the large window for cycle graphs are
 described in <a href="../rf-um-subsetlistbox/">the help page for subset controls</a>.</p>

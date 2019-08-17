@@ -77,7 +77,7 @@ and
 The arrows require some attention to follow carefully, but you can see how
 the six-element circle marches around the little three-element circle twice.
 I've taken the liberty of highlighting \(\mathbb{Z}_6\) red and its
-[image](rf-groupterms.md#morphimage) in \(S_3\) red also. (To do so,
+[image](rf-groupterms.md#image-of-a-subset-under-a-morphism) in \(S_3\) red also. (To do so,
 double-click either of the visualizers and play with its subsets [as
 documented here](rf-um-subsetlistbox.md).)
 
@@ -94,20 +94,20 @@ interesting to be able to see the result of the computation visually. I will
 whet your appetite for such illustrations by giving a few examples here, and
 providing links for you to browse further yourself.
 
- * To see a [short exact sequence](rf-groupterms.md#ses) exhibiting the
-   [normality](rf-groupterms.md#normalsubgroup) of a
+ * To see a [short exact sequence](rf-groupterms.md#short-exact-sequence) exhibiting the
+   [normality](rf-groupterms.md#normal-subgroup) of a
    [subgroup](rf-groupterms.md#subgroup)
-   (and the [quotient group](rf-groupterms.md#quotient) it computes):
+   (and the [quotient group](rf-groupterms.md#quotient-group) it computes):
     * Try the "tell me more" link next to "Subgroups" in the
       "Computated Properties" section of the
-      [group info page](rf-um-groupwindow.md).
+      [group info page](rf-um-groupwindow.md#computed-properties).
     * Then find the subgroup in question on the list and follow the link
       provided.
     * The illustration below shows the normality of \(V_4\) in \(A_4\).
 
 ![A connection of five groups illustrating the normality of V_4 in A_4](a_4_sheet_ses.png)
 
- * To see a [lattice of subgroups](rf-groupterms.md#subgrouplattice)
+ * To see a [lattice of subgroups](rf-groupterms.md#lattice-of-subgroups)
    for a given group:
     * Again, go to the "tell me more" link next to "Subgroups"
       in the group info page.
@@ -117,8 +117,8 @@ providing links for you to browse further yourself.
 
 ![The lattice of subgroups for S_3](illustration-sheettut8.png)
 
- * To see the [solvable decomposition](rf-groupterms.md#solvable) of any
-   [solvable group](rf-groupterms.md#solvable):
+ * To see the [solvable decomposition](rf-groupterms.md#solvable-group-solvable-decomposition) of any
+   [solvable group](rf-groupterms.md#solvable-group-solvable-decomposition):
     * Follow the "tell me more" link next to "Solvable"
       in the group info page.
     * The decomposition will be reported in text and you can click and of

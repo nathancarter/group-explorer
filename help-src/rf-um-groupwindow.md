@@ -20,10 +20,10 @@ each Group Info page).
 
 *Group Explorer* is all about visualization. Thus the Views section receives
 high priority, showing previews of every way to visualize a group,
-including [Cayley diagrams](rf-groupterms.md#cayleydiagram), a
+including [Cayley diagrams](rf-groupterms.md#cayley-diagrams), a
 [multiplication table](rf-groupterms.md#multtable), a [cycle
-graph](rf-groupterms.md#cyclegraph), and any [objects of
-symmetry](rf-groupterms.md#symmetryobject) the group has.
+graph](rf-groupterms.md#cycle-graph), and any [objects of
+symmetry](rf-groupterms.md#objects-of-symmetry) the group has.
 
 ## Description
 
@@ -49,7 +49,7 @@ other definitions appear here.
 
 ## Generators
 
-Groups can be [generated](rf-groupterms.md#generators) in many ways and some
+Groups can be [generated](rf-groupterms.md#generators-for-a-group-or-subgroup) in many ways and some
 groups come with a few different commonly-used sets of generators chosen. If
 the group has no pre-selected set of generators built in, *Group Explorer*
 computes one such (minimum-size) set when the group is loaded. Each list of

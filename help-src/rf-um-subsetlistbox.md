@@ -20,7 +20,7 @@ this section.
 
 The next portion of the window lists user-defined subsets, which is empty by
 default. You can add and delete subsets relevant to your study of the group;
-[see below](#topmost-items-on-the-menu).
+[see below](#topmost-items-on-the-popup-menu).
 
 The last portion of the window lists partitions of the group (e.g. conjugacy
 classes, cosets of a particular subgroup, etc.) and is particularly useful
@@ -33,11 +33,14 @@ subsets and subgroups of whatever group is being visualized. It has many
 features, covered one at a time below.
 
 For any subset listed in the pane, you can find out its list of elements by
-double-clicking the subset you're interested in.
+double-clicking [touch and holding] the subset you're interested in.
 
-Right-clicking on the subsets pane brings up a menu from which you can take
-several important actions, some of which are visible in the following
-screenshot.
+Right-clicking [tapping] on the subsets pane brings up a menu from which you can
+take several important actions, some of which are visible in the following
+screenshot. You can pin a submenu to keep it from disappearing by clicking [tapping]
+on its parent menu item (the line in the parent menu with a right-pointing triangle,
+like "Compute ►" in the following screenshot); you can clear it by clicking [tapping]
+on the line again.
 
 ![A screenshot of several subitems on the subset list box context menu](illustration-slbmenu.png)
 
@@ -49,7 +52,7 @@ the documentation for each option on this menu.
 
 ### Edit list of elements in \(S_i\)
 
-This menu item appears only if you right-clicked on a user-defined subset.
+This menu item appears only if you selected a user-defined subset.
 If you choose it, a window like the one pictured here opens.
 
 ![A dialog box for editing the contents of a user-defined subset](illustration-subsetedit.png)
@@ -62,15 +65,15 @@ them.
 
 ### Delete \(S_i\)
 
-This menu item appears only if you right-clicked on a user-defined subset.
-Choosing it deletes the user-defined subset on which you right-clicked.
+This menu item appears only if you selected a user-defined subset.
+Choosing it deletes the user-defined subset you selected.
 
 ### Delete \(CC_i\), \(OC_i\), \(gH_i\), etc.
 
-This menu item appears only if you right-clicked on a partition (i.e. on one
+This menu item appears only if you selected a partition (i.e. on one
 of its sets). Partitions can be conjugacy classes \(CC_i\), order classes
 \(OC_i\), left cosets \(gH_i\), or right cosets \(H_ig\). Choosing this
-option deletes the entire partition on which you right-clicked (e.g. all
+option deletes the entire partition you selected (e.g. all
 conjugacy classes, all order classes, or all left/right cosets of the
 subgroup, etc.).
 
@@ -78,30 +81,29 @@ subgroup, etc.).
 
 This menu item creates a new subset under the "User-defined subsets"
 heading. The subset will be empty, and you can [add elements to it as
-described above](#topmost-items-on-the-menu).
+described above](#topmost-items-on-the-popup-menu).
 
 ## The Compute &gt; submenu
 
 ### Compute &gt; all conjugacy classes \(CC_i\)
 
-This submenu item appears only if you have not already asked *Group
-Explorer* to perform this computation. It adds the set of [conjugacy
+This submenu item appears only if the conjugacy class partition does not
+already exist. It adds the set of [conjugacy
 classes](rf-groupterms.md#conjugacy-classes) as a new partition under the
 "Partitions" heading.
 
 ### Compute &gt; all order classes \(OC_i\)
 
-This submenu item appears only if you have not already asked *Group
-Explorer* to perform this computation. It adds the set of [order
+This submenu item appears only if the order class partition does not
+already exist. It adds the set of [order
 classes](rf-groupterms.md#order-classes) as a new partition under the
 "Partitions" heading.
 
-### Compute &gt; normalizer of \(X\), \(\text{Norm}(X)\)
+### Compute &gt; normalizer of \(H_i\), \(\text{Norm}(H_i)\)
 
-This submenu item appears when you right-click on the subset \(X\), but only
-if you have not already asked *Group Explorer* to perform this computation.
+This submenu item appears when you select the subgroup \(H_i\).
 It adds the [normalizer](rf-groupterms.md#normalizer-of-a-subgroupsubset) of
-the given subset to the list of user-defined subsets.
+the given subgroup to the list of user-defined subsets.
 
 Note that whenever you add a new subset, *Group Explorer* always checks
 whether it exists under another name, and gives you the option to cancel
@@ -109,8 +111,8 @@ your addition if so.
 
 ### Compute &gt; closure of \(X\), \(\langle X \rangle\)
 
-This submenu item appears when you right-click on the subset \(X\), but only
-if the subset on which you right-clicked is not a subgroup. It adds the
+This submenu item appears when you select the subset \(X\), but only
+if the subset you selected is not a subgroup. It adds the
 [closure](rf-groupterms.md#closure-of-a-subset) of the given subset to the
 list of user-defined subsets.
 
@@ -118,28 +120,27 @@ Note that whenever you add a new subset, *Group Explorer* always checks
 whether it exists under another name, and gives you the option to cancel
 your addition if so.
 
-### Compute &gt; left cosets \(g_iH\)
+### Compute &gt; left cosets \(gH_i\)
 
-This submenu item appears when you right-click on the subset \(X\), but only
-if you have not already asked *Group Explorer* to perform this computation,
-and the subset on which you right-clicked is a subgroup. It adds the set of
+This submenu item appears when you select the subgroup \(H_i\), but only
+if the partition by left cosets of that subgroup does not already exist.
+It adds the set of
 left [cosets](rf-groupterms.md#cosets) as a new partition under the
 "Partitions" heading.
 
-### Compute &gt; right cosets \(Hg_i\)
+### Compute &gt; right cosets \(H_ig\)
 
-This submenu item appears when you right-click on the subset \(X\), but only
-if you have not already asked *Group Explorer* to perform this computation,
-and the subset on which you right-clicked is a subgroup. It adds the set of
+This submenu item appears when you select the subgroup \(H_i\), but only
+if the partition by right cosets of that subgroup does not already exist.
+It adds the set of
 right [cosets](rf-groupterms.md#cosets) as a new partition under the
 "Partitions" heading.
 
 ### Compute &gt; an intersection &gt; subsubmenu
 
-This submenu appears when you right-click no the subset \(X\), and it
+This submenu appears when you select the subset \(X\), and it
 contains items allowing you to perform an intersection of \(X\) with any
-other subset listed in the whole pane, provided that you have not already
-requested such a computation. Choosing one of the items on this submenu
+other subset listed in the whole pane. Choosing one of the items on this submenu
 computes the intersection described in that item, e.g. "the intersection of
 \(H_2\) with \(S_5\)." Intersection here means simply what it does in set
 theory--the elements in common between the two sets.
@@ -150,10 +151,9 @@ your addition if so.
 
 ### Compute &gt; a union &gt; subsubmenu
 
-This submenu appears when you right-click no the subset \(X\), and it
+This submenu appears when you select the subset \(X\), and it
 contains items allowing you to perform a union of \(X\) with any other
-subset listed in the whole pane, provided that you have not already
-requested such a computation. Choosing one of the items on this submenu
+subset listed in the whole pane. Choosing one of the items on this submenu
 computes the union described in that item, e.g. "the union of \(H_2\) with
 \(S_5\)." Union here means simply what it does in set theory--the combined
 elements from the two sets.
@@ -164,11 +164,10 @@ your addition if so.
 
 ### Compute &gt; an elementwise product &gt; subsubmenu
 
-This submenu appears when you right-click no the subset \(X\), and it
+This submenu appears when you select the subset \(X\), and it
 contains items allowing you to perform an [elementwise
-product](rf-groupterms.md#elementwise-product) of \(X\) with any other
-subset listed in the whole pane, provided that you have not already
-requested such a computation. Choosing one of the items on this submenu
+product](rf-groupterms.md#elementwise-product-of-two-subsets-of-a-group) of \(X\) with any other
+subset listed in the whole pane. Choosing one of the items on this submenu
 computes the elementwise product described in that item, e.g. "the
 elementwise product of \(H_2\) with \(S_5\)."
 
@@ -224,7 +223,7 @@ looking at the pane into which the new subset is being introduced.
 
 ## Highlight subset by &gt; submenu
 
-This submenu appears only if you click on a subset (as opposed to a
+This submenu appears only if you select a subset (as opposed to a
 heading). Its items depend on the visualizer as follows.
 
 *   For Cayley diagrams, highlighting options are  
@@ -247,7 +246,7 @@ heading). Its items depend on the visualizer as follows.
     ![Highlight border icon](hightype-circle-border.jpg) Border, and  
     ![Highlight top icon](hightype-circle-top.jpg) Top.
 
-Choosing one causes the subset on which you right-clicked to be highlighted
+Choosing one causes the subset you selected to be highlighted
 in the visualizer (both its large and small incarnations) with the method
 you selected. For instance, here is a multiplication table with an order-4
 subgroup highlighted according to corners.
@@ -267,11 +266,11 @@ this same menu ([see below](#clear-all-highlighting)).
 
 ## Highlight partition by &gt; submenu
 
-This submenu appears only if you click on a partition (i.e. on one of its
+This submenu appears only if you select a partition (i.e. on one of its
 sets). Its items depend on the visualizer in the same way [described
 above](#highlight-subset-by-submenu).
 
-Choosing one of its items causes the partition on which you right-clicked to
+Choosing one of its items causes the partition you selected to
 be highlighted in the visualizer (both its large and small incarnations)
 with the method you selected, using a different color for each set in the
 partition. For instance, here is a cycle graph with the conjugacy class

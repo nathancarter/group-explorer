@@ -17,7 +17,8 @@ objects known as groups. Here are some places you might want to get started:
 
 The group library is [the main window of *Group
 Explorer*](rf-um-mainwindow.md) and shows all loaded groups. Try
-double-clicking them to learn more about them.
+clicking [tapping] them to learn more about them.
+(Touch gestures are listed in [brackets] after the mouse action.)
 
 If you need help, each page of the application has help links in the top
 right corner that go to the specific portion of the help files relevant to
