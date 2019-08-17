@@ -94,7 +94,11 @@ class Subgroup {
       const clone = new Subgroup();
       for (const prop in this) {
          ((clone /*: any */) /*: Obj */)[prop] =
-            (prop == 'group') ? this.group : ((this /*: any */) /*: Obj */)[prop].clone();
+            (((this /*: any */) /*: Obj */)[prop] == undefined)
+               ? undefined
+               : (prop == 'group')
+                  ? this.group
+                  : ((this /*: any */) /*: Obj */)[prop].clone();
       }
       return clone;
    }
