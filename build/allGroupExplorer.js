@@ -1290,7 +1290,7 @@ class Subgroup {
       const clone = new Subgroup();
       for (const prop in this) {
          ((clone /*: any */) /*: Obj */)[prop] =
-            (this[prop] == undefined)
+            (((this /*: any */) /*: Obj */)[prop] == undefined)
                ? undefined
                : (prop == 'group')
                   ? this.group
@@ -3238,6 +3238,7 @@ import Diagram3D from './Diagram3D.js';
 import CayleyDiagram from './CayleyDiagram.js';
 import DisplayDiagram from './DisplayDiagram.js';
 import type {LineUserData, SphereUserData} from './DisplayDiagram.js';
+import Log from './Log.js';
 
 export default
  */
@@ -3245,9 +3246,10 @@ class DiagramDnD {
 /*::
    displayDiagram: DisplayDiagram;
    canvas: HTMLCanvasElement;
-   mouse: THREE.Vector2;
+   eventLocation: THREE.Vector2;
    raycaster: THREE.Raycaster;
-   event_handler: (JQueryEventObject) => void;
+   mouse_handler: (MouseEvent) => void;
+   touch_handler: (TouchEvent) => void;
    repaint_poller: ?number;
    repaint_request: ?number;
    object: ?THREE.Object3D;
@@ -3255,42 +3257,110 @@ class DiagramDnD {
    constructor(displayDiagram /*: DisplayDiagram */) {
       this.displayDiagram = displayDiagram;
       this.canvas = displayDiagram.renderer.domElement;
-      this.mouse = new THREE.Vector2();
+      this.eventLocation = new THREE.Vector2();
       this.raycaster = new THREE.Raycaster();
       this.raycaster.linePrecision = 0.01;
-      this.event_handler = (event) => this.eventHandler(event);
-      this.repaint_poller = undefined;
-      this.repaint_request = undefined;
-      this.object = undefined;
+      this.repaint_poller = null;
+      this.object = null;
 
-      $(displayDiagram.renderer.domElement).on('mousedown', this.event_handler);
+      if (window.ontouchstart === undefined) {
+         this.mouse_handler = (mouseEvent /*: MouseEvent */) => this.mouseHandler(mouseEvent);
+         this.canvas.addEventListener('mousedown', this.mouse_handler);
+      } else {
+         this.touch_handler = (touchEvent /*: TouchEvent */) => this.touchHandler(touchEvent);
+         this.canvas.addEventListener('touchstart', this.touch_handler);
+      }
    }
 
-   eventHandler(_event /*: JQueryEventObject */) {
-      const event = ((_event /*: any */) /*: JQueryMouseEventObject */);
 
-      if (!event.shiftKey) {
+   mouseHandler(mouseEvent /*: MouseEvent */) {
+      if (!mouseEvent.shiftKey) {
          return;
       }
 
-      event.preventDefault();
-      event.stopPropagation();
+      mouseEvent.preventDefault();
+      mouseEvent.stopPropagation();
 
       const bounding_box = this.canvas.getBoundingClientRect();
-      this.mouse.x = ( (event.clientX - bounding_box.left) / this.canvas.width) * 2 - 1;
-      this.mouse.y = -( (event.clientY - bounding_box.top) / this.canvas.height) * 2 + 1;
+      this.eventLocation.x = ( (mouseEvent.clientX - bounding_box.left) / this.canvas.width) * 2 - 1;
+      this.eventLocation.y = -( (mouseEvent.clientY - bounding_box.top) / this.canvas.height) * 2 + 1;
 
-      switch (event.type) {
-         case 'mousedown':  this.dragStart(event);  break;
-         case 'mousemove':  this.dragOver(event);   break;
-         case 'mouseup':    this.drop(event);       break;
+      switch (mouseEvent.type) {
+      case 'mousedown':
+         if ((this.object = this.dragStart()) != undefined) {
+            this.canvas.addEventListener('mousemove', this.mouse_handler);
+            this.canvas.addEventListener('mouseup', this.mouse_handler);
+
+            // change cursor to grab
+            this.canvas.style.cursor = 'move';
+
+            this.repaintPoller();
+         }
+         break;
+
+      case 'mousemove':
+         this.dragOver();
+         break;
+
+      case 'mouseup':
+         this.drop();
+         this.canvas.removeEventListener('mousemove', this.mouse_handler);
+         this.canvas.removeEventListener('mouseup', this.mouse_handler);
+         break;
+
+      default:
+         Log.warn(`DiagramDnD.mouseHandler unexpected event ${mouseEvent.type}`);
+      }
+   }
+ 
+   touchHandler(touchEvent /*: TouchEvent */) {
+      const touchCount = touchEvent.touches.length
+            + ((touchEvent.type == 'touchend') ? touchEvent.changedTouches.length : 0);
+      const touch = (touchEvent.type == 'touchend') ? touchEvent.changedTouches[0] : touchEvent.touches[0];
+      
+      if (touchCount != 1) {
+         return;
+      }
+
+      const bounding_box = this.canvas.getBoundingClientRect();
+      this.eventLocation.x = ( (touch.clientX - bounding_box.left) / this.canvas.width) * 2 - 1;
+      this.eventLocation.y = -( (touch.clientY - bounding_box.top) / this.canvas.height) * 2 + 1;
+
+      switch (touchEvent.type) {
+      case 'touchstart':
+
+         if ((this.object = this.dragStart()) != undefined) {
+            this.canvas.addEventListener('touchmove', this.touch_handler);
+            this.canvas.addEventListener('touchend', this.touch_handler);
+
+            this.repaintPoller();
+
+            touchEvent.preventDefault();
+            touchEvent.stopPropagation();
+         }
+         break;
+
+      case 'touchmove':
+         this.dragOver();
+         touchEvent.preventDefault();
+         touchEvent.stopPropagation();
+         break;
+
+      case 'touchend':
+         this.drop();
+         this.canvas.removeEventListener('touchmove', this.touch_handler);
+         this.canvas.removeEventListener('touchend', this.touch_handler);
+         break;
+
+      default:
+         Log.warn(`DiagramDnD.touchHandler unexpected event ${touchEvent.type}`);
       }
    }
 
-   // start drag-and-drop; see if we've found a line
-   dragStart(event /*: JQueryMouseEventObject */) {
+   // start drag-and-drop; see if we've found a line or node
+   dragStart() /*: ?THREE.Object3D */ {
       // update the picking ray with the camera and mouse position
-      this.raycaster.setFromCamera(this.mouse, this.displayDiagram.camera);
+      this.raycaster.setFromCamera(this.eventLocation, this.displayDiagram.camera);
 
       // temporarily change the width of the lines to 1 for raycasting -- doesn't seem to work with meshLines (sigh)
       // (this change is never rendered, so user never sees it)
@@ -3309,50 +3379,34 @@ class DiagramDnD {
       diagram3D.lineWidth = saved_width;
       this.displayDiagram.updateLines(diagram3D);
 
-      // if empty intersect just return
-      if (intersects.length == 0) {
-         return;
-      }
-
-      // found an object (line or sphere); squirrel it away and wait for further dnd events
-      this.object = intersects[0].object;
-      $(this.canvas).off('mousemove', this.event_handler).on('mousemove', this.event_handler);
-      $(this.canvas).off('mouseup', this.event_handler).on('mouseup', this.event_handler);
-
-      // change cursor to grab
-      this.canvas.style.cursor = 'move';
-
-      this.repaint_poller = window.setInterval(() => this.repaintPoller(), 100);
+      // return intersect or null
+      return (intersects.length == 0) ? null : intersects[0].object;
    }
 
-   dragOver(event /*: JQueryMouseEventObject */) {
-      this.repaint_request = (this.repaint_request === undefined) ? performance.now() : this.repaint_request;
+   dragOver() {
    }
 
-   drop(event /*: JQueryMouseEventObject */) {
+   drop() {
       this.repaint();
-      this.endDrag(event);
+      this.endDrag();
    }
 
-   endDrag(event /*: JQueryMouseEventObject */) {
-      $(this.canvas).off('mousemove', this.event_handler);
-      $(this.canvas).off('mouseup', this.event_handler);
+   endDrag() {
       this.canvas.style.cursor = '';
-      window.clearInterval( ((this.repaint_poller /*: any */) /*: number */) );
-      this.repaint_poller = undefined;
+      window.clearTimeout( ((this.repaint_poller /*: any */) /*: number */) );
+      this.repaint_poller = null;
       this.object = undefined;
    }
 
    repaintPoller() {
-      if (performance.now() - ((this.repaint_request /*: any */) /*: number */) > 100) {
-         this.repaint();
-      }
+      this.repaint();
+      this.repaint_poller = window.setTimeout(() => this.repaintPoller(), 0);
    }
 
    // update line to run through current mouse position
    repaint() {
       // get ray through mouse
-      this.raycaster.setFromCamera(this.mouse, this.displayDiagram.camera);
+      this.raycaster.setFromCamera(this.eventLocation, this.displayDiagram.camera);
 
       if (this.object != null) {
          if (this.object.type == 'Line') {
@@ -3361,9 +3415,6 @@ class DiagramDnD {
             this.repaintSphere(this.object);
          }
       }
-
-      // clear repaint request
-      this.repaint_request = undefined;
    }
 
    repaintLine(line /*: THREE.Object3D */) {
@@ -3423,7 +3474,7 @@ class DiagramDnD {
       this.displayDiagram.updateLabels(diagram3D);
       this.displayDiagram.updateLines(diagram3D);
       this.displayDiagram.updateArrowheads(diagram3D);
-      this.displayDiagram.render();
+//      this.displayDiagram.render();
    }
 }
 // @flow

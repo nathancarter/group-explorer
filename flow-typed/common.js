@@ -27,7 +27,7 @@ declare class Window extends EventTarget {
     setInterval(fn: () => void, interval: number): number;
     clearInterval(number): void;
     setTimeout(fn: () => void, delay: number): number;
-    clearInterval(number): void;
+    clearTimeout(number): void;
     getSelection(): Selection;
     ontouchstart?: Function;
 }

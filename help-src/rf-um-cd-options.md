@@ -48,7 +48,8 @@ diagram, and seeing it in motion can give you a better mental picture of it.
 
 You can customize the appearance of any Cayley diagram by dragging the nodes
 in it around in three dimensions to any position you like. To drag the nodes
-around, hold the shift key while you click on the node and drag. It will
+around, hold the shift key while you click on the node and drag. [On a touch
+device just start a one-finger drag on the node.] It will
 move in the plane parallel to the screen. To reset the diagram to its
 original configuration, simply reload the page in your browser.
 
@@ -67,7 +68,8 @@ when there are nodes in the way and a curved path would avoid them.
 
 However you can feel free to improve on *Group Explorer*'s decisions in this
 matter by clicking on an arc in the diagram while holding down the shift
-key, and dragging to increase or decrease the amount of arcing it has. You
+key, and dragging to increase or decrease the amount of arcing it has. [On
+a touch device just start a one-finger drag on the arc.] You
 will not be able to change the direction of the arcing, only its amount.
 
 ## The Diagram tab
