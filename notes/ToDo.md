@@ -30,7 +30,8 @@
      much out on an iPad, too -- the event doesn't even exist, and I don't think there's
      any way to prevent the default action (magnification) even if you roll your own 
      from touch events._
- * Implement touch support for Sheets! (I seem to have overlooked this...)
+ * ~~Implement touch support for Sheets~~
+   * _Complete_
 
 ### Bugs
 
@@ -41,9 +42,11 @@
  * Fix subset display so that whenever you add a new subset, Group Explorer checks whether it exists under another name,
    and gives you the option to cancel your addition if so, matching GE2 behavior.
 
+ * Format dropdown lists in Sheets with MathJax
+
 ### Miscellany
 
- * Make test to simulate loading GE from GAP using 'waitForMessage'note
+ * Make test to simulate loading GE from GAP using 'waitForMessage'
 
 ### 3D diagrams and viewing angles
 
