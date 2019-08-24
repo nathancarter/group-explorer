@@ -66,7 +66,7 @@ function completeSetup () {
    // Document is assembled, register event handlers
    registerEventHandlers();
    const $container = $( '#graphic' );
-   const W = 10000, H = 7500;
+   const W = 4096, H = 4096; // down from 10000x7500 to accomodate mobile limitations
    $container[0].style.overflowX = 'scroll';
    $container[0].style.overflowY = 'scroll';
    $container.html( `<div style="min-width: ${W}; min-height: ${H};"></div>` );
