@@ -4105,7 +4105,7 @@ class DisplayDiagram {
     * add the output of the renderer to the container element (a jquery wrapped set)
     */
    constructor(options /*: Options */ = {}) {
-      Log.debug('DisplayDiagram');
+      // Log.debug('DisplayDiagram');
 
       if (options === undefined) {
          options = {};
@@ -4210,7 +4210,7 @@ class DisplayDiagram {
 
    // Display diagram
    showGraphic(diagram3D /*: Diagram3D */) {
-      Log.debug('showGraphic');
+      // Log.debug('showGraphic');
 
       // save diagram for use by LineDnD
       if (this.camControls !== undefined && diagram3D.isCayleyDiagram) {
@@ -4263,7 +4263,7 @@ class DisplayDiagram {
     *       distance so that diagram fills field of view
     */
    setCamera(diagram3D /*: Diagram3D */) {
-      Log.debug('setCamera');
+      // Log.debug('setCamera');
 
       if (diagram3D.isGenerated) {
          if (diagram3D.nodes.every( (node) => node.point.x == 0.0 )) {
@@ -4299,7 +4299,7 @@ class DisplayDiagram {
    }
 
    setBackground(diagram3D /*: Diagram3D */) {
-      Log.debug('setBackground');
+      // Log.debug('setBackground');
 
       let background = diagram3D.background;
       if (background == undefined)
@@ -4309,7 +4309,7 @@ class DisplayDiagram {
 
    // Create, arrange lighting
    updateLights(_diagram3D /*: Diagram3D */) {
-      Log.debug('updateLights');
+      // Log.debug('updateLights');
 
       const lights = this.getGroup('lights');
       lights.remove(...lights.children);
@@ -4322,7 +4322,7 @@ class DisplayDiagram {
 
    // Create a sphere for each node, add to scene as THREE.Group named "spheres"
    updateNodes(diagram3D /*: Diagram3D */, sphere_facets /*: number */ = 20) {
-      Log.debug('updateNodes');
+      // Log.debug('updateNodes');
 
       const spheres = this.getGroup('spheres');
       spheres.remove(...spheres.children);
@@ -4470,7 +4470,7 @@ class DisplayDiagram {
 
    // Draw labels on sprites positioned at nodes
    updateLabels(diagram3D /*: Diagram3D */) {
-      Log.debug('updateLabels');
+      // Log.debug('updateLabels');
 
       const labels = this.getGroup('labels');
       labels.remove(...labels.children);
@@ -4536,7 +4536,7 @@ class DisplayDiagram {
     *   An arc is drawn in the plane specified by the two ends and the center, if one is given, or [0,0,0]
     */
    updateLines(diagram3D /*: Diagram3D */, use_webgl_native_lines /*:: ?: boolean */ = false) {
-      Log.debug('updateLines');
+      // Log.debug('updateLines');
 
       const lines = diagram3D.lines;
       const spheres = this.getGroup('spheres').children;
@@ -4691,7 +4691,7 @@ class DisplayDiagram {
    }
 
    updateArrowheads(diagram3D /*: Diagram3D */) {
-      Log.debug('updateArrowheads');
+      // Log.debug('updateArrowheads');
 
       const spheres = ((this.getGroup('spheres').children /*: any */) /*: Array<THREE.Mesh> */);
       const lines = this.getGroup('lines').children;
@@ -4739,7 +4739,7 @@ class DisplayDiagram {
    }
 
    updateChunking(_diagram3D /*: Diagram3D */) {
-      Log.debug('updateChunking');
+      // Log.debug('updateChunking');
 
       const diagram3D /*: CayleyDiagram */ = ((_diagram3D /*: any */) /*: CayleyDiagram */);
 
