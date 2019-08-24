@@ -33,8 +33,9 @@ new regions of the sheet as needed, using your mouse wheel.
 
 ### Selecting items
 
-When you click an item on the sheet, a dotted line border appears around it
-to indicate that you have selected it.
+When you click [tap] an item on the sheet, a dotted line border appears
+around it to indicate that you have selected it, and some of the buttons
+in the right-hand pane may quit being grayed out, indicating they are enabled.
 
 Note that for nonrectangular items (lines and homomorphisms) the area of
 their sensitivity to the mouse may be fairly large, to give you ample
@@ -43,15 +44,17 @@ opportunity to click them without having to click exactly on a line.
 ### Moving and resizing items
 
 To move an item from one place to another on the sheet, simply click and
-drag it. To move an item forward or backwards on the sheet (i.e. farther
+drag it [one-finger drag]. To move an item forward or backwards on the sheet (i.e. farther
 into the background, or closer to the foreground), use one of the four
 buttons for this purpose in the right-hand pane, "Move forward," "Move to
-front," "Move backward", and "Move to back."
+front," "Move backward", and "Move to back" while the item is selected.
 
 You can resize an item by first selecting it, and then hovering your mouse
 over any part of its boundary. Your mouse cursor will shape itself like a
 pair of arrows to indicate that resizing is possible. Click and drag to
-resize the item.
+resize the item. [On touch devices simply touch the item and drag it with
+one finger to move it, or pinch it with two fingers to re-size it;
+it is not necessary to select it.]
 
 ## Saving and loading
 
@@ -109,7 +112,7 @@ of visualizer you would like to add.
    included because they serve no purpose in sheets, because it is not yet
    supported to connect them to any other items.
  * The right drop-down list presents all groups in the *Group Explorer*
-   library, in alphabetical order.  Choose which group you would like to
+   library, ordered by their number of elements.  Choose which group you would like to
    visualize.
 
 After making these choices and clicking the "Add this visualizer:" button,
