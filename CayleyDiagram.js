@@ -68,7 +68,7 @@ function load() {
    Promise.all([group_load, body_load])
       .then( () =>
              // Preload MathML cache for subsetDisplay, diagramControl
-             MathML.preload().then( loadPanels )
+             MathML.preload(group).then( loadPanels )
            )
       .catch( Log.err );
 }

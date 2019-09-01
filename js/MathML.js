@@ -23,8 +23,6 @@ declare class XSLTProcessor {
    transformToFragment(Node, Document): DocumentFragment;
 }
 
-var group: XMLGroup;
-
 export default
  */
 class MathML {
@@ -145,7 +143,7 @@ class MathML {
 
 ```js
 */
-   static preload() /*: Promise<void> */ {
+   static preload(group /*: XMLGroup */) /*: Promise<void> */ {
       const mathmlStrings = new Set([
          // from subsetDisplay
          '<mtext>is a subgroup of order</mtext>',

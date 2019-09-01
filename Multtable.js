@@ -66,7 +66,7 @@ function load() {
    Promise.all([groupLoad, bodyLoad])
           .then( () =>
              // Preload MathML cache for subsetDisplay
-             MathML.preload().then( () =>
+             MathML.preload(group).then( () =>
                 // Load subset display, and complete setup
                 SSD.load($('#subset-control')).then(completeSetup)
              )
