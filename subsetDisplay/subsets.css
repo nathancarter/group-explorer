@@ -29,7 +29,7 @@ p.placeholder:hover {
 }
 
 ul.subset_page_content {
-   font-size: 10pt;
+   font-size: 12pt;
    margin: 0;
    margin-top: 0;
    padding: 0;
@@ -56,7 +56,7 @@ ul.subset_page_content {
 
 /* Subset editor styling */
 #subset_editor {
-   font-size: 10pt;
+   font-size: 12pt;
    font-weight: bold;
    text-align: center;
    display: none; /* Hidden by default */
