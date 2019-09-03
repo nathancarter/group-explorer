@@ -78,11 +78,10 @@ function load() {
 function completeSetup() {
    // Create header from group name
    $('#header').html(MathML.sans('<mtext>Multiplication Table for&nbsp;</mtext>' + group.name));
-   MathJax.Hub.Queue(['Typeset', MathJax.Hub, $('#header')[0]]);
 
    // Create list of subgroups for Organize by subgroup menu:
    $('#organization-choices').html('').append(
-      $(`<li action="organizeBySubgroup(${group.subgroups.length-1})">`).html(MathML.sans('<mtext>none</mtext>')));
+      $(`<li action="organizeBySubgroup(${group.subgroups.length-1})">`).html(MathML.sansText('none')));
    for (let subgroupIndex = 1; subgroupIndex < group.subgroups.length-1; subgroupIndex++) {
       const subgroup = group.subgroups[subgroupIndex];
       const option /*: html */ =  eval(Template.HTML('organization-choice-template'));

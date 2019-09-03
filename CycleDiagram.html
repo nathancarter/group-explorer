@@ -64,37 +64,37 @@
 
       <!-- Templates for highlighting control menus in subsetDisplay -->
       <template class="subgroup-extension subset-extension partition-extension">
-         <li>Highlight item by<span class="menu-arrow"></span>
+         <li>${MathML.sansText('Highlight item by')} <span class="menu-arrow"></span>
             <ul>
                <li action="highlightByBackground([${this.elementString}])">
-                  <img src="./images/hightype-sphere-node.jpg">&nbsp;Background
+                  <img src="./images/hightype-sphere-node.jpg"> ${MathML.sansText('Background')}
                </li>
                <li action="highlightByBorder([${this.elementString}])">
-                  <img src="./images/hightype-sphere-ring.jpg">&nbsp;Border
+                  <img src="./images/hightype-sphere-node.jpg"> ${MathML.sansText('Border')}
                </li>
                <li action="highlightByTop([${this.elementString}])">
-                  <img src="./images/hightype-sphere-square.jpg">&nbsp;Top
+                  <img src="./images/hightype-sphere-node.jpg"> ${MathML.sansText('Top')}
                </li>
             </ul>
          </li>
       </template>
       <template class="partition-extension">
-         <li>Highlight partition by<span class="menu-arrow"></span>
+         <li>${MathML.sansText('Highlight partition by')} <span class="menu-arrow"></span>
             <ul>
                <li action="highlightByBackground(${this.parent.allElementString})">
-                  <img src="./images/hightype-sphere-node.jpg">&nbsp;Background
+                  <img src="./images/hightype-sphere-node.jpg"> ${MathML.sansText('Background')}
                </li>
                <li action="highlightByBorder(${this.parent.allElementString})">
-                  <img src="./images/hightype-sphere-ring.jpg">&nbsp;Border
+                  <img src="./images/hightype-sphere-node.jpg"> ${MathML.sansText('Border')}
                </li>
                <li action="highlightByTop(${this.parent.allElementString})">
-                  <img src="./images/hightype-sphere-square.jpg">&nbsp;Top
+                  <img src="./images/hightype-sphere-node.jpg"> ${MathML.sansText('Top')}
                </li>
             </ul>
          </li>
       </template>
       <template class="subgroup-extension subset-extension partition-extension">
-         <li action="clearHighlights()">Clear all highlighting</li>
+         <li action="clearHighlights()">${MathML.sansText('Clear all highlighting')}</li>
       </template>
    </body>
 </html>

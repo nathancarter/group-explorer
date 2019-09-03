@@ -63,38 +63,46 @@ class MathML {
 ```js
 */
    static sans(mathml /*: string */) /*: string */ {
-      const mml = MathML._mi2Sans(mathml);
-
-      return MathML.Cache.get(mml)
-          || '<math xmlns="http://www.w3.org/1998/Math/MathML" mathvariant="sans-serif">' + mml + '</math>';
+      return MathML.Cache.get(mathml)
+          || '<math xmlns="http://www.w3.org/1998/Math/MathML" mathvariant="sans-serif">' +
+             mathml.replace(/<mi>/g, '<mi mathvariant="sans-serif-italic">') +
+             '</math>';
    }
 
-   static _mi2Sans(mathml /*: string */) /*: string */ {
-      return mathml.replace(/<mi>/g, '<mi mathvariant="sans-serif-italic">');
+   static sansText(plainText /*: string */) {
+      return MathML.sans(MathML._2mtext(plainText));
    }
 
-   static sub(identifier /*: string */, subscript /*: number*/) /*: string */ {
+   static _2mtext(plainText /*: string */) {
+      return '<mtext>' + plainText + '</mtext>';
+   }
+   static sub(identifier /*: string */, subscript /*: number | string */) /*: string */ {
       return '<msub><mi>' + identifier + '</mi><mn>' + subscript + '</mn></msub>';
    }
 
-   static csList(elements /*: Array<string>*/) /*: string */ {
+   static csList(elements /*: Array<string> */) /*: string */ {
       return elements
          .map( (el, inx) => MathML.sans(el) + (inx < elements.length-1 ? ',&nbsp;' : '') ).join('');
    }
 
-   static setList(elements /*: Array<string>*/) /*: string */ {
-      return MathML.sans('<mtext>{&nbsp;</mtext>') +
-             MathML.csList(elements) +
-             MathML.sans('<mtext>&nbsp;}</mtext>');
+   static ccsList(elements /*: Array<string> */) /*: string */ {
+      return elements
+         .map( (el, inx) => (el) + ((inx < elements.length-1) ? ',&nbsp;' : '') ).join('');
    }
 
-   static genList(generators /*: Array<string>*/) /*: string */ {
-      return MathML.sans('<mtext mathvariant="bold">&#x27E8;&nbsp;&nbsp;</mtext>') +
-             MathML.csList(generators) +
-             MathML.sans('<mtext mathvariant="bold">&nbsp;&nbsp;&#x27E9;</mtext>');
+   static setList(elements /*: Array<string> */) /*: string */ {
+      return MathML.sans('<mtext>{</mtext>') +
+             '&nbsp;' + MathML.csList(elements) + '&nbsp;' +
+             MathML.sans('<mtext>}</mtext>');
    }
 
-   static rowList(elements /*: Array<string>*/) /*: string */ {
+   static genList(generators /*: Array<string> */) /*: string */ {
+      return MathML.sans('<mtext mathvariant="bold">&#x27E8;</mtext>') +
+             '&nbsp;&nbsp;' + MathML.csList(generators) + '&nbsp;&nbsp;' +
+             MathML.sans('<mtext mathvariant="bold">&#x27E9;</mtext>');
+   }
+
+   static rowList(elements /*: Array<string> */) /*: string */ {
       return elements.map( (el, inx) => MathML.sans(el) + '<br>').join('');
    }
 /*
@@ -146,37 +154,147 @@ class MathML {
    static preload(group /*: XMLGroup */) /*: Promise<void> */ {
       const mathmlStrings = new Set([
          // from subsetDisplay
-         '<mtext>is a subgroup of order</mtext>',
-         '<mtext>is the group itself.</mtext>',
-         '<mtext>is the trivial subgroup</mtext>',
-         '<mtext>{&nbsp;</mtext>',
-         '<mtext>&nbsp;}</mtext>',
-         '<mtext mathvariant="bold">&#x27E8;&nbsp;&nbsp;</mtext>',  // left math bracket, similar to <
-         '<mtext mathvariant="bold">&nbsp;&nbsp;&#x27E9;</mtext>',  // right math bracket, similart to >
+         MathML._2mtext(')'),
+         MathML._2mtext(','),
+         MathML._2mtext('...'),
+         MathML._2mtext('Clear all highlighting'),
+         MathML._2mtext('Compute'),
+         MathML._2mtext('Create'),
+         MathML._2mtext('Customize the elements of'),
+         MathML._2mtext('Delete partition'),
+         MathML._2mtext('Delete'),
+         MathML._2mtext('Edit list of elements in'),
+         MathML._2mtext('Elements in'),
+         MathML._2mtext('Elements not in'),
+         MathML._2mtext('Highlight item by'),
+         MathML._2mtext('Highlight partition by'),
+         MathML._2mtext('Node color'),
+         MathML._2mtext('Norm('),
+         MathML._2mtext('Ring around node'),
+         MathML._2mtext('Square around node'),
+         MathML._2mtext('a union'),
+         MathML._2mtext('all conjugacy classes'),
+         MathML._2mtext('all left cosets'),
+         MathML._2mtext('all order classes'),
+         MathML._2mtext('all right cosets'),
+         MathML._2mtext('an elementwise product'),
+         MathML._2mtext('an intersection'),
+         MathML._2mtext('by dragging elements into or out of it below.'),
+         MathML._2mtext('by'),
+         MathML._2mtext('elementwise product'),
+         MathML._2mtext('intersection'),
+         MathML._2mtext('is a conjugacy class of size'),
+         MathML._2mtext('is a subgroup of order'),
+         MathML._2mtext('is a subset of size'),
+         MathML._2mtext('is an order class of size'),
+         MathML._2mtext('is the group itself.'),
+         MathML._2mtext('is the left coset of'),
+         MathML._2mtext('is the right coset of'),
+         MathML._2mtext('is the subset of size'),
+         MathML._2mtext('is the trivial subgroup'),
+         MathML._2mtext('of'),
+         MathML._2mtext('the closure of'),
+         MathML._2mtext('the normalizer of'),
+         MathML._2mtext('the'),
+         MathML._2mtext('union'),
+         MathML._2mtext('with'),
+         MathML._2mtext('{'),
+         MathML._2mtext('}'),
+         '<mtext mathvariant="bold">&#x27E8;</mtext>',  // left math bracket, similar to <
+         '<mtext mathvariant="bold">&#x27E9;</mtext>',  // right math bracket, similart to >
+         '<mtext mathvariant="bold">⟨</mtext>',         // left math bracket in unicode
+         '<mtext mathvariant="bold">⟩</mtext>',         // right math bracket in unicode
+         '<mi>g</mi>',
 
          // from diagramController
-         '<mtext>, a subgroup of order</mtext>',
+         MathML._2mtext('(no chunking)'),
+         MathML._2mtext('a subgroup of order'),
+         MathML._2mtext('generated by'),
+         MathML._2mtext('Generate diagram'),
+         MathML._2mtext('Organize by'),
+         MathML._2mtext('The whole group'),
+         '<mtext>Linear in&nbsp;</mtext><mi>x</mi>',
+         '<mtext>Linear in&nbsp;</mtext><mi>y</mi>',
+         '<mtext>Linear in&nbsp;</mtext><mi>z</mi>',
+         '<mtext>Circular in&nbsp;</mtext><mi>y</mi><mo>,</mo><mi>z</mi>',
+         '<mtext>Circular in&nbsp;</mtext><mi>x</mi><mo>,</mo><mi>z</mi>',
+         '<mtext>Circular in&nbsp;</mtext><mi>x</mi><mo>,</mo><mi>y</mi>',
+         '<mtext>Rotated in&nbsp;</mtext><mi>y</mi><mo>,</mo><mi>z</mi>',
+         '<mtext>Rotated in&nbsp;</mtext><mi>x</mi><mo>,</mo><mi>z</mi>',
+         '<mtext>Rotated in&nbsp;</mtext><mi>x</mi><mo>,</mo><mi>y</mi>',
+         MathML._2mtext('N/A'),
+         MathML._2mtext('inside'),
+         MathML._2mtext('outside'),
+         MathML._2mtext('innermost'),
+         MathML._2mtext('middle'),
+         MathML._2mtext('outermost'),
+         MathML._2mtext('innermost'),
+         MathML._2mtext('second innermost'),
+         MathML._2mtext('second outermost'),
+         MathML._2mtext('outermost'),
+         MathML._2mtext('innermost'),
+         MathML._2mtext('second innermost'),
+         MathML._2mtext('middle'),
+         MathML._2mtext('second outermost'),
+         MathML._2mtext('outermost'),
+
+         // from Table controller
+         MathML._2mtext('none'),
       ]);
+
+      // cache diagram heading
+      mathmlStrings.add(`<mtext>Cayley Diagram for&nbsp;</mtext>${group.name}`);
+      mathmlStrings.add(`<mtext>Multiplication Table for&nbsp;</mtext>${group.name}`);
+      mathmlStrings.add(`<mtext>Cycle Graph for&nbsp;</mtext>${group.name}`);
+
+      // cache diagram names
+      for (let inx = 0; inx < group.cayleyDiagrams.length; inx++) {
+         mathmlStrings.add(`<mtext>${group.cayleyDiagrams[inx].name}</mtext>`);
+      }
+
+      // cache integers <= group order
+      for (let inx = 0; inx <= group.order; inx++) {
+         mathmlStrings.add(`<mn>${inx}</mn>`);
+      }
 
       // cache subgroup names, subgroup orders
       for (let inx = 0; inx < group.subgroups.length; inx++) {
          mathmlStrings.add(MathML.sub('H', inx));
-         mathmlStrings.add(`<mn>${group.subgroups[inx].order}</mn>`);
       }
 
-      // cache element representations
-      for (let inx = 0; inx < group.representations.length; inx++) {
-         for (let jnx = 0; jnx < group.representations[inx].length; jnx++) {
-            mathmlStrings.add(group.representations[inx][jnx]);
+      // cache current element representations
+      for (let inx = 0; inx < group.representation.length; inx++) {
+         mathmlStrings.add(group.representation[inx]);
+      }
+
+      // cache first two user-defined subset names
+      mathmlStrings.add(MathML.sub('S', 0));
+      mathmlStrings.add(MathML.sub('S', 1));
+
+      // cache conjugacy class names
+      mathmlStrings.add(MathML.sub('CC', 'i'));
+      for (let inx = 0; inx < group.conjugacyClasses.length; inx++) {
+         mathmlStrings.add(MathML.sub('CC', inx));
+      }
+
+      // cache order class names
+      mathmlStrings.add(MathML.sub('OC', 'i'));
+      for (let inx = 0, jnx = 0; inx < group.orderClasses.length; inx++) {
+         if (group.orderClasses[inx].popcount() != 0) {
+            mathmlStrings.add(MathML.sub('OC', jnx++));
          }
       }
 
+      return MathML.cacheStrings(mathmlStrings);
+   }
+
+   static cacheStrings(mathmlStrings /*: Iterable<string> */) /*: Promise<void> */ {
       // dom fragment in which all MathML elements will be staged
       const $preload = $('<div id="mathml-cache-preload">');
-      mathmlStrings.forEach( (mathml) => {
-         const mathmlSans = MathML._mi2Sans(mathml);
-         $preload.append($(`<div>${MathML.sans(mathmlSans)}</div>`).attr('key', mathmlSans));
-      } );
+
+      for (const mathml of mathmlStrings) {
+         $preload.append($(`<div>${MathML.sans(mathml)}</div>`).attr('key', mathml));
+      }
 
       // append fragment to document
       $preload.appendTo('html');
@@ -205,7 +323,7 @@ class MathML {
 * `MathML.subscripts` and `MathML.superscripts` contain the Unicode characters for subscript and superscript numerals.
 * `MathML.MATHML_2_HTML` contains XSLT code to transform the MathML subset used in GE into HTML.
 * `MathML.xsltProcessor` is an XSLT processor for transforming MathML into HTML.
-* `MathML.Cache` contains a fresh `Map` relating MathML strings => formatted DOM elements 
+* `MathML.Cache` contains a fresh `Map` relating MathML strings => formatted DOM elements
 
 ```js
 */

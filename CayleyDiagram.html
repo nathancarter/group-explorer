@@ -91,39 +91,39 @@
 
    <!-- Extension templates for highlighting control menus in subsetDisplay -->
    <template class="subgroup-extension subset-extension partition-extension">
-      <li>Highlight item by<span class="menu-arrow"></span>
+      <li>${MathML.sansText('Highlight item by')} <span class="menu-arrow"></span>
          <ul>
             <li action="highlightByNodeColor([${this.elementString}])">
-               <img src="./images/hightype-sphere-node.jpg">&nbsp;Node color
+               <img src="./images/hightype-sphere-node.jpg"> ${MathML.sansText('Node color')}
             </li>
             <li action="highlightByRingAroundNode([${this.elementString}])">
-               <img src="./images/hightype-sphere-ring.jpg">&nbsp;Ring around node
+               <img src="./images/hightype-sphere-ring.jpg"> ${MathML.sansText('Ring around node')}
             </li>
             <li action="highlightBySquareAroundNode([${this.elementString}])">
-               <img src="./images/hightype-sphere-square.jpg">&nbsp;Square around node
+               <img src="./images/hightype-sphere-square.jpg"> ${MathML.sansText('Square around node')}
             </li>
          </ul>
       </li>
    </template>
 
    <template class="partition-extension">
-      <li>Highlight partition by<span class="menu-arrow"></span>
+      <li>${MathML.sansText('Highlight partition by')} <span class="menu-arrow"></span>
          <ul>
             <li action="highlightByNodeColor(${this.parent.allElementString})">
-               <img src="./images/hightype-sphere-node.jpg">&nbsp;Node color
+               <img src="./images/hightype-sphere-node.jpg"> ${MathML.sansText('Node color')}
             </li>
             <li action="highlightByRingAroundNode(${this.parent.allElementString})">
-               <img src="./images/hightype-sphere-ring.jpg">&nbsp;Ring around node
+               <img src="./images/hightype-sphere-ring.jpg"> ${MathML.sansText('Ring around node')}
             </li>
             <li action="highlightBySquareAroundNode(${this.parent.allElementString})">
-               <img src="./images/hightype-sphere-square.jpg">&nbsp;Square around node
+               <img src="./images/hightype-sphere-square.jpg"> ${MathML.sansText('Square around node')}
             </li>
          </ul>
       </li>
    </template>
 
    <template class="subgroup-extension subset-extension partition-extension">
-      <li action="clearHighlights()">Clear all highlighting</li>
+      <li action="clearHighlights()">${MathML.sansText('Clear all highlighting')}</li>
    </template>
 
    <!-- Templates for tooltips -->

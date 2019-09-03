@@ -112,18 +112,16 @@ SSD.SubsetMenu = class {
          const $menu = $(eval(Template.HTML('subsetElements_template')));
          $curr.addClass('highlighted').append($menu);
          event.stopPropagation();
-         const follow = () => {
-            const bounds /*: Array<ClientRect> */ =
-                  $menu.find('span.mjx-chtml').map( (_, span) => span.getBoundingClientRect() ).toArray();
-            const extrema /*: {leftmost: number, rightmost: number} */ =
-                  bounds.reduce( (lr /*: {leftmost: number, rightmost: number} */, rect /*: ClientRect */) => {
-                     return {leftmost: Math.min(lr.leftmost, rect.left), rightmost: Math.max(lr.rightmost, rect.right)}
-                  }, {leftmost: Number.MAX_SAFE_INTEGER, rightmost: Number.MIN_SAFE_INTEGER} );
-            $menu.css({'width': extrema.rightmost - extrema.leftmost, 'max-width': ''});
-            Menu.setMenuLocations(location, $menu);
-            $menu.css('visibility', 'visible');
-         };
-         MathJax.Hub.Queue(['Typeset', MathJax.Hub, $menu[0]], follow);
+
+         const bounds /*: Array<ClientRect> */ =
+               $menu.find('span.mjx-chtml').map( (_, span) => span.getBoundingClientRect() ).toArray();
+         const extrema /*: {leftmost: number, rightmost: number} */ =
+               bounds.reduce( (lr /*: {leftmost: number, rightmost: number} */, rect /*: ClientRect */) => {
+                  return {leftmost: Math.min(lr.leftmost, rect.left), rightmost: Math.max(lr.rightmost, rect.right)}
+               }, {leftmost: Number.MAX_SAFE_INTEGER, rightmost: Number.MIN_SAFE_INTEGER} );
+         $menu.css({'width': extrema.rightmost - extrema.leftmost, 'max-width': ''});
+         Menu.setMenuLocations(location, $menu);
+         $menu.css('visibility', 'visible');
       }
    }
 }
@@ -166,7 +164,6 @@ class SSD_Menu {
          } else {
             eval($menuListItem.attr('action'));
             SSD.clearMenus();
-            MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'subset_page']);
          }
       }
    }
@@ -202,14 +199,11 @@ class SSD_Menu {
       $menu.css('visibility', 'hidden');
       event.stopPropagation();
 
-      const follow = () => {
-         if (!isHeaderMenu) {
-            this.makeLongLists($curr[0].id, $menu);
-         }
-         Menu.setMenuLocations(location, $menu);
-         $menu.css('visibility', 'visible');
-      };
-      MathJax.Hub.Queue(['Typeset', MathJax.Hub, $menu[0]], follow);
+      if (!isHeaderMenu) {
+         this.makeLongLists($curr[0].id, $menu);
+      }
+      Menu.setMenuLocations(location, $menu);
+      $menu.css('visibility', 'visible');
    }
 
    // Create the intersection, union, and elementwise product subMenus
@@ -218,7 +212,7 @@ class SSD_Menu {
       const classes = ['.intersection', '.union', '.elementwise-product'];
       const operations = ['intersection', 'union', 'elementwiseProduct'];
       const printOps = ['intersection', 'union', 'elementwise product'];
-      const node = MathML.sans(SSD.displayList[id].name);
+      const node = SSD.displayList[id].name;
       for (let inx = 0; inx < classes.length; inx++) {
          const operation = operations[inx];
          const printOp = printOps[inx];
@@ -227,7 +221,7 @@ class SSD_Menu {
             if (id != otherId) {
                frag +=
                   `<li action="SSD.displayList[${id}].${operation}(SSD.displayList[${otherId}])">` +
-                  `the ${printOp} of ${node} with ${MathML.sans(SSD.displayList[otherId].name)}</li>`;
+                  `${MathML.sansText('the')} ${MathML.sansText(printOp)} ${MathML.sansText('of')} ${node} ${MathML.sansText('with')} ${SSD.displayList[otherId].name}</li>`;
             }
          }
          for (let otherId = group.subgroups.length; otherId < SSD.displayList.length; otherId++) {
@@ -235,7 +229,7 @@ class SSD_Menu {
                const otherName = $(`#${otherId}`).children()[1].outerHTML;
                frag +=
                   `<li action="SSD.displayList[${id}].${operation}(SSD.displayList[${otherId}])">` +
-                  `the ${printOp} of ${node} with ${otherName}</li>`;
+                  `${MathML.sansText('the')} ${MathML.sansText(printOp)} ${MathML.sansText('of')} ${node} ${MathML.sansText('with')} ${SSD.displayList[otherId].name}</li>`;
             }
          }
          $menu.find(classes[inx]).html(frag);

@@ -27,7 +27,7 @@ SSD.Subgroup = class Subgroup extends SSD.AbstractSubset {
    }
 
    get name() {
-      return MathML.sub('H', this.subgroupIndex);
+      return MathML.sans(MathML.sub('H', this.subgroupIndex));
    }
 
    get displayLine() {

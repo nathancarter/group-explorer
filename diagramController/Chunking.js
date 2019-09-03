@@ -40,9 +40,7 @@ DC.Chunking = class {
          }
       } );
       $('#chunk-choices').append(eval(Template.HTML('chunk-select-last-template')));
-      MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'chunk-choices'],
-                        () => DC.Chunking.selectChunk(Cayley_diagram.chunk)
-                       );
+      DC.Chunking.selectChunk(Cayley_diagram.chunk);
    }
 
    static clickHandler(clickEvent /*: MouseEvent */) {

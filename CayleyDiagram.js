@@ -94,7 +94,6 @@ function setDiagramName() {
 function completeSetup() {
    // Create header from group name and queue MathJax to typeset it
    $('#header').html(MathML.sans('<mtext>Cayley Diagram for&nbsp;</mtext>' + group.name));
-   MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'header']);
 
    // Create graphic context
    Graphic_context = new DisplayDiagram({container: $('#graphic'), trackballControlled: true});

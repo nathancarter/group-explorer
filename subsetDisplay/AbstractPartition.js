@@ -18,7 +18,12 @@ SSD.AbstractPartition = class AbstractPartition {
    }
 
    get name() {
-      return MathML.setList([this.subsets[0].name, '<mtext>...</mtext>', this.subsets[this.subsets.length - 1].name]);
+      return [MathML.sans('<mtext>{</mtext>'),
+              this.subsets[0].name,
+              MathML.sans('<mtext>...</mtext>'), 
+              this.subsets[this.subsets.length - 1].name,
+              MathML.sans('<mtext>}</mtext>')]
+         .join('&nbsp;');
    }
 
    destroy() {

@@ -18,7 +18,7 @@ DC.DiagramChoice = class {
       group.cayleyDiagrams.forEach( (diagram, index) => {
          $('#diagram-choices').append(eval(Template.HTML('diagram-select-other-template'))).hide();
       } );
-      MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'diagram-choices'], () => DC.DiagramChoice._showChoice());
+      DC.DiagramChoice._showChoice();
    }
 
    static _showChoice() {

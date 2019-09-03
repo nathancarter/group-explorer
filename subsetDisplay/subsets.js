@@ -76,7 +76,6 @@ class SSD {
 
       // Display all subgroups
       SSD.Subgroup.displayAll();
-      MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'subset_page']);
 
       // set up event listeners for menus
       SSD.SubsetMenu.init();   }

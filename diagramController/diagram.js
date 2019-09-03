@@ -43,6 +43,7 @@ class DC {
 
    static setupDiagramPage() {
       DC.DiagramChoice.setupDiagramSelect();
+      DC.Generator.init();
 
       $('#diagram-select')[0].addEventListener('click', DC.DiagramChoice.clickHandler);
 

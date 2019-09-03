@@ -126,7 +126,6 @@ DC.Arrow = class {
       } else {
          DC.Arrow.enable()
       }
-      MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'arrow-control']);
       emitStateChange();
    }
 

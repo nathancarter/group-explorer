@@ -26,12 +26,17 @@ SSD.Subset = class Subset extends SSD.AbstractSubset {
          this.elements = elements;
       }
       this.subsetIndex = SSD.nextSubsetIndex++;
+
+      // cache formatted MathML for next two subset instances
+      MathML.cacheStrings([MathML.sub('S', SSD.nextSubsetIndex),
+                           MathML.sub('S', SSD.nextSubsetIndex + 1)]);
+
       $('#subsets_placeholder').hide();
       $('#subsets').append(this.displayLine).show();
    }
 
    get name() /*: mathml */ {
-      return MathML.sub('S', this.subsetIndex);
+      return MathML.sans(MathML.sub('S', this.subsetIndex));
    }
 
    get displayLine() /*: html */ {
@@ -60,6 +65,6 @@ SSD.Subset = class Subset extends SSD.AbstractSubset {
    }
 
    static nextName() /*: string */ {
-      return MathML.sub('S', SSD.nextSubsetIndex);
+      return MathML.sans(MathML.sub('S', SSD.nextSubsetIndex));
    }
 }

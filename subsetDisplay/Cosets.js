@@ -27,8 +27,8 @@ SSD.Cosets = class Cosets extends SSD.AbstractPartition {
          .map( (coset, inx) => {
             const rep = group.representation[((coset.first() /*: any */) /*: groupElement */)];
             const name = this.isLeft ?
-                         MathML.sans(rep) + MathML.sans(this.subgroup.name) :
-                         MathML.sans(this.subgroup.name) + MathML.sans(rep);
+                         MathML.sans(rep) + this.subgroup.name :
+                         this.subgroup.name + MathML.sans(rep);
             return new SSD.PartitionSubset(this, inx, coset, name, 'cosetClass');
          } );
 

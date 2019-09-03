@@ -24,6 +24,47 @@ DC.Generator = class {
    static axis_image: Array<[string, string, string]>;
    static orders: Array<Array<string>>;
  */
+   static init() {
+      // layout choices (linear/circular/rotated), direction (X/Y/Z)
+      DC.Generator.axis_label = [
+         [MathML.sans('<mtext>Linear in&nbsp;</mtext><mi>x</mi>'),
+          MathML.sans('<mtext>Linear in&nbsp;</mtext><mi>y</mi>'),
+          MathML.sans('<mtext>Linear in&nbsp;</mtext><mi>z</mi>')],
+         [MathML.sans('<mtext>Circular in&nbsp;</mtext><mi>y</mi><mo>,</mo><mi>z</mi>'),
+          MathML.sans('<mtext>Circular in&nbsp;</mtext><mi>x</mi><mo>,</mo><mi>z</mi>'),
+          MathML.sans('<mtext>Circular in&nbsp;</mtext><mi>x</mi><mo>,</mo><mi>y</mi>')],
+         [MathML.sans('<mtext>Rotated in&nbsp;</mtext><mi>y</mi><mo>,</mo><mi>z</mi>'),
+          MathML.sans('<mtext>Rotated in&nbsp;</mtext><mi>x</mi><mo>,</mo><mi>z</mi>'),
+          MathML.sans('<mtext>Rotated in&nbsp;</mtext><mi>x</mi><mo>,</mo><mi>y</mi>')],
+      ];
+
+      DC.Generator.axis_image = [
+         ['axis-x.png', 'axis-y.png', 'axis-z.png'],
+         ['axis-yz.png', 'axis-xz.png', 'axis-xy.png'],
+         ['axis-ryz.png', 'axis-rxz.png', 'axis-rxy.png']
+      ];
+
+      // wording for nesting order
+      DC.Generator.orders = [
+         [],
+         [MathML.sans('<mtext>N/A</mtext>')],
+         [MathML.sans('<mtext>inside</mtext>'),
+          MathML.sans('<mtext>outside</mtext>')],
+         [MathML.sans('<mtext>innermost</mtext>'),
+          MathML.sans('<mtext>middle</mtext>'),
+          MathML.sans('<mtext>outermost</mtext>')],
+         [MathML.sans('<mtext>innermost</mtext>'),
+          MathML.sans('<mtext>second innermost</mtext>'),
+          MathML.sans('<mtext>second outermost</mtext>'),
+          MathML.sans('<mtext>outermost</mtext>')],
+         [MathML.sans('<mtext>innermost</mtext>'),
+          MathML.sans('<mtext>second innermost</mtext>'),
+          MathML.sans('<mtext>middle</mtext>'),
+          MathML.sans('<mtext>second outermost</mtext>'),
+          MathML.sans('<mtext>outermost</mtext>')]
+      ];
+   }
+
    static clickHandler(clickEvent /*: MouseEvent */) {
       clickEvent.preventDefault();
 
@@ -55,7 +96,6 @@ DC.Generator = class {
       } else {
          Cayley_diagram.strategies.forEach( (strategy, inx) =>
             $generation_table.append($(eval(Template.HTML('generation-template')))) );
-         MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'generation-table']);
       }
    }
 
@@ -84,10 +124,8 @@ DC.Generator = class {
 
    static _typesetMenu(eventLocation /*: eventLocation */, $menu /*: JQuery */) {
       $menu.css('visibility', 'hidden');
-      const showMenu = () => { Menu.setMenuLocations(eventLocation, $menu);
-                               $menu.css('visibility', 'visible');
-                             };
-      MathJax.Hub.Queue(['Typeset', MathJax.Hub, $menu[0]], showMenu);
+      Menu.setMenuLocations(eventLocation, $menu);
+      $menu.css('visibility', 'visible');
    }
 
    static showAxisMenu(eventLocation /*: eventLocation */, strategy_index /*: number */) {
@@ -272,41 +310,3 @@ DC.Generator = class {
    }
 }
 
-// layout (linear/circular/rotated), direction (X/Y/Z)
-DC.Generator.axis_label = [
-   [MathML.sans('<mtext>Linear in&nbsp;</mtext><mi>x</mi>'),
-    MathML.sans('<mtext>Linear in&nbsp;</mtext><mi>y</mi>'),
-    MathML.sans('<mtext>Linear in&nbsp;</mtext><mi>z</mi>')],
-   [MathML.sans('<mtext>Circular in&nbsp;</mtext><mi>y</mi><mo>,</mo><mi>z</mi>'),
-    MathML.sans('<mtext>Circular in&nbsp;</mtext><mi>x</mi><mo>,</mo><mi>z</mi>'),
-    MathML.sans('<mtext>Circular in&nbsp;</mtext><mi>x</mi><mo>,</mo><mi>y</mi>')],
-   [MathML.sans('<mtext>Rotated in&nbsp;</mtext><mi>y</mi><mo>,</mo><mi>z</mi>'),
-    MathML.sans('<mtext>Rotated in&nbsp;</mtext><mi>x</mi><mo>,</mo><mi>z</mi>'),
-    MathML.sans('<mtext>Rotated in&nbsp;</mtext><mi>x</mi><mo>,</mo><mi>y</mi>')],
-];
-
-DC.Generator.axis_image = [
-   ['axis-x.png', 'axis-y.png', 'axis-z.png'],
-   ['axis-yz.png', 'axis-xz.png', 'axis-xy.png'],
-   ['axis-ryz.png', 'axis-rxz.png', 'axis-rxy.png']
-];
-
-// wording for nesting order
-DC.Generator.orders = [
-   [],
-   [MathML.sans('<mtext>N/A</mtext>')],
-   [MathML.sans('<mtext>inside</mtext>'),
-    MathML.sans('<mtext>outside</mtext>')],
-   [MathML.sans('<mtext>innermost</mtext>'),
-    MathML.sans('<mtext>middle</mtext>'),
-    MathML.sans('<mtext>outermost</mtext>')],
-   [MathML.sans('<mtext>innermost</mtext>'),
-    MathML.sans('<mtext>second innermost</mtext>'),
-    MathML.sans('<mtext>second outermost</mtext>'),
-    MathML.sans('<mtext>outermost</mtext>')],
-   [MathML.sans('<mtext>innermost</mtext>'),
-    MathML.sans('<mtext>second innermost</mtext>'),
-    MathML.sans('<mtext>middle</mtext>'),
-    MathML.sans('<mtext>second outermost</mtext>'),
-    MathML.sans('<mtext>outermost</mtext>')]
-];
