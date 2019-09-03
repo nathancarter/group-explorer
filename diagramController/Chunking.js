@@ -46,7 +46,6 @@ DC.Chunking = class {
    static clickHandler(clickEvent /*: MouseEvent */) {
       if (!DC.Chunking.isDisabled()) {
          const $curr = $(clickEvent.target).closest('[action]');
-         $('#bodyDouble').click();
          if ($curr != undefined) {
             eval($curr.attr('action'));
             clickEvent.stopPropagation();
@@ -54,8 +53,16 @@ DC.Chunking = class {
       }
    }
 
+   static toggleChoices() {
+      const choicesDisplay = $('#chunk-choices').css('display');
+      $('#bodyDouble').click();
+      if (choicesDisplay == 'none') {
+         $('#chunk-choices').show();
+      }         
+   }
+
    static selectChunk(subgroup_index /*: number */) {
-      $('#chunk-choices').hide();
+      $('#bodyDouble').click();
       const strategy_index =
             Cayley_diagram.strategies.findIndex( (strategy) => strategy.bitset.equals(group.subgroups[subgroup_index].members) );
       $('#chunk-choice').html($(`#chunk-choices > li:nth-of-type(${strategy_index + 2})`).html());

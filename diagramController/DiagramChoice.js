@@ -32,14 +32,22 @@ DC.DiagramChoice = class {
    /* Display control routines */
    static clickHandler(clickEvent /*: MouseEvent */) {
       const $curr = $(clickEvent.target).closest('[action]');
-      $('#bodyDouble').click();
       if ($curr != undefined) {
          eval($curr.attr('action'));
          clickEvent.stopPropagation();
       }
    }
 
+   static toggleChoices() {
+      const choicesDisplay = $('#diagram-choices').css('display');
+      $('#bodyDouble').click();
+      if (choicesDisplay == 'none') {
+         $('#diagram-choices').show();
+      }         
+   }
+
    static selectDiagram(diagram /*: ?string */, andDisplay /*:: ?: boolean */ = true) {
+      $('#bodyDouble').click();
       Diagram_name = (diagram == undefined) ? undefined : diagram;
       DC.Generator.enable();
       DC.Chunking.enable();

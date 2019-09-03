@@ -1,7 +1,7 @@
 
 <!-- Diagram-page layout -->
 <div id="diagram-page">
-   <div id="diagram-select" class="faux-select" action="$('#diagram-choices').toggle()">
+   <div id="diagram-select" class="faux-select" action="DC.DiagramChoice.toggleChoices()">
       <ul id="diagram-choices" class="faux-select-options"></ul>
       <span id="diagram-choice" class="faux-selection">Generate diagram</span>
       <div class="faux-select-arrow"></div>
@@ -121,7 +121,7 @@
 
    <div id="chunk-control" style="position: relative">
       <div class="graphic-lead">Chunk this subgroup:</div>
-      <div id="chunk-select" class="faux-select" action="$('#chunk-choices').toggle()">
+      <div id="chunk-select" class="faux-select" action="DC.Chunking.toggleChoices()">
          <ul id="chunk-choices" class="faux-select-options"></ul>
          <span id="chunk-choice" class="faux-selection">(no chunking)</span>
          <div class="faux-select-arrow"></div>
