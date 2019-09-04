@@ -4,6 +4,7 @@
 import CayleyDiagram from './js/CayleyDiagram.js';
 import DisplayDiagram from './js/DisplayDiagram.js';
 import type {CayleyDiagramJSON} from './js/DisplayDiagram.js';
+import DiagramDnD from './js/DiagramDnD.js';
 import GEUtils from './js/GEUtils.js';
 import Library from './js/Library.js';
 import Log from './js/Log.js';
@@ -26,10 +27,11 @@ type AugmentedCayleyDiagramJSON = CayleyDiagramJSON & {_use_fog?: string,
  */
 
 /* Global variables */
-var group		/*: XMLGroup */,	// group about which information will be displayed
-    Diagram_name	/*: ?string */,		// name of Cayley diagram, or undefined if generated
-    Cayley_diagram	/*: CayleyDiagram */,	// data being displayed in large diagram
-    Graphic_context	/*: DisplayDiagram */,	// graphic context for large diagram
+var group               /*: XMLGroup */,        // group about which information will be displayed
+    Diagram_name        /*: ?string */,         // name of Cayley diagram, or undefined if generated
+    Cayley_diagram      /*: CayleyDiagram */,   // data being displayed in large diagram
+    Graphic_context     /*: DisplayDiagram */,  // graphic context for large diagram
+    DnD_handler         /*: DiagramDnD */,	// drag-and-drop, tooltip handler for large diagram
     canEmit		/*: boolean */ = true;	// flag: whether to notify parent window of table changes
 const HELP_PAGE = 'help/rf-um-cd-options/index.html';
 
@@ -97,6 +99,7 @@ function completeSetup() {
 
    // Create graphic context
    Graphic_context = new DisplayDiagram({container: $('#graphic'), trackballControlled: true});
+   DnD_handler = new DiagramDnD(Graphic_context);
    displayGraphic();
 
    // Register the splitter with jquery-resizable
@@ -241,18 +244,16 @@ function resizeGraphic() {
  */
 class Tooltip {
 /*::
-   static lastObjects: Array<mathml>;  // the objects the mouse was over on the previous mousedown/touchstart
+   static lastObjects: Array<mathml>;  // the objects the mouse was over on the previous mousedown
    static startTime: number;
  */
    static init() {
       Tooltip.clear();
-
-      if (window.ontouchstart === undefined) {
-         ['mousedown', 'mouseup', 'click']
-            .forEach( (event) => $('#graphic')[0].addEventListener(event, Tooltip.eventHandler) );
-      } else {
-         ['touchstart', 'touchend', 'click']
-            .forEach( (event) => $('#graphic')[0].addEventListener(event, Tooltip.eventHandler) );
+      $('#graphic')[0].addEventListener('click', Tooltip.mouseHandler);
+      if (GEUtils.isMouseDevice()) {
+         $('#graphic')[0].addEventListener('mousedown', Tooltip.mouseHandler);
+         $('#graphic')[0].addEventListener('wheel', Tooltip.mouseHandler);
+         $('#graphic')[0].addEventListener('contextmenu', Tooltip.mouseHandler);
       }
    }
 
@@ -262,86 +263,71 @@ class Tooltip {
       Tooltip.startTime = 0;
    }      
 
-   static eventHandler(event /*: MouseEvent | TouchEvent */) {
-      // if event is modified by shift key, etc., this click isn't about tooltips, so just return
-      if (event.shiftKey || event.ctrlKey || event.altKey || event.metaKey) {
+   static mouseHandler(mouseEvent /*: MouseEvent */) {
+      // if event is modified by shift key, etc., this event isn't about tooltips, so just return
+      if (mouseEvent.shiftKey || mouseEvent.ctrlKey || mouseEvent.altKey || mouseEvent.metaKey) {
          return;
       }
 
-      // only process one-finger touches
-      if (event.type.startsWith('touch')) {
-         const touchEvent /*: TouchEvent */ = (event /*: any */);
-         const touchCount = touchEvent.touches.length + ((touchEvent.type == 'touchend') ? touchEvent.changedTouches.length : 0);
-         if (touchCount != 1)
-            return;
-      }
-
-      switch (event.type) {
+      switch (mouseEvent.type) {
       case 'mousedown':
-      case 'touchstart':
-         const savedObjects = Tooltip.lastObjects;
-         cleanWindow();
-         Tooltip.lastObjects = savedObjects;
-         Tooltip.startTime = event.timeStamp;
-         break;
-         
-      case 'mouseup':
-      case 'touchend': {
-         // find objects under click
-         const canvas = Graphic_context.renderer.domElement;
-         const bounding_box = canvas.getBoundingClientRect();
-         const eventLocation = function (ev /*: Event */) /*: eventLocation */ {
-            if (event.type.startsWith('touch')) {
-               const touchEvent /*: TouchEvent */ = (event /*: any */);
-               return (event.type == 'touchend') ? touchEvent.changedTouches[0] : touchEvent.touches[0];
-            } else {
-               return ((event /*: any */) /*: MouseEvent */);
-            }
-         } (event);
-         const x = ( (eventLocation.clientX - bounding_box.left) / canvas.width) * 2 - 1;
-         const y = -( (eventLocation.clientY - bounding_box.top) / canvas.height) * 2 + 1;
-         const objects = Graphic_context.getObjectsAtPoint(x, y).map( (obj) => MathML.sans(obj.name) );
-
-         // add tooltip if
-         //    mousedown is over some objects
-         // && tooltip wouldn't be the same as the last tooltip
-         // && mouseup is not too delayed
-         if (   objects.length != 0
-             && event.timeStamp - Tooltip.startTime < 500
-             && !GEUtils.equals(Tooltip.lastObjects, objects) ) {
-            // create tooltip
-            const first = objects[0];
-            const others = objects.slice(1);
-
-            let tooltip;
-            if (others.length == 0) {
-               tooltip = $(eval(Template.HTML('single-object_template')));
-            } else if (others.length == 1) {
-               tooltip = $(eval(Template.HTML('double-object_template')));
-            } else {
-               tooltip = $(eval(Template.HTML('multi-object_template')));
-               others.forEach( (obj) => {
-                  tooltip.find('ul').append($(`<li>${obj}</li>`));
-               } )
-            }
-
-            // add tooltip to graphic
-            $('#graphic').append(tooltip);
-            Menu.setMenuLocations(eventLocation, tooltip);
-            MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'tooltip']);
-
-            Tooltip.lastObjects = objects;
-         } else {
-            Tooltip.lastObjects = [];
-         } }
+         Tooltip.startTime = mouseEvent.timeStamp;
          break;
 
       case 'click':
-         event.stopPropagation();
+         if (GEUtils.isTouchDevice() || mouseEvent.timeStamp - Tooltip.startTime < 300) {
+            Tooltip.display(mouseEvent);
+         }
+         break;
+            
+      case 'wheel':
+      case 'contextmenu':
          break;
 
+         // Unexpected events
       default:
-         Log.warn('Tooltip handler -- unexpected event %s', event.type);
+         Log.warn(`CayleyDiagram Tooltip.mouseHandler unexpected event ${mouseEvent.type}`);
+      }
+   }
+
+   static display(mouseEvent /*: MouseEvent */) {
+      const $graphic = $('#graphic'); // Graphic_context.renderer.domElement;
+      const bounding_box = $graphic[0].getBoundingClientRect();
+      const x = ( (mouseEvent.clientX - bounding_box.left) / $graphic.width()) * 2 - 1;
+      const y = -( (mouseEvent.clientY - bounding_box.top) / $graphic.height()) * 2 + 1;
+      const objects = Graphic_context.getObjectsAtPoint(x, y).map( (obj) => MathML.sans(obj.name) );
+
+      // add tooltip if click is over one or more object (nodes or chunks),
+      //   and it's not the second click on the same objects
+      if (objects.length != 0 && !GEUtils.equals(Tooltip.lastObjects, objects) ) {
+
+         // clear other tooltips, menus, etc.
+         cleanWindow();
+
+         // create tooltip
+         const first = objects[0];
+         const others = objects.slice(1);
+
+         let tooltip;
+         if (others.length == 0) {
+            tooltip = $(eval(Template.HTML('single-object_template')));
+         } else if (others.length == 1) {
+            tooltip = $(eval(Template.HTML('double-object_template')));
+         } else {
+            tooltip = $(eval(Template.HTML('multi-object_template')));
+            others.forEach( (obj) => {
+               tooltip.find('ul').append($(`<li>${obj}</li>`));
+            } )
+         }
+
+         // add tooltip to graphic
+         $('#graphic').append(tooltip);
+         Menu.setMenuLocations(mouseEvent, tooltip);
+
+         Tooltip.lastObjects = objects;
+         mouseEvent.stopPropagation();
+      } else {
+         Tooltip.lastObjects = [];
       }
    }
 }

@@ -57,4 +57,12 @@ class GEUtils {
    static fromRainbow(hue /*: float */, saturation /*:: ?: float */ = 1.0, lightness /*:: ?: float */ = .8) /*: color */ {
       return `hsl(${Math.round(360*hue)}, ${Math.round(100*saturation)}%, ${Math.round(100*lightness)}%)`
    }
+
+   static isMouseDevice() /*: boolean */ {
+      return window.ontouchstart === undefined;
+   }
+
+   static isTouchDevice() /*: boolean */ {
+      return !GEUtils.isMouseDevice();
+   }
 }

@@ -20,7 +20,7 @@ class DiagramDnD {
    mouse_handler: (MouseEvent) => void;
    touch_handler: (TouchEvent) => void;
    repaint_poller: ?number;
-   repaint_request: ?number;
+   start_time: number;
    object: ?THREE.Object3D;
  */
    constructor(displayDiagram /*: DisplayDiagram */) {
@@ -41,18 +41,18 @@ class DiagramDnD {
       }
    }
 
-
    mouseHandler(mouseEvent /*: MouseEvent */) {
       if (!mouseEvent.shiftKey) {
+         this.endDrag();
          return;
       }
-
-      mouseEvent.preventDefault();
-      mouseEvent.stopPropagation();
 
       const bounding_box = this.canvas.getBoundingClientRect();
       this.eventLocation.x = ( (mouseEvent.clientX - bounding_box.left) / this.canvas.width) * 2 - 1;
       this.eventLocation.y = -( (mouseEvent.clientY - bounding_box.top) / this.canvas.height) * 2 + 1;
+
+      mouseEvent.preventDefault();
+      mouseEvent.stopPropagation();
 
       switch (mouseEvent.type) {
       case 'mousedown':
@@ -68,15 +68,16 @@ class DiagramDnD {
          break;
 
       case 'mousemove':
-         this.dragOver();
          break;
 
       case 'mouseup':
-         this.drop();
+         this.repaint();
+         this.endDrag();
          this.canvas.removeEventListener('mousemove', this.mouse_handler);
          this.canvas.removeEventListener('mouseup', this.mouse_handler);
          break;
 
+         // Unexpected events
       default:
          Log.warn(`DiagramDnD.mouseHandler unexpected event ${mouseEvent.type}`);
       }
@@ -88,6 +89,7 @@ class DiagramDnD {
       const touch = (touchEvent.type == 'touchend') ? touchEvent.changedTouches[0] : touchEvent.touches[0];
       
       if (touchCount != 1) {
+         this.endDrag();
          return;
       }
 
@@ -97,26 +99,28 @@ class DiagramDnD {
 
       switch (touchEvent.type) {
       case 'touchstart':
-
          if ((this.object = this.dragStart()) != undefined) {
             this.canvas.addEventListener('touchmove', this.touch_handler);
             this.canvas.addEventListener('touchend', this.touch_handler);
-
-            this.repaintPoller();
-
-            touchEvent.preventDefault();
-            touchEvent.stopPropagation();
+            this.repaint_poller = window.setTimeout(() => this.repaintPoller(), 300);
+            this.start_time = touchEvent.timeStamp;
          }
          break;
 
       case 'touchmove':
-         this.dragOver();
-         touchEvent.preventDefault();
-         touchEvent.stopPropagation();
+         if (this.object) {
+            touchEvent.stopPropagation();
+            touchEvent.preventDefault();
+         }
          break;
 
       case 'touchend':
-         this.drop();
+         if (touchEvent.timeStamp - this.start_time > 300) {  // this avoids an unintended bump on a quick tap
+            this.repaint();
+            touchEvent.preventDefault();  // prevents generation of mouse events
+         }
+         this.endDrag();
+         touchEvent.stopPropagation();  // prevents rotation
          this.canvas.removeEventListener('touchmove', this.touch_handler);
          this.canvas.removeEventListener('touchend', this.touch_handler);
          break;
@@ -152,14 +156,6 @@ class DiagramDnD {
       return (intersects.length == 0) ? null : intersects[0].object;
    }
 
-   dragOver() {
-   }
-
-   drop() {
-      this.repaint();
-      this.endDrag();
-   }
-
    endDrag() {
       this.canvas.style.cursor = '';
       window.clearTimeout( ((this.repaint_poller /*: any */) /*: number */) );
@@ -177,7 +173,7 @@ class DiagramDnD {
       // get ray through mouse
       this.raycaster.setFromCamera(this.eventLocation, this.displayDiagram.camera);
 
-      if (this.object != null) {
+      if (this.object != undefined) {
          if (this.object.type == 'Line') {
             this.repaintLine(this.object);
          } else if (this.object.type == 'Mesh') {
@@ -227,7 +223,6 @@ class DiagramDnD {
       const projection = ray_origin.clone().multiplyScalar(ray_origin.dot(node)/node.length()/ray_origin.length()/ray_origin.length());
       const inplane = node.clone().sub(projection);
       const normal = new THREE.Vector3().crossVectors(inplane, ray_origin).normalize();
-
       const m = new THREE.Matrix3().set(...inplane.toArray(),
                                         ...normal.toArray(),
                                         ...ray_direction.toArray() )
@@ -237,12 +232,17 @@ class DiagramDnD {
 
       sphereUserData.node.point = new_node;
 
+      // update node location
       const diagram3D = (this.displayDiagram.scene.userData /*: CayleyDiagram */);
-      this.displayDiagram.updateNodes(diagram3D);
+      sphere.position.set(...new_node.toArray());
+      const sphere_index = this.displayDiagram.getGroup('spheres').children.findIndex( (sp) => sp.uuid == sphere.uuid );
+
+      // update label
+      const label = this.displayDiagram.getGroup('labels').children[sphere_index];
+      label.position.set(...new_node.toArray());
+      
       this.displayDiagram.updateHighlights(diagram3D);
-      this.displayDiagram.updateLabels(diagram3D);
       this.displayDiagram.updateLines(diagram3D);
       this.displayDiagram.updateArrowheads(diagram3D);
-//      this.displayDiagram.render();
    }
 }

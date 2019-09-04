@@ -107,6 +107,7 @@ declare class THREE_Object3D {
    quaternion: THREE.Quaternion;
    rotateOnAxis(axis: THREE.Vector3, angle: number) : THREE.Object3D;
    matrix: THREE.Matrix4;
+   uuid: string;
 }
 
 declare class THREE_Scene extends THREE.Group {

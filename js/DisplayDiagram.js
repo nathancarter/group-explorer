@@ -7,7 +7,6 @@ import BitSet from './BitSet.js';
 import CayleyDiagram from './CayleyDiagram.js';
 import type {layout, direction} from './CayleyDiagram.js';
 import Diagram3D from './Diagram3D.js';
-import DiagramDnD from './DiagramDnD.js';
 import GEUtils from './GEUtils.js';
 import type {NodeTree, MeshTree} from './GEUtils.js';
 import Log from './Log.js';
@@ -68,7 +67,6 @@ class DisplayDiagram {
    camera: THREE.PerspectiveCamera;
    renderer: THREE.WebGLRenderer;
    camControls: THREE.TrackballControls;
-   lineDnD: DiagramDnD;
  */
    /*
     * Create three.js objects to display data in container
@@ -160,11 +158,6 @@ class DisplayDiagram {
                  resetCamera: (options.hasOwnProperty('resetCamera')) ? options.resetCamera : true};
       const img = new Image();
 
-      // save diagram for use by DiagramDnD -- not used for thumbnails
-      if (this.lineDnD !== undefined) {
-         this.scene.userData = diagram3D;
-      }
-
       if ( options.resetCamera ) this.setCamera(diagram3D);
       this.setBackground(diagram3D);
       this.updateLights(diagram3D);
@@ -186,11 +179,8 @@ class DisplayDiagram {
    showGraphic(diagram3D /*: Diagram3D */) {
       // Log.debug('showGraphic');
 
-      // save diagram for use by LineDnD
+      // save diagram for use by DiagramDnD
       if (this.camControls !== undefined && diagram3D.isCayleyDiagram) {
-         if (this.lineDnD === undefined) {
-            this.lineDnD = new DiagramDnD(this);
-         }
          this.scene.userData = diagram3D;
       }
 
@@ -878,7 +868,7 @@ class DisplayDiagram {
          intersects = raycaster.intersectObjects( ((this.getGroup('chunks').children /*: any */) /*: THREE.Object3D */), false );
       }
 
-      return Array.from(new Set(intersects.map( (intersect) => intersect.object )));
+      return intersects.map( (intersect) => intersect.object );
    }
 
    // Be able to answer the question of where in the diagram any given element is drawn.
