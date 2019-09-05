@@ -62,6 +62,9 @@
           },
           showMathMenu: false,   /* disable MathJax context menu (it interferes with subsetDisplay context menu) */
        });
+       MathJax.Hub.processUpdateTime = 1000;  // allow MathJax to work longer at a stretch, improves initial load time
+       MathJax.Hub.processSectionDelay = 0;   // no pause to let browser handle interaction -- only busy during loading
+       MathJax.Hub.processUpdateDelay = 0;
       </script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=MML_CHTML"></script>
       <script src="https://cdn.jsdelivr.net/npm/jquery-resizable-dom@0.32.0/dist/jquery-resizable.js"></script>
