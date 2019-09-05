@@ -76,7 +76,6 @@ class SSD {
 
       // Display all subgroups
       SSD.Subgroup.displayAll();
-      MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'subset_page']);
 
       // set up event listeners for menus
       SSD.SubsetMenu.init();   }
@@ -192,7 +191,7 @@ SSD.Subgroup = class Subgroup extends SSD.AbstractSubset {
    }
 
    get name() {
-      return MathML.sub('H', this.subgroupIndex);
+      return MathML.sans(MathML.sub('H', this.subgroupIndex));
    }
 
    get displayLine() {
@@ -264,12 +263,17 @@ SSD.Subset = class Subset extends SSD.AbstractSubset {
          this.elements = elements;
       }
       this.subsetIndex = SSD.nextSubsetIndex++;
+
+      // cache formatted MathML for next two subset instances
+      MathML.cacheStrings([MathML.sub('S', SSD.nextSubsetIndex),
+                           MathML.sub('S', SSD.nextSubsetIndex + 1)]);
+
       $('#subsets_placeholder').hide();
       $('#subsets').append(this.displayLine).show();
    }
 
    get name() /*: mathml */ {
-      return MathML.sub('S', this.subsetIndex);
+      return MathML.sans(MathML.sub('S', this.subsetIndex));
    }
 
    get displayLine() /*: html */ {
@@ -298,7 +302,7 @@ SSD.Subset = class Subset extends SSD.AbstractSubset {
    }
 
    static nextName() /*: string */ {
-      return MathML.sub('S', SSD.nextSubsetIndex);
+      return MathML.sans(MathML.sub('S', SSD.nextSubsetIndex));
    }
 }
 // @flow
@@ -321,7 +325,6 @@ SSD.SubsetEditor = class SubsetEditor {
       const setName = subset === undefined ? SSD.Subset.nextName() : subset.name;
       const $subsetEditor = $('body').append(eval(Template.HTML('subsetEditor_template')))
                                      .find('#subset_editor').show();
-      $subsetEditor.find('.ssedit_setName').html(setName);
       $subsetEditor.find('#ssedit_cancel_button').on('click', SSD.SubsetEditor.close);
       $subsetEditor.find('#ssedit_ok_button').on('click', SSD.SubsetEditor.accept);
       $subsetEditor.find('.ssedit_panel_container').on('dragover', (ev /*: JQueryEventObject */) => ev.preventDefault());
@@ -340,8 +343,6 @@ SSD.SubsetEditor = class SubsetEditor {
                           }
                        });
       }
-
-      MathJax.Hub.Queue(['Typeset', MathJax.Hub, "subset_editor"]);
    }
 
    // Create new subset from elementsIn list, make sure it's formatted, and close editor
@@ -351,7 +352,6 @@ SSD.SubsetEditor = class SubsetEditor {
             .map( (_, el) => parseInt($(el).attr('element')) )
             .toArray()
       );
-      MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'subsets']);
       SubsetEditor.close()
    }
 
@@ -397,7 +397,12 @@ SSD.AbstractPartition = class AbstractPartition {
    }
 
    get name() {
-      return MathML.setList([this.subsets[0].name, '<mtext>...</mtext>', this.subsets[this.subsets.length - 1].name]);
+      return [MathML.sans('<mtext>{</mtext>'),
+              this.subsets[0].name,
+              MathML.sans('<mtext>...</mtext>'), 
+              this.subsets[this.subsets.length - 1].name,
+              MathML.sans('<mtext>}</mtext>')]
+         .join('&nbsp;');
    }
 
    destroy() {
@@ -488,7 +493,7 @@ SSD.OrderClasses = class OrderClasses extends SSD.AbstractPartition {
          .orderClasses
          .filter( (orderClass) => orderClass.popcount() != 0 )
          .map( (orderClass, inx) => 
-            new SSD.PartitionSubset(this, inx, orderClass, MathML.sub('OC', inx), 'orderClass')
+            new SSD.PartitionSubset(this, inx, orderClass, MathML.sans(MathML.sub('OC', inx)), 'orderClass')
          );
 
       $('#partitions_placeholder').hide();
@@ -519,7 +524,7 @@ SSD.ConjugacyClasses = class ConjugacyClasses extends SSD.AbstractPartition {
       super();
 
       this.subsets = group.conjugacyClasses.map( (conjugacyClass, inx) =>
-         new SSD.PartitionSubset(this, inx, conjugacyClass, MathML.sub('CC', inx), 'conjugacyClass') );
+          new SSD.PartitionSubset(this, inx, conjugacyClass, MathML.sans(MathML.sub('CC', inx)), 'conjugacyClass') );
 
       $('#partitions_placeholder').hide();
       $('#partitions').append(
@@ -562,8 +567,8 @@ SSD.Cosets = class Cosets extends SSD.AbstractPartition {
          .map( (coset, inx) => {
             const rep = group.representation[((coset.first() /*: any */) /*: groupElement */)];
             const name = this.isLeft ?
-                         MathML.sans(rep) + MathML.sans(this.subgroup.name) :
-                         MathML.sans(this.subgroup.name) + MathML.sans(rep);
+                         MathML.sans(rep) + this.subgroup.name :
+                         this.subgroup.name + MathML.sans(rep);
             return new SSD.PartitionSubset(this, inx, coset, name, 'cosetClass');
          } );
 
@@ -693,18 +698,16 @@ SSD.SubsetMenu = class {
          const $menu = $(eval(Template.HTML('subsetElements_template')));
          $curr.addClass('highlighted').append($menu);
          event.stopPropagation();
-         const follow = () => {
-            const bounds /*: Array<ClientRect> */ =
-                  $menu.find('span.mjx-chtml').map( (_, span) => span.getBoundingClientRect() ).toArray();
-            const extrema /*: {leftmost: number, rightmost: number} */ =
-                  bounds.reduce( (lr /*: {leftmost: number, rightmost: number} */, rect /*: ClientRect */) => {
-                     return {leftmost: Math.min(lr.leftmost, rect.left), rightmost: Math.max(lr.rightmost, rect.right)}
-                  }, {leftmost: Number.MAX_SAFE_INTEGER, rightmost: Number.MIN_SAFE_INTEGER} );
-            $menu.css({'width': extrema.rightmost - extrema.leftmost, 'max-width': ''});
-            Menu.setMenuLocations(location, $menu);
-            $menu.css('visibility', 'visible');
-         };
-         MathJax.Hub.Queue(['Typeset', MathJax.Hub, $menu[0]], follow);
+
+         const bounds /*: Array<ClientRect> */ =
+               $menu.find('span.mjx-chtml').map( (_, span) => span.getBoundingClientRect() ).toArray();
+         const extrema /*: {leftmost: number, rightmost: number} */ =
+               bounds.reduce( (lr /*: {leftmost: number, rightmost: number} */, rect /*: ClientRect */) => {
+                  return {leftmost: Math.min(lr.leftmost, rect.left), rightmost: Math.max(lr.rightmost, rect.right)}
+               }, {leftmost: Number.MAX_SAFE_INTEGER, rightmost: Number.MIN_SAFE_INTEGER} );
+         $menu.css({'width': extrema.rightmost - extrema.leftmost, 'max-width': ''});
+         Menu.setMenuLocations(location, $menu);
+         $menu.css('visibility', 'visible');
       }
    }
 }
@@ -747,7 +750,6 @@ class SSD_Menu {
          } else {
             eval($menuListItem.attr('action'));
             SSD.clearMenus();
-            MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'subset_page']);
          }
       }
    }
@@ -783,14 +785,11 @@ class SSD_Menu {
       $menu.css('visibility', 'hidden');
       event.stopPropagation();
 
-      const follow = () => {
-         if (!isHeaderMenu) {
-            this.makeLongLists($curr[0].id, $menu);
-         }
-         Menu.setMenuLocations(location, $menu);
-         $menu.css('visibility', 'visible');
-      };
-      MathJax.Hub.Queue(['Typeset', MathJax.Hub, $menu[0]], follow);
+      if (!isHeaderMenu) {
+         this.makeLongLists($curr[0].id, $menu);
+      }
+      Menu.setMenuLocations(location, $menu);
+      $menu.css('visibility', 'visible');
    }
 
    // Create the intersection, union, and elementwise product subMenus
@@ -799,7 +798,7 @@ class SSD_Menu {
       const classes = ['.intersection', '.union', '.elementwise-product'];
       const operations = ['intersection', 'union', 'elementwiseProduct'];
       const printOps = ['intersection', 'union', 'elementwise product'];
-      const node = MathML.sans(SSD.displayList[id].name);
+      const node = SSD.displayList[id].name;
       for (let inx = 0; inx < classes.length; inx++) {
          const operation = operations[inx];
          const printOp = printOps[inx];
@@ -808,7 +807,7 @@ class SSD_Menu {
             if (id != otherId) {
                frag +=
                   `<li action="SSD.displayList[${id}].${operation}(SSD.displayList[${otherId}])">` +
-                  `the ${printOp} of ${node} with ${MathML.sans(SSD.displayList[otherId].name)}</li>`;
+                  `${MathML.sansText('the')} ${MathML.sansText(printOp)} ${MathML.sansText('of')} ${node} ${MathML.sansText('with')} ${SSD.displayList[otherId].name}</li>`;
             }
          }
          for (let otherId = group.subgroups.length; otherId < SSD.displayList.length; otherId++) {
@@ -816,7 +815,7 @@ class SSD_Menu {
                const otherName = $(`#${otherId}`).children()[1].outerHTML;
                frag +=
                   `<li action="SSD.displayList[${id}].${operation}(SSD.displayList[${otherId}])">` +
-                  `the ${printOp} of ${node} with ${otherName}</li>`;
+                  `${MathML.sansText('the')} ${MathML.sansText(printOp)} ${MathML.sansText('of')} ${node} ${MathML.sansText('with')} ${SSD.displayList[otherId].name}</li>`;
             }
          }
          $menu.find(classes[inx]).html(frag);
@@ -868,6 +867,7 @@ class DC {
 
    static setupDiagramPage() {
       DC.DiagramChoice.setupDiagramSelect();
+      DC.Generator.init();
 
       $('#diagram-select')[0].addEventListener('click', DC.DiagramChoice.clickHandler);
 
@@ -916,6 +916,47 @@ DC.Generator = class {
    static axis_image: Array<[string, string, string]>;
    static orders: Array<Array<string>>;
  */
+   static init() {
+      // layout choices (linear/circular/rotated), direction (X/Y/Z)
+      DC.Generator.axis_label = [
+         [MathML.sans('<mtext>Linear in&nbsp;</mtext><mi>x</mi>'),
+          MathML.sans('<mtext>Linear in&nbsp;</mtext><mi>y</mi>'),
+          MathML.sans('<mtext>Linear in&nbsp;</mtext><mi>z</mi>')],
+         [MathML.sans('<mtext>Circular in&nbsp;</mtext><mi>y</mi><mo>,</mo><mi>z</mi>'),
+          MathML.sans('<mtext>Circular in&nbsp;</mtext><mi>x</mi><mo>,</mo><mi>z</mi>'),
+          MathML.sans('<mtext>Circular in&nbsp;</mtext><mi>x</mi><mo>,</mo><mi>y</mi>')],
+         [MathML.sans('<mtext>Rotated in&nbsp;</mtext><mi>y</mi><mo>,</mo><mi>z</mi>'),
+          MathML.sans('<mtext>Rotated in&nbsp;</mtext><mi>x</mi><mo>,</mo><mi>z</mi>'),
+          MathML.sans('<mtext>Rotated in&nbsp;</mtext><mi>x</mi><mo>,</mo><mi>y</mi>')],
+      ];
+
+      DC.Generator.axis_image = [
+         ['axis-x.png', 'axis-y.png', 'axis-z.png'],
+         ['axis-yz.png', 'axis-xz.png', 'axis-xy.png'],
+         ['axis-ryz.png', 'axis-rxz.png', 'axis-rxy.png']
+      ];
+
+      // wording for nesting order
+      DC.Generator.orders = [
+         [],
+         [MathML.sans('<mtext>N/A</mtext>')],
+         [MathML.sans('<mtext>inside</mtext>'),
+          MathML.sans('<mtext>outside</mtext>')],
+         [MathML.sans('<mtext>innermost</mtext>'),
+          MathML.sans('<mtext>middle</mtext>'),
+          MathML.sans('<mtext>outermost</mtext>')],
+         [MathML.sans('<mtext>innermost</mtext>'),
+          MathML.sans('<mtext>second innermost</mtext>'),
+          MathML.sans('<mtext>second outermost</mtext>'),
+          MathML.sans('<mtext>outermost</mtext>')],
+         [MathML.sans('<mtext>innermost</mtext>'),
+          MathML.sans('<mtext>second innermost</mtext>'),
+          MathML.sans('<mtext>middle</mtext>'),
+          MathML.sans('<mtext>second outermost</mtext>'),
+          MathML.sans('<mtext>outermost</mtext>')]
+      ];
+   }
+
    static clickHandler(clickEvent /*: MouseEvent */) {
       clickEvent.preventDefault();
 
@@ -947,7 +988,6 @@ DC.Generator = class {
       } else {
          Cayley_diagram.strategies.forEach( (strategy, inx) =>
             $generation_table.append($(eval(Template.HTML('generation-template')))) );
-         MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'generation-table']);
       }
    }
 
@@ -976,10 +1016,8 @@ DC.Generator = class {
 
    static _typesetMenu(eventLocation /*: eventLocation */, $menu /*: JQuery */) {
       $menu.css('visibility', 'hidden');
-      const showMenu = () => { Menu.setMenuLocations(eventLocation, $menu);
-                               $menu.css('visibility', 'visible');
-                             };
-      MathJax.Hub.Queue(['Typeset', MathJax.Hub, $menu[0]], showMenu);
+      Menu.setMenuLocations(eventLocation, $menu);
+      $menu.css('visibility', 'visible');
    }
 
    static showAxisMenu(eventLocation /*: eventLocation */, strategy_index /*: number */) {
@@ -1164,44 +1202,6 @@ DC.Generator = class {
    }
 }
 
-// layout (linear/circular/rotated), direction (X/Y/Z)
-DC.Generator.axis_label = [
-   [MathML.sans('<mtext>Linear in&nbsp;</mtext><mi>x</mi>'),
-    MathML.sans('<mtext>Linear in&nbsp;</mtext><mi>y</mi>'),
-    MathML.sans('<mtext>Linear in&nbsp;</mtext><mi>z</mi>')],
-   [MathML.sans('<mtext>Circular in&nbsp;</mtext><mi>y</mi><mo>,</mo><mi>z</mi>'),
-    MathML.sans('<mtext>Circular in&nbsp;</mtext><mi>x</mi><mo>,</mo><mi>z</mi>'),
-    MathML.sans('<mtext>Circular in&nbsp;</mtext><mi>x</mi><mo>,</mo><mi>y</mi>')],
-   [MathML.sans('<mtext>Rotated in&nbsp;</mtext><mi>y</mi><mo>,</mo><mi>z</mi>'),
-    MathML.sans('<mtext>Rotated in&nbsp;</mtext><mi>x</mi><mo>,</mo><mi>z</mi>'),
-    MathML.sans('<mtext>Rotated in&nbsp;</mtext><mi>x</mi><mo>,</mo><mi>y</mi>')],
-];
-
-DC.Generator.axis_image = [
-   ['axis-x.png', 'axis-y.png', 'axis-z.png'],
-   ['axis-yz.png', 'axis-xz.png', 'axis-xy.png'],
-   ['axis-ryz.png', 'axis-rxz.png', 'axis-rxy.png']
-];
-
-// wording for nesting order
-DC.Generator.orders = [
-   [],
-   [MathML.sans('<mtext>N/A</mtext>')],
-   [MathML.sans('<mtext>inside</mtext>'),
-    MathML.sans('<mtext>outside</mtext>')],
-   [MathML.sans('<mtext>innermost</mtext>'),
-    MathML.sans('<mtext>middle</mtext>'),
-    MathML.sans('<mtext>outermost</mtext>')],
-   [MathML.sans('<mtext>innermost</mtext>'),
-    MathML.sans('<mtext>second innermost</mtext>'),
-    MathML.sans('<mtext>second outermost</mtext>'),
-    MathML.sans('<mtext>outermost</mtext>')],
-   [MathML.sans('<mtext>innermost</mtext>'),
-    MathML.sans('<mtext>second innermost</mtext>'),
-    MathML.sans('<mtext>middle</mtext>'),
-    MathML.sans('<mtext>second outermost</mtext>'),
-    MathML.sans('<mtext>outermost</mtext>')]
-];
 // @flow
 /*::
 import Template from '../js/Template.js';
@@ -1222,7 +1222,7 @@ DC.DiagramChoice = class {
       group.cayleyDiagrams.forEach( (diagram, index) => {
          $('#diagram-choices').append(eval(Template.HTML('diagram-select-other-template'))).hide();
       } );
-      MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'diagram-choices'], () => DC.DiagramChoice._showChoice());
+      DC.DiagramChoice._showChoice();
    }
 
    static _showChoice() {
@@ -1236,14 +1236,22 @@ DC.DiagramChoice = class {
    /* Display control routines */
    static clickHandler(clickEvent /*: MouseEvent */) {
       const $curr = $(clickEvent.target).closest('[action]');
-      $('#bodyDouble').click();
       if ($curr != undefined) {
          eval($curr.attr('action'));
          clickEvent.stopPropagation();
       }
    }
 
+   static toggleChoices() {
+      const choicesDisplay = $('#diagram-choices').css('display');
+      $('#bodyDouble').click();
+      if (choicesDisplay == 'none') {
+         $('#diagram-choices').show();
+      }         
+   }
+
    static selectDiagram(diagram /*: ?string */, andDisplay /*:: ?: boolean */ = true) {
+      $('#bodyDouble').click();
       Diagram_name = (diagram == undefined) ? undefined : diagram;
       DC.Generator.enable();
       DC.Chunking.enable();
@@ -1380,7 +1388,6 @@ DC.Arrow = class {
       } else {
          DC.Arrow.enable()
       }
-      MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'arrow-control']);
       emitStateChange();
    }
 
@@ -1454,15 +1461,12 @@ DC.Chunking = class {
          }
       } );
       $('#chunk-choices').append(eval(Template.HTML('chunk-select-last-template')));
-      MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'chunk-choices'],
-                        () => DC.Chunking.selectChunk(Cayley_diagram.chunk)
-                       );
+      DC.Chunking.selectChunk(Cayley_diagram.chunk);
    }
 
    static clickHandler(clickEvent /*: MouseEvent */) {
       if (!DC.Chunking.isDisabled()) {
          const $curr = $(clickEvent.target).closest('[action]');
-         $('#bodyDouble').click();
          if ($curr != undefined) {
             eval($curr.attr('action'));
             clickEvent.stopPropagation();
@@ -1470,8 +1474,16 @@ DC.Chunking = class {
       }
    }
 
+   static toggleChoices() {
+      const choicesDisplay = $('#chunk-choices').css('display');
+      $('#bodyDouble').click();
+      if (choicesDisplay == 'none') {
+         $('#chunk-choices').show();
+      }         
+   }
+
    static selectChunk(subgroup_index /*: number */) {
-      $('#chunk-choices').hide();
+      $('#bodyDouble').click();
       const strategy_index =
             Cayley_diagram.strategies.findIndex( (strategy) => strategy.bitset.equals(group.subgroups[subgroup_index].members) );
       $('#chunk-choice').html($(`#chunk-choices > li:nth-of-type(${strategy_index + 2})`).html());
