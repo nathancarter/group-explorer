@@ -598,11 +598,9 @@ class LargeGraphic {
          return cleanup();
 
       if (swapping == 'row') {
-         // $FlowFixMe: Flow doesn't seem to understand this sort of deconstructing
-         [multtable.elements[rowXcol.row], multtable.elements[start]] = [multtable.elements[start], multtable.elements[rowXcol.row]];
+         multtable.swap(start, rowXcol.row);
       } else {
-         // $FlowFixMe: Flow doesn't seem to understand this sort of deconstructing
-         [multtable.elements[rowXcol.col], multtable.elements[start]] = [multtable.elements[start], multtable.elements[rowXcol.col]];
+         multtable.swap(start, rowXcol.col);
       }
 
       graphicContext.showLargeGraphic(multtable);

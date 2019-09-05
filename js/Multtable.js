@@ -17,7 +17,8 @@ class Multtable {
    elements: Array<groupElement>;
    separation: number;
    organizingSubgroup: number;
-   coloration: Coloration;
+   _coloration: Coloration;
+   _colors: ?Array<color>;
    backgrounds: void | Array<color>;
    borders: void | Array<color | void>;
    corners: void | Array<color | void>;
@@ -39,6 +40,7 @@ class Multtable {
       this.elements = GEUtils.flatten_el(
          this.group.cosetsArray(GEUtils.flatten_el(this.group.closureArray(subgroup.generators)), false) );
       this.organizingSubgroup = subgroupIndex;
+      this._colors = null;
       return this;
    }
 
@@ -50,6 +52,8 @@ class Multtable {
       let result;
       if (this.backgrounds != undefined) {
          result = this.backgrounds;
+      } else if (this._colors != undefined) {
+         result = this._colors;
       } else {
          const frac = (inx, max, min) => Math.round(min + inx * (max - min) / this.group.order);
 
@@ -68,13 +72,22 @@ class Multtable {
             fn = (inx) => DisplayMulttable.BACKGROUND;
             break;
          }
-
-         result = (this.elements.map( (el,inx) => [inx, el] ) /*: Array<[number, groupElement]> */)
-                                .sort( ([_a, x], [_b, y]) => x - y )
-                                .map( ([inx,_]) => fn(inx) );
+      
+         this._colors = result = (this.elements.map( (el,inx) => [inx, el] ) /*: Array<[number, groupElement]> */)
+                                               .sort( ([_a, x], [_b, y]) => x - y )
+                                               .map( ([inx,_]) => fn(inx) );
       }
 
       return result;
+   }
+
+   get coloration() /*: Coloration */ {
+      return this._coloration;
+   }
+      
+   set coloration(coloration /*: Coloration */) {
+      this._coloration = coloration;
+      this._colors = null;
    }
 
    get stride() /*: number */ {
@@ -83,6 +96,12 @@ class Multtable {
 
    get size() /*: number */ {
       return this.group.order + this.separation * ((this.group.order/this.stride) - 1);
+   }
+
+   swap(i /*: number */, j /*: number */) {
+      // $FlowFixMe: Flow doesn't seem to understand this sort of deconstructing
+      [this.elements[i], this.elements[j]] = [this.elements[j], this.elements[i]];
+      this._colors = null;
    }
 
    position(index /*: number */) /*: void | number */ {
