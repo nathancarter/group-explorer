@@ -5,44 +5,24 @@
 
 ### To-dos related to tablet support
 
- * ~~In general, check how everything works on a tablet, find those things that don't work,
-   and then design how we want them to work, and make it happen.~~
-   * _Complete -- see [mobile.md](./mobile.md)_
- * Consider all the places where performance becomes evident due to lower tablet compute
-   power, and which can easily be improved.  What tables struggle with is graphics, so:
-    * One performance improvement may come when we replace spheres with sprites of circles.
-      This may have a huge impact.
-    * Another improvement may be simply to make the "show labels" option default to false
-      on tablets.
-    * _Graphics performance on my iPad Pro is pretty comparable to my desktop (6-core i5
-      cpu, entry level gaming accelerator). Re-painting the Cayley diagram while dragging
-      a node into a new position in a large-ish group is jerky and uneven in either case.
-      Did some quick timing studies and identified two targets for improvement:_
-        * _Caching `MathML.toUnicode` (`mathml2text`) output (I didn't expect this, but it was
-          a pretty big time sink!)_
-        * _Re-using existing spheres somehow when a node is being moved_
- * ~~Change subset control: don't pop up elements on double-click, but on hover...unless
-   that's bad for tablets?~~
-   * _Complete: used touch-hold on subset control instead of double-click, see [GE3 User 
-     Manual, Subset Options](../help/rf-um-subsetlistbox/index.html#tour-of-the-subsets-pane).
-     Hover is pretty awkward on touch devices: your finger tends to be where you
-     want to look, and it's easy to turn a touch into a click or drag. Double-click is pretty
-     much out on an iPad, too -- the event doesn't even exist, and I don't think there's
-     any way to prevent the default action (magnification) even if you roll your own 
-     from touch events._
- * ~~Implement touch support for Sheets~~
-   * _Complete_
+Complete: Tablet support is comparable to desktop with no known feature gaps. Interface
+documentation is complete.
+
+Graphics performance on my iPad Pro is generally comparable to my desktop (6-core i5 cpu,
+entry level gaming accelerator). After the library is stored locally visualizer loads take
+1-2 sec; menu response (subgroup option menu) takes 20-50 ms, 100 ms worst case;
+and drag-and-drop (node placement in Cayley diagram) maintains 20-30 fps, 10-15 worst case.
 
 ### Bugs
 
  * On iPad, in Cayley diagram visualizer -> Diagram panel -> Generator menus, if a scrolling
    submenu tries to open a scrolling submenu, the second submenu doesn't appear at all.
-   (How to workaround this? Javascript, instead of css?)
+   (no known workaround simpler than manual re-coding of menu behavior).
 
- * Fix subset display so that whenever you add a new subset, Group Explorer checks whether it exists under another name,
-   and gives you the option to cancel your addition if so, matching GE2 behavior.
+ * When you add a new subset in subset control, Group Explorer does not check whether it
+   exists under another name or give you the option to cancel your addition, as GE2 does.
 
- * Format dropdown lists in Sheets with MathJax
+ * Dropdown lists in Sheets are not formatted with MathJax
 
 ### Miscellany
 
