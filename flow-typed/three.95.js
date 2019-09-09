@@ -68,6 +68,8 @@ declare class THREE_Vector3 {
    multiplyScalar(n : number) : THREE.Vector3;
    applyMatrix4(THREE.Matrix4) : THREE.Vector3;
    add(THREE.Vector3) : THREE.Vector3;
+   addScaledVector(THREE.Vector3, float) : THREE.Vector3;
+   projectOnVector(THREE.Vector3) : THREE.Vector3;
    sub(THREE.Vector3) : THREE.Vector3;
    addVectors(THREE.Vector3, THREE.Vector3) : THREE.Vector3;
    dot(THREE.Vector3) : number;

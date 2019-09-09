@@ -182,29 +182,55 @@ class DiagramDnD {
       }
    }
 
+   /* Re-draw line by adjusting line.offset so the center of the line is under the drag point
+    */
    repaintLine(line /*: THREE.Object3D */) {
-      // get intersection of ray with plane of line (through start, end, center)
+      /* Find intersection of raycaster.ray with plane of line through start, end, and center
+       *   A point in the plane is
+       *      r*center2start + s*center2end + center
+       *   and a point on the ray is
+       *      raycaster.ray.origin + t*raycaster.ray.direction.
+       *   Collecting unknowns on the left, a point on both is
+       *      r*center2start + s*center2end - t*raycaster.ray.direction = raycaster.ray.origin - center.
+       *   Let M = the matrix ⟨center2start, center2end, raycaster.ray.direction⟩.
+       *   Then
+       *      M × ⟨r, s, -t⟩ = raycaster.ray.origin - center
+       *   and
+       *      U = ⟨r, s, -t⟩ = M⁻¹ × (raycaster.ray.origin - center). 
+       *   The location of the intersection point is then
+       *      raycaster.ray.origin - U₃*raycaster.ray.direction.
+       */
       const lineUserData = (line.userData /*: LineUserData */);
       const start = lineUserData.line.vertices[0].point;
       const end = lineUserData.line.vertices[1].point;
+
       const center = this.displayDiagram._getCenter(lineUserData.line);
       const center2start = start.clone().sub(center);
       const center2end = end.clone().sub(center);
 
-      // find 'intersection', the point the raycaster ray intersects the plane defined by start, end and center
-      const m = new THREE.Matrix3().set(...center2start.toArray(),
+      const M = new THREE.Matrix3().set(...center2start.toArray(),
                                         ...center2end.toArray(),
                                         ...this.raycaster.ray.direction.toArray())
                                    .transpose();
-      const s = this.raycaster.ray.origin.clone().applyMatrix3(new THREE.Matrix3().getInverse(m));
-      const intersection = this.raycaster.ray.origin.clone().add(this.raycaster.ray.direction.clone().multiplyScalar(-s.z));
+      const U = (this.raycaster.ray.origin.clone().addScaledVector(center, -1)).applyMatrix3(new THREE.Matrix3().getInverse(M));
+      const intersection = this.raycaster.ray.origin.clone().addScaledVector(this.raycaster.ray.direction, -U.z);
 
-      // get offset length
+      /* The offset of the intersection from the start2end vector is
+       *     |start2intxn| * sin(θ)
+       *   where θ is the angle between start2intxn and start2end.
+       *   The length of the cross product (start2intxn × start2end) is
+       *     |start2intxn| * |start2end| * |sin(θ)|,
+       *   so the offset length is
+       *     |start2intxn × start2end| / |start2end|.
+       *   The offset is considered positive then both cross products (start2intxn × start2end)
+       *   and (center2start × center2end) point in the same direction. We can thus calculate the
+       *   signed result by forming the dot product of the normalized (center2start × center2end)
+       *   vector with the (start2intxn × start2end)/|start2end| vector.
+       */
       const start2intxn = intersection.clone().sub(start);
       const start2end = end.clone().sub(start);
       const plane_normal = new THREE.Vector3().crossVectors(center2start, center2end).normalize();
-      const line_length = start2end.length();
-      const offset = new THREE.Vector3().crossVectors(start2intxn, start2end).dot(plane_normal)/(line_length * line_length);
+      const offset = new THREE.Vector3().crossVectors(start2intxn, start2end).dot(plane_normal)/start2end.length();
 
       // set line offset in diagram, and re-paint lines, arrowheads
       lineUserData.line.style = Diagram3D.CURVED;
@@ -214,30 +240,38 @@ class DiagramDnD {
       this.displayDiagram.updateArrowheads(diagram3D);
    }
 
+   /* Re-draw sphere by placing it under the drag point in the plane normal to the ray origin
+    */
    repaintSphere(sphere /*: THREE.Object3D */) {
-      // change node location to 3D intersection between ray and plane normal to camera POV containing node
       const sphereUserData = (sphere.userData /*: SphereUserData */);
       const node = sphereUserData.node.point;
       const ray_origin = this.raycaster.ray.origin;
       const ray_direction = this.raycaster.ray.direction;
-      const projection = ray_origin.clone().multiplyScalar(ray_origin.dot(node)/node.length()/ray_origin.length()/ray_origin.length());
-      const inplane = node.clone().sub(projection);
-      const normal = new THREE.Vector3().crossVectors(inplane, ray_origin).normalize();
-      const m = new THREE.Matrix3().set(...inplane.toArray(),
-                                        ...normal.toArray(),
-                                        ...ray_direction.toArray() )
-                                   .transpose();
-      const s = ray_origin.clone().sub(projection).applyMatrix3(new THREE.Matrix3().getInverse(m));
-      const new_node = ray_origin.clone().add(ray_direction.clone().multiplyScalar(-s.z));
+      const square = (val) => val * val;
+      let new_node;
+      // Find intersection of raycaster ray with plane through the sphere and normal to the camera POV
+      if (Math.abs(square(ray_origin.dot(ray_direction)) - ray_origin.lengthSq()*ray_direction.lengthSq()) < 1.e-6) {
+         // Degenerate case: mouse lies right on camera POV, just project the current node position onto the camera POV
+         new_node = node.clone().projectOnVector(ray_origin);
+      } else {
+         /* center is the point where the camera POV intersects the plane containing the sphere
+          * intxn is the point where the raycaster ray intersects the plane
+          * camera2intxn is the distance between the camera and intxn
+          */
+         const origin2center = node.clone().projectOnVector(ray_origin);
+         const center2camera = ray_origin.clone().sub(origin2center);
+         const camera2intxn = -center2camera.lengthSq()/(ray_direction.dot(center2camera));
+         new_node = ray_origin.clone().addScaledVector(ray_direction, camera2intxn);
+      }
 
       sphereUserData.node.point = new_node;
 
-      // update node location
+      // update a single node by changing its position
       const diagram3D = (this.displayDiagram.scene.userData /*: CayleyDiagram */);
       sphere.position.set(...new_node.toArray());
       const sphere_index = this.displayDiagram.getGroup('spheres').children.findIndex( (sp) => sp.uuid == sphere.uuid );
 
-      // update label
+      // update the single node's label by changing the label's position
       const label = this.displayDiagram.getGroup('labels').children[sphere_index];
       label.position.set(...new_node.toArray());
       
