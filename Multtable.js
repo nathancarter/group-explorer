@@ -34,7 +34,7 @@ window.addEventListener('load', load, {once: true});
 /* Register static event managers (called after document is assembled) */
 function registerCallbacks() {
    // window-wide default actions
-   window.addEventListener('resize', resizeBody);
+   window.onresize = resizeBody;
    $('#bodyDouble')[0].addEventListener('click', cleanWindow);
    window.addEventListener('contextmenu', (mouseEvent /*: MouseEvent */) => {
       cleanWindow();

@@ -42,7 +42,7 @@ window.addEventListener('load', load, {once: true});
 
 /* Register static event managers (called after document is assembled) */
 function registerCallbacks() {
-   window.addEventListener('resize', resizeBody);
+   window.onresize = resizeBody;
    $('#bodyDouble')[0].addEventListener('click', cleanWindow);
 
    $('#subset-button')[0].addEventListener('click', () => VC.showPanel('#subset-control') );
