@@ -30,5 +30,6 @@ declare class Window extends EventTarget {
     clearTimeout(number): void;
     getSelection(): Selection;
     ontouchstart?: Function;
+    onresize?: Function;
 }
 declare var window: Window;

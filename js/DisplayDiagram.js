@@ -499,7 +499,7 @@ class DisplayDiagram {
     * Draw lines between nodes
     *   An arc is drawn in the plane specified by the two ends and the center, if one is given, or [0,0,0]
     */
-   updateLines(diagram3D /*: Diagram3D */, use_webgl_native_lines /*:: ?: boolean */ = false) {
+   updateLines (diagram3D /*: Diagram3D */, use_webgl_native_lines /*:: ?: boolean */ = false) {
       // Log.debug('updateLines');
 
       const lines = diagram3D.lines;
@@ -536,7 +536,7 @@ class DisplayDiagram {
                resolution: new THREE.Vector2(((window.innerWidth /*: any */) /*: float */),
                                              ((window.innerHeight /*: any */) /*: float */)),
                fog: true,
-            });
+           });
             const meshLine = new MeshLine();
             meshLine.setGeometry(geometry);
             newLine = new THREE.Mesh(meshLine.geometry, lineMaterial);
@@ -592,20 +592,17 @@ class DisplayDiagram {
       return vertices.map( (vertex) => vertex.point );
    }
 
+   // inherent problem with this approach if start, end, and center are co-linear
    _curvePoints(line /*: Diagram3D.Line */) /*: Array<THREE.Vector3> */ {
-      const start_point = line.vertices[0].point,
-            end_point = line.vertices[1].point,
+      const start = line.vertices[0].point,
+            end = line.vertices[1].point,
             center = this._getCenter(line),
-            start = start_point.clone().sub(center),
-            end = end_point.clone().sub(center),
-            offset_distance = ((line.offset /*: any */) /*: float */) * start_point.distanceTo(end_point),
-            halfway = new THREE.Vector3().addVectors(start, end).multiplyScalar(0.5),  // (start + end)/2
-            start2end = end.clone().sub(start),
-            x = -start.dot(start2end)/end.dot(start2end),  // start + x*end is normal to start - end
-            normal = ((end.dot(start2end) == 0) ? end.clone() : start.clone().add(end.clone().multiplyScalar(x))).normalize(),
-            offset = normal.clone().multiplyScalar(2*offset_distance),
-            middle = center.clone().add(halfway).add(offset),
-            curve = new THREE.QuadraticBezierCurve3(start_point, middle, end_point),
+            midpoint = start.clone().add(end).multiplyScalar(0.5),
+            plane_normal = new THREE.Vector3().crossVectors(start.clone().sub(center), end.clone().sub(center)).normalize(),
+            start_end_normal = new THREE.Vector3().crossVectors(end.clone().sub(start), plane_normal).normalize(),
+            offset = ((line.offset /*: any */) /*: float */) * end.clone().sub(start).length(),
+            middle = midpoint.clone().addScaledVector(start_end_normal, 2*offset),
+            curve = new THREE.QuadraticBezierCurve3(start, middle, end),
             points = curve.getPoints(10);
       line.middle = middle;
       return points;
@@ -858,7 +855,7 @@ class DisplayDiagram {
    }
 
    // get objects at point x,y using raycasting
-   getObjectsAtPoint(x /*: number */, y /*: number */) /*: Array<{name: string}> */ {
+   getObjectsAtPoint (x /*: number */, y /*: number */) /*: Array<THREE.Object3D> */ {
       const mouse = new THREE.Vector2(x, y);
       const raycaster = new THREE.Raycaster();
       raycaster.setFromCamera(mouse, this.camera);

@@ -29,6 +29,10 @@ declare class THREE {
    static MeshBasicMaterial : typeof THREE_MeshBasicMaterial;
    static Quaternion : typeof THREE_Quaternion;
    static Raycaster : typeof THREE_Raycaster;
+   static Points : typeof THREE_Points;
+   static PointsMaterial : typeof THREE_PointsMaterial;
+   static Plane : typeof THREE_Plane;
+   static Line3 : typeof THREE_Line3;
 }
 
 
@@ -49,6 +53,7 @@ declare class THREE_Matrix4 {
    decompose(position: THREE.Vector3, quaternion: THREE.Quaternion, scale: THREE.Vector3) : void;
    fromArray(array: Array<number>) : THREE.Matrix4;
    toArray() : Array<number>;
+   makeBasis(xAxis: THREE.Vector3, yAxis: THREE.Vector3, zAxis: THREE.Vector3) : THREE.Matrix4;
 }
 
 declare class THREE_Matrix3 {
@@ -110,6 +115,7 @@ declare class THREE_Object3D {
    rotateOnAxis(axis: THREE.Vector3, angle: number) : THREE.Object3D;
    matrix: THREE.Matrix4;
    uuid: string;
+   id: number;
 }
 
 declare class THREE_Scene extends THREE.Group {
@@ -240,4 +246,25 @@ declare class THREE_Raycaster {
    ray : {origin: THREE.Vector3, direction: THREE.Vector3};
    setFromCamera(coords: THREE.Vector2, camera: THREE.PerspectiveCamera) : void;
    intersectObjects(object: THREE.Object3D, recursive: boolean) : Array<{object: THREE.Object3D}>;
+}
+
+declare class THREE_Points extends THREE.Object3D {
+   constructor(geometry: THREE.Geometry, material: THREE.Material) : void;
+}
+
+declare class THREE_PointsMaterial extends THREE.Material {
+   constructor(parameters: {color: number | string, size: number, sizeAttenuation: boolean}) : void;
+}
+
+declare class THREE_Plane {
+   normal: THREE.Vector3;
+   constructor(): void;
+   intersectLine(line: THREE.Line3, target: THREE.Vector3): THREE.Vector3;
+   setFromCoplanarPoints(p1: THREE.Vector3, p2: THREE.Vector3, p3: THREE.Vector3): THREE.Plane;
+}
+
+declare class THREE_Line3 {
+   constructor(start: THREE.Vector3, end: THREE.Vector3) : void;
+   closestPointToPoint(point: THREE.Vector3, clampToLine: boolean, target: THREE.Vector3): THREE.Vector3;
+   closestPointToPointParameter(point: THREE.Vector3, clampToLine: boolean): float;
 }

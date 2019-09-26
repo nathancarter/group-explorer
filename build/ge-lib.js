@@ -3401,9 +3401,6 @@ Diagram3D.Point = _Diagram3D_Point;
 Diagram3D.Node = _Diagram3D_Node;
 Diagram3D.Line = _Diagram3D_Line;
 // @flow
-/*
- * ToDo:  disable when chunking
- */
 /*::
 import Diagram3D from './Diagram3D.js';
 import CayleyDiagram from './CayleyDiagram.js';
@@ -3534,6 +3531,11 @@ class DiagramDnD {
 
    // start drag-and-drop; see if we've found a line or node
    dragStart() /*: ?THREE.Object3D */ {
+      // Don't allow manual re-arrangement if we're chunking
+      if (this.displayDiagram.scene.userData.chunk != 0) {
+         return null;
+      }
+      
       // update the picking ray with the camera and mouse position
       this.raycaster.setFromCamera(this.eventLocation, this.displayDiagram.camera);
 
@@ -3554,7 +3556,7 @@ class DiagramDnD {
       diagram3D.lineWidth = saved_width;
       this.displayDiagram.updateLines(diagram3D);
 
-      // return intersect or null
+     // return intersect or null
       return (intersects.length == 0) ? null : intersects[0].object;
    }
 
@@ -3587,56 +3589,41 @@ class DiagramDnD {
    /* Re-draw line by adjusting line.offset so the center of the line is under the drag point
     */
    repaintLine(line /*: THREE.Object3D */) {
-      /* Find intersection of raycaster.ray with plane of line through start, end, and center
-       *   A point in the plane is
-       *      r*center2start + s*center2end + center
-       *   and a point on the ray is
-       *      raycaster.ray.origin + t*raycaster.ray.direction.
-       *   Collecting unknowns on the left, a point on both is
-       *      r*center2start + s*center2end - t*raycaster.ray.direction = raycaster.ray.origin - center.
-       *   Let M = the matrix ⟨center2start, center2end, raycaster.ray.direction⟩.
-       *   Then
-       *      M × ⟨r, s, -t⟩ = raycaster.ray.origin - center
-       *   and
-       *      U = ⟨r, s, -t⟩ = M⁻¹ × (raycaster.ray.origin - center). 
-       *   The location of the intersection point is then
-       *      raycaster.ray.origin - U₃*raycaster.ray.direction.
-       */
       const lineUserData = (line.userData /*: LineUserData */);
+
       const start = lineUserData.line.vertices[0].point;
       const end = lineUserData.line.vertices[1].point;
-
       const center = this.displayDiagram._getCenter(lineUserData.line);
-      const center2start = start.clone().sub(center);
-      const center2end = end.clone().sub(center);
 
-      const M = new THREE.Matrix3().set(...center2start.toArray(),
-                                        ...center2end.toArray(),
-                                        ...this.raycaster.ray.direction.toArray())
-                                   .transpose();
-      const U = (this.raycaster.ray.origin.clone().addScaledVector(center, -1)).applyMatrix3(new THREE.Matrix3().getInverse(M));
-      const intersection = this.raycaster.ray.origin.clone().addScaledVector(this.raycaster.ray.direction, -U.z);
+      const plane = new THREE.Plane().setFromCoplanarPoints(start, end, center);
+      const ray = new THREE.Line3(this.raycaster.ray.origin,
+                                  this.raycaster.ray.origin.clone().addScaledVector(this.raycaster.ray.direction, 100));
+      
+      const pick = plane.intersectLine(ray, new THREE.Vector3());
 
-      /* The offset of the intersection from the start2end vector is
-       *     |start2intxn| * sin(θ)
-       *   where θ is the angle between start2intxn and start2end.
-       *   The length of the cross product (start2intxn × start2end) is
-       *     |start2intxn| * |start2end| * |sin(θ)|,
-       *   so the offset length is
-       *     |start2intxn × start2end| / |start2end|.
-       *   The offset is considered positive then both cross products (start2intxn × start2end)
-       *   and (center2start × center2end) point in the same direction. We can thus calculate the
-       *   signed result by forming the dot product of the normalized (center2start × center2end)
-       *   vector with the (start2intxn × start2end)/|start2end| vector.
-       */
-      const start2intxn = intersection.clone().sub(start);
-      const start2end = end.clone().sub(start);
-      const plane_normal = new THREE.Vector3().crossVectors(center2start, center2end).normalize();
-      const offset = new THREE.Vector3().crossVectors(start2intxn, start2end).dot(plane_normal)/start2end.length();
+      const pick_projection = new THREE.Line3(start, end).closestPointToPointParameter(pick, true);
+      if (pick_projection < 0.3 || pick_projection > 0.7) {
+         this.endDrag();
+         return;
+      }
+
+      // check that pick is over (middle third of) line?
+
+      // transformation from real to canonical space to simplify problem 
+      const midpoint = start.clone().add(end).multiplyScalar(0.5);
+      const start_end_normal = new THREE.Vector3().crossVectors(end.clone().sub(start), plane.normal).normalize();
+      const transform = new THREE.Matrix4().makeBasis(start.clone().sub(midpoint), start_end_normal, plane.normal)
+                                           .setPosition(midpoint);
+
+      // map pick to canonical space
+      const pick_canonical = pick.clone().applyMatrix4(new THREE.Matrix4().getInverse(transform));
+      const ymax_canonical = -pick_canonical.y/(pick_canonical.x*pick_canonical.x - 1);
+      const ymax_real =
+            Math.sign(ymax_canonical) * (new THREE.Vector3(0, ymax_canonical, 0).applyMatrix4(transform).sub(midpoint).length());
 
       // set line offset in diagram, and re-paint lines, arrowheads
       lineUserData.line.style = Diagram3D.CURVED;
-      lineUserData.line.offset = offset;
+      lineUserData.line.offset = ymax_real/start.clone().sub(end).length();
       const diagram3D = (this.displayDiagram.scene.userData /*: CayleyDiagram */);
       this.displayDiagram.updateLines(diagram3D);
       this.displayDiagram.updateArrowheads(diagram3D);
@@ -3682,6 +3669,7 @@ class DiagramDnD {
       this.displayDiagram.updateArrowheads(diagram3D);
    }
 }
+
 // @flow
 
 /*::
@@ -4730,7 +4718,7 @@ class DisplayDiagram {
     * Draw lines between nodes
     *   An arc is drawn in the plane specified by the two ends and the center, if one is given, or [0,0,0]
     */
-   updateLines(diagram3D /*: Diagram3D */, use_webgl_native_lines /*:: ?: boolean */ = false) {
+   updateLines (diagram3D /*: Diagram3D */, use_webgl_native_lines /*:: ?: boolean */ = false) {
       // Log.debug('updateLines');
 
       const lines = diagram3D.lines;
@@ -4767,7 +4755,7 @@ class DisplayDiagram {
                resolution: new THREE.Vector2(((window.innerWidth /*: any */) /*: float */),
                                              ((window.innerHeight /*: any */) /*: float */)),
                fog: true,
-            });
+           });
             const meshLine = new MeshLine();
             meshLine.setGeometry(geometry);
             newLine = new THREE.Mesh(meshLine.geometry, lineMaterial);
@@ -4823,20 +4811,17 @@ class DisplayDiagram {
       return vertices.map( (vertex) => vertex.point );
    }
 
+   // inherent problem with this approach if start, end, and center are co-linear
    _curvePoints(line /*: Diagram3D.Line */) /*: Array<THREE.Vector3> */ {
-      const start_point = line.vertices[0].point,
-            end_point = line.vertices[1].point,
+      const start = line.vertices[0].point,
+            end = line.vertices[1].point,
             center = this._getCenter(line),
-            start = start_point.clone().sub(center),
-            end = end_point.clone().sub(center),
-            offset_distance = ((line.offset /*: any */) /*: float */) * start_point.distanceTo(end_point),
-            halfway = new THREE.Vector3().addVectors(start, end).multiplyScalar(0.5),  // (start + end)/2
-            start2end = end.clone().sub(start),
-            x = -start.dot(start2end)/end.dot(start2end),  // start + x*end is normal to start - end
-            normal = ((end.dot(start2end) == 0) ? end.clone() : start.clone().add(end.clone().multiplyScalar(x))).normalize(),
-            offset = normal.clone().multiplyScalar(2*offset_distance),
-            middle = center.clone().add(halfway).add(offset),
-            curve = new THREE.QuadraticBezierCurve3(start_point, middle, end_point),
+            midpoint = start.clone().add(end).multiplyScalar(0.5),
+            plane_normal = new THREE.Vector3().crossVectors(start.clone().sub(center), end.clone().sub(center)).normalize(),
+            start_end_normal = new THREE.Vector3().crossVectors(end.clone().sub(start), plane_normal).normalize(),
+            offset = ((line.offset /*: any */) /*: float */) * end.clone().sub(start).length(),
+            middle = midpoint.clone().addScaledVector(start_end_normal, 2*offset),
+            curve = new THREE.QuadraticBezierCurve3(start, middle, end),
             points = curve.getPoints(10);
       line.middle = middle;
       return points;
@@ -5089,7 +5074,7 @@ class DisplayDiagram {
    }
 
    // get objects at point x,y using raycasting
-   getObjectsAtPoint(x /*: number */, y /*: number */) /*: Array<{name: string}> */ {
+   getObjectsAtPoint (x /*: number */, y /*: number */) /*: Array<THREE.Object3D> */ {
       const mouse = new THREE.Vector2(x, y);
       const raycaster = new THREE.Raycaster();
       raycaster.setFromCamera(mouse, this.camera);
