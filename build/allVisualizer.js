@@ -16,6 +16,8 @@ import SubsetEditor from './SubsetEditor.js';
 import Subset from './Subset.js';
 import SubsetMenu from './SubsetMenu.js';
 
+type highlighterRoutines = Array<{handler: (Array<Array<groupElement>>) => void, label: string}>;
+
 var group: XMLGroup;
 
 export default
@@ -26,6 +28,7 @@ class SSD {
    static nextId: number;
    static nextSubsetIndex: number;
    static displayList: Array<AbstractSubset>;
+   static highlighters: highlighterRoutines;
 
    static AbstractSubset: Class<AbstractSubset>;
    static ConjugacyClasses: Class<ConjugacyClasses>;
@@ -42,19 +45,13 @@ class SSD {
       SSD.subsetsURL = './subsetDisplay/subsets.html';
    }
 
-   static clearMenus() {
-      $('#subset_page .highlighted').removeClass('highlighted');
-      $('#subset_page .menu:visible').remove();
-      $('#subset_page .elements').remove();
-   }
-
    /* Load, initialize subset display */
-   static load($subsetWrapper /*: JQuery */) /*: Promise<void> */ {
+   static load($subsetWrapper /*: JQuery */, highlighters /*: highlighterRoutines*/) /*: Promise<void> */ {
       return new Promise( (resolve, reject) => {
          $.ajax( { url: SSD.subsetsURL,
                    success: (data /*: string */) => {
                       $subsetWrapper.html(data);
-                      SSD.setup_subset_page();
+                      SSD.setup_subset_page(highlighters);
                       resolve();
                    },
                    error: (_jqXHR, _status, err) => {
@@ -64,7 +61,8 @@ class SSD {
       } )
    }
 
-   static setup_subset_page() {
+   static setup_subset_page(highlighters /*: highlighterRoutines */) {
+      SSD.highlighters = highlighters;
       // Initialize list of all displayed subsets
       SSD.nextId = 0;
       SSD.nextSubsetIndex = 0;
@@ -78,7 +76,8 @@ class SSD {
       SSD.Subgroup.displayAll();
 
       // set up event listeners for menus
-      SSD.SubsetMenu.init();   }
+      SSD.SubsetMenu.init();
+   }
 }
 
 SSD._init();
@@ -200,19 +199,17 @@ SSD.Subgroup = class Subgroup extends SSD.AbstractSubset {
       let templateName;
       switch (this.subgroupIndex) {
          case 0:
-            templateName = 'firstSubgroup_template';	break;
+            templateName = 'first-subgroup-template';	break;
          case group.subgroups.length - 1:
-            templateName = 'lastSubgroup_template';	break;
+            templateName = 'last-subgroup-template';	break;
          default:
-            templateName = 'subgroup_template';	break;
+            templateName = 'subgroup-template';	break;
       }
       return eval(Template.HTML(templateName));
    }
 
    get menu() {
-      const $menu = $(eval(Template.HTML('subgroupMenu_template')));
-      $('template.subgroup-extension').each( (_, template) => $menu.append(eval('`' + $(template).html() + '`')) );
-      return $menu;
+      return $(eval(Template.HTML('subgroup-menu-template')));
    }
 
    get normalizer() {
@@ -285,12 +282,13 @@ SSD.Subset = class Subset extends SSD.AbstractSubset {
        if (numElements > 3) {
          items.push('<mtext>...</mtext>');
       }
-      return eval(Template.HTML('subset_template'));
+      return eval(Template.HTML('subset-template'));
    }
 
    get menu() {
-      const $menu = $(eval(Template.HTML('subsetMenu_template')));
-      $('template.subset-extension').each( (_, template) => $menu.append(eval('`' + $(template).html() + '`')) );
+      const id = this.id,
+            name = this.name;
+      const $menu = $(eval(Template.HTML('subset-menu-template')));
       return $menu;
    }
 
@@ -323,7 +321,7 @@ SSD.SubsetEditor = class SubsetEditor {
       const subset = displayId === undefined ? undefined : SSD.displayList[displayId];
       const elements = subset === undefined ? new BitSet(group.order) : subset.elements;
       const setName = subset === undefined ? SSD.Subset.nextName() : subset.name;
-      const $subsetEditor = $('body').append(eval(Template.HTML('subsetEditor_template')))
+      const $subsetEditor = $('body').append(eval(Template.HTML('subset-editor-template')))
                                      .find('#subset_editor').show();
       $subsetEditor.find('#ssedit_cancel_button').on('click', SSD.SubsetEditor.close);
       $subsetEditor.find('#ssedit_ok_button').on('click', SSD.SubsetEditor.accept);
@@ -465,13 +463,11 @@ SSD.PartitionSubset = class PartitionSubset extends SSD.AbstractSubset {
    }
 
    get menu() {
-      const $menu = $(eval(Template.HTML('partitionMenu_template')));
-      $('template.partition-extension').each( (_, template) => $menu.append(eval('`' + $(template).html() + '`')) );
-      return $menu;
+      return $(eval(Template.HTML('partition-menu-template')));
    }
 
    get displayLine() /*: html */ {
-      return eval(Template.HTML(this.partitionClass + '_template'));
+      return eval(Template.HTML(this.partitionClass + '-template'));
    }
 }
 // @flow
@@ -493,7 +489,7 @@ SSD.OrderClasses = class OrderClasses extends SSD.AbstractPartition {
          .orderClasses
          .filter( (orderClass) => orderClass.popcount() != 0 )
          .map( (orderClass, inx) => 
-            new SSD.PartitionSubset(this, inx, orderClass, MathML.sans(MathML.sub('OC', inx)), 'orderClass')
+            new SSD.PartitionSubset(this, inx, orderClass, MathML.sans(MathML.sub('OC', inx)), 'order-class')
          );
 
       $('#partitions_placeholder').hide();
@@ -524,7 +520,7 @@ SSD.ConjugacyClasses = class ConjugacyClasses extends SSD.AbstractPartition {
       super();
 
       this.subsets = group.conjugacyClasses.map( (conjugacyClass, inx) =>
-          new SSD.PartitionSubset(this, inx, conjugacyClass, MathML.sans(MathML.sub('CC', inx)), 'conjugacyClass') );
+          new SSD.PartitionSubset(this, inx, conjugacyClass, MathML.sans(MathML.sub('CC', inx)), 'conjugacy-class') );
 
       $('#partitions_placeholder').hide();
       $('#partitions').append(
@@ -569,7 +565,7 @@ SSD.Cosets = class Cosets extends SSD.AbstractPartition {
             const name = this.isLeft ?
                          MathML.sans(rep) + this.subgroup.name :
                          this.subgroup.name + MathML.sans(rep);
-            return new SSD.PartitionSubset(this, inx, coset, name, 'cosetClass');
+            return new SSD.PartitionSubset(this, inx, coset, name, 'coset-class');
          } );
 
       $('#partitions_placeholder').hide();
@@ -586,6 +582,7 @@ SSD.Cosets = class Cosets extends SSD.AbstractPartition {
 }
 // @flow
 /*::
+import GEUtils from '../js/GEUtils.js';
 import MathML from '../js/MathML.js';
 import Menu from '../js/Menu.js';
 import Template from '../js/Template.js';
@@ -599,20 +596,22 @@ export default
  */
 SSD.SubsetMenu = class {
 /*::
-   static lastEntry: {menuElement: ?HTMLElement, timeStamp: number};
+   static element_display_timeoutID: ?TimeoutID;
  */
    static init() {
-      SSD.SubsetMenu.lastEntry = {menuElement: undefined, timeStamp: 0};
-      const subsetPage = $('#subset_page')[0];
-      if (window.hasOwnProperty('ontouchstart')) {   // touch device?
+      const subsetPage = $('#subset-control')[0];
+      if (GEUtils.isTouchDevice()) {
          // register touchstart, touchmove, touchend events on subset page
+
          subsetPage.addEventListener('touchstart', SSD.SubsetMenu.touchHandler);
          subsetPage.addEventListener('touchmove', SSD.SubsetMenu.touchHandler);
          subsetPage.addEventListener('touchend', SSD.SubsetMenu.touchHandler);
+
+         subsetPage.addEventListener('click', Menu.actionClickHandler);
       } else {
          // register contextmenu, dblclick
-         subsetPage.addEventListener('contextmenu', SSD.SubsetMenu.mouseHandler);
-         subsetPage.addEventListener('dblclick', SSD.SubsetMenu.mouseHandler);
+         subsetPage.addEventListener('contextmenu', Menu.actionClickHandler);
+         subsetPage.addEventListener('dblclick', (event /*: MouseEvent */) => SSD.SubsetMenu.displayElements(event, event));
      }
    }
 
@@ -624,69 +623,27 @@ SSD.SubsetMenu = class {
     * Mouse double-click or touchscreen tap-hold displays elements in subset
     *   Following mouse click or touchscreen tap anywhere clears element display
     */
-   static mouseHandler(mouseEvent /*: MouseEvent */) {
-      switch (mouseEvent.type) {
-      case 'dblclick':
-         SSD.SubsetMenu.displayElements(mouseEvent, mouseEvent);
-         break;
-
-      case 'contextmenu':
-         SSD_Menu.postMenu(mouseEvent, mouseEvent);
-         break;
-      }
-   }
-
    static touchHandler(touchEvent /*: TouchEvent */) {
-      // just skip modified events, multi-touches
+      // skip modified events, multi-touches
       if (   touchEvent.altKey || touchEvent.ctrlKey || touchEvent.metaKey || touchEvent.shiftKey
           || touchEvent.touches.length > 1 || touchEvent.changedTouches.length > 1) {
          return;
       }
 
       switch (touchEvent.type) {
-
-         // reset lastEntry
-      case 'touchstart': {
-         const touch /*: Touch */ = (touchEvent.changedTouches[0] /*: any */);
-         const $target = $(document.elementFromPoint(touch.clientX, touch.clientY));
-         const $menuHead = $target.closest('p.subset_page_header, p.placeholder, li[id]');
-         SSD.SubsetMenu.lastEntry = {menuElement: $menuHead[0], timeStamp: touchEvent.timeStamp};
-         touchEvent.stopPropagation(); }
+      case 'touchstart':
+         SSD.SubsetMenu.element_display_timeoutID = setTimeout( () => {
+            SSD.SubsetMenu.displayElements(touchEvent, touchEvent.touches[0]);
+         }, 500);
          break;
 
-         // update lastEntry, if needed
-      case 'touchmove': {
-         const touch /*: Touch */ = (touchEvent.changedTouches[0] /*: any */);
-         const $target = $(document.elementFromPoint(touch.clientX, touch.clientY));
-         const $menuHead = $target.closest('p.subset_page_header, p.placeholder, li[id]');
-         if ($menuHead[0] != SSD.SubsetMenu.lastEntry.menuElement) {
-            SSD.SubsetMenu.lastEntry = {menuElement: $menuHead[0], timeStamp: touchEvent.timeStamp};
-         } }
-         break;
-
-         //   if there are menus, just use this tap to clear them
-         //   otherwise, if interval is short, post menu; else popup elements display
       case 'touchend':
-         if ($('#subset_page .menu:visible, #subset_page .elements').length != 0) {
-            $('#bodyDouble').click();
-         } else {
-            const touch /*: Touch */ = (touchEvent.changedTouches[0] /*: any */);
-            const $target = $(document.elementFromPoint(touch.clientX, touch.clientY));
-            const $menuHead = $target.closest('p.subset_page_header, p.placeholder, li[id]');
-            if ($menuHead[0] != SSD.SubsetMenu.lastEntry.menuElement) {  // did this event enter a new menuHead?
-               SSD.SubsetMenu.lastEntry = {menuElement: $menuHead[0], timeStamp: touchEvent.timeStamp};
-            }
-            if (touchEvent.timeStamp - SSD.SubsetMenu.lastEntry.timeStamp < 500) {  // short touch?
-               const menuObject = SSD_Menu.postMenu(touchEvent, touch);
-            } else {
-               SSD.SubsetMenu.displayElements(touchEvent, touch);
-            }
-         }
+         clearTimeout(SSD.SubsetMenu.element_display_timeoutID);
          break;
       }
    }
 
-   static displayElements(event /*: Event */, location /*: {clientX: number, clientY: number} */) {
+   static displayElements(event /*: Event */, location /*: eventLocation */) {
       event.preventDefault();
       $('#bodyDouble').click();
       const $curr = $(document.elementFromPoint(location.clientX, location.clientY)).closest('li');
@@ -695,12 +652,12 @@ SSD.SubsetMenu = class {
          const subset = SSD.displayList[parseInt(id)];
          const subsetName = subset.name;
          const subsetElements = subset.elements.toArray().map( (el) => group.representation[el] );
-         const $menu = $(eval(Template.HTML('subsetElements_template')));
+         const $menu = $(eval(Template.HTML('subset-elements-template')));
          $curr.addClass('highlighted').append($menu);
          event.stopPropagation();
 
          const bounds /*: Array<ClientRect> */ =
-               $menu.find('span.mjx-chtml').map( (_, span) => span.getBoundingClientRect() ).toArray();
+               $menu.find('span.mjx-chtml, h3').map( (_, span) => span.getBoundingClientRect() ).toArray();
          const extrema /*: {leftmost: number, rightmost: number} */ =
                bounds.reduce( (lr /*: {leftmost: number, rightmost: number} */, rect /*: ClientRect */) => {
                   return {leftmost: Math.min(lr.leftmost, rect.left), rightmost: Math.max(lr.rightmost, rect.right)}
@@ -710,116 +667,43 @@ SSD.SubsetMenu = class {
          $menu.css('visibility', 'visible');
       }
    }
-}
 
-class SSD_Menu {
-/*::
-   menuList: HTMLElement;
-   subMenu: ?SSD_Menu;
- */
-   constructor(menuList /*: HTMLElement */) {
-      this.menuList = menuList;
-      this.subMenu = null;
-      $(menuList).css('visibility', 'visible');
-      menuList.addEventListener('click', this.clickHandler);
-      menuList.addEventListener('touchstart', this.touchHandler);
-      menuList.addEventListener('touchend', this.touchHandler);
+   static showingOrderClasses() /*: boolean */ {
+      return $('#partitions li.orderClass').length != 0;
    }
 
-   // Captures touchstart, touchend events to keep them from propagating to the subset_page event handler
-   //   (let touchmove through to allow scrolling)
-   touchHandler(touchEvent /*: TouchEvent */) {
-      touchEvent.stopPropagation();
+   static showingConjugacyClasses() /*: boolean */ {
+      return $('#partitions li.conjugacyClass').length != 0;
    }
 
-   /* Handles click events on this.menuList, and stops their propagation to the subset_page event handler
-    *   -- if there's a subMenu being displayed, just close it
-    *   -- if the list item under this click has an action attribute, eval it
-    *   -- if the list item under this click has a ul, open it as a subMenu
-    */
-   clickHandler(mouseEvent /*: MouseEvent */) {
-      mouseEvent.stopPropagation();
-      mouseEvent.preventDefault();
-      if (this.subMenu) {        // is there's a submenu open, just close it
-         this.subMenu.close();
-         this.subMenu = null;
-      } else {
-         const $menuListItem = $(document.elementFromPoint(mouseEvent.clientX, mouseEvent.clientY)).closest('li');
-         if ($menuListItem.attr('action') == undefined) {
-            this.subMenu = new SSD_Menu($menuListItem.find('> ul')[0]);
-         } else {
-            eval($menuListItem.attr('action'));
-            SSD.clearMenus();
-         }
-      }
+   static showingLeftCosets(id /*: groupElement */) /*: boolean */ {
+      return $('#partitions li.leftCoset' + id).length != 0;
    }
 
-   // Closes this menu's subMenu, if it exists, then removes this menu's event listeners and hides itself
-   close() {
-      if (this.subMenu) {
-         this.subMenu.close();
-      }
-      this.menuList.removeEventListener('click', this.clickHandler);
-      this.menuList.removeEventListener('touchend', this.touchHandler);
-      this.menuList.removeEventListener('touchstart', this.touchHandler);
-      $(this.menuList).css('visibility', 'hidden');
+   static showingRightCosets(id /*: groupElement */) /*: boolean */ {
+      return $('#partitions li.rightCoset' + id).length != 0;
    }
 
-   // Create entire menu tree for subset/header under this event, and display its first level
-   static postMenu(event /*: Event */, location /*: {clientX: number, clientY: number} */) {
-      event.preventDefault();
-
-      const $curr = $(event.target).closest('p.subset_page_header, p.placeholder, li[id]');
-
-      // unrecognized event
-      if ($curr.length == 0) return;
-
-      $('#bodyDouble').click();
-
-      const isHeaderMenu = $curr[0].tagName == "P";
-      const $menu = isHeaderMenu ?
-                    $(eval(Template.HTML('headerMenu_template'))) :
-                    SSD.displayList[parseInt($curr[0].id)].menu;
-      new SSD_Menu($menu[0]);
-      $curr.addClass('highlighted').append($menu);
-      $menu.css('visibility', 'hidden');
-      event.stopPropagation();
-
-      if (!isHeaderMenu) {
-         this.makeLongLists($curr[0].id, $menu);
-      }
-      Menu.setMenuLocations(location, $menu);
-      $menu.css('visibility', 'visible');
+   static makeLongList(id /*: groupElement */, template_name /*: string */) /*: html */ {
+      const template = Template.HTML(template_name);
+      const result = SSD.displayList.reduce(
+         (list, item, other_id) => ((other_id == id) ? null : list.push(eval(template)), list), [] )
+            .join('');
+      return result;
    }
 
-   // Create the intersection, union, and elementwise product subMenus
-   static makeLongLists(_id /*: string */, $menu /*: JQuery */) {
-      const id = parseInt(_id);
-      const classes = ['.intersection', '.union', '.elementwise-product'];
-      const operations = ['intersection', 'union', 'elementwiseProduct'];
-      const printOps = ['intersection', 'union', 'elementwise product'];
-      const node = SSD.displayList[id].name;
-      for (let inx = 0; inx < classes.length; inx++) {
-         const operation = operations[inx];
-         const printOp = printOps[inx];
-         let frag = '';
-         for (let otherId = 0; otherId < group.subgroups.length; otherId++) {
-            if (id != otherId) {
-               frag +=
-                  `<li action="SSD.displayList[${id}].${operation}(SSD.displayList[${otherId}])">` +
-                  `${MathML.sansText('the')} ${MathML.sansText(printOp)} ${MathML.sansText('of')} ${node} ${MathML.sansText('with')} ${SSD.displayList[otherId].name}</li>`;
-            }
-         }
-         for (let otherId = group.subgroups.length; otherId < SSD.displayList.length; otherId++) {
-            if (id != otherId && SSD.displayList[otherId] !== undefined) {
-               const otherName = $(`#${otherId}`).children()[1].outerHTML;
-               frag +=
-                  `<li action="SSD.displayList[${id}].${operation}(SSD.displayList[${otherId}])">` +
-                  `${MathML.sansText('the')} ${MathML.sansText(printOp)} ${MathML.sansText('of')} ${node} ${MathML.sansText('with')} ${SSD.displayList[otherId].name}</li>`;
-            }
-         }
-         $menu.find(classes[inx]).html(frag);
-      }
+   static showHeaderMenu(event /*: MouseEvent */) {
+      GEUtils.cleanWindow();
+      const $menus = $(eval(Template.HTML('header-menu-template')))
+            .appendTo($(event.target).closest('[action]')[0]);
+      Menu.addMenus($menus, event);
+   }
+
+   static showMenu(event /*: MouseEvent */, id /*: number */) {
+      GEUtils.cleanWindow();
+      const $menus = SSD.displayList[id].menu
+            .appendTo($(event.target).closest('li'));
+      Menu.addMenus($menus, event);
    }
 }
 // @flow
@@ -829,6 +713,7 @@ import ArrowMult from './ArrowMult.js';
 import Chunking from './Chunking.js';
 import DiagramChoice from './DiagramChoice.js';
 import Generator from './Generator.js';
+import Menu from '../js/Menu.js';
 
 export default
  */
@@ -841,14 +726,6 @@ class DC {
    static DiagramChoice: Class<DiagramChoice>;
    static Generator: Class<Generator>;
  */
-   static clearMenus() {
-      $('#diagram-page .highlighted').removeClass('highlighted');
-      $('#diagram-page .menu:visible').remove();
-      $('#remove-arrow-button').prop('disabled', true);
-      $('#diagram-choices').hide();
-      $('#chunk-choices').hide();
-   }
-
    /* Load, initialize diagram control */
    static load($diagramWrapper /*: JQuery */) /*: Promise<void> */ {
       return new Promise( (resolve, reject) => {
@@ -869,16 +746,16 @@ class DC {
       DC.DiagramChoice.setupDiagramSelect();
       DC.Generator.init();
 
-      $('#diagram-select')[0].addEventListener('click', DC.DiagramChoice.clickHandler);
+      $('#diagram-select')[0].addEventListener('click', Menu.actionClickHandler);
 
-      $('#generation-control')[0].addEventListener('click', DC.Generator.clickHandler);
+      $('#generation-control')[0].addEventListener('click', Menu.actionClickHandler);
       $('#generation-table')[0].addEventListener('dragstart', DC.Generator.dragStart);
       $('#generation-table')[0].addEventListener('drop', DC.Generator.drop);
       $('#generation-table')[0].addEventListener('dragover', DC.Generator.dragOver);
 
-      $('#arrow-control')[0].addEventListener('click', DC.Arrow.clickHandler);
+      $('#arrow-control')[0].addEventListener('click', Menu.actionClickHandler);
 
-      $('#chunk-select')[0].addEventListener('click', DC.Chunking.clickHandler);
+      $('#chunk-select')[0].addEventListener('click', Menu.actionClickHandler);
    }
 
    static update() {
@@ -957,25 +834,10 @@ DC.Generator = class {
       ];
    }
 
-   static clickHandler(clickEvent /*: MouseEvent */) {
-      clickEvent.preventDefault();
-
-      // check if disabled
-      if (DC.Generator.isDisabled()) {
-         return;
-      }
-      eval($($(clickEvent.target).closest('[action]')).attr('action'));
-      clickEvent.stopPropagation();
-   }
-
    /*
     * Draw Generator table
     */
    static draw() {
-      if (DC.Generator.isDisabled()) {
-         return;
-      }
-
       // clear table
       const $generation_table = $('#generation-table');
       $generation_table.children().remove();
@@ -987,41 +849,40 @@ DC.Generator = class {
             '<tr style="height: 3em"><td></td><td style="width: 25%"></td><td style="width: 40%"></td><td></td></tr>');
       } else {
          Cayley_diagram.strategies.forEach( (strategy, inx) =>
-            $generation_table.append($(eval(Template.HTML('generation-template')))) );
+            $generation_table.append($(eval(Template.HTML('generation-table-row-template')))) );
       }
    }
 
    /*
     * Show option menus for the columns of the Generator table
     */
-   static showGeneratorMenu(eventLocation /*: eventLocation */, strategy_index /*: number */) {
-      DC.clearMenus();
-      const $generator_menu = DC.Generator.getGenericMenu();
+   static showGeneratorMenu(click_location /*: eventLocation */, strategy_index /*: number */) {
+      $('#bodyDouble').click();
 
       // show only elements not generated by previously applied strategies
-      const eligible = ( (strategy_index == 0) ?
-                         new BitSet(group.order, [0]) :
-                         Cayley_diagram.strategies[strategy_index-1].bitset.clone() )
-         .complement().toArray();
+      const eligibleGenerators = ( (strategy_index == 0) ?
+                                   new BitSet(group.order, [0]) :
+                                   Cayley_diagram.strategies[strategy_index-1].bitset.clone() )
+            .complement().toArray();
 
-      $generator_menu.prepend(
-         ...eligible.map( (generator) =>
-            $(eval(Template.HTML('generator-menu-item-template')))
-               .html(MathML.sans(group.representation[generator])) )
-      );
 
-      $('#generation-table').append($generator_menu);
-      DC.Generator._typesetMenu(eventLocation, $generator_menu);
+      // returns an HTML string with a list element for each arrow that can be added to the arrow-list
+      const makeEligibleGeneratorList = () /*: html */ => {
+         const template_html = Template.HTML('generation-generator-menu-item-template')
+         const result = eligibleGenerators
+               .reduce( (generators, generator) => (generators.push(eval(template_html)), generators), [] )
+               .join('');
+         return result;
+      }
+
+      const $menus = $(eval(Template.HTML('generation-generator-menu-template')))
+            .appendTo('#generation-table');
+
+      Menu.addMenus($menus, click_location);
    }
 
-   static _typesetMenu(eventLocation /*: eventLocation */, $menu /*: JQuery */) {
-      $menu.css('visibility', 'hidden');
-      Menu.setMenuLocations(eventLocation, $menu);
-      $menu.css('visibility', 'visible');
-   }
-
-   static showAxisMenu(eventLocation /*: eventLocation */, strategy_index /*: number */) {
-      DC.clearMenus();
+   static showAxisMenu(click_location /*: eventLocation */, strategy_index /*: number */) {
+      $('#bodyDouble').click();
 
       // previously generated subgroup must have > 2 cosets in this subgroup
       //   in order to show it in a curved (circular or rotated) layout
@@ -1030,42 +891,46 @@ DC.Generator = class {
             /  ((strategy_index == 0) ? 1 : Cayley_diagram.strategies[strategy_index - 1].bitset.popcount()))
       > 2;
 
-      const $layout_menu = DC.Generator.getGenericMenu()
-                             .prepend($(eval(Template.HTML('axis-menu-template'))));
+      const $menus = $(eval(Template.HTML('generation-axis-menu-template')))
+            .appendTo('#generation-table');
 
-      $('#generation-table').append($layout_menu);
-      DC.Generator._typesetMenu(eventLocation, $layout_menu);
+      Menu.addMenus($menus, click_location);
    }
 
-   static showOrderMenu(eventLocation /*: eventLocation */, strategy_index /*: number */) {
-      DC.clearMenus();
-      const $order_menu = DC.Generator.getGenericMenu();
+   static showOrderMenu(click_location /*: eventLocation */, strategy_index /*: number */) {
+      $('#bodyDouble').click();
 
+      const makeStrategyList = () => {
+         const template = Template.HTML('generation-order-menu-item-template');
+         const result = Cayley_diagram.strategies
+               .reduce( (orders, _strategy, order) => (orders.push(eval(template)), orders), [])
+               .join('');
+      return result;
+      };
+      
       const num_strategies = Cayley_diagram.strategies.length;
-      $order_menu.prepend(
-         ...Array.from({length: Cayley_diagram.strategies.length},
-                       (_,order) => $(eval(Template.HTML('order-menu-item-template')))));
+      const $menus = $(eval(Template.HTML('generation-order-menu-template')))
+            .appendTo('#generation-table');
 
-      $('#generation-table').append($order_menu);
-      DC.Generator._typesetMenu(eventLocation, $order_menu);
+      Menu.addMenus($menus, click_location);
    }
 
-   static getGenericMenu() {
-      const $menu = $(eval(Template.HTML('generation-menu-template')));
-
-      const $organize_by_menu = $menu.find('#generation-organize-menu');
-
-      // for each non-trivial subgroup
-      group.subgroups
-           .forEach( (subgroup, inx) => {
-              if (subgroup.order != 1 && subgroup.order != group.order) {
-                 $organize_by_menu.append($(eval(Template.HTML('organize-menu-item-template'))));
+   static makeOrganizeByMenu() {
+      const template = Template.HTML('generation-organize-by-menu-item-template');
+      const result = group.subgroups
+           .reduce( (list, subgroup, inx) => {
+              if (subgroup.order != 1 && subgroup.order != group.order) {  // only append non-trivial subgroups
+                 list.push(eval(template));
               }
-           } )
-
-      return $menu;
+              return list;
+           }, [] )
+         .join('');
+      return result;
    }
 
+   /*
+    * Perform actions directed by option menus
+    */
    static organizeBy(subgroup_index /*: number */) {
       // get subgroup generators
       const subgroup_generators = group.subgroups[subgroup_index].generators.toArray();
@@ -1077,9 +942,6 @@ DC.Generator = class {
       }
    }
 
-   /*
-    * Perform actions directed by option menus
-    */
    static updateGenerator(strategy_index /*: number */, generator /*: number */) {
       const strategies = Cayley_diagram.getStrategies();
       strategies[strategy_index][0] = generator;
@@ -1182,24 +1044,6 @@ DC.Generator = class {
    static dragOver(dragoverEvent /*: DragEvent */) {
          dragoverEvent.preventDefault();
    }
-
-   /*
-    * Enable/Disable user input to Generator
-    */
-   static enable() {
-      $('#generation-fog').hide();
-   }
-
-   static disable() {
-      const $generation_fog = $('#generation-fog');
-      $generation_fog.css('height', '100%');
-      $generation_fog.css('width', '100%');
-      $('#generation-fog').show();
-   }
-
-   static isDisabled() {
-      return $('#generation-fog').css('display') != 'none';  // fog is hidden
-   }
 }
 
 // @flow
@@ -1233,15 +1077,6 @@ DC.DiagramChoice = class {
          .show();
    }
 
-   /* Display control routines */
-   static clickHandler(clickEvent /*: MouseEvent */) {
-      const $curr = $(clickEvent.target).closest('[action]');
-      if ($curr != undefined) {
-         eval($curr.attr('action'));
-         clickEvent.stopPropagation();
-      }
-   }
-
    static toggleChoices() {
       const choicesDisplay = $('#diagram-choices').css('display');
       $('#bodyDouble').click();
@@ -1253,7 +1088,6 @@ DC.DiagramChoice = class {
    static selectDiagram(diagram /*: ?string */, andDisplay /*:: ?: boolean */ = true) {
       $('#bodyDouble').click();
       Diagram_name = (diagram == undefined) ? undefined : diagram;
-      DC.Generator.enable();
       DC.Chunking.enable();
       DC.DiagramChoice._showChoice();
 
@@ -1271,15 +1105,16 @@ DC.DiagramChoice = class {
    Removing an arrow is done by left-clicking one of the lines in the arrow-list display to highlight it,
    and then left-clicking the 'Remove' button to remove it.
 
-   All of these events are fielded by a single event handler, Arrow.clickHandler(), which
+   All of these events are fielded and dispatched through the Menu.actionClickHandler()
  */
 /*::
-import MathML from '../js/MathML.js';
-import Template from '../js/Template.js';
-import Menu from '../js/Menu.js';
-import XMLGroup from '../js/XMLGroup.js';
 import CayleyDiagram from '../js/CayleyDiagram.js';
 import DisplayDiagram from '../js/DisplayDiagram.js';
+import GEUtils from '../js/GEUtils.js';
+import MathML from '../js/MathML.js';
+import Menu from '../js/Menu.js';
+import Template from '../js/Template.js';
+import XMLGroup from '../js/XMLGroup.js';
 
 import DC from './diagram.js';
 
@@ -1296,22 +1131,12 @@ DC.Arrow = class {
    // utility function add_arrow_list_item(element) to add arrow to list (called from initialization, select from menu)
    // utility function clearArrowList() to remove all arrows from list (called during reset)
 
-   // arrow-control click handler
-   //   find closest element with action and execute action
-   static clickHandler(clickEvent /*: MouseEvent */) {
-      const action = $(clickEvent.target).closest('[action]').attr('action');
-      if (action != undefined) {
-         $('#bodyDouble').click();
-         clickEvent.stopPropagation();
-         eval(action);
-      }
-   }
-
    // Row selected in arrow-list:
    //   clear all highlights
    //   highlight row (find arrow-list item w/ arrow = ${element})
    //   enable remove button
    static selectArrow(element /*: number */) {
+      GEUtils.cleanWindow();
       $('#arrow-list li').removeClass('highlighted');
       $(`#arrow-list li[arrow=${element}]`).addClass('highlighted');
       $('#remove-arrow-button').attr('action', `DC.Arrow.removeArrow(${element})`);
@@ -1328,18 +1153,25 @@ DC.Arrow = class {
    //   Populate menu (for each element not in arrow-list)
    //   Position, expose menu
    static showArrowMenu(event /*: JQueryMouseEventObject */) {
-      DC.clearMenus();
-      const $menu = $(eval(Template.HTML('arrow-menu-template')));
-      group.elements.forEach( (element) => {
-         if (element != 0 && $(`#arrow-list li[arrow=${element}]`).length == 0) {
-            $menu.append(
-               $(eval(Template.HTML('arrow-menu-item-template')))
-                  .html(MathML.sans(group.representation[element])));
-         }
-      } );
-      // $('#add-arrow-button').append($menu);
-      $(event.target).closest('button').append($menu);
-      Menu.setMenuLocations(event, $menu);
+      // returns an HTML string with a list element for each arrow that can be added to the arrow-list
+      const makeArrowList = () /*: html */ => {
+         const template = Template.HTML('arrow-menu-item-template');
+         const result = group.elements
+               .reduce( (list, element) => {
+                  // not the identity and not already displayed
+                  if (element != 0 && $(`#arrow-list li[arrow=${element}]`).length == 0) {
+                     list.push(eval(template));
+                  }
+                  return list;
+               }, [] )
+               .join('');
+         return result;
+      }
+
+      GEUtils.cleanWindow();
+      const $menus = $(eval(Template.HTML('arrow-menu-template')))
+            .appendTo('#add-arrow-button');
+      Menu.addMenus($menus, event);
    }
 
    // Add button menu element clicked:
@@ -1347,7 +1179,7 @@ DC.Arrow = class {
    //   Add lines to Cayley_diagram
    //   Update lines, arrowheads in graphic, arrow-list
    static addArrow(element /*: number */) {
-      DC.clearMenus();
+      GEUtils.cleanWindow();
       Cayley_diagram.addLines(element);
       DC.Arrow.updateArrows();
    }
@@ -1464,16 +1296,6 @@ DC.Chunking = class {
       DC.Chunking.selectChunk(Cayley_diagram.chunk);
    }
 
-   static clickHandler(clickEvent /*: MouseEvent */) {
-      if (!DC.Chunking.isDisabled()) {
-         const $curr = $(clickEvent.target).closest('[action]');
-         if ($curr != undefined) {
-            eval($curr.attr('action'));
-            clickEvent.stopPropagation();
-         }
-      }
-   }
-
    static toggleChoices() {
       const choicesDisplay = $('#chunk-choices').css('display');
       $('#bodyDouble').click();
@@ -1483,6 +1305,7 @@ DC.Chunking = class {
    }
 
    static selectChunk(subgroup_index /*: number */) {
+      if (DC.Chunking.isDisabled()) return;
       $('#bodyDouble').click();
       const strategy_index =
             Cayley_diagram.strategies.findIndex( (strategy) => strategy.bitset.equals(group.subgroups[subgroup_index].members) );
