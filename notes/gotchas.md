@@ -1,61 +1,77 @@
 <em>A general collections of gotchas encountered in developing GE3, together with references to parts they affected. It may explain why some things were done in an unusual way.</em>
 
+<hr>
 
-If you have an entity like "&amp;Zopf;" (&Zopf;, double-strike Z) in an XML file without defining it (as in a DTD), the browser's built-in XML parser will fail to parse it.  All the XML group definition files have such entities. Get around this by replacing the string "$amp;Zopf;" with "&amp;#8484;", its unicode character code. See [XMLGroup](../js/XMLGroup.js), around line 29.
+If you have an entity like "&amp;Zopf;" (&Zopf;, double-strike Z) in an XML file without defining it (as in a DTD), the browser's built-in XML parser will fail to parse it.  All the XML group definition files have such entities. Get around this by replacing the string "&amp;Zopf;" with "&amp;#8484;", its unicode character code. See [XMLGroup](../js/XMLGroup.js), around line 29.
 
+<hr>
 
 There is a limit to the number of html canvas elements a browser can handle: having one canvas for each thumbnail in the GroupExplorer opening page easily exceeds that number. To work around this limitation only a few canvases are used. The thumbnails are drawn to the canvas and the data extracted in png format, which is then displayed in an &lt;img&gt; element. See the [GroupExplorer](../GroupExplorer.html) calls to `getImage` in the `displayGroup` function.
 
+<hr>
 
-There is a limit to the size of a canvas, depending on the browser. It's 2^14-1 pixels square on Chrome/Ubuntu, others browser/systems are comparable. This caused initial implementations of the [Multtable](../Multtable.html) and [CycleDiagram](../CycleDiagram.html) visualizers to be unable to display larger groups, like the 168.group.  This in turn informed the design of the [DisplayCycleGraph](../js/DisplayCycleGraph.js) and [DisplayMulttable](../js/DisplayMulttable.js) classes and their interfaces.
+There is a limit to the size of a canvas, depending on the browser. It's 2<sup>14</sup>-1 pixels square on Chrome/Ubuntu, others browser/systems are comparable. This caused initial implementations of the [Multtable](../Multtable.html) and [CycleDiagram](../CycleDiagram.html) visualizers to be unable to display larger groups, like the 168.group.  This in turn informed the design of the [DisplayCycleGraph](../js/DisplayCycleGraph.js) and [DisplayMulttable](../js/DisplayMulttable.js) classes and their interfaces.
 
+<hr>
 
-You can have fractional-sized fonts (who knew?). For example `context.font = '0.7pt Arial';` is OK. There are limitations, though:
+You can draw fractional-sized fonts to a canvas context. For example `context.font = '0.7pt Arial';` is OK. This is useful if the characters will subsequently be scaled and you're trying to make them about the same size as other displayed objects. There are limitations, though:
 * They can't be smaller than 0.008pt for Arial in Chrome/Ubuntu, and similar for other browsers/systems and fonts.
-* You can't use something like `` context.font = `${3/7}pt Arial`; ``, you've got to convert it to a fixed representation with the expression `` context.font = `${(3/7).toFixed(6)}pt Arial`; `` (6 isn't magic, other numbers work too).
+* You can't use something like `` context.font = `${3/7}pt Arial`; ``, there seem to be too many characters in the representation of 3/7. 
+You've got to convert it to a fixed representation with the expression `` context.font = `${(3/7).toFixed(6)}pt Arial`; `` (6 isn't magic, other numbers work too).
 * You've got to use pt, not px in the font spec for fractional fonts, thus: `context.font = '0.7pt Arial'`. While the way they fail varies, no browser/system combination seems to work completely without error if you don't use pt.
 See [DisplayCycleGraph](../js/DisplayCycleGraph.js) at the end of the `showLargeGraphic` routine for an example.
 
+<hr>
 
-Drag-and-drop was surprisingly consistent. A couple of small-ish exceptions:
+Drag-and-drop was surprisingly consistent, even on touch platforms. A couple of small-ish exceptions:
 * Across platforms Firefox has an odd pre-condition: you have to set the data in the `event.dataTransfer` object, thus: `event.originalEvent.dataTransfer.setData('text/plain', 'anything');`.  It doesn't seem to be used for anything, you just have to do it.
 * The image drag on Chrome/Ubuntu doesn't work, a bug in that browser/system.
 You can see the effect of these in [CycleDiagram](../CycleDiagram.html) in the `dragstart` routine.
 
+<hr>
     
-THREE.js raycasting works with lines, but it doesn't work with meshLines, and you need meshlines to display anything thicker than about a pixel in any browser except Safari. Workaround in [DisplayDiagram](../js/DisplayDiagram.js) is to set `Diagram3D.lineWidth` to 1, run `DisplayDiagram.updateLines(..)`, and then restore previous lineWidth. Since the scene is never rendered with the skinny lines, the user never sees it; and it only happens on the grab.
+THREE.js raycasting works with lines, but it doesn't work with meshLines, and you need meshlines to display anything thicker than a pixel or two (except for Safari). Workaround in [DisplayDiagram](../js/DisplayDiagram.js) is to set `Diagram3D.lineWidth` to 1, run `DisplayDiagram.updateLines(..)`, and then restore previous lineWidth. Since the scene is never rendered with the skinny lines, so the user never sees it; and it only affects the ability to grab a line.
 
+<hr>
 
 MathJax can be configured to break lines automatically (cf. http://docs.mathjax.org/en/latest/options/output-processors/CommonHTML.html ), but it is not fast enough to keep up with something like resizing the subset display panel. In addition it executes asynchronously, so if you need to know the size of the text in order to proceed (as when formatted text is included in a menu which must be placed on the page) the programming is a bit convoluted. The browser is much more performant when re-flowing text, so you can compose lines with MathML in them out of smaller pieces of relatively indivisible <math>...</math> chunks and let MathJax do the formatting and let the browser do the text placement. Setting MathML next to browser fonts is generally not pretty, so it's usually best to make the whole line MathML chunks, not a mixture of the two.
 
+<hr>
 
 Rather than having MathJax re-generate a phrase every time you use it, you can copy the HTML generated by MathJax from one place to another. You have to be sure the &lt;style&gt; defining `mjx-chtml` is available, either from a previous MathJax formatting run (which creates it) or by copying it from a previous session. (There's no documentation that indicates this definition is the same across browsers/systems/devices, so saving it to a local file and distributing it with the release might not work. The implementation here is to copy it to local storage from the DOM on the first visit to the site, and then restore it in later runs. The first run doesn't need it because there are no previous MathJax results that need to be styled.) 
 In the interest of saving space you really only need to copy part of the generated HTML, the top &lt;span&gt; with class `mjx-chtml` and its sub-span with class `mjx-math`. A problem came up doing this, though: mixing the partial HTML copy with new MathML for MathJax to process confuses MathJax. The workaround in GroupExplorer is to stage the new MathML in a hidden scratch area and process it there, then copy it to the normal visible area on completion.
 
+<hr>
+
 Firefox (65.0.1) seems to ignore the size of a parent flex container if it's expressed as %. Since the container is going to be flexed anyhow, the workaround here is just to give it some value to work from.
 
-Mouse-driven and touch-driven displays have some conceptual differences between the way primitive pointer actions (mouseup/mousedown, touchstart/touchend) synthesize events like click and dblclick. 
-Click:
-  On a mouse-only machine a clicking a mouse button causes the event sequence "mousedown mouseup click"
-    even if the mouse moves while depressed
-    even if it's depressed for a long time
-    even if you call event.preventDefault() on all the mouse* events
-    (unless the mousedown occurs over a draggable element)
-  On the iPad a tapping causes the event sequence "touchstart touchend click"
-    only if they are in rapid succession
-    only if they are close to each other
-    only if event.preventDefault() is not called on either event
-Double click:
-  On a mouse-only machine a double-click causes the event sequence "mousedown mouseup click mousedown mouseup click dblclick"
-    unless the mouse moves
-    unless the clicks are sustained
-    unless the interval between the clicks is too long
-    even if you call event.preventDefault() on all the events
-  On the iPad a double-tap never produces a dblclick event -- you have to implement that yourself
-    it causes the event sequence "touchstart touchend touchstart touchend" if the taps are in rapid succession
-    otherwise it just looks like two separate taps (see above)
+<hr>
 
-On an iPad the following bug
+Mouse-driven and touch-driven displays have some conceptual differences between the way primitive pointer actions (mouseup/mousedown, touchstart/touchend) synthesize events like click and dblclick:
+* Click:
+    * On a mouse-only machine clicking a mouse button causes the event sequence "mousedown-mouseup-click"
+        * even if the mouse moves while depressed
+        * even if it's depressed for a long time
+        * even if you call `event.preventDefault(`) on all the mouse* events
+        * (unless the mousedown occurs over a draggable element)
+    * On the iPad a tapping causes the event sequence "touchstart-touchend-click"
+        * only if they are in rapid succession
+        * only if they are close to each other
+        * only if event.preventDefault() is not called on either event
+* Double click:
+    * On a mouse-only machine a double-click causes the event sequence "mousedown-mouseup-click-mousedown-mouseup-click-dblclick"
+        * unless the mouse moves
+        * unless the clicks are sustained
+        * unless the interval between the clicks is too long
+        * even if you call event.preventDefault() on all the events
+    * On the iPad a double-tap never produces a dblclick event -- you have to implement that in javascript
+        * it causes the event sequence "touchstart-touchend-touchstart-touchend" if the taps are in rapid succession
+        * otherwise it just looks like two separate taps (see above)
+
+<hr>
+
+No IOS browsers (Safari, Chrome, Firefox) allow you to simply attach an event handler to the `body` of a document:
+```html
    <head>
       <script>
        function register() {
@@ -68,9 +84,60 @@ On an iPad the following bug
    <body id="body" onload="register()">
       <div id="inner" style="height: 100%"></div>
    </body>
-can be worked around by putting a wrapper immediately inside the body element:
+```
+This can be worked around by putting a wrapper immediately inside the body element, a minor pita:
+```html
    <body onload="register()">
-      <div id="body">
+      <div id="bodyDouble">
         <div id="inner" style="height: 100%"></div>
       </div>
    </body>
+```
+<hr>
+
+The standard `resize` event is only triggered if the window resizes, not if an element resizes. There is thus only one global resize handler, the window's. By the standard, resize events don't bubble, and they can't be cancelled. Resize handlers aren't invoked with an event argument. There are various ways of registering a resize handler:
+* `window.onresize = handler`
+* `window.addEventListener('resize',handler)`
+* `$(window).on('resize',handler)`
+
+and there are a couple of ways of triggering it:
+* `$(window).resize()`
+* actually resizing the window.
+
+But if you create a handler with `window.addEventListener('resize', handler)` and plan to trigger it with `$(window).resize()`, you'll be disappointed.
+
+<hr>
+
+Safari does not display overflowing cascaded menus the way other browsers on other platforms do. In an example that affected GE3, cascading menus used to be organized in the DOM as
+```html
+   <ul id="menu" class="menu-class">
+      <li>
+         <ul id="sub-menu" class="menu-class">
+            <li>..</li>
+         </ul>
+      </li>
+   </ul>,
+```
+with static css display parameters like `overflow-y: auto` and `position: relative` set. The location was determined dynamically with css `top` and `left` variables, which depended on the desired position of the top menu and its proximity to the edges of the window. In the case that the outer menu in fact overflowed, however, Safari wouldn't display the inner menu at all! No error, the menu simply couldn't be seen. Its elements could be inspected in the debugger; its `visibility` was `visible`; its `display` was `block`; but you couldn't see it. You could click on it and events would be dispatched; if you moused over its elements in the debugger the expected areas on the screen would be highlighted blue; but you couldn't see it. This behavior is exhibited on both MacOS and IOS, and, since the IOS versions of Chrome and Firefox seem to be wrappers around Safari, all the major browser on IOS behave similarly.
+
+As a result the iPad was unable to completely display some of the larger groups in the GE3 library. You can see this behavior in GE3 versions before commit fac801c8..., for example, by
+  * Bring up http://.../group-explorer/CayleyDiagram.html?groupURL=groups/A_5.group .
+  * Click the `Diagram` button on the right and go to the Diagram control panel.
+  * Look down to the `Generate diagram this way` table, and click and element in the Generator column.
+  * Scroll down to the 'Organize By' menu entry (this first menu should be long enough to require scrolling) and click on it.
+
+The menu of subgroups that should be exposed by `Organize By` doesn't appear. (To compare this with the desired result, follow the above steps with a smaller group having shorter menus by substituting S_3 for A_5 in the URL.) Since A<sub>5</sub> is one the more interesting groups in the library (IMHO) and IOS/iPad will arguably be one of the most popular platforms, it's a hard issue to ignore.
+
+As nearly as I can tell the problem stems from the browser being told to deal with overflow automatically, while at the same time being told the position of part of that content. It is not a function of using js or hiding/exposing menus with css: the same thing can happen in a static web page. The best fix I could develop, implemented in commit fac801c8..., was to re-define cascaded menus as separate lists and link the lists together through an attribute of one of the list elements (rather than using the DOM to express the menu-submenu relationship):
+```html
+   <ul id="menu" class="menu-class">
+      <li link="sub-menu"></li>
+   </ul>,
+   <ul id="sub-menu" class="menu-class">
+      <li>..</li>
+   </ul>.
+```
+This seems a bit more fragile to me, and it requires a bit more js to manage, but it turns out to be easier to re-use the js code and menu structure across the application, since menus and sub-menus all look pretty much the same now.
+
+And, of course, it keeps Safari happy.
+<hr>
