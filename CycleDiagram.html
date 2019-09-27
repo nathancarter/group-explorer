@@ -26,7 +26,7 @@
           background-color: #C8C8F0;
        }
 
-       #nodeLabel {
+       #node-label {
           background-color: #FFFFD6;
           border: 1px solid #000000;
           box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);	/* gray mist */
@@ -65,39 +65,10 @@
          <!-- This is filled in by subsetDisplay/subsets.html -->
       </div>
 
-      <!-- Templates for highlighting control menus in subsetDisplay -->
-      <template class="subgroup-extension subset-extension partition-extension">
-         <li>${MathML.sansText('Highlight item by')} <span class="menu-arrow"></span>
-            <ul>
-               <li action="highlightByBackground([${this.elementString}])">
-                  <img src="./images/hightype-sphere-node.jpg"> ${MathML.sansText('Background')}
-               </li>
-               <li action="highlightByBorder([${this.elementString}])">
-                  <img src="./images/hightype-sphere-node.jpg"> ${MathML.sansText('Border')}
-               </li>
-               <li action="highlightByTop([${this.elementString}])">
-                  <img src="./images/hightype-sphere-node.jpg"> ${MathML.sansText('Top')}
-               </li>
-            </ul>
-         </li>
-      </template>
-      <template class="partition-extension">
-         <li>${MathML.sansText('Highlight partition by')} <span class="menu-arrow"></span>
-            <ul>
-               <li action="highlightByBackground(${this.parent.allElementString})">
-                  <img src="./images/hightype-sphere-node.jpg"> ${MathML.sansText('Background')}
-               </li>
-               <li action="highlightByBorder(${this.parent.allElementString})">
-                  <img src="./images/hightype-sphere-node.jpg"> ${MathML.sansText('Border')}
-               </li>
-               <li action="highlightByTop(${this.parent.allElementString})">
-                  <img src="./images/hightype-sphere-node.jpg"> ${MathML.sansText('Top')}
-               </li>
-            </ul>
-         </li>
-      </template>
-      <template class="subgroup-extension subset-extension partition-extension">
-         <li action="clearHighlights()">${MathML.sansText('Clear all highlighting')}</li>
+      <template id="node-label-template">
+         <div id="node-label" class="remove-on-clean">
+            ${MathML.sans(group.representation[element])}
+         </div>
       </template>
    </body>
 </html>

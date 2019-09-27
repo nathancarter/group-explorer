@@ -53,16 +53,30 @@ class GEUtils {
       return arr[arr.length - 1];
    }
 
-   // Note that all values, including hue, are given as a fractional value 0 <= val < 1.0
+   // All arguments, including hue, are fractional values 0 <= val <= 1.0
    static fromRainbow(hue /*: float */, saturation /*:: ?: float */ = 1.0, lightness /*:: ?: float */ = .8) /*: color */ {
       return `hsl(${Math.round(360*hue)}, ${Math.round(100*saturation)}%, ${Math.round(100*lightness)}%)`
    }
 
-   static isMouseDevice() /*: boolean */ {
-      return window.ontouchstart === undefined;
+   static isTouchDevice() /*: boolean */ {
+      return 'ontouchstart' in window;
    }
 
-   static isTouchDevice() /*: boolean */ {
-      return !GEUtils.isMouseDevice();
+   /*
+    * Generally applicable routine that clears window of existing tooltips, menus, highlighting, etc. It is
+    *    called from a high level (e.g., #bodyDouble) default click handler, or by a menu/tooltip routine just
+    *    before it displays a new menu/tooltip or after it has finished performing a selected function.
+    *
+    * Actions taken are determined from the following classes applied to DOM elements:
+    *    highlighted -- remove highlighting from list elements
+    *    hide-on-clean -- hide statically generated lists, like faux-select options
+    *    remove-on-clean -- remove dynamically-generated temporary artifacts, like menus and tooltips
+    *    disable-on-clean -- disable buttons
+    */
+   static cleanWindow() {
+      $('.highlighted').each( (_inx, el) => $(el).removeClass('highlighted') );
+      $('.hide-on-clean').hide();
+      $('.remove-on-clean').remove();
+      $('.disable-on-clean').each( (_inx, el) => $(el).prop('disabled', true) );
    }
 }

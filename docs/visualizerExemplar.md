@@ -182,7 +182,7 @@ Note the use of [faux-select](visualizerFramework_css.md#faux-select) and associ
       <div id="view-control" class="fill-vert">
          <p>Organize by subgroup:</p>
          <div id="organization-select" class="faux-select" onclick="$('#organization-choices').toggle()">
-            <ul id="organization-choices" class="faux-select-options hidden"></ul>
+            <ul id="organization-choices" class="faux-select-options hidden hide-on-clean"></ul>
             <span id="organization-choice" class="faux-selection">none</span>
             <div class="faux-select-arrow" ></div>
          </div>

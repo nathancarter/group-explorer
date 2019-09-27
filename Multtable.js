@@ -3,6 +3,7 @@
 /*::
 import DisplayMulttable from './js/DisplayMulttable.js';
 import type {MulttableJSON} from './js/DisplayMulttable.js';
+import GEUtils from './js/GEUtils.js';
 import Library from './js/Library.js';
 import Log from './js/Log.js';
 import MathML from './js/MathML.js';
@@ -35,9 +36,9 @@ window.addEventListener('load', load, {once: true});
 function registerCallbacks() {
    // window-wide default actions
    window.onresize = resizeBody;
-   $('#bodyDouble')[0].addEventListener('click', cleanWindow);
+   $('#bodyDouble')[0].addEventListener('click', GEUtils.cleanWindow);
    window.addEventListener('contextmenu', (mouseEvent /*: MouseEvent */) => {
-      cleanWindow();
+      GEUtils.cleanWindow();
       mouseEvent.preventDefault();
    });
 
@@ -64,12 +65,16 @@ function load() {
 
    // When group and framework are loaded, insert subset_page and complete rest of setup
    Promise.all([groupLoad, bodyLoad])
-          .then( () =>
-             // Preload MathML cache for subsetDisplay
-             MathML.preload(group).then( () =>
+          .then( () => 
+             MathML.preload(group).then( () => { // Preload MathML cache for subsetDisplay
+                const highlighters = [
+                   {handler: highlightByBackground, label: 'Background'},
+                   {handler: highlightByBorder, label: 'Border'},
+                   {handler: highlightByCorner, label: 'Corner'}
+                ];
                 // Load subset display, and complete setup
-                SSD.load($('#subset-control')).then(completeSetup)
-             )
+                SSD.load($('#subset-control'), highlighters).then(completeSetup)
+             } )
           )
           .catch( Log.err );
 }
@@ -167,7 +172,7 @@ function organizationClickHandler(event /*: MouseEvent */) {
 
 function toggleOrganizationChoices() {
    const hidingChoices = $('#organization-choices').css('display') == 'none';
-   cleanWindow();
+   GEUtils.cleanWindow();
    if (hidingChoices) {
       $('#organization-choices').show();
    }
@@ -213,13 +218,6 @@ function resizeGraphic() {
    graphicContext.canvas.width = $('#graphic').width();
    graphicContext.canvas.height = $('#graphic').height();
    graphicContext.showLargeGraphic(multtable);
-}
-
-function cleanWindow() {
-   $('#nodeLabel').remove();
-   $('#drag-image').remove();
-   $('#organization-choices').hide();
-   SSD.clearMenus();
 }
 
 /* Highlighting routines */
@@ -289,7 +287,7 @@ class LargeGraphic {
          if (LargeGraphic.lastEvent == null) {
             LargeGraphic.displayNewLabel(mouseEvent);
          } else {
-            cleanWindow();
+            GEUtils.cleanWindow();
          }
          LargeGraphic.lastEvent = null;
          mouseEvent.stopPropagation();
@@ -302,7 +300,7 @@ class LargeGraphic {
          break;
 
       case 'wheel':
-         cleanWindow();
+         GEUtils.cleanWindow();
          (((mouseEvent /*: any */) /*: WheelEvent */).deltaY < 0) ? graphicContext.zoomIn() : graphicContext.zoomOut();
          graphicContext.showLargeGraphic(multtable);
          break;
@@ -457,17 +455,16 @@ class LargeGraphic {
 
    static displayNewLabel(loc /*: eventLocation */) /*: ?HTMLElement */ {
       const rowXcol = LargeGraphic.loc2rowXcol(loc);
-      const hasLabel = rowXcol && $(`#nodeLabel[row='${rowXcol.row}'][col='${rowXcol.col}']`).length != 0;
-      cleanWindow();
+      const hasLabel = rowXcol && $(`#node-label[row='${rowXcol.row}'][col='${rowXcol.col}']`).length != 0;
+      GEUtils.cleanWindow();
       if (rowXcol == undefined || hasLabel) {
          return null;
       } else {
          const element = group.mult(multtable.elements[rowXcol.row], multtable.elements[rowXcol.col]);
-         const $label = $(`<div id="nodeLabel" row="${rowXcol.row}" col="${rowXcol.col}">`)
-                           .html(MathML.sans(group.representation[element]));
-         $('#graphic').append($label);
+         const $label = $(eval(Template.HTML('node-label-template')))
+                          .appendTo('#graphic');
          Menu.setMenuLocations(loc, $label);
-         MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'nodeLabel']);
+         MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'node-label']);
          return $label[0];
       }
    }
@@ -492,7 +489,7 @@ class LargeGraphic {
    }
 
    static touchZoomAndMove(start /*: TouchEvent */, end /*: TouchEvent */) {
-      cleanWindow();
+      GEUtils.cleanWindow();
       const [startCentroid, startDiameter] = LargeGraphic.centroidAndDiameter(LargeGraphic.touches(start)),
             [endCentroid, endDiameter] = LargeGraphic.centroidAndDiameter(LargeGraphic.touches(end)),
             zoomFactor = endDiameter / startDiameter;
@@ -503,13 +500,13 @@ class LargeGraphic {
    }
 
    static mouseMove(start /*: MouseEvent */, end /*: MouseEvent */) {
-      cleanWindow();
+      GEUtils.cleanWindow();
       graphicContext.move(end.clientX - start.clientX, end.clientY - start.clientY);
       graphicContext.showLargeGraphic(multtable);
    }
 
    static zoom2fit() {
-      cleanWindow();
+      GEUtils.cleanWindow();
       graphicContext.reset();
       graphicContext.showLargeGraphic(multtable);
    }
@@ -521,7 +518,7 @@ class LargeGraphic {
          return null;
       }
 
-      cleanWindow();
+      GEUtils.cleanWindow();
       
       const canvas = graphicContext.canvas;
 
@@ -550,11 +547,11 @@ class LargeGraphic {
             'opacity: 0.75; ' +
             '';
 
-      const image = $(`<img id="drag-image" src="${graphicContext.canvas.toDataURL()}" swapping="${swapping}" start="${start}" style="${style}">`)[0];
-      $('#graphic').append(image);
+      const $image = $(eval(Template.HTML('drag-image-template')))
+                       .appendTo('#graphic');
       LargeGraphic.dragOver(loc);
 
-      return image;
+      return $image[0];
    }
 
    static dragOver(loc /*: eventLocation */) {

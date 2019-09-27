@@ -14,6 +14,7 @@
    z-index: 1;
    white-space: nowrap;
    list-style-type: none;
+   visibility: hidden;
 }
 .menu a {
    color: #000000;			/* black */
@@ -45,14 +46,29 @@
    width: 0;
    position: relative;
 }
+.menu-arrow:before {
+    content: '\00a0';  /* unicode NO-BREAK SPACE */
+}
+.menu-arrow:after {
+   border-bottom: 8px solid rgba(0,0,0,0);	/* transparent*/
+   border-left: 16px solid #A0A0A0;		/* ~dark gray */
+   border-top: 8px solid rgba(0,0,0,0);	/* transparent */
+   content: '';
+   float: right;
+   height: 0;
+   width: 0;
+   position: relative;
+}
 
 .menu ul ul {
    overflow-y: auto;
 }
 
+/*
 #arrow-menu {
     overflow-y: auto;
 }
+*/
 
 .top-right-menu {
   position: absolute;

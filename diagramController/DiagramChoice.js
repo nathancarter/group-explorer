@@ -29,15 +29,6 @@ DC.DiagramChoice = class {
          .show();
    }
 
-   /* Display control routines */
-   static clickHandler(clickEvent /*: MouseEvent */) {
-      const $curr = $(clickEvent.target).closest('[action]');
-      if ($curr != undefined) {
-         eval($curr.attr('action'));
-         clickEvent.stopPropagation();
-      }
-   }
-
    static toggleChoices() {
       const choicesDisplay = $('#diagram-choices').css('display');
       $('#bodyDouble').click();
@@ -49,7 +40,6 @@ DC.DiagramChoice = class {
    static selectDiagram(diagram /*: ?string */, andDisplay /*:: ?: boolean */ = true) {
       $('#bodyDouble').click();
       Diagram_name = (diagram == undefined) ? undefined : diagram;
-      DC.Generator.enable();
       DC.Chunking.enable();
       DC.DiagramChoice._showChoice();
 

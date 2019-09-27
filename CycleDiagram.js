@@ -4,10 +4,12 @@
 import CycleGraph from './js/CycleGraph.js';
 import DisplayCycleGraph from './js/DisplayCycleGraph.js';
 import type {CycleGraphJSON} from './js/DisplayCycleGraph.js';
+import GEUtils from './js/GEUtils.js';
 import Library from './js/Library.js';
 import Log from './js/Log.js';
 import MathML from './js/MathML.js';
 import Menu from './js/Menu.js';
+import Template from './js/Template.js';
 import XMLGroup from './js/XMLGroup.js';
 
 import VC from './visualizerFramework/visualizer.js';
@@ -32,9 +34,9 @@ window.addEventListener('load', load, {once: true});
 function registerCallbacks() {
    // window-wide event listeners
    window.onresize = resizeBody;
-   $('#bodyDouble')[0].addEventListener('click', cleanWindow);
+   $('#bodyDouble')[0].addEventListener('click', GEUtils.cleanWindow);
    window.addEventListener('contextmenu', (mouseEvent /*: MouseEvent */) => {
-      cleanWindow();
+      GEUtils.cleanWindow();
       mouseEvent.preventDefault();
    });
 
@@ -53,12 +55,16 @@ function load() {
 
    // When group and framework are loaded, insert subset_page and complete rest of setup
    Promise.all([groupLoad, bodyLoad])
-          .then( () =>
-             // Preload MathML cache for subsetDisplay
-             MathML.preload(group).then( () =>
+          .then( () => 
+             MathML.preload(group).then( () => { // Preload MathML cache for subsetDisplay
+                const highlighters = [
+                   {handler: highlightByBackground, label: 'Background'},
+                   {handler: highlightByBorder, label: 'Border'},
+                   {handler: highlightByTop, label: 'Top'}
+                ];
                 // Load subset display, and complete setup
-                SSD.load($('#subset-control')).then(completeSetup)
-             )
+                SSD.load($('#subset-control'), highlighters).then(completeSetup)
+             } )
           )
           .catch( Log.err );
 }
@@ -137,11 +143,6 @@ function resizeGraphic() {
    graphicContext.showLargeGraphic(cyclegraph);
 }
 
-function cleanWindow() {
-   $('#nodeLabel').remove();
-   SSD.clearMenus();
-}
-
 
 /*
  * Large graphic mouse events
@@ -178,7 +179,7 @@ class LargeGraphic {
 
       switch (mouseEvent.type) {
       case 'click':
-         cleanWindow();
+         GEUtils.cleanWindow();
          if (LargeGraphic.lastEvent == null) {
             LargeGraphic.displayLabel(mouseEvent);
          }
@@ -193,7 +194,7 @@ class LargeGraphic {
          break;
 
       case 'wheel':
-         cleanWindow();
+         GEUtils.cleanWindow();
          (((mouseEvent /*: any */) /*: WheelEvent */).deltaY < 0) ? graphicContext.zoomIn() : graphicContext.zoomOut();
          graphicContext.showLargeGraphic(cyclegraph);
          break;
@@ -246,7 +247,7 @@ class LargeGraphic {
 
       switch (event.type) {
       case 'click':
-         cleanWindow();
+         GEUtils.cleanWindow();
          LargeGraphic.displayLabel( ((event /*: any */) /*: MouseEvent */) );
          LargeGraphic.lastEvent = null;
          event.stopPropagation();
@@ -284,8 +285,8 @@ class LargeGraphic {
       const clickY = event.clientY - bounding_rectangle.top;
       const element = graphicContext.select(clickX, clickY);
       if (element != undefined) {
-         const $label = $('<div id="nodeLabel">').html(MathML.sans(group.representation[element]));
-         $('#graphic').append($label);
+         const $label = $(eval(Template.HTML('node-label-template')))
+                          .appendTo('#graphic');
          Menu.setMenuLocations(event, $label);
          MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'nodeLabel']);
       }
@@ -311,7 +312,7 @@ class LargeGraphic {
    }
 
    static touchZoomAndMove(start /*: TouchEvent */, end /*: TouchEvent */) {
-      cleanWindow();
+      GEUtils.cleanWindow();
       const [startCentroid, startDiameter] = LargeGraphic.centroidAndDiameter(LargeGraphic.touches(start)),
             [endCentroid, endDiameter] = LargeGraphic.centroidAndDiameter(LargeGraphic.touches(end)),
             zoomFactor = endDiameter / startDiameter;
@@ -322,13 +323,13 @@ class LargeGraphic {
    }
 
    static mouseMove(start /*: MouseEvent */, end /*: MouseEvent */) {
-      cleanWindow();
+      GEUtils.cleanWindow();
       graphicContext.move(end.clientX - start.clientX, end.clientY - start.clientY);
       graphicContext.showLargeGraphic(cyclegraph);
    }
 
    static zoom2fit() {
-      cleanWindow();
+      GEUtils.cleanWindow();
       graphicContext.reset();
       graphicContext.showLargeGraphic(cyclegraph);
    }

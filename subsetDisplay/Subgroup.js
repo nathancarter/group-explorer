@@ -36,19 +36,17 @@ SSD.Subgroup = class Subgroup extends SSD.AbstractSubset {
       let templateName;
       switch (this.subgroupIndex) {
          case 0:
-            templateName = 'firstSubgroup_template';	break;
+            templateName = 'first-subgroup-template';	break;
          case group.subgroups.length - 1:
-            templateName = 'lastSubgroup_template';	break;
+            templateName = 'last-subgroup-template';	break;
          default:
-            templateName = 'subgroup_template';	break;
+            templateName = 'subgroup-template';	break;
       }
       return eval(Template.HTML(templateName));
    }
 
    get menu() {
-      const $menu = $(eval(Template.HTML('subgroupMenu_template')));
-      $('template.subgroup-extension').each( (_, template) => $menu.append(eval('`' + $(template).html() + '`')) );
-      return $menu;
+      return $(eval(Template.HTML('subgroup-menu-template')));
    }
 
    get normalizer() {

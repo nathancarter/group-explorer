@@ -9,15 +9,16 @@
    Removing an arrow is done by left-clicking one of the lines in the arrow-list display to highlight it,
    and then left-clicking the 'Remove' button to remove it.
 
-   All of these events are fielded by a single event handler, Arrow.clickHandler(), which
+   All of these events are fielded and dispatched through the Menu.actionClickHandler()
  */
 /*::
-import MathML from '../js/MathML.js';
-import Template from '../js/Template.js';
-import Menu from '../js/Menu.js';
-import XMLGroup from '../js/XMLGroup.js';
 import CayleyDiagram from '../js/CayleyDiagram.js';
 import DisplayDiagram from '../js/DisplayDiagram.js';
+import GEUtils from '../js/GEUtils.js';
+import MathML from '../js/MathML.js';
+import Menu from '../js/Menu.js';
+import Template from '../js/Template.js';
+import XMLGroup from '../js/XMLGroup.js';
 
 import DC from './diagram.js';
 
@@ -34,22 +35,12 @@ DC.Arrow = class {
    // utility function add_arrow_list_item(element) to add arrow to list (called from initialization, select from menu)
    // utility function clearArrowList() to remove all arrows from list (called during reset)
 
-   // arrow-control click handler
-   //   find closest element with action and execute action
-   static clickHandler(clickEvent /*: MouseEvent */) {
-      const action = $(clickEvent.target).closest('[action]').attr('action');
-      if (action != undefined) {
-         $('#bodyDouble').click();
-         clickEvent.stopPropagation();
-         eval(action);
-      }
-   }
-
    // Row selected in arrow-list:
    //   clear all highlights
    //   highlight row (find arrow-list item w/ arrow = ${element})
    //   enable remove button
    static selectArrow(element /*: number */) {
+      GEUtils.cleanWindow();
       $('#arrow-list li').removeClass('highlighted');
       $(`#arrow-list li[arrow=${element}]`).addClass('highlighted');
       $('#remove-arrow-button').attr('action', `DC.Arrow.removeArrow(${element})`);
@@ -66,18 +57,25 @@ DC.Arrow = class {
    //   Populate menu (for each element not in arrow-list)
    //   Position, expose menu
    static showArrowMenu(event /*: JQueryMouseEventObject */) {
-      DC.clearMenus();
-      const $menu = $(eval(Template.HTML('arrow-menu-template')));
-      group.elements.forEach( (element) => {
-         if (element != 0 && $(`#arrow-list li[arrow=${element}]`).length == 0) {
-            $menu.append(
-               $(eval(Template.HTML('arrow-menu-item-template')))
-                  .html(MathML.sans(group.representation[element])));
-         }
-      } );
-      // $('#add-arrow-button').append($menu);
-      $(event.target).closest('button').append($menu);
-      Menu.setMenuLocations(event, $menu);
+      // returns an HTML string with a list element for each arrow that can be added to the arrow-list
+      const makeArrowList = () /*: html */ => {
+         const template = Template.HTML('arrow-menu-item-template');
+         const result = group.elements
+               .reduce( (list, element) => {
+                  // not the identity and not already displayed
+                  if (element != 0 && $(`#arrow-list li[arrow=${element}]`).length == 0) {
+                     list.push(eval(template));
+                  }
+                  return list;
+               }, [] )
+               .join('');
+         return result;
+      }
+
+      GEUtils.cleanWindow();
+      const $menus = $(eval(Template.HTML('arrow-menu-template')))
+            .appendTo('#add-arrow-button');
+      Menu.addMenus($menus, event);
    }
 
    // Add button menu element clicked:
@@ -85,7 +83,7 @@ DC.Arrow = class {
    //   Add lines to Cayley_diagram
    //   Update lines, arrowheads in graphic, arrow-list
    static addArrow(element /*: number */) {
-      DC.clearMenus();
+      GEUtils.cleanWindow();
       Cayley_diagram.addLines(element);
       DC.Arrow.updateArrows();
    }

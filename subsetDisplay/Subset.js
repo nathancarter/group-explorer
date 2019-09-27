@@ -48,12 +48,13 @@ SSD.Subset = class Subset extends SSD.AbstractSubset {
        if (numElements > 3) {
          items.push('<mtext>...</mtext>');
       }
-      return eval(Template.HTML('subset_template'));
+      return eval(Template.HTML('subset-template'));
    }
 
    get menu() {
-      const $menu = $(eval(Template.HTML('subsetMenu_template')));
-      $('template.subset-extension').each( (_, template) => $menu.append(eval('`' + $(template).html() + '`')) );
+      const id = this.id,
+            name = this.name;
+      const $menu = $(eval(Template.HTML('subset-menu-template')));
       return $menu;
    }
 

@@ -42,9 +42,8 @@ window.addEventListener('load', load, {once: true});
 
 /* Register static event managers (called after document is assembled) */
 function registerCallbacks() {
-   window.onresize = resizeBody;
-   $('#bodyDouble')[0].addEventListener('click', cleanWindow);
-
+    window.onresize = resizeBody;
+   $('#bodyDouble')[0].addEventListener('click', GEUtils.cleanWindow);
    $('#subset-button')[0].addEventListener('click', () => VC.showPanel('#subset-control') );
    $('#view-button')[0].addEventListener('click', () => VC.showPanel('#view-control') );
    $('#diagram-button')[0].addEventListener('click', () => VC.showPanel('#diagram-control') );
@@ -76,7 +75,12 @@ function load() {
 }
 
 function loadPanels() {
-   const subset_display_load = SSD.load($('#subset-control'));
+   const highlighters = [
+      {handler: highlightByNodeColor, label: 'Node color'},
+      {handler: highlightByRingAroundNode, label: 'Ring around node'},
+      {handler: highlightBySquareAroundNode, label: 'Square around node'}
+   ];
+   const subset_display_load = SSD.load($('#subset-control'), highlighters);
    const view_controller_load = CVC.load($('#view-control'));
    const diagram_controller_load = DC.load($('#diagram-control'));
    Promise.all([subset_display_load, view_controller_load, diagram_controller_load])
@@ -211,12 +215,6 @@ function resizeBody() {
    resizeGraphic();
 };
 
-function cleanWindow() {
-   Tooltip.clear();
-   SSD.clearMenus();
-   DC.clearMenus();
-}
-
 /*
  * Resize the 3D scene from the freshly re-sized graphic
  *   (detach the canvas containing the 3D scene from the DOM,
@@ -236,99 +234,110 @@ function resizeGraphic() {
 
 /*
  * Manages tooltip display in large graphic
- *   mousedown / touchstart clears all tooltips/menus/etc from entire screen and displays
- *   mouseup / touchend then displays label if over an object like a node or a chunk
- *     (don't display the label if it would be the same as the last label displayed
- *       -- so clicking on a spot a second time just removes the label the first click displayed)
+ *   
+ *   mousedown / touchstart clears all tooltips/menus/etc from entire screen
+ *   if event wasn't over same objects as it was for 
+
+ *   if mouseup / touchend is over an object like a node or a chunk show new label or just remove old
+ *     if mouseup is a click
+ *        if $tooltip exists && new $tooltip would be for same element again
+ *           remove old $tooltip
+ *        else
+ *           remove old $tooltip
+ *           add new $tooltip
+ *        endif
+ *     endif
+ *           
  *   click propagation is blocked to prevent the #bodyDouble click handler from removing the just-displayed label
  */
 class Tooltip {
-/*::
-   static lastObjects: Array<mathml>;  // the objects the mouse was over on the previous mousedown
-   static startTime: number;
- */
    static init() {
-      Tooltip.clear();
-      $('#graphic')[0].addEventListener('click', Tooltip.mouseHandler);
-      if (GEUtils.isMouseDevice()) {
-         $('#graphic')[0].addEventListener('mousedown', Tooltip.mouseHandler);
-         $('#graphic')[0].addEventListener('wheel', Tooltip.mouseHandler);
-         $('#graphic')[0].addEventListener('contextmenu', Tooltip.mouseHandler);
+      $('#graphic')[0].addEventListener('click', Tooltip.eventHandler);
+      if (GEUtils.isTouchDevice()) {
+         $('#graphic')[0].addEventListener('touchstart', Tooltip.eventHandler);
+      } else {
+         $('#graphic')[0].addEventListener('mousedown', Tooltip.eventHandler);
+         $('#graphic')[0].addEventListener('wheel', Tooltip.eventHandler);
+         $('#graphic')[0].addEventListener('contextmenu', Tooltip.eventHandler);
       }
-   }
+   } 
 
-   static clear() {
-      $('#tooltip').remove();
-      Tooltip.lastObjects = [];
-      Tooltip.startTime = 0;
-   }      
-
-   static mouseHandler(mouseEvent /*: MouseEvent */) {
-      // if event is modified by shift key, etc., this event isn't about tooltips, so just return
-      if (mouseEvent.shiftKey || mouseEvent.ctrlKey || mouseEvent.altKey || mouseEvent.metaKey) {
+   static eventHandler(event /*: Event */) {
+      if (event.type == 'touchstart') {
+         const touchEvent = ((event /*: any */) /*: TouchEvent */);
+         // only handle single touch events
+         if (touchEvent.touches.length != 1)
+            return;
+      } else if (event.type == 'mousedown') {
+         const mouseEvent = ((event /*: any */) /*: MouseEvent */);
+         // if event is modified by shift key, etc., this event isn't about tooltips, so just return
+         if (mouseEvent.shiftKey || mouseEvent.ctrlKey || mouseEvent.altKey || mouseEvent.metaKey)
+            return;
+      } else if (event.type != 'click') {
+         GEUtils.cleanWindow();
          return;
       }
 
-      switch (mouseEvent.type) {
-      case 'mousedown':
-         Tooltip.startTime = mouseEvent.timeStamp;
+      const event_location = (event.type == 'touchstart')
+                             ? ((event /*: any */) /*: TouchEvent */).touches[0]
+                             : ((event /*: any */) /*: MouseEvent */);
+
+      switch (event.type) {
+      case 'touchstart':
+      case 'mousedown': {
+         const $old_tooltip = $('#tooltip:visible');
+         const current_objectIDs = Tooltip.getObjectIDsAtLocation(event_location).map( (obj) => obj.id ).join(', ');
+         const make_new_tooltip = current_objectIDs.length != 0 &&				   // clicked over an object
+               !($old_tooltip.length != 0 && $old_tooltip.attr('objectIDs') == current_objectIDs); // not the same as existing tooltip
+         GEUtils.cleanWindow();
+         if (make_new_tooltip) {
+            const $new_tooltip = Tooltip.createTooltip(event_location);
+            const timeoutID = setTimeout( () => $new_tooltip.remove(), 500 );
+            $new_tooltip.attr('timeoutID', ((timeoutID /*: any */) /*: number */));
+         } }
          break;
 
-      case 'click':
-         if (GEUtils.isTouchDevice() || mouseEvent.timeStamp - Tooltip.startTime < 300) {
-            Tooltip.display(mouseEvent);
-         }
-         break;
-            
-      case 'wheel':
-      case 'contextmenu':
+      case 'click': {
+         const $tooltip = $('#tooltip');
+         if ($tooltip.length != 0) {
+            clearTimeout( (($tooltip.attr('timeoutID') /*: any */) /*: TimeoutID */) );
+            $tooltip.show();
+            event.stopPropagation();
+         } }
          break;
 
          // Unexpected events
       default:
-         Log.warn(`CayleyDiagram Tooltip.mouseHandler unexpected event ${mouseEvent.type}`);
+         Log.warn(`CayleyDiagram Tooltip.eventHandler unexpected event ${event.type}`);
       }
    }
 
-   static display(mouseEvent /*: MouseEvent */) {
+   static getObjectIDsAtLocation(location /*: eventLocation */) /*: Array<THREE.Object3D> */ {
       const $graphic = $('#graphic'); // Graphic_context.renderer.domElement;
       const bounding_box = $graphic[0].getBoundingClientRect();
-      const x = ( (mouseEvent.clientX - bounding_box.left) / $graphic.width()) * 2 - 1;
-      const y = -( (mouseEvent.clientY - bounding_box.top) / $graphic.height()) * 2 + 1;
-      const objects = Graphic_context.getObjectsAtPoint(x, y).map( (obj) => MathML.sans(obj.name) );
+      const x = ( (location.clientX - bounding_box.left) / $graphic.width()) * 2 - 1;
+      const y = -( (location.clientY - bounding_box.top) / $graphic.height()) * 2 + 1;
+      const objects = Graphic_context.getObjectsAtPoint(x, y);
+      return objects;
+   }
 
-      // add tooltip if click is over one or more object (nodes or chunks),
-      //   and it's not the second click on the same objects
-      if (objects.length != 0 && !GEUtils.equals(Tooltip.lastObjects, objects) ) {
+   static createTooltip(location /*: eventLocation */) {
+      const objects = Tooltip.getObjectIDsAtLocation(location);
+      const object_names = objects.map( (obj) => MathML.sans(obj.name) );
+      const objectIDs_string = objects.map( (obj) => obj.id ).join(', ');
 
-         // clear other tooltips, menus, etc.
-         cleanWindow();
+      // create tooltip
+      const top = object_names[0];
+      const rest = object_names.slice(1);
 
-         // create tooltip
-         const first = objects[0];
-         const others = objects.slice(1);
+      const template_name = (rest.length == 0) ? 'single-object-template' :
+                            (rest.length == 1) ? 'double-object-template' :
+                            'multi-object-template';
+      const $tooltip = $(eval(Template.HTML(template_name)))
+                          .appendTo('#graphic');
+      Menu.setMenuTreeLocation({id: 'tooltip'}, location);
 
-         let tooltip;
-         if (others.length == 0) {
-            tooltip = $(eval(Template.HTML('single-object_template')));
-         } else if (others.length == 1) {
-            tooltip = $(eval(Template.HTML('double-object_template')));
-         } else {
-            tooltip = $(eval(Template.HTML('multi-object_template')));
-            others.forEach( (obj) => {
-               tooltip.find('ul').append($(`<li>${obj}</li>`));
-            } )
-         }
-
-         // add tooltip to graphic
-         $('#graphic').append(tooltip);
-         Menu.setMenuLocations(mouseEvent, tooltip);
-
-         Tooltip.lastObjects = objects;
-         mouseEvent.stopPropagation();
-      } else {
-         Tooltip.lastObjects = [];
-      }
+      return $tooltip;
    }
 }
 

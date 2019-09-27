@@ -16,6 +16,8 @@ import SubsetEditor from './SubsetEditor.js';
 import Subset from './Subset.js';
 import SubsetMenu from './SubsetMenu.js';
 
+type highlighterRoutines = Array<{handler: (Array<Array<groupElement>>) => void, label: string}>;
+
 var group: XMLGroup;
 
 export default
@@ -26,6 +28,7 @@ class SSD {
    static nextId: number;
    static nextSubsetIndex: number;
    static displayList: Array<AbstractSubset>;
+   static highlighters: highlighterRoutines;
 
    static AbstractSubset: Class<AbstractSubset>;
    static ConjugacyClasses: Class<ConjugacyClasses>;
@@ -42,19 +45,13 @@ class SSD {
       SSD.subsetsURL = './subsetDisplay/subsets.html';
    }
 
-   static clearMenus() {
-      $('#subset_page .highlighted').removeClass('highlighted');
-      $('#subset_page .menu:visible').remove();
-      $('#subset_page .elements').remove();
-   }
-
    /* Load, initialize subset display */
-   static load($subsetWrapper /*: JQuery */) /*: Promise<void> */ {
+   static load($subsetWrapper /*: JQuery */, highlighters /*: highlighterRoutines*/) /*: Promise<void> */ {
       return new Promise( (resolve, reject) => {
          $.ajax( { url: SSD.subsetsURL,
                    success: (data /*: string */) => {
                       $subsetWrapper.html(data);
-                      SSD.setup_subset_page();
+                      SSD.setup_subset_page(highlighters);
                       resolve();
                    },
                    error: (_jqXHR, _status, err) => {
@@ -64,7 +61,8 @@ class SSD {
       } )
    }
 
-   static setup_subset_page() {
+   static setup_subset_page(highlighters /*: highlighterRoutines */) {
+      SSD.highlighters = highlighters;
       // Initialize list of all displayed subsets
       SSD.nextId = 0;
       SSD.nextSubsetIndex = 0;
@@ -78,7 +76,8 @@ class SSD {
       SSD.Subgroup.displayAll();
 
       // set up event listeners for menus
-      SSD.SubsetMenu.init();   }
+      SSD.SubsetMenu.init();
+   }
 }
 
 SSD._init();

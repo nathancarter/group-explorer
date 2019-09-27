@@ -17,7 +17,7 @@ SSD.OrderClasses = class OrderClasses extends SSD.AbstractPartition {
          .orderClasses
          .filter( (orderClass) => orderClass.popcount() != 0 )
          .map( (orderClass, inx) => 
-            new SSD.PartitionSubset(this, inx, orderClass, MathML.sans(MathML.sub('OC', inx)), 'orderClass')
+            new SSD.PartitionSubset(this, inx, orderClass, MathML.sans(MathML.sub('OC', inx)), 'order-class')
          );
 
       $('#partitions_placeholder').hide();

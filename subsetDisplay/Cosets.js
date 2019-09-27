@@ -29,7 +29,7 @@ SSD.Cosets = class Cosets extends SSD.AbstractPartition {
             const name = this.isLeft ?
                          MathML.sans(rep) + this.subgroup.name :
                          this.subgroup.name + MathML.sans(rep);
-            return new SSD.PartitionSubset(this, inx, coset, name, 'cosetClass');
+            return new SSD.PartitionSubset(this, inx, coset, name, 'coset-class');
          } );
 
       $('#partitions_placeholder').hide();

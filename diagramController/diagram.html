@@ -2,7 +2,7 @@
 <!-- Diagram-page layout -->
 <div id="diagram-page">
    <div id="diagram-select" class="faux-select" action="DC.DiagramChoice.toggleChoices()">
-      <ul id="diagram-choices" class="faux-select-options"></ul>
+      <ul id="diagram-choices" class="faux-select-options hide-on-clean"></ul>
       <span id="diagram-choice" class="faux-selection">Generate diagram</span>
       <div class="faux-select-arrow"></div>
    </div>
@@ -29,10 +29,8 @@
             </tbody>
          </table>
 
-         <div id="generation-fog" class="fog hidden"></div>
-
          <!-- Templates for generation-strategy table -->
-         <template id="generation-template">
+         <template id="generation-table-row-template">
             <tr>
                <td draggable="true">${inx+1}</td>
                <td action="DC.Generator.showGeneratorMenu(event, ${inx})">
@@ -48,38 +46,55 @@
             </tr>
          </template>
 
-         <template id="generation-menu-template">
-            <ul id="generation-list" class="menu">
+         <template id="generation-generator-menu-template">
+            <ul id="generation-generator-menu" class="menu remove-on-clean">
+               ${makeEligibleGeneratorList()}
                <hr>
-               <li>${MathML.sansText('Organize by')}&nbsp;&nbsp;<span class="menu-arrow"></span>
-                  <ul id="generation-organize-menu"></ul>
-               </li>
+               ${Menu.makeLink('Organize by', 'generation-organize-by-menu')}
             </ul>
+            <ul id="generation-organize-by-menu" class="menu remove-on-clean">${DC.Generator.makeOrganizeByMenu()}</ul>
          </template>
-         <template id="generator-menu-item-template">
-            <li action="DC.Generator.updateGenerator(${strategy_index}, ${generator})"></li>
+         <template id="generation-generator-menu-item-template">
+            <li action="DC.Generator.updateGenerator(${strategy_index}, ${generator})">
+               ${MathML.sans(group.representation[generator])}</li>
          </template>
-         <template id="organize-menu-item-template">
+
+         <template id="generation-axis-menu-template">
+            <ul id="generation-axis-order-menu" class="menu remove-on-clean">
+               <li action="DC.Generator.updateAxes(${strategy_index}, 0, 0)">${DC.Generator.axis_label[0][0]}</li>
+               <li action="DC.Generator.updateAxes(${strategy_index}, 0, 1)">${DC.Generator.axis_label[0][1]}</li>
+               <li action="DC.Generator.updateAxes(${strategy_index}, 0, 2)">${DC.Generator.axis_label[0][2]}</li>
+               <div class="${curvable ? '' : 'hidden'}">
+                  <li action="DC.Generator.updateAxes(${strategy_index}, 1, 2)">${DC.Generator.axis_label[1][2]}</li>
+                  <li action="DC.Generator.updateAxes(${strategy_index}, 1, 1)">${DC.Generator.axis_label[1][1]}</li>
+                  <li action="DC.Generator.updateAxes(${strategy_index}, 1, 0)">${DC.Generator.axis_label[1][0]}</li>
+                  <li action="DC.Generator.updateAxes(${strategy_index}, 2, 2)">${DC.Generator.axis_label[2][2]}</li>
+                  <li action="DC.Generator.updateAxes(${strategy_index}, 2, 1)">${DC.Generator.axis_label[2][1]}</li>
+                  <li action="DC.Generator.updateAxes(${strategy_index}, 2, 0)">${DC.Generator.axis_label[2][0]}</li>
+               </div>
+               <hr>
+               ${Menu.makeLink('Organize by', 'generation-organize-by-menu')}
+            </ul>
+            <ul id="generation-organize-by-menu" class="menu remove-on-clean">${DC.Generator.makeOrganizeByMenu()}</ul>
+         </template>
+
+         <template id="generation-order-menu-template">
+            <ul id="generation-order-menu" class="menu remove-on-clean">
+               ${makeStrategyList()}
+               <hr>
+               ${Menu.makeLink('Organize by', 'generation-organize-by-menu')}
+            </ul>
+            <ul id="generation-organize-by-menu" class="menu remove-on-clean">${DC.Generator.makeOrganizeByMenu()}</ul>
+         </template>
+         <template id="generation-order-menu-item-template">
+            <li action="DC.Generator.updateOrder(${strategy_index}, ${order})">
+               ${DC.Generator.orders[num_strategies][order]}</li>
+         </template>
+
+         <template id="generation-organize-by-menu-item-template">
             <li action="DC.Generator.organizeBy(${inx})">
                ${MathML.sans(MathML.sub('H', inx))}, ${MathML.sansText('a subgroup of order')}
                ${MathML.sans('<mn>' + subgroup.order + '</mn>')}</li>
-         </template>
-         <template id="axis-menu-template">
-            <li action="DC.Generator.updateAxes(${strategy_index}, 0, 0)">${DC.Generator.axis_label[0][0]}</li>
-            <li action="DC.Generator.updateAxes(${strategy_index}, 0, 1)">${DC.Generator.axis_label[0][1]}</li>
-            <li action="DC.Generator.updateAxes(${strategy_index}, 0, 2)">${DC.Generator.axis_label[0][2]}</li>
-            <div class="${curvable ? '' : 'hidden'}">
-               <li action="DC.Generator.updateAxes(${strategy_index}, 1, 2)">${DC.Generator.axis_label[1][2]}</li>
-               <li action="DC.Generator.updateAxes(${strategy_index}, 1, 1)">${DC.Generator.axis_label[1][1]}</li>
-               <li action="DC.Generator.updateAxes(${strategy_index}, 1, 0)">${DC.Generator.axis_label[1][0]}</li>
-               <li action="DC.Generator.updateAxes(${strategy_index}, 2, 2)">${DC.Generator.axis_label[2][2]}</li>
-               <li action="DC.Generator.updateAxes(${strategy_index}, 2, 1)">${DC.Generator.axis_label[2][1]}</li>
-               <li action="DC.Generator.updateAxes(${strategy_index}, 2, 0)">${DC.Generator.axis_label[2][0]}</li>
-            </div>
-         </template>
-         <template id="order-menu-item-template">
-            <li action="DC.Generator.updateOrder(${strategy_index}, ${order})">
-               ${DC.Generator.orders[num_strategies][order]}</li>
          </template>
       </div>
    </div>
@@ -96,13 +111,16 @@
          </div>
          <div id="arrow-buttons" class="vert">
             <button id="add-arrow-button" action="DC.Arrow.showArrowMenu(event)">Add</button>
-            <button id="remove-arrow-button" action="DC.Arrow.removeArrow()" disabled>Remove</button>
+            <button id="remove-arrow-button" action="DC.Arrow.removeArrow()" disabled class="disable-on-clean">Remove</button>
          </div>
+
          <template id="arrow-menu-template">
-            <ul id="arrow-menu" class="menu" style="min-width: 80px"></ul>
+            <ul id="arrow-menu" class="menu remove-on-clean" style="min-width: 80px">
+               ${makeArrowList()}
+            </ul>
          </template>
          <template id="arrow-menu-item-template">
-            <li action="DC.Arrow.addArrow(${element})"></li>
+            <li action="DC.Arrow.addArrow(${element})">${MathML.sans(group.representation[element])}</li>
          </template>
       </div>
    </div>
@@ -122,7 +140,7 @@
    <div id="chunk-control" style="position: relative">
       <div class="graphic-lead">Chunk this subgroup:</div>
       <div id="chunk-select" class="faux-select" action="DC.Chunking.toggleChoices()">
-         <ul id="chunk-choices" class="faux-select-options"></ul>
+         <ul id="chunk-choices" class="faux-select-options hide-on-clean"></ul>
          <span id="chunk-choice" class="faux-selection">(no chunking)</span>
          <div class="faux-select-arrow"></div>
       </div>

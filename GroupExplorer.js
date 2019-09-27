@@ -324,8 +324,7 @@ class HoverHelp {
       case 'touchstart':
       case 'touchmove':
       case 'mousemove': {
-         const xy /*: {clientX: number, clientY: number} */ =
-               event.type.startsWith('touch')
+         const xy /*: eventLocation */ = event.type.startsWith('touch')
                ? ((event /*: any */) /*: TouchEvent */).touches[0]
                : ((event /*: any */) /*: MouseEvent */);
          const $cell = $(document.elementFromPoint(xy.clientX, xy.clientY)).closest('td');

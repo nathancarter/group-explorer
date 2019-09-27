@@ -33,5 +33,11 @@ Used by CayleyDiagram.html, CycleDiagram.html, Multtable.html, SymmetryObject.ht
       <div id="version" style="float: right; font-size: small"></div>
       <script>document.getElementById('version').textContent = Version.label</script>
    </div>
+
+   <!-- Template used by Menu.makeLink for subsetDisplay, diagramControler -->
+   <template id="link-template">
+      <li action="Menu.pinMenu(event)" link="${link}">
+         ${MathML.sansText(label)} <span class="menu-arrow"></span> </li>
+   </template>
 </div></body>
 ```

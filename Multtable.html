@@ -30,7 +30,7 @@
           -webkit-user-drag: none;      /* prevents annoying default drag behavior */
        }
 
-       #nodeLabel {
+       #node-label {
           background-color: #FFFFD6;
           border: 1px solid #000000;
           box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);	/* gray mist */
@@ -83,10 +83,20 @@
          <!-- This is filled in by subsetDisplay/subsets.html -->
       </div>
 
+      <template id="drag-image-template">
+         <img id="drag-image" src="${graphicContext.canvas.toDataURL()}" class="remove-on-clean" swapping="${swapping}" start="${start}" style="${style}">
+      </template>
+
+      <template id="node-label-template">
+         <div id="node-label" class="remove-on-clean" row="${rowXcol.row}" col="${rowXcol.col}">
+            ${MathML.sans(group.representation[element])}
+         </div>
+      </template>
+
       <div id="table-control" class="fill-vert control hidden">
          <div class="graphic-lead">Organize by subgroup:</div>
          <div id="organization-select" class="faux-select" action="toggleOrganizationChoices()">
-            <ul id="organization-choices" class="faux-select-options" style="width: 13em"></ul>
+            <ul id="organization-choices" class="faux-select-options hide-on-clean" style="width: 13em"></ul>
             <span id="organization-choice" class="faux-selection">none</span>
             <div class="faux-select-arrow"></div>
          </div>
@@ -116,40 +126,5 @@
             </div>
          </form>
       </div>
-
-      <!-- Templates for highlighting control menus in subsetDisplay -->
-      <template class="subgroup-extension subset-extension partition-extension">
-         <li>${MathML.sansText('Highlight item by')} <span class="menu-arrow"></span>
-            <ul>
-               <li action="highlightByBackground([${this.elementString}])">
-                  <img src="./images/hightype-sphere-node.jpg"> ${MathML.sansText('Background')}
-               </li>
-               <li action="highlightByBorder([${this.elementString}])">
-                  <img src="./images/hightype-sphere-node.jpg"> ${MathML.sansText('Border')}
-               </li>
-               <li action="highlightByCorner([${this.elementString}])">
-                  <img src="./images/hightype-sphere-node.jpg"> ${MathML.sansText('Corner')}
-               </li>
-            </ul>
-         </li>
-      </template>
-      <template class="partition-extension">
-         <li>Highlight partition by<span class="menu-arrow"></span>
-            <ul>
-               <li action="highlightByBackground(${this.parent.allElementString})">
-                  <img src="./images/hightype-sphere-node.jpg"> ${MathML.sansText('Background')}
-               </li>
-               <li action="highlightByBorder(${this.parent.allElementString})">
-                  <img src="./images/hightype-sphere-node.jpg"> ${MathML.sansText('Border')}
-               </li>
-               <li action="highlightByCorner(${this.parent.allElementString})">
-                  <img src="./images/hightype-sphere-node.jpg"> ${MathML.sansText('Corner')}
-               </li>
-            </ul>
-         </li>
-      </template>
-      <template class="subgroup-extension subset-extension partition-extension">
-         <li action="clearHighlights()">${MathML.sansText('Clear all highlighting')}</li>
-      </template>
    </body>
 </html>

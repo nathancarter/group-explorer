@@ -18,7 +18,7 @@
 }
 
 #diagram-control {
-    padding: 8;  /* margin around all elements of diagram-control */
+    padding: 1em;  /* margin around all elements of diagram-control */
 }
 
 /* Generation control */
