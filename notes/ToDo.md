@@ -13,16 +13,19 @@ entry level gaming accelerator). After the library is stored locally visualizer 
 1-2 sec; menu response (subgroup option menu) takes 20-50 ms, 100 ms worst case;
 and drag-and-drop (node placement in Cayley diagram) maintains 20-30 fps, 10-15 worst case.
 
-### Bugs
+### Bugs / Deficiencies
 
- * On iPad, in Cayley diagram visualizer -> Diagram panel -> Generator menus, if a scrolling
+ * *Complete.* ~~On iPad, in Cayley diagram visualizer -> Diagram panel -> Generator menus, if a scrolling
    submenu tries to open a scrolling submenu, the second submenu doesn't appear at all.
-   (no known workaround simpler than manual re-coding of menu behavior).
+   (no known workaround simpler than manual re-coding of menu behavior).~~
 
  * When you add a new subset in subset control, Group Explorer does not check whether it
-   exists under another name or give you the option to cancel your addition, as GE2 does.
+   exists under another name or give you the option to cancel your addition, as GE2 does
+   (and as the documentation claims).
 
  * Dropdown lists in Sheets are not formatted with MathJax
+
+ * Give visible feedback (color change?) when grabbing a node/line during Cayley diagram manual re-arrangement 
 
 ### Miscellany
 
