@@ -35,23 +35,12 @@ ul.subset_page_content {
    padding: 0;
 }
 
-.elements {
-   background-color: #FFFFD6;
-   border: 1px solid #000000;
+#subset-elements {
+    background-color: #505050;
+   border: none;
    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);	/* gray mist */
-   color: #000000;
-   font-size: medium;
-   font-style: normal;
-   font-weight: normal;
-   margin: 0;
-   padding: 16px;
-   position: absolute;
-   z-index: 1;
-}
-
-.elements h3 {
-    margin-top: 0;
-    margin-bottom: 0.3em;
+   color: #ffffff;
+   padding: 0px 16px 16px 16px;
 }
 
 /* Subset editor styling */

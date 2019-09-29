@@ -463,7 +463,7 @@ class LargeGraphic {
          const element = group.mult(multtable.elements[rowXcol.row], multtable.elements[rowXcol.col]);
          const $label = $(eval(Template.HTML('node-label-template')))
                           .appendTo('#graphic');
-         Menu.setMenuLocations(loc, $label);
+         Menu.setMenuLocation($label, loc);
          MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'node-label']);
          return $label[0];
       }

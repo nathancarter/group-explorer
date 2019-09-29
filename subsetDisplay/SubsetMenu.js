@@ -63,8 +63,8 @@ SSD.SubsetMenu = class {
 
    static displayElements(event /*: Event */, location /*: eventLocation */) {
       event.preventDefault();
-      $('#bodyDouble').click();
-      const $curr = $(document.elementFromPoint(location.clientX, location.clientY)).closest('li');
+      GEUtils.cleanWindow();
+      const $curr = $(event.target).closest('li');
       const id = $curr.attr('id');
       if (id != undefined) {
          const subset = SSD.displayList[parseInt(id)];
@@ -72,17 +72,9 @@ SSD.SubsetMenu = class {
          const subsetElements = subset.elements.toArray().map( (el) => group.representation[el] );
          const $menu = $(eval(Template.HTML('subset-elements-template')));
          $curr.addClass('highlighted').append($menu);
-         event.stopPropagation();
-
-         const bounds /*: Array<ClientRect> */ =
-               $menu.find('span.mjx-chtml, h3').map( (_, span) => span.getBoundingClientRect() ).toArray();
-         const extrema /*: {leftmost: number, rightmost: number} */ =
-               bounds.reduce( (lr /*: {leftmost: number, rightmost: number} */, rect /*: ClientRect */) => {
-                  return {leftmost: Math.min(lr.leftmost, rect.left), rightmost: Math.max(lr.rightmost, rect.right)}
-               }, {leftmost: Number.MAX_SAFE_INTEGER, rightmost: Number.MIN_SAFE_INTEGER} );
-         $menu.css({'width': extrema.rightmost - extrema.leftmost, 'max-width': ''});
-         Menu.setMenuLocations(location, $menu);
+         Menu.setMenuLocation($menu, location);
          $menu.css('visibility', 'visible');
+         event.stopPropagation();
       }
    }
 

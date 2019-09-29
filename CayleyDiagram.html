@@ -28,22 +28,8 @@
        #graphic {
           -webkit-user-select: none;  /* prevents cut-and-paste in graphic */
        }
-       #tooltip {
-          background-color: #FFFFD6;		/* light yellow (matches subset display) */
-          border: 1px solid #CFCFCF;		/* ~silver */
-          box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);	/* gray mist */
-          color: #000000;
-          font-size: medium;
-          font-style: normal;
-          font-weight: normal;
-          padding: 1em;
-          position: fixed;
-          z-index: 1;
-          white-space: nowrap;
-          list-style-type: none;
-          visibility: visible;
-       }
-       #tooltip ul {
+       
+       .tooltip ul {
           margin: 0;
           padding-inline-start: 1em;
        }
@@ -94,18 +80,18 @@
 
    <!-- Templates for tooltips -->
    <template id="single-object-template">
-      <div id="tooltip" class="hidden remove-on-clean" objectIDs="${objectIDs_string}">${top}</div>
+      <div id="tooltip" class="tooltip remove-on-clean" objectIDs="${objectIDs_string}">${top}</div>
    </template>
 
    <template id="double-object-template">
-      <div id="tooltip" class="hidden remove-on-clean" objectIDs="${objectIDs_string}">
+      <div id="tooltip" class="tooltip remove-on-clean" objectIDs="${objectIDs_string}">
          <b>In front:</b> ${top}<br>
          <b>Behind:</b> ${rest[0]}
       </div>
    </template>
 
    <template id="multi-object-template">
-      <div id="tooltip" class="hidden remove-on-clean" objectIDs="${objectIDs_string}">
+      <div id="tooltip" class="tooltip remove-on-clean" objectIDs="${objectIDs_string}">
          <b>In front:</b> ${top}<br>
          <b>Others behind:</b>
          <ul>

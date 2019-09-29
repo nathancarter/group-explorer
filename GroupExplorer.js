@@ -270,7 +270,8 @@ class HoverHelp {
             $tooltip.remove();
             const $newTip = HoverHelp.getTooltip($cell);
             if ($newTip) {
-               Menu.setMenuLocations(touch, $newTip);
+               Menu.setMenuLocation($newTip, touch);
+               $newTip.css('visibility', 'visible');
             }
          }
          touchEvent.preventDefault();  // prevents scrolling while user moves around display showing highlighting, tooltips
@@ -286,7 +287,8 @@ class HoverHelp {
                $tooltip.remove();
                const $newTip = HoverHelp.getTooltip($cell);
                if ($newTip) {
-                  Menu.setMenuLocations(touch, $newTip);
+                  Menu.setMenuLocation($newTip, touch);
+                  $newTip.css('visibility', 'visible');
                }
             }
          }

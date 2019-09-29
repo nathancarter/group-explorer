@@ -8,6 +8,13 @@ type MenuTree = {id: string, children?: Array<MenuTree>};
 export default
 */
 class Menu {
+/*::
+   static MARGIN: number;
+ */
+   static init() {
+      Menu.MARGIN = 4;
+   }      
+
    static addMenus($menus /*: JQuery */, location /*: eventLocation */) {
       // remove all other menus
       const $parent = $menus.first().parent();
@@ -63,40 +70,20 @@ class Menu {
    }
 
    static setMenuTreeLocation(menu_tree /*: MenuTree */, location /*: eventLocation */) {
-      const MARGIN = 4;
-
-      // set upper left corner of menu to base
       const $menu = $(`#${menu_tree.id}`);
-      const menu_box = $menu[0].getBoundingClientRect();
-      const body_box = $('#bodyDouble')[0].getBoundingClientRect();
-
-      let {clientX, clientY} = location;
-
-      // if it doesn't fit on the right push it to the left enough to fit
-      if (clientX + menu_box.width > body_box.right - MARGIN)
-         clientX = body_box.right - MARGIN - menu_box.width;
-      
-      // if it doesn't fit on the bottom push it up until it bumps into the top of the frame
-      if (clientY + menu_box.height > body_box.bottom - MARGIN)
-         clientY = body_box.bottom - MARGIN - menu_box.height
-      if (clientY < body_box.top + MARGIN) {
-         clientY = body_box.top + MARGIN;
-         $menu.css('height', body_box.bottom - body_box.top - 2*MARGIN)  // fix margin, padding here?
-              .css('overflow-y', 'scroll');
-      }
-
-      $menu.css('left', clientX)
-           .css('top', clientY);
+      const {clientX, clientY} = Menu.setMenuLocation($menu, location); 
          
       // fit child menus
       //   put child on right if it fits, left if it doesn't
       //   recursively descend tree to fit each child menu
+      const menu_box = $menu[0].getBoundingClientRect();
+      const body_box = $('body')[0].getBoundingClientRect();
       if (menu_tree.children != undefined) {
          menu_tree.children.forEach( (child) => {
             const $link = $menu.find(`> [link=${child.id}]`);
             const link_box = $link[0].getBoundingClientRect();
             const child_box = $(`#${child.id}`)[0].getBoundingClientRect();
-            const childX = (clientX + menu_box.width + child_box.width > body_box.right - MARGIN)
+            const childX = (clientX + menu_box.width + child_box.width > body_box.right - Menu.MARGIN)
                   ? clientX - child_box.width
                   : clientX + menu_box.width;
             const childY = link_box.top;
@@ -104,7 +91,33 @@ class Menu {
          } )
       }
    }
-   
+
+   static setMenuLocation($menu /*: JQuery */, location /*: eventLocation */) /*: eventLocation */ {
+      // set upper left corner of menu to base
+      const menu_box = $menu[0].getBoundingClientRect();
+      const body_box = $('body')[0].getBoundingClientRect();
+
+      let {clientX, clientY} = location;
+
+      // if it doesn't fit on the right push it to the left enough to fit
+      if (clientX + menu_box.width > body_box.right - Menu.MARGIN)
+         clientX = body_box.right - Menu.MARGIN - menu_box.width;
+      
+      // if it doesn't fit on the bottom push it up until it bumps into the top of the frame
+      if (clientY + menu_box.height > body_box.bottom - Menu.MARGIN)
+         clientY = body_box.bottom - Menu.MARGIN - menu_box.height
+      if (clientY < body_box.top + Menu.MARGIN) {
+         clientY = body_box.top + Menu.MARGIN;
+         $menu.css('height', body_box.bottom - body_box.top - 2*Menu.MARGIN)  // fix margin, padding here?
+              .css('overflow-y', 'scroll');
+      }
+
+      $menu.css('left', clientX)
+           .css('top', clientY);
+         
+      return {clientX: clientX, clientY: clientY};
+   }
+
    static actionClickHandler(event /*: MouseEvent */) {
       event.preventDefault();
       const $action = $(event.target).closest('[action]');
@@ -152,65 +165,6 @@ class Menu {
    static makeLink(label /*: string */, link /*: string */) /*: html */ {
       return eval(Template.HTML('link-template'));
    }
-
-   static setMenuLocations(event /*: eventLocation */, $menu /*: JQuery */) {
-      const menuBox = $menu[0].getBoundingClientRect();
-      const menuHeight = menuBox.height;
-      const windowHeight = 0.99*window.innerHeight;
-      // set top edge so menu grows down until it sits on the bottom, up until it reaches the top
-      if (menuHeight > windowHeight) {
-         $menu.css({top: 0, height: windowHeight, 'overflow-y': 'auto'});    // too tall for window
-      } else if (event.clientY + menuHeight > windowHeight) {
-         $menu.css({top: windowHeight - menuHeight});    // won't fit below click
-      } else {
-         $menu.css({top: event.clientY});  // fits below click
-      }
-
-      // set left edge location so menu doesn't disappear to the right
-      const menuWidth = menuBox.width;
-      const windowWidth /*: float */ = window.innerWidth;
-      if (event.clientX + menuWidth > windowWidth) {
-         $menu.css({left: windowWidth - menuWidth});
-      } else {
-         $menu.css({left: event.clientX});
-      }
-
-      // similarly for submenus (but they also have to avoid covering the main menu)
-      $menu.children('li:has(span.menu-arrow)')
-           .children('ul')
-           .each( (_, subMenu) => Menu.setSubMenuLocation($menu, $(subMenu)) );
-   }
-
-   static setSubMenuLocation($menu /*: JQuery */, $subMenu /*: JQuery */) {
-      const parentBox = $subMenu.parent()[0].getBoundingClientRect();
-      const menuBox = $menu[0].getBoundingClientRect();
-      const subMenuBox = $subMenu[0].getBoundingClientRect();
-      const windowHeight = 0.99*window.innerHeight;
-      const bottomRoom = windowHeight - (parentBox.top + subMenuBox.height);
-      if (parentBox.top + subMenuBox.height < windowHeight) {  // subMenu can drop down from parent
-         $subMenu.css({top: parentBox.top});
-      } else if (subMenuBox.height < windowHeight) {  // subMenu fits in window, but not below parent
-         $subMenu.css({top: windowHeight - subMenuBox.height});
-      } else {  // subMenu doesn't fit in window
-         $subMenu.css({top: 0, height: windowHeight, 'overflow-y': 'auto'})
-      }
-
-      const windowWidth /*: float */ = window.innerWidth;
-      const rightRoom = windowWidth - (menuBox.right + subMenuBox.width);
-      const leftRoom = menuBox.left - subMenuBox.width;
-      const overlap = (subMenuBox.width - $subMenu.width())/2;
-      if (rightRoom > 0) {
-         $subMenu.css({left: menuBox.right - overlap});
-      } else if (leftRoom > 0) {
-         $subMenu.css({left: menuBox.left - subMenuBox.width + overlap});
-      } else if (rightRoom > leftRoom) {
-         $subMenu.css({left: windowWidth - subMenuBox.width});
-      } else {
-         $subMenu.css({left: 0});
-      }
-
-      $subMenu.children('li:has(span.menu-arrow)')
-              .children('ul')
-              .each( (_, subMenu) => Menu.setSubMenuLocation($subMenu, $(subMenu)) );
-   }
 }
+
+Menu.init();

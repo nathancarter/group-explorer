@@ -287,7 +287,7 @@ class LargeGraphic {
       if (element != undefined) {
          const $label = $(eval(Template.HTML('node-label-template')))
                           .appendTo('#graphic');
-         Menu.setMenuLocations(event, $label);
+         Menu.setMenuLocation($label, event);
          MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'nodeLabel']);
       }
    }
