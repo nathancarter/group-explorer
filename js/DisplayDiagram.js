@@ -761,7 +761,7 @@ class DisplayDiagram {
          color: '#303030',
          opacity: 0.2,
          transparent: true,
-         side: THREE.DoubleSide,
+         side: THREE.FrontSide,
          depthWrite: false,  // needed to keep from obscuring labels underneath
          depthTest: false,
       } );

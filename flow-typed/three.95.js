@@ -1,5 +1,6 @@
 declare class THREE {
    static PerspectiveCamera : typeof THREE_PerspectiveCamera;
+   static FrontSide : number;
    static DoubleSide : number;
    static Matrix4 : typeof THREE_Matrix4;
    static Matrix3 : typeof THREE_Matrix3;

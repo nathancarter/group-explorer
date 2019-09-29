@@ -336,6 +336,7 @@ class Tooltip {
       const $tooltip = $(eval(Template.HTML(template_name)))
                           .appendTo('#graphic');
       Menu.setMenuTreeLocation({id: 'tooltip'}, location);
+      MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'tooltip']);
 
       return $tooltip;
    }
