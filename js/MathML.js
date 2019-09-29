@@ -42,20 +42,30 @@ class MathML {
   <br>&nbsp;&nbsp;`MathML.sans('<mtext>Linear in </mtext><mi>rf</mi>')` => "Linear in <i>rf</i>"
   + All identifiers (&lt;mi&gt; elements) are italicized, including multi-character identifiers.
 
+* sansText -- format a string as MathML <mtext> in sans-serif font
+  <br>&nbsp;&nbsp;`MathML.sansText('Some string here')` => "Some string here"
+  + Font, size, positioning, etc. match surrounding MathJax formatting better than a browser-formatted string. Thus,
+    <br>`<p>MathML.sans('<msub><mi>H</mi><mn>3</mn></msub>') MathML.sansText('is the third subgroup of...')`
+    <br>will generally look better than
+    <br>`<p>MathML.sans('<msub><mi>H</mi><mn>3</mn></msub>') is the third subgroup of...`
+  + As the name suggests, it just runs `MathML.sans('<mtext>' + argument + '</mtext>')`
+
 * sub -- format two character strings as an identifier with a subscript
   <br>&nbsp;&nbsp;`MathML.sans(MathML.sub('CC','3'))` => "<i>CC</i><sub>3</sub>"
   + Arguments are not treated as MathML strings.
 
 * csList -- format a list of MathML strings as a comma-separated list
   <br>&nbsp;&nbsp;`MathML.csList(['<mi>x</mi>', '<mn>3</mn>'])` =>  "<i>x</i>, 3"
-  + The resulting list elements are separate top-level MathML constructs, separated by normal HTML. This allows the browser to re-flow the text instead of having MathJax do it.
+  + The resulting list elements are separate top-level MathML constructs, separated by normal HTML. This allows the browser to re-flow the text instead of having MathJax do it. It also improves the ability of MathML to cache commonly used constructs like element representations.
   + This routine is used internally by setList and genList.
 
 * setList -- format a list of MathML strings as a comma-separated list surrounded by {, } braces
   <br>&nbsp;&nbsp;`MathML.setList(['<mi>r</mi>', '<mi>f</mi>'])` => "{ <i>r</i>, <i>f</i> }"
+  + Used to represent elements of a set
 
 * genList -- format a list of MathML strings as a comma-separated list surrounded by ⟨, ⟩ brackets
   <br>&nbsp;&nbsp;`MathML.genList(['<mi>r</mi>', '<mi>f</mi>'])` => "⟨ <i>r</i>, <i>f</i> ⟩"
+  + Used to represent elements of a group or subgroup
   + Brackets are in bold because the normal font renders them lighter than other characters.
 
 * rowList -- format a list of MathML strings as rows (a &lt;br&gt;-separated list)
@@ -73,21 +83,18 @@ class MathML {
       return MathML.sans(MathML._2mtext(plainText));
    }
 
+   // just wrap plainText in an <mtext> element, but without making it a full MathML <math...> element
    static _2mtext(plainText /*: string */) {
       return '<mtext>' + plainText + '</mtext>';
    }
+
    static sub(identifier /*: string */, subscript /*: number | string */) /*: string */ {
       return '<msub><mi>' + identifier + '</mi><mn>' + subscript + '</mn></msub>';
    }
 
    static csList(elements /*: Array<string> */) /*: string */ {
       return elements
-         .map( (el, inx) => MathML.sans(el) + (inx < elements.length-1 ? ',&nbsp;' : '') ).join('');
-   }
-
-   static ccsList(elements /*: Array<string> */) /*: string */ {
-      return elements
-         .map( (el, inx) => (el) + ((inx < elements.length-1) ? ',&nbsp;' : '') ).join('');
+         .map( (el) => MathML.sans(el) ).join(',&nbsp;');
    }
 
    static setList(elements /*: Array<string> */) /*: string */ {
@@ -97,9 +104,9 @@ class MathML {
    }
 
    static genList(generators /*: Array<string> */) /*: string */ {
-      return MathML.sans('<mtext mathvariant="bold">&#x27E8;</mtext>') +
+      return MathML.sans('<mtext mathvariant="bold">⟨</mtext>') +     // \langle
              '&nbsp;&nbsp;' + MathML.csList(generators) + '&nbsp;&nbsp;' +
-             MathML.sans('<mtext mathvariant="bold">&#x27E9;</mtext>');
+             MathML.sans('<mtext mathvariant="bold">⟩</mtext>');      // \rangle
    }
 
    static rowList(elements /*: Array<string> */) /*: string */ {
@@ -155,10 +162,12 @@ class MathML {
       const mathmlStrings = new Set([
          // from subsetDisplay
          MathML._2mtext(')'),
-         MathML._2mtext(','),
          MathML._2mtext('...'),
+         MathML._2mtext('Background'),
+         MathML._2mtext('Border'),
          MathML._2mtext('Clear all highlighting'),
          MathML._2mtext('Compute'),
+         MathML._2mtext('Corner'),
          MathML._2mtext('Create'),
          MathML._2mtext('Customize the elements of'),
          MathML._2mtext('Delete partition'),
@@ -173,6 +182,7 @@ class MathML {
          MathML._2mtext('Norm('),
          MathML._2mtext('Ring around node'),
          MathML._2mtext('Square around node'),
+         MathML._2mtext('Top'),
          MathML._2mtext('a union'),
          MathML._2mtext('all conjugacy classes'),
          MathML._2mtext('all left cosets'),
@@ -182,8 +192,6 @@ class MathML {
          MathML._2mtext('an intersection'),
          MathML._2mtext('by dragging elements into or out of it below.'),
          MathML._2mtext('by'),
-         MathML._2mtext('elementwise product'),
-         MathML._2mtext('intersection'),
          MathML._2mtext('is a conjugacy class of size'),
          MathML._2mtext('is a subgroup of order'),
          MathML._2mtext('is a subset of size'),
@@ -199,15 +207,13 @@ class MathML {
          MathML._2mtext('the intersection of'),
          MathML._2mtext('the normalizer of'),
          MathML._2mtext('the union of'),
-         MathML._2mtext('the'),
-         MathML._2mtext('union'),
          MathML._2mtext('with'),
          MathML._2mtext('{'),
          MathML._2mtext('}'),
-         '<mtext mathvariant="bold">&#x27E8;</mtext>',  // left math bracket, similar to <
-         '<mtext mathvariant="bold">&#x27E9;</mtext>',  // right math bracket, similart to >
-         '<mtext mathvariant="bold">⟨</mtext>',         // left math bracket in unicode
-         '<mtext mathvariant="bold">⟩</mtext>',         // right math bracket in unicode
+         '<mtext mathvariant="bold">&#x27E8;</mtext>',  // unicode MATHEMATICAL LEFT ANGLE BRACKET, \langle, similar to <
+         '<mtext mathvariant="bold">&#x27E9;</mtext>',  // unicode MATHEMATICAL RIGHT ANGLE BRACKET, \rangle, similar to >
+         '<mtext mathvariant="bold">⟨</mtext>',         // unicode MATHEMATICAL LEFT ANGLE BRACKET
+         '<mtext mathvariant="bold">⟩</mtext>',         // unicode MATHEMATICAL RIGHT ANGLE BRACKET
          '<mi>g</mi>',
 
          // from diagramController
