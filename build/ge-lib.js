@@ -2312,20 +2312,30 @@ class MathML {
   <br>&nbsp;&nbsp;`MathML.sans('<mtext>Linear in </mtext><mi>rf</mi>')` => "Linear in <i>rf</i>"
   + All identifiers (&lt;mi&gt; elements) are italicized, including multi-character identifiers.
 
+* sansText -- format a string as MathML <mtext> in sans-serif font
+  <br>&nbsp;&nbsp;`MathML.sansText('Some string here')` => "Some string here"
+  + Font, size, positioning, etc. match surrounding MathJax formatting better than a browser-formatted string. Thus,
+    <br>`<p>MathML.sans('<msub><mi>H</mi><mn>3</mn></msub>') MathML.sansText('is the third subgroup of...')`
+    <br>will generally look better than
+    <br>`<p>MathML.sans('<msub><mi>H</mi><mn>3</mn></msub>') is the third subgroup of...`
+  + As the name suggests, it just runs `MathML.sans('<mtext>' + argument + '</mtext>')`
+
 * sub -- format two character strings as an identifier with a subscript
   <br>&nbsp;&nbsp;`MathML.sans(MathML.sub('CC','3'))` => "<i>CC</i><sub>3</sub>"
   + Arguments are not treated as MathML strings.
 
 * csList -- format a list of MathML strings as a comma-separated list
   <br>&nbsp;&nbsp;`MathML.csList(['<mi>x</mi>', '<mn>3</mn>'])` =>  "<i>x</i>, 3"
-  + The resulting list elements are separate top-level MathML constructs, separated by normal HTML. This allows the browser to re-flow the text instead of having MathJax do it.
+  + The resulting list elements are separate top-level MathML constructs, separated by normal HTML. This allows the browser to re-flow the text instead of having MathJax do it. It also improves the ability of MathML to cache commonly used constructs like element representations.
   + This routine is used internally by setList and genList.
 
 * setList -- format a list of MathML strings as a comma-separated list surrounded by {, } braces
   <br>&nbsp;&nbsp;`MathML.setList(['<mi>r</mi>', '<mi>f</mi>'])` => "{ <i>r</i>, <i>f</i> }"
+  + Used to represent elements of a set
 
 * genList -- format a list of MathML strings as a comma-separated list surrounded by ⟨, ⟩ brackets
   <br>&nbsp;&nbsp;`MathML.genList(['<mi>r</mi>', '<mi>f</mi>'])` => "⟨ <i>r</i>, <i>f</i> ⟩"
+  + Used to represent elements of a group or subgroup
   + Brackets are in bold because the normal font renders them lighter than other characters.
 
 * rowList -- format a list of MathML strings as rows (a &lt;br&gt;-separated list)
@@ -2343,21 +2353,18 @@ class MathML {
       return MathML.sans(MathML._2mtext(plainText));
    }
 
+   // just wrap plainText in an <mtext> element, but without making it a full MathML <math...> element
    static _2mtext(plainText /*: string */) {
       return '<mtext>' + plainText + '</mtext>';
    }
+
    static sub(identifier /*: string */, subscript /*: number | string */) /*: string */ {
       return '<msub><mi>' + identifier + '</mi><mn>' + subscript + '</mn></msub>';
    }
 
    static csList(elements /*: Array<string> */) /*: string */ {
       return elements
-         .map( (el, inx) => MathML.sans(el) + (inx < elements.length-1 ? ',&nbsp;' : '') ).join('');
-   }
-
-   static ccsList(elements /*: Array<string> */) /*: string */ {
-      return elements
-         .map( (el, inx) => (el) + ((inx < elements.length-1) ? ',&nbsp;' : '') ).join('');
+         .map( (el) => MathML.sans(el) ).join(',&nbsp;');
    }
 
    static setList(elements /*: Array<string> */) /*: string */ {
@@ -2367,9 +2374,9 @@ class MathML {
    }
 
    static genList(generators /*: Array<string> */) /*: string */ {
-      return MathML.sans('<mtext mathvariant="bold">&#x27E8;</mtext>') +
+      return MathML.sans('<mtext mathvariant="bold">⟨</mtext>') +     // \langle
              '&nbsp;&nbsp;' + MathML.csList(generators) + '&nbsp;&nbsp;' +
-             MathML.sans('<mtext mathvariant="bold">&#x27E9;</mtext>');
+             MathML.sans('<mtext mathvariant="bold">⟩</mtext>');      // \rangle
    }
 
    static rowList(elements /*: Array<string> */) /*: string */ {
@@ -2425,10 +2432,12 @@ class MathML {
       const mathmlStrings = new Set([
          // from subsetDisplay
          MathML._2mtext(')'),
-         MathML._2mtext(','),
          MathML._2mtext('...'),
+         MathML._2mtext('Background'),
+         MathML._2mtext('Border'),
          MathML._2mtext('Clear all highlighting'),
          MathML._2mtext('Compute'),
+         MathML._2mtext('Corner'),
          MathML._2mtext('Create'),
          MathML._2mtext('Customize the elements of'),
          MathML._2mtext('Delete partition'),
@@ -2443,6 +2452,7 @@ class MathML {
          MathML._2mtext('Norm('),
          MathML._2mtext('Ring around node'),
          MathML._2mtext('Square around node'),
+         MathML._2mtext('Top'),
          MathML._2mtext('a union'),
          MathML._2mtext('all conjugacy classes'),
          MathML._2mtext('all left cosets'),
@@ -2452,8 +2462,6 @@ class MathML {
          MathML._2mtext('an intersection'),
          MathML._2mtext('by dragging elements into or out of it below.'),
          MathML._2mtext('by'),
-         MathML._2mtext('elementwise product'),
-         MathML._2mtext('intersection'),
          MathML._2mtext('is a conjugacy class of size'),
          MathML._2mtext('is a subgroup of order'),
          MathML._2mtext('is a subset of size'),
@@ -2469,15 +2477,13 @@ class MathML {
          MathML._2mtext('the intersection of'),
          MathML._2mtext('the normalizer of'),
          MathML._2mtext('the union of'),
-         MathML._2mtext('the'),
-         MathML._2mtext('union'),
          MathML._2mtext('with'),
          MathML._2mtext('{'),
          MathML._2mtext('}'),
-         '<mtext mathvariant="bold">&#x27E8;</mtext>',  // left math bracket, similar to <
-         '<mtext mathvariant="bold">&#x27E9;</mtext>',  // right math bracket, similart to >
-         '<mtext mathvariant="bold">⟨</mtext>',         // left math bracket in unicode
-         '<mtext mathvariant="bold">⟩</mtext>',         // right math bracket in unicode
+         '<mtext mathvariant="bold">&#x27E8;</mtext>',  // unicode MATHEMATICAL LEFT ANGLE BRACKET, \langle, similar to <
+         '<mtext mathvariant="bold">&#x27E9;</mtext>',  // unicode MATHEMATICAL RIGHT ANGLE BRACKET, \rangle, similar to >
+         '<mtext mathvariant="bold">⟨</mtext>',         // unicode MATHEMATICAL LEFT ANGLE BRACKET
+         '<mtext mathvariant="bold">⟩</mtext>',         // unicode MATHEMATICAL RIGHT ANGLE BRACKET
          '<mi>g</mi>',
 
          // from diagramController
@@ -2707,6 +2713,13 @@ type MenuTree = {id: string, children?: Array<MenuTree>};
 export default
 */
 class Menu {
+/*::
+   static MARGIN: number;
+ */
+   static init() {
+      Menu.MARGIN = 4;
+   }      
+
    static addMenus($menus /*: JQuery */, location /*: eventLocation */) {
       // remove all other menus
       const $parent = $menus.first().parent();
@@ -2762,40 +2775,20 @@ class Menu {
    }
 
    static setMenuTreeLocation(menu_tree /*: MenuTree */, location /*: eventLocation */) {
-      const MARGIN = 4;
-
-      // set upper left corner of menu to base
       const $menu = $(`#${menu_tree.id}`);
-      const menu_box = $menu[0].getBoundingClientRect();
-      const body_box = $('#bodyDouble')[0].getBoundingClientRect();
-
-      let {clientX, clientY} = location;
-
-      // if it doesn't fit on the right push it to the left enough to fit
-      if (clientX + menu_box.width > body_box.right - MARGIN)
-         clientX = body_box.right - MARGIN - menu_box.width;
-      
-      // if it doesn't fit on the bottom push it up until it bumps into the top of the frame
-      if (clientY + menu_box.height > body_box.bottom - MARGIN)
-         clientY = body_box.bottom - MARGIN - menu_box.height
-      if (clientY < body_box.top + MARGIN) {
-         clientY = body_box.top + MARGIN;
-         $menu.css('height', body_box.bottom - body_box.top - 2*MARGIN)  // fix margin, padding here?
-              .css('overflow-y', 'scroll');
-      }
-
-      $menu.css('left', clientX)
-           .css('top', clientY);
+      const {clientX, clientY} = Menu.setMenuLocation($menu, location); 
          
       // fit child menus
       //   put child on right if it fits, left if it doesn't
       //   recursively descend tree to fit each child menu
+      const menu_box = $menu[0].getBoundingClientRect();
+      const body_box = $('body')[0].getBoundingClientRect();
       if (menu_tree.children != undefined) {
          menu_tree.children.forEach( (child) => {
             const $link = $menu.find(`> [link=${child.id}]`);
             const link_box = $link[0].getBoundingClientRect();
             const child_box = $(`#${child.id}`)[0].getBoundingClientRect();
-            const childX = (clientX + menu_box.width + child_box.width > body_box.right - MARGIN)
+            const childX = (clientX + menu_box.width + child_box.width > body_box.right - Menu.MARGIN)
                   ? clientX - child_box.width
                   : clientX + menu_box.width;
             const childY = link_box.top;
@@ -2803,7 +2796,33 @@ class Menu {
          } )
       }
    }
-   
+
+   static setMenuLocation($menu /*: JQuery */, location /*: eventLocation */) /*: eventLocation */ {
+      // set upper left corner of menu to base
+      const menu_box = $menu[0].getBoundingClientRect();
+      const body_box = $('body')[0].getBoundingClientRect();
+
+      let {clientX, clientY} = location;
+
+      // if it doesn't fit on the right push it to the left enough to fit
+      if (clientX + menu_box.width > body_box.right - Menu.MARGIN)
+         clientX = body_box.right - Menu.MARGIN - menu_box.width;
+      
+      // if it doesn't fit on the bottom push it up until it bumps into the top of the frame
+      if (clientY + menu_box.height > body_box.bottom - Menu.MARGIN)
+         clientY = body_box.bottom - Menu.MARGIN - menu_box.height
+      if (clientY < body_box.top + Menu.MARGIN) {
+         clientY = body_box.top + Menu.MARGIN;
+         $menu.css('height', body_box.bottom - body_box.top - 2*Menu.MARGIN)  // fix margin, padding here?
+              .css('overflow-y', 'scroll');
+      }
+
+      $menu.css('left', clientX)
+           .css('top', clientY);
+         
+      return {clientX: clientX, clientY: clientY};
+   }
+
    static actionClickHandler(event /*: MouseEvent */) {
       event.preventDefault();
       const $action = $(event.target).closest('[action]');
@@ -2851,68 +2870,9 @@ class Menu {
    static makeLink(label /*: string */, link /*: string */) /*: html */ {
       return eval(Template.HTML('link-template'));
    }
-
-   static setMenuLocations(event /*: eventLocation */, $menu /*: JQuery */) {
-      const menuBox = $menu[0].getBoundingClientRect();
-      const menuHeight = menuBox.height;
-      const windowHeight = 0.99*window.innerHeight;
-      // set top edge so menu grows down until it sits on the bottom, up until it reaches the top
-      if (menuHeight > windowHeight) {
-         $menu.css({top: 0, height: windowHeight, 'overflow-y': 'auto'});    // too tall for window
-      } else if (event.clientY + menuHeight > windowHeight) {
-         $menu.css({top: windowHeight - menuHeight});    // won't fit below click
-      } else {
-         $menu.css({top: event.clientY});  // fits below click
-      }
-
-      // set left edge location so menu doesn't disappear to the right
-      const menuWidth = menuBox.width;
-      const windowWidth /*: float */ = window.innerWidth;
-      if (event.clientX + menuWidth > windowWidth) {
-         $menu.css({left: windowWidth - menuWidth});
-      } else {
-         $menu.css({left: event.clientX});
-      }
-
-      // similarly for submenus (but they also have to avoid covering the main menu)
-      $menu.children('li:has(span.menu-arrow)')
-           .children('ul')
-           .each( (_, subMenu) => Menu.setSubMenuLocation($menu, $(subMenu)) );
-   }
-
-   static setSubMenuLocation($menu /*: JQuery */, $subMenu /*: JQuery */) {
-      const parentBox = $subMenu.parent()[0].getBoundingClientRect();
-      const menuBox = $menu[0].getBoundingClientRect();
-      const subMenuBox = $subMenu[0].getBoundingClientRect();
-      const windowHeight = 0.99*window.innerHeight;
-      const bottomRoom = windowHeight - (parentBox.top + subMenuBox.height);
-      if (parentBox.top + subMenuBox.height < windowHeight) {  // subMenu can drop down from parent
-         $subMenu.css({top: parentBox.top});
-      } else if (subMenuBox.height < windowHeight) {  // subMenu fits in window, but not below parent
-         $subMenu.css({top: windowHeight - subMenuBox.height});
-      } else {  // subMenu doesn't fit in window
-         $subMenu.css({top: 0, height: windowHeight, 'overflow-y': 'auto'})
-      }
-
-      const windowWidth /*: float */ = window.innerWidth;
-      const rightRoom = windowWidth - (menuBox.right + subMenuBox.width);
-      const leftRoom = menuBox.left - subMenuBox.width;
-      const overlap = (subMenuBox.width - $subMenu.width())/2;
-      if (rightRoom > 0) {
-         $subMenu.css({left: menuBox.right - overlap});
-      } else if (leftRoom > 0) {
-         $subMenu.css({left: menuBox.left - subMenuBox.width + overlap});
-      } else if (rightRoom > leftRoom) {
-         $subMenu.css({left: windowWidth - subMenuBox.width});
-      } else {
-         $subMenu.css({left: 0});
-      }
-
-      $subMenu.children('li:has(span.menu-arrow)')
-              .children('ul')
-              .each( (_, subMenu) => Menu.setSubMenuLocation($subMenu, $(subMenu)) );
-   }
 }
+
+Menu.init();
 //@flow
 /*
  * The functions in this script file define how Group Explorer
@@ -5148,7 +5108,7 @@ class DisplayDiagram {
          color: '#303030',
          opacity: 0.2,
          transparent: true,
-         side: THREE.DoubleSide,
+         side: THREE.FrontSide,
          depthWrite: false,  // needed to keep from obscuring labels underneath
          depthTest: false,
       } );
