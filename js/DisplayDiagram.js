@@ -46,7 +46,11 @@ type Options = {
 };
 
 export type SphereUserData = {node: Diagram3D.Node};
-export type LineUserData = {line: Diagram3D.Line};
+export type LineUserData = {
+   line: Diagram3D.Line,
+   vertices: Array<THREE.Vector3>,
+   meshLine?: MeshLine
+};
 
 export default
  */
@@ -63,6 +67,7 @@ class DisplayDiagram {
    static DEFAULT_ARC_OFFSET: number;
    static LIGHT_POSITIONS: Array<[number, number, number]>;
 
+   diagram3D: Diagram3D;
    scene: THREE.Scene;
    camera: THREE.PerspectiveCamera;
    renderer: THREE.WebGLRenderer;
@@ -285,7 +290,7 @@ class DisplayDiagram {
    }
 
    // Create a sphere for each node, add to scene as THREE.Group named "spheres"
-   updateNodes(diagram3D /*: Diagram3D */, sphere_facets /*: number */ = 20) {
+   updateNodes (diagram3D /*: Diagram3D */, sphere_facets /*: number */ = 20) {
       // Log.debug('updateNodes');
 
       const spheres = this.getGroup('spheres');
@@ -319,48 +324,47 @@ class DisplayDiagram {
       } )
    }
 
-   updateHighlights(diagram3D /*: Diagram3D */) {
+   updateHighlights (diagram3D /*: Diagram3D */) {
       const highlights = this.getGroup('nodeHighlights');
       highlights.remove(...highlights.children);
 
       const spheres = ((this.getGroup('spheres').children /*: any */) /*: Array<THREE.Mesh> */),
-            materialsByColor = spheres.reduce( (materials, sphere) => {
-               if (!materials.has(sphere.material.color)) {
-                  materials.set(sphere.material.color, sphere.material);
-               }
-               return materials;
-            }, new Map());
+            materialsByColor = spheres.reduce( (materials, sphere) => materials.set(sphere.material.color, sphere.material), new Map() );
 
-      spheres.forEach( (sphere) => {
-         const node = diagram3D.nodes[((sphere.userData /*: any */) /*: SphereUserData */).node.element];
+      spheres.forEach( (sphere) => this.drawHighlight(sphere, materialsByColor) );
+   }
 
-         // Find sphere's desired color: priority is colorHighlight, then color, then default
-         let color = node.colorHighlight;
-         if (color == undefined) color = node.color;
-         if (color == undefined) color = DisplayDiagram.DEFAULT_NODE_COLOR;
-         const desiredColor = new THREE.Color(color);
+   drawHighlight (sphere /*: THREE.Mesh */, materialsByColor /*: Map<THREE_Color, THREE.Material> */) {
+      const node = ((this.scene.userData /*: any */) /*: Diagram3D */)
+            .nodes[((sphere.userData /*: any */) /*: SphereUserData */).node.element],
+            sphere_geometry = ((sphere.geometry /*: any */) /*: THREE.Geometry */);
 
-         // If sphere is not desired color set material color to desired color
-         if (!sphere.material.color.equals(desiredColor)) {
-            let materialWithDesiredColor = materialsByColor.get(desiredColor);
-            if (materialWithDesiredColor == undefined) {
-               materialWithDesiredColor = new THREE.MeshPhongMaterial({color: desiredColor.getHex()});
-               materialsByColor.set(desiredColor, materialWithDesiredColor);
-            }
-            sphere.material = materialWithDesiredColor;
-            sphere.geometry.uvsNeedUpdate = true;
+      // Find sphere's desired color: priority is colorHighlight, then color, then default
+      let color = node.colorHighlight;
+      if (color == undefined) color = node.color;
+      if (color == undefined) color = DisplayDiagram.DEFAULT_NODE_COLOR;
+      const desiredColor = new THREE.Color(color);
+
+      // If sphere is not desired color set material color to desired color
+      if (!sphere.material.color.equals(desiredColor)) {
+         let materialWithDesiredColor = materialsByColor.get(desiredColor);
+         if (materialWithDesiredColor == undefined) {
+            materialWithDesiredColor = new THREE.MeshPhongMaterial({color: desiredColor.getHex()});
+            materialsByColor.set(desiredColor, materialWithDesiredColor);
          }
+         sphere.material = materialWithDesiredColor;
+         sphere_geometry.uvsNeedUpdate = true;
+      }
 
-         // if node has ring, draw it
-         if (node.ringHighlight !== undefined) {
-            this._drawRing(node, sphere.geometry.parameters.radius);
-         }
+      // if node has ring, draw it
+      if (node.ringHighlight !== undefined) {
+         this._drawRing(node, sphere_geometry.parameters.radius);
+      }
 
-         // if node has square, draw it
-         if (node.squareHighlight !== undefined) {
-            this._drawSquare(node, sphere.geometry.parameters.radius);
-         }
-      } );
+      // if node has square, draw it
+      if (node.squareHighlight !== undefined) {
+         this._drawSquare(node, sphere_geometry.parameters.radius);
+      }
    }
 
    _drawRing(node /*: Diagram3D.Node */, nodeRadius /*: number */) {
@@ -443,8 +447,8 @@ class DisplayDiagram {
          return;
       }
 
-      const spheres = ((this.getGroup('spheres').children /*: any */) /*: Array<THREE.Mesh> */);
-      const radius = ((spheres.find( (el) => el != undefined ) /*: any */) /*: THREE.Mesh */).geometry.parameters.radius;
+      const spheres = ((this.getGroup('spheres').children /*: any */) /*: Array<THREE.Mesh> */),
+            radius = ((spheres[0].geometry /*: any */) /*: THREE.Geometry */).parameters.radius;
       let canvas_width, canvas_height, label_font;
       const big_node_limit = 0.1, small_node_limit = 0.05;
       if (radius >= big_node_limit) {
@@ -519,14 +523,15 @@ class DisplayDiagram {
                lineWidth = use_webgl_native_lines ? 1
                               : (isIOS ? DisplayDiagram.IOS_LINE_WIDTH
                                  : (this.getSize().w < 400 ? 1 : diagram3D.lineWidth)),
+               line_vertices = this.getLineVertices(line),
                geometry = new THREE.Geometry();
-
-         geometry.vertices = this._getLineVertices(line);
+         geometry.vertices = line_vertices;
 
          let newLine;
          if (lineWidth <= maxLineWidth) {
             const lineMaterial = new THREE.LineBasicMaterial({color: lineColor, linewidth: lineWidth});
             newLine = new THREE.Line(geometry, lineMaterial);
+            newLine.userData = {line: line, vertices: line_vertices};
          } else {
             const lineMaterial = new MeshLineMaterial({
                color: new THREE.Color(lineColor),
@@ -536,17 +541,58 @@ class DisplayDiagram {
                resolution: new THREE.Vector2(((window.innerWidth /*: any */) /*: float */),
                                              ((window.innerHeight /*: any */) /*: float */)),
                fog: true,
-           });
+            });
             const meshLine = new MeshLine();
             meshLine.setGeometry(geometry);
             newLine = new THREE.Mesh(meshLine.geometry, lineMaterial);
+            meshLine.geometry.userData = newLine;
+            newLine.userData = {line: line, vertices: line_vertices, meshLine: meshLine};
          }
-         newLine.userData = {line: line, vertices: geometry.vertices, color: lineColor};
          lineGroup.add(newLine);
       } )
    }
 
-   _getLineVertices(line /*: Diagram3D.Line */) /*: Array<THREE.Vector3> */ {
+   redrawLine (line_or_mesh /*: THREE.Line | THREE.Mesh */) {
+      const line_userData = ((line_or_mesh.userData /*: any */) /*: LineUserData */);
+
+      // Update object differently depending on whether it's a Line or a Mesh
+      const new_vertices = this.getLineVertices(line_userData.line);
+      line_userData.vertices = new_vertices;
+      if (line_or_mesh.isLine) {
+         // Just update geometry in current line if they're the same length
+         const line = ((line_or_mesh /*: any */) /*: THREE.Line */);
+         if (line.geometry.vertices.length != new_vertices.length) {
+            line.geometry.dispose();
+            line.geometry = new THREE.Geometry()
+            line.geometry.vertices = new_vertices;
+         }
+         line.geometry.vertices = new_vertices;
+         line.geometry.verticesNeedUpdate = true;
+      } else {
+         const mesh = ((line_or_mesh /*: any */) /*: THREE.Mesh */);
+         
+         // Create new Geometry
+         const geometry = new THREE.Geometry();
+         geometry.vertices = new_vertices;
+
+         // Create new MeshLine
+         const mesh_line = new MeshLine();
+         mesh_line.setGeometry(geometry);
+         line_userData.meshLine = mesh_line;
+
+         // Replace geometry in current mesh and dispose of current geometry
+         const old_geometry = mesh.geometry;
+         mesh.geometry = ((mesh_line.geometry /*: any */) /*: THREE.BufferGeometry */);
+         mesh.geometry.userData = mesh;  // create link in BufferGeometry back to Mesh
+         old_geometry.dispose();
+      }
+
+      if (line_userData.line.arrowhead) {
+         this.redrawArrowhead(line_or_mesh);
+      }
+   }
+
+   getLineVertices (line /*: Diagram3D.Line */) /*: Array<THREE.Vector3> */ {
       const spheres = ((this.getGroup('spheres').children /*: any */) /*: Array<THREE.Mesh> */),
             vertices = line.vertices;
 
@@ -562,8 +608,10 @@ class DisplayDiagram {
       }
 
       // arc around intervening points
-      const thisSphere = ((spheres.find( (sphere) => sphere.geometry.parameters.radius !== undefined ) /*: any */) /*: THREE.Mesh */),
-            radius = thisSphere.geometry.parameters.radius,
+      line.offset = undefined;
+      const get_radius = (sphere) => ((sphere.geometry /*: any */) /*: THREE.Geometry */).parameters.radius,
+            thisSphere = ((spheres.find( (sphere) => get_radius(sphere) !== undefined ) /*: any */) /*: THREE.Mesh */),
+            radius = get_radius(thisSphere),
             start = vertices[0].point,
             end = vertices[1].point,
             start2end = end.clone().sub(start),
@@ -583,7 +631,7 @@ class DisplayDiagram {
              && x < start2end_len
              && normal.lengthSq() < min_squared_distance )
             {
-               line.offset = (line.offset == undefined) ? 1.7*radius/Math.sqrt(start2end_sq) : line.offset;
+               line.offset = 1.7*radius/Math.sqrt(start2end_sq);
                const points = this._curvePoints(line);
                return points;
             }
@@ -670,12 +718,13 @@ class DisplayDiagram {
                startPoint = startNode.point,
                endNode = ((lineData.vertices[1] /*: any */) /*: Diagram3D.Node */),
                endPoint = endNode.point,
-               nodeRadius = spheres[endNode.element].geometry.parameters.radius,
+               geometry = ((spheres[endNode.element].geometry /*: any */) /*: THREE.Geometry */),
+               nodeRadius = geometry.parameters.radius,
                center2center = startPoint.distanceTo(endPoint),
                headLength = Math.min(nodeRadius, (center2center - 2*nodeRadius)/2),
                headWidth = 0.6 * headLength,
                arrowLength = 1.1 * headLength,
-               color = lineData.color || DisplayDiagram.DEFAULT_LINE_COLOR;
+               color = line.material.color;
          if (center2center <= 2*nodeRadius) {
             return;
          }
@@ -695,8 +744,54 @@ class DisplayDiagram {
             arrowDir = arrowTip.clone().sub(arrowStart).normalize();
          }
          const arrowhead = new THREE.ArrowHelper(arrowDir, arrowStart, arrowLength, color, headLength, headWidth);
+         arrowhead.userData = line;
          arrowheads.add(arrowhead);
       } )
+   }
+
+   redrawArrowhead (line /*: THREE.Line | THREE.Mesh */) {
+      const arrowheadPlacement = ((this.scene.userData /*: any */) /*: Diagram3D */).arrowheadPlacement,
+            arrowheads = this.getGroup('arrowheads'),
+            lineData = ((line.userData /*: any */) /*: LineUserData */).line,
+            startNode = ((lineData.vertices[0] /*: any */) /*: Diagram3D.Node */),
+            startPoint = startNode.point,
+            endNode = ((lineData.vertices[1] /*: any */) /*: Diagram3D.Node */),
+            endPoint = endNode.point,
+            spheres = ((this.getGroup('spheres').children /*: any */) /*: Array<THREE.Mesh> */),
+            geometry = ((spheres[endNode.element].geometry /*: any */) /*: THREE.Geometry */),
+            nodeRadius = geometry.parameters.radius,
+            center2center = startPoint.distanceTo(endPoint),
+            headLength = Math.min(nodeRadius, (center2center - 2*nodeRadius)/2),
+            headWidth = 0.6 * headLength,
+            arrowLength = 1.1 * headLength,
+            color = line.material.color,
+            old_arrowhead = arrowheads.children.find( (arrowhead) => (arrowhead.userData == line) );
+      if (center2center <= 2*nodeRadius) {
+         return;
+      }
+      if (old_arrowhead != undefined) {
+         arrowheads.remove(old_arrowhead);
+      } else {
+         const s = 1;
+      }
+      // 0.001 offset to make arrowhead stop at node surface
+      let arrowStart, arrowDir;
+      if (lineData.offset === undefined) {
+         const length = center2center,
+               arrowPlace = 0.001 + (nodeRadius - 0.1*headLength + (length - 2*nodeRadius - headLength) * arrowheadPlacement) / length;
+         arrowDir = endPoint.clone().sub(startPoint).normalize();
+         arrowStart = new THREE.Vector3().addVectors(startPoint.clone().multiplyScalar(1-arrowPlace), endPoint.clone().multiplyScalar(arrowPlace));
+      } else {
+         const bezier = new THREE.QuadraticBezierCurve3(startPoint, lineData.middle, endPoint),
+               length = bezier.getLength(),
+               arrowPlace = 0.001 + (nodeRadius - 0.1*headLength + (length - 2*nodeRadius - headLength) * arrowheadPlacement)/length,
+               arrowTip = bezier.getPointAt(arrowPlace + headLength/length);
+         arrowStart = bezier.getPointAt(arrowPlace);
+         arrowDir = arrowTip.clone().sub(arrowStart).normalize();
+      }
+      const new_arrowhead = new THREE.ArrowHelper(arrowDir, arrowStart, arrowLength, color, headLength, headWidth);
+      new_arrowhead.userData = line;
+      arrowheads.add(new_arrowhead);
    }
 
    updateChunking(_diagram3D /*: Diagram3D */) {
@@ -826,6 +921,7 @@ class DisplayDiagram {
 
    updateLineWidth(diagram3D /*: Diagram3D */) {
       this.updateLines(diagram3D);
+      this.updateArrowheads(diagram3D);
    }
 
    updateNodeRadius(diagram3D /*: Diagram3D */) {
@@ -854,15 +950,39 @@ class DisplayDiagram {
       this.updateArrowheads(diagram3D);
    }
 
+   // move a Node and its associated label, highlights, lines, etc. to a new location
+   moveSphere(sphere /*: THREE.Mesh */, location /*: THREE.Vector3 */) {
+      // clear existing highlights
+      const highlights = this.getGroup('nodeHighlights');
+      highlights.remove(...highlights.children.filter(
+         (highlight) => GEUtils.equals(highlight.position.toArray(), sphere.position.toArray())
+      ));
+
+      // change sphere position
+      sphere.position.set(...location.toArray());
+
+      // find sphere_index and update the corresponding label's position
+      const spheres = ((this.getGroup('spheres').children /*: any */) /*: Array<THREE.Mesh> */);
+      const sphere_index = spheres.findIndex( (sp) => sp.uuid == sphere.uuid );
+      const label = this.getGroup('labels').children[sphere_index];
+      label.position.set(...location.toArray());
+
+      // update highlights
+      const materialsByColor = spheres.reduce( (materials, sphere) => materials.set(sphere.material.color, sphere.material), new Map() );
+      this.drawHighlight(sphere, materialsByColor);
+   }
+
    // get objects at point x,y using raycasting
    getObjectsAtPoint (x /*: number */, y /*: number */) /*: Array<THREE.Object3D> */ {
       const mouse = new THREE.Vector2(x, y);
       const raycaster = new THREE.Raycaster();
       raycaster.setFromCamera(mouse, this.camera);
 
-      let intersects = raycaster.intersectObjects( ((this.getGroup('spheres').children /*: any */) /*: THREE.Object3D */), false );
+      const spheres = ((this.getGroup('spheres').children /*: any */) /*: Array<THREE_Raycastable> */);
+      let intersects = raycaster.intersectObjects(spheres, false);
       if (intersects.length == 0) {
-         intersects = raycaster.intersectObjects( ((this.getGroup('chunks').children /*: any */) /*: THREE.Object3D */), false );
+         const chunks = ((this.getGroup('chunks').children /*: any */) /*: Array<THREE_Raycastable> */);
+         intersects = raycaster.intersectObjects(chunks, false);
       }
 
       return intersects.map( (intersect) => intersect.object );

@@ -1,7 +1,8 @@
 
-declare class MeshLine {
-  +geometry: THREE.Geometry;
+declare class MeshLine implements THREE_Raycastable {
+  +geometry: THREE.BufferGeometry;
    setGeometry(geometry: THREE.Geometry) : void;
+   raycast(raycaster: THREE.Raycaster, intersects: Array<THREE_Intersection>) : void;
 }
 
 declare class MeshLineMaterial extends THREE.Material {

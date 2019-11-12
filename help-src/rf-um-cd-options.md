@@ -50,13 +50,16 @@ You can customize the appearance of any Cayley diagram by dragging the nodes
 in it around in three dimensions to any position you like. To drag the nodes
 around, hold the shift key while you click on the node and drag. [On a touch
 device just start a one-finger drag on the node.] It will
-move in the plane parallel to the screen. To reset the diagram to its
-original configuration, simply reload the page in your browser.
+move in the plane parallel to the screen. As you move the node you may find
+that it obscures some of the arcs; you can [change the curvature of the arcs
+and arrows in the diagram](#changing-the-arcing-of-arrows-in-the-diagram) to
+avoid this. To reset the diagram to its original configuration, simply reload
+the page in your browser.
 
 Note that because [chunking](#chunking) depends on the positions of nodes in
-the diagram, if you reposition the nodes in this way you will not be able to
-chunk cosets without allowing *Group Explorer* to put the nodes back to
-their original position.
+the diagram, if you reposition the nodes in this way you may have to redisplay
+the chunking. Simply reselect the desired subgroup from the "Chunk this subgroup"
+drop-down list at the bottom of the Diagram tab to do so.
 
 ## Changing the arcing of arrows in the diagram
 
@@ -66,11 +69,13 @@ node to its destination node. The exceptions to this are when the diagram is
 inherently round, and so the arrows follow the curvature of the diagram, or
 when there are nodes in the way and a curved path would avoid them.
 
-However you can feel free to improve on *Group Explorer*'s decisions in this
-matter by clicking on an arc in the diagram while holding down the shift
-key, and dragging to increase or decrease the amount of arcing it has. [On
-a touch device just start a one-finger drag on the arc.] You
-will not be able to change the direction of the arcing, only its amount.
+However you can feel free to improve on *Group Explorer*'s decisions
+in this matter by clicking in the middle of an arc in the diagram
+while holding down the shift key, and dragging to increase or decrease
+the amount of arcing it has. [On a touch device just start a
+one-finger drag on the arc. The arc color will change when it is
+selected.] You will not be able to change the direction of the arcing,
+only its amount.
 
 ## The Diagram tab
 

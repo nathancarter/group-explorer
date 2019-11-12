@@ -22,6 +22,7 @@ declare class THREE {
    static Sprite : typeof THREE_Sprite;
    static LineBasicMaterial : typeof THREE_LineBasicMaterial;
    static Geometry : typeof THREE_Geometry;
+   static BufferGeometry : typeof THREE_BufferGeometry;
    static Line : typeof THREE_Line;
    static Material : typeof THREE_Material;
    static QuadraticBezierCurve3 : typeof THREE_QuadraticBezierCurve3;
@@ -36,6 +37,9 @@ declare class THREE {
    static Line3 : typeof THREE_Line3;
 }
 
+interface THREE_Raycastable {
+   raycast(raycaster: THREE.Raycaster, intersects: Array<THREE_Intersection>) : void;
+}
 
 declare class THREE_Matrix4 {
    set(number, number, number, number,
@@ -117,6 +121,7 @@ declare class THREE_Object3D {
    matrix: THREE.Matrix4;
    uuid: string;
    id: number;
+   parent: THREE.Object3D;
 }
 
 declare class THREE_Scene extends THREE.Group {
@@ -179,11 +184,13 @@ declare class THREE_SphereGeometry extends THREE.Geometry {
    constructor(radius: number, widthSegments: number, heightSegments: number) : void;
 }
 
-declare class THREE_Mesh extends THREE.Object3D {
-   constructor(geometry: THREE.Geometry, material: THREE.Material) : void;
+declare class THREE_Mesh extends THREE.Object3D implements THREE_Raycastable {
+   constructor(geometry: THREE.Geometry | THREE.BufferGeometry, material: THREE.Material) : void;
+   isMesh: boolean;
    name: string;
    material: THREE.Material;
-   geometry: THREE.Geometry;
+   geometry: THREE.Geometry | THREE.BufferGeometry;
+   raycast(raycaster: THREE.Raycaster, intersects: Array<THREE_Intersection>) : void;
 }
 
 declare class THREE_Texture {
@@ -205,13 +212,25 @@ declare class THREE_LineBasicMaterial extends THREE.Material {
 }
 
 declare class THREE_Geometry {
+   isGeometry: boolean;
    uvsNeedUpdate: boolean;
    parameters: {radius: float};
    vertices: Array<THREE.Vector3>;
+   verticesNeedUpdate: boolean;
+   dispose() : void;
 }
 
-declare class THREE_Line extends THREE.Object3D {
+declare class THREE_BufferGeometry {
+   isBufferGeometry: boolean;
+   dispose(): void;
+   userData: ?any;
+}
+
+declare class THREE_Line extends THREE.Object3D implements THREE_Raycastable {
    constructor(geometry: THREE.Geometry, material: THREE.Material) : void;
+   isLine: boolean;
+   geometry: THREE.Geometry;
+   raycast(raycaster: THREE.Raycaster, intersects: Array<THREE_Intersection>) : void;
 }
 
 declare class THREE_Material {
@@ -246,8 +265,10 @@ declare class THREE_Raycaster {
    linePrecision : number;
    ray : {origin: THREE.Vector3, direction: THREE.Vector3};
    setFromCamera(coords: THREE.Vector2, camera: THREE.PerspectiveCamera) : void;
-   intersectObjects(object: THREE.Object3D, recursive: boolean) : Array<{object: THREE.Object3D}>;
+   intersectObjects(objects: Array<THREE_Raycastable>, recursive: boolean) : Array<THREE_Intersection>;
 }
+
+type THREE_Intersection = {distance: float, object: THREE.Object3D};
 
 declare class THREE_Points extends THREE.Object3D {
    constructor(geometry: THREE.Geometry, material: THREE.Material) : void;
@@ -261,11 +282,14 @@ declare class THREE_Plane {
    normal: THREE.Vector3;
    constructor(): void;
    intersectLine(line: THREE.Line3, target: THREE.Vector3): THREE.Vector3;
-   setFromCoplanarPoints(p1: THREE.Vector3, p2: THREE.Vector3, p3: THREE.Vector3): THREE.Plane;
+   setFromCoplanarPoints(a: THREE.Vector3, b: THREE.Vector3, c: THREE.Vector3): THREE.Plane;
+   setFromNormalAndCoplanarPoint(normal: THREE.Vector3, point: THREE.Vector3): THREE.Plane;
 }
 
 declare class THREE_Line3 {
    constructor(start: THREE.Vector3, end: THREE.Vector3) : void;
    closestPointToPoint(point: THREE.Vector3, clampToLine: boolean, target: THREE.Vector3): THREE.Vector3;
    closestPointToPointParameter(point: THREE.Vector3, clampToLine: boolean): float;
+   distance(): float;
+   distanceSq(): float;
 }

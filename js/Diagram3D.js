@@ -5,6 +5,7 @@
 
 /*::
 import BitSet from './BitSet.js';
+import GEUtils from './GEUtils.js';
 import XMLGroup from './XMLGroup.js';
 
 type PointConstructor = [float, float, float] | THREE.Vector3;
@@ -223,7 +224,7 @@ class Diagram3D {
                                ).toArray();
       const colors = this.arrowColors
                   || Array.from({length: arrows.length},
-                                (_, inx) => '#' + new THREE.Color(`hsl(${360*inx/arrows.length}, 100%, 20%)`).getHexString());
+                                (_, inx) => '#' + new THREE.Color(GEUtils.fromRainbow(inx/arrows.length, 1.0, 0.2)).getHexString());
       this.lines.forEach( (line) => line.color = colors[arrows.indexOf( line.arrow )] );
       if ( this.emitStateChange ) this.emitStateChange();
       return this;

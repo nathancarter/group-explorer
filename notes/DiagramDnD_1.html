@@ -1,0 +1,217 @@
+<html>
+   <head>
+      <title>Illustration for DiagramDnD</title>
+
+      <style type="text/css">
+       canvas {
+          border: 1px solid black;
+       }
+      </style>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/95/three.js"></script>
+      <script>module = { };</script>
+      <script src="https://cdn.jsdelivr.net/npm/three-trackballcontrols@0.0.7/index.js"></script>
+      <script>THREE.TrackballControls = module.exports;</script>
+      <script src="../lib/THREE.MeshLine.js"></script>
+      <script>
+       window.addEventListener('load', load, {once: true});
+
+       var scene,
+           camera,
+           renderer,
+           camControls;
+       
+       var WIDTH = 1500,
+           HEIGHT = 1000;
+
+       function load() {
+          // Scene
+          scene = new THREE.Scene();
+
+          // Renderer
+          renderer = new THREE.WebGLRenderer({preserveDrawingBuffer: true, antialias: true});
+          renderer.setSize(WIDTH, HEIGHT);
+          renderer.setClearColor('white', 1.0);
+          $('#graphic').append(renderer.domElement);
+
+          // Camera
+          camera = new THREE.PerspectiveCamera(41, WIDTH/HEIGHT, 0.1, 2000);
+          camera.position.set(5.5, 3.3, 2);
+          camera.up.set(0, 0, 1.0);
+          camera.lookAt(new THREE.Vector3(-1, -1, 0));
+
+          // Light
+          scene.add(new THREE.AmbientLight());
+
+          const Origin = new THREE.Vector3(-1, -1, -2),
+                Camera = new THREE.Vector3(-1, -1, 2),
+                P = Origin.clone().add(Camera).multiplyScalar(0.5),
+                S = new THREE.Vector3(1, -1, 0),
+                R = new THREE.Vector3(-1, 1.5, 0),
+                r = R.clone().sub(Camera).normalize().add(Camera);
+
+          scene.add(makeSphere(S.toArray(), 0.02));
+          scene.add(makeSphere(S.toArray(), 0.08, {color: '#8C8C8C', opacity: 0.7, transparent: true}));
+          scene.add(makeSphere(R.toArray(), 0.02));
+          scene.add(makeSphere(R.toArray(), 0.08, {color: '#8C8C8C', opacity: 0.7, transparent: true}));
+
+          scene.add(makeMeshLine([Origin, Camera]));
+          scene.add(makeArrowhead([Origin, Camera]));
+          scene.add(makeArrowhead([Origin, new THREE.Vector3(-1, -1, -1)]));
+          scene.add(makeMeshLine([Camera, r]));
+          scene.add(makeArrowhead([Camera, r]));
+          scene.add(makeMeshLine([r, r.clone().addScaledVector(R.clone().sub(r), 1.3)]));
+          scene.add(makeMeshLine([Origin, S]));
+          scene.add(makeArrowhead([Origin, S]));
+          scene.add(makeMeshLine([Origin, R]));
+          scene.add(makeArrowhead([Origin, R]));
+
+          scene.add(makeLine([P, S]));
+          scene.add(makeLine([new THREE.Vector3(0, 0, -0.15).add(P),
+                              new THREE.Vector3(0, 0, -0.15).add(P).addScaledVector(S.clone().sub(P), 0.07),
+                              P.clone().addScaledVector(S.clone().sub(P), 0.07)]));
+
+          scene.add(makeLabel(new THREE.Vector3(0, 0, -0.1).add(Origin), 'Origin', 0.26, 72));
+          scene.add(makeLabel(new THREE.Vector3(0, 0, 0.1).add(Camera), 'Camera', 0.25, 55));
+          scene.add(makeLabel(new THREE.Vector3(0, 0, -0.15).add(Camera), 'raycaster.ray.origin', 1.05, 45));
+          scene.add(makeLabel(new THREE.Vector3(0.5, 0.5, 0.25).add(S), 'Current position', 0.85, 40));
+          scene.add(makeLabel(new THREE.Vector3(0.5, 0.3, 0.2).add(R), 'New position', 0.05, 45));
+
+          scene.add(makeLabel(Origin.clone().multiplyScalar(0.78).addScaledVector(Camera, 0.22), 'camera_direction', -0.08, 55));
+          scene.add(makeLabel(Origin.clone().multiplyScalar(0.15).addScaledVector(S, 0.85), 'curr_position', -0.1, 45));
+          scene.add(makeLabel(Origin.clone().multiplyScalar(0.15).addScaledVector(R, 0.85), 'new_position', 0.95, 50));
+          scene.add(makeLabel(Camera.clone().multiplyScalar(0.6).addScaledVector(r, 0.4), 'raycaster.ray.direction', -0.15, 45));
+          scene.add(makeLabel(Camera.clone().multiplyScalar(0.45).addScaledVector(R, 0.55), 'pick_line', -0.15, 45));
+
+          scene.add(makePlane(new THREE.Vector3(0, 0, 0)));
+
+          // Trackball controls
+          camControls = new THREE.TrackballControls(camera, $('graphic')[0]);
+
+          // showAxes();
+          render();
+       }
+
+       function render() {
+          renderer.render(scene, camera);
+          window.requestAnimationFrame( () => this.render() );
+          this.camControls.update();
+       }
+
+       function makeSphere(location, radius, properties = {color: '#000000'}) {
+          const material = new THREE.MeshPhongMaterial(properties);
+          const geometry = new THREE.SphereGeometry(radius, 10, 10);
+          const sphere = new THREE.Mesh(geometry, material);
+          sphere.position.set(...location);
+
+          return sphere;
+       }
+
+       function makeLine(vertices, color = 'black') {
+          const geometry = new THREE.Geometry();
+          geometry.vertices = vertices;
+          const lineMaterial = new THREE.LineBasicMaterial({color: color});
+          const new_line = new THREE.Line(geometry, lineMaterial);
+
+          return new_line;
+       }
+
+       function makeMeshLine(vertices, dashed = false, color = 'black', lineWidth = 5) {
+          const material_properties = {
+             color: new THREE.Color(color),
+             lineWidth: lineWidth,
+             sizeAttenuation: false,
+             side: THREE.DoubleSide,
+             resolution: new THREE.Vector2(((window.innerWidth /*: any */) /*: float */),
+                                           ((window.innerHeight /*: any */) /*: float */)),
+          };
+          if (dashed) {
+             // set dashArray (whatever that is) from line length
+             material_properties.dashArray = 0.066 / new THREE.Line3(vertices[0], vertices[1]).distance();
+             material_properties.dashOffset = 0;
+             material_properties.dashRatio = 0.5;
+             material_properties.opacity = 1;
+             material_properties.transparent = true;
+          };
+          const material = new MeshLineMaterial(material_properties);
+          const geometry = new THREE.Geometry();
+          geometry.vertices = vertices;
+          const mesh_line = new MeshLine();
+          mesh_line.setGeometry(geometry);
+          const new_line = new THREE.Mesh(mesh_line.geometry, material);
+
+          return new_line;
+       }
+
+       function makeArrowhead(vertices, color = 'black') {
+          const l = vertices[1].clone().sub(vertices[0]),
+                ll = l.length(),
+                t = 1 - 0.21 / ll,
+                origin = vertices[0].clone().multiplyScalar(1-t).addScaledVector(vertices[1], t),
+                line = vertices[1].clone().sub(origin),
+                length = line.length(),
+                dir = line.normalize(),
+                head_length = 0.2,
+                arrowhead = new THREE.ArrowHelper(dir, origin, length, color, head_length, 0.3*head_length);
+
+          return arrowhead;
+       }
+
+       function makeLabel(location, text, x_offset = 0, label_font, color = 'black') {
+          const canvas = document.createElement('canvas'),
+                context = canvas.getContext('2d'),
+                text_width = context.measureText(text).width,
+                short_text = (text_width < 150),
+                label_width = short_text ? 1024 : 2048,
+                label_height = 128,
+                scale = short_text ? 2 : 4;
+          canvas.width = label_width;
+          canvas.height = label_height;
+          context.font = `${label_font}pt Arial`;
+          //context.fillStyle = 'rgba(100, 0, 0, 0.5)';
+          //context.fillRect(0, 0, canvas.width, canvas.height);
+          context.fillStyle = color;
+          context.fillText(text, 0, 0.7*label_height);
+
+          const texture = new THREE.CanvasTexture(canvas),
+                labelMaterial = new THREE.SpriteMaterial({
+                   map: texture,
+                   side: THREE.DoubleSide,
+                   transparent: true,
+                   opacity: 1,
+                   depthWrite: false,
+                }),
+                label = new THREE.Sprite(labelMaterial);
+          label.scale.set(scale, scale*canvas.height/canvas.width, 1.0);
+          label.center = new THREE.Vector2(x_offset/scale, 0.5);
+          label.position.set(...location.toArray());
+          
+          return label;
+       }
+
+       function makePlane(position) {
+          const geometry = new THREE.PlaneGeometry(4,4,1,1);
+          const material = new THREE.MeshBasicMaterial({
+             color: '#E8C8C8',
+             opacity: 0.5,
+             transparent: true,
+             //depthTest: false,
+             depthWrite: false
+          });
+          const plane = new THREE.Mesh(geometry, material);
+          plane.position.set(...position.toArray());
+
+          return plane;
+       }
+
+       function showAxes() {
+          scene.add(makeLine([new THREE.Vector3(0,0,0), new THREE.Vector3(2,0,0)], 'red'));
+          scene.add(makeLine([new THREE.Vector3(0,0,0), new THREE.Vector3(0,2,0)], 'green'));
+          scene.add(makeLine([new THREE.Vector3(0,0,0), new THREE.Vector3(0,0,2)], 'blue'));
+       }
+      </script>
+   </head>
+   <body>
+      <div id="graphic"></div>
+   </body>
+</html>
