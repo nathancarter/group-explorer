@@ -9,7 +9,7 @@ import Library from './js/Library.js';
 import Log from './js/Log.md';
 import MathML from './js/MathML.md';
 import MathUtils from './js/MathUtils.js';
-import Menu from './js/Menu.js';
+import Menu from './js/Menu.md';
 import Multtable from './js/Multtable.js';
 import {CreateNewSheet} from './js/SheetModel.js';
 import setUpGAPCells from './js/ShowGAPCode.js';

@@ -5,7 +5,7 @@ import ArrowMult from './ArrowMult.js';
 import Chunking from './Chunking.js';
 import DiagramChoice from './DiagramChoice.js';
 import Generator from './Generator.js';
-import Menu from '../js/Menu.js';
+import Menu from '../js/Menu.md';
 
 export default
  */

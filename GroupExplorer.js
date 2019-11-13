@@ -8,7 +8,7 @@ import DisplayMulttable from './js/DisplayMulttable.js';
 import GroupURLs from './GroupURLs.js';
 import Library from './js/Library.js';
 import Log from './js/Log.md';
-import Menu from './js/Menu.js';
+import Menu from './js/Menu.md';
 import Multtable from './js/Multtable.js';
 import SymmetryObject from './js/SymmetryObject.js';
 import Template from './js/Template.md';

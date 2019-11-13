@@ -7,7 +7,7 @@ import Library from './js/Library.js';
 import Log from './js/Log.md';
 import MathML from './js/MathML.md';
 import MathUtils from './js/MathUtils.js';
-import Menu from './js/Menu.js';
+import Menu from './js/Menu.md';
 import SymmetryObject from './js/SymmetryObject.js';
 import Template from './js/Template.md';
 import XMLGroup from './js/XMLGroup.js';

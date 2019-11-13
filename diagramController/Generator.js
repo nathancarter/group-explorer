@@ -5,7 +5,7 @@ import CayleyDiagram from '../js/CayleyDiagram.js';
 import type {layout, direction, StrategyArray} from '../js/CayleyDiagram.js';
 import DisplayDiagram from '../js/DisplayDiagram.js';
 import MathML from '../js/MathML.md';
-import Menu from '../js/Menu.js';
+import Menu from '../js/Menu.md';
 import Template from '../js/Template.md';
 import XMLGroup from '../js/XMLGroup.js';
 

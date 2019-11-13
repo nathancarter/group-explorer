@@ -9,7 +9,7 @@ import GEUtils from './js/GEUtils.js';
 import Library from './js/Library.js';
 import Log from './js/Log.md';
 import MathML from './js/MathML.md';
-import Menu from './js/Menu.js';
+import Menu from './js/Menu.md';
 import Template from './js/Template.md';
 import XMLGroup from './js/XMLGroup.js';
 
@@ -335,7 +335,7 @@ class Tooltip {
                             'multi-object-template';
       const $tooltip = $(eval(Template.HTML(template_name)))
                           .appendTo('#graphic');
-      Menu.setMenuTreeLocation({id: 'tooltip'}, location);
+      Menu.setMenuLocation($tooltip, location);
       MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'tooltip']);
 
       return $tooltip;

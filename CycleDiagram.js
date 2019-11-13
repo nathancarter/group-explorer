@@ -8,7 +8,7 @@ import GEUtils from './js/GEUtils.js';
 import Library from './js/Library.js';
 import Log from './js/Log.md';
 import MathML from './js/MathML.md';
-import Menu from './js/Menu.js';
+import Menu from './js/Menu.md';
 import Template from './js/Template.md';
 import XMLGroup from './js/XMLGroup.js';
 

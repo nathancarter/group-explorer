@@ -33,11 +33,20 @@ Used by CayleyDiagram.html, CycleDiagram.html, Multtable.html, SymmetryObject.ht
       <div id="version" style="float: right; font-size: small"></div>
       <script>document.getElementById('version').textContent = Version.label</script>
    </div>
+```
+#### Menu-Submenu Link Template
+A template to make a styled &lt;li&gt; element to link a menu to a submenu in a cascaded menu;
+used by [Menu.makeLink()](../js/Menu.md#menumakelinklabel-link).
 
-   <!-- Template used by Menu.makeLink for subsetDisplay, diagramControler -->
+It refers to the following variables when eval'd (see [Template](../js/Template.md) for more details on Template evaluation):
+  * label -- text to be displayed in generated &lt;li&gt; element
+  * link -- submenu id
+
+```html
    <template id="link-template">
-      <li action="Menu.pinMenu(event)" link="${link}">
+      <li action="Menu.pinSubMenu(event)" link="${link}">
          ${MathML.sansText(label)} <span class="menu-arrow"></span> </li>
    </template>
 </div></body>
 ```
+
