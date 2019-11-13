@@ -4,7 +4,7 @@
 import CayleyDiagram from './js/CayleyDiagram.js';
 import DisplayDiagram from './js/DisplayDiagram.js';
 import type {CayleyDiagramJSON} from './js/DisplayDiagram.js';
-import DiagramDnD from './js/DiagramDnD.js';
+import DiagramDnD from './js/DiagramDnD.md';
 import GEUtils from './js/GEUtils.js';
 import Library from './js/Library.js';
 import Log from './js/Log.js';

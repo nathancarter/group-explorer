@@ -142,6 +142,7 @@ declare class THREE_Color {
    equals(color: THREE.Color): boolean;
    getHexString() : string;
    getHex() : number;
+   set(value: THREE.Color | number | color): THREE.Color;
 };
 
 declare class THREE_WebGLRenderer {
@@ -230,6 +231,7 @@ declare class THREE_Line extends THREE.Object3D implements THREE_Raycastable {
    constructor(geometry: THREE.Geometry, material: THREE.Material) : void;
    isLine: boolean;
    geometry: THREE.Geometry;
+   material: THREE.Material;
    raycast(raycaster: THREE.Raycaster, intersects: Array<THREE_Intersection>) : void;
 }
 
@@ -246,7 +248,7 @@ declare class THREE_QuadraticBezierCurve3 {
 }
 
 declare class THREE_ArrowHelper extends THREE.Object3D {
-   constructor(dir: THREE.Vector3, origin: THREE.Vector3, length: number, color: color, headLength: number, headWidth: number) : void;
+   constructor(dir: THREE.Vector3, origin: THREE.Vector3, length: number, color: number, headLength: number, headWidth: number) : void;
 }
 
 declare class THREE_BoxGeometry extends THREE.Geometry {

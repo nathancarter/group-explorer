@@ -703,7 +703,7 @@ class DisplayDiagram {
       // Log.debug('updateArrowheads');
 
       const spheres = ((this.getGroup('spheres').children /*: any */) /*: Array<THREE.Mesh> */);
-      const lines = this.getGroup('lines').children;
+      const lines = ((this.getGroup('lines').children /*: any */) /*: Array<THREE.Line | THREE.Mesh> */);;
       const arrowheads = this.getGroup('arrowheads');
       arrowheads.remove(...arrowheads.children);
 
@@ -724,7 +724,7 @@ class DisplayDiagram {
                headLength = Math.min(nodeRadius, (center2center - 2*nodeRadius)/2),
                headWidth = 0.6 * headLength,
                arrowLength = 1.1 * headLength,
-               color = line.material.color;
+               color = line.material.color.getHex();
          if (center2center <= 2*nodeRadius) {
             return;
          }
@@ -764,7 +764,7 @@ class DisplayDiagram {
             headLength = Math.min(nodeRadius, (center2center - 2*nodeRadius)/2),
             headWidth = 0.6 * headLength,
             arrowLength = 1.1 * headLength,
-            color = line.material.color,
+            color = line.material.color.getHex(),
             old_arrowhead = arrowheads.children.find( (arrowhead) => (arrowhead.userData == line) );
       if (center2center <= 2*nodeRadius) {
          return;

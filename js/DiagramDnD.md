@@ -71,7 +71,7 @@ class DiagramDnD {
    touch_handler: (TouchEvent) => void;
    async_painter: ?number;  // asyncPainter timeoutID; null if asyncPainter not queued
    start_time: number;  // time of first touch event
-   object: ?(THREE.Mesh | THREE.Line);
+   picked_object: ?(THREE.Mesh | THREE.Line);
  */
 /*
 ```
@@ -86,7 +86,7 @@ Registers event handlers for touch or non-touch devices, as appropriate.
       this.raycaster = new THREE.Raycaster();
       this.raycaster.linePrecision = 0.02;
       this.async_painter = null;
-      this.object = null;
+      this.picked_object = null;
 
       if (GEUtils.isTouchDevice()) {
          this.touch_handler = (touchEvent /*: TouchEvent */) => this.touchHandler(touchEvent);
@@ -123,8 +123,8 @@ calls[`repaint()`](#asynchronous-painter)directly to update the diagram one last
 
       switch (mouseEvent.type) {
       case 'mousedown':
-         this.object = this.pickedObject();
-         if (this.object != undefined) {
+         this.picked_object = this.pickedObject();
+         if (this.picked_object != undefined) {
             this.canvas.addEventListener('mousemove', this.mouse_handler);
             this.canvas.addEventListener('mouseup', this.mouse_handler);
             this.canvas.style.cursor = 'move';  // change cursor to grab
@@ -194,42 +194,47 @@ its arrowhead when it is picked, and then change it back upon completion of the 
       this.eventLocation.y = -( (touch.clientY - bounding_box.top) / this.canvas.height) * 2 + 1;
 
       switch (touchEvent.type) {
-      case 'touchstart':
-         this.object = this.pickedObject();
-         if (this.object != undefined) {
+      case 'touchstart': {
+         const picked_object = this.picked_object = this.pickedObject();
+         if (picked_object != undefined) {
             this.canvas.addEventListener('touchmove', this.touch_handler);
             this.canvas.addEventListener('touchend', this.touch_handler);
             
-            if (this.object.parent.name == 'lines') {
-                this.object.material.color.set('gray'); // turn arc gray to show it's been selected
+            if (picked_object.parent.name == 'lines') {
+                picked_object.material.color.set('gray'); // turn arc gray to show it's been selected
                 this.asyncPainter();
             } else {
                 this.async_painter = window.setTimeout(() => this.asyncPainter(), 300);
             }
             this.start_time = touchEvent.timeStamp;
-         }
+         } }
          break;
 
       case 'touchmove':
-         if (this.object != undefined) {
+         if (this.picked_object != undefined) {
             touchEvent.stopPropagation();
             touchEvent.preventDefault();
          }
          break;
 
       case 'touchend':
-         // reset arc, arrowhead color
-         if (this.object.parent.name == 'lines') {
-            this.object.material.color.set(this.object.userData.line.color);
+         const picked_object = this.picked_object;
+         if (picked_object != undefined) {
+            // reset arc, arrowhead color
+            if (picked_object.parent.name == 'lines') {
+               picked_object.material.color.set(picked_object.userData.line.color);
+            }
+
+            // don't redraw if this appears to be a short tap over a node (to display a tooltip)
+            //   redrawing makes the node jump in an unintended way
+            if (touchEvent.timeStamp - this.start_time > 300 || picked_object.parent.name == 'lines') {
+               this.repaint();
+               touchEvent.preventDefault();  // prevents generation of mouse-like events (like a click)
+            }
+
+            this.endDrag();
+            touchEvent.stopPropagation();  // prevents propagation that might cause, e.g., canvas rotation 
          }
-         // don't redraw if this appears to be a short tap over a node (to display a tooltip)
-         //   redrawing makes the node jump in an unintended way
-         if (touchEvent.timeStamp - this.start_time > 300 || this.object.parent.name == 'lines') {
-            this.repaint();
-            touchEvent.preventDefault();  // prevents generation of mouse-like events (like a click)
-         }
-         this.endDrag();
-         touchEvent.stopPropagation();  // prevents propagation that might cause, e.g., canvas rotation
          break;
 
       default:
@@ -297,7 +302,7 @@ Generally clean up after a drag-and-drop operation
 * remove event handlers that are only used during a manual rearrangement
 * return the cursor to its default style (generally an arrow)
 * stop [asynchronous painting](#asynchronous-painting)
-* clear`this.object`so even if the [asynchronous painter] runs it will exit without doing anything
+* clear`this.picked_object`so even if the [asynchronous painter] runs it will exit without doing anything
 
 ```js
 */
@@ -305,7 +310,7 @@ Generally clean up after a drag-and-drop operation
       this.canvas.style.cursor = '';
       window.clearTimeout( ((this.async_painter /*: any */) /*: number */) );
       this.async_painter = null;
-      this.object = undefined;
+      this.picked_object = undefined;
       if (GEUtils.isTouchDevice()) {
          this.canvas.removeEventListener('touchmove', this.touch_handler);
          this.canvas.removeEventListener('touchend', this.touch_handler);   
@@ -322,18 +327,18 @@ Done asynchronously to avoid stacking up move events faster than we can paint th
 */
    asyncPainter () {
       this.repaint();
-      if (this.object != undefined) {
+      if (this.picked_object != undefined) {
          this.async_painter = window.setTimeout(() => this.asyncPainter(), 0);
       }
    }
 
    // update line to run through current mouse position
    repaint () {
-      if (this.object != undefined) {
-         if (this.object.parent.name == 'lines') {
-            this.redrawArc(this.object);
-         } else if (this.object.parent.name == 'spheres') {
-            this.redrawSphere( ((this.object /*: any */) /*: THREE.Mesh */) );
+      if (this.picked_object != undefined) {
+         if (this.picked_object.parent.name == 'lines') {
+            this.redrawArc(this.picked_object);
+         } else if (this.picked_object.parent.name == 'spheres') {
+            this.redrawSphere( ((this.picked_object /*: any */) /*: THREE.Mesh */) );
          }
       }
    }
