@@ -13,7 +13,7 @@
  */
 
 /*::
-import Log from './Log.js';
+import Log from './Log.md';
 
 export type JQueryDnD = JQuery & {
    draggableAndSizable: () => void,
@@ -459,8 +459,8 @@ import type {CayleyDiagramJSON} from './DisplayDiagram.js';
 import DisplayMulttable from './DisplayMulttable.js';
 import type {MulttableJSON} from './DisplayMulttable.js';
 import Library from './Library.js';
-import Log from './Log.js';
-import MathML from './MathML.js';
+import Log from './Log.md';
+import MathML from './MathML.md';
 import Multtable from './Multtable.js';
 import XMLGroup from './XMLGroup.js';
 import type {XMLGroupJSON, BriefXMLGroupJSON} from './XMLGroup.js';

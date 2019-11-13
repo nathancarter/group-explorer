@@ -1,8 +1,8 @@
 // @flow
 /*::
-import MathML from '../js/MathML.js';
-import Menu from '../js/Menu.js';
-import Template from '../js/Template.js';
+import MathML from '../js/MathML.md';
+import Menu from '../js/Menu.md';
+import Template from '../js/Template.md';
 import XMLGroup from '../js/XMLGroup.js';
 
 import AbstractSubset from './AbstractSubset.js';
@@ -164,8 +164,8 @@ SSD.AbstractSubset = class AbstractSubset {
 // @flow
 /*::
 import BitSet from '../js/BitSet.js';
-import MathML from '../js/MathML.js';
-import Template from '../js/Template.js';
+import MathML from '../js/MathML.md';
+import Template from '../js/Template.md';
 import SubgroupFinder from '../js/SubgroupFinder.js';
 import XMLGroup from '../js/XMLGroup.js';
 
@@ -235,8 +235,8 @@ SSD.Subgroup = class Subgroup extends SSD.AbstractSubset {
 // @flow
 /*::
 import BitSet from '../js/BitSet.js';
-import MathML from '../js/MathML.js';
-import Template from '../js/Template.js';
+import MathML from '../js/MathML.md';
+import Template from '../js/Template.md';
 import XMLGroup from '../js/XMLGroup.js';
 
 import SSD from './subsets.js';
@@ -306,8 +306,8 @@ SSD.Subset = class Subset extends SSD.AbstractSubset {
 // @flow
 /*::
 import BitSet from '../js/BitSet.js';
-import MathML from '../js/MathML.js';
-import Template from '../js/Template.js';
+import MathML from '../js/MathML.md';
+import Template from '../js/Template.md';
 import XMLGroup from '../js/XMLGroup.js';
 
 import SSD from './subsets.js';
@@ -377,7 +377,7 @@ SSD.SubsetEditor = class SubsetEditor {
 }
 // @flow
 /*::
-import MathML from '../js/MathML.js';
+import MathML from '../js/MathML.md';
 
 import SSD from './subsets.js';
 
@@ -417,7 +417,7 @@ SSD.AbstractPartition = class AbstractPartition {
 // @flow
 /*::
 import BitSet from '../js/BitSet.js';
-import Template from '../js/Template.js';
+import Template from '../js/Template.md';
 import XMLGroup from '../js/XMLGroup.js';
 
 import SSD from './subsets.js';
@@ -472,7 +472,7 @@ SSD.PartitionSubset = class PartitionSubset extends SSD.AbstractSubset {
 }
 // @flow
 /*::
-import MathML from '../js/MathML.js';
+import MathML from '../js/MathML.md';
 import XMLGroup from '../js/XMLGroup.js';
 
 import SSD from './subsets.js';
@@ -506,7 +506,7 @@ SSD.OrderClasses = class OrderClasses extends SSD.AbstractPartition {
 }
 // @flow
 /*::
-import MathML from '../js/MathML.js';
+import MathML from '../js/MathML.md';
 import XMLGroup from '../js/XMLGroup.js';
 
 import SSD from './subsets.js';
@@ -536,7 +536,7 @@ SSD.ConjugacyClasses = class ConjugacyClasses extends SSD.AbstractPartition {
 }
 // @flow
 /*::
-import MathML from '../js/MathML.js';
+import MathML from '../js/MathML.md';
 import XMLGroup from '../js/XMLGroup.js';
 
 import SSD from './subsets.js';
@@ -583,9 +583,9 @@ SSD.Cosets = class Cosets extends SSD.AbstractPartition {
 // @flow
 /*::
 import GEUtils from '../js/GEUtils.js';
-import MathML from '../js/MathML.js';
-import Menu from '../js/Menu.js';
-import Template from '../js/Template.js';
+import MathML from '../js/MathML.md';
+import Menu from '../js/Menu.md';
+import Template from '../js/Template.md';
 import XMLGroup from '../js/XMLGroup.js';
 
 import SSD from './subsets.js';
@@ -705,7 +705,7 @@ import ArrowMult from './ArrowMult.js';
 import Chunking from './Chunking.js';
 import DiagramChoice from './DiagramChoice.js';
 import Generator from './Generator.js';
-import Menu from '../js/Menu.js';
+import Menu from '../js/Menu.md';
 
 export default
  */
@@ -765,9 +765,9 @@ import BitSet from '../js/BitSet.js';
 import CayleyDiagram from '../js/CayleyDiagram.js';
 import type {layout, direction, StrategyArray} from '../js/CayleyDiagram.js';
 import DisplayDiagram from '../js/DisplayDiagram.js';
-import MathML from '../js/MathML.js';
-import Menu from '../js/Menu.js';
-import Template from '../js/Template.js';
+import MathML from '../js/MathML.md';
+import Menu from '../js/Menu.md';
+import Template from '../js/Template.md';
 import XMLGroup from '../js/XMLGroup.js';
 
 import DC from './diagram.js';
@@ -1040,7 +1040,7 @@ DC.Generator = class {
 
 // @flow
 /*::
-import Template from '../js/Template.js';
+import Template from '../js/Template.md';
 import XMLGroup from '../js/XMLGroup.js';
 
 import DC from './diagram.js';
@@ -1103,9 +1103,9 @@ DC.DiagramChoice = class {
 import CayleyDiagram from '../js/CayleyDiagram.js';
 import DisplayDiagram from '../js/DisplayDiagram.js';
 import GEUtils from '../js/GEUtils.js';
-import MathML from '../js/MathML.js';
-import Menu from '../js/Menu.js';
-import Template from '../js/Template.js';
+import MathML from '../js/MathML.md';
+import Menu from '../js/Menu.md';
+import Template from '../js/Template.md';
 import XMLGroup from '../js/XMLGroup.js';
 
 import DC from './diagram.js';
@@ -1248,7 +1248,7 @@ DC.ArrowMult = class ArrowMult {
 import CayleyDiagram from '../js/CayleyDiagram.js';
 import DisplayDiagram from '../js/DisplayDiagram.js';
 import GEUtils from '../js/GEUtils.js';
-import Template from '../js/Template.js';
+import Template from '../js/Template.md';
 import XMLGroup from '../js/XMLGroup.js';
 
 import DC from './diagram.js';
