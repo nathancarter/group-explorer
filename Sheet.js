@@ -2,7 +2,7 @@
 
 /*::
 import GroupURLs from './GroupURLs.js';
-import Log from './js/Log.js';
+import Log from './js/Log.md';
 import {
    SheetModel,
    SheetElement,

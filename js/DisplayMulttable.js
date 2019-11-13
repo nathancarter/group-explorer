@@ -1,6 +1,6 @@
 // @flow
 /*::
-import Log from './Log.js';
+import Log from './Log.md';
 import Multtable from './Multtable.js';
 import type {Coloration} from './Multtable.js';
 

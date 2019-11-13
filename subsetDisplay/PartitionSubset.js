@@ -1,7 +1,7 @@
 // @flow
 /*::
 import BitSet from '../js/BitSet.js';
-import Template from '../js/Template.js';
+import Template from '../js/Template.md';
 import XMLGroup from '../js/XMLGroup.js';
 
 import SSD from './subsets.js';

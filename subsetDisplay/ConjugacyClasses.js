@@ -1,6 +1,6 @@
 // @flow
 /*::
-import MathML from '../js/MathML.js';
+import MathML from '../js/MathML.md';
 import XMLGroup from '../js/XMLGroup.js';
 
 import SSD from './subsets.js';

@@ -13,7 +13,7 @@
  */
 
 /*::
-import Log from './Log.js';
+import Log from './Log.md';
 
 export type JQueryDnD = JQuery & {
    draggableAndSizable: () => void,

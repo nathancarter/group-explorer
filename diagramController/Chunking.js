@@ -3,7 +3,7 @@
 import CayleyDiagram from '../js/CayleyDiagram.js';
 import DisplayDiagram from '../js/DisplayDiagram.js';
 import GEUtils from '../js/GEUtils.js';
-import Template from '../js/Template.js';
+import Template from '../js/Template.md';
 import XMLGroup from '../js/XMLGroup.js';
 
 import DC from './diagram.js';

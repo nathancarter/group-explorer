@@ -4,12 +4,12 @@
 import Diagram3D from './js/Diagram3D.js';
 import DisplayDiagram from './js/DisplayDiagram.js';
 import Library from './js/Library.js';
-import Log from './js/Log.js';
-import MathML from './js/MathML.js';
+import Log from './js/Log.md';
+import MathML from './js/MathML.md';
 import MathUtils from './js/MathUtils.js';
 import Menu from './js/Menu.js';
 import SymmetryObject from './js/SymmetryObject.js';
-import Template from './js/Template.js';
+import Template from './js/Template.md';
 import XMLGroup from './js/XMLGroup.js';
 
 import VC from './visualizerFramework/visualizer.js';

@@ -2,9 +2,9 @@
 
 /*::
 import Library from './js/Library.js';
-import Log from './js/Log.js';
+import Log from './js/Log.md';
 import setUpGAPCells from './js/ShowGAPCode.js';
-import Template from './js/Template.js';
+import Template from './js/Template.md';
 import XMLGroup from './js/XMLGroup.js';
  */
 

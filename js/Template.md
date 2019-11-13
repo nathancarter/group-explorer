@@ -17,7 +17,7 @@ The subset display panel in the visualizer pages provides a ready example. The f
 </template>
 ```
 
-To use the template it is retrieved with a jQuery call, its HTML extracted as a string, and the result turned into a string literal, as done in the [Template.js](#template-retrieval-caching) code below:
+To use the template it is retrieved with a jQuery call, its HTML extracted as a string, and the result turned into a string literal, as done in the [Template.md](#template-retrieval-caching) code below:
 
 ```js
 '`' + $('template[id="subgroup_template"]').html() + '`'
@@ -62,7 +62,7 @@ While this example may seem too simple to provide much justification for introdu
 
 ## Template retrieval caching
 
-Since template retrieval is done repeatedly, the actual template retrieval code caches results by template id in a class static variable, as you can see here: [Template.js](../js/Template.js).
+Since template retrieval is done repeatedly, the actual template retrieval code caches results by template id in a class static variable, as you can see here: [Template.md](../js/Template.md).
 
 ```js
  */

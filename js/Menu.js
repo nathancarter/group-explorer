@@ -1,7 +1,7 @@
 // @flow
 
 /*::
-import Template from './Template.js';
+import Template from './Template.md';
 
 type MenuTree = {id: string, children?: Array<MenuTree>};
 

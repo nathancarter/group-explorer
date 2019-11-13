@@ -1,8 +1,8 @@
 // @flow
 /*::
-import MathML from '../js/MathML.js';
+import MathML from '../js/MathML.md';
 import Menu from '../js/Menu.js';
-import Template from '../js/Template.js';
+import Template from '../js/Template.md';
 import XMLGroup from '../js/XMLGroup.js';
 
 import AbstractSubset from './AbstractSubset.js';

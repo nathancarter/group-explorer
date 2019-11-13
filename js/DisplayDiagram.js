@@ -9,8 +9,8 @@ import type {layout, direction} from './CayleyDiagram.js';
 import Diagram3D from './Diagram3D.js';
 import GEUtils from './GEUtils.js';
 import type {NodeTree, MeshTree} from './GEUtils.js';
-import Log from './Log.js';
-import MathML from './MathML.js';
+import Log from './Log.md';
+import MathML from './MathML.md';
 
 export type CayleyDiagramJSON = {
    groupURL: string,

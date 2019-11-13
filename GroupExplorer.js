@@ -7,11 +7,11 @@ import DisplayDiagram from './js/DisplayDiagram.js';
 import DisplayMulttable from './js/DisplayMulttable.js';
 import GroupURLs from './GroupURLs.js';
 import Library from './js/Library.js';
-import Log from './js/Log.js';
+import Log from './js/Log.md';
 import Menu from './js/Menu.js';
 import Multtable from './js/Multtable.js';
 import SymmetryObject from './js/SymmetryObject.js';
-import Template from './js/Template.js';
+import Template from './js/Template.md';
 import XMLGroup from './js/XMLGroup.js';
  */
 

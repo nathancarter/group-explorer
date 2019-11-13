@@ -56,7 +56,7 @@ import CayleyDiagram from './CayleyDiagram.js';
 import DisplayDiagram from './DisplayDiagram.js';
 import type {LineUserData, SphereUserData} from './DisplayDiagram.js';
 import GEUtils from './GEUtils.js';
-import Log from './Log.js';
+import Log from './Log.md';
 
 export default
  */

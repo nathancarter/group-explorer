@@ -10,7 +10,7 @@
 /*::
 import BasicGroup from './BasicGroup.js';
 import type {BasicGroupJSON} from './BasicGroup.js';
-import MathML from './MathML.js';
+import MathML from './MathML.md';
 
 // Cayley diagram from XML
 type XMLCayleyDiagram = {

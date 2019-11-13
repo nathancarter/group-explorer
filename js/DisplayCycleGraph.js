@@ -1,6 +1,6 @@
 // @flow
 /*::
-import Log from './Log.js';
+import Log from './Log.md';
 import CycleGraph from './CycleGraph.js';
 import type {Highlights} from './CycleGraph.js';
 

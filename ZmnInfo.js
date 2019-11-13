@@ -5,11 +5,11 @@ import BasicGroup from './js/BasicGroup.js';
 import type {StrategyArray, layout, direction} from './js/CayleyDiagram.js';
 import IsomorphicGroups from './js/IsomorphicGroups.js';
 import Library from './js/Library.js';
-import Log from './js/Log.js';
+import Log from './js/Log.md';
 import MathUtils from './js/MathUtils.js';
-import MathML from './js/MathML.js';
+import MathML from './js/MathML.md';
 import {CreateNewSheet} from './js/SheetModel.js';
-import Template from './js/Template.js';
+import Template from './js/Template.md';
 import XMLGroup from './js/XMLGroup.js';
  */
 

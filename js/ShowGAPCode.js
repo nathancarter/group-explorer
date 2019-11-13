@@ -24,7 +24,7 @@ const GAPlink = '<a target="_blank" href="help/rf-um-gap">What is GAP?</a>';
  */
 /*::
 import XMLGroup from './XMLGroup.js';
-import Log from './Log.js';
+import Log from './Log.md';
 
 var group: XMLGroup;
 var sagecell: any;

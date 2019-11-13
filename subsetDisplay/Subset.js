@@ -1,8 +1,8 @@
 // @flow
 /*::
 import BitSet from '../js/BitSet.js';
-import MathML from '../js/MathML.js';
-import Template from '../js/Template.js';
+import MathML from '../js/MathML.md';
+import Template from '../js/Template.md';
 import XMLGroup from '../js/XMLGroup.js';
 
 import SSD from './subsets.js';

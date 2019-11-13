@@ -27,7 +27,7 @@
  */
 /*::
 import BasicGroup from './BasicGroup.js';
-import Log from './Log.js';
+import Log from './Log.md';
 import type {MSG_loadGroup} from './SheetModel.js';
 import XMLGroup from './XMLGroup.js';
 import type {XMLGroupJSON, BriefXMLGroupJSON} from './XMLGroup.js';

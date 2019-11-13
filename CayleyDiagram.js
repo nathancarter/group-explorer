@@ -7,10 +7,10 @@ import type {CayleyDiagramJSON} from './js/DisplayDiagram.js';
 import DiagramDnD from './js/DiagramDnD.md';
 import GEUtils from './js/GEUtils.js';
 import Library from './js/Library.js';
-import Log from './js/Log.js';
-import MathML from './js/MathML.js';
+import Log from './js/Log.md';
+import MathML from './js/MathML.md';
 import Menu from './js/Menu.js';
-import Template from './js/Template.js';
+import Template from './js/Template.md';
 import XMLGroup from './js/XMLGroup.js';
 
 import SSD from './subsetDisplay/subsets.js';
