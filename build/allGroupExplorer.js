@@ -4845,10 +4845,8 @@ class DisplayDiagram {
    showGraphic(diagram3D /*: Diagram3D */) {
       // Log.debug('showGraphic');
 
-      // save diagram for use by DiagramDnD
-      if (this.camControls !== undefined && diagram3D.isCayleyDiagram) {
-         this.scene.userData = diagram3D;
-      }
+      // save diagram
+      this.scene.userData = diagram3D;
 
       this.setCamera(diagram3D);
       this.setBackground(diagram3D);
