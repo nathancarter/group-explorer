@@ -65,8 +65,8 @@ class BitSet {
    }
 
    complement() /*: BitSet */ {
-      const mask = 0xFFFFFFFF >>> (0x20 - (this.len & 0x1F));
-      for (let i = 0; i < this.arr.length; i++) {
+      for (let i = 0, len = this.len; i < this.arr.length; i++, len -= 32) {
+         const mask = 0xFFFFFFFF >>> (32 - Math.min(32,len));
          this.arr[i] = (~ this.arr[i]) & mask;
       }
       return this;
@@ -75,7 +75,7 @@ class BitSet {
    clone() /*: BitSet */ {
       let other = new BitSet(this.len);
       for (let i = 0; i < this.arr.length; i++) {
-	 other.arr[i] = this.arr[i];
+         other.arr[i] = this.arr[i];
       }
       return other;
    }
