@@ -924,6 +924,7 @@ class DisplayDiagram {
 
    updateNodeRadius(diagram3D /*: Diagram3D */) {
       this.updateNodes(diagram3D);
+      this.updateHighlights(diagram3D);
       this.updateLabels(diagram3D);
       this.updateArrowheads(diagram3D);
    }
