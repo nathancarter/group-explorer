@@ -4824,6 +4824,8 @@ class DisplayDiagram {
                  resetCamera: (options.hasOwnProperty('resetCamera')) ? options.resetCamera : true};
       const img = new Image();
 
+      this.scene.userData = diagram3D;
+
       if ( options.resetCamera ) this.setCamera(diagram3D);
       this.setBackground(diagram3D);
       this.updateLights(diagram3D);
