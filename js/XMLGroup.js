@@ -47,7 +47,6 @@ export type XMLGroupJSON = {
    representationIndex: number,
    cayleyDiagrams: Array<XMLCayleyDiagram>,
    symmetryObjects: Array<XMLSymmetryObject>,
-   _labels: Array<Array<string>>,
 
    // XMLGroup properties set elsewhere
    lastModifiedOnServer: string,
@@ -89,7 +88,7 @@ class XMLGroup extends BasicGroup {
    representationIndex: number;
    cayleyDiagrams: Array<XMLCayleyDiagram>;
    symmetryObjects: Array<XMLSymmetryObject>;
-   _labels: Array<Array<string>>;
+   _labels: ?Array<string>;
 
    lastModifiedOnServer: string;
    URL: string;
@@ -219,6 +218,7 @@ class XMLGroup extends BasicGroup {
             this.representationIndex = inx + this.representations.length;
          }
       }
+      this._labels = undefined;  // representation has changed, invalidate labels
    }
 
    get representationIsUserDefined () {
@@ -229,19 +229,13 @@ class XMLGroup extends BasicGroup {
       return (this.representationIndex < this.representations.length) ? this.reps[this.representationIndex] : this.representation;
    }
 
+   // unicode text for current representation
    get labels() /*: Array<string> */ {
-      if (this.representationIsUserDefined) {
-         return this.representation.map( (rep) => MathML.toUnicode(rep) );
-      } else {
-         if (this._labels == undefined) {
-            this._labels = Array(this.representations.length).fill([]);
-         }
-         const labels /*: Array<Array<string>> */ = this._labels;
-         const representationIndex /*: number */ = this.representationIndex;
-         const result /*: Array<string> */ = labels[representationIndex];
-         labels[representationIndex] = (result.length == 0) ? this.representation.map( (rep) => MathML.toUnicode(rep) ) : result;
-         return labels[representationIndex];
+      if (this._labels == undefined) {
+         this._labels = this.representation.map( (rep) => MathML.toUnicode(rep) );
       }
+
+      return this._labels;
    }
 
    get longestLabel() /*: mathml */ {

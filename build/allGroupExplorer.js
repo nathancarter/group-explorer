@@ -898,7 +898,6 @@ export type XMLGroupJSON = {
    representationIndex: number,
    cayleyDiagrams: Array<XMLCayleyDiagram>,
    symmetryObjects: Array<XMLSymmetryObject>,
-   _labels: Array<Array<string>>,
 
    // XMLGroup properties set elsewhere
    lastModifiedOnServer: string,
@@ -940,7 +939,7 @@ class XMLGroup extends BasicGroup {
    representationIndex: number;
    cayleyDiagrams: Array<XMLCayleyDiagram>;
    symmetryObjects: Array<XMLSymmetryObject>;
-   _labels: Array<Array<string>>;
+   _labels: ?Array<string>;
 
    lastModifiedOnServer: string;
    URL: string;
@@ -1070,6 +1069,7 @@ class XMLGroup extends BasicGroup {
             this.representationIndex = inx + this.representations.length;
          }
       }
+      this._labels = undefined;  // representation has changed, invalidate labels
    }
 
    get representationIsUserDefined () {
@@ -1080,19 +1080,13 @@ class XMLGroup extends BasicGroup {
       return (this.representationIndex < this.representations.length) ? this.reps[this.representationIndex] : this.representation;
    }
 
+   // unicode text for current representation
    get labels() /*: Array<string> */ {
-      if (this.representationIsUserDefined) {
-         return this.representation.map( (rep) => MathML.toUnicode(rep) );
-      } else {
-         if (this._labels == undefined) {
-            this._labels = Array(this.representations.length).fill([]);
-         }
-         const labels /*: Array<Array<string>> */ = this._labels;
-         const representationIndex /*: number */ = this.representationIndex;
-         const result /*: Array<string> */ = labels[representationIndex];
-         labels[representationIndex] = (result.length == 0) ? this.representation.map( (rep) => MathML.toUnicode(rep) ) : result;
-         return labels[representationIndex];
+      if (this._labels == undefined) {
+         this._labels = this.representation.map( (rep) => MathML.toUnicode(rep) );
       }
+
+      return this._labels;
    }
 
    get longestLabel() /*: mathml */ {
@@ -2253,6 +2247,7 @@ class MathML {
    static MATHML_2_HTML: string;
    static xsltProcessor: XSLTProcessor;
    static Cache: Map<string, string>;
+   static UnicodeCache: Map<mathml, string>;
  */
 /*
 ```
@@ -2353,12 +2348,20 @@ class MathML {
    }
 
    static toUnicode(mathml /*: mathml */) /*: string */ {
-      const $html = $( MathML.toHTML(mathml) );
+      let result = MathML.UnicodeCache.get(mathml);
 
-      $html.find('sub').each( (_,el) => $(el).text($(el).text().split('').map(ch => MathML.subscripts[ch]).join('')) );
-      $html.find('sup').each( (_,el) => $(el).text($(el).text().split('').map(ch => MathML.superscripts[ch]).join('')));
+      if (result == undefined) {
+         const $html = $( MathML.toHTML(mathml) );
 
-      return $html.text();
+         $html.find('sub').each( (_,el) => $(el).text($(el).text().split('').map(ch => MathML.subscripts[ch]).join('')) );
+         $html.find('sup').each( (_,el) => $(el).text($(el).text().split('').map(ch => MathML.superscripts[ch]).join('')));
+
+         result = $html.text();
+
+         MathML.UnicodeCache.set(mathml, result);
+      }
+
+      return result;
    }
 /*
 ```
@@ -2635,6 +2638,7 @@ class MathML {
 
       // Create MathML.Cache
       MathML.Cache = new Map();
+      MathML.UnicodeCache = new Map();
    }
 
 }
