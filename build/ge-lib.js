@@ -4842,7 +4842,7 @@ class DisplayDiagram {
       this.renderer.setSize(w, h);
    }
    getSize() /*: {w: number, h: number} */ {
-       const size = this.renderer.getSize();
+       const size = this.renderer.getSize(new THREE.Vector2());
        return {w: size.width, h: size.height};
    }
 
@@ -5693,10 +5693,10 @@ class DisplayDiagram {
       const raycaster = new THREE.Raycaster();
       raycaster.setFromCamera(mouse, this.camera);
 
-      const spheres = ((this.getGroup('spheres').children /*: any */) /*: Array<THREE_Raycastable> */);
+      const spheres = this.getGroup('spheres').children;
       let intersects = raycaster.intersectObjects(spheres, false);
       if (intersects.length == 0) {
-         const chunks = ((this.getGroup('chunks').children /*: any */) /*: Array<THREE_Raycastable> */);
+         const chunks = this.getGroup('chunks').children;
          intersects = raycaster.intersectObjects(chunks, false);
       }
 
