@@ -221,12 +221,16 @@ class XMLGroup extends BasicGroup {
       }
    }
 
+   get representationIsUserDefined () {
+      return this.representationIndex >= this.representations.length;
+   }
+
    get rep() /*: Array<mathml> */ {
       return (this.representationIndex < this.representations.length) ? this.reps[this.representationIndex] : this.representation;
    }
 
    get labels() /*: Array<string> */ {
-      if (this.representationIndex > this.representations.length) {
+      if (this.representationIsUserDefined) {
          return this.representation.map( (rep) => MathML.toUnicode(rep) );
       } else {
          if (this._labels == undefined) {

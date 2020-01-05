@@ -161,15 +161,16 @@ function displayDynamic() {
    // Default element names
    if (group.representation.length != 0) {
       $('#default-element-names').html(MathML.csList(group.elements.map( (el) => group.representation[el] )));
-      if (group.representationIndex < group.representations.length) {
-         $('#default-element-names').append('<br>This representation was loaded from the group file.');
-      } else {
+      if (group.representationIsUserDefined) {
          $('#default-element-names').append('<br>This representation is user-defined; see below.');
+      } else {
+         $('#default-element-names').append('<br>This representation was loaded from the group file.');
       }
    }
 
    // Loaded element names
-   if (group.representations.length > 1 || group.representationIndex > group.representations.length) {
+   $('#loaded-naming-schemes').html('');
+   if (group.representations.length > 1 || group.representationIsUserDefined) {
       const fragment = group
          .representations
          .reduce( (frag, rep, index) => {

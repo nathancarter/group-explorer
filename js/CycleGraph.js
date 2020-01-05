@@ -135,10 +135,10 @@ class CycleGraph {
    layOutElementsAndPaths() {
       // sort the elements by the length of their name, as text
       var eltsByName = this.group.elements.slice();
-      if ( this.group.representations ) {
+      if ( this.group.representation ) {
          eltsByName.sort( ( a, b ) => {
-            var aName = this.group.representations[this.group.representationIndex][a];
-            var bName = this.group.representations[this.group.representationIndex][b];
+            var aName = this.group.representation[a];
+            var bName = this.group.representation[b];
             return aName.length < bName.length ? -1 : (aName.length > bName.length ?  1 : 0);
          } );
       }

@@ -1125,12 +1125,16 @@ class XMLGroup extends BasicGroup {
       }
    }
 
+   get representationIsUserDefined () {
+      return this.representationIndex >= this.representations.length;
+   }
+
    get rep() /*: Array<mathml> */ {
       return (this.representationIndex < this.representations.length) ? this.reps[this.representationIndex] : this.representation;
    }
 
    get labels() /*: Array<string> */ {
-      if (this.representationIndex > this.representations.length) {
+      if (this.representationIsUserDefined) {
          return this.representation.map( (rep) => MathML.toUnicode(rep) );
       } else {
          if (this._labels == undefined) {
@@ -6481,10 +6485,10 @@ class CycleGraph {
    layOutElementsAndPaths() {
       // sort the elements by the length of their name, as text
       var eltsByName = this.group.elements.slice();
-      if ( this.group.representations ) {
+      if ( this.group.representation ) {
          eltsByName.sort( ( a, b ) => {
-            var aName = this.group.representations[this.group.representationIndex][a];
-            var bName = this.group.representations[this.group.representationIndex][b];
+            var aName = this.group.representation[a];
+            var bName = this.group.representation[b];
             return aName.length < bName.length ? -1 : (aName.length > bName.length ?  1 : 0);
          } );
       }
