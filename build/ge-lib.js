@@ -1009,11 +1009,11 @@ class XMLGroup extends BasicGroup {
 
       let $xml /*: JQuery */;
       if (typeof(text) == 'string') {
-         // Replacing named entities with values ensure that later fragment parsing succeeds...
-         const cleanText = text.replace(/&Zopf;/g, "&#8484;")
-                               .replace(/&times;/g, "&#215;")
-                               .replace(/&ltimes;/g, "&#8905;")
-                               .replace(/&rtimes;/g, "&#8906;")
+         // Replacing named entities with unicode characters to ensure that later fragments parse successfully...
+         const cleanText = text.replace(/&Zopf;/g, "ℤ")
+                               .replace(/&times;/g, "×")
+                               .replace(/&ltimes;/g, "⋉")
+                               .replace(/&rtimes;/g, "⋊")
                                .replace(/<br.>/g, "&lt;br/&gt;");  // hack to read fgb notes
          $xml = $($.parseXML(cleanText));
       } else {
@@ -1819,12 +1819,12 @@ Most of what appears on the screen in GE3 is dynamic HTML, created at runtime by
 
 *(Note that example code may be simplified from the actual implementation.)*
 
-The subset display panel in the visualizer pages provides a ready example. The format for a subgroup is given by a template tag like this, similar to those in [subsets.html](../subsetDisplay/subsets.html) (Note: &amp;#x27E8; and &amp;#x27E9; are entity numbers for mathematical left and right angle brackets, &#x27E8; and &#x27e9;.):
+The subset display panel in the visualizer pages provides a ready example. The format for a subgroup is given by a template tag like this, similar to those in [subsets.html](../subsetDisplay/subsets.html):
 
 ```html
 <template id="subgroup_template">
    <li id="${this.id}">
-      ${this.name} = &#x27E8; ${generators} &#x27E9; is a subgroup of ${subgroupOrder}
+      ${this.name} = ⟨ ${generators} ⟩ is a subgroup of ${subgroupOrder}
    </li>
 </template>
 ```
@@ -1839,7 +1839,7 @@ When executed, `Template.HTML` produces the template contents as a string litera
 
 ```js
 `<li id="${this.id}">
-     ${this.name} = &#x27E8; ${generators} &#x27E9; is a subgroup of order ${subgroupOrder}
+     ${this.name} = ⟨ ${generators} ⟩ is a subgroup of order ${subgroupOrder}
  </li>`
 ```
 
@@ -1855,7 +1855,7 @@ The expressions enclosed by curly braces ${...} are evaluated and replaced in th
 
 ```html
 <li id="1">
-    <i>H<i><sub>1</sub> = &#x27E8; <i>r</i><sup>2</sup> &#x27E9; is a subgroup of order 2.
+    <i>H<i><sub>1</sub> = ⟨ <i>r</i><sup>2</sup> ⟩ is a subgroup of order 2.
 </li>
 ```
 
@@ -1867,7 +1867,7 @@ $('#subgroups').append(subgroupLine)
 
 to give the following line in the list of subgroups:
 
-&nbsp;&nbsp;&nbsp;&nbsp;<i>H</i><sub>1</sub> = &#x27E8; <i>r</i><sup>2</sup> &#x27E9; is a subgroup of order 2.
+&nbsp;&nbsp;&nbsp;&nbsp;<i>H</i><sub>1</sub> = ⟨ <i>r</i><sup>2</sup> ⟩ is a subgroup of order 2.
 
 While this example may seem too simple to provide much justification for introducing a sort of arcane use of HTML5 templates, in practice they get considerably more involved. There are quite a number of three-deep floating menus in `subsetDisplay`, for example.
 
@@ -4043,7 +4043,7 @@ vector as a percentage of the **start-end** vector, a number from 0 to 1.
     * The sign of the offset is positive if**`pick`**is on the opposite side of the **start-end**
     vector from**`center.`** This means that the**`start-pick-end`**triangle has the same
     orientation as the**`start-end-center`**triangle or, using vector cross products, that
-    <br>&nbsp;&nbsp;&nbsp;&nbsp;**`(end-start`⨯`center-end)`·`(pick-start`⨯`end-pick)`** <br>is
+    <br>&nbsp;&nbsp;&nbsp;&nbsp;**`(end-start`⨯`center-end)`⋅`(pick-start`⨯`end-pick)`** <br>is
     positive.
 
 After combining these results and calculating the new arc offset, update the

@@ -341,7 +341,7 @@ function showQuotientSheet ( indexOfN /*: number */, type /*: VisualizerType */)
          x : L, y : T-100, w : 5*W+4*gap, h : 50,
          text : 'Short Exact Sequence showing '
               + MathML.toUnicode( group.name ) + ' / '
-              + MathML.toUnicode( libraryN.name ) + ' &cong; '
+              + MathML.toUnicode( libraryN.name ) + ' ≅ '
               + MathML.toUnicode( libraryQ.name ),
          fontSize : '20pt', alignment : 'center'
       },

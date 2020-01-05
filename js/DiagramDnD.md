@@ -405,7 +405,7 @@ vector as a percentage of the **start-end** vector, a number from 0 to 1.
     * The sign of the offset is positive if**`pick`**is on the opposite side of the **start-end**
     vector from**`center.`** This means that the**`start-pick-end`**triangle has the same
     orientation as the**`start-end-center`**triangle or, using vector cross products, that
-    <br>&nbsp;&nbsp;&nbsp;&nbsp;**`(end-start`⨯`center-end)`·`(pick-start`⨯`end-pick)`** <br>is
+    <br>&nbsp;&nbsp;&nbsp;&nbsp;**`(end-start`⨯`center-end)`⋅`(pick-start`⨯`end-pick)`** <br>is
     positive.
 
 After combining these results and calculating the new arc offset, update the

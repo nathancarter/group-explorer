@@ -154,7 +154,7 @@
       ${SSD.SubsetMenu.showingOrderClasses() ? '' : eval(Template.HTML('all-order-classes-template'))}
       <li action="SSD.displayList[${this.id}].closure">
          ${MathML.sansText('the closure of')} ${name}, 
-         ${MathML.sans('<mtext mathvariant="bold">&#x27E8;</mtext>')}${name}${MathML.sans('<mtext mathvariant="bold">&#x27E9;</mtext>')}
+         ${MathML.sans('<mtext mathvariant="bold">⟨</mtext>')}${name}${MathML.sans('<mtext mathvariant="bold">⟩</mtext>')}
       </li>
       ${Menu.makeLink('an intersection', 'intersection-menu')}
       ${Menu.makeLink('a union', 'union-menu')}
@@ -189,7 +189,7 @@
       ${SSD.SubsetMenu.showingOrderClasses() ? '' : eval(Template.HTML('all-order-classes-template'))}
       <li action="SSD.displayList[${this.id}].closure">
          ${MathML.sansText('the closure of')} ${this.name}, 
-         ${MathML.sans('<mtext mathvariant="bold">&#x27E8;</mtext>')}${this.name}${MathML.sans('<mtext mathvariant="bold">&#x27E9;</mtext>')}
+         ${MathML.sans('<mtext mathvariant="bold">⟨</mtext>')}${this.name}${MathML.sans('<mtext mathvariant="bold">⟩</mtext>')}
       </li>
       ${Menu.makeLink('an intersection', 'intersection-menu')}
       ${Menu.makeLink('a union', 'union-menu')}

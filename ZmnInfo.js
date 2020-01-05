@@ -69,11 +69,11 @@ function formatGroup() {
 }
 
 function statement ( m /*: number */, n /*: number */, bool /*: boolean */ ) {
-   return MathML.sans( MathML.sub( '&Zopf;', m * n ) )
+   return MathML.sans( MathML.sub( 'ℤ', m * n ) )
         + ` is ${bool ? '' : 'not '}isomorphic to `
-        + MathML.sans( `<msub><mi>&Zopf;</mi><mn>${m}</mn></msub>`
-                     + '<mo>&times;</mo>'
-                     + `<msub><mi>&Zopf;</mi><mn>${n}</mn></msub>` );
+        + MathML.sans( `<msub><mi>ℤ;</mi><mn>${m}</mn></msub>`
+                     + '<mo>×</mo>'
+                     + `<msub><mi>ℤ;</mi><mn>${n}</mn></msub>` );
 }
 
 function allOffers ( product /*: groupElement */ ) /*: html */ {
@@ -89,8 +89,8 @@ function allOffers ( product /*: groupElement */ ) /*: html */ {
 }
 
 function showZnmIsomorphismSheet ( m /*: groupElement */, n /*: groupElement */ ) {
-   const Z = ( k ) => `<msub><mi>&#8484;</mi><mn>${k}</mn></msub>`;
-   const prod = ( A, B ) => `<mrow>${A}<mo>&#215;</mo>${B}</mrow>`;
+   const Z = ( k ) => `<msub><mi>ℤ</mi><mn>${k}</mn></msub>`;
+   const prod = ( A, B ) => `<mrow>${A}<mo>×;</mo>${B}</mrow>`;
    const a = group.elementOrders.indexOf( m );
    const b = group.elementOrders.indexOf( n );
    const ab = group.mult( a, b );
@@ -160,8 +160,8 @@ function showZnmIsomorphismSheet ( m /*: groupElement */, n /*: groupElement */ 
 
 function showNoZnmIsomorphismSheet ( m /*: groupElement */, n /*: groupElement */ ) {
    // define constants similar to those in showZnmIsomorphismSheet()
-   const Z = ( k ) => `<msub><mi>&#8484;</mi><mn>${k}</mn></msub>`;
-   const prod = ( A, B ) => `<mrow>${A}<mo>&#215;</mo>${B}</mrow>`;
+   const Z = ( k ) => `<msub><mi>ℤ</mi><mn>${k}</mn></msub>`;
+   const prod = ( A, B ) => `<mrow>${A}<mo>×;</mo>${B}</mrow>`;
    const hmar = 20, vmar = 20, hsep = 20, vsep = 20,
          W = 300, H = W, hdrH = 50, txtH = 100;
    // build the group Z_m x Z_n and find it in the group library.

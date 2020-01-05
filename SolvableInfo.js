@@ -72,7 +72,7 @@ function formatGroup() {
             .reverse()
             .map( el => makeGroupRef(el) );
          decompositionDisplay.push(makeGroupRef(IsomorphicGroups.map[1][0]));
-         decompositionDisplay = decompositionDisplay.reverse().join(' &#x25c5; ');  // ◅ 'is normal in' character
+         decompositionDisplay = decompositionDisplay.reverse().join(' ◅ ');  // ◅ 'is normal in' character
          $rslt.append(eval(Template.HTML('solvable')));
          for (let i = 0; i < decomposition.length - 1; i++) {
             let g = decomposition[i];
@@ -278,7 +278,7 @@ function showSolvableDecompositionSheet ( type /*: VisualizerType */ ) {
          sheetElementsAsJSON.push( {
             className : 'TextElement',
             text : MathML.toUnicode( ((entry.group /*: any */) /*: {name?: string} */).name || '<mtext>(unnamed)</mtext>' ) + ' / '
-                 + MathML.toUnicode( ((previous.group /*: any */) /*: {name?: string} */).name || '<mtext>(unnamed)</mtext>' ) + ' &cong; '
+                 + MathML.toUnicode( ((previous.group /*: any */) /*: {name?: string} */).name || '<mtext>(unnamed)</mtext>' ) + ' ≅ '
                  + MathML.toUnicode( ((entry.quotientByPrevious /*: any */) /*: {name?: string} */).name || '<mtext>(unnamed)</mtext>'),
             x : L+index*W+index*hgap+bottomShift, y : T+2*H+vgap+txtH/2,
             w : W, h : txtH,
