@@ -5,6 +5,8 @@ import GEUtils from './GEUtils.js';
 import Subgroup from './Subgroup.js';
 import XMLGroup from './XMLGroup.js';
 
+import type {Tree} from './GEUtils.js';
+
 export type Coloration = 'Rainbow' | 'Grayscale' | 'None';
 
 export default
@@ -37,8 +39,8 @@ class Multtable {
 
    organizeBySubgroup(subgroupIndex /*: number */) /*: Multtable */ {
       const subgroup = this.group.subgroups[subgroupIndex];
-      this.elements = GEUtils.flatten_el(
-         this.group.cosetsArray(GEUtils.flatten_el(this.group.closureArray(subgroup.generators)), false) );
+      this.elements = GEUtils.flatten(
+         this.group.cosetsArray(GEUtils.flatten(this.group.closureArray(subgroup.generators)), false) );
       this.organizingSubgroup = subgroupIndex;
       this._colors = null;
       return this;

@@ -2,15 +2,7 @@
 /*::
 import Diagram3D from './Diagram3D.js';
 
-// Tree structures (should be generic Tree<T>, but Flow has trouble with that)
-export type ElementTree = Array<Elem>;
-export type Elem = groupElement | Array<Elem>;
-
-export type NodeTree = Array<Nd>;
-export type Nd = Diagram3D.Node | Array<Nd>;
-
-export type MeshTree = Array<Msh>;
-export type Msh = THREE.Mesh | Array<Msh>;
+export type Tree<T> = Array< T | Tree<T> >;
 
 export default
  */
@@ -27,26 +19,16 @@ class GEUtils {
       return false;
    }
 
-   static _flatten(arr /*: Array<any> */) /*: Array<any> */ {
-      return arr.reduce(
+   static flatten/*:: <T> */(tree /*: Tree<T> */) /*: Array<T> */ {
+      return tree.reduce(
          (flattened, el) => {
             if (Array.isArray(el)) {
-               flattened.push(...GEUtils._flatten(el))
+               flattened.push(...GEUtils.flatten( ((el /*: any */) /*: Tree<T> */) ))
             } else {
                flattened.push(el)
             }
             return flattened;
          }, [] );
-   }
-
-   static flatten_el(arr /*: ElementTree | Array<Array<groupElement>> */) /*: Array<groupElement> */ {
-      return GEUtils._flatten(arr);
-   }
-   static flatten_nd(arr /*: NodeTree | Array<Array<Diagram3D.Node>> */) /*: Array<Diagram3D.Node> */ {
-      return GEUtils._flatten(arr);
-   }
-   static flatten_msh(arr /*: MeshTree */) /*: Array<THREE.Mesh> */ {
-      return GEUtils._flatten(arr);
    }
 
    static last/*:: <T> */(arr /*: Array<T> */) /*: T */ {

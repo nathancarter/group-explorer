@@ -4,7 +4,7 @@
 import BitSet from './BitSet.js';
 import Diagram3D from './Diagram3D.js';
 import GEUtils from './GEUtils.js';
-import type {ElementTree, Elem, NodeTree, Nd} from './GEUtils.js';
+import type {Tree} from './GEUtils.js';
 import Library from './Library.js';
 import XMLGroup from './XMLGroup.js';
 
@@ -65,7 +65,7 @@ class _CayleyDiagram_LinearLayout extends _CayleyDiagram_AbstractLayoutStrategy 
 
       // find a child diameter in <direction>, scale so all fit in [0,1] box
       const target_width = 1.4/(3*num_children - 1);  // heuristic
-      const child_width = this.width(GEUtils.flatten_nd(children), this.direction);
+      const child_width = this.width(GEUtils.flatten( ((children /*: any */) /*: Tree<Diagram3D.Node> */)), this.direction);
       const scale = child_width < target_width ? 1 : target_width / child_width;
 
       // create scale transform
@@ -213,7 +213,7 @@ class CayleyDiagram extends Diagram3D {
 
    strategies: Array<CayleyDiagram.AbstractLayoutStrategy>;
    diagram_name: ?string;
-   ordered_nodes: NodeTree;
+   ordered_nodes: Tree<Diagram3D.Node>;
    chunk: number;  // chunking group.subgroups index; 0 (trivial subgroup) => no chunking
 
    // fields unused in GE, added for compatibility with JSON methods in DisplayDiagram.js
@@ -294,20 +294,20 @@ class CayleyDiagram extends Diagram3D {
       this.emitStateChange();
    }
 
-   _generateNodes() /*: ElementTree */ {
+   _generateNodes() /*: Tree<groupElement> */ {
       const generators = this.strategies.map( (strategy) => strategy.generator );
 
       const node_list = this.strategies.reduce( (nodes, strategy, inx) => {
          const [newNodes, newBitSet] = this._extendSubgroup(nodes, generators.slice(0, inx+1));
          this.strategies[inx].bitset = newBitSet;
-         return (inx == 0) ? ((GEUtils.flatten_el(newNodes) /*: any */) /*: ElementTree */) : newNodes;
+         return (inx == 0) ? ((GEUtils.flatten(newNodes) /*: any */) /*: Tree<groupElement> */) : newNodes;
       }, [0] );
 
       this.emitStateChange();
       return node_list;
    }
 
-   _extendSubgroup(H_prev /*: ElementTree */, generators /*: Array<groupElement> */) /*: [ElementTree, BitSet] */ {
+   _extendSubgroup(H_prev /*: Tree<groupElement> */, generators /*: Array<groupElement> */) /*: [Tree<groupElement>, BitSet] */ {
       const deepMultiply = (g, arr) => {
          if (Array.isArray(arr)) {
             return arr.map( (el) => deepMultiply(g, el) );
@@ -320,7 +320,7 @@ class CayleyDiagram extends Diagram3D {
 
       const new_generator = generators[generators.length - 1];
       const result = [H_prev];
-      const result_bitset = new BitSet(this.group.order, GEUtils.flatten_el(H_prev));
+      const result_bitset = new BitSet(this.group.order, GEUtils.flatten(H_prev));
       Array.from({length: this.group.elementOrders[new_generator]})
            .reduce( (cycle) => (cycle.push(this.group.mult(GEUtils.last(cycle), new_generator)), cycle), [0])
            .forEach( (el) => {
@@ -345,7 +345,7 @@ class CayleyDiagram extends Diagram3D {
       return [result, result_bitset];
    }
 
-   _transposeNodes(node_list /*: ElementTree */) /*: NodeTree */ {
+   _transposeNodes(node_list /*: Tree<groupElement> */) /*: Tree<Diagram3D.Node> */ {
       const copyPush = (arr /*: Array<groupElement> */, el /*: groupElement */) /*: Array<groupElement> */ => {
          const result = arr.slice();
          result.push(el);
@@ -363,7 +363,7 @@ class CayleyDiagram extends Diagram3D {
             Array(transpose_allocations[transpose_index]).fill().map( (_) => makeEmpty(transpose_index + 1) );
 
       // traverse node_list, inserting new Diagram3D.Node into transpose
-      const traverse = (nodes /*: groupElement | ElementTree */, indices /*: Array<groupElement> */ = []) => {
+      const traverse = (nodes /*: groupElement | Tree<groupElement> */, indices /*: Array<groupElement> */ = []) => {
          if (Array.isArray(nodes)) {
             nodes.forEach( (el,inx) => { traverse(el, copyPush(indices, inx)) } );
          } else {
@@ -378,13 +378,13 @@ class CayleyDiagram extends Diagram3D {
       }
 
       // now actually do the work
-      const result /*: NodeTree */ = makeEmpty();
+      const result /*: Tree<Diagram3D.Node> */ = makeEmpty();
       traverse(node_list);
 
       return result;
    }
 
-   _layout(nested_nodes /*: Diagram3D.Node | NodeTree */,
+   _layout(nested_nodes /*: Diagram3D.Node | Tree<Diagram3D.Node> */,
            nested_strategies /*: Array<CayleyDiagram.AbstractLayoutStrategy> */ = this.strategies.slice().sort( (a,b) => a.nesting_level - b.nesting_level )
            ) /*: Array<Diagram3D.Node> */ {
 
@@ -393,7 +393,7 @@ class CayleyDiagram extends Diagram3D {
          const child_results = [...nested_nodes.map( (children) => this._layout(children, nested_strategies) )]
          nested_strategies.push(strategy);
          const layout_results = strategy.doLayout(child_results);
-         return GEUtils.flatten_nd(layout_results);
+         return GEUtils.flatten( ((layout_results /*: any */) /*: Tree<Diagram3D.Node> */) );
       } else {
          return [nested_nodes];
       }

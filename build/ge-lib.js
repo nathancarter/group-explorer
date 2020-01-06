@@ -55,15 +55,7 @@ THREE = require( 'three' );
 /*::
 import Diagram3D from './Diagram3D.js';
 
-// Tree structures (should be generic Tree<T>, but Flow has trouble with that)
-export type ElementTree = Array<Elem>;
-export type Elem = groupElement | Array<Elem>;
-
-export type NodeTree = Array<Nd>;
-export type Nd = Diagram3D.Node | Array<Nd>;
-
-export type MeshTree = Array<Msh>;
-export type Msh = THREE.Mesh | Array<Msh>;
+export type Tree<T> = Array< T | Tree<T> >;
 
 export default
  */
@@ -80,26 +72,16 @@ class GEUtils {
       return false;
    }
 
-   static _flatten(arr /*: Array<any> */) /*: Array<any> */ {
-      return arr.reduce(
+   static flatten/*:: <T> */(tree /*: Tree<T> */) /*: Array<T> */ {
+      return tree.reduce(
          (flattened, el) => {
             if (Array.isArray(el)) {
-               flattened.push(...GEUtils._flatten(el))
+               flattened.push(...GEUtils.flatten( ((el /*: any */) /*: Tree<T> */) ))
             } else {
                flattened.push(el)
             }
             return flattened;
          }, [] );
-   }
-
-   static flatten_el(arr /*: ElementTree | Array<Array<groupElement>> */) /*: Array<groupElement> */ {
-      return GEUtils._flatten(arr);
-   }
-   static flatten_nd(arr /*: NodeTree | Array<Array<Diagram3D.Node>> */) /*: Array<Diagram3D.Node> */ {
-      return GEUtils._flatten(arr);
-   }
-   static flatten_msh(arr /*: MeshTree */) /*: Array<THREE.Mesh> */ {
-      return GEUtils._flatten(arr);
    }
 
    static last/*:: <T> */(arr /*: Array<T> */) /*: T */ {
@@ -502,7 +484,7 @@ MathUtils.init();
 
 /*::
 import BitSet from './BitSet.js';
-import type {ElementTree, Elem} from './GEUtils.js';
+import type {Tree} from './GEUtils.js';
 import MathUtils from './MathUtils.js';
 import Subgroup from './Subgroup.js';
 import type {SubgroupJSON} from './Subgroup.js';
@@ -834,11 +816,11 @@ class BasicGroup {
 
    // returns closure of passed generators as an array of arrays of ...
    // generators may be passed as a bitset, array, or a single element
-   closureArray(generators /*: BitSet | Array<groupElement> | groupElement */) /*: ElementTree */ {
-      const deepMultiply = (array /*: ElementTree */, factor , elementsUsed ) =>
-            array.map( (el /*: groupElement | Array<Elem> */) => {
+   closureArray(generators /*: BitSet | Array<groupElement> | groupElement */) /*: Tree<groupElement> */ {
+      const deepMultiply = (array /*: Tree<groupElement> */, factor , elementsUsed ) =>
+            array.map( (el) => {
                if (Array.isArray(el)) {
-                  return deepMultiply(el, factor, elementsUsed);
+                  return deepMultiply( ((el /*: any */) /*: Tree<groupElement> */), factor, elementsUsed);
                } else {
                   const product = this.mult(el, factor);
                   elementsUsed.set(product);
@@ -883,20 +865,20 @@ class BasicGroup {
    }
 
    // calculates cosets of the passed group
-   cosetsArray(subgroup /*: Array<groupElement> */, isLeft /*: ?boolean */ = true) /*: Array<Array<groupElement>> */ {
-      const cosets /*: Array<Array<groupElement>> */ = [subgroup];
-      const cosetReps /*: Array<groupElement> */ = [subgroup[0]];
+   cosetsArray(subgroup /*: Array<groupElement> */, isLeft /*: ?boolean */ = true) /*: Tree<groupElement> */ {
+      const cosets = [subgroup];
+      const cosetReps = [subgroup[0]];
       const todo = new BitSet(this.order, subgroup).complement();
 
       for (let _g = todo.pop(); _g != undefined; _g = todo.pop()) {
          const g = _g;  // to help Flow
          cosetReps.push(g);
-         const newCoset = subgroup.map( (el) => isLeft ? this.multtable[g][el] : this.multtable[el][g] );
+         const newCoset = subgroup.map( (el) => (isLeft ? this.multtable[g][el] : this.multtable[el][g]) );
          cosets.push(newCoset);
          todo.subtract(new BitSet(this.order, newCoset));
       }
 
-      return cosets;
+      return ((cosets /*: any */) /*: Tree<groupElement> */);
    }
 }
 /*
@@ -4179,7 +4161,7 @@ highlighting, labels, lines, and arrowheads.
 import BitSet from './BitSet.js';
 import Diagram3D from './Diagram3D.js';
 import GEUtils from './GEUtils.js';
-import type {ElementTree, Elem, NodeTree, Nd} from './GEUtils.js';
+import type {Tree} from './GEUtils.js';
 import Library from './Library.js';
 import XMLGroup from './XMLGroup.js';
 
@@ -4240,7 +4222,7 @@ class _CayleyDiagram_LinearLayout extends _CayleyDiagram_AbstractLayoutStrategy 
 
       // find a child diameter in <direction>, scale so all fit in [0,1] box
       const target_width = 1.4/(3*num_children - 1);  // heuristic
-      const child_width = this.width(GEUtils.flatten_nd(children), this.direction);
+      const child_width = this.width(GEUtils.flatten( ((children /*: any */) /*: Tree<Diagram3D.Node> */)), this.direction);
       const scale = child_width < target_width ? 1 : target_width / child_width;
 
       // create scale transform
@@ -4388,7 +4370,7 @@ class CayleyDiagram extends Diagram3D {
 
    strategies: Array<CayleyDiagram.AbstractLayoutStrategy>;
    diagram_name: ?string;
-   ordered_nodes: NodeTree;
+   ordered_nodes: Tree<Diagram3D.Node>;
    chunk: number;  // chunking group.subgroups index; 0 (trivial subgroup) => no chunking
 
    // fields unused in GE, added for compatibility with JSON methods in DisplayDiagram.js
@@ -4469,20 +4451,20 @@ class CayleyDiagram extends Diagram3D {
       this.emitStateChange();
    }
 
-   _generateNodes() /*: ElementTree */ {
+   _generateNodes() /*: Tree<groupElement> */ {
       const generators = this.strategies.map( (strategy) => strategy.generator );
 
       const node_list = this.strategies.reduce( (nodes, strategy, inx) => {
          const [newNodes, newBitSet] = this._extendSubgroup(nodes, generators.slice(0, inx+1));
          this.strategies[inx].bitset = newBitSet;
-         return (inx == 0) ? ((GEUtils.flatten_el(newNodes) /*: any */) /*: ElementTree */) : newNodes;
+         return (inx == 0) ? ((GEUtils.flatten(newNodes) /*: any */) /*: Tree<groupElement> */) : newNodes;
       }, [0] );
 
       this.emitStateChange();
       return node_list;
    }
 
-   _extendSubgroup(H_prev /*: ElementTree */, generators /*: Array<groupElement> */) /*: [ElementTree, BitSet] */ {
+   _extendSubgroup(H_prev /*: Tree<groupElement> */, generators /*: Array<groupElement> */) /*: [Tree<groupElement>, BitSet] */ {
       const deepMultiply = (g, arr) => {
          if (Array.isArray(arr)) {
             return arr.map( (el) => deepMultiply(g, el) );
@@ -4495,7 +4477,7 @@ class CayleyDiagram extends Diagram3D {
 
       const new_generator = generators[generators.length - 1];
       const result = [H_prev];
-      const result_bitset = new BitSet(this.group.order, GEUtils.flatten_el(H_prev));
+      const result_bitset = new BitSet(this.group.order, GEUtils.flatten(H_prev));
       Array.from({length: this.group.elementOrders[new_generator]})
            .reduce( (cycle) => (cycle.push(this.group.mult(GEUtils.last(cycle), new_generator)), cycle), [0])
            .forEach( (el) => {
@@ -4520,7 +4502,7 @@ class CayleyDiagram extends Diagram3D {
       return [result, result_bitset];
    }
 
-   _transposeNodes(node_list /*: ElementTree */) /*: NodeTree */ {
+   _transposeNodes(node_list /*: Tree<groupElement> */) /*: Tree<Diagram3D.Node> */ {
       const copyPush = (arr /*: Array<groupElement> */, el /*: groupElement */) /*: Array<groupElement> */ => {
          const result = arr.slice();
          result.push(el);
@@ -4538,7 +4520,7 @@ class CayleyDiagram extends Diagram3D {
             Array(transpose_allocations[transpose_index]).fill().map( (_) => makeEmpty(transpose_index + 1) );
 
       // traverse node_list, inserting new Diagram3D.Node into transpose
-      const traverse = (nodes /*: groupElement | ElementTree */, indices /*: Array<groupElement> */ = []) => {
+      const traverse = (nodes /*: groupElement | Tree<groupElement> */, indices /*: Array<groupElement> */ = []) => {
          if (Array.isArray(nodes)) {
             nodes.forEach( (el,inx) => { traverse(el, copyPush(indices, inx)) } );
          } else {
@@ -4553,13 +4535,13 @@ class CayleyDiagram extends Diagram3D {
       }
 
       // now actually do the work
-      const result /*: NodeTree */ = makeEmpty();
+      const result /*: Tree<Diagram3D.Node> */ = makeEmpty();
       traverse(node_list);
 
       return result;
    }
 
-   _layout(nested_nodes /*: Diagram3D.Node | NodeTree */,
+   _layout(nested_nodes /*: Diagram3D.Node | Tree<Diagram3D.Node> */,
            nested_strategies /*: Array<CayleyDiagram.AbstractLayoutStrategy> */ = this.strategies.slice().sort( (a,b) => a.nesting_level - b.nesting_level )
            ) /*: Array<Diagram3D.Node> */ {
 
@@ -4568,7 +4550,7 @@ class CayleyDiagram extends Diagram3D {
          const child_results = [...nested_nodes.map( (children) => this._layout(children, nested_strategies) )]
          nested_strategies.push(strategy);
          const layout_results = strategy.doLayout(child_results);
-         return GEUtils.flatten_nd(layout_results);
+         return GEUtils.flatten( ((layout_results /*: any */) /*: Tree<Diagram3D.Node> */) );
       } else {
          return [nested_nodes];
       }
@@ -4730,7 +4712,7 @@ import CayleyDiagram from './CayleyDiagram.js';
 import type {layout, direction} from './CayleyDiagram.js';
 import Diagram3D from './Diagram3D.js';
 import GEUtils from './GEUtils.js';
-import type {NodeTree, MeshTree} from './GEUtils.js';
+import type {Tree} from './GEUtils.js';
 import Log from './Log.md';
 import MathML from './MathML.md';
 
@@ -5584,9 +5566,9 @@ class DisplayDiagram {
       } );
 
       let subgroup_name;  // MathML subgroup name, generated first time through
-      const createChunks = (arr /*: NodeTree */, desired, current = diagram3D.strategies.length - 1) /*: Array<THREE.Mesh> */ => {
+      const createChunks = (arr /*: Tree<Diagram3D.Node> */, desired, current = diagram3D.strategies.length - 1) /*: Array<THREE.Mesh> */ => {
          if (current == desired) {
-            const nodes = GEUtils.flatten_nd(arr);
+            const nodes = GEUtils.flatten(  ((arr /*: any */) /*: Tree<Diagram3D.Node> */) );
             const elements = new BitSet(diagram3D.group.order, nodes.map( (node) => node.element ));
             const points = nodes.map( (node) => node.point );
             const box = new THREE.Mesh(box_geometry, box_material);
@@ -5598,10 +5580,10 @@ class DisplayDiagram {
             box.position.set(...centroid(points).toArray());
             return [box];
          } else {
-            // arr is an array of NodeTrees at this point, though the logic that ensures this is convoluted
-            const boxes = ((arr.map( (el) => createChunks(((el /*: any */) /*: NodeTree */), desired, current-1)
+            // arr is an array of Tree<Diagram3D.Node>s at this point, though the logic that ensures this is convoluted
+            const boxes = ((arr.map( (el) => createChunks(((el /*: any */) /*: Tree<Diagram3D.Node> */), desired, current-1)
                                    ) /*: any */) /*: Array<Array<THREE.Mesh>> */);
-            const all_boxes = GEUtils.flatten_msh(((boxes /*: any */) /*: MeshTree */));
+            const all_boxes = GEUtils.flatten( ((boxes /*: any */) /*: Tree<THREE.Mesh> */) );
             const strategy = diagram3D.strategies[current];
             if (strategy.layout == CayleyDiagram.LAYOUT.ROTATED) {
                // find centroid of all boxes
@@ -5826,6 +5808,8 @@ import GEUtils from './GEUtils.js';
 import Subgroup from './Subgroup.js';
 import XMLGroup from './XMLGroup.js';
 
+import type {Tree} from './GEUtils.js';
+
 export type Coloration = 'Rainbow' | 'Grayscale' | 'None';
 
 export default
@@ -5858,8 +5842,8 @@ class Multtable {
 
    organizeBySubgroup(subgroupIndex /*: number */) /*: Multtable */ {
       const subgroup = this.group.subgroups[subgroupIndex];
-      this.elements = GEUtils.flatten_el(
-         this.group.cosetsArray(GEUtils.flatten_el(this.group.closureArray(subgroup.generators)), false) );
+      this.elements = GEUtils.flatten(
+         this.group.cosetsArray(GEUtils.flatten(this.group.closureArray(subgroup.generators)), false) );
       this.organizingSubgroup = subgroupIndex;
       this._colors = null;
       return this;

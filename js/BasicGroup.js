@@ -8,7 +8,7 @@
 
 /*::
 import BitSet from './BitSet.js';
-import type {ElementTree, Elem} from './GEUtils.js';
+import type {Tree} from './GEUtils.js';
 import MathUtils from './MathUtils.js';
 import Subgroup from './Subgroup.js';
 import type {SubgroupJSON} from './Subgroup.js';
@@ -340,11 +340,11 @@ class BasicGroup {
 
    // returns closure of passed generators as an array of arrays of ...
    // generators may be passed as a bitset, array, or a single element
-   closureArray(generators /*: BitSet | Array<groupElement> | groupElement */) /*: ElementTree */ {
-      const deepMultiply = (array /*: ElementTree */, factor , elementsUsed ) =>
-            array.map( (el /*: groupElement | Array<Elem> */) => {
+   closureArray(generators /*: BitSet | Array<groupElement> | groupElement */) /*: Tree<groupElement> */ {
+      const deepMultiply = (array /*: Tree<groupElement> */, factor , elementsUsed ) =>
+            array.map( (el) => {
                if (Array.isArray(el)) {
-                  return deepMultiply(el, factor, elementsUsed);
+                  return deepMultiply( ((el /*: any */) /*: Tree<groupElement> */), factor, elementsUsed);
                } else {
                   const product = this.mult(el, factor);
                   elementsUsed.set(product);
@@ -389,20 +389,20 @@ class BasicGroup {
    }
 
    // calculates cosets of the passed group
-   cosetsArray(subgroup /*: Array<groupElement> */, isLeft /*: ?boolean */ = true) /*: Array<Array<groupElement>> */ {
-      const cosets /*: Array<Array<groupElement>> */ = [subgroup];
-      const cosetReps /*: Array<groupElement> */ = [subgroup[0]];
+   cosetsArray(subgroup /*: Array<groupElement> */, isLeft /*: ?boolean */ = true) /*: Tree<groupElement> */ {
+      const cosets = [subgroup];
+      const cosetReps = [subgroup[0]];
       const todo = new BitSet(this.order, subgroup).complement();
 
       for (let _g = todo.pop(); _g != undefined; _g = todo.pop()) {
          const g = _g;  // to help Flow
          cosetReps.push(g);
-         const newCoset = subgroup.map( (el) => isLeft ? this.multtable[g][el] : this.multtable[el][g] );
+         const newCoset = subgroup.map( (el) => (isLeft ? this.multtable[g][el] : this.multtable[el][g]) );
          cosets.push(newCoset);
          todo.subtract(new BitSet(this.order, newCoset));
       }
 
-      return cosets;
+      return ((cosets /*: any */) /*: Tree<groupElement> */);
    }
 }
 /*
