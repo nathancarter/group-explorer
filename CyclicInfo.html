@@ -16,8 +16,10 @@
        });
       </script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.6/MathJax.js?config=MML_CHTML"></script>
-      <script src="./build/allGroupExplorer.js"></script>
-      <script src="./CyclicInfo.js"></script>
+      <script type="module">
+       import {load} from "./CyclicInfo.js";
+       window.addEventListener('load', load, {once: true});
+      </script>
    </head>
 
    <body>

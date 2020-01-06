@@ -14,17 +14,12 @@
  *
  *   (AbstractSubset would be an abstract superclass in another language.)
  */
-/*::
 import BitSet from '../js/BitSet.js';
 import XMLGroup from '../js/XMLGroup.js';
 
-import SSD from './subsets.js';
+import * as SSD from './subsets.js';
 
-var group: XMLGroup;
-
-export default
- */
-SSD.AbstractSubset = class AbstractSubset {
+export default class AbstractSubset {
 /*::
    id: number;
    elements: BitSet;
@@ -33,12 +28,12 @@ SSD.AbstractSubset = class AbstractSubset {
   +displayLine: string; // implemented in subclass
  */  
    constructor() {
-      this.id = SSD.nextId++;
+      this.id = SSD.getNextId();
       SSD.displayList[this.id] = this;
    }
 
    get closure() /*: SSD.Subset */ {
-      return new SSD.Subset(group.closure(this.elements));
+      return new SSD.Subset(SSD.group.closure(this.elements));
    }
 
    // delete is a javascript keyword...
@@ -61,12 +56,12 @@ SSD.AbstractSubset = class AbstractSubset {
    }
 
    elementwiseProduct(other /*: SSD.AbstractSubset */) /*: SSD.Subset */{
-      const newElements = new BitSet(group.order);
+      const newElements = new BitSet(SSD.group.order);
       for (let i = 0; i < this.elements.len; i++) {
          if (this.elements.isSet(i)) {
             for (let j = 0; j < other.elements.len; j++) {
                if (other.elements.isSet(j)) {
-                  newElements.set(group.multtable[i][j]);
+                  newElements.set(SSD.group.multtable[i][j]);
                }
             }
          }

@@ -22,16 +22,15 @@ const GAPlink = '<a target="_blank" href="help/rf-um-gap">What is GAP?</a>';
  * the work of setting up the page, including such things as instantiating
  * templates.
  */
-/*::
+
 import XMLGroup from './XMLGroup.js';
-import Log from './Log.md';
+import Log from './Log.js';
 
-var group: XMLGroup;
-var sagecell: any;
+// Module variables
+let group /*: XMLGroup */;
 
-export default
-*/
-function setUpGAPCells () {
+export default function setUpGAPCells ( _group /*: XMLGroup */ ) {
+    group = _group;
     // Import the Sage Cell script and wait until it has loaded.
     // Note that the sequence of calls here is very important;
     // we must create the script element, add it to the document,
@@ -71,7 +70,7 @@ function setUpGAPCells () {
             // While the block is hidden, have the Sage Cell script
             // replace it with an editor and Run button that can send
             // the code to the Sage Cell Server for execution.
-            sagecell.makeSagecell( {
+            window.sagecell.makeSagecell( {
                 inputLocation : $block.get(0),
                 evalButtonText : 'Run',
                 languages : [ 'gap' ],

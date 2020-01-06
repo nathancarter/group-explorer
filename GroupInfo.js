@@ -1,22 +1,23 @@
 // @flow
-/*::
+
 import CayleyDiagram from './js/CayleyDiagram.js';
 import CycleGraph from './js/CycleGraph.js';
 import DisplayCycleGraph from './js/DisplayCycleGraph.js';
 import DisplayDiagram from './js/DisplayDiagram.js';
 import DisplayMulttable from './js/DisplayMulttable.js';
 import Library from './js/Library.js';
-import Log from './js/Log.md';
-import MathML from './js/MathML.md';
+import Log from './js/Log.js';
+import MathML from './js/MathML.js';
 import MathUtils from './js/MathUtils.js';
-import Menu from './js/Menu.md';
+import Menu from './js/Menu.js';
 import Multtable from './js/Multtable.js';
 import {CreateNewSheet} from './js/SheetModel.js';
 import setUpGAPCells from './js/ShowGAPCode.js';
 import SymmetryObject from './js/SymmetryObject.js';
-import Template from './js/Template.md';
+import Template from './js/Template.js';
 import XMLGroup from './js/XMLGroup.js';
- */
+
+export {loadGroup as load};
 
 // Global variables
 var group		/*: XMLGroup */,	// group this page displays information about
@@ -27,19 +28,20 @@ var group		/*: XMLGroup */,	// group this page displays information about
 // Static event managers (setup after document is available)
 $(function() {
    $('#Computed_properties + div').on('click', (ev /*: JQueryEventObject */) =>
-      ($(ev.target).attr('page') === undefined) ? undefined : Library.openWithGroupURL($(ev.target).attr('page'), group.URL))
+      ($(ev.target).attr('page') === undefined) ? undefined : Library.openWithGroupURL($(ev.target).attr('page'), group.URL));
+   $('body')[0].addEventListener('click', actionClickHandler);
 });
-$(window).on('load', load);	// like onload handler in body
 
 // read in library, group from invocation
-function load() {
-   Library.loadFromURL()
-          .then( (_group) => {
-             group = _group;
-             displayStatic();
-             displayDynamic();
-          } )
-          .catch( Log.err );
+function loadGroup() {
+   Library
+      .loadFromURL()
+      .then( (_group) => {
+         group = _group;
+         displayStatic();
+         displayDynamic();
+      } )
+      .catch( Log.err );
 }
 
 // displays group information that is independent of the representation
@@ -61,6 +63,8 @@ function displayStatic() {
          $('#basic-fact-table').append(eval(Template.HTML('basicFact-template')));
       }
    }
+
+   setUpGAPCells(group);
 
    // Views --
    //   Add rows to ViewTable until there are no more Cayley Diagrams (including
@@ -206,14 +210,16 @@ function displayDynamic() {
    // notes
    Notes.show();
 
-   setUpGAPCells();
-
    MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
+}
 
-   $( '.show-all-visualizers-sheet' ).on( 'click', function ( event /*: JQueryEventObject */ ) {
+function actionClickHandler(event /*: MouseEvent */) {
+   const action = $(event.target).attr('action');
+   if (action != undefined) {
       event.preventDefault();
-      showAllVisualizersSheet();
-   } );
+      event.stopPropagation();
+      eval(action);
+   }
 }
 
 function displayClassEquation() {
@@ -281,7 +287,7 @@ class UDR {
    static _showEditor(representation /*: Array<mathml> */) {
       const editor = $(eval(Template.HTML('namingEditor-template')));
       const tableBody = editor.find('tbody');
-      representation.forEach( (rep, inx) => tableBody.append(eval(Template.HTML('udredit-template'))) );
+      representation.forEach( (rep, inx) => tableBody.append(eval(Template.HTML('udr-edit-template'))) );
       $('body').append(editor).find('#naming-editor').show();
       MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'naming-editor']);
    }
@@ -293,7 +299,7 @@ class UDR {
 
    static saveEdit() {
       group.userRepresentations[((UDR.current_index /*: any */) /*: number */)] =
-         $('#udredit-table tbody textarea').map( (_, el) => '<mtext>' + ((el /*: any */) /*: HTMLTextAreaElement */).value + '</mtext>' ).toArray();
+         $('#udr-edit-table tbody textarea').map( (_, el) => '<mtext>' + ((el /*: any */) /*: HTMLTextAreaElement */).value + '</mtext>' ).toArray();
       Library.saveGroup(group);
       UDR.closeEdit();
       displayDynamic();

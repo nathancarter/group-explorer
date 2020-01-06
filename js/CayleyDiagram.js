@@ -1,12 +1,13 @@
 // @flow
 
-/*::
 import BitSet from './BitSet.js';
 import Diagram3D from './Diagram3D.js';
 import GEUtils from './GEUtils.js';
-import type {Tree} from './GEUtils.js';
 import Library from './Library.js';
 import XMLGroup from './XMLGroup.js';
+
+/*::
+import type {Tree} from './GEUtils.js';
 
 export type layout = 0 | 1 | 2;
 export type direction = 0 | 1 | 2;
@@ -65,7 +66,7 @@ class _CayleyDiagram_LinearLayout extends _CayleyDiagram_AbstractLayoutStrategy 
 
       // find a child diameter in <direction>, scale so all fit in [0,1] box
       const target_width = 1.4/(3*num_children - 1);  // heuristic
-      const child_width = this.width(GEUtils.flatten( ((children /*: any */) /*: Tree<Diagram3D.Node> */)), this.direction);
+      const child_width = this.width(GEUtils.flatten( ((children /*: any */) /*: Tree<Diagram3D.Node> */) ), this.direction);
       const scale = child_width < target_width ? 1 : target_width / child_width;
 
       // create scale transform
@@ -198,7 +199,7 @@ class _CayleyDiagram_RotatedLayout extends _CayleyDiagram_CurvedLayout {
    }
 }
 
-/*:: export default */
+export default
 class CayleyDiagram extends Diagram3D {
 /*::
    static BACKGROUND_COLOR: color;

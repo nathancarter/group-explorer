@@ -75,10 +75,27 @@
       <script src="https://cdn.jsdelivr.net/npm/jquery-resizable-dom@0.32.0/dist/jquery-resizable.js"></script>
       <script src="https://cdn.jsdelivr.net/npm/three@0.110.0/build/three.min.js"></script>
       <script src="./lib/THREE.MeshLine.js"></script>
-      <script src="./build/allGroupExplorer.js"></script>
-      <script src="./build/allVisualizer.js"></script>
-      <script src="./build/allSheets.js"></script>
-      <script src="./Sheet.js"></script>
+      <script type="module">
+       import * as Sheet from './Sheet.js';
+       window.addEventListener('load', Sheet.load, {once: true});
+       window.loadChosen = Sheet.loadChosen;
+       window.saveAs = Sheet.saveAs;
+       window.addRectangle = Sheet.addRectangle;
+       window.addText = Sheet.addText;
+       window.addVisualizer = Sheet.addVisualizer;
+       window.copySelected = Sheet.copySelected;
+       window.pasteItem = Sheet.pasteItem;
+       window.deleteSelected = Sheet.deleteSelected;
+       window.undo = Sheet.undo;
+       window.redo = Sheet.redo;
+       window.morphismSelected = Sheet.morphismSelected;
+       window.connectSelected = Sheet.connectSelected;
+       window.moveSelectedUp = Sheet.moveSelectedUp;
+       window.moveSelectedDown = Sheet.moveSelectedDown;
+       window.moveSelectedToTop = Sheet.moveSelectedToTop;
+       window.moveSelectedToBottom = Sheet.moveSelectedToBottom;
+       window.loadSheetFromJSON = Sheet.loadSheetFromJSON;
+      </script>
    </head>
 
    <body class="vert">

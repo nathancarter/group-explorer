@@ -1,28 +1,25 @@
 //@flow
 
-/*::
 import GroupURLs from './GroupURLs.js';
-import Log from './js/Log.md';
-import {
-   SheetModel,
-   SheetElement,
-   RectangleElement,
-   TextElement,
-   VisualizerElement,
-   MTElement,
-   CGElement,
-   CDElement,
-   ConnectingElement,
-   MorphismElement
-} from './js/SheetModel.js';
+import Log from './js/Log.js';
+
+import * as SM from './js/SheetModel.js';
+import * as VC from './visualizerFramework/visualizer.js';
+
+export {load, loadChosen, saveAs, addRectangle, addText, addVisualizer, copySelected, pasteItem, deleteSelected, undo, redo,
+        morphismSelected, connectSelected, moveSelectedUp, moveSelectedDown, moveSelectedToTop, moveSelectedToBottom,
+        loadSheetFromJSON};
+
+/*::
 import type {
    SheetElementJSON,
-   MSG_loadFromJSON
+   MSG_loadFromJSON,
+   JSONType,
 } from './js/SheetModel.js';
 import type {JQueryDnD} from './js/DragResizeExtension.js';
+*/
 
-import VC from './visualizerFramework/visualizer.js';
-
+/*::
 // from Sheet.html
 var filenameInput: HTMLInputElement;
 var loadButton: HTMLButtonElement;
@@ -32,17 +29,14 @@ var redoButton: HTMLButtonElement;
 var visualizerList: HTMLSelectElement;
 var groupList: HTMLSelectElement;
 var savedSheetsList: HTMLSelectElement;
- */
+*/
 
 /* Global variables */
 const panelNames /*: Array<string> */ = ['#sheet-control'];
 const HELP_PAGE /*: string */ = 'help/rf-um-sheetwindow/index.html';
 
 var $sheet /*: JQuery */;
-var Model /*: SheetModel */;
-
-/* Initial entry to javascript -- called once after document load */
-$(window).one('load', load);
+var Model /*: SM.SheetModel */;
 
 /*
  * Register static event managers -- called after document is assembled
@@ -52,9 +46,10 @@ function registerEventHandlers() {
    $('#sheet-button').on('click', () => show('#sheet-control') );
    $(window).off('resize', resizeBody).on('resize', resizeBody);
 }
+
 /* Load the static components of the page */
 function load() {
-   VC.load()
+   VC.load(null, HELP_PAGE)
       .then( () => {
          $('.top-right-menu > a[href="Sheet.html"]').hide();  // hide top-right-menu Sheets icon
          completeSetup();
@@ -71,7 +66,7 @@ function completeSetup () {
    $container[0].style.overflowY = 'scroll';
    $container.html( `<div style="min-width: ${W}; min-height: ${H};"></div>` );
    $sheet = $( $container[0].childNodes[0] );
-   Model = new SheetModel( ($sheet[0] /*: HTMLElement */) );
+   Model = new SM.SheetModel( ($sheet[0] /*: HTMLElement */) );
 
 
    // Create header from group name and queue MathJax to typeset it
@@ -171,14 +166,14 @@ function handleSelectionChanged () {
        $mlist = $( '#morphismToList' );
    $clist.children().remove();
    $mlist.children().remove();
-   if ( sel && !( sel instanceof ConnectingElement ) )
+   if ( sel && !( sel instanceof SM.ConnectingElement ) )
       Model.elements.map( function ( element, index ) {
          const item = `<option value="${index}">${element.toString()}</option>`;
-         if ( ( element instanceof ConnectingElement ) || ( element == sel ) ) return;
+         if ( ( element instanceof SM.ConnectingElement ) || ( element == sel ) ) return;
          $clist.append( $( item ) );
-         if ( ( sel instanceof VisualizerElement ) && ( element instanceof VisualizerElement )
-              && !MorphismElement.existsMorphismBetween( sel, element )
-              && !MorphismElement.existsMorphismBetween( element, sel ) )
+         if ( ( sel instanceof SM.VisualizerElement ) && ( element instanceof SM.VisualizerElement )
+              && !SM.MorphismElement.existsMorphismBetween( sel, element )
+              && !SM.MorphismElement.existsMorphismBetween( element, sel ) )
             $mlist.append( $( item ) );
       } );
    $( '#connectButton,#connectToList' ).prop( 'disabled', !$clist.children().length );
@@ -230,20 +225,20 @@ function show(panel_name) {
 }
 
 function addRectangle () {
-   new RectangleElement( Model );
+   new SM.RectangleElement( Model );
    scrollToTopLeft();
 }
 function addText () {
-   new TextElement( Model );
+   new SM.TextElement( Model );
    scrollToTopLeft();
 }
 function connectSelected () {
-   new ConnectingElement( Model, ((Model.selected() /*: any */) /*: SheetElement */),
-                          Model.elements[parseInt($( '#connectToList' ).val())] );
+   new SM.ConnectingElement( Model, ((Model.selected() /*: any */) /*: SM.SheetElement */),
+                             Model.elements[parseInt($( '#connectToList' ).val())] );
 }
 function morphismSelected () {
-   new MorphismElement( Model, ((Model.selected() /*: any */) /*: VisualizerElement<any, any, any> */),
-                        ((Model.elements[parseInt($( '#morphismToList' ).val())] /*: any */) /*: VisualizerElement<any, any, any> */) );
+   new SM.MorphismElement( Model, ((Model.selected() /*: any */) /*: SM.VisualizerElement<any, any, any> */),
+                          ((Model.elements[parseInt($( '#morphismToList' ).val())] /*: any */) /*: SM.VisualizerElement<any, any, any> */) );
    handleSelectionChanged();
 }
 function deleteSelected () {
@@ -300,12 +295,12 @@ function moveSelectedToTop () {
    var selected = Model.selected();
    if ( selected ) {
       const highestElt = Model.elements
-          .reduce( (highest /*: SheetElement */, curr /*: SheetElement */ ) =>
+          .reduce( (highest /*: SM.SheetElement */, curr /*: SM.SheetElement */ ) =>
                       (curr.zIndex > highest.zIndex) ? curr : highest,
                    Model.elements[0]
                  )
       // const highestZ = Math.max( ...Model.elements.map( ( e ) => e.zIndex ) );
-      // const thatElt = ((Model.elements.find( ( e ) => e.zIndex == highestZ ) /*: any */) /*: SheetElement */);
+      // const thatElt = ((Model.elements.find( ( e ) => e.zIndex == highestZ ) /*: any */) /*: SM.SheetElement */);
       Model.adjustZ( selected, highestElt );
       scrollToShow( selected );
    }
@@ -314,12 +309,12 @@ function moveSelectedToBottom () {
    var selected = Model.selected();
    if ( selected ) {
       const lowestElt = Model.elements
-          .reduce( (lowest /*: SheetElement */, curr /*: SheetElement */ ) =>
+          .reduce( (lowest /*: SM.SheetElement */, curr /*: SM.SheetElement */ ) =>
                       (curr.zIndex < lowest.zIndex) ? curr : lowest,
                    Model.elements[0]
                  )
       // const lowestZ = Math.min( ...Model.elements.map( ( e ) => e.zIndex ) );
-      // const thatElt = ((Model.elements.find( ( e ) => e.zIndex == lowestZ ) /*: any */) /*: SheetElement */);
+      // const thatElt = ((Model.elements.find( ( e ) => e.zIndex == lowestZ ) /*: any */) /*: SM.SheetElement */);
       Model.adjustZ( selected, lowestElt );
       scrollToShow( selected );
    }
@@ -330,20 +325,20 @@ function addVisualizer () {
    var vizType = visualizerList.value;
    var groupURL = groupList.value;
    if ( visualizerList.value == 'MT' ) {
-      new MTElement( Model, groupURL );
+      new SM.MTElement( Model, groupURL );
       scrollToTopLeft();
    } else if ( visualizerList.value == 'CD' ) {
-      new CDElement( Model, groupURL );
+      new SM.CDElement( Model, groupURL );
       scrollToTopLeft();
    } else if ( visualizerList.value == 'CG' ) {
-      new CGElement( Model, groupURL );
+      new SM.CGElement( Model, groupURL );
       scrollToTopLeft();
    }
 }
 
 // The following functions let a parent page that programmatically opened this page
 // construct sheet content programmatically as well.
-function loadSheetFromJSON ( json ) {
+function loadSheetFromJSON ( json /*: Array<JSONType> */ ) {
    json.map( adjustSheetElementPosition );
    Model.fromJSON( json );
    scrollToTopLeft();
@@ -354,7 +349,7 @@ function addSheetElementFromJSON( json /*: SheetElementJSON */ ) {
    scrollToShow( element );
 }
 // Adjusts y coordinate to take header into account.
-function adjustSheetElementPosition ( elementJSON ) {
+function adjustSheetElementPosition ( elementJSON /*: JSONType */ ) {
    if ( elementJSON.hasOwnProperty( 'y' ) )
       elementJSON.y += $('#graphic').offset().top;
 }

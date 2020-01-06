@@ -1,34 +1,34 @@
 // @flow
 
-/*::
 import CycleGraph from './js/CycleGraph.js';
 import DisplayCycleGraph from './js/DisplayCycleGraph.js';
-import type {CycleGraphJSON} from './js/DisplayCycleGraph.js';
 import GEUtils from './js/GEUtils.js';
 import Library from './js/Library.js';
-import Log from './js/Log.md';
-import MathML from './js/MathML.md';
-import Menu from './js/Menu.md';
-import Template from './js/Template.md';
+import Log from './js/Log.js';
+import MathML from './js/MathML.js';
+import Menu from './js/Menu.js';
+import Template from './js/Template.js';
 import XMLGroup from './js/XMLGroup.js';
 
-import VC from './visualizerFramework/visualizer.js';
-import SSD from './subsetDisplay/subsets.js';
+import * as VC from './visualizerFramework/visualizer.js';
+import * as SSD from './subsetDisplay/subsets.js';
 
+export {loadGroup as load};
+
+/*::
+import type {CycleGraphJSON} from './js/DisplayCycleGraph.js';
 import type {MSG_listenerReady, MSG_stateLoaded, MSG_external, MSG_editor} from './js/SheetModel.js';
- */
+*/
 
-// global variables
-var group		/*: XMLGroup */,		// group about which information will be displayed
-    cyclegraph		/*: CycleGraph */,		// data being displayed in large diagram
-    graphicContext	/*: DisplayCycleGraph */,	// graphic context for large diagram
-    canEmit		/*: boolean */ = true;		// flag: whether to notify parent window of table changes
+// Module variables
+let group		/*: XMLGroup */;		// group about which information will be displayed
+let cyclegraph		/*: CycleGraph */;		// data being displayed in large diagram
+let graphicContext	/*: DisplayCycleGraph */;	// graphic context for large diagram
+let canEmit		/*: boolean */ = true;		// flag: whether to notify parent window of table changes
+
 const HELP_PAGE = 'help/rf-um-cg-options/index.html';
 
 const myDomain = new URL(window.location.href).origin;
-
-/* Initial entry to javascript, called once after document load */
-window.addEventListener('load', load, {once: true});
 
 // Static event managers (called after document is assembled)
 function registerCallbacks() {
@@ -43,32 +43,43 @@ function registerCallbacks() {
    LargeGraphic.init();
 }
 
-function load() {
-   // Promise to load group from invocation URL
-   const groupLoad = Library
+// Load group from invocation URL
+function loadGroup() {
+   Library
       .loadFromURL()
-      .then( (_group) => group = _group )
+      .then( (_group) => {
+         group = _group;
+         loadVisualizerFramework();
+      } )
       .catch( Log.err );
-
-   // Promise to load visualizer framework around visualizer-specific code in this file
-   const bodyLoad = VC.load();
-
-   // When group and framework are loaded, insert subset_page and complete rest of setup
-   Promise.all([groupLoad, bodyLoad])
-          .then( () => 
-             MathML.preload(group).then( () => { // Preload MathML cache for subsetDisplay
-                const highlighters = [
-                   {handler: highlightByBackground, label: 'Background'},
-                   {handler: highlightByBorder, label: 'Border'},
-                   {handler: highlightByTop, label: 'Top'}
-                ];
-                // Load subset display, and complete setup
-                SSD.load($('#subset-control'), highlighters).then(completeSetup)
-             } )
-          )
-          .catch( Log.err );
 }
 
+// Load visualizer framework around visualizer-specific code in this file
+function loadVisualizerFramework() {
+   VC.load(group, HELP_PAGE)
+      .then( () => {
+         preloadMathMLCache();
+      } )
+      .catch( Log.err );
+}
+
+function preloadMathMLCache() {
+   MathML.preload(group)
+      .then( () => loadSubsetDisplay() )
+      .catch( Log.err )
+}
+
+function loadSubsetDisplay() {
+   const highlighters = [
+      {handler: highlightByBackground, label: 'Background'},
+      {handler: highlightByBorder, label: 'Border'},
+      {handler: highlightByTop, label: 'Top'}
+   ];
+   // Load subset display, and complete setup
+   SSD.load($('#subset-control'), highlighters, clearHighlights, group)
+      .then(completeSetup)
+      .catch( Log.err );
+}
 
 /* Now that subsetDisplay is loaded, complete the setup */
 function completeSetup() {

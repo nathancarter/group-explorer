@@ -35,9 +35,13 @@
       </script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.6/MathJax.js?config=MML_CHTML"></script>
       <script src="https://cdn.jsdelivr.net/npm/three@0.110.0/build/three.min.js"></script>
-      <script src="./build/allGroupExplorer.js"></script>
-      <script src="./build/allSheets.js"></script>
-      <script src="./SubgroupInfo.js"></script>
+      <script type="module">
+       import * as SUB from './SubgroupInfo.js';
+       window.addEventListener('load', SUB.load, {once: true});
+       window.showSubgroupLattice = SUB.showSubgroupLattice;
+       window.showEmbeddingSheet = SUB.showEmbeddingSheet;
+       window.showQuotientSheet = SUB.showQuotientSheet;
+      </script>
    </head>
 
    <body>

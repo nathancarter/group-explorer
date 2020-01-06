@@ -42,9 +42,10 @@
       <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.6/MathJax.js?config=MML_CHTML"></script>
       <script src="https://cdn.jsdelivr.net/npm/three@0.110.0/build/three.min.js"></script>
       <script src="https://cdn.jsdelivr.net/npm/jquery-resizable-dom@0.32.0/dist/jquery-resizable.js"></script>
-      <script src="./build/allGroupExplorer.js"></script>
-      <script src="./build/allVisualizer.js"></script>
-      <script src="./CycleDiagram.js"></script>
+      <script type="module">
+       import {load} from "./CycleDiagram.js";
+       window.addEventListener('load', load, {once: true});
+      </script>
    </head>
    <body class="vert">
       <div id="subset-control" class="fill-vert">

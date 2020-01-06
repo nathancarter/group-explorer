@@ -50,17 +50,17 @@ next execution of the [DisplayDiagram render() automation routine](./DisplayDiag
 
 ```js
 */
-/*::
 import Diagram3D from './Diagram3D.js';
 import CayleyDiagram from './CayleyDiagram.js';
 import DisplayDiagram from './DisplayDiagram.js';
-import type {LineUserData, SphereUserData} from './DisplayDiagram.js';
 import GEUtils from './GEUtils.js';
-import Log from './Log.md';
+import Log from './Log.js';
 
-export default
- */
-class DiagramDnD {
+/*::
+import type {LineUserData, SphereUserData} from './DisplayDiagram.js';
+*/
+
+export default class DiagramDnD {
 /*::
    displayDiagram: DisplayDiagram;
    canvas: HTMLCanvasElement;

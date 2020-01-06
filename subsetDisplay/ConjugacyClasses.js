@@ -1,19 +1,15 @@
 // @flow
-/*::
-import MathML from '../js/MathML.md';
+
+import MathML from '../js/MathML.js';
 import XMLGroup from '../js/XMLGroup.js';
 
-import SSD from './subsets.js';
+import * as SSD from './subsets.js';
 
-var group: XMLGroup;
-
-export default
- */
-SSD.ConjugacyClasses = class ConjugacyClasses extends SSD.AbstractPartition {
+export default class ConjugacyClasses extends SSD.AbstractPartition {
    constructor() {
       super();
 
-      this.subsets = group.conjugacyClasses.map( (conjugacyClass, inx) =>
+      this.subsets = SSD.group.conjugacyClasses.map( (conjugacyClass, inx) =>
           new SSD.PartitionSubset(this, inx, conjugacyClass, MathML.sans(MathML.sub('CC', inx)), 'conjugacy-class') );
 
       $('#partitions_placeholder').hide();

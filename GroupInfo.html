@@ -80,29 +80,29 @@
           background-color: rgba(0,0,0,0.4); /* Gray mist */
        }
 
-       #udredit-content {
+       #udr-edit-content {
           background-color: #E4E4E4;		/* nearly white (~white smoke) */
           margin: auto;
           border: 1px solid #BFBFBF;		/* ~silver */
           width: 49em;
        }
 
-       #udredit-header {
+       #udr-edit-header {
           padding: 0.3em;
        }
 
-       #udredit-title {
+       #udr-edit-title {
           background: #4D4D4d;		/* dark gray */
           color: #FFFFFF;               /* white font */
           padding: 0.3em;
        }
 
-       #udredit-body {
+       #udr-edit-body {
           height: 200px;
           padding: 0 1em;
        }
 
-       #udredit-table {
+       #udr-edit-table {
           width: 100%;
           height: 100%;
           margin: 0 1em;
@@ -111,32 +111,32 @@
           border: none;
        }
 
-       #udredit-table tbody {
+       #udr-edit-table tbody {
           display: block;
           overflow: auto;
           height: 100%;
        }
 
-       #udredit-table thead tr {
+       #udr-edit-table thead tr {
           display: block;
        }
 
-       #udredit-table th,
-       #udredit-table td {
+       #udr-edit-table th,
+       #udr-edit-table td {
           border: 1px solid black;
           width: 20em;
           padding: 2px;
        }
 
-       #udredit-table th {
+       #udr-edit-table th {
           background-color: #D2D2D2;
        }
 
-       #udredit-table td {
+       #udr-edit-table td {
           background-color: #FFFFFF;
        }
 
-       .udredit-button {
+       .udr-edit-button {
           background-image: linear-gradient(#DDDDDD, #C0C0C0);
           border: 1px solid #7E7E7E;
           height: 26px;
@@ -157,9 +157,10 @@
       </script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.6/MathJax.js?config=MML_CHTML"></script>
       <script src="https://cdn.jsdelivr.net/npm/three@0.110.0/build/three.min.js"></script>
-      <script src="./build/allGroupExplorer.js"></script>
-      <script src="./build/allSheets.js"></script>
-      <script src="./GroupInfo.js"></script>
+      <script type="module">
+       import {load} from "./GroupInfo.js";
+       window.addEventListener('load', load, {once: true});
+      </script>
    </head>
 
    <body>
@@ -182,7 +183,10 @@
                <i title="Source on GitHub" class="fa fa-github fa-2x trm-black"></i></a>
          </div>
          <div id="version" style="float: right; font-size: small"></div>
-         <script>document.getElementById('version').textContent = Version.label</script>
+         <script type="module">
+          import {Version} from './Version.js';
+          document.getElementById('version').textContent = Version.label
+         </script>
       </div>
 
       <div align="center">
@@ -195,7 +199,7 @@
          <a href="#File_data">File data</a> &nbsp; | &nbsp;
          <a href="#Other_definitions">Other definitions</a> &nbsp; | &nbsp;
          <a href="#Generators">Generators</a> &nbsp; | &nbsp;
-         <a href="#Naming_schemes">Naming schemes</a> &nbsp; | &nbsp;
+         <a href="#Naming_schemes_header">Naming schemes</a> &nbsp; | &nbsp;
          <a href="#Notes">Notes</a>
       </div>
       <hr>
@@ -246,7 +250,7 @@
       </div>
       <div class="indent1">
          To see all of these visualizations shown together on a sheet,
-         <a href="" class="show-all-visualizers-sheet">click here</a>.
+         <span action="showAllVisualizersSheet()" class="programLink">click here</span>.
       </div>
 
       <h3 id="Description">Description</h3>
@@ -333,85 +337,88 @@
       </div>
 
 
-      <h3 id="Naming_schemes">Naming Schemes</h3>
+      <h3 id="Naming_schemes_header">Naming Schemes</h3>
+      <div id="Naming-schemes">
 
-      <h4 class="indent1">Default element names</h4>
-      <div id="default-element-names" class="indent2"></div>
+         <h4 class="indent1">Default element names</h4>
+         <div id="default-element-names" class="indent2"></div>
 
-      <h4 class="indent1">Loaded naming schemes</h4>
-      <div id="loaded-naming-schemes" class="indent1"></div>
-      <template id="loadedSchemeChoice-template">
-         <li>${scheme}
-            <a href="javascript:setRep(${index})">Click here</a> to make this the default representation
-         </li>
-      </template>
+         <h4 class="indent1">Loaded naming schemes</h4>
+         <div id="loaded-naming-schemes" class="indent1"></div>
+         <template id="loadedSchemeChoice-template">
+            <li>${scheme}
+               <span action="setRep(${index})" class="programLink">Click here</span> to make this the default representation
+            </li>
+         </template>
 
 
-      <h4 class="indent1">User-defined naming schemes</h4>
-      <div id="no-user-defined-naming-schemes" class="indent1">
-         <i>none</i><br><br>
-      </div>
-      <div id="user-defined-naming-schemes" class="indent1 hidden">
-      </div>
-      <a class="indent1" href="javascript:UDR.create()">Click here</a> to add a new representation for this group.
-      <template id="userSchemeChoice-template">
-         <li>${scheme}
-            <a href="javascript:UDR.setRep(${index})">Click here</a> to make this the default representation.<br>
-            <a href="javascript:UDR.edit(${index})">Click here</a> to edit this representation.<br>
-            <a href="javascript:UDR.remove(${index})">Click here</a> to remove this representation.
-         </li>
-      </template>
-      <template id="inUseScheme-template">
-         <li>The default naming scheme shown above<br>
-            If you wish to edit or remove this representation, first make a different representation the default.
-         </li>
-      </template>
-      <template id="namingEditor-template">
-         <div id="naming-editor">
-            <div id="udredit-content" class="vert">
-               <div id="udredit-title">Edit naming scheme for ${MathML.sans(group.name)}</div>
-               <div id="udredit-header">
-                  Below are all the naming schemes for ${MathML.sans(group.name)}.  Edit the Custom
-                  representation column by clicking on the entries you wish to change and typing any plain text.
-               </div>
-               <div id="udredit-body">
-                  <table id="udredit-table">
-                     <thead>
-                        <tr>
-                           <th>Default representation</th>
-                           <th>Custom representation</th>
-                        </tr>
-                     </thead>
-                     <tbody>
-                     </tbody>
-                  </table>
-               </div>
-               <div style="height: 45px">&nbsp;
-                  <button class="udredit-button" onclick="UDR.closeEdit()">Cancel</button>
-                  <button class="udredit-button" onclick="UDR.saveEdit()">OK</button>
+         <h4 class="indent1">User-defined naming schemes</h4>
+         <div id="no-user-defined-naming-schemes" class="indent1">
+            <i>none</i><br><br>
+         </div>
+         <div id="user-defined-naming-schemes" class="indent1 hidden">
+         </div>
+         <span action="UDR.create()" class="indent1 programLink">Click here</span> to add a new representation for this group.
+         </template>
+         <template id="userSchemeChoice-template">
+            <li>${scheme}
+               <span action="UDR.setRep(${index})" class="programLink">Click here</span> to make this the default representation.<br>
+               <span action="UDR.edit(${index})" class="programLink">Click here</span> to edit this representation.<br>
+               <span action="UDR.remove(${index})" class="programLink">Click here</span> to remove this representation.
+            </li>
+         </template>
+         <template id="inUseScheme-template">
+            <li>The default naming scheme shown above<br>
+               If you wish to edit or remove this representation, first make a different representation the default.
+            </li>
+         </template>
+         <template id="namingEditor-template">
+            <div id="naming-editor">
+               <div id="udr-edit-content" class="vert">
+                  <div id="udr-edit-title">Edit naming scheme for ${MathML.sans(group.name)}</div>
+                  <div id="udr-edit-header">
+                     Below are all the naming schemes for ${MathML.sans(group.name)}.  Edit the Custom
+                     representation column by clicking on the entries you wish to change and typing any plain text.
+                  </div>
+                  <div id="udr-edit-body">
+                     <table id="udr-edit-table">
+                        <thead>
+                           <tr>
+                              <th>Default representation</th>
+                              <th>Custom representation</th>
+                           </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                     </table>
+                  </div>
+                  <div style="height: 45px">&nbsp;
+                     <button class="udr-edit-button" action="UDR.closeEdit()">Cancel</button>
+                     <button class="udr-edit-button" action="UDR.saveEdit()">OK</button>
+                  </div>
                </div>
             </div>
-         </div>
-      </template>
-      <template id="udredit-template">
-         <tr>
-            <td>${MathML.sans(group.representation[inx])}</td>
-            <td><textarea maxlength="50" rows="1" style="width: 24em">${rep.slice(7,-8)}</textarea></td>
-         </tr>
-      </template>
-
+         </template>
+         <template id="udr-edit-template">
+            <tr>
+               <td>${MathML.sans(group.representation[inx])}</td>
+               <td><textarea maxlength="50" rows="1" style="width: 24em">${rep.slice(7,-8)}</textarea></td>
+            </tr>
+         </template>
+      </div>
+      
       <h3 id="Notes">Notes</h3>
       <div id="notes-area" class="indent1">
          <div id="notes-show">
             <div id="notes-content"><i>none</i></div>
-            <br><a href="javascript:Notes.edit()">Click to edit notes</a>
+            <br><span action="Notes.edit()" class="programLink">Click to edit notes</a>
          </div>
          <div id="notes-edit" class="hidden" >
             <textarea id="notes-text" maxlength="1000" rows="10"></textarea>
             <div id="notes-buttons">
-               <button onclick="Notes.clear()">Clear</button>
-               <button onclick="Notes.show()">Cancel</button>
-               <button onclick="Notes.save()">Save</button>
+               <button action="Notes.clear()">Clear</button>
+               <button action="Notes.show()">Cancel</button>
+               <button action="Notes.save()">Save</button>
             </div>
          </div>
       </div>

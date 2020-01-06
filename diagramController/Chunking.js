@@ -1,27 +1,20 @@
 // @flow
-/*::
+
 import CayleyDiagram from '../js/CayleyDiagram.js';
 import DisplayDiagram from '../js/DisplayDiagram.js';
 import GEUtils from '../js/GEUtils.js';
-import Template from '../js/Template.md';
+import MathML from '../js/MathML.js';
+import Template from '../js/Template.js';
 import XMLGroup from '../js/XMLGroup.js';
 
-import DC from './diagram.js';
+import * as DC from './diagram.js';
+import * as CD from '../CayleyDiagram.js';
 
-// globals implemented in CayleyDiagram.js
-var group: XMLGroup;
-var Cayley_diagram: CayleyDiagram;
-var Graphic_context: DisplayDiagram;
-var Diagram_name: string;
-var emitStateChange: () => void;
-
-export default
- */
-DC.Chunking = class {
+export default class Chunking {
    static updateChunkingSelect() {
       // check that first generator is innermost, second is middle, etc.
-      if (   Diagram_name === undefined
-          && Cayley_diagram.strategies.every( (strategy, inx) => strategy.nesting_level == inx ) ) {
+      if (   CD.Diagram_Name[0] === undefined
+          && CD.Cayley_Diagram[0].strategies.every( (strategy, inx) => strategy.nesting_level == inx ) ) {
          DC.Chunking.enable();
       } else {
          DC.Chunking.disable();
@@ -31,16 +24,16 @@ DC.Chunking = class {
       $('#chunk-choices').html(eval(Template.HTML('chunk-select-first-template')));
       const generators = [];
       // generate option for each strategy in Cayley diagram
-      Cayley_diagram.strategies.forEach( (strategy, strategy_index) => {
-         if (strategy != GEUtils.last(Cayley_diagram.strategies)) {
-            generators.push(group.representation[strategy.generator]);
+      CD.Cayley_Diagram[0].strategies.forEach( (strategy, strategy_index) => {
+         if (strategy != GEUtils.last(CD.Cayley_Diagram[0].strategies)) {
+            generators.push(CD.Group[0].representation[strategy.generator]);
             // find matching subgroup for chunking option
-            const subgroup_index = group.subgroups.findIndex( (subgroup) => strategy.bitset.equals(subgroup.members) );
+            const subgroup_index = CD.Group[0].subgroups.findIndex( (subgroup) => strategy.bitset.equals(subgroup.members) );
             $('#chunk-choices').append(eval(Template.HTML('chunk-select-other-template')));
          }
       } );
       $('#chunk-choices').append(eval(Template.HTML('chunk-select-last-template')));
-      DC.Chunking.selectChunk(Cayley_diagram.chunk);
+      DC.Chunking.selectChunk(CD.Cayley_Diagram[0].chunk);
    }
 
    static toggleChoices() {
@@ -55,11 +48,11 @@ DC.Chunking = class {
       if (DC.Chunking.isDisabled()) return;
       $('#bodyDouble').click();
       const strategy_index =
-            Cayley_diagram.strategies.findIndex( (strategy) => strategy.bitset.equals(group.subgroups[subgroup_index].members) );
+            CD.Cayley_Diagram[0].strategies.findIndex( (strategy) => strategy.bitset.equals(CD.Group[0].subgroups[subgroup_index].members) );
       $('#chunk-choice').html($(`#chunk-choices > li:nth-of-type(${strategy_index + 2})`).html());
-      Cayley_diagram.chunk = (strategy_index == -1) ? 0 : subgroup_index;
-      Graphic_context.updateChunking(Cayley_diagram);
-      emitStateChange();
+      CD.Cayley_Diagram[0].chunk = (strategy_index == -1) ? 0 : subgroup_index;
+      CD.Graphic_Context[0].updateChunking(CD.Cayley_Diagram[0]);
+      CD.emitStateChange();
    }
 
    static enable() {
@@ -68,8 +61,8 @@ DC.Chunking = class {
    }
 
    static disable() {
-      Cayley_diagram.chunk = 0;
-      Graphic_context.updateChunking(Cayley_diagram);
+      CD.Cayley_Diagram[0].chunk = 0;
+      CD.Graphic_Context[0].updateChunking(CD.Cayley_Diagram[0]);
 
       const $chunking_fog = $('#chunking-fog');
       $chunking_fog.css('height', '100%');
@@ -77,7 +70,7 @@ DC.Chunking = class {
       $chunking_fog.show();
 
       $('#chunk-select').prop('disabled', true);
-      emitStateChange();
+      CD.emitStateChange();
    }
 
    static isDisabled() /*: boolean */ {

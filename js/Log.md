@@ -9,9 +9,9 @@ The routines in this class perform simple logging and error reporting functions 
  */
 /*::
   type logLevel = 'debug' | 'info' | 'warn' | 'err' | 'none';
+*/
 
-  export default
- */
+export default
 class Log {
 /*::
    static logLevels: {[key: logLevel]: number};

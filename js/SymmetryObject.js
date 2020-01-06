@@ -4,13 +4,14 @@
  *
  * caller adds node color, label; line color, width
  */
-/*::
 import XMLGroup from './XMLGroup.js';
-import type {XMLSymmetryObject} from './XMLGroup.js';
 import Diagram3D from './Diagram3D.js';
 
-export default
+/*::
+import type {XMLSymmetryObject} from './XMLGroup.js';
  */
+
+export default
 class SymmetryObject {
 /*::
    static BACKGROUND_COLOR: color;

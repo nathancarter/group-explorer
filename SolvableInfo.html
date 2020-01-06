@@ -16,9 +16,13 @@
        });
       </script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.6/MathJax.js?config=MML_CHTML"></script>
-      <script src="./build/allGroupExplorer.js"></script>
-      <script src="./build/allSheets.js"></script>
-      <script src="./SolvableInfo.js"></script>
+      <script type="module">
+       import {load, showSolvableDecompositionSheet} from './SolvableInfo.js';
+       import Library from './js/Library.js';
+       window.addEventListener('load', load, {once: true});
+       window.showSolvableDecompositionSheet = showSolvableDecompositionSheet;
+       window.Library = Library;
+      </script>
    </head>
 
    <body>
@@ -79,6 +83,9 @@
             the library currently loaded.</p>
          <p>You will need to more groups loaded (see <a href="">options window</a> for starters)
             to make this computation possible.</p>
+      </template>
+      <template id="group-reference-template">
+         <a href="javascript:Library.openWithGroupURL('GroupInfo.html', '${G.URL}')">${MathML.sans(G.name)}</a>;
       </template>
       <div class="gapcode" data-built-in-code-type="is solvable"/>
    </body>

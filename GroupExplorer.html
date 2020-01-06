@@ -125,8 +125,10 @@
       </script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.6/MathJax.js?config=MML_CHTML"></script>
       <script src="https://cdn.jsdelivr.net/npm/three@0.110.0/build/three.min.js"></script>
-      <script src="./build/allGroupExplorer.js"></script>
-      <script src="./GroupExplorer.js"></script>
+      <script type="module">
+       import {load} from "./GroupExplorer.js";
+       window.addEventListener('load', load, {once: true});
+      </script>
    </head>
    <body>
       <table id="ScratchTable" style="width: 100%; display: none"></table>
@@ -154,7 +156,10 @@
                               <i title="Source on GitHub" class="fa fa-github fa-2x trm-blue"></i></a>
                      </div>
                      <div id="version" style="float: right; font-size: small; color: #2196f3;"></div>
-                     <script>document.getElementById("version").textContent = Version.label</script>
+                     <script type="module">
+                      import {Version} from './Version.js';
+                      document.getElementById("version").textContent = Version.label
+                     </script>
                   </div>
                </th>
             </tr>

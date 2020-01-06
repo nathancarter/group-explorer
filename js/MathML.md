@@ -15,16 +15,16 @@ Nearly all mathematical text in GE is formatted with MathML and rendered into HT
 
 ```js
 */
-/*::
 import XMLGroup from './XMLGroup.js';
 
+/*::
 declare class XSLTProcessor {
    importStylesheet(Node): void;
    transformToFragment(Node, Document): DocumentFragment;
 }
+*/
 
 export default
- */
 class MathML {
 /*::
    static subscripts: {[key: string]: string};

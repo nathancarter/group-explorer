@@ -53,11 +53,12 @@
        MathJax.Hub.processUpdateDelay = 0;
       </script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.6/MathJax.js?config=MML_CHTML"></script>
-      <script src="https://cdn.jsdelivr.net/npm/jquery-resizable-dom@0.32.0/dist/jquery-resizable.js"></script>
       <script src="https://cdn.jsdelivr.net/npm/three@0.110.0/build/three.min.js"></script>
-      <script src="./build/allGroupExplorer.js"></script>
-      <script src="./build/allVisualizer.js"></script>
-      <script src="./Multtable.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/jquery-resizable-dom@0.32.0/dist/jquery-resizable.js"></script>
+      <script type="module">
+       import {load} from "./Multtable.js";
+       window.addEventListener('load', load, {once: true});
+      </script>
    </head>
    <body class="vert">
       <div id="control-options" class="horiz">
@@ -99,15 +100,15 @@
          <form id="coloration-choice" class="graphic-lead" style="margin-bottom: 0">
             Default coloration:
             <div>
-               <input id="Rainbow" name="coloration" type="radio" onclick="chooseColoration(Multtable.COLORATION.RAINBOW)" checked>
+               <input id="Rainbow" name="coloration" type="radio" checked>
                <label for="Rainbow">Spectrum/rainbow</label>
             </div>
             <div>
-               <input id="Grayscale" name="coloration" type="radio" onclick="chooseColoration(Multtable.COLORATION.GRAYSCALE)">
+               <input id="Grayscale" name="coloration" type="radio">
                <label for="Grayscale">Grayscale</label>
             </div>
             <div>
-               <input id="None" name="coloration" type="radio" onclick="chooseColoration(Multtable.COLORATION.NONE)">
+               <input id="None" name="coloration" type="radio">
                <label for="None">None</label>
             </div>
          </form>

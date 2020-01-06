@@ -2,24 +2,18 @@
 module.file_ext=.js
 module.file_ext=.md
 
-# advertised, but doesn't seem to do anything
-munge_underscores=true
-
 [include]
 
 [ignore]
 <PROJECT_ROOT>/.*\.css
-<PROJECT_ROOT>/build
+<PROJECT_ROOT>/README\.md
+<PROJECT_ROOT>/package\.json
 <PROJECT_ROOT>/docs
 <PROJECT_ROOT>/help
 <PROJECT_ROOT>/help-src
 <PROJECT_ROOT>/images
 <PROJECT_ROOT>/lib
 <PROJECT_ROOT>/notes
-<PROJECT_ROOT>/node_modules
-<PROJECT_ROOT>/Version\.js
-<PROJECT_ROOT>/README\.md
-<PROJECT_ROOT>/package\.json
 
 [libs]
 

@@ -1,15 +1,17 @@
 // @flow
-/*::
-import Log from './Log.md';
-import CycleGraph from './CycleGraph.js';
-import type {Highlights} from './CycleGraph.js';
 
-type Options = {width?: number, height?: number, container?: JQuery};
+import Log from './Log.js';
+import CycleGraph from './CycleGraph.js';
+
+/*::
+import type {Highlights} from './CycleGraph.js';
 
 export type CycleGraphJSON = {groupURL: string, highlights: Highlights, elements: Array<groupElement>}
 
+type Options = {width?: number, height?: number, container?: JQuery};
+*/
+
 export default
- */
 class DisplayCycleGraph {
 /*::
    static DEFAULT_MIN_CANVAS_HEIGHT: number;

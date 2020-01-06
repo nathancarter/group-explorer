@@ -1,5 +1,5 @@
 // @flow
-/*::
+
 import CayleyDiagram from './js/CayleyDiagram.js';
 import CycleGraph from './js/CycleGraph.js';
 import DisplayCycleGraph from './js/DisplayCycleGraph.js';
@@ -7,20 +7,20 @@ import DisplayDiagram from './js/DisplayDiagram.js';
 import DisplayMulttable from './js/DisplayMulttable.js';
 import GroupURLs from './GroupURLs.js';
 import Library from './js/Library.js';
-import Log from './js/Log.md';
-import Menu from './js/Menu.md';
+import Log from './js/Log.js';
+import MathML from './js/MathML.js';
+import Menu from './js/Menu.js';
 import Multtable from './js/Multtable.js';
 import SymmetryObject from './js/SymmetryObject.js';
-import Template from './js/Template.md';
+import Template from './js/Template.js';
 import XMLGroup from './js/XMLGroup.js';
- */
 
-// Global variables
-var graphicContext /*: DisplayDiagram */;	// hidden scratchpad, re-used to reduce WebGL contexts
-var multtableContext /*: DisplayMulttable */;
-var cycleGraphContext /*: DisplayCycleGraph */;
+export {readLibrary as load};
 
-$(window).on('load', readLibrary);
+// Module variables
+let graphicContext /*: DisplayDiagram */;	// hidden scratchpad, re-used to reduce WebGL contexts
+let multtableContext /*: DisplayMulttable */;
+let cycleGraphContext /*: DisplayCycleGraph */;
 
 // Static event managers (setup after document is available)
 function registerEventHandlers() {

@@ -1,7 +1,8 @@
 //@flow
-/*::
+
 import XMLGroup from './XMLGroup.js';
 
+/*::
 export type Highlights = {background: Array<color>; border: Array<color>; top: Array<color>};
 
 type Coordinate = {x: float, y: float};
@@ -13,9 +14,9 @@ type Path = {
    cycle?: Array<groupElement>,
    pathIndex?: number
 };
+*/
 
 export default
-*/
 class CycleGraph {
 /*::
    static SOME_SETTING_NAME: string;

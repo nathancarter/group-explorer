@@ -3,15 +3,16 @@
  * Structure used to describe Cayley diagram, symmetry object to DrawDiagram
  */
 
-/*::
 import BitSet from './BitSet.js';
 import GEUtils from './GEUtils.js';
 import XMLGroup from './XMLGroup.js';
 
-type PointConstructor = [float, float, float] | THREE.Vector3;
+/*::
 export type NodeOptions = {color?: color, radius?: float, lineStyle?: number};
 export type LineOptions = {arrow?: groupElement, arrowhead?: boolean, color?: color, offset?: float, style?: number} ;
 export type Diagram3DOptions = {background?: color, isGenerated?: boolean};
+
+type PointConstructor = [float, float, float] | THREE.Vector3;
 */
 
 const _Diagram3D_STRAIGHT = 0;
@@ -109,8 +110,7 @@ class _Diagram3D_Line {
    }
 }
 
-
-/*:: export default */
+export default
 class Diagram3D {
 /*::
    static STRAIGHT: number;

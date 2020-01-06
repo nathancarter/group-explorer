@@ -1,44 +1,47 @@
 // @flow
 
-/*::
 import CayleyDiagram from './js/CayleyDiagram.js';
 import DisplayDiagram from './js/DisplayDiagram.js';
-import type {CayleyDiagramJSON} from './js/DisplayDiagram.js';
-import DiagramDnD from './js/DiagramDnD.md';
+import DiagramDnD from './js/DiagramDnD.js';
 import GEUtils from './js/GEUtils.js';
 import Library from './js/Library.js';
-import Log from './js/Log.md';
-import MathML from './js/MathML.md';
-import Menu from './js/Menu.md';
-import Template from './js/Template.md';
+import Log from './js/Log.js';
+import MathML from './js/MathML.js';
+import Menu from './js/Menu.js';
+import Template from './js/Template.js';
 import XMLGroup from './js/XMLGroup.js';
 
-import SSD from './subsetDisplay/subsets.js';
-import CVC from './cayleyViewController/view.js';
-import DC from './diagramController/diagram.js';
-import VC from './visualizerFramework/visualizer.js';
+import * as SSD from './subsetDisplay/subsets.js';
+import * as CVC from './cayleyViewController/view.js';
+import * as DC from './diagramController/diagram.js';
+import * as VC from './visualizerFramework/visualizer.js';
 
+export {loadGroup as load, emitStateChange, displayGraphic};
+
+/*::
+import type {CayleyDiagramJSON} from './js/DisplayDiagram.js';
 import type {MSG_listenerReady, MSG_stateLoaded, MSG_external, MSG_editor} from './js/SheetModel.js';
 
 type AugmentedCayleyDiagramJSON = CayleyDiagramJSON & {_use_fog?: string,
                                                        _fog_level?: string | string[] | number,
                                                        _show_labels?: string,
                                                        _label_size?: string | string[] | number};
- */
+*/
 
-/* Global variables */
-var group               /*: XMLGroup */,        // group about which information will be displayed
-    Diagram_name        /*: ?string */,         // name of Cayley diagram, or undefined if generated
-    Cayley_diagram      /*: CayleyDiagram */,   // data being displayed in large diagram
-    Graphic_context     /*: DisplayDiagram */,  // graphic context for large diagram
-    DnD_handler         /*: DiagramDnD */,	// drag-and-drop, tooltip handler for large diagram
-    canEmit		/*: boolean */ = true;	// flag: whether to notify parent window of table changes
-const HELP_PAGE = 'help/rf-um-cd-options/index.html';
+/* Exported module variables */
+const Group          /*: Array<XMLGroup> */ = [];       // group about which information will be displayed
+const Diagram_Name   /*: Array<string> */ = [];		// name of Cayley diagram, or undefined if generated
+const Cayley_Diagram /*: Array<CayleyDiagram> */ = [];  // data being displayed in large diagram
+const Graphic_Context/*: Array<DisplayDiagram> */ = []; // graphic context for large diagram
+export {Group, Diagram_Name, Cayley_Diagram, Graphic_Context};
+
+/* Module variables */
+let DnD_handler      /*: DiagramDnD */;			// drag-and-drop, tooltip handler for large diagram
+let canEmit          /*: boolean */ = true;		// flag: whether to notify parent window of table changes
+
+const HELP_PAGE /*: string */ = 'help/rf-um-cd-options/index.html';
 
 const myDomain = new URL(window.location.href).origin;
-
-/* Initial entry to javascript, called once after document load */
-window.addEventListener('load', load, {once: true});
 
 /* Register static event managers (called after document is assembled) */
 function registerCallbacks() {
@@ -51,27 +54,31 @@ function registerCallbacks() {
    Tooltip.init();
 }
 
-/* Load the static components of the page */
-function load() {
-   // Promise to load group from invocation URL
-   const group_load = Library
-         .loadFromURL()
-         .then( (_group) => {
-             group = _group;
-             setDiagramName();
-         } )
-         .catch( Log.err );
-
-   // Promise to load visualizer framework around visualizer-specific code in this file
-   const body_load = VC.load();
-
-   // When group and framework are loaded, load panels and complete setup
-   Promise.all([group_load, body_load])
-      .then( () =>
-             // Preload MathML cache for subsetDisplay, diagramControl
-             MathML.preload(group).then( loadPanels )
-           )
+// Load group from invocation URL
+function loadGroup() {
+   Library
+      .loadFromURL()
+      .then( (group) => {
+         Group[0] = group;
+         setDiagramNameFromURL();
+         loadVisualizerFramework();
+      } )
       .catch( Log.err );
+}
+
+// Load visualizer framework around visualizer-specific code in this file
+function loadVisualizerFramework() {
+   VC.load(Group[0], HELP_PAGE)
+      .then( () => {
+         preloadMathMLCache();
+      } )
+      .catch( Log.err );
+}
+
+function preloadMathMLCache() {
+   MathML.preload(Group[0])
+      .then( () => loadPanels() )
+      .catch( Log.err )
 }
 
 function loadPanels() {
@@ -80,7 +87,7 @@ function loadPanels() {
       {handler: highlightByRingAroundNode, label: 'Ring around node'},
       {handler: highlightBySquareAroundNode, label: 'Square around node'}
    ];
-   const subset_display_load = SSD.load($('#subset-control'), highlighters);
+   const subset_display_load = SSD.load($('#subset-control'), highlighters, clearHighlights, Group[0]);
    const view_controller_load = CVC.load($('#view-control'));
    const diagram_controller_load = DC.load($('#diagram-control'));
    Promise.all([subset_display_load, view_controller_load, diagram_controller_load])
@@ -88,22 +95,24 @@ function loadPanels() {
           .catch( Log.err );
 }
 
-/* Set Diagram_name from URL (undefined => use generated Cayley diagram) */
-function setDiagramName() {
-   Diagram_name = new URL(window.location.href).searchParams.get('diagram');
-   if (Diagram_name == null || !group.cayleyDiagrams.some( (diagram) => diagram.name == Diagram_name )) {
-      Diagram_name = undefined;
+/* Set Diagram_Name from URL (undefined => use generated Cayley diagram) */
+function setDiagramNameFromURL() {
+   let name = new URL(window.location.href).searchParams.get('diagram');
+   if (name == null || !Group[0].cayleyDiagrams.some( (diagram) => diagram.name == name )) {
+      Diagram_Name.pop();
+   } else {
+      Diagram_Name[0] = name;
    }
 }
 
 /* Now that all the static HTML is loaded, complete the setup */
 function completeSetup() {
    // Create header from group name and queue MathJax to typeset it
-   $('#header').html(MathML.sans('<mtext>Cayley Diagram for&nbsp;</mtext>' + group.name));
+   $('#header').html(MathML.sans('<mtext>Cayley Diagram for&nbsp;</mtext>' + Group[0].name));
 
    // Create graphic context
-   Graphic_context = new DisplayDiagram({container: $('#graphic'), trackballControlled: true});
-   DnD_handler = new DiagramDnD(Graphic_context);
+   Graphic_Context[0] = new DisplayDiagram({container: $('#graphic'), trackballControlled: true});
+   DnD_handler = new DiagramDnD(Graphic_Context[0]);
    displayGraphic();
 
    // Register the splitter with jquery-resizable
@@ -128,12 +137,15 @@ function completeSetup() {
       }
       const jsonData /*: AugmentedCayleyDiagramJSON */ = (event_data.json /*: any */);
       canEmit = false; // don't spam notifications of changes about to happen
-      Diagram_name = jsonData.hasOwnProperty( '_diagram_name' ) ?
-         jsonData._diagram_name :
-         group.cayleyDiagrams.length > 0 ?
-         group.cayleyDiagrams[0].name : undefined;
-      DC.DiagramChoice.selectDiagram( Diagram_name, false );
-      Cayley_diagram = new CayleyDiagram(group, Diagram_name);
+      const diagram_name = jsonData.hasOwnProperty( '_diagram_name' ) ?
+            jsonData._diagram_name : (Group[0].cayleyDiagrams.length > 0 ? Group[0].cayleyDiagrams[0].name : undefined);
+      if (diagram_name == undefined) {
+         Diagram_Name.pop();
+      } else {
+         Diagram_Name[0] = diagram_name;
+      }
+      DC.DiagramChoice.selectDiagram( Diagram_Name[0], false );
+      Cayley_Diagram[0] = new CayleyDiagram(Group[0], Diagram_Name[0]);
       const _use_fog = jsonData._use_fog;
       if ( _use_fog != undefined )
          $( '#use-fog' ).prop( 'checked', _use_fog );
@@ -146,13 +158,13 @@ function completeSetup() {
       const _label_size = jsonData._label_size;
       if ( _label_size != undefined )
          $( '#label-size' ).val( _label_size );
-      Graphic_context.fromJSON( jsonData, Cayley_diagram );
-      $( '#zoom-level' ).val( 10 * Math.log( Cayley_diagram.zoomLevel ) );
-      $( '#line-thickness' ).val( Cayley_diagram.lineWidth );
-      $( '#node-radius' ).val( 10 * Math.log( Cayley_diagram.nodeScale ) );
-      $( '#arrowhead-placement' ).val( 20 * Cayley_diagram.arrowheadPlacement );
+      Graphic_Context[0].fromJSON( jsonData, Cayley_Diagram[0] );
+      $( '#zoom-level' ).val( 10 * Math.log( Cayley_Diagram[0].zoomLevel ) );
+      $( '#line-thickness' ).val( Cayley_Diagram[0].lineWidth );
+      $( '#node-radius' ).val( 10 * Math.log( Cayley_Diagram[0].nodeScale ) );
+      $( '#arrowhead-placement' ).val( 20 * Cayley_Diagram[0].arrowheadPlacement );
       canEmit = true; // restore default behavior
-      Graphic_context.showGraphic(Cayley_diagram);
+      Graphic_Context[0].showGraphic(Cayley_Diagram[0]);
       DC.update();
       const msg /*: MSG_stateLoaded */ = 'state loaded';
       window.postMessage( msg, myDomain );
@@ -168,24 +180,24 @@ function completeSetup() {
    // these include camera position, node position, node radius, and arrow positions.
    var lastKey = null;
    setInterval( function () {
-      const camera = Graphic_context.camera.matrix.toArray();
-      const nodes = Cayley_diagram.nodes.map( n => `${n.point.toArray().toString()}` ).join( ';' );
-      const radii = Cayley_diagram.nodes.map( n => `${n.radius || 'undefined'}` ).join( ',' );
-      const arrows = Cayley_diagram.lines.map( a => `${a.style},${a.offset || 'undefined'}` ).join( ';' );
+      const camera = Graphic_Context[0].camera.matrix.toArray();
+      const nodes = Cayley_Diagram[0].nodes.map( n => `${n.point.toArray().toString()}` ).join( ';' );
+      const radii = Cayley_Diagram[0].nodes.map( n => `${n.radius || 'undefined'}` ).join( ',' );
+      const arrows = Cayley_Diagram[0].lines.map( a => `${a.style},${a.offset || 'undefined'}` ).join( ';' );
       const thisKey = `${camera.toString()} ${nodes} ${radii} ${arrows}`;
       if ( lastKey != thisKey ) emitStateChange();
       lastKey = thisKey;
    }, 1000 );
 
    // No need to keep the "find group" icon visible if the group was loaded from a URL
-   if ( group.URL ) $( '#find-group' ).hide();
+   if ( Group[0].URL ) $( '#find-group' ).hide();
 }
 
 function emitStateChange () {
    if ( canEmit ) {
       const json /*: AugmentedCayleyDiagramJSON */ = Object.assign(
          {},
-         Graphic_context.toJSON( Cayley_diagram ),
+         Graphic_Context[0].toJSON( Cayley_Diagram[0] ),
          { _use_fog: $( '#use-fog' ).prop( 'checked' ),
            _fog_level: $( '#fog-level' ).val(),
            _show_labels: $( '#show-labels' ).prop( 'checked' ),
@@ -202,8 +214,8 @@ function emitStateChange () {
 
 // Draw Cayley diagram in graphic
 function displayGraphic() {
-   Cayley_diagram = new CayleyDiagram(group, Diagram_name);
-   Graphic_context.showGraphic(Cayley_diagram);
+   Cayley_Diagram[0] = new CayleyDiagram(Group[0], Diagram_Name[0]);
+   Graphic_Context[0].showGraphic(Cayley_Diagram[0]);
    DC.update();
 }
 
@@ -221,13 +233,13 @@ function resizeBody() {
  *    change camera parameters and renderer size, and then re-attach it)
  */
 function resizeGraphic() {
-   if (Graphic_context.camera !== undefined) {
+   if (Graphic_Context[0].camera !== undefined) {
       $('#graphic > canvas').detach();
-      Graphic_context.camera.aspect = $('#graphic').width() / $('#graphic').height();
-      Graphic_context.camera.updateProjectionMatrix();
-      Graphic_context.renderer.setSize($('#graphic').width(), $('#graphic').height());
-      Graphic_context.updateLineWidth(Cayley_diagram);  // not sure why -- seems to be needed in Chrome
-      $('#graphic').append(Graphic_context.renderer.domElement);
+      Graphic_Context[0].camera.aspect = $('#graphic').width() / $('#graphic').height();
+      Graphic_Context[0].camera.updateProjectionMatrix();
+      Graphic_Context[0].renderer.setSize($('#graphic').width(), $('#graphic').height());
+      Graphic_Context[0].updateLineWidth(Cayley_Diagram[0]);  // not sure why -- seems to be needed in Chrome
+      $('#graphic').append(Graphic_Context[0].renderer.domElement);
    }
 }
 
@@ -313,11 +325,11 @@ class Tooltip {
    }
 
    static getObjectIDsAtLocation(location /*: eventLocation */) /*: Array<THREE.Object3D> */ {
-      const $graphic = $('#graphic'); // Graphic_context.renderer.domElement;
+      const $graphic = $('#graphic'); // Graphic_Context.renderer.domElement;
       const bounding_box = $graphic[0].getBoundingClientRect();
       const x = ( (location.clientX - bounding_box.left) / $graphic.width()) * 2 - 1;
       const y = -( (location.clientY - bounding_box.top) / $graphic.height()) * 2 + 1;
-      const objects = Graphic_context.getObjectsAtPoint(x, y);
+      const objects = Graphic_Context[0].getObjectsAtPoint(x, y);
       return objects;
    }
 
@@ -344,25 +356,25 @@ class Tooltip {
 
 /* Highlighting routines */
 function highlightByNodeColor(elements /*: Array<Array<groupElement>> */) {
-   Cayley_diagram.highlightByNodeColor(elements);
-   Graphic_context.updateHighlights(Cayley_diagram);
+   Cayley_Diagram[0].highlightByNodeColor(elements);
+   Graphic_Context[0].updateHighlights(Cayley_Diagram[0]);
    emitStateChange();
 }
 
 function highlightByRingAroundNode(elements /*: Array<Array<groupElement>> */) {
-   Cayley_diagram.highlightByRingAroundNode(elements);
-   Graphic_context.updateHighlights(Cayley_diagram);
+   Cayley_Diagram[0].highlightByRingAroundNode(elements);
+   Graphic_Context[0].updateHighlights(Cayley_Diagram[0]);
    emitStateChange();
 }
 
 function highlightBySquareAroundNode(elements /*: Array<Array<groupElement>> */) {
-   Cayley_diagram.highlightBySquareAroundNode(elements);
-   Graphic_context.updateHighlights(Cayley_diagram);
+   Cayley_Diagram[0].highlightBySquareAroundNode(elements);
+   Graphic_Context[0].updateHighlights(Cayley_Diagram[0]);
    emitStateChange();
 }
 
 function clearHighlights() {
-   Cayley_diagram.clearHighlights();
-   Graphic_context.updateHighlights(Cayley_diagram);
+   Cayley_Diagram[0].clearHighlights();
+   Graphic_Context[0].updateHighlights(Cayley_Diagram[0]);
    emitStateChange();
 }

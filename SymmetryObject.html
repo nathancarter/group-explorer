@@ -34,9 +34,10 @@
       <script src="https://cdn.jsdelivr.net/npm/three@0.110.0/examples/js/controls/TrackballControls.js"></script>
       <script src="https://cdn.jsdelivr.net/npm/jquery-resizable-dom@0.32.0/dist/jquery-resizable.js"></script>
       <script src="./lib/THREE.MeshLine.js"></script>
-      <script src="./build/allGroupExplorer.js"></script>
-      <script src="./build/allVisualizer.js"></script>
-      <script src="./SymmetryObject.js"></script>
+      <script type="module">
+       import {load} from './SymmetryObject.js';
+       window.addEventListener('load', load, {once: true});
+      </script>
    </head>
    <body class="vert">
       <div class="fill-vert control">

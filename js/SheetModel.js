@@ -8,27 +8,29 @@
  * construction time into which it is in charge of syncing its data.  It will ask its
  * contained Sheet Elements to create and destroy HTML element in that view as needed.
  */
-/*::
 import BasicGroup from './BasicGroup.js';
-import type {BasicGroupJSON} from './BasicGroup.js';
 import CayleyDiagram from './CayleyDiagram.js';
-import type {StrategyArray} from './CayleyDiagram.js';
 import CycleGraph from './CycleGraph.js';
 import DisplayCycleGraph from './DisplayCycleGraph.js';
-import type {CycleGraphJSON} from './DisplayCycleGraph.js';
 import DisplayDiagram from './DisplayDiagram.js';
-import type {CayleyDiagramJSON} from './DisplayDiagram.js';
 import DisplayMulttable from './DisplayMulttable.js';
-import type {MulttableJSON} from './DisplayMulttable.js';
+import {DEFAULT_RESIZING_MARGIN, SELECTED_FOR_DRAGGING_CLASS} from './DragResizeExtension.js';
 import Library from './Library.js';
-import Log from './Log.md';
-import MathML from './MathML.md';
+import Log from './Log.js';
+import MathML from './MathML.js';
 import Multtable from './Multtable.js';
+import {loadSheetFromJSON} from '../Sheet.js';
 import XMLGroup from './XMLGroup.js';
+
+/*::
+import type {BasicGroupJSON} from './BasicGroup.js';
+import type {StrategyArray} from './CayleyDiagram.js';
+import type {CycleGraphJSON} from './DisplayCycleGraph.js';
+import type {CayleyDiagramJSON} from './DisplayDiagram.js';
+import type {MulttableJSON} from './DisplayMulttable.js';
 import type {XMLGroupJSON, BriefXMLGroupJSON} from './XMLGroup.js';
 
 // From DragResizeExtension.js -- awkward to extend existing class in Flow
-import {SELECTED_FOR_DRAGGING_CLASS, DEFAULT_RESIZING_MARGIN} from './DragResizeExtension.js';
 import type {JQueryDnD} from './DragResizeExtension.js';
 
 type Obj = {[key: string]: any};
@@ -120,10 +122,9 @@ export type MSG_editor<VizType: MulttableJSON | CayleyDiagramJSON | CycleGraphJS
    source: 'editor',
    json: VizType
 };
-
-export
 */
-class SheetModel {
+
+export class SheetModel {
 /*::
     view: HTMLElement;
     elements: Array<SheetElement>;
@@ -373,10 +374,7 @@ class SheetModel {
  * We also make a global convenience function for popping up a sheet in a new tab,
  * and building it from a big bolus of JSON.
  */
-/*::
-export
-*/
-function CreateNewSheet ( json /*: Array<JSONType> */ ) {
+export function CreateNewSheet ( json /*: Array<JSONType> */ ) {
     var sheet = window.open( './Sheet.html' );
     sheet.addEventListener( 'load', function () {
         // Sheet.html has loaded, but its own load handlers may still need to fire, so:
@@ -396,8 +394,7 @@ function CreateNewSheet ( json /*: Array<JSONType> */ ) {
  * It can compute, if requested, an HTML element representing itself, for inclusion
  * in the view of its parent SheetModel.
  */
-/*:: export */
-class SheetElement {
+export class SheetElement {
 /*::
     model: SheetModel;
     zIndex: number;
@@ -614,8 +611,7 @@ class SheetElement {
 /*
  * Simplest SheetElement subclass: a colored rectangle.
  */
-/*:: export */
-class RectangleElement extends SheetElement {
+export class RectangleElement extends SheetElement {
 /*::
     color: color;
  */
@@ -685,8 +681,7 @@ class RectangleElement extends SheetElement {
 /*
  * SheetElement subclass for showing text
  */
-/*:: export */
-class TextElement extends SheetElement {
+export class TextElement extends SheetElement {
 /*::
     text: string;
     fontSize: string;
@@ -793,8 +788,7 @@ class TextElement extends SheetElement {
 /*
  * SheetElement subclass for showing a visualizer for a group
  */
-/*:: export */
-class VisualizerElement/*:: < VizObjType, VizDispJSON: Obj, VizDispType: VizDisplay<VizObjType, VizDispJSON> > */ extends SheetElement {
+export class VisualizerElement/*:: < VizObjType, VizDispJSON: Obj, VizDispType: VizDisplay<VizObjType, VizDispJSON> > */ extends SheetElement {
 /*::
     group: XMLGroup;
     groupURL: string;
@@ -973,8 +967,7 @@ class VisualizerElement/*:: < VizObjType, VizDispJSON: Obj, VizDispType: VizDisp
 /*
  * SheetElement subclass for showing the multiplication table of a group
  */
-/*:: export */
-class MTElement extends VisualizerElement/*:: <Multtable, MulttableJSON, DisplayMulttable> */ {
+export class MTElement extends VisualizerElement/*:: <Multtable, MulttableJSON, DisplayMulttable> */ {
     constructor ( model /*: SheetModel */, groupURL /*: string */ ) {
         super( model, groupURL );
         this.ignoresAspectRatio = true;
@@ -991,8 +984,7 @@ class MTElement extends VisualizerElement/*:: <Multtable, MulttableJSON, Display
 /*
  * SheetElement subclass for showing the cycle graph of a group
  */
-/*:: export */
-class CGElement extends VisualizerElement/*:: <CycleGraph, CycleGraphJSON, DisplayCycleGraph> */ {
+export class CGElement extends VisualizerElement/*:: <CycleGraph, CycleGraphJSON, DisplayCycleGraph> */ {
     constructor ( model /*: SheetModel */, groupURL /*: string */ ) {
         super( model, groupURL  );
         // The following hack is because the CG has to realize that its canvas size
@@ -1016,8 +1008,7 @@ class CGElement extends VisualizerElement/*:: <CycleGraph, CycleGraphJSON, Displ
 /*
  * SheetElement subclass for showing the Cayley diagram of a group
  */
-/*:: export */
-class CDElement extends VisualizerElement/*:: <CayleyDiagram, CayleyDiagramJSON, DisplayDiagram> */ {
+export class CDElement extends VisualizerElement/*:: <CayleyDiagram, CayleyDiagramJSON, DisplayDiagram> */ {
     makeVisualizerObject ( group /*: XMLGroup */ ) {
         return group.cayleyDiagrams.length > 0 ?
                new CayleyDiagram( group, group.cayleyDiagrams[0].name ) :
@@ -1034,8 +1025,7 @@ class CDElement extends VisualizerElement/*:: <CayleyDiagram, CayleyDiagramJSON,
 /*
  * SheetElement subclass for connecting two other SheetElements
  */
-/*:: export */
-class ConnectingElement/*:: <TerminalType: SheetElement> */ extends SheetElement {
+export class ConnectingElement/*:: <TerminalType: SheetElement> */ extends SheetElement {
 /*::
     color: color;
     thickness: number;
@@ -1236,8 +1226,7 @@ class ConnectingElement/*:: <TerminalType: SheetElement> */ extends SheetElement
 /*
  * SheetElement representing a homomorphism from one group to another
  */
-/*:: export */
-class MorphismElement extends ConnectingElement/*:: < VisualizerElement<any, any, any> > */ {
+export class MorphismElement extends ConnectingElement/*:: < VisualizerElement<any, any, any> > */ {
 /*::
     name: string;
     showManyArrows: boolean;

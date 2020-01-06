@@ -1,17 +1,14 @@
 // @flow
-/*::
+
 import BitSet from '../js/BitSet.js';
-import MathML from '../js/MathML.md';
-import Template from '../js/Template.md';
+import MathML from '../js/MathML.js';
+import Menu from '../js/Menu.js';
+import Template from '../js/Template.js';
 import XMLGroup from '../js/XMLGroup.js';
 
-import SSD from './subsets.js';
+import * as SSD from './subsets.js';
 
-var group: XMLGroup;
-
-export default
- */
-SSD.Subset = class Subset extends SSD.AbstractSubset {
+export default class Subset extends SSD.AbstractSubset {
 /*::
    subsetIndex: number;
  */
@@ -19,13 +16,13 @@ SSD.Subset = class Subset extends SSD.AbstractSubset {
       super();
 
       if (elements === undefined) {
-         this.elements = new BitSet(group.order);
+         this.elements = new BitSet(SSD.group.order);
       } else if (Array.isArray(elements)) {
-         this.elements = new BitSet(group.order, elements);
+         this.elements = new BitSet(SSD.group.order, elements);
       } else {
          this.elements = elements;
       }
-      this.subsetIndex = SSD.nextSubsetIndex++;
+      this.subsetIndex = SSD.getNextSubsetIndex();
 
       // cache formatted MathML for next two subset instances
       MathML.cacheStrings([MathML.sub('S', SSD.nextSubsetIndex),
@@ -44,7 +41,7 @@ SSD.Subset = class Subset extends SSD.AbstractSubset {
       let items = this.elements
                       .toArray()
                       .slice(0, 3)
-                      .map( (el) => group.representation[el] );
+                      .map( (el) => SSD.group.representation[el] );
        if (numElements > 3) {
          items.push('<mtext>...</mtext>');
       }

@@ -1,11 +1,9 @@
 // @flow
 /*::
-import Diagram3D from './Diagram3D.js';
-
 export type Tree<T> = Array< T | Tree<T> >;
+ */
 
 export default
- */
 class GEUtils {
    static equals(a /*: Array<any> */, b /*: Array<any> */) /*: boolean */ {
       if (Array.isArray(a) && Array.isArray(b) && a.length == b.length) {

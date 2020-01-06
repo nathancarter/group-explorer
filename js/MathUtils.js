@@ -1,10 +1,9 @@
 // @flow
 // math functions
-/*::
+
 import BitSet from './BitSet.js';
 
 export default
-*/
 class MathUtils {
 /*::
    static primeList: BitSet;
@@ -26,10 +25,12 @@ class MathUtils {
    }
 
    static isPrime(n /*: number */) /*: boolean */ {
+      if (MathUtils.primeList == undefined) MathUtils.init();
       return (n < 200) ? MathUtils.primeList.isSet(n) : MathUtils.getFactors(n).length == 1
    }
 
    static isPrimePower(n /*: number */) /*: boolean */ {
+      if (MathUtils.primeList == undefined) MathUtils.init();
       if (n < 200) {
          return MathUtils.primePowerList.isSet(n)
       } else {
@@ -50,6 +51,3 @@ class MathUtils {
       return [n];
    }
 }
-
-// initialize static properties
-MathUtils.init();

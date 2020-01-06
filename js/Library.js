@@ -25,20 +25,22 @@
  *   resolveURL -- get full URL
  *   saveGroup -- serialize and store group by URL in Libary.map/localStorage
  */
-/*::
+
 import BasicGroup from './BasicGroup.js';
-import Log from './Log.md';
-import type {MSG_loadGroup} from './SheetModel.js';
+import Log from './Log.js';
 import XMLGroup from './XMLGroup.js';
+
+/*::
+import type {MSG_loadGroup} from './SheetModel.js';
 import type {XMLGroupJSON, BriefXMLGroupJSON} from './XMLGroup.js';
 
 type StoredLibraryValue = {
    rev: number,
    object: XMLGroup
 };
-   
+*/   
+
 export default
- */
 class Library {
 /*::
    static map: {[key: string]: XMLGroup};

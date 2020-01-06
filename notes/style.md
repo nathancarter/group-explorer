@@ -18,7 +18,7 @@ It's a generally accepted notion in the programming community that a consistent,
 * local variables are `snake_case`
 * instance variable are `this.snake_case`
 * class static variables are `Class.snake_case`
-* global variables are `Snake_case`
+* global/module variables are `Snake_Case`
 * global constants (real constants, not const's) are `SNAKE_CASE`
 * class static constants (real constants, not const's) are `Class.SNAKE_CASE`
 * functions are `camelCase`

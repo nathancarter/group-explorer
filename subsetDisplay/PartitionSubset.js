@@ -1,16 +1,14 @@
 // @flow
-/*::
+
 import BitSet from '../js/BitSet.js';
-import Template from '../js/Template.md';
+import MathML from '../js/MathML.js';
+import Menu from '../js/Menu.js';
+import Template from '../js/Template.js';
 import XMLGroup from '../js/XMLGroup.js';
 
-import SSD from './subsets.js';
+import * as SSD from './subsets.js';
 
-var group: XMLGroup;
-
-export default
- */
-SSD.PartitionSubset = class PartitionSubset extends SSD.AbstractSubset {
+export default class PartitionSubset extends SSD.AbstractSubset {
 /*::
    parent: SSD.AbstractPartition;
    subIndex: number;
@@ -37,7 +35,7 @@ SSD.PartitionSubset = class PartitionSubset extends SSD.AbstractSubset {
       const result = [];
       for (let i = 0; i < this.elements.len && result.length < 3; i++) {
          if (this.elements.isSet(i)) {
-            result.push(group.representation[i]);
+            result.push(SSD.group.representation[i]);
          }
       }
       if (this.elements.popcount() > 3) {

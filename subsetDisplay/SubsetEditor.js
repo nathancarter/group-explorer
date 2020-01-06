@@ -1,20 +1,17 @@
 // @flow
-/*::
+
 import BitSet from '../js/BitSet.js';
-import MathML from '../js/MathML.md';
-import Template from '../js/Template.md';
+import MathML from '../js/MathML.js';
+import Template from '../js/Template.js';
 import XMLGroup from '../js/XMLGroup.js';
 
-import SSD from './subsets.js';
-
-var group: XMLGroup;
+import * as SSD from './subsets.js';
 
 export default
- */
-SSD.SubsetEditor = class SubsetEditor {
+class SubsetEditor {
    static open(displayId /*: number */) {
       const subset = displayId === undefined ? undefined : SSD.displayList[displayId];
-      const elements = subset === undefined ? new BitSet(group.order) : subset.elements;
+      const elements = subset === undefined ? new BitSet(SSD.group.order) : subset.elements;
       const setName = subset === undefined ? SSD.Subset.nextName() : subset.name;
       const $subsetEditor = $('body').append(eval(Template.HTML('subset-editor-template')))
                                      .find('#subset_editor').show();
@@ -24,9 +21,9 @@ SSD.SubsetEditor = class SubsetEditor {
       $subsetEditor.find('#ssedit_elementsIn_container').on('drop', SSD.SubsetEditor.addElement);
       $subsetEditor.find('#ssedit_elementsNotIn_container').on('drop', SSD.SubsetEditor.removeElement);
 
-      for (const el of group.elements) {
+      for (const el of SSD.group.elements) {
          const elementHTML =
-            `<li element=${el} draggable="true">${MathML.sans(group.representation[el])}</li>`;
+            `<li element=${el} draggable="true">${MathML.sans(SSD.group.representation[el])}</li>`;
          const listName = elements.isSet(el) ? 'elementsIn' : 'elementsNotIn';
          $(elementHTML).appendTo($subsetEditor.find(`#${listName}`))
                        .on('dragstart', (event /*: JQueryEventObject */) => {

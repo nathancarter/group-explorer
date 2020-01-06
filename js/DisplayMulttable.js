@@ -1,7 +1,9 @@
 // @flow
-/*::
-import Log from './Log.md';
+
+import Log from './Log.js';
 import Multtable from './Multtable.js';
+
+/*::
 import type {Coloration} from './Multtable.js';
 
 export type MulttableJSON = {
@@ -23,9 +25,9 @@ type Options = {
    height?: number,
    size?: string
 };
+*/
 
 export default
- */
 class DisplayMulttable {
 /*::
    static DEFAULT_CANVAS_HEIGHT: number;

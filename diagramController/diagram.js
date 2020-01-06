@@ -1,61 +1,56 @@
 // @flow
-/*::
+
+import XMLGroup from '../js/XMLGroup.js';
+
 import Arrow from './Arrow.js';
-import ArrowMult from './ArrowMult.js';
 import Chunking from './Chunking.js';
 import DiagramChoice from './DiagramChoice.js';
+import {clickHandler} from './EventHandler.js';
 import Generator from './Generator.js';
-import Menu from '../js/Menu.md';
 
-export default
- */
-class DC {
-/*::
-   static DIAGRAM_PANEL_URL: string;
-   static Arrow: Class<Arrow>;
-   static ArrowMult: Class<ArrowMult>;
-   static Chunking: Class<Chunking>;
-   static DiagramChoice: Class<DiagramChoice>;
-   static Generator: Class<Generator>;
- */
-   /* Load, initialize diagram control */
-   static load($diagramWrapper /*: JQuery */) /*: Promise<void> */ {
-      return new Promise( (resolve, reject) => {
-         $.ajax( { url: DC.DIAGRAM_PANEL_URL,
-                   success: (data /*: string */) => {
-                      $diagramWrapper.html(data);
-                      DC.setupDiagramPage();
-                      resolve();
-                   },
-                   error: (_jqXHR, _status, err) => {
-                      reject(`Error loading ${DC.DIAGRAM_PANEL_URL} ${err === undefined ? '' : ': ' + err}`);
-                   }
-         } )
-      } )
-   }
+export {default as Arrow} from './Arrow.js';
+export {default as Chunking} from './Chunking.js';
+export {default as DiagramChoice} from './DiagramChoice.js';
+export {default as Generator} from './Generator.js';
 
-   static setupDiagramPage() {
-      DC.DiagramChoice.setupDiagramSelect();
-      DC.Generator.init();
+export {load, update, clickHandler};
 
-      $('#diagram-select')[0].addEventListener('click', Menu.actionClickHandler);
+const DIAGRAM_PANEL_URL /*: string */ = './diagramController/diagram.html';
 
-      $('#generation-control')[0].addEventListener('click', Menu.actionClickHandler);
-      $('#generation-table')[0].addEventListener('dragstart', DC.Generator.dragStart);
-      $('#generation-table')[0].addEventListener('drop', DC.Generator.drop);
-      $('#generation-table')[0].addEventListener('dragover', DC.Generator.dragOver);
-
-      $('#arrow-control')[0].addEventListener('click', Menu.actionClickHandler);
-
-      $('#chunk-select')[0].addEventListener('click', Menu.actionClickHandler);
-   }
-
-   static update() {
-      DC.Generator.draw();
-      DC.Arrow.updateArrows();
-      DC.Chunking.updateChunkingSelect();
-   }
+/* Load, initialize diagram control */
+function load($diagramWrapper /*: JQuery */) /*: Promise<void> */ {
+   return new Promise( (resolve, reject) => {
+      $.ajax( { url: DIAGRAM_PANEL_URL,
+                success: (data /*: string */) => {
+                   $diagramWrapper.html(data);
+                   setupDiagramPage();
+                   resolve();
+                },
+                error: (_jqXHR, _status, err) => {
+                   reject(`Error loading ${DIAGRAM_PANEL_URL} ${err === undefined ? '' : ': ' + err}`);
+                }
+              } )
+   } )
 }
 
-DC.DIAGRAM_PANEL_URL = 'diagramController/diagram.html';
+function setupDiagramPage() {
+   DiagramChoice.setupDiagramSelect();
+   Generator.init();
 
+   $('#diagram-select')[0].addEventListener('click', clickHandler);
+
+   $('#generation-control')[0].addEventListener('click', clickHandler);
+   $('#generation-table')[0].addEventListener('dragstart', Generator.dragStart);
+   $('#generation-table')[0].addEventListener('drop', Generator.drop);
+   $('#generation-table')[0].addEventListener('dragover', Generator.dragOver);
+
+   $('#arrow-control')[0].addEventListener('click', clickHandler);
+
+   $('#chunk-select')[0].addEventListener('click', clickHandler);
+}
+
+function update() {
+   Generator.draw();
+   Arrow.updateArrows();
+   Chunking.updateChunkingSelect();
+}

@@ -1,12 +1,10 @@
 // @flow
-/*::
-import MathML from '../js/MathML.md';
 
-import SSD from './subsets.js';
+import MathML from '../js/MathML.js';
 
-export default
- */
-SSD.AbstractPartition = class AbstractPartition {
+import * as SSD from './subsets.js';
+
+export default class AbstractPartition {
 /*::
   +destroy: () => void;   
   +name: string;

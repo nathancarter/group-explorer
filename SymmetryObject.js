@@ -1,29 +1,26 @@
 // @flow
 
-/*::
 import Diagram3D from './js/Diagram3D.js';
 import DisplayDiagram from './js/DisplayDiagram.js';
 import Library from './js/Library.js';
-import Log from './js/Log.md';
-import MathML from './js/MathML.md';
+import Log from './js/Log.js';
+import MathML from './js/MathML.js';
 import MathUtils from './js/MathUtils.js';
-import Menu from './js/Menu.md';
+import Menu from './js/Menu.js';
 import SymmetryObject from './js/SymmetryObject.js';
-import Template from './js/Template.md';
+import Template from './js/Template.js';
+import * as VC from './visualizerFramework/visualizer.js';
 import XMLGroup from './js/XMLGroup.js';
 
-import VC from './visualizerFramework/visualizer.js';
- */
+export {loadGroup as load};
 
-/* Global variables */
-var group		/*: XMLGroup */,	// group about which information will be displayed
-    diagramName		/*: string */,		// name of SymmetryObject, guaranteed to be non-empty
-    graphicData		/*: Diagram3D */,	// data being displayed in large diagram
-    graphicContext	/*: DisplayDiagram */;	// graphic context for large diagram
+/* Module variables */
+let group		/*: XMLGroup */;	// group about which information will be displayed
+let diagramName		/*: string */;		// name of SymmetryObject, guaranteed to be non-empty
+let graphicData		/*: Diagram3D */;	// data being displayed in large diagram
+let graphicContext	/*: DisplayDiagram */;	// graphic context for large diagram
+
 const HELP_PAGE = 'help/rf-um-os-options/index.html';
-
-/* Initial entry to javascript, called once after document load */
-window.addEventListener('load', load, {once: true});
 
 /* Register static event managers (called after document is assembled) */
 function registerCallbacks() {
@@ -38,25 +35,26 @@ function registerCallbacks() {
    $('#fog-level')[0].addEventListener('input', set_fog_level);
 }
 
-/* Load the static components of the page */
-function load() {
-   // Promise to load group from invocation URL
-   const groupLoad = Library
+// Load group from invocation URL
+function loadGroup() {
+   Library
       .loadFromURL()
-      .then( (_group) => group = _group )
+      .then( (_group) => {
+         group = _group;
+         loadVisualizerFramework();
+      } )
       .catch( Log.err );
+}
 
-   // Promise to load visualizer framework around visualizer-specific code in this file
-   const bodyLoad = VC.load();
-
-   // When group and framework are loaded, insert subset_page and complete rest of setup
-   Promise.all([groupLoad, bodyLoad])
-          .then( () => {
-             setDiagramName();
-             if (diagramName != undefined) {
-                completeSetup();
-             }} )
-          .catch( Log.err );
+// Load visualizer framework around visualizer-specific code in this file
+function loadVisualizerFramework() {
+   VC.load(group, HELP_PAGE)
+      .then( () => {
+         setDiagramName();
+         if (diagramName != undefined) {
+            completeSetup();
+         }} )
+      .catch( Log.err );
 }
 
 /* Set diagramName from URL (undefined => error, no symmetry group) */

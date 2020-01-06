@@ -12,9 +12,9 @@
  * GUIs (top NS, bottom NS, left EW, right EW, top right NESW, etc.).
  */
 
-/*::
-import Log from './Log.md';
+import Log from './Log.js';
 
+/*::
 export type JQueryDnD = JQuery & {
    draggableAndSizable: () => void,
    removeDragAndSizeSelection: () => void,
@@ -25,8 +25,7 @@ export type JQueryDnD = JQuery & {
 
 */
 // Set the distance from the edge of the element that counts as the resizing area.
-/*:: export */
-const DEFAULT_RESIZING_MARGIN /*: number */ = 10;
+export const DEFAULT_RESIZING_MARGIN /*: number */ = 10;
 
 // Use the following class to mark an element the user has selected for dragging
 // or resizing.  The user cannot drag or resize an element they have not first
@@ -34,8 +33,7 @@ const DEFAULT_RESIZING_MARGIN /*: number */ = 10;
 // and controls without triggering a move/resize event by accident.
 // The client should typically assign this some style to make it obvious that the
 // element has been selected, such as "border: 2px dotted #aaf;".
-/*:: export */
-const SELECTED_FOR_DRAGGING_CLASS /*: string */ = 'selected-for-moving-and-sizing';
+export const SELECTED_FOR_DRAGGING_CLASS /*: string */ = 'selected-for-moving-and-sizing';
 
 // For temporarily pausing this feature.
 const pausedDragSelectClass /*: string */ = 'move-and-size-on-pause';
@@ -69,7 +67,7 @@ function eventToCellNumber ( event /*: JQueryEventObject */, relativeToThisAnces
 // Recall that in jQuery, an extension is a function that is called in all jQuery
 // objects to which clients have applied it.  That is, it's run with "this" set to
 // an element that needs draggableAndSizable applied to it.
-$.fn.draggableAndSizable = function () {
+window.$.fn.draggableAndSizable = function () {
 
     // Remember the element for use in all the closures below.
     // Store in that element an empty object we will fill with data during a drag/resize.

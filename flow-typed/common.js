@@ -31,5 +31,8 @@ declare class Window extends EventTarget {
     getSelection(): Selection;
     ontouchstart?: Function;
     onresize?: Function;
+    VC?: Module;
+    sagecell: any;
+    $: jQuery;
 }
 declare var window: Window;

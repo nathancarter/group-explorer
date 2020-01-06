@@ -1,20 +1,23 @@
 // @flow
 
-/*::
 import BasicGroup from './js/BasicGroup.js';
 import CayleyDiagram from './js/CayleyDiagram.js';
 import DisplayDiagram from './js/DisplayDiagram.js';
 import IsomorphicGroups from './js/IsomorphicGroups.js';
 import Library from './js/Library.js';
-import Log from './js/Log.md';
-import MathML from './js/MathML.md';
+import Log from './js/Log.js';
+import MathML from './js/MathML.js';
 import MathUtils from './js/MathUtils.js';
 import setUpGAPCells from './js/ShowGAPCode.js';
 import Subgroup from './js/Subgroup.js';
-import Template from './js/Template.md';
+import Template from './js/Template.js';
 import XMLGroup from './js/XMLGroup.js';
 
 import {CreateNewSheet} from './js/SheetModel.js';
+
+export {loadGroup as load, showSubgroupLattice, showEmbeddingSheet, showQuotientSheet};
+
+/*::
 import type {
    JSONType,
    SheetElementJSON,
@@ -27,26 +30,25 @@ import type {
 } from './js/SheetModel.js';
 
 type DecoratedSubgroup = Subgroup & {_tierIndex?: number, _used?: boolean};
-
  */
 
-// Global variables
-var group		/*: XMLGroup */,	// group for which subgroups are being displayed
-    graphicContext	/*: DisplayDiagram */;
+// Module variables
+let group		/*: XMLGroup */;	// group for which subgroups are being displayed
+let graphicContext	/*: DisplayDiagram */;
 
-$(window).on('load', load);	// like onload handler in body
-
-function load() {
-   graphicContext = new DisplayDiagram( { width : 50, height : 50, fog : false } );
-   Library.loadFromURL()
-          .then( (_group) => {
-             group = _group;
-             displayGroup()
-          } )
-          .catch( Log.err );
+// Load group from invocation URL
+function loadGroup() {
+   Library
+      .loadFromURL()
+      .then( (_group) => {
+         group = _group;
+         displayGroup()
+      } )
+      .catch( Log.err );
 }
 
 function displayGroup() {
+   graphicContext = new DisplayDiagram( { width : 50, height : 50, fog : false } );
    const $rslt = $(document.createDocumentFragment())
       .append(eval(Template.HTML('header_template')));
    if (group.isSimple) {
@@ -69,7 +71,7 @@ function displayGroup() {
    $('body').prepend($rslt);
    MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
 
-   setUpGAPCells();
+   setUpGAPCells(group);
 }
 
 function subgroupInfo(index /*: number */) {

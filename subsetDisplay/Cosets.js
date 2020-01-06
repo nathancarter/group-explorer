@@ -1,15 +1,11 @@
 // @flow
-/*::
-import MathML from '../js/MathML.md';
+
+import MathML from '../js/MathML.js';
 import XMLGroup from '../js/XMLGroup.js';
 
-import SSD from './subsets.js';
+import * as SSD from './subsets.js';
 
-var group: XMLGroup;
-
-export default
- */
-SSD.Cosets = class Cosets extends SSD.AbstractPartition {
+export default class Cosets extends SSD.AbstractPartition {
 /*::
   subgroup: SSD.Subgroup;
   isLeft: boolean;
@@ -22,10 +18,10 @@ SSD.Cosets = class Cosets extends SSD.AbstractPartition {
       this.isLeft = side == 'left';
       this.side = side;
 
-      this.subsets = group
+      this.subsets = SSD.group
          .getCosets(this.subgroup.elements, this.isLeft)
          .map( (coset, inx) => {
-            const rep = group.representation[((coset.first() /*: any */) /*: groupElement */)];
+            const rep = SSD.group.representation[((coset.first() /*: any */) /*: groupElement */)];
             const name = this.isLeft ?
                          MathML.sans(rep) + this.subgroup.name :
                          this.subgroup.name + MathML.sans(rep);

@@ -31,7 +31,11 @@ Used by CayleyDiagram.html, CycleDiagram.html, Multtable.html, SymmetryObject.ht
             <i title="Show controls" class="fa fa-chevron-circle-left fa-2x trm-black"></i></a>
       </div>
       <div id="version" style="float: right; font-size: small"></div>
-      <script>document.getElementById('version').textContent = Version.label</script>
+      <script type="module">
+       import {Version} from './Version.js';
+
+       document.getElementById('version').textContent = Version.label;
+      </script>
    </div>
 ```
 #### Menu-Submenu Link Template

@@ -7,13 +7,17 @@
  * To create from JSON:
  *      XMLGroup.parseJSON(json)
  */
-/*::
+
 import BasicGroup from './BasicGroup.js';
+import BitSet from './BitSet.js';
+import MathML from './MathML.js';
+import Subgroup from './Subgroup.js';
+
+/*::
 import type {BasicGroupJSON} from './BasicGroup.js';
-import MathML from './MathML.md';
 
 // Cayley diagram from XML
-type XMLCayleyDiagram = {
+export type XMLCayleyDiagram = {
    name: string,
    arrows: Array<groupElement>,
    points: Array<Point>
@@ -68,9 +72,9 @@ export type BriefXMLGroupJSON = {
    symmetryObjects: Array<XMLSymmetryObject>,
    multtable: Array<Array<groupElement>>
 };
+*/
 
 export default
- */
 class XMLGroup extends BasicGroup {
 /*::
    name: string;
@@ -361,5 +365,14 @@ class XMLGroup extends BasicGroup {
          }
       )
       return symmetryObjects;
+   }
+
+   bitsetToRepString(bitset /*: BitSet */) /*: string */ {
+      return bitset.toArray().map( (el /*: groupElement */) => this.reps[el] ).join(', ');
+   }
+
+   subgroupToRepString(subgroup /*: Subgroup */) /*: string */ {
+      return `generators: ${this.bitsetToRepString(subgroup.generators)}}; ` +
+             `members: ${this.bitsetToRepString(subgroup.members)}`;
    }
 }

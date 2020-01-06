@@ -5,23 +5,22 @@
 /*
 ```js
  */
-
-/*::
 import BitSet from './BitSet.js';
-import type {Tree} from './GEUtils.js';
 import MathUtils from './MathUtils.js';
 import Subgroup from './Subgroup.js';
-import type {SubgroupJSON} from './Subgroup.js';
 import SubgroupFinder from './SubgroupFinder.js';
-import XMLGroup from './XMLGroup.js';
+
+/*::
+import type {Tree} from './GEUtils.js';
+import type {SubgroupJSON} from './Subgroup.js';
 
 export type BasicGroupJSON = {
    multtable: Array<Array<groupElement>>,
    _subgroups: Array<SubgroupJSON>
 };
+ */
 
 export default
- */
 class BasicGroup {
 /*::
    multtable: Array<Array<groupElement>>;

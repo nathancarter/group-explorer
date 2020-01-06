@@ -1,16 +1,15 @@
-
-<!-- subset_page layout -->
+<!-- subset layout -->
 <div id="subset_page">
-   <p class="subset_page_header" action="SSD.SubsetMenu.showHeaderMenu(event)">Subgroups</p>
+   <p class="subset_page_header" action="SSD.showHeaderMenu(event)">Subgroups</p>
    <ul id="subgroups" class="subset_page_content"></ul>
 
-   <p class="subset_page_header" action="SSD.SubsetMenu.showHeaderMenu(event)">User-defined subsets</p>
-   <p id="subsets_placeholder" class="placeholder" action="SSD.SubsetMenu.showHeaderMenu(event)">
+   <p class="subset_page_header" action="SSD.showHeaderMenu(event)">User-defined subsets</p>
+   <p id="subsets_placeholder" class="placeholder" action="SSD.showHeaderMenu(event)">
       <i>(None)</i></p>
    <ul id="subsets" class="subset_page_content"></ul>
 
-   <p class="subset_page_header" action="SSD.SubsetMenu.showHeaderMenu(event)">Partitions</p>
-   <p id="partitions_placeholder" class="placeholder" action="SSD.SubsetMenu.showHeaderMenu(event)">
+   <p class="subset_page_header" action="SSD.showHeaderMenu(event)">Partitions</p>
+   <p id="partitions_placeholder" class="placeholder" action="SSD.showHeaderMenu(event)">
       <i>(None)</i></p>
    <ul id="partitions" class="subset_page_content"></ul>
 </div>
@@ -18,25 +17,25 @@
 <!-- Templates -->
 <div id="subgroup_templates">
    <template id="first-subgroup-template">
-      <li id="${this.id}" action="SSD.SubsetMenu.showMenu(event, ${this.id})">
+      <li id="${this.id}" action="SSD.showMenu(event, ${this.id})">
          ${this.name}
          <b>&nbsp;=&nbsp;</b>
-         ${MathML.genList([group.representation[0]])}
+         ${MathML.genList([SSD.group.representation[0]])}
          ${MathML.sansText('is the trivial subgroup')}
-         ${MathML.setList([group.representation[0]])}.
+         ${MathML.setList([SSD.group.representation[0]])}.
       </li>
    </template>
    <template id="subgroup-template">
-      <li id="${this.id}" action="SSD.SubsetMenu.showMenu(event, ${this.id})">
+      <li id="${this.id}" action="SSD.showMenu(event, ${this.id})">
          ${this.name}
          <b>&nbsp;=&nbsp;</b>
          ${MathML.genList(generators)}
          ${MathML.sansText('is a subgroup of order')}
-         ${MathML.sans('<mn>' + group.subgroups[this.subgroupIndex].order + '</mn>')}.
+         ${MathML.sans('<mn>' + SSD.group.subgroups[this.subgroupIndex].order + '</mn>')}.
       </li>
    </template>
    <template id="last-subgroup-template">
-      <li id="${this.id}" action="SSD.SubsetMenu.showMenu(event, ${this.id})">
+      <li id="${this.id}" action="SSD.showMenu(event, ${this.id})">
          ${this.name}
          <b>&nbsp;=&nbsp;</b>
          ${MathML.genList(generators)}
@@ -46,17 +45,17 @@
 </div>
 
 <template id="subset-template">
-   <li id="${this.id}" action="SSD.SubsetMenu.showMenu(event, ${this.id})">
+   <li id="${this.id}" action="SSD.showMenu(event, ${this.id})">
       ${this.name}
       <b>&nbsp;=&nbsp;</b>
       ${MathML.setList(items)}
-      ${MathML.sansText((numElements == 0 || numElements == group.order) ? 'is the subset of size' : 'is a subset of size')}
+      ${MathML.sansText((numElements == 0 || numElements == SSD.group.order) ? 'is the subset of size' : 'is a subset of size')}
       ${MathML.sans('<mn>' + numElements + '</mn>')}.
    </li>
 </template>
 
 <template id="order-class-template">
-   <li id="${this.id}" class="orderClass" action="SSD.SubsetMenu.showMenu(event, ${this.id})">
+   <li id="${this.id}" class="orderClass" action="SSD.showMenu(event, ${this.id})">
       ${this.name}
       <b>&nbsp;=&nbsp;</b>
       ${MathML.setList(this.elementRepresentations)}
@@ -66,7 +65,7 @@
 </template>
 
 <template id="conjugacy-class-template">
-   <li id="${this.id}" class="conjugacyClass" action="SSD.SubsetMenu.showMenu(event, ${this.id})">
+   <li id="${this.id}" class="conjugacyClass" action="SSD.showMenu(event, ${this.id})">
       ${this.name}
       <b>&nbsp;=&nbsp;</b>
       ${MathML.setList(this.elementRepresentations)}
@@ -76,14 +75,14 @@
 </template>
 
 <template id="coset-class-template">
-   <li id="${this.id}" class="${this.parent.side}coset${this.parent.subgroup.id}" action="SSD.SubsetMenu.showMenu(event, ${this.id})">
+   <li id="${this.id}" class="${this.parent.side}coset${this.parent.subgroup.id}" action="SSD.showMenu(event, ${this.id})">
       ${this.name}
       <b>&nbsp;=&nbsp;</b>
       ${MathML.setList(this.elementRepresentations)}
       ${MathML.sansText(this.parent.isLeft ? 'is the left coset of' : 'is the right coset of')}
       ${this.parent.subgroup.name}
       ${MathML.sansText('by')}
-      ${MathML.sans(group.representation[this.elements.toArray()[0]])}.
+      ${MathML.sans(SSD.group.representation[this.elements.toArray()[0]])}.
    </li>
 </template>
 
@@ -95,63 +94,63 @@
 </template>
 
 <template id="header-menu-template">
-   <ul id="header-menu" class="menu remove-on-clean">
+   <ul id="header-menu" class="menu remove-on-clean" action="() => void 0">
       <li action="SSD.SubsetEditor.open()">${MathML.sansText('Create')} ${SSD.Subset.nextName()}</li>
       <hr>
-      ${(!SSD.SubsetMenu.showingOrderClasses() || !SSD.SubsetMenu.showingConjugacyClasses())
+      ${(!SSD.showingOrderClasses() || !SSD.showingConjugacyClasses())
       ? Menu.makeLink('Compute', 'compute-menu') : ''}
-      <li action="clearHighlights()">${MathML.sansText('Clear all highlighting')}</li>
+      <li action="SSD.clearHighlights()">${MathML.sansText('Clear all highlighting')}</li>
    </ul>
-   <ul id="compute-menu" class="menu remove-on-clean">
-      ${SSD.SubsetMenu.showingConjugacyClasses() ? '' : eval(Template.HTML('all-conjugacy-classes-template'))}
-      ${SSD.SubsetMenu.showingOrderClasses() ? '' : eval(Template.HTML('all-order-classes-template'))}
+   <ul id="compute-menu" class="menu remove-on-clean" action="() => void 0">
+      ${SSD.showingConjugacyClasses() ? '' : eval(Template.HTML('all-conjugacy-classes-template'))}
+      ${SSD.showingOrderClasses() ? '' : eval(Template.HTML('all-order-classes-template'))}
    </ul>
 </template>
 
 <template id="subgroup-menu-template">
-   <ul id="subgroup-menu" class="menu remove-on-clean">
+   <ul id="subgroup-menu" class="menu remove-on-clean" action="() => void 0">
       <li action="SSD.SubsetEditor.open()">${MathML.sansText('Create')} ${SSD.Subset.nextName()}</li>
       <hr>
       ${Menu.makeLink('Compute', 'compute-menu')}
       ${Menu.makeLink('Highlight item by', 'highlight-item-menu')}
-      <li action="clearHighlights()">${MathML.sansText('Clear all highlighting')}</li>
+      <li action="SSD.clearHighlights()">${MathML.sansText('Clear all highlighting')}</li>
    </ul>
-   <ul id="compute-menu" class="menu remove-on-clean">
-      ${SSD.SubsetMenu.showingConjugacyClasses() ? '' : eval(Template.HTML('all-conjugacy-classes-template'))}
-      ${SSD.SubsetMenu.showingOrderClasses() ? '' : eval(Template.HTML('all-order-classes-template'))}
+   <ul id="compute-menu" class="menu remove-on-clean" action="() => void 0">
+      ${SSD.showingConjugacyClasses() ? '' : eval(Template.HTML('all-conjugacy-classes-template'))}
+      ${SSD.showingOrderClasses() ? '' : eval(Template.HTML('all-order-classes-template'))}
       <li action="SSD.displayList[${this.id}].normalizer">
          ${MathML.sansText('the normalizer of')} ${this.name}, ${MathML.sansText('Norm(')}${this.name}${MathML.sansText(')')}</li>
-      ${SSD.SubsetMenu.showingLeftCosets(this.id) ? '' : eval(Template.HTML('left-cosets-template'))}
-      ${SSD.SubsetMenu.showingRightCosets(this.id) ? '' : eval(Template.HTML('right-cosets-template'))}
+      ${SSD.showingLeftCosets(this.id) ? '' : eval(Template.HTML('left-cosets-template'))}
+      ${SSD.showingRightCosets(this.id) ? '' : eval(Template.HTML('right-cosets-template'))}
       ${Menu.makeLink('an intersection', 'intersection-menu')}
       ${Menu.makeLink('a union', 'union-menu')}
       ${Menu.makeLink('an elementwise product', 'elementwise-product-menu')}
    </ul>
-   <ul id="intersection-menu" class="menu remove-on-clean">
-      ${ SSD.SubsetMenu.makeLongList(this.id, 'intersection-item-template') }
+   <ul id="intersection-menu" class="menu remove-on-clean" action="() => void 0">
+      ${ SSD.makeLongList(this.id, 'intersection-item-template') }
    </ul>
-   <ul id="union-menu" class="menu remove-on-clean">
-      ${ SSD.SubsetMenu.makeLongList(this.id, 'union-item-template') }
+   <ul id="union-menu" class="menu remove-on-clean" action="() => void 0">
+      ${ SSD.makeLongList(this.id, 'union-item-template') }
    </ul>
-   <ul id="elementwise-product-menu" class="menu remove-on-clean">
-      ${SSD.SubsetMenu.makeLongList(this.id, 'elementwise-product-item-template') }
+   <ul id="elementwise-product-menu" class="menu remove-on-clean" action="() => void 0">
+      ${SSD.makeLongList(this.id, 'elementwise-product-item-template') }
    </ul>
    ${eval(Template.HTML('highlight-item-menu-template'))}
 </template>
 
 <template id="subset-menu-template">
-   <ul id="subset-menu" class="menu remove-on-clean">
+   <ul id="subset-menu" class="menu remove-on-clean" action="() => void 0">
       <li action="SSD.SubsetEditor.open(${this.id})">${MathML.sansText('Edit list of elements in')} ${this.name}</li>
       <li action="SSD.displayList[${this.id}].destroy()">${MathML.sansText('Delete')} ${this.name}</li>
       <li action="SSD.SubsetEditor.open()">${MathML.sansText('Create')} ${SSD.Subset.nextName()}</li>
       <hr>
       ${Menu.makeLink('Compute', 'compute-menu')}
       ${Menu.makeLink('Highlight item by', 'highlight-item-menu')}
-      <li action="clearHighlights()">${MathML.sansText('Clear all highlighting')}</li>
+      <li action="SSD.clearHighlights()">${MathML.sansText('Clear all highlighting')}</li>
    </ul>
-   <ul id="compute-menu" class="menu remove-on-clean">
-      ${SSD.SubsetMenu.showingConjugacyClasses() ? '' : eval(Template.HTML('all-conjugacy-classes-template'))}
-      ${SSD.SubsetMenu.showingOrderClasses() ? '' : eval(Template.HTML('all-order-classes-template'))}
+   <ul id="compute-menu" class="menu remove-on-clean" action="() => void 0">
+      ${SSD.showingConjugacyClasses() ? '' : eval(Template.HTML('all-conjugacy-classes-template'))}
+      ${SSD.showingOrderClasses() ? '' : eval(Template.HTML('all-order-classes-template'))}
       <li action="SSD.displayList[${this.id}].closure">
          ${MathML.sansText('the closure of')} ${name}, 
          ${MathML.sans('<mtext mathvariant="bold">⟨</mtext>')}${name}${MathML.sans('<mtext mathvariant="bold">⟩</mtext>')}
@@ -160,20 +159,20 @@
       ${Menu.makeLink('a union', 'union-menu')}
       ${Menu.makeLink('an elementwise product', 'elementwise-product-menu')}
    </ul>
-   <ul id="intersection-menu" class="menu remove-on-clean">
-      ${SSD.SubsetMenu.makeLongList(this.id, 'intersection-item-template')}
+   <ul id="intersection-menu" class="menu remove-on-clean" action="() => void 0">
+      ${SSD.makeLongList(this.id, 'intersection-item-template')}
    </ul>
-   <ul id="union-menu" class="menu remove-on-clean">
-      ${SSD.SubsetMenu.makeLongList(this.id, 'union-item-template')}
+   <ul id="union-menu" class="menu remove-on-clean" action="() => void 0">
+      ${SSD.makeLongList(this.id, 'union-item-template')}
    </ul>
-   <ul id="elementwise-product-menu" class="menu remove-on-clean">
-      ${SSD.SubsetMenu.makeLongList(this.id, 'elementwise-product-item-template')}
+   <ul id="elementwise-product-menu" class="menu remove-on-clean" action="() => void 0">
+      ${SSD.makeLongList(this.id, 'elementwise-product-item-template')}
    </ul>
    ${eval(Template.HTML('highlight-item-menu-template'))}
 </template>
 
 <template id="partition-menu-template">
-   <ul id="partition-menu" class="menu remove-on-clean">
+   <ul id="partition-menu" class="menu remove-on-clean" action="() => void 0">
       <li action="SSD.displayList[${this.id}].parent.destroy()">
          ${MathML.sansText('Delete partition')} ${this.parent.name}
       </li>
@@ -182,11 +181,11 @@
       ${Menu.makeLink('Compute', 'compute-menu')}
       ${Menu.makeLink('Highlight item by', 'highlight-item-menu')}
       ${Menu.makeLink('Highlight partition by', 'highlight-partition-menu')}
-      <li action="clearHighlights()">${MathML.sansText('Clear all highlighting')}</li>
+      <li action="SSD.clearHighlights()">${MathML.sansText('Clear all highlighting')}</li>
    </ul>
-   <ul id="compute-menu" class="menu remove-on-clean">
-      ${SSD.SubsetMenu.showingConjugacyClasses() ? '' : eval(Template.HTML('all-conjugacy-classes-template'))}
-      ${SSD.SubsetMenu.showingOrderClasses() ? '' : eval(Template.HTML('all-order-classes-template'))}
+   <ul id="compute-menu" class="menu remove-on-clean" action="() => void 0">
+      ${SSD.showingConjugacyClasses() ? '' : eval(Template.HTML('all-conjugacy-classes-template'))}
+      ${SSD.showingOrderClasses() ? '' : eval(Template.HTML('all-order-classes-template'))}
       <li action="SSD.displayList[${this.id}].closure">
          ${MathML.sansText('the closure of')} ${this.name}, 
          ${MathML.sans('<mtext mathvariant="bold">⟨</mtext>')}${this.name}${MathML.sans('<mtext mathvariant="bold">⟩</mtext>')}
@@ -195,14 +194,14 @@
       ${Menu.makeLink('a union', 'union-menu')}
       ${Menu.makeLink('an elementwise product', 'elementwise-product-menu')}
    </ul>
-   <ul id="intersection-menu" class="menu remove-on-clean">
-      ${SSD.SubsetMenu.makeLongList(this.id, 'intersection-item-template')}
+   <ul id="intersection-menu" class="menu remove-on-clean" action="() => void 0">
+      ${SSD.makeLongList(this.id, 'intersection-item-template')}
    </ul>
-   <ul id="union-menu" class="menu remove-on-clean">
-      ${SSD.SubsetMenu.makeLongList(this.id, 'union-item-template')}
+   <ul id="union-menu" class="menu remove-on-clean" action="() => void 0">
+      ${SSD.makeLongList(this.id, 'union-item-template')}
    </ul>
-   <ul id="elementwise-product-menu" class="menu remove-on-clean">
-      ${SSD.SubsetMenu.makeLongList(this.id, 'elementwise-product-item-template')}
+   <ul id="elementwise-product-menu" class="menu remove-on-clean" action="() => void 0">
+      ${SSD.makeLongList(this.id, 'elementwise-product-item-template')}
    </ul>
    ${eval(Template.HTML('highlight-item-menu-template'))}
    ${eval(Template.HTML('highlight-partition-menu-template'))}
@@ -244,28 +243,28 @@
 </template>
 
 <template id="highlight-item-menu-template">
-   <ul id="highlight-item-menu" class="menu remove-on-clean">
-      <li action="${SSD.highlighters[0].handler.name}([${this.elementString}])">
+   <ul id="highlight-item-menu" class="menu remove-on-clean" action="() => void 0">
+      <li action="SSD.highlighters[0].handler([${this.elementString}])">
          <img src="./images/hightype-sphere-node.jpg"> ${MathML.sansText(SSD.highlighters[0].label)}
       </li>
-      <li action="${SSD.highlighters[1].handler.name}([${this.elementString}])">
+      <li action="SSD.highlighters[1].handler([${this.elementString}])">
          <img src="./images/hightype-sphere-node.jpg"> ${MathML.sansText(SSD.highlighters[1].label)}
       </li>
-      <li action="${SSD.highlighters[2].handler.name}([${this.elementString}])">
+      <li action="SSD.highlighters[2].handler([${this.elementString}])">
          <img src="./images/hightype-sphere-node.jpg"> ${MathML.sansText(SSD.highlighters[2].label)}
       </li>
    </ul>
 </template>
 
 <template id="highlight-partition-menu-template">
-   <ul id="highlight-partition-menu" class="menu remove-on-clean">
-      <li action="${SSD.highlighters[0].handler.name}(${this.parent.allElementString})">
+   <ul id="highlight-partition-menu" class="menu remove-on-clean" action="() => void 0">
+      <li action="SSD.highlighters[0].handler(${this.parent.allElementString})">
          <img src="./images/hightype-sphere-node.jpg"> ${MathML.sansText(SSD.highlighters[0].label)}
       </li>
-      <li action="${SSD.highlighters[1].handler.name}(${this.parent.allElementString})">
+      <li action="SSD.highlighters[1].handler(${this.parent.allElementString})">
          <img src="./images/hightype-sphere-node.jpg"> ${MathML.sansText(SSD.highlighters[1].label)}
       </li>
-      <li action="${SSD.highlighters[2].handler.name}(${this.parent.allElementString})">
+      <li action="SSD.highlighters[2].handler(${this.parent.allElementString})">
          <img src="./images/hightype-sphere-node.jpg"> ${MathML.sansText(SSD.highlighters[2].label)}
       </li>
    </ul>

@@ -2,15 +2,16 @@
 /*
  * Routines to draw 3D ball-and-stick diagrams using three.js
  */
-/*::
 import BitSet from './BitSet.js';
 import CayleyDiagram from './CayleyDiagram.js';
-import type {layout, direction} from './CayleyDiagram.js';
 import Diagram3D from './Diagram3D.js';
 import GEUtils from './GEUtils.js';
+import Log from './Log.js';
+import MathML from './MathML.js';
+
+/*::
+import type {layout, direction} from './CayleyDiagram.js';
 import type {Tree} from './GEUtils.js';
-import Log from './Log.md';
-import MathML from './MathML.md';
 
 export type CayleyDiagramJSON = {
    groupURL: string,
@@ -37,14 +38,6 @@ export type CayleyDiagramJSON = {
    arrowsData: Array<{style: number, offset: ?float}>
 };
 
-type Options = {
-   container?: JQuery,
-   trackballControlled?: boolean,
-   width?: number,
-   height?: number,
-   fog?: boolean
-};
-
 export type SphereUserData = {node: Diagram3D.Node};
 export type LineUserData = {
    line: Diagram3D.Line,
@@ -52,8 +45,16 @@ export type LineUserData = {
    meshLine?: MeshLine
 };
 
+type Options = {
+   container?: JQuery,
+   trackballControlled?: boolean,
+   width?: number,
+   height?: number,
+   fog?: boolean
+};
+*/
+
 export default
- */
 class DisplayDiagram {
 /*::
    static groupNames: Array<string>;
@@ -864,7 +865,7 @@ class DisplayDiagram {
       let subgroup_name;  // MathML subgroup name, generated first time through
       const createChunks = (arr /*: Tree<Diagram3D.Node> */, desired, current = diagram3D.strategies.length - 1) /*: Array<THREE.Mesh> */ => {
          if (current == desired) {
-            const nodes = GEUtils.flatten(  ((arr /*: any */) /*: Tree<Diagram3D.Node> */) );
+            const nodes = GEUtils.flatten(arr);
             const elements = new BitSet(diagram3D.group.order, nodes.map( (node) => node.element ));
             const points = nodes.map( (node) => node.point );
             const box = new THREE.Mesh(box_geometry, box_material);
@@ -876,10 +877,10 @@ class DisplayDiagram {
             box.position.set(...centroid(points).toArray());
             return [box];
          } else {
-            // arr is an array of Tree<Diagram3D.Node>s at this point, though the logic that ensures this is convoluted
-            const boxes = ((arr.map( (el) => createChunks(((el /*: any */) /*: Tree<Diagram3D.Node> */), desired, current-1)
-                                   ) /*: any */) /*: Array<Array<THREE.Mesh>> */);
-            const all_boxes = GEUtils.flatten( ((boxes /*: any */) /*: Tree<THREE.Mesh> */) );
+            // arr must be an array of Tree<Diagram3D.Node>'s at this point
+            const boxes /*: Array<Array<THREE.Mesh>> */ = 
+                  ((arr /*: any */) /*: Array<Tree<Diagram3D.Node>> */).map( (el) => createChunks(el, desired, current-1) );
+            const all_boxes /*: Array<THREE.Mesh> */ = GEUtils.flatten( ((boxes /*: any */) /*: Tree<THREE.Mesh> */) );
             const strategy = diagram3D.strategies[current];
             if (strategy.layout == CayleyDiagram.LAYOUT.ROTATED) {
                // find centroid of all boxes

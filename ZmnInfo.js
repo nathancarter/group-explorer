@@ -1,23 +1,24 @@
 // @flow
 
-/*::
 import BasicGroup from './js/BasicGroup.js';
-import type {StrategyArray, layout, direction} from './js/CayleyDiagram.js';
 import IsomorphicGroups from './js/IsomorphicGroups.js';
 import Library from './js/Library.js';
-import Log from './js/Log.md';
+import Log from './js/Log.js';
 import MathUtils from './js/MathUtils.js';
-import MathML from './js/MathML.md';
+import MathML from './js/MathML.js';
 import {CreateNewSheet} from './js/SheetModel.js';
-import Template from './js/Template.md';
+import Template from './js/Template.js';
 import XMLGroup from './js/XMLGroup.js';
- */
 
-var group /*: XMLGroup */;
+export {loadGroup as load};
 
-$(window).on('load', load);	// like onload handler in body
+/*::
+import type {StrategyArray, layout, direction} from './js/CayleyDiagram.js';
+*/
 
-function load() {
+let group /*: XMLGroup */;
+
+function loadGroup() {
    Library.loadFromURL()
           .then( (_group) => {
               group = _group;
@@ -66,14 +67,16 @@ function formatGroup() {
       const n = parseInt( target.getAttribute( 'data-n' ) );
       showNoZnmIsomorphismSheet( m, n );
    } );
+
+   MathJax.Hub.Queue(['Typeset', MathJax.Hub], () => void(0));
 }
 
 function statement ( m /*: number */, n /*: number */, bool /*: boolean */ ) {
    return MathML.sans( MathML.sub( 'ℤ', m * n ) )
         + ` is ${bool ? '' : 'not '}isomorphic to `
-        + MathML.sans( `<msub><mi>ℤ;</mi><mn>${m}</mn></msub>`
+        + MathML.sans( `<msub><mi>ℤ</mi><mn>${m}</mn></msub>`
                      + '<mo>×</mo>'
-                     + `<msub><mi>ℤ;</mi><mn>${n}</mn></msub>` );
+                     + `<msub><mi>ℤ</mi><mn>${n}</mn></msub>` );
 }
 
 function allOffers ( product /*: groupElement */ ) /*: html */ {
@@ -90,7 +93,7 @@ function allOffers ( product /*: groupElement */ ) /*: html */ {
 
 function showZnmIsomorphismSheet ( m /*: groupElement */, n /*: groupElement */ ) {
    const Z = ( k ) => `<msub><mi>ℤ</mi><mn>${k}</mn></msub>`;
-   const prod = ( A, B ) => `<mrow>${A}<mo>×;</mo>${B}</mrow>`;
+   const prod = ( A, B ) => `<mrow>${A}<mo>×</mo>${B}</mrow>`;
    const a = group.elementOrders.indexOf( m );
    const b = group.elementOrders.indexOf( n );
    const ab = group.mult( a, b );
@@ -161,7 +164,7 @@ function showZnmIsomorphismSheet ( m /*: groupElement */, n /*: groupElement */ 
 function showNoZnmIsomorphismSheet ( m /*: groupElement */, n /*: groupElement */ ) {
    // define constants similar to those in showZnmIsomorphismSheet()
    const Z = ( k ) => `<msub><mi>ℤ</mi><mn>${k}</mn></msub>`;
-   const prod = ( A, B ) => `<mrow>${A}<mo>×;</mo>${B}</mrow>`;
+   const prod = ( A, B ) => `<mrow>${A}<mo>×</mo>${B}</mrow>`;
    const hmar = 20, vmar = 20, hsep = 20, vsep = 20,
          W = 300, H = W, hdrH = 50, txtH = 100;
    // build the group Z_m x Z_n and find it in the group library.

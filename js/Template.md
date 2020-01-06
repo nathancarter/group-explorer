@@ -71,9 +71,7 @@ Since template retrieval is done repeatedly, the actual template retrieval code 
  *   returns the html of template with id = templateId as a `string literal` for subsequent eval'ing
  *   returns the value undefined if template does not exist
  */
-/*::
 export default
-*/
 class Template {
 /*::
    static _map: Map<string, ?string>;

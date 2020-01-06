@@ -2,11 +2,11 @@
 /*
  *   subgroup structure -- containing group, and generator, member, contains, containedIn bitsets
  */
-/*::
 import BitSet from './BitSet.js';
-import type {BitSetJSON} from './BitSet.js';
 import BasicGroup from './BasicGroup.js';
-import XMLGroup from './XMLGroup.js';
+
+/*::
+import type {BitSetJSON} from './BitSet.js';
 
 export type SubgroupJSON = {
    generators: BitSetJSON,
@@ -15,9 +15,9 @@ export type SubgroupJSON = {
    contains: BitSetJSON,
    containedIn: BitSetJSON
 };
+*/
 
 export default
- */
 class Subgroup {
 /*::
    group: BasicGroup;
@@ -67,11 +67,6 @@ class Subgroup {
    toString() /*: string */ {
       return `generators: ${this.generators.toString()}; ` +
              `members: ${this.members.toString()}`;
-   }
-
-   toRepString(group /*: XMLGroup */) /*: string */ {
-      return `generators: ${this.generators.toRepString(group)}; ` +
-             `members: ${this.members.toRepString(group)}`;
    }
 
    get order() /*: number */ {

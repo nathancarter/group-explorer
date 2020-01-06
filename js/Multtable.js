@@ -1,17 +1,17 @@
 // @flow
-/*::
+
 import DisplayMulttable from './DisplayMulttable.js';
 import GEUtils from './GEUtils.js';
 import Subgroup from './Subgroup.js';
 import XMLGroup from './XMLGroup.js';
 
+/*::
 import type {Tree} from './GEUtils.js';
 
 export type Coloration = 'Rainbow' | 'Grayscale' | 'None';
-
-export default
  */
-class Multtable {
+
+export default class Multtable {
 /*::
    static COLORATION: {[key: string]: Coloration};
 

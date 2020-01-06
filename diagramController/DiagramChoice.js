@@ -1,21 +1,19 @@
 // @flow
-/*::
-import Template from '../js/Template.md';
+
+import MathML from '../js/MathML.js';
+import Template from '../js/Template.js';
 import XMLGroup from '../js/XMLGroup.js';
 
-import DC from './diagram.js';
+import * as DC from './diagram.js';
+import * as CD from '../CayleyDiagram.js';
 
-var displayGraphic: () => void;
-var group: XMLGroup;
-var Diagram_name: ?string;
+var displayGraphic /*: () => void */;
 
-export default
- */
-DC.DiagramChoice = class {
+export default class DiagramChoice {
    /* Populate diagram select element, show selected diagram */
    static setupDiagramSelect() {
       $('#diagram-choices').html(eval(Template.HTML('diagram-select-first-template'))).hide();
-      group.cayleyDiagrams.forEach( (diagram, index) => {
+      CD.Group[0].cayleyDiagrams.forEach( (diagram, index) => {
          $('#diagram-choices').append(eval(Template.HTML('diagram-select-other-template'))).hide();
       } );
       DC.DiagramChoice._showChoice();
@@ -23,7 +21,7 @@ DC.DiagramChoice = class {
 
    static _showChoice() {
       $('#diagram-choices').hide();
-      const index = group.cayleyDiagrams.findIndex( (cd) => cd.name == Diagram_name );
+      const index = CD.Group[0].cayleyDiagrams.findIndex( (cd) => cd.name == CD.Diagram_Name[0] );
       $('#diagram-choice')
          .html($(`#diagram-choices > li:nth-of-type(${index+2})`).html())
          .show();
@@ -39,10 +37,10 @@ DC.DiagramChoice = class {
 
    static selectDiagram(diagram /*: ?string */, andDisplay /*:: ?: boolean */ = true) {
       $('#bodyDouble').click();
-      Diagram_name = (diagram == undefined) ? undefined : diagram;
+      (diagram == undefined) ? CD.Diagram_Name.pop() : CD.Diagram_Name[0] = diagram;
       DC.Chunking.enable();
       DC.DiagramChoice._showChoice();
 
-      if ( andDisplay ) displayGraphic();
+      if ( andDisplay ) CD.displayGraphic();
    }
 }

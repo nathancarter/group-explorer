@@ -1,19 +1,15 @@
 // @flow
-/*::
-import MathML from '../js/MathML.md';
+
+import MathML from '../js/MathML.js';
 import XMLGroup from '../js/XMLGroup.js';
 
-import SSD from './subsets.js';
+import * as SSD from './subsets.js';
 
-var group: XMLGroup;
-
-export default
- */
-SSD.OrderClasses = class OrderClasses extends SSD.AbstractPartition {
+export default class OrderClasses extends SSD.AbstractPartition {
    constructor() {
       super();
 
-      this.subsets = group
+      this.subsets = SSD.group
          .orderClasses
          .filter( (orderClass) => orderClass.popcount() != 0 )
          .map( (orderClass, inx) => 
