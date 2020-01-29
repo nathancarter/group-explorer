@@ -56,6 +56,9 @@ import DisplayDiagram from './DisplayDiagram.js';
 import GEUtils from './GEUtils.js';
 import Log from './Log.js';
 
+// $FlowFixMe -- external module imports described in flow-typed directory
+import {THREE} from '../lib/externals.js';
+
 /*::
 import type {LineUserData, SphereUserData} from './DisplayDiagram.js';
 */

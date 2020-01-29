@@ -7,6 +7,9 @@ import BitSet from './BitSet.js';
 import GEUtils from './GEUtils.js';
 import XMLGroup from './XMLGroup.js';
 
+// $FlowFixMe -- external module imports described in flow-typed directory
+import {THREE} from '../lib/externals.js';
+
 /*::
 export type NodeOptions = {color?: color, radius?: float, lineStyle?: number};
 export type LineOptions = {arrow?: groupElement, arrowhead?: boolean, color?: color, offset?: float, style?: number} ;

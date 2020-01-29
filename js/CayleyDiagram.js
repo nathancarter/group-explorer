@@ -6,6 +6,9 @@ import GEUtils from './GEUtils.js';
 import Library from './Library.js';
 import XMLGroup from './XMLGroup.js';
 
+// $FlowFixMe -- external module imports described in flow-typed directory
+import {THREE} from '../lib/externals.js';
+
 /*::
 import type {Tree} from './GEUtils.js';
 

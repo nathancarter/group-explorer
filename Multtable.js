@@ -13,6 +13,9 @@ import XMLGroup from './js/XMLGroup.js';
 import * as VC from './visualizerFramework/visualizer.js';
 import * as SSD from './subsetDisplay/subsets.js';
 
+// $FlowFixMe -- external module imports described in flow-typed directory
+import {THREE} from './lib/externals.js';
+
 export {loadGroup as load};
 
 /*::

@@ -9,6 +9,9 @@ import GEUtils from './GEUtils.js';
 import Log from './Log.js';
 import MathML from './MathML.js';
 
+// $FlowFixMe -- external module imports described in flow-typed directory
+import {THREE, TrackballControls, MeshLine, MeshLineMaterial} from '../lib/externals.js';
+
 /*::
 import type {layout, direction} from './CayleyDiagram.js';
 import type {Tree} from './GEUtils.js';
@@ -120,7 +123,7 @@ class DisplayDiagram {
       if (container != undefined) {
          container.append(this.renderer.domElement);
          if (options.trackballControlled) {
-            this.camControls = new THREE.TrackballControls(this.camera, container[0]);
+            this.camControls = new TrackballControls(this.camera, container[0]);
          }
       }
    }

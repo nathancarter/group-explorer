@@ -3,6 +3,9 @@
 import Log from './Log.js';
 import Multtable from './Multtable.js';
 
+// $FlowFixMe -- external module imports described in flow-typed directory
+import {THREE} from '../lib/externals.js';
+
 /*::
 import type {Coloration} from './Multtable.js';
 

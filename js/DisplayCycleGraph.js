@@ -3,6 +3,9 @@
 import Log from './Log.js';
 import CycleGraph from './CycleGraph.js';
 
+// $FlowFixMe -- external module imports described in flow-typed directory
+import {THREE} from '../lib/externals.js';
+
 /*::
 import type {Highlights} from './CycleGraph.js';
 
