@@ -8,19 +8,23 @@ Multtable.html, SymmetryObject.html, and Sheet.html
 [hideControls()](#hidecontrols) and [showControls()](#showcontrols) hide and expose the
 visualizer-specific control panels
 
-[showPanel(panel_name)](#showpanelpanel_name) switch panel by showing desired panel_name, hiding the
-others
+[showPanel(panel_name)](#showpanelpanel_name) switches from one visualizer-specific control panel
+to another by showing desired panel_name and hiding the others
+
+[findGroup()](#findGroup) try to find this group in the Library based only on its structure
 
 [help()](#help) links to the visualizer-specific help page
+
+[Change broadcast](#change-broadcast) functions enable/disable the capability to send change notifications
+from a visualizer to a Sheet.
 
 ```javascript
  */
 import XMLGroup from '../js/XMLGroup.js';
 import IsomorphicGroups from '../js/IsomorphicGroups.js';
 
-export {load, hideControls, showControls, help, findGroup, showPanel};
-
 const VISUALIZER_LAYOUT_URL /*: string */ = './visualizerFramework/visualizer.html';
+
 let Group /*: XMLGroup*/;
 let Help_Page /*: string*/;
 
@@ -34,7 +38,7 @@ It returns the just-started ajax load as an ES6 Promise
 
 ```javascript
 */
-function load(group /*: ?XMLGroup */, help_page /*: string */) /*: Promise<void> */ {
+export function load(group /*: ?XMLGroup */, help_page /*: string */) /*: Promise<void> */ {
    window.VC = this;
    if (group != undefined)
       Group = group;
@@ -67,10 +71,10 @@ function load(group /*: ?XMLGroup */, help_page /*: string */) /*: Promise<void>
 /*
 ```
 ## hideControls()
-Hide visualizer-specific control panels, resize graphic
+Hides visualizer-specific control panels and resizes the main graphic
 ```javascript
 */
-function hideControls () {
+export function hideControls () {
    $( '#hide-controls' ).hide();
    $( '#show-controls' ).show();
    $( '#vert-container' ).hide().resize();
@@ -78,13 +82,29 @@ function hideControls () {
 /*
 ```
 ## showControls()
-Expose visualizer-specific control panels, resize graphic
+Exposes visualizer-specific control panels and resizes the main graphic to fit
 ```javascript
 */
-function showControls () {
+export function showControls () {
    $( '#hide-controls' ).show();
    $( '#show-controls' ).hide();
    $( '#vert-container' ).show().resize();
+}
+/*
+```
+## showPanel(panel_name)
+Switches among visualizer-specific control panels by showing the desired panel and hiding the rest
+```javascript
+*/
+export function showPanel(panel_name /*: string */) {
+   $('#vert-container > .fill-vert').each( (_, control) => {
+      const control_name = '#' + $(control).attr('id');
+      if (control_name == panel_name) {
+         $(control_name).show();
+      } else {
+         $(control_name).hide();
+      }
+   } )
 }
 /*
 ```
@@ -92,7 +112,7 @@ function showControls () {
 Link to visualizer-specific help page
 ```javascript
 */
-function help() {
+export function help() {
    window.open(Help_Page);
 }
 /*
@@ -101,7 +121,7 @@ function help() {
 Try to find this group in the Library based only on its structure
 ```javascript
 */
-function findGroup() {
+export function findGroup() {
    const found = IsomorphicGroups.find( Group );
    if ( found ) {
       window.open( `./GroupInfo.html?groupURL=${encodeURIComponent( found.URL )}` );
@@ -111,19 +131,62 @@ function findGroup() {
 }
 /*
 ```
-## showPanel(panel_name)
-Switch panels by showing desired panel, hiding the rest
+## Change broadcast
+When a Sheet spawns an editor to modify one of the visualizers being displayed, the
+changes in the editor are broadcast back to the Sheet using the `window.postMessage()`
+function. Since ability to function as an editor is common across the visualizers, it
+has been abstracted here. 
+
+The module variable`broadcastChange`holds the particular function used to send a change
+message.
+
+`disableChangeBroadcast`disables the broadcast capability by setting`broadcastChange`to a
+do-nothing function. This is the initial state.
+
+`enableChangeBroadcast`is passed a function that takes no arguments and generates JSON.
+This would typically be something like`() => MulttableView.toJSON().`From the passed function
+a`changeBroadcaster`is created and stored in`broadcastChange.`The`changeBroadcaster`compares
+the current JSON with JSON from the previous invocation and posts the new JSON if there is a change.
 ```javascript
 */
-function showPanel(panel_name /*: string */) {
-   $('#vert-container > .fill-vert').each( (_, control) => {
-      const control_name = '#' + $(control).attr('id');
-      if (control_name == panel_name) {
-         $(control_name).show();
-      } else {
-         $(control_name).hide();
-      }
-   } )
+export let broadcastChange = () => {};
+
+export function disableChangeBroadcast () {
+    broadcastChange = () => {};
+}
+
+export function enableChangeBroadcast (json_generator /*: () => Obj */) {
+    broadcastChange = (function (_json_generator) {
+        const deep_equals = (a, b) => {
+            if (typeof a == 'object') {
+                for (let p in a) {
+                    if (b == undefined || !b.hasOwnProperty(p) || !deep_equals(a[p], b[p])) {
+                        return false;
+                    }
+                }
+                return true;
+            } else {
+                return a == b;
+            }
+        }
+
+        let last_json;
+        
+        function changeBroadcaster () {
+            const current_json = _json_generator();
+            if (last_json == undefined || !deep_equals(current_json, last_json)) {
+                last_json = current_json;
+                const msg = {
+                    source: 'editor',
+                    json: current_json,
+                };
+                window.postMessage( msg, new URL(window.location.href).origin );
+                console.log('posting msg');
+            }
+        }
+
+        return changeBroadcaster;
+    }) (json_generator);
 }
 /*
 ```

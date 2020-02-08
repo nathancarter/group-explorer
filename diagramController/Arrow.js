@@ -11,8 +11,6 @@
 
    All of these events are fielded and dispatched through the Menu.actionClickHandler()
  */
-import CayleyDiagram from '../js/CayleyDiagram.js';
-import DisplayDiagram from '../js/DisplayDiagram.js';
 import GEUtils from '../js/GEUtils.js';
 import MathML from '../js/MathML.js';
 import Menu from '../js/Menu.js';
@@ -20,7 +18,10 @@ import Template from '../js/Template.js';
 import XMLGroup from '../js/XMLGroup.js';
 
 import * as DC from './diagram.js';
-import * as CD from '../CayleyDiagram.js';
+import {Group, Cayley_Diagram_View} from '../CayleyDiagram.js';
+
+// $FlowFixMe -- external module imports described in flow-typed directory
+import {THREE} from '../lib/externals.js';
 
 export default class Arrow {
    // actions:  show menu; select from menu; select from list; remove
@@ -40,7 +41,7 @@ export default class Arrow {
    }
 
    // returns all arrows displayed in arrow-list as an array
-   static getAllArrows() /*: Array<number> */ {
+   static getAllArrows() /*: Array<groupElement> */ {
       return $('#arrow-list li').toArray().map( (list_item /*: HTMLLIElement */) => parseInt(list_item.getAttribute('arrow')) );
    }
 
@@ -52,7 +53,7 @@ export default class Arrow {
       // returns an HTML string with a list element for each arrow that can be added to the arrow-list
       const makeArrowList = () /*: html */ => {
          const template = Template.HTML('arrow-menu-item-template');
-         const result = CD.Group[0].elements
+         const result = Group[0].elements
                .reduce( (list, element) => {
                   // not the identity and not already displayed
                   if (element != 0 && $(`#arrow-list li[arrow=${element}]`).length == 0) {
@@ -76,7 +77,7 @@ export default class Arrow {
    //   Update lines, arrowheads in graphic, arrow-list
    static addArrow(element /*: number */) {
       GEUtils.cleanWindow();
-      CD.Cayley_Diagram[0].addLines(element);
+      Cayley_Diagram_View[0].addArrows([element]);
       DC.Arrow.updateArrows();
    }
 
@@ -87,7 +88,7 @@ export default class Arrow {
    //   Update lines in graphic, arrow-list
    static removeArrow(element /*: number */) {
       $('#remove-arrow-button').prop('disabled', true);
-      CD.Cayley_Diagram[0].removeLines(element);
+      Cayley_Diagram_View[0].removeArrows([element]);
       DC.Arrow.updateArrows()
    }
 
@@ -97,26 +98,22 @@ export default class Arrow {
    // add rows to arrow list from line colors
    static updateArrows() {
       $('#arrow-list').children().remove();
-      CD.Cayley_Diagram[0].setLineColors();
-      CD.Graphic_Context[0].updateLines(CD.Cayley_Diagram[0]);
-      CD.Graphic_Context[0].updateArrowheads(CD.Cayley_Diagram[0]);
       // ES6 introduces a Set, but does not provide any way to change the notion of equality among set members
       // Here we work around that by joining a generator value from the line.arrow attribute ("27") and a color ("#99FFC1")
       //   into a unique string ("27#99FFC1") in the Set, then partitioning the string back into an element and a color part
-      const arrow_hashes = new Set(CD.Cayley_Diagram[0].lines.map(
-         (line) => '' + ((line.arrow /*: any */) /*: groupElement */) + ( ((line.color /*: any */) /*: color */) ).toString()
+      const arrow_hashes = new Set(Cayley_Diagram_View[0].arrows.map(
+          (arrow) => '' + arrow.generator.toString() + '#' + (new THREE.Color(arrow.color).getHexString())
       ));
       arrow_hashes.forEach( (hash) => {
          const element = hash.slice(0,-7);
          const color = hash.slice(-7);
          $('#arrow-list').append(eval(Template.HTML('arrow-list-item-template')));  // make entry in arrow-list
       } );
-      if (arrow_hashes.size == CD.Group[0].order - 1) {  // can't make an arrow out of the identity
+      if (arrow_hashes.size == Group[0].order - 1) {  // can't make an arrow out of the identity
          DC.Arrow.disable()
       } else {
          DC.Arrow.enable()
       }
-      CD.emitStateChange();
    }
 
    // disable Add button

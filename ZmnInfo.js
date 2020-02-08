@@ -13,7 +13,7 @@ import XMLGroup from './js/XMLGroup.js';
 export {loadGroup as load};
 
 /*::
-import type {StrategyArray, layout, direction} from './js/CayleyDiagram.js';
+import type {StrategyParameters, Layout, Direction} from './js/CayleyDiagramView.js';
 */
 
 let group /*: XMLGroup */;
@@ -92,7 +92,7 @@ function allOffers ( product /*: groupElement */ ) /*: html */ {
 }
 
 function showZnmIsomorphismSheet ( m /*: groupElement */, n /*: groupElement */ ) {
-   const Z = ( k ) => `<msub><mi>ℤ</mi><mn>${k}</mn></msub>`;
+   const Z = ( k ) => MathML.sub('ℤ', k); 
    const prod = ( A, B ) => `<mrow>${A}<mo>×</mo>${B}</mrow>`;
    const a = group.elementOrders.indexOf( m );
    const b = group.elementOrders.indexOf( n );
@@ -113,25 +113,24 @@ function showZnmIsomorphismSheet ( m /*: groupElement */, n /*: groupElement */ 
          // rectangular CD of Z_m x Z_n with arrows for a,b shown
          className : 'CDElement', groupURL : group.URL,
          x : hmar, y : vmar+hdrH+vsep, w : W, h : H,
-         arrows : [ a, b ],
-         arrowColors : [ '#660000', '#006600' ],
-         strategies : [ [ a, 0, 0, 0 ], [ b, 0, 1, 1 ] ]
+         arrow_generators : [ {generator: a, color: '#660000'}, {generator: b, color: '#006600'} ],
+         strategy_parameters : [ {generator: a, layout: 'linear', direction: 'X', nestingLevel: 0},
+                                 {generator: b, layout: 'linear', direction: 'Y', nestingLevel: 1} ]
       },
       {
          // same as previous, plus arrow for ab
          className : 'CDElement', groupURL : group.URL,
          x : hmar+hsep+W, y : vmar+hdrH+vsep, w : W, h : H,
-         arrows : [ a, b, ab ],
-         arrowColors : [ '#660000', '#006600', '#000066' ],
-         strategies : [ [ a, 0, 0, 0 ], [ b, 0, 1, 1 ] ]
+         arrow_generators : [ {generator: a, color: '#660000'}, {generator: b, color: '#006600'}, {generator: ab, color: '#000066'} ],
+         strategy_parameters : [ {generator: a, layout: 'linear', direction: 'X', nestingLevel: 0},
+                                 {generator: b, layout: 'linear', direction: 'Y', nestingLevel: 1} ]
       },
       {
          // circular CD of Z_mn with arrow for ab shown only
          className : 'CDElement', groupURL : group.URL,
          x : hmar+2*hsep+2*W, y : vmar+hdrH+vsep, w : W, h : H,
-         arrows : [ ab ],
-         arrowColors : [ '#000066' ],
-         strategies : [ [ ab, 1, 2, 0 ] ]
+         arrow_generators : [ {generator: ab, color: '#000066'} ],
+         strategy_parameters : [ {generator: ab, layout: 'circular', direction: 'XY', nestingLevel: 0} ]
       },
       {
          className : 'TextElement',
@@ -163,12 +162,12 @@ function showZnmIsomorphismSheet ( m /*: groupElement */, n /*: groupElement */ 
 
 function showNoZnmIsomorphismSheet ( m /*: groupElement */, n /*: groupElement */ ) {
    // define constants similar to those in showZnmIsomorphismSheet()
-   const Z = ( k ) => `<msub><mi>ℤ</mi><mn>${k}</mn></msub>`;
+   const Z = ( k ) => MathML.sub('ℤ', k); 
    const prod = ( A, B ) => `<mrow>${A}<mo>×</mo>${B}</mrow>`;
    const hmar = 20, vmar = 20, hsep = 20, vsep = 20,
          W = 300, H = W, hdrH = 50, txtH = 100;
    // build the group Z_m x Z_n and find it in the group library.
-   const elements = Array( {length: m * n}, ( _ /*: mixed */, i /*: number */ ) => i );
+   const elements = Array.from( {length: m * n}, ( _ /*: mixed */, i /*: number */ ) => i );
    const multtable = elements.map( (row /*: number */) => {
       const a1 = Math.floor( row / n );
       const b1 = row % n;
@@ -207,25 +206,27 @@ function showNoZnmIsomorphismSheet ( m /*: groupElement */, n /*: groupElement *
          // rectangular CD of Z_m x Z_n with arrows for a,b shown
          className : 'CDElement', groupURL : ZmxZn.URL,
          x : hmar, y : vmar+hdrH+vsep, w : W, h : H,
-         arrows : [ a, b ],
-         arrowColors : [ '#660000', '#006600' ],
-         strategies : [ [ a, 0, 0, 0 ], [ b, 0, 1, 1 ] ]
+         arrow_generators : [ {generator: a, color: '#660000'}, {generator: b, color: '#006600'} ],
+         strategy_parameters : [ {generator: a, layout: 'linear', direction: 'X', nestingLevel: 0},
+                                 {generator: b, layout: 'linear', direction: 'Y', nestingLevel: 1} ]
       },
       {
          // same as previous, plus arrow for maxOrdElt
          className : 'CDElement', groupURL : ZmxZn.URL,
          x : hmar+hsep+W, y : vmar+hdrH+vsep, w : W, h : H,
-         arrows : [ a, b, maxOrdElt ],
-         arrowColors : [ '#660000', '#006600', '#000066' ],
-         strategies : [ [ a, 0, 0, 0 ], [ b, 0, 1, 1 ] ]
+          arrow_generators : [ {generator: a, color: '#660000'},
+                               {generator: b, color: '#006600'},
+                               {generator: maxOrdElt, color: '#000066'} ],
+         strategy_parameters : [ {generator: a, layout: 'linear', direction: 'X', nestingLevel: 0},
+                                 {generator: b, layout: 'linear', direction: 'Y', nestingLevel: 1} ]
       },
       {
          // circular CD of Z_mn with arrow for maxOrdElt shown only
          className : 'CDElement', groupURL : ZmxZn.URL,
          x : hmar+2*hsep+2*W, y : vmar+hdrH+vsep, w : W, h : H,
-         arrows : [ maxOrdElt ],
-         arrowColors : [ '#000066' ],
-         strategies : [ [ maxOrdElt, 2, 0, 0 ], [ b, 0, 1, 1 ] ]
+         arrow_generators : [ {generator: maxOrdElt, color: '#000066'} ],
+         strategy_parameters : [ {generator: maxOrdElt, layout: 'rotated', direction: 'XY', nestingLevel: 0 },
+                                 {generator: b, layout: 'linear', direction: 'Y', nestingLevel: 1} ]
       },
       {
          className : 'TextElement',

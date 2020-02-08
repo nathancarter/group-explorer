@@ -3,7 +3,7 @@
 
 Visualizers include
 - CayleyDiagram.html
-- CycleDiagram.html
+- CycleGraph.html
 - Multtable.html
 - SymmetryObject.html
 

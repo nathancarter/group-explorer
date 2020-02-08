@@ -25,8 +25,8 @@ export type XMLCayleyDiagram = {
 
 // Symmetry object from XML
 type Point = [float, float, float];
-type Path = {color?: color, points: Array<Point>};
-type Sphere = {radius: float, color?: color, point: Point};
+type Path = {color: ?color, points: Array<Point>};
+type Sphere = {radius: float, color: ?color, point: Point};
 type Operation = {element: groupElement, degrees: float, point: Point};
 export type XMLSymmetryObject = {
    name: string,
@@ -99,6 +99,9 @@ class XMLGroup extends BasicGroup {
    CayleyThumbnail: string;
    rowHTML: string;
    userNotes: string;
+
+   CayleyThumbnail: string | void;
+   rowHTML: string | void;
  */
    constructor (text /*: void | string | Document */) {
       if (text === undefined) {
@@ -322,35 +325,31 @@ class XMLGroup extends BasicGroup {
       let symmetryObjects = [];
       $xml.find('symmetryobject').each(
          (_, so) => {
-            const name = so.getAttribute('name') || '(unnamed)',
-                  operations = [],
-                  spheres = [],
-                  paths = [];
+            const name = so.getAttribute('name') || '(unnamed)';
+            const operations = [];
+            const spheres = [];
+            const paths = [];
             $(so).find('operation').each(
                (_, op) => {
-                  const element = Number(op.getAttribute('element')),
-                        degrees = Number(op.getAttribute('degrees')),
-                        point = getPoint(op.children[0]);
+                  const element = Number(op.getAttribute('element'));
+                  const degrees = Number(op.getAttribute('degrees'));
+                  const point = getPoint(op.children[0]);
                   operations.push({element: element, degrees: degrees, point: point});
                }
             );
             $(so).find('sphere').each(
                (_, sp) => {
-                  const radius = Number(sp.getAttribute('radius')),
-                        color = sp.getAttribute('color'),
-                        point = getPoint(sp.children[0]);
-                  const sphere /*: Sphere */ = {radius: radius, point: point};
-                  if (color != undefined)
-                     sphere.color = color;
+                  const radius = Number(sp.getAttribute('radius'));
+                  const color = sp.getAttribute('color');
+                  const point = getPoint(sp.children[0]);
+                  const sphere /*: Sphere */ = {radius: radius, color: color, point: point};
                   spheres.push(sphere);
                }
             );
             $(so).find('path').each(
                (_, pa) => {
-                  const path /*: Path */ = {points: []};
                   const color = pa.getAttribute('color');
-                  if (color != undefined)
-                     path.color = color;
+                  const path /*: Path */ = {points: [], color: color};
                   $(pa).find('point').each(
                      (_, pt) => {
                         path.points.push(getPoint(pt));

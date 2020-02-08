@@ -34,14 +34,14 @@
             <tr>
                <td draggable="true">${inx+1}</td>
                <td action="DC.Generator.showGeneratorMenu(event, ${inx})">
-                  ${MathML.sans(CD.Group[0].representation[strategy.generator])}
+                  ${MathML.sans(Group[0].representation[strategy.generator])}
                </td>
                <td action="DC.Generator.showAxisMenu(event, ${inx})">
                   <img src="./images/${DC.Generator.axis_image[strategy.layout][strategy.direction]}">
                   ${DC.Generator.axis_label[strategy.layout][strategy.direction]}
                </td>
                <td action="DC.Generator.showOrderMenu(event, ${inx})">
-                  ${DC.Generator.orders[num_strategies][strategy.nesting_level]}
+                  ${DC.Generator.orders[strategies.length][strategy.nestingLevel]}
                </td>
             </tr>
          </template>
@@ -56,21 +56,21 @@
          </template>
          <template id="generation-generator-menu-item-template">
             <li action="DC.Generator.updateGenerator(${strategy_index}, ${generator})">
-               ${MathML.sans(CD.Group[0].representation[generator])}</li>
+               ${MathML.sans(Group[0].representation[generator])}</li>
          </template>
 
          <template id="generation-axis-menu-template">
             <ul id="generation-axis-order-menu" class="menu remove-on-clean">
-               <li action="DC.Generator.updateAxes(${strategy_index}, 0, 0)">${DC.Generator.axis_label[0][0]}</li>
-               <li action="DC.Generator.updateAxes(${strategy_index}, 0, 1)">${DC.Generator.axis_label[0][1]}</li>
-               <li action="DC.Generator.updateAxes(${strategy_index}, 0, 2)">${DC.Generator.axis_label[0][2]}</li>
+               <li action="DC.Generator.updateAxes(${strategy_index}, 'linear', 'X')">${DC.Generator.axis_label['linear']['X']}</li>
+               <li action="DC.Generator.updateAxes(${strategy_index}, 'linear', 'Y')">${DC.Generator.axis_label['linear']['Y']}</li>
+               <li action="DC.Generator.updateAxes(${strategy_index}, 'linear', 'Z')">${DC.Generator.axis_label['linear']['Z']}</li>
                <div class="${curvable ? '' : 'hidden'}">
-                  <li action="DC.Generator.updateAxes(${strategy_index}, 1, 2)">${DC.Generator.axis_label[1][2]}</li>
-                  <li action="DC.Generator.updateAxes(${strategy_index}, 1, 1)">${DC.Generator.axis_label[1][1]}</li>
-                  <li action="DC.Generator.updateAxes(${strategy_index}, 1, 0)">${DC.Generator.axis_label[1][0]}</li>
-                  <li action="DC.Generator.updateAxes(${strategy_index}, 2, 2)">${DC.Generator.axis_label[2][2]}</li>
-                  <li action="DC.Generator.updateAxes(${strategy_index}, 2, 1)">${DC.Generator.axis_label[2][1]}</li>
-                  <li action="DC.Generator.updateAxes(${strategy_index}, 2, 0)">${DC.Generator.axis_label[2][0]}</li>
+                  <li action="DC.Generator.updateAxes(${strategy_index}, 'circular', 'XY')">${DC.Generator.axis_label['circular']['XY']}</li>
+                  <li action="DC.Generator.updateAxes(${strategy_index}, 'circular', 'XZ')">${DC.Generator.axis_label['circular']['XZ']}</li>
+                  <li action="DC.Generator.updateAxes(${strategy_index}, 'circular', 'YZ')">${DC.Generator.axis_label['circular']['YZ']}</li>
+                  <li action="DC.Generator.updateAxes(${strategy_index}, 'rotated', 'XY')">${DC.Generator.axis_label['rotated']['XY']}</li>
+                  <li action="DC.Generator.updateAxes(${strategy_index}, 'rotated', 'XZ')">${DC.Generator.axis_label['rotated']['XZ']}</li>
+                  <li action="DC.Generator.updateAxes(${strategy_index}, 'rotated', 'YZ')">${DC.Generator.axis_label['rotated']['YZ']}</li>
                </div>
                <hr>
                ${Menu.makeLink('Organize by', 'generation-organize-by-menu')}
@@ -106,7 +106,7 @@
             <ul id="arrow-list"></ul>
             <template id="arrow-list-item-template">
                <li arrow="${element}" color="${color}" action="DC.Arrow.selectArrow(${element})"><hr style="border: 2px solid ${color}">
-                  ${MathML.sans(CD.Group[0].representation[element])}</li>
+                  ${MathML.sans(Group[0].representation[element])}</li>
             </template>
          </div>
          <div id="arrow-buttons" class="vert">
@@ -120,7 +120,7 @@
             </ul>
          </template>
          <template id="arrow-menu-item-template">
-            <li action="DC.Arrow.addArrow(${element})">${MathML.sans(CD.Group[0].representation[element])}</li>
+            <li action="DC.Arrow.addArrow(${element})">${MathML.sans(Group[0].representation[element])}</li>
          </template>
       </div>
    </div>
@@ -156,7 +156,7 @@
          </li>
       </template>
       <template id="chunk-select-last-template">
-         <li action="DC.Chunking.selectChunk(${CD.Group[0].subgroups.length-1})">${MathML.sansText('The whole group')}</li>
+         <li action="DC.Chunking.selectChunk(${Group[0].subgroups.length-1})">${MathML.sansText('The whole group')}</li>
       </template>
 
       <div id="chunking-fog" class="fog hidden"></div>

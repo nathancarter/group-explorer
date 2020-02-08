@@ -1,34 +1,32 @@
 // @flow
 
-import CayleyDiagram from './js/CayleyDiagram.js';
-import CycleGraph from './js/CycleGraph.js';
-import DisplayCycleGraph from './js/DisplayCycleGraph.js';
-import DisplayDiagram from './js/DisplayDiagram.js';
-import DisplayMulttable from './js/DisplayMulttable.js';
+import {CayleyDiagramView, createUnlabelledCayleyDiagramView} from './js/CayleyDiagramView.js';
+import {CycleGraphView, createUnlabelledCycleGraphView} from './js/CycleGraphView.js';
 import Library from './js/Library.js';
 import Log from './js/Log.js';
 import MathML from './js/MathML.js';
 import MathUtils from './js/MathUtils.js';
 import Menu from './js/Menu.js';
-import Multtable from './js/Multtable.js';
+import {MulttableView, createMinimalMulttableView} from './js/MulttableView.js';
 import {CreateNewSheet} from './js/SheetModel.js';
 import setUpGAPCells from './js/ShowGAPCode.js';
-import SymmetryObject from './js/SymmetryObject.js';
+import {SymmetryObjectView, createStaticSymmetryObjectView} from './js/SymmetryObjectView.js';
 import Template from './js/Template.js';
 import XMLGroup from './js/XMLGroup.js';
 
 export {loadGroup as load};
 
 // Global variables
-var group		/*: XMLGroup */,	// group this page displays information about
-    graphicContext	/*: DisplayDiagram */,
-    cycleGraphContext	/*: DisplayCycleGraph */,
-    multtableContext	/*: DisplayMulttable */;
+let Group			/*: XMLGroup */;		// group this page displays information about
+let Cayley_Diagram_View		/*: CayleyDiagramView */;
+let Symmetry_Object_View	/*: SymmetryObjectView */;
+let Cycle_Graph_View		/*: CycleGraphView */;
+let Multtable_View		/*: MulttableView */;
 
 // Static event managers (setup after document is available)
 $(function() {
    $('#Computed_properties + div').on('click', (ev /*: JQueryEventObject */) =>
-      ($(ev.target).attr('page') === undefined) ? undefined : Library.openWithGroupURL($(ev.target).attr('page'), group.URL));
+      ($(ev.target).attr('page') === undefined) ? undefined : Library.openWithGroupURL($(ev.target).attr('page'), Group.URL));
    $('body')[0].addEventListener('click', actionClickHandler);
 });
 
@@ -37,7 +35,7 @@ function loadGroup() {
    Library
       .loadFromURL()
       .then( (_group) => {
-         group = _group;
+         Group = _group;
          displayStatic();
          displayDynamic();
       } )
@@ -46,98 +44,100 @@ function loadGroup() {
 
 // displays group information that is independent of the representation
 function displayStatic() {
-   graphicContext = new DisplayDiagram({width: 100, height: 100, fog: false});
+   Cayley_Diagram_View = createUnlabelledCayleyDiagramView({height: 100, width: 100});
+   Cycle_Graph_View = createUnlabelledCycleGraphView({height: 100, width: 100});
+   Symmetry_Object_View = createStaticSymmetryObjectView({height: 100, width: 100});
+   Multtable_View = createMinimalMulttableView({height: 100, width: 100});
 
    // Header
    $('#heading').html(eval(Template.HTML('heading_template')));
 
    // Basic facts
    const basicFacts = [
-      {groupField: 'order',      displayName: 'Order',      formattedValue: '<mn>' + group.order.toString() + '</mn>' },
-      {groupField: 'gapid',      displayName: 'GAP ID',     formattedValue: '<mtext>' + group.gapid + '</mtext>' },
-      {groupField: 'gapname',    displayName: 'GAP name',   formattedValue: '<mtext>' + group.gapname + '</mtext>' },
-      {groupField: 'definition', displayName: 'Definition', formattedValue: group.definition },
+      {groupField: 'order',      displayName: 'Order',      formattedValue: '<mn>' + Group.order.toString() + '</mn>' },
+      {groupField: 'gapid',      displayName: 'GAP ID',     formattedValue: '<mtext>' + Group.gapid + '</mtext>' },
+      {groupField: 'gapname',    displayName: 'GAP name',   formattedValue: '<mtext>' + Group.gapname + '</mtext>' },
+      {groupField: 'definition', displayName: 'Definition', formattedValue: Group.definition },
    ];
    for (const basicFact of basicFacts) {
-      if ((group /*: {[key: string]: mixed} */)[basicFact.groupField] != undefined) {
+      if ((Group /*: {[key: string]: mixed} */)[basicFact.groupField] != undefined) {
          $('#basic-fact-table').append(eval(Template.HTML('basicFact-template')));
       }
    }
 
-   setUpGAPCells(group);
+   setUpGAPCells(Group);
 
    // Views --
    //   Add rows to ViewTable until there are no more Cayley Diagrams (including
    //   the generated one) && no more Symmetry Objects
    for (let inx = 0;
-      inx < group.cayleyDiagrams.length + 1 || inx < group.symmetryObjects.length;
-      inx++) {
+        inx < Group.cayleyDiagrams.length + 1 || inx < Group.symmetryObjects.length;
+        inx++) {
       const $row = $('#ViewTable').append(eval(Template.HTML('view_row_template')))
                                   .children()
                                   .last();
 
-      if (inx < group.cayleyDiagrams.length + 1) {
-         const diagramName = (inx == group.cayleyDiagrams.length)
+      if (inx < Group.cayleyDiagrams.length + 1) {
+         const cayley_diagram_name = (inx == Group.cayleyDiagrams.length)
                            ? undefined
-                           : group.cayleyDiagrams[inx].name;
-         const graphicData = new CayleyDiagram(group, diagramName);
-         const img = graphicContext.getImage(graphicData);
-         $(img).attr('title', `${diagramName == undefined ? 'Generated' : diagramName} Cayley diagram visualizer link`);
+                           : Group.cayleyDiagrams[inx].name;
+         Cayley_Diagram_View.setDiagram(Group, cayley_diagram_name);
+         const img = Cayley_Diagram_View.getImage();
+         $(img).attr('title', `${cayley_diagram_name == undefined ? 'Generated' : cayley_diagram_name} Cayley diagram visualizer link`);
          $row.children(':nth-child(1)')
              .addClass('programLink')
-             .text(diagramName === undefined ? '' : diagramName)
-             .on('click', () =>
-                Library.openWithGroupURL('CayleyDiagram.html', group.URL, diagramName === undefined ? {} : {diagram: diagramName}))
+             .text(cayley_diagram_name === undefined ? '' : cayley_diagram_name)
+             .on('click', () => {
+                const options = (cayley_diagram_name === undefined) ? {} : {diagram: cayley_diagram_name};
+                Library.openWithGroupURL('CayleyDiagram.html', Group.URL, options);
+             })
              .prepend(img);
       }
 
       if (inx == 0) {
-         const graphicData = new CycleGraph(group);
-         cycleGraphContext = new DisplayCycleGraph({height: 100, width: 100});
-         const img = cycleGraphContext.getImage(graphicData);
+         Cycle_Graph_View.group = Group;
+         const img = Cycle_Graph_View.getImage();
          $(img).attr('title', 'Cycle graph visualizer link');
          $row.children(':nth-child(2)')
              .addClass('programLink')
              .text('')
-             .on('click', () => Library.openWithGroupURL('CycleDiagram.html', group.URL))
+             .on('click', () => Library.openWithGroupURL('CycleGraph.html', Group.URL))
              .prepend(img);
       }
 
       if (inx == 0) {
-         const graphicData = new Multtable(group);
-         multtableContext = new DisplayMulttable({height: 100, width: 100});
-         const img = multtableContext.getImage(graphicData);
+         Multtable_View.group = Group;
+         const img = Multtable_View.getImage();
          $(img).attr('title', 'Multiplication table visualizer link');
          $row.children(':nth-child(3)')
              .addClass('programLink')
              .text('')
-             .on('click', () => Library.openWithGroupURL('Multtable.html', group.URL))
+             .on('click', () => Library.openWithGroupURL('Multtable.html', Group.URL))
              .prepend(img);
       }
 
-      if (inx < group.symmetryObjects.length) {
-         const objectName  = group.symmetryObjects[inx].name;
-         const graphicData = SymmetryObject.generate(group, objectName);
-         const img = graphicContext.getImage(graphicData);
-         $(img).attr('title', `${objectName} symmetry object visualizer link`);
+      if (inx < Group.symmetryObjects.length) {
+         const img = Symmetry_Object_View.setObject(Group.symmetryObjects[inx]).getImage();
+         const symmetry_object_name  = Group.symmetryObjects[inx].name;
+         $(img).attr('title', `${symmetry_object_name} symmetry object visualizer link`);
          $row.children(':nth-child(4)')
              .addClass('programLink')
-             .text(objectName)
+             .text(symmetry_object_name)
              .on('click', () =>
-                Library.openWithGroupURL('SymmetryObject.html', group.URL, {diagram: objectName}))
+                Library.openWithGroupURL('SymmetryObject.html', Group.URL, {diagram: symmetry_object_name}))
              .prepend(img);
       }
    }
 
    // Description
-   if (group.notes != '') {
-      $('#description').html(group.notes);
+   if (Group.notes != '') {
+      $('#description').html(Group.notes);
    }
 
    // Computed properties:
    $('#computed-properties').prepend(eval(Template.HTML('computedProperties_template')));
-   if (group.isCyclic) {
-      const [m, n, _] = MathUtils.getFactors(group.order)
+   if (Group.isCyclic) {
+      const [m, n, _] = MathUtils.getFactors(Group.order)
                                  .reduce( ([fac1, fac2, prev], el) => {
                                     if (el >= prev) {
                                        fac1 *= el;
@@ -158,14 +158,14 @@ function displayStatic() {
 // (Re-)paints group information that depends on the representation (which may change)
 function displayDynamic() {
    // Generators
-   if (group.generators.length != 0) {
+   if (Group.generators.length != 0) {
       $('#generators').html(displayGenerators());
    }
 
    // Default element names
-   if (group.representation.length != 0) {
-      $('#default-element-names').html(MathML.csList(group.elements.map( (el) => group.representation[el] )));
-      if (group.representationIsUserDefined) {
+   if (Group.representation.length != 0) {
+      $('#default-element-names').html(MathML.csList(Group.elements.map( (el) => Group.representation[el] )));
+      if (Group.representationIsUserDefined) {
          $('#default-element-names').append('<br>This representation is user-defined; see below.');
       } else {
          $('#default-element-names').append('<br>This representation was loaded from the group file.');
@@ -174,12 +174,12 @@ function displayDynamic() {
 
    // Loaded element names
    $('#loaded-naming-schemes').html('');
-   if (group.representations.length > 1 || group.representationIsUserDefined) {
-      const fragment = group
+   if (Group.representations.length > 1 || Group.representationIsUserDefined) {
+      const fragment = Group
          .representations
          .reduce( (frag, rep, index) => {
-            if (group.representations[index] != group.representation) {
-               const scheme = MathML.rowList(group.elements.map( (el) => group.representation[el] + '<mo>=</mo>' + rep[el] ));
+            if (Group.representations[index] != Group.representation) {
+               const scheme = MathML.rowList(Group.elements.map( (el) => Group.representation[el] + '<mo>=</mo>' + rep[el] ));
                frag.append(eval(Template.HTML('loadedSchemeChoice-template')));
             }
             return frag;
@@ -188,18 +188,18 @@ function displayDynamic() {
    }
 
    // User-defined naming schemes
-   if (group.userRepresentations.length == 0) {
+   if (Group.userRepresentations.length == 0) {
       $('#no-user-defined-naming-schemes').show();
       $('#user-defined-naming-schemes').hide();
    } else {
       $('#no-user-defined-naming-schemes').hide();
-      const fragment = group
+      const fragment = Group
          .userRepresentations
          .reduce( (frag, rep, index) => {
-            if (group.userRepresentations[index] == group.representation) {
+            if (Group.userRepresentations[index] == Group.representation) {
                frag.append(eval(Template.HTML('inUseScheme-template')));
             } else {
-               const scheme = MathML.rowList(group.elements.map( (el) => group.representation[el] + '<mo>=</mo>' + rep[el] ));
+               const scheme = MathML.rowList(Group.elements.map( (el) => Group.representation[el] + '<mo>=</mo>' + rep[el] ));
                frag.append(eval(Template.HTML('userSchemeChoice-template')));
             }
             return frag;
@@ -223,27 +223,27 @@ function actionClickHandler(event /*: MouseEvent */) {
 }
 
 function displayClassEquation() {
-   if (   group.order > 5
-       && group.conjugacyClasses.every( (el) => el.popcount() == 1 )) {
-      return `1 + 1 + ... (${group.order} times) ... + 1 = ${group.order}`;
+   if (   Group.order > 5
+       && Group.conjugacyClasses.every( (el) => el.popcount() == 1 )) {
+      return `1 + 1 + ... (${Group.order} times) ... + 1 = ${Group.order}`;
    } else {
-      return group.conjugacyClasses
+      return Group.conjugacyClasses
                   .map( (el) => el.popcount() )
                   .join(' + ') +
-             ` = ${group.order}`;
+             ` = ${Group.order}`;
    }
 }
 
 function displayOrderClasses() {
-   return `${(new Set(group.elementOrders)).size} order
-                  class${(group.order != 1) ? 'es' : ''}`;
+   return `${(new Set(Group.elementOrders)).size} order
+                  class${(Group.order != 1) ? 'es' : ''}`;
 }
 
 function displayGenerators() {
-   return group.generators.map(
+   return Group.generators.map(
       (gen) => gen.reduce(
          (acc, el, inx) => {
-            const rep = MathML.sans(group.representation[el]);
+            const rep = MathML.sans(Group.representation[el]);
             if (gen.length == 1) {
                return `The element ${rep} generates the group.`;
             } else if (inx == 0) {
@@ -259,8 +259,8 @@ function displayGenerators() {
 }
 
 function setRep(index /*: number */) {
-   group.representation = group.representations[index];
-   Library.saveGroup(group);
+   Group.representation = Group.representations[index];
+   Library.saveGroup(Group);
    displayDynamic();
 }
 
@@ -269,19 +269,19 @@ class UDR {
    static current_index : ?number;
  */
    static setRep(index /*: number */) {
-      group.representation = group.userRepresentations[index];
-      Library.saveGroup(group);
+      Group.representation = Group.userRepresentations[index];
+      Library.saveGroup(Group);
       displayDynamic();
    }
 
    static create() {
-      UDR.current_index = group.userRepresentations.length;
-      UDR._showEditor(Array(group.order).fill('<mtext>change me</mtext>'));
+      UDR.current_index = Group.userRepresentations.length;
+      UDR._showEditor(Array(Group.order).fill('<mtext>change me</mtext>'));
    }
 
    static edit(index /*: number */) {
       UDR.current_index = index;
-      UDR._showEditor(group.userRepresentations[index]);
+      UDR._showEditor(Group.userRepresentations[index]);
    }
 
    static _showEditor(representation /*: Array<mathml> */) {
@@ -298,33 +298,33 @@ class UDR {
    }
 
    static saveEdit() {
-      group.userRepresentations[((UDR.current_index /*: any */) /*: number */)] =
+      Group.userRepresentations[((UDR.current_index /*: any */) /*: number */)] =
          $('#udr-edit-table tbody textarea').map( (_, el) => '<mtext>' + ((el /*: any */) /*: HTMLTextAreaElement */).value + '</mtext>' ).toArray();
-      Library.saveGroup(group);
+      Library.saveGroup(Group);
       UDR.closeEdit();
       displayDynamic();
    }
 
    static remove(index /*: number */) {
-      group.deleteUserRepresentation(index);
-      Library.saveGroup(group);
+      Group.deleteUserRepresentation(index);
+      Library.saveGroup(Group);
       displayDynamic();
    }
 }
 
 class Notes {
    static show() {
-      if (group.userNotes == '') {
+      if (Group.userNotes == '') {
          $('#notes-content').html('<i>none</i>');
       } else {
-         $('#notes-content').text(group.userNotes);
+         $('#notes-content').text(Group.userNotes);
       }
       $('#notes-show').show();
       $('#notes-edit').hide();
    }
 
    static edit() {
-      $('#notes-text').text( (group.userNotes == undefined) ? '' : group.userNotes );
+      $('#notes-text').text( (Group.userNotes == undefined) ? '' : Group.userNotes );
       $('#notes-show').hide();
       $('#notes-edit').show();
    }
@@ -334,19 +334,19 @@ class Notes {
    }
 
    static save() {
-      group.userNotes = (($('#notes-text')[0] /*: any */) /*: HTMLTextAreaElement */).value;
-      Library.saveGroup(group);
+      Group.userNotes = (($('#notes-text')[0] /*: any */) /*: HTMLTextAreaElement */).value;
+      Library.saveGroup(Group);
       Notes.show();
    }
 }
 
 function showAllVisualizersSheet () {
-   const iso = group.generators[0].map( g => [ g, g ] );
+   const iso = Group.generators[0].map( g => [ g, g ] );
    CreateNewSheet( [
       {
          className : 'TextElement',
          x : 50, y : 50, w : 800, h : 50,
-         text : `All Visualizers for the Group ${MathML.toUnicode(group.name)}`,
+         text : `All Visualizers for the Group ${MathML.toUnicode(Group.name)}`,
          fontSize : '20pt', alignment : 'center'
       },
       {
@@ -366,17 +366,17 @@ function showAllVisualizersSheet () {
       },
       {
          className : `CDElement`,
-         groupURL : group.URL,
+         groupURL : Group.URL,
          x : 50, y : 150, w : 200, h : 200
       },
       {
          className : `MTElement`,
-         groupURL : group.URL,
+         groupURL : Group.URL,
          x : 350, y : 150, w : 200, h : 200
       },
       {
          className : `CGElement`,
-         groupURL : group.URL,
+         groupURL : Group.URL,
          x : 650, y : 150, w : 200, h : 200
       },
       {

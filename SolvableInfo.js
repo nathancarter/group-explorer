@@ -2,7 +2,6 @@
 
 import BasicGroup from './js/BasicGroup.js';
 import BitSet from './js/BitSet.js';
-import CayleyDiagram from './js/CayleyDiagram.js';
 import IsomorphicGroups from './js/IsomorphicGroups.js';
 import Library from './js/Library.js';
 import Log from './js/Log.js';
@@ -11,6 +10,7 @@ import setUpGAPCells from './js/ShowGAPCode.js';
 import Template from './js/Template.js';
 import XMLGroup from './js/XMLGroup.js';
 
+import {DEFAULT_SPHERE_COLOR} from './js/AbstractDiagramDisplay.js';
 import {CreateNewSheet} from './js/SheetModel.js';
 
 export {loadGroup as load, showSolvableDecompositionSheet};
@@ -222,7 +222,7 @@ function showSolvableDecompositionSheet ( type /*: VisualizerType */ ) {
       }
    ];
    const red = 'hsl(0, 100%, 80%)';
-   const notred = CayleyDiagram.NODE_COLOR;
+   const notred = DEFAULT_SPHERE_COLOR;
    var previous = null, previousIndex = -1;
    D.map( ( entry, index ) => {
       // put name of group atop each element in top row, the decomposition

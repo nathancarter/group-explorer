@@ -3,7 +3,9 @@ declare class THREE {
    static BoxGeometry: typeof THREE_BoxGeometry;
    static BufferGeometry: typeof THREE_BufferGeometry;
    static Camera: typeof THREE_Camera;
+   static CanvasTexture: typeof THREE_CanvasTexture;
    static Color: typeof THREE_Color;
+   static Curve: typeof THREE_Curve;
    static DirectionalLight: typeof THREE_DirectionalLight;
    static DoubleSide: number;
    static Fog: typeof THREE_Fog;
@@ -13,6 +15,7 @@ declare class THREE {
    static Line: typeof THREE_Line;
    static Line3: typeof THREE_Line3;
    static LineBasicMaterial: typeof THREE_LineBasicMaterial;
+   static LineCurve3: typeof THREE_LineCurve3;
    static Material: typeof THREE_Material;
    static Matrix3: typeof THREE_Matrix3;
    static Matrix4: typeof THREE_Matrix4;
@@ -38,7 +41,13 @@ declare class THREE {
 }
 
 declare class THREE_ArrowHelper extends THREE.Object3D {
-   constructor(dir: THREE.Vector3, origin?: THREE.Vector3, length?: number, color?: number, headLength?: number, headWidth?: number): void;
+   constructor(dir: THREE.Vector3,
+               origin?: THREE.Vector3,
+               length?: number,
+               color?: THREE.Color | string | number,
+               headLength?: number,
+               headWidth?: number): void;
+   line: THREE.Line;
 }
 
 declare class THREE_BoxGeometry extends THREE.Geometry {
@@ -54,19 +63,29 @@ declare class THREE_BufferGeometry {
 declare class THREE_Camera extends THREE.Object3D {
 }
 
+declare class THREE_CanvasTexture extends THREE.Texture {
+}
+
 declare class THREE_Color {
    constructor(color: THREE.Color | string | number): void;
    equals(color: THREE.Color): boolean;
    getHex(): number;
    getHexString(): string;
+   getHSL(Obj): {h: number, s: number, l: number};
    set(value: THREE.Color | string | number): THREE.Color;
 };
+
+declare class THREE_Curve {
+   getLength(): number;
+   getPointAt(u: number): THREE.Vector3;
+   getPoints(divisions: number): Array<THREE.Vector3>;
+}
 
 declare class THREE_DirectionalLight extends THREE.Object3D {
 }
 
 declare class THREE_Fog {
-   constructor(color: THREE.Color | string | number): void;
+   constructor(color?: THREE.Color | string | number): void;
    color: THREE.Color;
    far: number;
    near: number;
@@ -102,8 +121,13 @@ declare class THREE_Line3 {
 }
 
 declare class THREE_LineBasicMaterial extends THREE.Material {
-   constructor({color: THREE.Color | string | number}): void;
+   constructor({color?: THREE.Color | string | number, linewidth?: number}): void;
    color: THREE.Color;
+   linewidth: number;
+}
+
+declare class THREE_LineCurve3 extends THREE.Curve {
+   constructor(v1: THREE.Vector3, v2: THREE.Vector3): void;
 }
 
 type THREE_MaterialParameters = {
@@ -117,10 +141,12 @@ type THREE_MaterialParameters = {
 declare class THREE_Material {
    depthTest: boolean;
    depthWrite: boolean;
+   isLineBasicMaterial: boolean | void;
    opacity: number;
    side: typeof THREE.FrontSide;
    transparent: boolean;
    userData: any;
+   visible: boolean;
    color: THREE.Color;  /* really only subclass property -- THREE.LineBasicMaterial */
    dispose(): void;
 }
@@ -189,13 +215,14 @@ declare class THREE_Object3D {
    userData: { [key: string]: any };
    uuid: string;
    add(...Array<THREE.Object3D>): THREE.Object3D;
+   applyMatrix(matrix: THREE.Matrix4): void;
    lookAt(vector: THREE.Vector3): void;
    remove(...Array<THREE.Object3D>): THREE.Object3D;
    rotateOnAxis(axis: THREE.Vector3, angle: number): THREE.Object3D;
 }
 
 declare class THREE_PerspectiveCamera extends THREE.Camera {
-   constructor(fov: number, aspect: number, near?: number, far?: number): void;
+   constructor(fov?: number, aspect?: number, near?: number, far?: number): void;
    aspect: number;
    zoom: number;
    updateProjectionMatrix(): void;
@@ -209,11 +236,8 @@ declare class THREE_Plane {
    setFromNormalAndCoplanarPoint(normal: THREE.Vector3, point: THREE.Vector3): THREE.Plane;
 }
 
-declare class THREE_QuadraticBezierCurve3 {
+declare class THREE_QuadraticBezierCurve3 extends THREE.Curve {
    constructor(v0: THREE.Vector3, v1: THREE.Vector3, v2: THREE.Vector3): void;
-   getLength(): number;
-   getPointAt(u: number): THREE.Vector3;
-   getPoints(divisions: number): Array<THREE.Vector3>;
 }
 
 declare class THREE_Quaternion {
@@ -251,20 +275,25 @@ declare class THREE_SphereGeometry extends THREE.Geometry {
 
 declare class THREE_Sprite extends THREE.Object3D {
    constructor(material?: THREE.SpriteMaterial): void;
-   center: THREE.Vector2;   
+   center: THREE.Vector2;
+   geometry: THREE.Geometry | THREE.BufferGeometry;
+   material: THREE.SpriteMaterial;
 }
 
 declare class THREE_SpriteMaterial extends THREE.Material {
    constructor({map: THREE.Texture}): void;
+    map: THREE.Texture;
 }
 
 declare class THREE_Texture {
    constructor(image: HTMLCanvasElement): void;
    needsUpdate: boolean;
+   dispose(): void;
 }
 
 declare class THREE_TrackballControls {
    constructor(camera: THREE.Camera, domElement: HTMLElement): void;
+   dynamicDampingFactor: float;    
    update(): void;
 }
 

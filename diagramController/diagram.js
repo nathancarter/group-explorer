@@ -13,7 +13,7 @@ export {default as Chunking} from './Chunking.js';
 export {default as DiagramChoice} from './DiagramChoice.js';
 export {default as Generator} from './Generator.js';
 
-export {load, update, clickHandler};
+export {load, setup, update, clickHandler};
 
 const DIAGRAM_PANEL_URL /*: string */ = './diagramController/diagram.html';
 
@@ -23,7 +23,6 @@ function load($diagramWrapper /*: JQuery */) /*: Promise<void> */ {
       $.ajax( { url: DIAGRAM_PANEL_URL,
                 success: (data /*: string */) => {
                    $diagramWrapper.html(data);
-                   setupDiagramPage();
                    resolve();
                 },
                 error: (_jqXHR, _status, err) => {
@@ -33,8 +32,7 @@ function load($diagramWrapper /*: JQuery */) /*: Promise<void> */ {
    } )
 }
 
-function setupDiagramPage() {
-   DiagramChoice.setupDiagramSelect();
+function setup() {
    Generator.init();
 
    $('#diagram-select')[0].addEventListener('click', clickHandler);
@@ -47,9 +45,12 @@ function setupDiagramPage() {
    $('#arrow-control')[0].addEventListener('click', clickHandler);
 
    $('#chunk-select')[0].addEventListener('click', clickHandler);
+
+   update();
 }
 
 function update() {
+   DiagramChoice.setupDiagramSelect();
    Generator.draw();
    Arrow.updateArrows();
    Chunking.updateChunkingSelect();

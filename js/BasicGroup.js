@@ -403,6 +403,15 @@ class BasicGroup {
 
       return ((cosets /*: any */) /*: Tree<groupElement> */);
    }
+
+
+   elementPowerArray(element /*: groupElement */) /*: Array<groupElement> */ {
+      const result = [0];
+      for (let g = element; g != 0; g = this.mult(element, g)) {
+         result.push(g);
+      }
+      return result;
+   }
 }
 /*
 ```

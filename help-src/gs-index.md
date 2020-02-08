@@ -50,7 +50,7 @@ CITE(VGT-2.4 MM-1.2 DE-3)
 Symmetry objects are very common and cycle graphs are very rare, but both are also integrated in *Group Explorer.*
 
  * [See an example object of symmetry here](http://nathancarter.github.io/group-explorer/SymmetryObject.html?groupURL=groups/S_3.group)
- * [See an example cycle graph here](http://nathancarter.github.io/group-explorer/CycleDiagram.html?groupURL=groups/S_3.group)
+ * [See an example cycle graph here](http://nathancarter.github.io/group-explorer/CycleGraph.html?groupURL=groups/S_3.group)
 
 These help pages allow the student to be guided by the software on their
 explorations and investigations in group theory.  [*Group Explorer's* group

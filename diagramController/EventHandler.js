@@ -1,6 +1,7 @@
 // @flow
 
 import GEUtils from '../js/GEUtils.js';
+import Menu from '../js/Menu.js';
 import XMLGroup from '../js/XMLGroup.js';
 
 import * as DC from './diagram.js';

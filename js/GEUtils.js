@@ -34,7 +34,7 @@ class GEUtils {
    }
 
    // All arguments, including hue, are fractional values 0 <= val <= 1.0
-   static fromRainbow(hue /*: float */, saturation /*:: ?: float */ = 1.0, lightness /*:: ?: float */ = .8) /*: color */ {
+   static fromRainbow(hue /*: float */, saturation /*:: ?: float */ = 1.0, lightness /*:: ?: float */ = .8) /*: css_color */ {
       return `hsl(${Math.round(360*hue)}, ${Math.round(100*saturation)}%, ${Math.round(100*lightness)}%)`
    }
 

@@ -1,8 +1,7 @@
 // @flow
 
 import BasicGroup from './js/BasicGroup.js';
-import CayleyDiagram from './js/CayleyDiagram.js';
-import DisplayDiagram from './js/DisplayDiagram.js';
+import {CayleyDiagramView, createUnlabelledCayleyDiagramView} from './js/CayleyDiagramView.js';
 import IsomorphicGroups from './js/IsomorphicGroups.js';
 import Library from './js/Library.js';
 import Log from './js/Log.js';
@@ -33,8 +32,8 @@ type DecoratedSubgroup = Subgroup & {_tierIndex?: number, _used?: boolean};
  */
 
 // Module variables
-let group		/*: XMLGroup */;	// group for which subgroups are being displayed
-let graphicContext	/*: DisplayDiagram */;
+let group		/*: XMLGroup */;		// group for which subgroups are being displayed
+let Cayley_Diagram_View	/*: CayleyDiagramView */;
 
 // Load group from invocation URL
 function loadGroup() {
@@ -48,7 +47,7 @@ function loadGroup() {
 }
 
 function displayGroup() {
-   graphicContext = new DisplayDiagram( { width : 50, height : 50, fog : false } );
+   Cayley_Diagram_View = createUnlabelledCayleyDiagramView( { width : 50, height : 50 } );
    const $rslt = $(document.createDocumentFragment())
       .append(eval(Template.HTML('header_template')));
    if (group.isSimple) {
@@ -88,10 +87,18 @@ function subgroupInfo(index /*: number */) {
    } else {
       // FIXME -- get CayleyDiagram to build for unnamed BasicGroup
       if (!isomorphicGroup.hasOwnProperty('name'))
-          Log.err('trying to build CayleyDiagram for unnamed BasicGroup in SubgroupInfo');
-      const img = graphicContext.getImage( new CayleyDiagram(((isomorphicGroup /*: any */) /*: XMLGroup */)) );
-      img.height = img.width = 50;
-      $row.find('.image').html('').append(img);
+         Log.err('trying to build CayleyDiagram for unnamed BasicGroup in SubgroupInfo');
+      // Use cached Cayley diagram where possible
+      const cached_thumbnail = ((isomorphicGroup /*: any */) /*: XMLGroup */).CayleyThumbnail;
+      let image /*: Image */;
+      if (cached_thumbnail != undefined) {
+         image = (($('<img>').attr({src: cached_thumbnail})[0] /*: any */) /*: Image */);
+      } else {
+         Cayley_Diagram_View.setDiagram( ((isomorphicGroup /*: any */) /*: XMLGroup */) );
+         image = Cayley_Diagram_View.getImage();
+      }
+      image.height = image.width = 50;
+      $row.find('.image').html('').append(image);
       $row.find('ul').append(eval(Template.HTML('isomorphism_template')));
    }
 

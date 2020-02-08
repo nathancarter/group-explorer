@@ -59,9 +59,9 @@ CITE(VGT-2.4 MM-1.2 DE-3)
 Cycle graphs show an important relationship among the elements of the group
 by exhibiting *the group's orbits.*
 
-[![Cycle graph of V_4](v_4_cycle_unlabelled.png)](http://nathancarter.github.io/group-explorer/CycleDiagram.html?groupURL=groups/V_4.group)
+[![Cycle graph of V_4](v_4_cycle_unlabelled.png)](http://nathancarter.github.io/group-explorer/CycleGraph.html?groupURL=groups/V_4.group)
 &nbsp; &nbsp; &nbsp;
-[![Cycle graph of Z_16](z_16_cycle_unlabelled.png)](http://nathancarter.github.io/group-explorer/CycleDiagram.html?groupURL=groups/Z_16.group)
+[![Cycle graph of Z_16](z_16_cycle_unlabelled.png)](http://nathancarter.github.io/group-explorer/CycleGraph.html?groupURL=groups/Z_16.group)
 
  * [Definition of a cycle graph](rf-groupterms.md#cycle-graph)
  * [Complete information about the cycle graph interface](rf-um-cg-options.md) (User Manual)

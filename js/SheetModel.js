@@ -9,84 +9,86 @@
  * contained Sheet Elements to create and destroy HTML element in that view as needed.
  */
 import BasicGroup from './BasicGroup.js';
-import CayleyDiagram from './CayleyDiagram.js';
-import CycleGraph from './CycleGraph.js';
-import DisplayCycleGraph from './DisplayCycleGraph.js';
-import DisplayDiagram from './DisplayDiagram.js';
-import DisplayMulttable from './DisplayMulttable.js';
+import {CayleyDiagramView, createLabelledCayleyDiagramView} from './CayleyDiagramView.js';
+import {CycleGraphView, createLabelledCycleGraphView} from './CycleGraphView.js';
 import {DEFAULT_RESIZING_MARGIN, SELECTED_FOR_DRAGGING_CLASS} from './DragResizeExtension.js';
 import Library from './Library.js';
 import Log from './Log.js';
 import MathML from './MathML.js';
-import Multtable from './Multtable.js';
+import {MulttableView, createFullMulttableView} from './MulttableView.js';
 import {loadSheetFromJSON} from '../Sheet.js';
 import XMLGroup from './XMLGroup.js';
 
+export const LISTENER_READY_MESSAGE = 'listener ready';  // sent by visualizers on load complete
+export const STATE_LOADED_MESSAGE = 'state loaded';      // sent by visualizers on model received
+
 /*::
 import type {BasicGroupJSON} from './BasicGroup.js';
-import type {StrategyArray} from './CayleyDiagram.js';
-import type {CycleGraphJSON} from './DisplayCycleGraph.js';
-import type {CayleyDiagramJSON} from './DisplayDiagram.js';
-import type {MulttableJSON} from './DisplayMulttable.js';
+import type {StrategyParameters} from './CayleyDiagramView.js';
+import type {CycleGraphJSON} from './CycleGraphView.js';
+import type {CayleyDiagramJSON} from './CayleyDiagramView.js';
+import type {MulttableJSON} from './MulttableView.js';
 import type {XMLGroupJSON, BriefXMLGroupJSON} from './XMLGroup.js';
-
 // From DragResizeExtension.js -- awkward to extend existing class in Flow
 import type {JQueryDnD} from './DragResizeExtension.js';
 
-type Obj = {[key: string]: any};
+export interface VizDisplay<VizObjType, VizDispJSON> {
+   getSize(): {w: number, h: number};
+   setSize(w: number, h: number): void;
+   getImage(): Image;
+   toJSON(): VizDispJSON;
+   fromJSON(VizDispJSON): void;
+   unitSquarePosition(groupElement): {x: number, y: number};
+};
 
-type _SheetElementJSON = {
+export type VisualizerType = 'CDElement' | 'MTElement' | 'CGElement';
+type ClassName = 
+      'SheetElement'
+    | 'RectangleElement'
+    | 'TextElement'
+    | 'ConnectingElement'
+    | 'MorphismElement'
+    | VisualizerType;
+
+export type SheetElementJSON = {
+    className: ClassName,
     x: number,
     y: number,
     w: number,
     h: number,
-    z: number
-};
-export type SheetElementJSON = {className: 'SheetElement'} & _SheetElementJSON & Obj;
+    z?: number
+} & Obj;
 
-type _RectangleElementJSON = {
+export type RectangleElementJSON = {
     color: color
-};
-export type RectangleElementJSON = {className: 'RectangleElement'} & _RectangleElementJSON & $Rest<_SheetElementJSON, {}> & Obj;
+} & SheetElementJSON;
 
 export type TextAlignment = 'left' | 'center' | 'right';
-type _TextElementJSON = {
+export type TextElementJSON = {
     text: string,
     fontSize?: string,
     fontColor?: color,
     alignment?: TextAlignment
-};
-export type TextElementJSON = {className: 'TextElement'} & _TextElementJSON & $Rest<_SheetElementJSON, {}> & Obj;
+} & SheetElementJSON;
 
-export type VisualizerType = 'CDElement' | 'MTElement' | 'CGElement';
-type _VisualizerElementJSON = {
+export type VisualizerElementJSON = {
     groupURL: string,
     group?: XMLGroupJSON & BasicGroupJSON,
     elements?: Array<groupElement>,
     highlights?: {background?: Array<null | void | color>}
-};
-export type VisualizerElementJSON = {className: VisualizerType} & _VisualizerElementJSON & $Rest<_SheetElementJSON, {}> & Obj;
+} & SheetElementJSON;
 
-interface VizDisplay<VizObjType, VizDispJSON> {
-   getSize(): {w: number, h: number};
-   setSize(w: number, h: number): void;
-   getImage(diagram3D: VizObjType, options: Obj): Image;
-   toJSON(VizObjType): VizDispJSON;
-   fromJSON(any, VizObjType): void;
-   unitSquarePosition(groupElement, VizObjType): {x: number, y: number};
-};
-
-type _ConnectingElementJSON = {
+export type ConnectingElementJSON = {
+   className: ClassName,
    fromIndex: number,
    toIndex: number,
    color?: color,
    thickness?: number,
    useArrowhead?: boolean,
    arrowheadSize?: number
-};
-export type ConnectingElementJSON = {className: 'ConnectingElement'} & _ConnectingElementJSON & $Rest<_SheetElementJSON, {}> & Obj;
+} & Obj;
 
-type _MorphismElementJSON = {
+export type MorphismElementJSON = {
    name: string,
    showManyArrows?: boolean,
    showDomAndCod?: boolean,
@@ -94,31 +96,36 @@ type _MorphismElementJSON = {
    showDefiningPairs?: boolean,
    arrowMargin?: number,
    definingPairs: Array<[groupElement, groupElement]>
-}
-export type MorphismElementJSON = {className: 'MorphismElement'} & _MorphismElementJSON & $Rest<_SheetElementJSON, {}> & $Rest<_ConnectingElementJSON, {}> & Obj;
+} & ConnectingElementJSON;
 
 export type JSONType =
    SheetElementJSON | RectangleElementJSON | TextElementJSON | VisualizerElementJSON | ConnectingElementJSON | MorphismElementJSON;
 
 type Coordinate = {x: float, y: float};
 
-// message formats
-export type MSG_listenerReady = 'listener ready';  // sent by visualizers on load complete to SheetModel, others
-export type MSG_stateLoaded = 'state loaded';  // sent by visualizers on model received to SheetModel
 
-export type MSG_loadFromJSON = {  // sent by ??? to create new Sheet.js using loadSheetFromJSON global function
+///// message formats
+
+// sent by ??? to create new Sheet.js using loadSheetFromJSON global function
+export type MSG_loadFromJSON = {
    type: 'load from json',
    json: Array<JSONType>
 };
-export type MSG_loadGroup = {  // sent by parent window (or Sheet) to any page using Library and 'waitForMessage' in URL
+
+// sent by parent window (or Sheet) to any page using Library and 'waitForMessage' in URL
+export type MSG_loadGroup = {
    type: 'load group',
    group: BriefXMLGroupJSON
 };
-export type MSG_external<VizType: MulttableJSON | CayleyDiagramJSON | CycleGraphJSON>  = {  // sent by SheetModel to visualizers to update them
+
+// sent by SheetModel to visualizers to update visualizers
+export type MSG_external<VizType: MulttableJSON | CayleyDiagramJSON | CycleGraphJSON>  = {
    source: 'external',
    json: VizType
 };
-export type MSG_editor<VizType: MulttableJSON | CayleyDiagramJSON | CycleGraphJSON> = {  // sent by visualizers to SheetModel to update it
+
+// sent by visualizers to SheetModel to update sheet
+export type MSG_editor<VizType: MulttableJSON | CayleyDiagramJSON | CycleGraphJSON> = {
    source: 'editor',
    json: VizType
 };
@@ -568,7 +575,7 @@ export class SheetElement {
     // this instance is equal to json.className, and then extracts all relevant data
     // from the parameter to re-establish the saved state.  Again, subclasses should
     // override and can feel free to call this method as part of their work.
-    fromJSON ( json /*: SheetElementJSON */ ) {
+    fromJSON ( json /*: SheetElementJSON & Obj */ ) {
         const $wrapper = $( this.htmlViewElement().parentElement );
         $wrapper.offset( { left : json.x, top : json.y } )
                 .width( json.w ).height( json.h )
@@ -798,7 +805,7 @@ export class VisualizerElement/*:: < VizObjType, VizDispJSON: Obj, VizDispType: 
     ignoresAspectRatio: boolean;
  */
     // abstract functions that must be overridden in subclasses:
-   makeVisualizerObject ( group /*: XMLGroup */ ) /*: VizObjType */ { return ((1 /*: any */) /*: VizObjType */) };
+    makeVisualizerObject ( group /*: XMLGroup */ ) /*: VizObjType */ { return ((1 /*: any */) /*: VizObjType */) };
     makeVisualizerDisplay ( options /*: Obj */ ) /*: VizDispType */ { return ((1 /*: any */) /*: VizDispType */) }
     getEditPage () /*: string */ { return ''; }
     getClassName() /*: string */ { return ''; }
@@ -831,16 +838,9 @@ export class VisualizerElement/*:: < VizObjType, VizDispJSON: Obj, VizDispType: 
     isReady () { return !!this.vizobj; }
     // how to create an image of the visualizer
     render () {
-        var result = this.vizobj ?
-            this.vizdisplay.getImage( this.vizobj, {
-                size : "large",
-                resetCamera : !this._extra_json || !this._extra_json._camera
-            } ) :
-            $( '<img/>' )[0];
-        $( result ).css( { "pointer-events" : "none" } );
-        var $wrapper = $( '<div></div>' );
-        $wrapper.append( result );
-        return $wrapper[0];
+        const image = this.vizdisplay.getImage();
+        $(image).css( {"pointer-events" : "none" } );
+        return $('<div></div>').append(image)[0]
     }
     // how to force updating with the latest image
     rerender () {
@@ -896,7 +896,7 @@ export class VisualizerElement/*:: < VizObjType, VizDispJSON: Obj, VizDispType: 
                 if ( otherWinState == 'ready' ) {
                     // but when the editor changes, update us to be just like it
                     if (event.data != undefined && event.data.source == 'editor') {
-                       const event_data = ((event.data /*: any */) /*: MSG_editor<VizDispJSON> */);
+                        const event_data = ((event.data /*: any */) /*: MSG_editor<VizDispJSON> */);
                         that.fromJSON( event_data.json );
                         that.model.sync();
                     }
@@ -909,13 +909,14 @@ export class VisualizerElement/*:: < VizObjType, VizDispJSON: Obj, VizDispType: 
         const result /*: VisualizerElementJSON */ = super.toJSON();
         result.className = ((this.getClassName() /*: any */) /*: VisualizerType */);
         if ( this.vizobj ) {
-            const inner = this.vizdisplay.toJSON( this.vizobj );
+            const inner = this.vizdisplay.toJSON();
             for ( const key in inner )
                 if ( inner.hasOwnProperty( key ) ) result[key] = inner[key];
         }
         return result;
     }
-    fromJSON ( json /*: VisualizerElementJSON */ ) {
+    // $FlowFixMe -- not sure why Flow doesn't understand this...
+    fromJSON ( json /*: VisualizerElementJSON & VizDispJSON */ ) {
         super.fromJSON( json );
         var that = this;
         if ( json.groupURL ) {
@@ -924,18 +925,18 @@ export class VisualizerElement/*:: < VizObjType, VizDispJSON: Obj, VizDispType: 
                 Library.getGroupOrDownload( json.groupURL )
                        .then( ( group ) => {
                            that.vizobj = that.makeVisualizerObject( that.group = group );
-                           that.vizdisplay.fromJSON( json, that.vizobj );
+                           that.vizdisplay.fromJSON(json);
                            that.rerender();
                        } )
                        .catch( Log.err );
             } else {
-                this.vizdisplay.fromJSON( json, this.vizobj );
+                this.vizdisplay.fromJSON(json);
                 this.rerender();
             }
         } else if ( json.group ) {
             this.group = XMLGroup.parseJSON( json.group );
             this.vizobj = this.makeVisualizerObject( this.group );
-            this.vizdisplay.fromJSON( json, this.vizobj );
+            this.vizdisplay.fromJSON(json);
             this.rerender();
         }
     }
@@ -950,7 +951,7 @@ export class VisualizerElement/*:: < VizObjType, VizDispJSON: Obj, VizDispType: 
     // stretch to fill their rectangle, or stay square-shaped, leaving unused
     // regions on sides (or top and bottom) to fill out their aspect ratio.
     unitSquarePosition ( element /*: groupElement */ ) /*: Coordinate */ {
-        let result = this.vizdisplay.unitSquarePosition( element, this.vizobj );
+        let result = this.vizdisplay.unitSquarePosition(element);
         if ( this.ignoresAspectRatio ) {
             const $wrapper = $( this.htmlViewElement().parentElement ),
                   w = $wrapper.width(),
@@ -967,13 +968,18 @@ export class VisualizerElement/*:: < VizObjType, VizDispJSON: Obj, VizDispType: 
 /*
  * SheetElement subclass for showing the multiplication table of a group
  */
-export class MTElement extends VisualizerElement/*:: <Multtable, MulttableJSON, DisplayMulttable> */ {
+export class MTElement extends VisualizerElement/*:: <MulttableView, MulttableJSON, MulttableView> */ {
     constructor ( model /*: SheetModel */, groupURL /*: string */ ) {
         super( model, groupURL );
         this.ignoresAspectRatio = true;
     }
-    makeVisualizerObject ( group /*: XMLGroup */ ) { return new Multtable( group ); }
-    makeVisualizerDisplay ( options /*: Obj */ ) { return new DisplayMulttable( options ); }
+    makeVisualizerObject ( group /*: XMLGroup */ ) {
+        this.vizdisplay.group = group;
+        return this.vizdisplay;
+    }
+    makeVisualizerDisplay ( options /*: Obj */ ) {
+        return createFullMulttableView(options);
+    }
     getEditPage () { return './Multtable.html'; }
     getClassName () { return 'MTElement'; }
     toString () {
@@ -984,7 +990,7 @@ export class MTElement extends VisualizerElement/*:: <Multtable, MulttableJSON, 
 /*
  * SheetElement subclass for showing the cycle graph of a group
  */
-export class CGElement extends VisualizerElement/*:: <CycleGraph, CycleGraphJSON, DisplayCycleGraph> */ {
+export class CGElement extends VisualizerElement/*:: <CycleGraphView, CycleGraphJSON, CycleGraphView> */ {
     constructor ( model /*: SheetModel */, groupURL /*: string */ ) {
         super( model, groupURL  );
         // The following hack is because the CG has to realize that its canvas size
@@ -996,9 +1002,14 @@ export class CGElement extends VisualizerElement/*:: <CycleGraph, CycleGraphJSON
             setTimeout( function () { that.model.drawOverlay() }, 1 );
         } );
     }
-    makeVisualizerObject ( group /*: XMLGroup */ ) { return new CycleGraph( group ); }
-    makeVisualizerDisplay ( options /*: Obj */ ) { return new DisplayCycleGraph( options ); }
-    getEditPage () { return './CycleDiagram.html'; }
+    makeVisualizerObject ( group /*: XMLGroup */ ) {
+        this.vizdisplay.group = group;
+        return this.vizdisplay;
+    }
+    makeVisualizerDisplay ( options /*: Obj */ ) {
+        return createLabelledCycleGraphView(options);
+    }
+    getEditPage () { return './CycleGraph.html'; }
     getClassName () { return 'CGElement'; }
     toString () {
         return super.toString().replace( 'Visualization', 'Cycle graph' );
@@ -1008,13 +1019,14 @@ export class CGElement extends VisualizerElement/*:: <CycleGraph, CycleGraphJSON
 /*
  * SheetElement subclass for showing the Cayley diagram of a group
  */
-export class CDElement extends VisualizerElement/*:: <CayleyDiagram, CayleyDiagramJSON, DisplayDiagram> */ {
+export class CDElement extends VisualizerElement/*:: <CayleyDiagramView, CayleyDiagramJSON, CayleyDiagramView> */ {
     makeVisualizerObject ( group /*: XMLGroup */ ) {
-        return group.cayleyDiagrams.length > 0 ?
-               new CayleyDiagram( group, group.cayleyDiagrams[0].name ) :
-               new CayleyDiagram( group );
+        this.vizdisplay.setDiagram(group, group.cayleyDiagrams.length > 0 ? group.cayleyDiagrams[0].name : undefined);
+        return this.vizdisplay;
     }
-    makeVisualizerDisplay ( options /*: Obj */ ) { return new DisplayDiagram( options ); }
+    makeVisualizerDisplay ( options /*: Obj */ ) {
+        return createLabelledCayleyDiagramView( options );
+    }
     getEditPage () { return './CayleyDiagram.html'; }
     getClassName () { return 'CDElement'; }
     toString () {

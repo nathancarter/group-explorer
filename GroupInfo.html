@@ -165,7 +165,7 @@
    <body>
       <h2 id="heading" align="center" style="margin-bottom: 1em">
          <template id="heading_template">
-            ${MathML.sans(group.name + ((group.phrase == "") ? '' : '<mtext>&nbsp;- ' + group.phrase + '</mtext>'))}
+            ${MathML.sans(Group.name + ((Group.phrase == "") ? '' : '<mtext>&nbsp;- ' + Group.phrase + '</mtext>'))}
          </template>
       </h2>
       <div class="top-right-menu">
@@ -263,7 +263,7 @@
             <table>
                <tr>
                   <th align="right">Abelian group</th>
-                  <td>${group.isAbelian ? 'yes' : 'no'}</td>
+                  <td>${Group.isAbelian ? 'yes' : 'no'}</td>
                   <td page="AbelianInfo.html" class="programLink">Tell me more</td>
                </tr>
                <tr>
@@ -273,12 +273,12 @@
                </tr>
                <tr>
                   <th align="right">Cyclic group</th>
-                  <td>${group.isCyclic ? 'yes' : 'no'}</td>
+                  <td>${Group.isCyclic ? 'yes' : 'no'}</td>
                   <td page="CyclicInfo.html" class="programLink">Tell me more</td>
                </tr>
                <tr>
                   <th align="right">Subgroups</th>
-                  <td>${group.subgroups.length}</td>
+                  <td>${Group.subgroups.length}</td>
                   <td page="SubgroupInfo.html" class="programLink">Tell me more</td>
                </tr>
                <tr>
@@ -288,7 +288,7 @@
                </tr>
                <tr>
                   <th align="right">Solvable group</th>
-                  <td>${group.isSolvable ? 'yes' : 'no'}</td>
+                  <td>${Group.isSolvable ? 'yes' : 'no'}</td>
                   <td page="SolvableInfo.html" class="programLink">Tell me more</td>
                </tr>
             </table>
@@ -318,9 +318,9 @@
       <div id="file-data" class="indent1">
          <template id="fileData_template">
             <table>
-               <tr><th align="right">Author</th><td align="left">${group.author}</td></tr>
-               <tr><th align="right">URL</th><td align="left">${group.URL}</td></tr>
-               <tr><th align="right">Last modified</th><td align="left">${group.lastModifiedOnServer}</td></tr>
+               <tr><th align="right">Author</th><td align="left">${Group.author}</td></tr>
+               <tr><th align="right">URL</th><td align="left">${Group.URL}</td></tr>
+               <tr><th align="right">Last modified</th><td align="left">${Group.lastModifiedOnServer}</td></tr>
             </table>
          </template>
       </div>
@@ -374,9 +374,9 @@
          <template id="namingEditor-template">
             <div id="naming-editor">
                <div id="udr-edit-content" class="vert">
-                  <div id="udr-edit-title">Edit naming scheme for ${MathML.sans(group.name)}</div>
+                  <div id="udr-edit-title">Edit naming scheme for ${MathML.sans(Group.name)}</div>
                   <div id="udr-edit-header">
-                     Below are all the naming schemes for ${MathML.sans(group.name)}.  Edit the Custom
+                     Below are all the naming schemes for ${MathML.sans(Group.name)}.  Edit the Custom
                      representation column by clicking on the entries you wish to change and typing any plain text.
                   </div>
                   <div id="udr-edit-body">
@@ -400,7 +400,7 @@
          </template>
          <template id="udr-edit-template">
             <tr>
-               <td>${MathML.sans(group.representation[inx])}</td>
+               <td>${MathML.sans(Group.representation[inx])}</td>
                <td><textarea maxlength="50" rows="1" style="width: 24em">${rep.slice(7,-8)}</textarea></td>
             </tr>
          </template>

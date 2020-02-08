@@ -6,11 +6,13 @@ declare var MathJax : any;
 type Obj = {[key: string]: any};
 
 // types that indicate the use of the string/number
+declare type integer = number;
 declare type float = number;
 declare type html = string;
 declare type mathml = string;
 declare type groupElement = number;
 declare type color = string;
+declare type css_color = string;
 declare type eventLocation = {clientX: number, clientY: number};
 
 // Window, as used in GE3

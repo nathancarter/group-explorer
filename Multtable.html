@@ -70,7 +70,7 @@
       </div>
 
       <template id="drag-image-template">
-         <img id="drag-image" src="${graphicContext.canvas.toDataURL()}" class="remove-on-clean" swapping="${swapping}" start="${start}" style="${style}">
+         <img id="drag-image" src="${Multtable_View.canvas.toDataURL()}" class="remove-on-clean" swapping="${swapping}" start="${start}" style="${style}">
       </template>
 
       <template id="node-label-template">
@@ -99,16 +99,16 @@
          <form id="coloration-choice" class="graphic-lead" style="margin-bottom: 0">
             Default coloration:
             <div>
-               <input id="Rainbow" name="coloration" type="radio" checked>
-               <label for="Rainbow">Spectrum/rainbow</label>
+               <input id="rainbow" name="coloration" type="radio" checked>
+               <label for="rainbow">Spectrum/rainbow</label>
             </div>
             <div>
-               <input id="Grayscale" name="coloration" type="radio">
-               <label for="Grayscale">Grayscale</label>
+               <input id="grayscale" name="coloration" type="radio">
+               <label for="grayscale">Grayscale</label>
             </div>
             <div>
-               <input id="None" name="coloration" type="radio">
-               <label for="None">None</label>
+               <input id="none" name="coloration" type="radio">
+               <label for="none">None</label>
             </div>
          </form>
       </div>

@@ -10,7 +10,7 @@ There is a limit to the number of html canvas elements a browser can handle: hav
 
 <hr>
 
-There is a limit to the size of a canvas, depending on the browser. It's 2<sup>14</sup>-1 pixels square on Chrome/Ubuntu, others browser/systems are comparable. This caused initial implementations of the [Multtable](../Multtable.html) and [CycleDiagram](../CycleDiagram.html) visualizers to be unable to display larger groups, like the 168.group.  This in turn informed the design of the [DisplayCycleGraph](../js/DisplayCycleGraph.js) and [DisplayMulttable](../js/DisplayMulttable.js) classes and their interfaces.
+There is a limit to the size of a canvas, depending on the browser. It's 2<sup>14</sup>-1 pixels square on Chrome/Ubuntu, others browser/systems are comparable. This caused initial implementations of the [Multtable](../Multtable.html) and [CycleGraph](../CycleGraph.html) visualizers to be unable to display larger groups, like the 168.group.  This in turn informed the design of the [DisplayCycleGraph](../js/DisplayCycleGraph.js) and [DisplayMulttable](../js/DisplayMulttable.js) classes and their interfaces.
 
 <hr>
 
@@ -26,7 +26,7 @@ See [DisplayCycleGraph](../js/DisplayCycleGraph.js) at the end of the `showLarge
 Drag-and-drop was surprisingly consistent, even on touch platforms. A couple of small-ish exceptions:
 * Across platforms Firefox has an odd pre-condition: you have to set the data in the `event.dataTransfer` object, thus: `event.originalEvent.dataTransfer.setData('text/plain', 'anything');`.  It doesn't seem to be used for anything, you just have to do it.
 * The image drag on Chrome/Ubuntu doesn't work, a bug in that browser/system.
-You can see the effect of these in [CycleDiagram](../CycleDiagram.html) in the `dragstart` routine.
+You can see the effect of these in [CycleGraph](../CycleGraph.html) in the `dragstart` routine.
 
 <hr>
     

@@ -1,24 +1,22 @@
 // @flow
 
-import Diagram3D from './js/Diagram3D.js';
-import DisplayDiagram from './js/DisplayDiagram.js';
 import Library from './js/Library.js';
 import Log from './js/Log.js';
 import MathML from './js/MathML.js';
-import MathUtils from './js/MathUtils.js';
-import Menu from './js/Menu.js';
-import SymmetryObject from './js/SymmetryObject.js';
+import {SymmetryObjectView, createInteractiveSymmetryObjectView} from './js/SymmetryObjectView.js';
 import Template from './js/Template.js';
 import * as VC from './visualizerFramework/visualizer.js';
 import XMLGroup from './js/XMLGroup.js';
 
 export {loadGroup as load};
 
+/*::
+import type {XMLSymmetryObject} from './js/XMLGroup.js';
+*/
+
 /* Module variables */
-let group		/*: XMLGroup */;	// group about which information will be displayed
-let diagramName		/*: string */;		// name of SymmetryObject, guaranteed to be non-empty
-let graphicData		/*: Diagram3D */;	// data being displayed in large diagram
-let graphicContext	/*: DisplayDiagram */;	// graphic context for large diagram
+let Group			/*: XMLGroup */;		// group about which information will be displayed
+let Symmetry_Object_View	/*: SymmetryObjectView */;	// SymmetryObject view of Group
 
 const HELP_PAGE = 'help/rf-um-os-options/index.html';
 
@@ -39,8 +37,8 @@ function registerCallbacks() {
 function loadGroup() {
    Library
       .loadFromURL()
-      .then( (_group) => {
-         group = _group;
+      .then( (group) => {
+         Group = group;
          loadVisualizerFramework();
       } )
       .catch( Log.err );
@@ -48,66 +46,68 @@ function loadGroup() {
 
 // Load visualizer framework around visualizer-specific code in this file
 function loadVisualizerFramework() {
-   VC.load(group, HELP_PAGE)
+   VC.load(Group, HELP_PAGE)
       .then( () => {
-         setDiagramName();
-         if (diagramName != undefined) {
-            completeSetup();
-         }} )
+         const diagram_name = getDiagramName();
+         completeSetup(diagram_name);
+      } )
       .catch( Log.err );
 }
 
-/* Set diagramName from URL (undefined => error, no symmetry group) */
-function setDiagramName() {
+/* Get diagram name from URL; throw exception when group has no symmetry object */
+function getDiagramName() /*: string */ {
+   let diagram_name;
    // Check that this group has a symmetry object
-   if (group.symmetryObjects.length == 0) {
-      // If not, leave diagramName undefined and alert user
-      alert(`The group ${MathML.toUnicode(group.name)} has no symmetry objects.`);
+   if (Group.symmetryObjects.length == 0) {
+      // Throws exception is group has no symmetry objects
+      throw `The group ${MathML.toUnicode(Group.name)} has no symmetry objects.`;
    } else {
       // If so, use the diagram name from the URL search string
       const urlDiagramName = new URL(window.location.href).searchParams.get('diagram');
       // unless it is empty
       if (urlDiagramName == undefined) {
-         diagramName = group.symmetryObjects[0].name;
+         diagram_name = Group.symmetryObjects[0].name;
       } else {
          // or it does not match one of the symmetryObjects
-         if (!group.symmetryObjects.some( (symmetryObject) => symmetryObject.name == urlDiagramName )) {
+         if (!Group.symmetryObjects.some( (symmetryObject) => symmetryObject.name == urlDiagramName )) {
             // Name is passed but there is no matching symmetryObject -- alert user and continue
-            alert(`The group ${MathML.toUnicode(group.name)} has no symmetry object named ${urlDiagramName}. ` +
-                  `Using ${group.symmetryObjects[0].name} instead.`);
-            diagramName = group.symmetryObjects[0].name;
+            Log.warn(`The group ${MathML.toUnicode(Group.name)} has no symmetry object named ${urlDiagramName}. ` +
+                     `Using ${Group.symmetryObjects[0].name} instead.`);
+            diagram_name = Group.symmetryObjects[0].name;
          } else {
-            diagramName = urlDiagramName;
+            diagram_name = urlDiagramName;
          }
       }
    }
+
+   return diagram_name;
 }
 
-/* Now that group has loaded, complete the setup */
-function completeSetup() {
+/* Now that Group has loaded, complete the setup */
+function completeSetup(diagram_name /*: string */) {
    // Register event handlers
    registerCallbacks();
 
    // Create header from group name and queue MathJax to typeset it
-   $('#header').html(MathML.sans('<mtext>Object of Symmetry for&nbsp;</mtext>' + group.name));
+   $('#header').html(MathML.sans('<mtext>Object of Symmetry for&nbsp;</mtext>' + Group.name));
    MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'header']);
 
    // Create list of symmetry object option for faux-select
-   for (let index = 0; index < group.symmetryObjects.length; index++) {
+   for (let index = 0; index < Group.symmetryObjects.length; index++) {
       $('#diagram-choices').append(eval(Template.HTML('diagram-choice-template'))).hide();
    };
    MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'diagram-choices',
                       () => $('#diagram-choice').html($('#diagram-choices > li:first-of-type').html())]);
 
    // Draw symmetry object in graphic
-   graphicContext = new DisplayDiagram({container: $('#graphic'), trackballControlled: true});
-   displaySymmetryObject();
+   Symmetry_Object_View = createInteractiveSymmetryObjectView({container: $('#graphic')});
+   set_diagram_name(Group.symmetryObjects.findIndex( (symmetry_object) => symmetry_object.name == diagram_name ));
 
    (($('#vert-container') /*: any */) /*: JQuery & {resizable: Function} */).resizable({
       handleSelector: '#splitter',
       resizeHeight: false,
       resizeWidthFrom: 'left',
-      onDrag: resizeGraphic,
+      onDrag: () => Symmetry_Object_View.resize(), // resizeGraphic,
    })
 }
 
@@ -116,30 +116,8 @@ function resizeBody() {
    $('#bodyDouble').height(window.innerHeight);
    $('#bodyDouble').width(window.innerWidth);
 
-   resizeGraphic();
+   Symmetry_Object_View.resize(); // resizeGraphic();
 };
-
-/* Displays symmetry object -- called during setup, and upon changing symmetry object */
-function displaySymmetryObject() {
-   graphicData = SymmetryObject.generate(group, diagramName);
-   graphicData.lineWidth = 10;
-   graphicContext.showGraphic(graphicData);
-}
-
-/*
- * Resize the 3D scene from the freshly re-sized graphic
- *   (detach the canvas containing the 3D scene from the DOM,
- *    change camera parameters and renderer size, and then re-attach it)
- */
-function resizeGraphic() {
-   if (graphicContext.camera !== undefined) {
-      $('#graphic > canvas').remove();
-      graphicContext.camera.aspect = $('#graphic').width() / $('#graphic').height();
-      graphicContext.camera.updateProjectionMatrix();
-      graphicContext.renderer.setSize($('#graphic').width(), $('#graphic').height());
-      $('#graphic').append(graphicContext.renderer.domElement);
-   }
-}
 
 function cleanWindow() {
    $('#diagram-choices').hide();
@@ -157,16 +135,16 @@ function diagramClickHandler(event /*: MouseEvent */) {
 }
 
 function set_diagram_name(index /*: number */) {
-   diagramName = group.symmetryObjects[index].name;
+   const diagram_name = Group.symmetryObjects[index].name;
    $('#diagram-choice').html($(`#diagram-choices > li:nth-of-type(${index+1})`).html());
    $('#diagram-choices').hide();
-   displaySymmetryObject();
+   Symmetry_Object_View.setObject(Group.symmetryObjects[index]);
 }
 
 /* Slider handlers */
 function set_zoom_level() {
-   graphicData.zoomLevel = Math.exp( parseInt($('#zoom-level').val())/10 );
-   graphicContext.updateZoomLevel(graphicData);
+   const zoom_level = Math.exp( parseInt($('#zoom-level').val())/10 );
+   Symmetry_Object_View.zoom_level = zoom_level;
 }
 
 /* Set line thickness from slider value
@@ -176,17 +154,16 @@ function set_zoom_level() {
  */
 function set_line_thickness() {
    const slider_value = parseInt($('#line-thickness').val());
-   const lineWidth = (slider_value == 1) ? 1 : 4*Math.exp(0.0734*(slider_value-2));
-   graphicData.lineWidth = lineWidth;
-   graphicContext.updateLineWidth(graphicData);
+   const line_width = (slider_value == 1) ? 1 : 4*Math.exp(0.0734*(slider_value-2));
+   Symmetry_Object_View.line_width = line_width;
 }
 
 function set_node_radius() {
-   graphicData.nodeScale = Math.exp( parseInt($('#node-radius').val())/10 );
-   graphicContext.updateNodeRadius(graphicData);
+   const node_scale = Math.exp( parseInt($('#node-radius').val())/10 );
+   Symmetry_Object_View.sphere_scale_factor = node_scale;
 }
 
 function set_fog_level() {
-   graphicData.fogLevel = $('#use-fog').is(':checked') ? parseInt($('#fog-level').val())/10 : 0;
-   graphicContext.updateFogLevel(graphicData);
+   const fog_level = $('#use-fog').is(':checked') ? parseInt($('#fog-level').val())/10 : 0;
+   Symmetry_Object_View.fog_level = fog_level;
 }

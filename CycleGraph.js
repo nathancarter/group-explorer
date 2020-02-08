@@ -1,30 +1,30 @@
 // @flow
 
-import CycleGraph from './js/CycleGraph.js';
-import DisplayCycleGraph from './js/DisplayCycleGraph.js';
+import {CycleGraphView, createLabelledCycleGraphView} from './js/CycleGraphView.js';
 import GEUtils from './js/GEUtils.js';
 import Library from './js/Library.js';
 import Log from './js/Log.js';
 import MathML from './js/MathML.js';
 import Menu from './js/Menu.js';
+import {LISTENER_READY_MESSAGE, STATE_LOADED_MESSAGE} from './js/SheetModel.js';
 import Template from './js/Template.js';
 import XMLGroup from './js/XMLGroup.js';
 
-import * as VC from './visualizerFramework/visualizer.js';
 import * as SSD from './subsetDisplay/subsets.js';
+import * as VC from './visualizerFramework/visualizer.js';
+
+export {broadcastChange} from './visualizerFramework/visualizer.js';
 
 export {loadGroup as load};
 
 /*::
-import type {CycleGraphJSON} from './js/DisplayCycleGraph.js';
-import type {MSG_listenerReady, MSG_stateLoaded, MSG_external, MSG_editor} from './js/SheetModel.js';
+import type {CycleGraphJSON} from './js/CycleGraphView.js';
+import type {MSG_external, MSG_editor} from './js/SheetModel.js';
 */
 
 // Module variables
 let group		/*: XMLGroup */;		// group about which information will be displayed
-let cyclegraph		/*: CycleGraph */;		// data being displayed in large diagram
-let graphicContext	/*: DisplayCycleGraph */;	// graphic context for large diagram
-let canEmit		/*: boolean */ = true;		// flag: whether to notify parent window of table changes
+let Cycle_Graph_View	/*: CycleGraphView */;		// graphic context for large diagram
 
 const HELP_PAGE = 'help/rf-um-cg-options/index.html';
 
@@ -88,8 +88,8 @@ function completeSetup() {
    MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
 
    // Create Cycle Graph, graphic context (it will be displayed in resizeBody below)
-   cyclegraph = new CycleGraph(group);
-   graphicContext = new DisplayCycleGraph({container: $('#graphic')});
+   Cycle_Graph_View = createLabelledCycleGraphView({container: $('#graphic')});
+   Cycle_Graph_View.group = group;
 
    // Register event handlers
    registerCallbacks();
@@ -100,43 +100,39 @@ function completeSetup() {
       handleSelector: '#splitter',
       resizeHeight: false,
       resizeWidthFrom: 'left',
-      onDrag: resizeGraphic,
+      onDrag: () => Cycle_Graph_View.resize(),
    });
 
    resizeBody();
 
-   window.addEventListener( 'message', function (event /*: MessageEvent */) {
-      const event_data /*: MSG_external<CycleGraphJSON> */ = (event.data /*: any */);
-      if (typeof event.data == 'undefined' || ((event.data /*: any */) /*: Obj */).source != 'external') {
-         Log.warn('unknown message received in CycleDiagram.js:');
-         Log.warn(event.data);
-         return;
-      }
-      canEmit = false; // don't spam notifications of changes about to happen
-      graphicContext.fromJSON( event_data.json, cyclegraph );
-      graphicContext.showLargeGraphic( cyclegraph );
-      canEmit = true; // restore default behavior
-      const msg /*: MSG_stateLoaded */ = 'state loaded';
-      window.postMessage( msg, myDomain );
-   }, false );
+   window.addEventListener('message', receiveInitialSetup, false);
 
-   const msg /*: MSG_listenerReady */ = 'listener ready';
    // let any GE window that spawned this know that we're ready to receive signals
-   window.postMessage( msg, myDomain );
+   window.postMessage( LISTENER_READY_MESSAGE, myDomain );
    // or if any external program is using GE as a service, let it know we're ready, too
-   window.parent.postMessage( msg, '*' );
+   window.parent.postMessage( LISTENER_READY_MESSAGE, '*' );
 
    // No need to keep the "find group" icon visible if the group was loaded from a URL
    if ( group.URL ) $( '#find-group' ).hide();
 }
 
-function emitStateChange () {
-   if ( canEmit ) {
-      const msg /*: MSG_editor<CycleGraphJSON> */ = {
-         source : 'editor',
-         json : graphicContext.toJSON( cyclegraph )
-      };
-      window.postMessage( msg, myDomain );
+function receiveInitialSetup (event /*: MessageEvent */) {
+   if (event.data == undefined)
+      return;
+
+   const event_data /*: MSG_external<CycleGraphJSON> */ = (event.data /*: any */);
+   if (event_data.source == 'external') {
+      Cycle_Graph_View.fromJSON(event_data.json);
+      VC.enableChangeBroadcast(() => Cycle_Graph_View.toJSON());
+      window.postMessage( STATE_LOADED_MESSAGE, myDomain );
+   } else if (   event_data.source == 'editor'
+              || ((event.data /*: any */) /*: string */) == LISTENER_READY_MESSAGE
+              || ((event.data /*: any */) /*: string */) == STATE_LOADED_MESSAGE)
+   {
+      // we're just receiving our own messages -- ignore them
+   } else {
+      Log.warn('unknown message received in CycleGraph.js:');
+      Log.warn(event.data);
    }
 }
 
@@ -145,14 +141,8 @@ function resizeBody() {
    $('#bodyDouble').height(window.innerHeight);
    $('#bodyDouble').width(window.innerWidth);
 
-   resizeGraphic();
+    Cycle_Graph_View.resize();
 };
-
-function resizeGraphic() {
-   graphicContext.canvas.width = $('#graphic').width();
-   graphicContext.canvas.height = $('#graphic').height();
-   graphicContext.showLargeGraphic(cyclegraph);
-}
 
 
 /*
@@ -206,8 +196,7 @@ class LargeGraphic {
 
       case 'wheel':
          GEUtils.cleanWindow();
-         (((mouseEvent /*: any */) /*: WheelEvent */).deltaY < 0) ? graphicContext.zoomIn() : graphicContext.zoomOut();
-         graphicContext.showLargeGraphic(cyclegraph);
+         (((mouseEvent /*: any */) /*: WheelEvent */).deltaY < 0) ? Cycle_Graph_View.zoomIn() : Cycle_Graph_View.zoomOut();
          break;
 
       case 'mousedown':
@@ -294,7 +283,7 @@ class LargeGraphic {
       const bounding_rectangle = $('#graphic')[0].getBoundingClientRect();
       const clickX = event.clientX - bounding_rectangle.left;
       const clickY = event.clientY - bounding_rectangle.top;
-      const element = graphicContext.select(clickX, clickY);
+      const element = Cycle_Graph_View.select(clickX, clickY);
       if (element != undefined) {
          const $label = $(eval(Template.HTML('node-label-template')))
                           .appendTo('#graphic');
@@ -327,47 +316,36 @@ class LargeGraphic {
       const [startCentroid, startDiameter] = LargeGraphic.centroidAndDiameter(LargeGraphic.touches(start)),
             [endCentroid, endDiameter] = LargeGraphic.centroidAndDiameter(LargeGraphic.touches(end)),
             zoomFactor = endDiameter / startDiameter;
-      graphicContext
+      Cycle_Graph_View
          .zoom(endDiameter / startDiameter)
          .move(endCentroid.clientX - startCentroid.clientX, endCentroid.clientY - startCentroid.clientY);
-      graphicContext.showLargeGraphic(cyclegraph);
    }
 
    static mouseMove(start /*: MouseEvent */, end /*: MouseEvent */) {
       GEUtils.cleanWindow();
-      graphicContext.move(end.clientX - start.clientX, end.clientY - start.clientY);
-      graphicContext.showLargeGraphic(cyclegraph);
+      Cycle_Graph_View.move(end.clientX - start.clientX, end.clientY - start.clientY);
    }
 
    static zoom2fit() {
       GEUtils.cleanWindow();
-      graphicContext.reset();
-      graphicContext.showLargeGraphic(cyclegraph);
+      Cycle_Graph_View.reset();
    }
 }
 
 
 /* Highlighting routines */
 function highlightByBackground(elements /*: Array<Array<groupElement>> */) {
-   cyclegraph.highlightByBackground(elements);
-   emitStateChange();
-   graphicContext.showLargeGraphic(cyclegraph);
+   Cycle_Graph_View.highlightByBackground(elements);
 }
 
 function highlightByBorder(elements /*: Array<Array<groupElement>> */) {
-   cyclegraph.highlightByBorder(elements);
-   emitStateChange();
-   graphicContext.showLargeGraphic(cyclegraph);
+   Cycle_Graph_View.highlightByBorder(elements);
 }
 
 function highlightByTop(elements /*: Array<Array<groupElement>> */) {
-   cyclegraph.highlightByTop(elements);
-   emitStateChange();
-   graphicContext.showLargeGraphic(cyclegraph);
+   Cycle_Graph_View.highlightByTop(elements);
 }
 
 function clearHighlights() {
-   cyclegraph.clearHighlights();
-   emitStateChange();
-   graphicContext.showLargeGraphic(cyclegraph);
+   Cycle_Graph_View.clearHighlights();
 }
