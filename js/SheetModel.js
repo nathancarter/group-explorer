@@ -1378,9 +1378,9 @@ class MorphismElement extends ConnectingElement/*:: < VisualizerElement<any, any
         if ( $( this.htmlViewElement() ).is( ':hidden' ) ) return;
         if ( !this.from || !this.to ) return; // may still be initializing
         const $fromWrapper = $( this.from.htmlViewElement().parentElement ),
-              fromPadding = parseInt( $fromWrapper.css( 'padding' ) ),
+              fromPadding = parseInt( $fromWrapper.css( 'padding-bottom' ) ),
               $toWrapper = $( this.to.htmlViewElement().parentElement ),
-              toPadding = parseInt( $toWrapper.css( 'padding' ) ),
+              toPadding = parseInt( $toWrapper.css( 'padding-bottom' ) ),
               left = $( this.model.view ).offset().left,
               top = $( this.model.view ).offset().top,
               f1 = { x : $fromWrapper.offset().left + fromPadding,
