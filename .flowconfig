@@ -12,7 +12,6 @@ module.file_ext=.md
 <PROJECT_ROOT>/help
 <PROJECT_ROOT>/help-src
 <PROJECT_ROOT>/images
-<PROJECT_ROOT>/lib
 <PROJECT_ROOT>/notes
 
 [libs]

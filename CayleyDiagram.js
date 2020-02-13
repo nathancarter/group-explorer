@@ -1,5 +1,7 @@
 // @flow
 
+import {THREE} from './lib/externals.js';
+
 import {CayleyDiagramView, createInteractiveCayleyDiagramView} from './js/CayleyDiagramView.js';
 import DiagramDnD from './js/DiagramDnD.js';
 import GEUtils from './js/GEUtils.js';
