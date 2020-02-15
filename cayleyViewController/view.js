@@ -2,7 +2,7 @@
 
 import {Cayley_Diagram_View} from '../CayleyDiagram.js';
 
-export {load, setFromJSON};
+export {load, fromJSON};
 
 const VIEW_PANEL_URL = 'cayleyViewController/view.html';
 
@@ -45,12 +45,12 @@ function setupViewPage() {
  *   show labels/label size
  *   arrowhead placement
  */
-function setFromJSON (jsonData /*: CayleyDiagramJSON */) {
+function fromJSON (jsonData /*: CayleyDiagramJSON */) {
     Object.entries(jsonData).forEach( ([name, value]) => {
         value = Number(value);
         switch (name) {
         case 'line_width':
-           $('#line-thickness').val((value == 1) ? 1 : Math.log(value/4)/0.0734 + 2);
+           $('#line-thickness').val(1 + (value - 1)/0.75);
 	   break;
         case 'sphere_scale_factor':
 	   $('#node-radius').val( 10*Math.log(value) );
@@ -81,14 +81,9 @@ function setZoomLevel() {
    Cayley_Diagram_View[0].zoom_level = zoom_level;
 }
 
-/* Set line thickness from slider value
- *   slider is in range [1,20], maps non-linearly to [1,15] so that:
- *   1 -> 1, using native WebGL line
- *   2 -> [4,15] by 4*exp(0.07*(slider-2)) heuristic, using THREE.js mesh line
- */
 function setLineThickness() {
    const slider_value = Number($('#line-thickness').val());
-   const line_width = (slider_value == 1) ? 1 : 4*Math.exp(0.0734*(slider_value-2));
+   const line_width = 1 + 0.75*(slider_value - 1);
    Cayley_Diagram_View[0].line_width = line_width;
 }
 

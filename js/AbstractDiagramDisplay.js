@@ -5,9 +5,11 @@
  */
 
 // $FlowFixMe -- external module imports described in flow-typed directory
-import {THREE, TrackballControls, MeshLine, MeshLineMaterial} from '../lib/externals.js';
+import {THREE, TrackballControls, Line2, LineMaterial, LineGeometry} from '../lib/externals.js';
 
 /*::
+export type LineType = THREE.Line | Line2;
+
 type SphereData = {
    position: THREE.Vector3,
    color?: css_color,
@@ -22,9 +24,8 @@ export type AbstractDiagramDisplayOptions = {
 */
 
 const DEFAULT_SPHERE_COLOR = '#8c8c8c';  // gray
-const DEFAULT_SPHERE_FACET_COUNT = 20;
 const DEFAULT_LINE_COLOR = 'black';
-const DEFAULT_LINE_WIDTH = 7;
+const DEFAULT_LINE_WIDTH = 4;
 const DEFAULT_CANVAS_HEIGHT = 50;
 const DEFAULT_CANVAS_WIDTH = 50;
 const DEFAULT_LIGHT_POSITIONS = [
@@ -46,11 +47,11 @@ export class AbstractDiagramDisplay {
 
     _fog_level: float;  // in [0,1]
 
-    _sphere_facet_count: integer;
+    sphere_facet_count: integer;
     sphere_base_radius: float;
     _sphere_scale_factor: float;
 
-    _max_webgl_line_width: number;
+    use_fat_lines: boolean;
     _line_width: number;
 */
     /*
@@ -94,6 +95,9 @@ export class AbstractDiagramDisplay {
         // Scene objects
         this.scene.fog = new THREE.Fog();
         this.light_positions = DEFAULT_LIGHT_POSITIONS;
+
+        const scene_diameter = Math.sqrt(this.size.w*this.size.w + this.size.h*this.size.h);
+        this.sphere_facet_count = (scene_diameter < 100) ? 5 : (scene_diameter < 300) ? 10 : 20;
     }
 
     /* 
@@ -181,6 +185,7 @@ export class AbstractDiagramDisplay {
 
     deleteAllObjects () {
         this.deleteAllSpheres();
+        this.deleteAllLines();
     }
 
     getImage () /*: Image */ {
@@ -219,18 +224,18 @@ export class AbstractDiagramDisplay {
      *     place camera on z-axis, y-axis up (x-axis to the right)
      *   Otherwise place camera with y-axis up, offset a bit from
      *     the (1,1,1) vector so that opposite corners don't line up
-     *     and make cubes look flat; look at origina, and adjust camera
+     *     and make cubes look flat; look at origin, and adjust camera
      *     distance so that diagram fills field of view
      */
-    setCameraFromNodes (sphere_data /*: Array<SphereData> */) {
+    setCamera (sphere_positions /*: Array<THREE.Vector3> */) {
         let location, up;
-        if (sphere_data.every( (sphere) => sphere.position.x == 0.0 )) {
+        if (sphere_positions.every( (position) => position.x == 0.0 )) {
             location = new THREE.Vector3(3, 0, 0);
             up = new THREE.Vector3(0, 1, 0);
-        } else if (sphere_data.every( (sphere) => sphere.position.y == 0.0 )) {
+        } else if (sphere_positions.every( (position) => position.y == 0.0 )) {
             location = new THREE.Vector3(0, 3, 0);
             up = new THREE.Vector3(0, 0, -1);
-        } else if (sphere_data.every( (sphere) => sphere.position.z == 0.0 )) {
+        } else if (sphere_positions.every( (position) => position.z == 0.0 )) {
             location = new THREE.Vector3(0, 0, 3);
             up = new THREE.Vector3(0, 1, 0);
         } else {
@@ -238,7 +243,7 @@ export class AbstractDiagramDisplay {
             up = new THREE.Vector3(0, 1, 0);
         }
 
-        const radius = Math.sqrt(Math.max(1, ...sphere_data.map( (sphere) => sphere.position.lengthSq() )));
+        const radius = Math.sqrt(Math.max(1, ...sphere_positions.map( (position) => position.lengthSq() )));
         location.multiplyScalar(radius);
     
         this.camera.position.copy(location);
@@ -256,18 +261,6 @@ export class AbstractDiagramDisplay {
     }
 
     ////////////////////////////   Sphere routines   ////////////////////////////////
-
-    get sphere_facet_count () /*: integer */ {
-        if (this._sphere_facet_count == undefined) {
-            this._sphere_facet_count = DEFAULT_SPHERE_FACET_COUNT;
-        }
-
-        return this._sphere_facet_count;
-    }
-
-    set sphere_facet_count (sphere_facet_count /*: integer */) {
-        this._sphere_facet_count = sphere_facet_count;
-    }
     
     get sphere_scale_factor () /*: float */ {
         if (this._sphere_scale_factor == undefined) {
@@ -314,70 +307,65 @@ export class AbstractDiagramDisplay {
     
     ////////////////////////////   Line routines   ////////////////////////////////
 
-    get max_webgl_line_width () {
-        if (this._max_webgl_line_width == undefined) {
-            const max_line_width =
-                  this.renderer.getContext().getParameter(this.renderer.getContext().ALIASED_LINE_WIDTH_RANGE)[1];
-            this._max_webgl_line_width = max_line_width || 1;
-        }
-
-        return this._max_webgl_line_width;
-    }
-
     get line_width () /*: float */ {
         if (this._line_width == undefined) {
-            this._line_width = DEFAULT_LINE_WIDTH;
+            this._line_width = (this.use_fat_lines) ? DEFAULT_LINE_WIDTH : 1;
         }
 
         return this._line_width;
     }
     
     set line_width (line_width /*: float */) {
-        /* overridden in subclasses */
-        this._line_width = line_width;
-    }
-    
-    // Create a thick or thin THREE line from a geometry
-    createLine (geometry /*: THREE.Geometry */) /*: THREE.Line | THREE.Mesh */ {
-        let material;
-        if (this.line_width <= this.max_webgl_line_width) {
-            material = new THREE.LineBasicMaterial({});
-            material.linewidth = this.line_width;
-        } else {
-            material = new MeshLineMaterial({
-                sizeAttenuation: false,
-                side: THREE.DoubleSide,
-                resolution: new THREE.Vector2(window.innerWidth, window.innerHeight),
-                fog: true,
-            });
-            material.lineWidth = this.line_width;
-        };
-
-        let line;
-        if (material.isLineBasicMaterial) {
-            line = new THREE.Line(geometry, material);
-        } else {
-            const mesh_line = new MeshLine();
-            mesh_line.setGeometry(geometry);
-            line = new THREE.Mesh(mesh_line.geometry, material);
-            line.userData.meshLine = mesh_line;  // needed for raycasting fat lines
-            mesh_line.geometry.userData = line;  // used in DiagramDnD
+        if (this.line_width != line_width) {
+            this._line_width = line_width;
+            const lines = ((this.getGroup('lines').children /*: any */) /*: Array<LineType> */);
+            lines.forEach( (line) => line.material.linewidth = line_width );
         }
+    }
 
+    createLine (vertices /*: Array<THREE.Vector3> */) /*: LineType */ {
+        const new_line = (this.use_fat_lines) ? this.createFatLine(vertices) : this.createWebglLine(vertices);
+        return new_line;
+    }
+
+    createWebglLine (vertices /*: Array<THREE.Vector3> */) /*: THREE.Line */ {
+        const geometry = new THREE.Geometry();
+        geometry.vertices = vertices;
+
+        const material = new THREE.LineBasicMaterial( {
+            linewidth: this.line_width,
+        } );
+            
+        const line = new THREE.Line(geometry, material);
         return line;
     }
 
-    canUpdateLineWidthInPlace (old_width /*: float */, new_width /*: float */) /*: boolean */ {
-        return (new_width <= this.max_webgl_line_width && old_width <= this.max_webgl_line_width)
-            || (new_width > this.max_webgl_line_width && old_width > this.max_webgl_line_width);
+    // Create a fat line from an array of vertices
+    createFatLine (vertices /*: Array<THREE.Vector3> */) /*: LineType */ {
+        const geometry = new LineGeometry();
+        geometry.setPositions( vertices.reduce(
+            (positions, vertex) => (positions.push(vertex.x, vertex.y, vertex.z), positions),
+            [] ) );
+
+        const material = new LineMaterial( {
+            linewidth: this.line_width,
+            resolution:  new THREE.Vector2(window.innerWidth, window.innerHeight),
+        } );
+            
+        const line = new Line2( geometry, material );
+        return line;
     }
 
-    updateLineWidthInPlace (new_width /*: float */) {
-        const lines = ((this.getGroup('lines').children /*: any */) /*: Array<THREE.Mesh | THREE.Line> */);
-        if (new_width <= this.max_webgl_line_width) {
-            lines.forEach( (line) => ((line.material /*: any */) /*: THREE.LineBasicMaterial */).linewidth = new_width );
-        } else {
-            lines.forEach( (line) => ((line.material /*: any */) /*: MeshLineMaterial */).lineWidth = new_width );
-        }
+    deleteAllLines () {
+        this.deleteLines( ((this.getGroup('lines').children /*: any */) /*: Array<LineType> */) );
+    }
+
+    deleteLines (lines /*: Array<LineType> */) {
+        // dispose of all geometries, materials;
+        lines.forEach( (line) => {
+            line.geometry.dispose();
+            line.material.dispose();  // FIXME: should we do this for fat lines?
+        } );
+        this.getGroup('lines').remove(...lines);
     }
 }

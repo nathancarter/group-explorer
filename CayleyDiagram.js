@@ -105,6 +105,7 @@ function completeSetup(diagram_name /*: ?string */) {
    // Create graphic context
    Cayley_Diagram_View[0] = createInteractiveCayleyDiagramView({container: $('#graphic')});
    Cayley_Diagram_View[0].setDiagram(Group[0], diagram_name);
+   CVC.fromJSON(Cayley_Diagram_View[0].toJSON());
    DnD_handler = new DiagramDnD(Cayley_Diagram_View[0]);
    DC.setup();
 
@@ -133,6 +134,8 @@ function completeSetup(diagram_name /*: ?string */) {
    if ( Group[0].URL ) $( '#find-group' ).hide();
 }
 
+// FIXME: can this be invoked more than once with 'external' message?
+//   (what if there are two editors around?)
 function receiveInitialSetup (event /*: MessageEvent */) {
    if (event.data == undefined)
       return;
@@ -141,7 +144,7 @@ function receiveInitialSetup (event /*: MessageEvent */) {
    if (event_data.source == 'external') {
       const json_data = event_data.json;
       Cayley_Diagram_View[0].fromJSON(json_data);
-      CVC.setFromJSON(json_data);
+      CVC.fromJSON(json_data);
       DC.update();
       window.postMessage( STATE_LOADED_MESSAGE, myDomain );
       VC.enableChangeBroadcast(() => Cayley_Diagram_View[0].toJSON());
