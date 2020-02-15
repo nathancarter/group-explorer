@@ -410,8 +410,8 @@ export class SheetElement {
     viewElement: HTMLElement;
     editElement: HTMLElement;
     buttons: JQuery;  // JQuery for SheetElement buttons
-    zBeforeEdit: string;
-    bgBeforeEdit: color;
+    zBeforeEdit: ?string;
+    bgBeforeEdit: ?color;
     _extra_json: Obj;
  */
     // The parameter must be a SheetModel that will contain this.
@@ -523,12 +523,13 @@ export class SheetElement {
         $( this.htmlEditElement() ).hide();
         const $wrapper = (($( this.htmlViewElement().parentElement ) /*: any */) /*: JQueryDnD */);
         $wrapper.unpauseDragAndResize();
-        if ( this.hasOwnProperty( 'zBeforeEdit' ) ) {
+        if ( this.zBeforeEdit != undefined ) {
             $wrapper.css( 'z-index', this.zBeforeEdit );
             delete this.zBeforeEdit;
         }
-        if ( this.hasOwnProperty( 'bgBeforeEdit' ) ) {
-            $( this.htmlEditElement() ).css( 'background-color', this.bgBeforeEdit );
+        const bgBeforeEdit = this.bgBeforeEdit;
+        if ( bgBeforeEdit != undefined ) {
+            $( this.htmlEditElement() ).css( 'background-color', bgBeforeEdit );
             delete this.bgBeforeEdit;
         }
         this.model.drawOverlay(); // hide/show morphism arrows
@@ -849,7 +850,8 @@ export class VisualizerElement/*:: < VizObjType, VizDispJSON: Obj, VizDispType: 
             var $wrapper = $( that.htmlViewElement().parentElement );
             if ( !$wrapper[0] ) return;
             $wrapper[0].removeChild( that.htmlViewElement() );
-            delete that.viewElement; // forces recreation in next line
+            // $FlowFixMe -- flow complains that this.viewElement = undefined, but it's recreated in the next line
+            delete that.viewElement;
             $wrapper.append( that.htmlViewElement() );
         }, 0 );
     }
