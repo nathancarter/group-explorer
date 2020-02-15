@@ -48,16 +48,16 @@ export class CayleyGeneratorFromStrategy /*:: implements CayleyDiagramGenerator 
             strategy_parameters = this.generateStrategy();
         }
 
-        // nothing to do if strategey_parameters == []
-        if (strategy_parameters.length == 0) {
-            return;
-        }
-
         // create strategies from strategy parameters
         this.strategies = strategy_parameters.map(
             ({generator, layout, direction, nestingLevel}) =>
                 new STRATEGY_BY_LAYOUT[layout](generator, direction, nestingLevel)
         );
+
+        // nothing to do if this.strategies == [] (e.g., Trivial group) -- just return
+        if (this.strategies.length == 0) {
+            return;
+        }
 
         // make node tree according to generators
         this.node_tree = this.generateTree();
