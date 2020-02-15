@@ -39,6 +39,8 @@ input[type=range]::-webkit-slider-runnable-track {
     height: 4px;
 }
 input[type=range]::-moz-range-track {
+    background: #c9c9c9;
+    height: 4px;
 }
 input[type=range]::-ms-track {
     background: #c9c9c9;
