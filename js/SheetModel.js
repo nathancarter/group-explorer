@@ -1206,7 +1206,11 @@ export class ConnectingElement/*:: <TerminalType: SheetElement> */ extends Sheet
     }
     // This is shown as a canvas, which we will draw a diagonal line on whenenver
     // this element is repositioned/resized.
-    createHtmlViewElement () /*: HTMLCanvasElement */ { return (($( '<canvas></canvas>' )[0] /*: any */) /*: HTMLCanvasElement */); }
+    createHtmlViewElement () /*: HTMLCanvasElement */ {
+        const html = 
+              '<canvas style="top: inherit; left: inherit; right: inherit; width: inherit; height: inherit"></canvas>';
+        return (($( html )[0] /*: any */) /*: HTMLCanvasElement */);
+    }
     // when editing, use one input for each defining feature
     createHtmlEditElement () /*: HTMLElement */ {
         return $(
