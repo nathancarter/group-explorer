@@ -524,6 +524,8 @@ export class CayleyDiagramView extends AbstractDiagramDisplay  /*:: implements V
             label.center = new THREE.Vector2(-0.045/label_scale_factor, 0.30 - 0.72/label_scale_factor);
             label.position.copy(node.position);
 
+            sphere.userData.label = label;
+
             label_group.add(label);
         } )
     }
