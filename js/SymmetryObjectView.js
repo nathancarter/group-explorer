@@ -68,15 +68,16 @@ export class SymmetryObjectView extends AbstractDiagramDisplay {
 
 ////////////////////////////   Factory Functions   ////////////////////////////////
 
-export function createInteractiveSymmetryObjectView(options /*: SymmetryObjectViewOptions */) {
-    const display = new SymmetryObjectView(Object.assign({}, {trackballControlled: true}, options));
+export function createInteractiveSymmetryObjectView(options /*: SymmetryObjectViewOptions */ = {}) {
+    const display = new SymmetryObjectView(options);
     display.use_fat_lines = true;
-    display.render();
+    display.enableTrackballControl();
+    display.beginAnimation();
     return display;
 }
 
-export function createStaticSymmetryObjectView(options /*: SymmetryObjectViewOptions */) {
-    const display = new SymmetryObjectView(Object.assign({}, {trackballControlled: false}, options));
+export function createStaticSymmetryObjectView(options /*: SymmetryObjectViewOptions */ = {}) {
+    const display = new SymmetryObjectView(options);
     display.use_fat_lines = false;
     return display;
 }

@@ -12,7 +12,7 @@ export default class DiagramChoice {
    /* Populate diagram select element, show selected diagram */
    static setupDiagramSelect() {
       $('#diagram-choices').html(eval(Template.HTML('diagram-select-first-template'))).hide();
-      Group[0].cayleyDiagrams.forEach( (diagram, index) => {
+      Group.cayleyDiagrams.forEach( (diagram, index) => {
          $('#diagram-choices').append(eval(Template.HTML('diagram-select-other-template'))).hide();
       } );
       DC.DiagramChoice._showChoice();
@@ -20,7 +20,7 @@ export default class DiagramChoice {
 
    static _showChoice() {
       $('#diagram-choices').hide();
-      const index = Group[0].cayleyDiagrams.findIndex( (cd) => cd.name == Cayley_Diagram_View[0].diagram_name );
+      const index = Group.cayleyDiagrams.findIndex( (cd) => cd.name == Cayley_Diagram_View.diagram_name );
       $('#diagram-choice')
          .html($(`#diagram-choices > li:nth-of-type(${index+2})`).html())
          .show();
@@ -36,7 +36,7 @@ export default class DiagramChoice {
 
    static selectDiagram(diagram /*: ?string */, andDisplay /*:: ?: boolean */ = true) {
       $('#bodyDouble').click();
-      Cayley_Diagram_View[0].setDiagram(Group[0], diagram);
+      Cayley_Diagram_View.setDiagram(Group, diagram);
       DC.Chunking.enable();
       DC.DiagramChoice._showChoice();
       DC.update();

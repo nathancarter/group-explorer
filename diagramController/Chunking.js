@@ -12,15 +12,15 @@ import * as DC from './diagram.js';
 export default class Chunking {
    static updateChunkingSelect() {
       // check that first generator is innermost, second is middle, etc.
-      const generator = ((Cayley_Diagram_View[0].generator /*: any */) /*: CayleyGeneratorFromStrategy */);
-      if (   Cayley_Diagram_View[0].isGenerated
+      const generator = ((Cayley_Diagram_View.generator /*: any */) /*: CayleyGeneratorFromStrategy */);
+      if (   Cayley_Diagram_View.isGenerated
           && generator.strategies.every( (strategy, inx) => strategy.nesting_level == inx ) ) {
          DC.Chunking.enable();
 
          $('#chunk-choices').html(eval(Template.HTML('chunk-select-first-template')));
          generator.strategies.slice(0, -1).reduce( (generators, strategy, inx) => {
-            generators.push(Group[0].representation[strategy.generator]);
-            const subgroup_index = Group[0].subgroups.findIndex( (subgroup) => subgroup.members.equals(strategy.elements) );
+            generators.push(Group.representation[strategy.generator]);
+            const subgroup_index = Group.subgroups.findIndex( (subgroup) => subgroup.members.equals(strategy.elements) );
             $('#chunk-choices').append(eval(Template.HTML('chunk-select-other-template')));
             return generators;
          }, [] );
@@ -42,11 +42,11 @@ export default class Chunking {
    static selectChunk(subgroup_index /*: number */) {
       if (DC.Chunking.isDisabled()) return;
       $('#bodyDouble').click();
-      const generator = ((Cayley_Diagram_View[0].generator /*: any */) /*: CayleyGeneratorFromStrategy */);
-      const subgroup_members = Group[0].subgroups[subgroup_index].members;
+      const generator = ((Cayley_Diagram_View.generator /*: any */) /*: CayleyGeneratorFromStrategy */);
+      const subgroup_members = Group.subgroups[subgroup_index].members;
       const strategy_index = generator.strategies.findIndex( (strategy) => strategy.elements.equals(subgroup_members) );
       $('#chunk-choice').html($(`#chunk-choices > li:nth-of-type(${strategy_index + 2})`).html());
-      Cayley_Diagram_View[0].chunk = (strategy_index == -1) ? 0 : subgroup_index;
+      Cayley_Diagram_View.chunk = (strategy_index == -1) ? 0 : subgroup_index;
    }
 
    static enable() {
@@ -55,8 +55,8 @@ export default class Chunking {
    }
 
    static disable() {
-      if (Cayley_Diagram_View[0].isGenerated) {
-         const generator = ((Cayley_Diagram_View[0].generator /*: any */) /*: CayleyGeneratorFromStrategy */);
+      if (Cayley_Diagram_View.isGenerated) {
+         const generator = ((Cayley_Diagram_View.generator /*: any */) /*: CayleyGeneratorFromStrategy */);
          generator.chunk = 0;
       }
 

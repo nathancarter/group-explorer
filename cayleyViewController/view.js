@@ -78,32 +78,32 @@ function fromJSON (jsonData /*: CayleyDiagramJSON */) {
 /* Slider handlers */
 function setZoomLevel() {
    const zoom_level = Math.exp( Number($('#zoom-level').val())/10 );
-   Cayley_Diagram_View[0].zoom_level = zoom_level;
+   Cayley_Diagram_View.zoom_level = zoom_level;
 }
 
 function setLineThickness() {
    const slider_value = Number($('#line-thickness').val());
    const line_width = 1 + 0.75*(slider_value - 1);
-   Cayley_Diagram_View[0].line_width = line_width;
+   Cayley_Diagram_View.line_width = line_width;
 }
 
 function setNodeRadius() {
    const sphere_scale_factor = Math.exp( Number($('#node-radius').val())/10 );
-   Cayley_Diagram_View[0].sphere_scale_factor = sphere_scale_factor;
+   Cayley_Diagram_View.sphere_scale_factor = sphere_scale_factor;
 }
 
 function setFogLevel() {
    const fog_level = $('#use-fog').is(':checked') ? Number($('#fog-level').val())/10 : 0;
-   Cayley_Diagram_View[0].fog_level = fog_level;
+   Cayley_Diagram_View.fog_level = fog_level;
 }
 
 function setLabelSize() {
    const label_scale_factor = $('#show-labels').is(':checked') ? Math.exp( Number($('#label-size').val())/10 ) : 0;
-   Cayley_Diagram_View[0].label_scale_factor = label_scale_factor;
+   Cayley_Diagram_View.label_scale_factor = label_scale_factor;
 }
 
 function setArrowheadPlacement() {
    const arrowhead_placement = Number($('#arrowhead-placement').val())/20;
-   Cayley_Diagram_View[0].arrowhead_placement = arrowhead_placement;
+   Cayley_Diagram_View.arrowhead_placement = arrowhead_placement;
 }
 

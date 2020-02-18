@@ -19,7 +19,6 @@ export type AbstractDiagramDisplayOptions = {
    container?: JQuery,
    width?: number,
    height?: number,
-   trackballControlled?: boolean,
 };
 */
 
@@ -77,13 +76,7 @@ export class AbstractDiagramDisplay {
         this.size = (options.container != undefined)
               ? {w: $(options.container).width(), h: $(options.container).height()}
               : {w: options.width || DEFAULT_CANVAS_WIDTH, h: options.height || DEFAULT_CANVAS_HEIGHT};
-
-        // Controls
-        if (this.container != undefined && options.trackballControlled) {
-            this.control = new TrackballControls(this.camera, this.container);
-            this.control.dynamicDampingFactor = 1.0;
-        }
-        
+       
         // Create new Scene
         this.scene = new THREE.Scene();
         ABSTRACT_DIAGRAM_DISPLAY_GROUP_NAMES.forEach( (name) => {
@@ -115,6 +108,18 @@ export class AbstractDiagramDisplay {
 
     get container () /*: HTMLElement */ {
         return ((this.renderer.domElement.parentElement /*: any */) /*: HTMLElement */);
+    }
+
+    enableTrackballControl (container /*: ?HTMLElement */) {
+        if (container != undefined) {
+            container.append(this.renderer.domElement);
+            this.resize();
+        }
+
+        if (this.container != undefined) {
+            this.control = new TrackballControls(this.camera, this.container);
+            this.control.dynamicDampingFactor = 1.0;
+        }
     }
 
     get fog_level () {
@@ -196,10 +201,12 @@ export class AbstractDiagramDisplay {
     }
 
     // Render graphics, recursing to animate
-    render () {
+    beginAnimation () {
         this.renderer.render(this.scene, this.camera);
-        window.requestAnimationFrame( () => this.render() );
-        this.control.update();
+        if (this.control != undefined) {
+            window.requestAnimationFrame( () => this.beginAnimation() );
+            this.control.update();
+        }
     }
 
     // Resize the 3D scene from the freshly re-sized graphic

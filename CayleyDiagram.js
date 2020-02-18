@@ -27,17 +27,11 @@ import type {CayleyDiagramJSON} from './js/CayleyDiagramView.js';
 import type {MSG_external, MSG_editor} from './js/SheetModel.js';
 */
 
-/* Exported module variables */
-const Group			/*: Array<XMLGroup> */ = [];		// group about which information will be displayed
-const Cayley_Diagram_View	/*: Array<CayleyDiagramView> */ = [];	// display for large diagram
-
-export {Group, Cayley_Diagram_View};
-
 /* Module variables */
-let DnD_handler      /*: DiagramDnD */;			// drag-and-drop, tooltip handler for large diagram
-
+export let Group /*: XMLGroup */ = new XMLGroup();  // group about which information is displayed
+export const Cayley_Diagram_View /*: CayleyDiagramView */ = createInteractiveCayleyDiagramView();
+const DnD_handler /*: DiagramDnD */ = new DiagramDnD(Cayley_Diagram_View);  // drag-and-drop handler for large diagram
 const HELP_PAGE /*: string */ = 'help/rf-um-cd-options/index.html';
-
 const myDomain = new URL(window.location.href).origin;
 
 /* Register static event managers (called after document is assembled) */
@@ -56,7 +50,7 @@ function loadGroup() {
    Library
       .loadFromURL()
       .then( (group) => {
-         Group[0] = group;
+         Group = group;
          let diagram_name = new URL(window.location.href).searchParams.get('diagram');
          if (   diagram_name != undefined
              && group.cayleyDiagrams.find( (cayleyDiagram) => cayleyDiagram.name == diagram_name) == undefined) {
@@ -70,7 +64,7 @@ function loadGroup() {
 
 // Load visualizer framework around visualizer-specific code in this file
 function loadVisualizerFramework(diagram_name /*: ?string */) {
-   VC.load(Group[0], HELP_PAGE)
+   VC.load(Group, HELP_PAGE)
       .then( () => {
          preloadMathMLCache(diagram_name);
       } )
@@ -78,7 +72,7 @@ function loadVisualizerFramework(diagram_name /*: ?string */) {
 }
 
 function preloadMathMLCache (diagram_name /*: ?string */) {
-   MathML.preload(Group[0])
+   MathML.preload(Group)
       .then( () => loadPanels(diagram_name) )
       .catch( Log.err )
 }
@@ -89,7 +83,7 @@ function loadPanels (diagram_name /*: ?string */) {
       {handler: highlightByRingAroundNode, label: 'Ring around node'},
       {handler: highlightBySquareAroundNode, label: 'Square around node'}
    ];
-   const subset_display_load = SSD.load($('#subset-control'), highlighters, clearHighlights, Group[0]);
+   const subset_display_load = SSD.load($('#subset-control'), highlighters, clearHighlights, Group);
    const view_controller_load = CVC.load($('#view-control'));
    const diagram_controller_load = DC.load($('#diagram-control'));
    Promise.all([subset_display_load, view_controller_load, diagram_controller_load])
@@ -99,14 +93,16 @@ function loadPanels (diagram_name /*: ?string */) {
 
 /* Now that all the static HTML is loaded, complete the setup */
 function completeSetup(diagram_name /*: ?string */) {
+   // Draw Cayley diagram in main panel, but don't animate it yet
+   Cayley_Diagram_View.enableTrackballControl($('#graphic')[0]);
+   Cayley_Diagram_View.setDiagram(Group, diagram_name);
+
    // Create header from group name and queue MathJax to typeset it
-   $('#header').html(MathML.sans('<mtext>Cayley Diagram for&nbsp;</mtext>' + Group[0].name));
+   $('#header').html(MathML.sans('<mtext>Cayley Diagram for&nbsp;</mtext>' + Group.name));
 
    // Create graphic context
-   Cayley_Diagram_View[0] = createInteractiveCayleyDiagramView({container: $('#graphic')});
-   Cayley_Diagram_View[0].setDiagram(Group[0], diagram_name);
-   CVC.fromJSON(Cayley_Diagram_View[0].toJSON());
-   DnD_handler = new DiagramDnD(Cayley_Diagram_View[0]);
+   Cayley_Diagram_View.beginAnimation();
+   CVC.fromJSON(Cayley_Diagram_View.toJSON());
    DC.setup();
 
    // Register the splitter with jquery-resizable
@@ -114,7 +110,7 @@ function completeSetup(diagram_name /*: ?string */) {
       handleSelector: '#splitter',
       resizeHeight: false,
       resizeWidthFrom: 'left',
-      onDrag: () => Cayley_Diagram_View[0].resize(),
+      onDrag: () => Cayley_Diagram_View.resize(),
    });
 
    // Register event handlers
@@ -131,7 +127,7 @@ function completeSetup(diagram_name /*: ?string */) {
    window.parent.postMessage( LISTENER_READY_MESSAGE, '*' );
 
    // No need to keep the "find group" icon visible if the group was loaded from a URL
-   if ( Group[0].URL ) $( '#find-group' ).hide();
+   if ( Group.URL ) $( '#find-group' ).hide();
 }
 
 // FIXME: can this be invoked more than once with 'external' message?
@@ -143,11 +139,11 @@ function receiveInitialSetup (event /*: MessageEvent */) {
    const event_data /*: MSG_external<CayleyDiagramJSON> */ = (event.data /*: any */);
    if (event_data.source == 'external') {
       const json_data = event_data.json;
-      Cayley_Diagram_View[0].fromJSON(json_data);
+      Cayley_Diagram_View.fromJSON(json_data);
       CVC.fromJSON(json_data);
       DC.update();
       window.postMessage( STATE_LOADED_MESSAGE, myDomain );
-      VC.enableChangeBroadcast(() => Cayley_Diagram_View[0].toJSON());
+      VC.enableChangeBroadcast(() => Cayley_Diagram_View.toJSON());
       setInterval( () => VC.broadcastChange(), 1000);
    } else if (   event_data.source == 'editor'
                  || ((event.data /*: any */) /*: string */) == LISTENER_READY_MESSAGE
@@ -165,7 +161,7 @@ function resizeBody() {
    $('body').height(window.innerHeight);
    $('body').width(window.innerWidth);
 
-   Cayley_Diagram_View[0].resize();
+   Cayley_Diagram_View.resize();
 };
 
 
@@ -250,11 +246,11 @@ class Tooltip {
    }
 
    static getObjectIDsAtLocation(location /*: eventLocation */) /*: Array<THREE.Object3D> */ {
-      const $graphic = $('#graphic'); // Cayley_Diagram_View[0].renderer.domElement;
+      const $graphic = $('#graphic'); // Cayley_Diagram_View.renderer.domElement;
       const bounding_box = $graphic[0].getBoundingClientRect();
       const x = ( (location.clientX - bounding_box.left) / $graphic.width()) * 2 - 1;
       const y = -( (location.clientY - bounding_box.top) / $graphic.height()) * 2 + 1;
-      const objects = Cayley_Diagram_View[0].getObjectsAtPoint(x, y);
+      const objects = Cayley_Diagram_View.getObjectsAtPoint(x, y);
       return objects;
    }
 
@@ -281,17 +277,17 @@ class Tooltip {
 
 /* Highlighting routines */
 function highlightByNodeColor(elements /*: Array<Array<groupElement>> */) {
-   Cayley_Diagram_View[0].drawColorHighlights(elements);
+   Cayley_Diagram_View.drawColorHighlights(elements);
 }
 
 function highlightByRingAroundNode(elements /*: Array<Array<groupElement>> */) {
-   Cayley_Diagram_View[0].drawRingHighlights(elements);
+   Cayley_Diagram_View.drawRingHighlights(elements);
 }
 
 function highlightBySquareAroundNode(elements /*: Array<Array<groupElement>> */) {
-   Cayley_Diagram_View[0].drawSquareHighlights(elements);
+   Cayley_Diagram_View.drawSquareHighlights(elements);
 }
 
 function clearHighlights() {
-   Cayley_Diagram_View[0].clearHighlights();
+   Cayley_Diagram_View.clearHighlights();
 }

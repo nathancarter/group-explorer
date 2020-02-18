@@ -53,7 +53,7 @@ export default class Arrow {
       // returns an HTML string with a list element for each arrow that can be added to the arrow-list
       const makeArrowList = () /*: html */ => {
          const template = Template.HTML('arrow-menu-item-template');
-         const result = Group[0].elements
+         const result = Group.elements
                .reduce( (list, element) => {
                   // not the identity and not already displayed
                   if (element != 0 && $(`#arrow-list li[arrow=${element}]`).length == 0) {
@@ -77,7 +77,7 @@ export default class Arrow {
    //   Update lines, arrowheads in graphic, arrow-list
    static addArrow(element /*: number */) {
       GEUtils.cleanWindow();
-      Cayley_Diagram_View[0].addArrows([element]);
+      Cayley_Diagram_View.addArrows([element]);
       DC.Arrow.updateArrows();
    }
 
@@ -88,7 +88,7 @@ export default class Arrow {
    //   Update lines in graphic, arrow-list
    static removeArrow(element /*: number */) {
       $('#remove-arrow-button').prop('disabled', true);
-      Cayley_Diagram_View[0].removeArrows([element]);
+      Cayley_Diagram_View.removeArrows([element]);
       DC.Arrow.updateArrows()
    }
 
@@ -101,7 +101,7 @@ export default class Arrow {
       // ES6 introduces a Set, but does not provide any way to change the notion of equality among set members
       // Here we work around that by joining a generator value from the line.arrow attribute ("27") and a color ("#99FFC1")
       //   into a unique string ("27#99FFC1") in the Set, then partitioning the string back into an element and a color part
-      const arrow_hashes = new Set(Cayley_Diagram_View[0].arrows.map(
+      const arrow_hashes = new Set(Cayley_Diagram_View.arrows.map(
           (arrow) => '' + arrow.generator.toString() + '#' + (new THREE.Color(arrow.color).getHexString())
       ));
       arrow_hashes.forEach( (hash) => {
@@ -109,7 +109,7 @@ export default class Arrow {
          const color = hash.slice(-7);
          $('#arrow-list').append(eval(Template.HTML('arrow-list-item-template')));  // make entry in arrow-list
       } );
-      if (arrow_hashes.size == Group[0].order - 1) {  // can't make an arrow out of the identity
+      if (arrow_hashes.size == Group.order - 1) {  // can't make an arrow out of the identity
          DC.Arrow.disable()
       } else {
          DC.Arrow.enable()
