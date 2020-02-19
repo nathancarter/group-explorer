@@ -46,15 +46,23 @@
        window.addEventListener('load', load, {once: true});
       </script>
    </head>
-   <body class="vert">
-      <div id="subset-control" class="fill-vert">
-         <!-- This is filled in by subsetDisplay/subsets.html -->
-      </div>
-
-      <template id="node-label-template">
-         <div id="node-label" class="tooltip remove-on-clean">
-            ${MathML.sans(group.representation[element])}
+   <body>
+      <div id="bodyDouble" class="vert">
+         <div id="header" class="horiz"></div>
+         <div id="horiz-container" class="horiz">
+            <div id="graphic"></div>
+            <div id="splitter"></div>
+            <div id="vert-container" class="vert">
+               <div id="subset-control" class="fill-vert">
+                  <!-- This is filled in by subsetDisplay/subsets.html -->
+               </div>
+               <template id="node-label-template">
+                  <div id="node-label" class="tooltip remove-on-clean">
+                     ${MathML.sans(group.representation[element])}
+                  </div>
+               </template>
+            </div>
          </div>
-      </template>
+      </div>
    </body>
 </html>

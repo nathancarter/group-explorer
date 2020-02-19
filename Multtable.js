@@ -18,7 +18,7 @@ export {broadcastChange} from './visualizerFramework/visualizer.js';
 // $FlowFixMe -- external module imports described in flow-typed directory
 import {THREE} from './lib/externals.js';
 
-export {loadGroup as load};
+export {load};
 
 /*::
 import type {MulttableJSON} from './js/MulttableView.js';
@@ -58,33 +58,20 @@ function registerCallbacks() {
    $('#separation-slider')[0].addEventListener('input', separation);
 }
 
-// Load group from invocation URL
-function loadGroup() {
+// Load group from invocation URL, then preload MathML cache, then complete setup
+function load() {
    Library
       .loadFromURL()
       .then( (_group) => {
          Group = _group;
-         loadVisualizerFramework();
+         MathML.preload(Group)
+            .then( () => completeSetup() )
+            .catch( Log.err );
       } )
       .catch( Log.err );
 }
 
-// Load visualizer framework around visualizer-specific code in this file
-function loadVisualizerFramework() {
-   VC.load(Group, HELP_PAGE)
-      .then( () => {
-         preloadMathMLCache();
-      } )
-      .catch( Log.err );
-}
-
-function preloadMathMLCache() {
-   MathML.preload(Group)
-      .then( () => loadSubsetDisplay() )
-      .catch( Log.err )
-}
-
-function loadSubsetDisplay() {
+function completeSetup() {
    const highlighters = [
       {handler: highlightByBackground, label: 'Background'},
       {handler: highlightByBorder, label: 'Border'},
@@ -92,11 +79,7 @@ function loadSubsetDisplay() {
    ];
    // Load subset display, and complete setup
    SSD.load($('#subset-control'), highlighters, clearHighlights, Group);
-   completeSetup();
-}
 
-/* Now that subsetDisplay is loaded, complete the setup */
-function completeSetup() {
    // Create header from group name
    $('#header').html(MathML.sans('<mtext>Multiplication Table for&nbsp;</mtext>' + Group.name));
 
@@ -108,11 +91,13 @@ function completeSetup() {
       const option /*: html */ =  eval(Template.HTML('organization-choice-template'));
       $('#organization-choices').append(option);
    }
-   MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'organization-choices'],
-                     () => {
-                        $('#organization-choice').html($('#organization-choices > li:first-of-type').html());
-                        $('#organization-choices').hide();
-                     });
+   MathJax.Hub.Queue(
+      ['Typeset', MathJax.Hub, 'organization-choices'],
+      () => {
+         $('#organization-choice').html($('#organization-choices > li:first-of-type').html());
+         $('#organization-choices').hide();
+      }
+   );
 
    // Draw Multtable in graphic
    Multtable_View = createFullMulttableView({container: $('#graphic')});
@@ -141,8 +126,8 @@ function completeSetup() {
    // or if any external program is using GE as a service, let it know we're ready, too
    window.parent.postMessage( LISTENER_READY_MESSAGE, '*' );
 
-   // No need to keep the "find group" icon visible if the group was loaded from a URL
-   if ( Group.URL ) $( '#find-group' ).hide();
+   // Load icon strip in upper right-hand corner
+   VC.load(Group, HELP_PAGE);
 }
 
 function receiveInitialSetup (event /*: MessageEvent */) {

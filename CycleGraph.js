@@ -15,7 +15,7 @@ import * as VC from './visualizerFramework/visualizer.js';
 
 export {broadcastChange} from './visualizerFramework/visualizer.js';
 
-export {loadGroup as load};
+export {load};
 
 /*::
 import type {CycleGraphJSON} from './js/CycleGraphView.js';
@@ -43,45 +43,30 @@ function registerCallbacks() {
    LargeGraphic.init();
 }
 
-// Load group from invocation URL
-function loadGroup() {
+// Load group from invocation URL, then preload MathML cache, then complete setup
+function load() {
    Library
       .loadFromURL()
       .then( (_group) => {
          group = _group;
-         loadVisualizerFramework();
+         MathML.preload(group)
+            .then( () => completeSetup() )
+            .catch( Log.err );
       } )
       .catch( Log.err );
 }
 
-// Load visualizer framework around visualizer-specific code in this file
-function loadVisualizerFramework() {
-   VC.load(group, HELP_PAGE)
-      .then( () => {
-         preloadMathMLCache();
-      } )
-      .catch( Log.err );
-}
-
-function preloadMathMLCache() {
-   MathML.preload(group)
-      .then( () => loadSubsetDisplay() )
-      .catch( Log.err )
-}
-
-function loadSubsetDisplay() {
+// Complete setup functions that depend on the Group and the MathML cache
+function completeSetup() {
+   // This just starts building the subset display -- no need to wait until it completes
    const highlighters = [
       {handler: highlightByBackground, label: 'Background'},
       {handler: highlightByBorder, label: 'Border'},
       {handler: highlightByTop, label: 'Top'}
    ];
    SSD.load($('#subset-control'), highlighters, clearHighlights, group);
-   completeSetup();
-}
 
-/* Now that subsetDisplay is loaded, complete the setup */
-function completeSetup() {
-   // Create header from group name and queue MathJax to typeset it
+   // Create header from group name
    $('#header').html(MathML.sans('<mtext>Cycle Graph for&nbsp;</mtext>' + group.name));
 
    // Create Cycle Graph, graphic context (it will be displayed in resizeBody below)
@@ -109,8 +94,8 @@ function completeSetup() {
    // or if any external program is using GE as a service, let it know we're ready, too
    window.parent.postMessage( LISTENER_READY_MESSAGE, '*' );
 
-   // No need to keep the "find group" icon visible if the group was loaded from a URL
-   if ( group.URL ) $( '#find-group' ).hide();
+   // Load icon strip in upper right-hand corner
+   VC.load(group, HELP_PAGE);
 }
 
 function receiveInitialSetup (event /*: MessageEvent */) {

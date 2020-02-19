@@ -54,23 +54,32 @@
        window.addEventListener('load', load, {once: true});
       </script>
    </head>
-   <body class="vert">
-      <div id="control-options" class="horiz">
-         <button id="subset-button">Subsets</button>
-         <button id="view-button">View</button>
-         <button id="diagram-button">Diagram</button>
-      </div>
+   <body>
+      <div id="bodyDouble" class="vert">
+         <div id="header" class="horiz"></div>
+         <div id="horiz-container" class="horiz">
+            <div id="graphic"></div>
+            <div id="splitter"></div>
+            <div id="vert-container" class="vert">
+               <div id="control-options" class="horiz">
+                  <button id="subset-button">Subsets</button>
+                  <button id="view-button">View</button>
+                  <button id="diagram-button">Diagram</button>
+               </div>
 
-      <div id="subset-control" class="fill-vert">
-         <!-- This is filled in by subsetDisplay/subsets.html -->
-      </div>
+               <div id="subset-control" class="fill-vert">
+                  <!-- This is filled in by subsetDisplay/subsets.html -->
+               </div>
 
-      <div id="view-control" class="vert fill-vert control">
-         <!-- This is filled in by cayleyViewController/view.html -->
-      </div>
+               <div id="view-control" class="vert fill-vert control">
+                  <!-- This is filled in by cayleyViewController/view.html -->
+               </div>
 
-      <div id="diagram-control" class="fill-vert control">
-         <!-- This is filled in by diagramController/diagram.html -->
+               <div id="diagram-control" class="fill-vert control">
+                  <!-- This is filled in by diagramController/diagram.html -->
+               </div>
+            </div>
+         </div>
       </div>
    </body>
 

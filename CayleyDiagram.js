@@ -20,11 +20,11 @@ import * as DC from './diagramController/diagram.js';
 import * as VC from './visualizerFramework/visualizer.js';
 export {broadcastChange} from './visualizerFramework/visualizer.js';
 
-export {loadGroup as load};
+export {load};
 
 /*::
 import type {CayleyDiagramJSON} from './js/CayleyDiagramView.js';
-import type {MSG_external, MSG_editor} from './js/SheetModel.js';
+import type {MSG_external} from './js/SheetModel.js';
 */
 
 /* Module variables */
@@ -45,63 +45,48 @@ function registerCallbacks() {
    Tooltip.init();
 }
 
-// Load group from invocation URL
-function loadGroup() {
+// Load group from invocation URL, then preload MathML cache, find diagram name if there is one, and complete setup
+function load() {
    Library
       .loadFromURL()
       .then( (group) => {
          Group = group;
-         let diagram_name = new URL(window.location.href).searchParams.get('diagram');
-         if (   diagram_name != undefined
-             && group.cayleyDiagrams.find( (cayleyDiagram) => cayleyDiagram.name == diagram_name) == undefined) {
-            Log.err(`group ${group.shortName} has no Cayley diagram named ${diagram_name} -- generating diagram instead`);
-            diagram_name = undefined;
-         }
-         loadVisualizerFramework(diagram_name);
+         MathML.preload(Group)
+            .then( () => {
+               let diagram_name = new URL(window.location.href).searchParams.get('diagram');
+               if (   diagram_name != undefined
+                      && group.cayleyDiagrams.find( (cayleyDiagram) => cayleyDiagram.name == diagram_name) == undefined) {
+                  Log.err(`group ${group.shortName} has no Cayley diagram named ${diagram_name} -- generating diagram instead`);
+                  diagram_name = undefined;
+               }
+               completeSetup(diagram_name)
+            } )
+            .catch( Log.err );
       } )
       .catch( Log.err );
 }
 
-// Load visualizer framework around visualizer-specific code in this file
-function loadVisualizerFramework(diagram_name /*: ?string */) {
-   VC.load(Group, HELP_PAGE)
-      .then( () => {
-         preloadMathMLCache(diagram_name);
-      } )
-      .catch( Log.err );
-}
-
-function preloadMathMLCache (diagram_name /*: ?string */) {
-   MathML.preload(Group)
-      .then( () => loadPanels(diagram_name) )
-      .catch( Log.err )
-}
-
-function loadPanels (diagram_name /*: ?string */) {
-   const highlighters = [
-      {handler: highlightByNodeColor, label: 'Node color'},
-      {handler: highlightByRingAroundNode, label: 'Ring around node'},
-      {handler: highlightBySquareAroundNode, label: 'Square around node'}
-   ];
-   const subset_display_load = SSD.load($('#subset-control'), highlighters, clearHighlights, Group);
-   const view_controller_load = CVC.load($('#view-control'));
-   const diagram_controller_load = DC.load($('#diagram-control'));
-
-   completeSetup(diagram_name);
-}
-
-/* Now that all the static HTML is loaded, complete the setup */
+// Complete setup functions that depend on the Group and the MathML cache
 function completeSetup(diagram_name /*: ?string */) {
    // Draw Cayley diagram in main panel, but don't animate it yet
    Cayley_Diagram_View.enableTrackballControl($('#graphic')[0]);
    Cayley_Diagram_View.setDiagram(Group, diagram_name);
 
-   // Create header from group name and queue MathJax to typeset it
+   // This just starts building these panels -- no need to wait until they complete
+   const highlighters = [
+      {handler: highlightByNodeColor, label: 'Node color'},
+      {handler: highlightByRingAroundNode, label: 'Ring around node'},
+      {handler: highlightBySquareAroundNode, label: 'Square around node'}
+   ];
+   SSD.load($('#subset-control'), highlighters, clearHighlights, Group);
+   DC.load($('#diagram-control'));
+   CVC.load($('#view-control'));
+
+   // Create header from group name
    $('#header').html(MathML.sans('<mtext>Cayley Diagram for&nbsp;</mtext>' + Group.name));
 
-   // Create graphic context
+   // Start animating the main view
    Cayley_Diagram_View.beginAnimation();
-   CVC.updateFromView();
 
    // Register the splitter with jquery-resizable
    (($('#vert-container') /*: any */) /*: JQuery & {resizable: Function} */).resizable({
@@ -114,8 +99,6 @@ function completeSetup(diagram_name /*: ?string */) {
    // Register event handlers
    registerCallbacks();
 
-   VC.showPanel('#subset-control');
-
    // this happens only once, after initiation, doesn't it?
    window.addEventListener('message', receiveInitialSetup, false);
 
@@ -124,8 +107,8 @@ function completeSetup(diagram_name /*: ?string */) {
    // or if any external program is using GE as a service, let it know we're ready, too
    window.parent.postMessage( LISTENER_READY_MESSAGE, '*' );
 
-   // No need to keep the "find group" icon visible if the group was loaded from a URL
-   if ( Group.URL ) $( '#find-group' ).hide();
+   // Load icon strip in upper right-hand corner
+   VC.load(Group, HELP_PAGE);
 }
 
 // FIXME: can this be invoked more than once with 'external' message?

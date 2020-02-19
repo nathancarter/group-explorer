@@ -20,8 +20,6 @@ Version.js: package.json
 #################
 
 DOCS =  docs/visualizerExemplar.md              \
-        docs/visualizerFramework_css.md         \
-        docs/visualizerFramework_js.md          \
         docs/visualizerFramework_html.md
 
 docs : ${DOCS}
@@ -33,10 +31,3 @@ docs/visualizerExemplar.md : docs/visualizerExemplar.html
 
 docs/visualizerFramework_html.md : visualizerFramework/visualizer.html
 	sed -e '/^<!--Markdown/d' -e '/^Markdown-->/d' < visualizerFramework/visualizer.html > docs/visualizerFramework_html.md
-
-# add newline to these files so git doesn't decide we're just moving the old file to a new place...
-docs/visualizerFramework_css.md : visualizerFramework/visualizer.css
-	echo '' | cat visualizerFramework/visualizer.css - > docs/visualizerFramework_css.md
-
-docs/visualizerFramework_js.md : visualizerFramework/visualizer.js
-	echo '' | cat visualizerFramework/visualizer.js - > docs/visualizerFramework_js.md

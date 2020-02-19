@@ -20,8 +20,9 @@ from a visualizer to a Sheet.
 
 ```javascript
  */
-import XMLGroup from '../js/XMLGroup.js';
 import IsomorphicGroups from '../js/IsomorphicGroups.js';
+import Log from '../js/Log.js';
+import XMLGroup from '../js/XMLGroup.js';
 
 const VISUALIZER_LAYOUT_URL /*: string */ = './visualizerFramework/visualizer.html';
 
@@ -38,35 +39,23 @@ It returns the just-started ajax load as an ES6 Promise
 
 ```javascript
 */
-export function load(group /*: ?XMLGroup */, help_page /*: string */) /*: Promise<void> */ {
+export function load(group /*: ?XMLGroup */, help_page /*: string */) {
    window.VC = this;
    if (group != undefined)
       Group = group;
    Help_Page = help_page;
-   return new Promise( (resolve, reject) => {
-      $.ajax( { url: VISUALIZER_LAYOUT_URL,
-                success: (data /*: string */) => {
-                   // The current body element contains visualizer-specific layout
-                   // Detach it and save it for insertion into the visualizer framework below
-                   const $customCode = $('body').children().detach();
 
-                   // Replace the current body with content of visualizer.html, append resetTemplate
-                   $('body').html(data);
-
-                   // Remove controls-placeholder div and insert visualizer-specific code saved above
-                   $('#controls-placeholder').remove();
-                   $('#vert-container').prepend($customCode);
-
-                   // Hide top right-hand 'hide-controls' icon initially
-                   $( '#show-controls' ).hide();
-
-                   resolve();
-                },
-                error: (_jqXHR, _status, err) => {
-                   reject(`Error loading ${VISUALIZER_LAYOUT_URL} ${err === undefined ? '' : ': ' + err}`);
-                }
-              } );
-   } )
+   $.ajax( { url: VISUALIZER_LAYOUT_URL,
+             success: (data /*: html */) => {
+                $('body').append(data); // append the top right-hand icon strip, etc. to existing body
+                $('#show-controls').hide();  // Hide top right-hand 'hide-controls' icon initially
+                if (group != undefined && group.URL != undefined)
+                   $('#find-group').hide();
+             },
+             error: (_jqXHR, _status, err) => {
+                Log.err(`Error loading ${VISUALIZER_LAYOUT_URL} ${err === undefined ? '' : ': ' + err}`);
+             }
+           } );
 }
 /*
 ```
@@ -157,31 +146,18 @@ export function disableChangeBroadcast () {
 
 export function enableChangeBroadcast (json_generator /*: () => Obj */) {
     broadcastChange = (function (_json_generator) {
-        const deep_equals = (a, b) => {
-            if (typeof a == 'object') {
-                for (let p in a) {
-                    if (b == undefined || !b.hasOwnProperty(p) || !deep_equals(a[p], b[p])) {
-                        return false;
-                    }
-                }
-                return true;
-            } else {
-                return a == b;
-            }
-        }
-
-        let last_json;
+        let last_json_string;
         
         function changeBroadcaster () {
             const current_json = _json_generator();
-            if (last_json == undefined || !deep_equals(current_json, last_json)) {
-                last_json = current_json;
+            const current_json_string = JSON.stringify(current_json);
+            if (current_json_string != last_json_string) {
+                last_json_string = current_json_string;
                 const msg = {
                     source: 'editor',
                     json: current_json,
                 };
                 window.postMessage( msg, new URL(window.location.href).origin );
-                console.log('posting msg');
             }
         }
 

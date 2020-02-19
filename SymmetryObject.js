@@ -8,7 +8,7 @@ import Template from './js/Template.js';
 import * as VC from './visualizerFramework/visualizer.js';
 import XMLGroup from './js/XMLGroup.js';
 
-export {loadGroup as load};
+export {load};
 
 /*::
 import type {XMLSymmetryObject} from './js/XMLGroup.js';
@@ -33,21 +33,12 @@ function registerCallbacks() {
    $('#fog-level')[0].addEventListener('input', set_fog_level);
 }
 
-// Load group from invocation URL
-function loadGroup() {
+// Load group from invocation URL, then get diagram name and complete setup
+function load() {
    Library
       .loadFromURL()
       .then( (group) => {
          Group = group;
-         loadVisualizerFramework();
-      } )
-      .catch( Log.err );
-}
-
-// Load visualizer framework around visualizer-specific code in this file
-function loadVisualizerFramework() {
-   VC.load(Group, HELP_PAGE)
-      .then( () => {
          const diagram_name = getDiagramName();
          completeSetup(diagram_name);
       } )
@@ -110,6 +101,9 @@ function completeSetup(diagram_name /*: string */) {
       resizeWidthFrom: 'left',
       onDrag: () => Symmetry_Object_View.resize(), // resizeGraphic,
    })
+
+   // Load icon strip in upper right-hand corner
+   VC.load(Group, HELP_PAGE)
 }
 
 // Resize the body, including the graphic

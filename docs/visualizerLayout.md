@@ -8,7 +8,8 @@ Visualizers include
 - SymmetryObject.html
 
 There is also a sample [visualizerExemplar](./visualizerExemplar.md) that requires a group argument to run, thus:
-<br>&nbsp;&nbsp;&nbsp;&nbsp;[visualizerExemplar.html?groupURL=/group-explorer/groups/D_4.group](./visualizerExemplar.html?groupURL=/group-explorer/groups/D_4.group).
+<br>&nbsp;&nbsp;&nbsp;&nbsp;
+    [visualizerExemplar.html?groupURL=../groups/D_4.group](./visualizerExemplar.html?groupURL=../groups/D_4.group).
 
 ## Top-level elements
 
@@ -21,7 +22,7 @@ The top-level visual components of the visualizers are
 - **controls**: visualizer-specific panels that control the visualization, perhaps modifying their arrangement or highlighting a subset
 - **help-reset**: buttons with the obvious functions
 
-These layout components are defined in [visualizerFramework/visualizer.html](./visualizerFramework_html.md) and styled by the CSS in [visualizerFramework/visualizer.css](./visualizerFramework_css.md). They are inserted into the DOM by [VC.load()](./visualizerFramework_js.md#vc-load-) (defined in [visualizerFramework/visualizer.js](./visualizerFramework_js.md)), which is called by all of the visualizers during their initialization. For a specific example of how this is done, see the initial [load()](./visualizerExemplar.md#visualizer-framework-loading) routine from the [visualizerExemplar](./visualizerExemplar.md).
+These layout components are defined in the visualizer's HTML and styled by the CSS in [visualizerFramework/visualizer.css](./visualizerFramework/visualizer_css.md).
 
 ## Graphical layout
      

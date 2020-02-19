@@ -7,18 +7,26 @@ interspersed.
 ## Visualizer invocation
 
 The visualizer exemplar may be viewed in the browser by entering a URL like
-  <br>&nbsp;&nbsp;&nbsp;&nbsp;http://localhost:8080/group-explorer/docs/visualizerExemplar.html?groupURL=../groups/D_4.group,
+     <br>&nbsp;&nbsp;&nbsp;&nbsp;
+     [http://.../group-explorer/docs/visualizerExemplar.html?groupURL=../groups/D_4.group](
+     ./visualizerExemplar.html?groupURL=../groups/D_4.group),
 <br>which passes the visualizer the URL of a group definition in .group file XML, or
-  <br>&nbsp;&nbsp;&nbsp;&nbsp;http://localhost:8080/group-explorer/docs/visualizerExemplar.html?groupJSON=../groups/D_4.json,
+     <br>&nbsp;&nbsp;&nbsp;&nbsp;
+     [http://.../group-explorer/docs/visualizerExemplar.html?groupJSON=../groups/D_4.json](
+     ./visualizerExemplar.html?groupJSON=../groups/D_4.json),
 <br>which passes the visualizer the URL of a group definition in JSON format. (Note that this won't work with the current release -- there are no .json files in the library.)
 
 In the normal use of GE3 the visualizers are opened from the GroupInfo page by selecting one of the visualizer thumbnails. The GroupInfo
-page opens the visualizer with a URL like
-  <br>&nbsp;&nbsp;&nbsp;&nbsp;http://localhost:8080/group-explorer/Multtable.html?groupURL=./groups/D_4.group
+page opens the visualizer with a URL of the form
+     <br>&nbsp;&nbsp;&nbsp;&nbsp;
+     [http://.../group-explorer/Multtable.html?groupURL=groups/D_4.group](
+     ../Multtable.html?groupURL=groups/D_4.group),
 <br>passing it a URL referencing a group definition in XML (.group) format. Other parameters may also be passed in the URL.
-For example, this invocation of a Cayley diagram
-  <br>&nbsp;&nbsp;&nbsp;&nbsp;http://localhost:8080/group-explorer/CayleyDiagram.html?groupURL=./groups/S_4.group&diagram=Truncated%20cube
-<br>specifies that the `Truncated cube` diagram is to be displayed initially.
+For example, this invocation of the Cayley diagram visualizer
+     <br>&nbsp;&nbsp;&nbsp;&nbsp;
+     [http://.../group-explorer/CayleyDiagram.html?groupURL=groups/S_4.group&diagram=Truncated%20cube](
+     ../CayleyDiagram.html?groupURL=groups/S_4.group&diagram=Truncated%20cube)
+<br>initially displays the `Truncated cube` diagram of the S<sub>4</sub> group.
 
 ## Visualizer display
 
@@ -61,14 +69,22 @@ Other visualizers extend the exemplar with different displays in the graphic ele
           showMathMenu: false,   /* disable MathJax context menu (it interferes with subsetDisplay context menu) */
        });
       </script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=MML_CHTML"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.6/MathJax.js?config=MML_CHTML"></script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
       <script src="https://cdn.jsdelivr.net/npm/jquery-resizable-dom@0.32.0/dist/jquery-resizable.js"></script>
-      <script src="./build/allGroupExplorer.js"></script>
-      <script src="./build/allVisualizer.js"></script>
 ```
+## Visualizer Javascript
+     
+(The following code would generally be found in a separate .js file, not in the .html file.)
 ```javascript
-      <script>
+      <script type="module">
+       import Library from './js/Library.js';
+       import Log from './js/Log.js';
+       import MathML from './js/MathML.js';
+       import Template from './js/Template.js';
+       import * as VC from './visualizerFramework/visualizer.js';
+       import * as SSD from './subsetDisplay/subsets.js';
+       
        /* Global variables */
        var group;  // group about which information will be displayed
        const HELP_PAGE = 'help/index.html';
@@ -86,35 +102,34 @@ Other visualizers extend the exemplar with different displays in the graphic ele
           $(window).off('resize', resizeBody).on('resize', resizeBody);
        }
 
-       /*
+/*
 ```
-## Visualizer framework loading
+### Asynchronous loading
 
-Invokes [VC.load()](visualizerFramework_js.md#vc-load-) to wrap visualizer framework layout around visualizer-specific controls
+Asynchronous tasks are generally presented as ES6 Promises in GE. Since the [Library](../js/Library.js) will request the group definition from a server if it doesn't have a copy locally, the [loadFromURL()](../js/Library.js) method returns a Promise, not the group itself.
+
+Note the [MathML preload](../js/MathML.js#preload). This is often desirable since it avoids having to perform many small asynchronous activities in subsequent MathMLcalls, which together can take considerably longer than a single consolidated action at the start. 
 ```javascript
        /* Load the static components of the page */
        function load() {
           // Create a Promise to load group from invocation URL
           const groupLoad = Library
              .loadFromURL()
-             .then( (_group) => group = _group )
-             .catch( Log.err );
-
-          // Create a Promise to load visualizer framework around visualizer-specific code in this file
-          const bodyLoad = VC.load();
-
-          // When group and framework are loaded, insert subset_page and complete rest of the setup
-          Promise.all([groupLoad, bodyLoad])
-                 .then( () => SSD.load($('#subset-control')).then(completeSetup) )
-                 .catch( Log.err );
+             .then( (_group) => {
+                group = _group;
+                MathML.preload(group)  // Create a promise to preload the MathML cache
+                      .then( () => completeSetup() )
+                      .catch( Log.err );
+             } )
        }
-
-       /*
+/*
 ```
-## Exemplar initialization
+### Exemplar initialization
 ```javascript
        /* Now that all the static HTML is loaded, complete the setup */
        function completeSetup() {
+          SSD.load($('#subset-control'), undefined, undefined, group);
+          
           // Document is assembled, register event handlers
           registerEventHandlers();
 
@@ -132,7 +147,7 @@ Invokes [VC.load()](visualizerFramework_js.md#vc-load-) to wrap visualizer frame
           MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'organization-choices',
                              () => $('#organization-choice').html($('#organization-choices > li:first-of-type').html())]);
 
-             
+          
           // Register the splitter with jquery-resizable, so you can resize the graphic horizontally
           // by grabbing the border between the graphic and the subset control and dragging it
           $('#vert-container').resizable({
@@ -144,8 +159,10 @@ Invokes [VC.load()](visualizerFramework_js.md#vc-load-) to wrap visualizer frame
              }
           });
 
-          VC.showPanel('#subset-control');
           resizeBody();
+
+          // Load icon strip in upper right-hand corner
+          VC.load();
        }
 
        /*
@@ -163,41 +180,52 @@ Invokes [VC.load()](visualizerFramework_js.md#vc-load-) to wrap visualizer frame
       </script>
    </head>
 ```
-## Visualizer-specific HTML
+## HTML
 
-The body contains the visualizer-specific HTML to lay out the controls for this visualizer.  This HTML will be wrapped in the visualizer framework by [VC.load()](./visualizerFramework_js.md#vc-load-), called during [initialization](#visualizer-framework-loading).
+The HTML lays out the visualizer elements in the [format](./visualizerLayout.md) used by GE3.
 
-Note the use of [faux-select](visualizerFramework_css.md#faux-select) and associated classes to simulate an HTML select element with HTML and MathML formatted text.
+A string of icons is placed in the upper right-hand corner of the screen by [VC.load()](../visualizerFramework/visualizer.md#vc-load-) during [initialization](#visualizer-framework-loading) and does not appear in the static HTML below.
+
+Note the use of [faux-select](../visualizerFramework/visualizer_css.md#faux-select) and associated classes to simulate an HTML select element with HTML and MathML formatted text.
 ```html
-   <body class="vert">
-      <div id="control-options" class="horiz">
-         <button id="subset-button">Subsets</button>
-         <button id="view-button">View</button>
-      </div>
+   <body>
+      <div id="bodyDouble" class="vert">
+         <div id="header" class="horiz"></div>
+         <div id="horiz-container" class="horiz">
+            <div id="graphic"></div>
+            <div id="splitter"></div>
+            <div id="vert-container" class="vert">
+               <div id="control-options" class="horiz">
+                  <button id="subset-button">Subsets</button>
+                  <button id="view-button">View</button>
+               </div>
 
-      <div id="subset-control" class="fill-vert">
-         <!-- This is filled in by subsetDisplay/subsets.html -->
-      </div>
+               <div id="subset-control" class="fill-vert">
+                  <!-- This is filled in by subsetDisplay/subsets.html -->
+               </div>
 
-      <div id="view-control" class="fill-vert">
-         <p>Organize by subgroup:</p>
-         <div id="organization-select" class="faux-select" onclick="$('#organization-choices').toggle()">
-            <ul id="organization-choices" class="faux-select-options hidden hide-on-clean"></ul>
-            <span id="organization-choice" class="faux-selection">none</span>
-            <div class="faux-select-arrow" ></div>
+               <div id="view-control" class="fill-vert">
+                  <p>Organize by subgroup:</p>
+                  <div id="organization-select" class="faux-select" onclick="$('#organization-choices').toggle()">
+                     <ul id="organization-choices" class="faux-select-options hidden hide-on-clean"></ul>
+                     <span id="organization-choice" class="faux-selection">none</span>
+                     <div class="faux-select-arrow" ></div>
+                  </div>
+                  <template id="organization-choice-template">
+                     <li onclick="choose(${subgroupIndex})">
+                        ${MathML.sans(MathML.sub('H', subgroupIndex) + '<mo>,</mo><mtext>a subgroup of order&nbsp;</mtext><mn>' +
+                        subgroup.order + '</mn>')}
+                     </li>
+                  </template>
+
+                  <p>Zoom level:</p>
+                  <input id="zoom-level" type="range" min="-10" max="10" value="0">
+
+                  <p>Line thickness:</p>
+                  <input id="line-thickness" type="range" min="1" max="20" value="10">
+               </div>
+            </div>
          </div>
-         <template id="organization-choice-template">
-            <li onclick="choose(${subgroupIndex})">
-               ${MathML.sans(MathML.sub('H', subgroupIndex) + '<mo>,</mo><mtext>a subgroup of order&nbsp;</mtext><mn>' +
-               subgroup.order + '</mn>')}
-            </li>
-         </template>
-
-         <p>Zoom level:</p>
-         <input id="zoom-level" type="range" min="-10" max="10" value="0">
-
-         <p>Line thickness:</p>
-         <input id="line-thickness" type="range" min="1" max="20" value="10">
       </div>
    </body>
 </html>

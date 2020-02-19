@@ -49,15 +49,6 @@ function registerEventHandlers() {
 
 /* Load the static components of the page */
 function load() {
-   VC.load(null, HELP_PAGE)
-      .then( () => {
-         $('.top-right-menu > a[href="Sheet.html"]').hide();  // hide top-right-menu Sheets icon
-         completeSetup();
-      } )
-      .catch( Log.err );
-}
-/* Now that all the static HTML is loaded, complete the setup */
-function completeSetup () {
    // Document is assembled, register event handlers
    registerEventHandlers();
    const $container = $( '#graphic' );
@@ -145,6 +136,9 @@ function completeSetup () {
       }
       loadSheetFromJSON( event_data.json );
    }, false );
+
+   // Load icon strip in upper right-hand corner
+   VC.load(null, HELP_PAGE)
 }
 
 function scrollToTopLeft () {

@@ -143,19 +143,12 @@ export class CycleGraphView /*:: implements VizDisplay<CycleGraphView, CycleGrap
         }
     }
         
-    // This function makes a small graphic by doing the exact same thing
-    // it would do to create a large graphic, with one exception:
-    // It passes an optional second parameter to that routine, so that
-    // it hides all element names, thus making the vertices in the graph
-    // much smaller, and thus the image itself much smaller as well.
-    //
-    // Draws the visualization at an optimal (large) size.
-    // All the data needed about the group and how to lay it out in the
-    // plane has been computed at construction time by the cycleGraph
-    // object, and we can leverage that here and just do drawing.
-    // The second parameter, which defaults to true, says whether to omit
-    // the names inside the elements.  (False == normal behavior, true
-    // == a smaller graphic in the end, useful for thumbnails.)
+    // This routine draws the cycle graph from the data generated
+    // by the layoutElementsAndPaths method.
+    // Displaying labels within the cycle graph nodes is controlled by
+    // the value of 'this.display_labels', set in the factory methods.
+    // Not displaying the element names allows the nodes in the
+    // graph to be much smaller and so better suited for thumbnails.
     drawGraphic () {
         const bbox = this.bbox;
 
