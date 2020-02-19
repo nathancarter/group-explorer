@@ -10,7 +10,7 @@ import {LISTENER_READY_MESSAGE, STATE_LOADED_MESSAGE} from './js/SheetModel.js';
 import Template from './js/Template.js';
 import XMLGroup from './js/XMLGroup.js';
 
-import * as SSD from './subsetDisplay/subsets.js';
+import * as SSD from './js/SubsetHighlightController.js';
 import * as VC from './visualizerFramework/visualizer.js';
 
 export {broadcastChange} from './visualizerFramework/visualizer.js';

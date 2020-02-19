@@ -6,7 +6,7 @@ import Log from '../js/Log.js';
 
 export {load, updateFromView};
 
-const VIEW_PANEL_URL = './cayleyViewController/view.html';
+const VIEW_PANEL_URL = './html/CayleyViewController.html';
 
 /*::
 import type {CayleyDiagramJSON} from '../js/CayleyDiagramView.js';

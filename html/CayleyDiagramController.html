@@ -1,16 +1,16 @@
 
 <!-- Diagram-page layout -->
 <div id="diagram-page">
-   <div id="diagram-select" class="faux-select" action="DC.DiagramChoice.toggleChoices()">
+   <div id="diagram-select" class="faux-select" action="DiagramChoice.toggleChoices()">
       <ul id="diagram-choices" class="faux-select-options hide-on-clean"></ul>
       <span id="diagram-choice" class="faux-selection">Generate diagram</span>
       <div class="faux-select-arrow"></div>
    </div>
    <template id="diagram-select-first-template">
-      <li action="DC.DiagramChoice.selectDiagram()">${MathML.sansText('Generate diagram')}</li>
+      <li action="DiagramChoice.selectDiagram()">${MathML.sansText('Generate diagram')}</li>
    </template>
    <template id="diagram-select-other-template">
-      <li action="DC.DiagramChoice.selectDiagram('${diagram.name}')">${MathML.sansText(diagram.name)}</li>
+      <li action="DiagramChoice.selectDiagram('${diagram.name}')">${MathML.sansText(diagram.name)}</li>
    </template>
 
    <div id="generation-control">
@@ -33,15 +33,15 @@
          <template id="generation-table-row-template">
             <tr>
                <td draggable="true">${inx+1}</td>
-               <td action="DC.Generator.showGeneratorMenu(event, ${inx})">
+               <td action="Generator.showGeneratorMenu(event, ${inx})">
                   ${MathML.sans(Group.representation[strategy.generator])}
                </td>
-               <td action="DC.Generator.showAxisMenu(event, ${inx})">
-                  <img src="./images/${DC.Generator.axis_image[strategy.layout][strategy.direction]}">
-                  ${DC.Generator.axis_label[strategy.layout][strategy.direction]}
+               <td action="Generator.showAxisMenu(event, ${inx})">
+                  <img src="./images/${Generator.axis_image[strategy.layout][strategy.direction]}">
+                  ${Generator.axis_label[strategy.layout][strategy.direction]}
                </td>
-               <td action="DC.Generator.showOrderMenu(event, ${inx})">
-                  ${DC.Generator.orders[strategies.length][strategy.nestingLevel]}
+               <td action="Generator.showOrderMenu(event, ${inx})">
+                  ${Generator.orders[strategies.length][strategy.nestingLevel]}
                </td>
             </tr>
          </template>
@@ -52,30 +52,30 @@
                <hr>
                ${Menu.makeLink('Organize by', 'generation-organize-by-menu')}
             </ul>
-            <ul id="generation-organize-by-menu" class="menu remove-on-clean">${DC.Generator.makeOrganizeByMenu()}</ul>
+            <ul id="generation-organize-by-menu" class="menu remove-on-clean">${Generator.makeOrganizeByMenu()}</ul>
          </template>
          <template id="generation-generator-menu-item-template">
-            <li action="DC.Generator.updateGenerator(${strategy_index}, ${generator})">
+            <li action="Generator.updateGenerator(${strategy_index}, ${generator})">
                ${MathML.sans(Group.representation[generator])}</li>
          </template>
 
          <template id="generation-axis-menu-template">
             <ul id="generation-axis-order-menu" class="menu remove-on-clean">
-               <li action="DC.Generator.updateAxes(${strategy_index}, 'linear', 'X')">${DC.Generator.axis_label['linear']['X']}</li>
-               <li action="DC.Generator.updateAxes(${strategy_index}, 'linear', 'Y')">${DC.Generator.axis_label['linear']['Y']}</li>
-               <li action="DC.Generator.updateAxes(${strategy_index}, 'linear', 'Z')">${DC.Generator.axis_label['linear']['Z']}</li>
+               <li action="Generator.updateAxes(${strategy_index}, 'linear', 'X')">${Generator.axis_label['linear']['X']}</li>
+               <li action="Generator.updateAxes(${strategy_index}, 'linear', 'Y')">${Generator.axis_label['linear']['Y']}</li>
+               <li action="Generator.updateAxes(${strategy_index}, 'linear', 'Z')">${Generator.axis_label['linear']['Z']}</li>
                <div class="${curvable ? '' : 'hidden'}">
-                  <li action="DC.Generator.updateAxes(${strategy_index}, 'circular', 'XY')">${DC.Generator.axis_label['circular']['XY']}</li>
-                  <li action="DC.Generator.updateAxes(${strategy_index}, 'circular', 'XZ')">${DC.Generator.axis_label['circular']['XZ']}</li>
-                  <li action="DC.Generator.updateAxes(${strategy_index}, 'circular', 'YZ')">${DC.Generator.axis_label['circular']['YZ']}</li>
-                  <li action="DC.Generator.updateAxes(${strategy_index}, 'rotated', 'XY')">${DC.Generator.axis_label['rotated']['XY']}</li>
-                  <li action="DC.Generator.updateAxes(${strategy_index}, 'rotated', 'XZ')">${DC.Generator.axis_label['rotated']['XZ']}</li>
-                  <li action="DC.Generator.updateAxes(${strategy_index}, 'rotated', 'YZ')">${DC.Generator.axis_label['rotated']['YZ']}</li>
+                  <li action="Generator.updateAxes(${strategy_index}, 'circular', 'XY')">${Generator.axis_label['circular']['XY']}</li>
+                  <li action="Generator.updateAxes(${strategy_index}, 'circular', 'XZ')">${Generator.axis_label['circular']['XZ']}</li>
+                  <li action="Generator.updateAxes(${strategy_index}, 'circular', 'YZ')">${Generator.axis_label['circular']['YZ']}</li>
+                  <li action="Generator.updateAxes(${strategy_index}, 'rotated', 'XY')">${Generator.axis_label['rotated']['XY']}</li>
+                  <li action="Generator.updateAxes(${strategy_index}, 'rotated', 'XZ')">${Generator.axis_label['rotated']['XZ']}</li>
+                  <li action="Generator.updateAxes(${strategy_index}, 'rotated', 'YZ')">${Generator.axis_label['rotated']['YZ']}</li>
                </div>
                <hr>
                ${Menu.makeLink('Organize by', 'generation-organize-by-menu')}
             </ul>
-            <ul id="generation-organize-by-menu" class="menu remove-on-clean">${DC.Generator.makeOrganizeByMenu()}</ul>
+            <ul id="generation-organize-by-menu" class="menu remove-on-clean">${Generator.makeOrganizeByMenu()}</ul>
          </template>
 
          <template id="generation-order-menu-template">
@@ -84,15 +84,15 @@
                <hr>
                ${Menu.makeLink('Organize by', 'generation-organize-by-menu')}
             </ul>
-            <ul id="generation-organize-by-menu" class="menu remove-on-clean">${DC.Generator.makeOrganizeByMenu()}</ul>
+            <ul id="generation-organize-by-menu" class="menu remove-on-clean">${Generator.makeOrganizeByMenu()}</ul>
          </template>
          <template id="generation-order-menu-item-template">
-            <li action="DC.Generator.updateOrder(${strategy_index}, ${order})">
-               ${DC.Generator.orders[num_strategies][order]}</li>
+            <li action="Generator.updateOrder(${strategy_index}, ${order})">
+               ${Generator.orders[num_strategies][order]}</li>
          </template>
 
          <template id="generation-organize-by-menu-item-template">
-            <li action="DC.Generator.organizeBy(${inx})">
+            <li action="Generator.organizeBy(${inx})">
                ${MathML.sans(MathML.sub('H', inx))}, ${MathML.sansText('a subgroup of order')}
                ${MathML.sans('<mn>' + subgroup.order + '</mn>')}</li>
          </template>
@@ -105,13 +105,13 @@
          <div id="arrow-display">
             <ul id="arrow-list"></ul>
             <template id="arrow-list-item-template">
-               <li arrow="${element}" color="${color}" action="DC.Arrow.selectArrow(${element})"><hr style="border: 2px solid ${color}">
+               <li arrow="${element}" color="${color}" action="Arrow.selectArrow(${element})"><hr style="border: 2px solid ${color}">
                   ${MathML.sans(Group.representation[element])}</li>
             </template>
          </div>
          <div id="arrow-buttons" class="vert">
-            <button id="add-arrow-button" action="DC.Arrow.showArrowMenu(event)">Add</button>
-            <button id="remove-arrow-button" action="DC.Arrow.removeArrow()" disabled class="disable-on-clean">Remove</button>
+            <button id="add-arrow-button" action="Arrow.showArrowMenu(event)">Add</button>
+            <button id="remove-arrow-button" action="Arrow.removeArrow()" disabled class="disable-on-clean">Remove</button>
          </div>
 
          <template id="arrow-menu-template">
@@ -120,7 +120,7 @@
             </ul>
          </template>
          <template id="arrow-menu-item-template">
-            <li action="DC.Arrow.addArrow(${element})">${MathML.sans(Group.representation[element])}</li>
+            <li action="Arrow.addArrow(${element})">${MathML.sans(Group.representation[element])}</li>
          </template>
       </div>
    </div>
@@ -139,24 +139,24 @@
 
    <div id="chunk-control" style="position: relative">
       <div class="graphic-lead">Chunk this subgroup:</div>
-      <div id="chunk-select" class="faux-select" action="DC.Chunking.toggleChoices()">
+      <div id="chunk-select" class="faux-select" action="Chunking.toggleChoices()">
          <ul id="chunk-choices" class="faux-select-options hide-on-clean"></ul>
          <span id="chunk-choice" class="faux-selection">(no chunking)</span>
          <div class="faux-select-arrow"></div>
       </div>
 
       <template id="chunk-select-first-template">
-         <li action="DC.Chunking.selectChunk(0)">${MathML.sansText('(no chunking)')}</li>
+         <li action="Chunking.selectChunk(0)">${MathML.sansText('(no chunking)')}</li>
       </template>
       <template id="chunk-select-other-template">
-         <li action="DC.Chunking.selectChunk(${subgroup_index})">
+         <li action="Chunking.selectChunk(${subgroup_index})">
             ${MathML.sans(MathML.sub('H', subgroup_index))}, ${MathML.sansText('generated by')}
             ${MathML.setList(generators)}
 
          </li>
       </template>
       <template id="chunk-select-last-template">
-         <li action="DC.Chunking.selectChunk(${Group.subgroups.length-1})">${MathML.sansText('The whole group')}</li>
+         <li action="Chunking.selectChunk(${Group.subgroups.length-1})">${MathML.sansText('The whole group')}</li>
       </template>
 
       <div id="chunking-fog" class="fog hidden"></div>
