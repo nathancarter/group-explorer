@@ -1,6 +1,7 @@
 // @flow
 
 import GEUtils from '../js/GEUtils.js';
+import Log from '../js/Log.js';
 import MathML from '../js/MathML.js';
 import Menu from '../js/Menu.js';
 import Template from '../js/Template.js';
@@ -49,7 +50,7 @@ export {group, nextSubsetIndex, nextId, displayList, highlighters, clearHighligh
 function load($subsetWrapper /*: JQuery */,
               _highlighters /*: highlighterRoutines*/,
               _clearHighlights /*: () => void */,
-              _group /*: XMLGroup */) /*: Promise<void> */
+              _group /*: XMLGroup */)
 {
    group = _group;
    highlighters = _highlighters;
@@ -57,18 +58,16 @@ function load($subsetWrapper /*: JQuery */,
    nextSubsetIndex = 0;
    nextId = 0;
    displayList = [];
-   return new Promise( (resolve, reject) => {
-      $.ajax( { url: SUBSET_DISPLAY_URL,
-                success: (data /*: string */) => {
-                   $subsetWrapper.html(data);
-                   setupSubsetPage();
-                   resolve();
-                },
-                error: (_jqXHR, _status, err) => {
-                   reject(`Error loading ${SUBSET_DISPLAY_URL} ${err === undefined ? '' : ': ' + err}`);
-                }
-              } )
-   } )
+
+   $.ajax( { url: SUBSET_DISPLAY_URL,
+             success: (data /*: html */) => {
+                $subsetWrapper.html(data);
+                setupSubsetPage();
+             },
+             error: (_jqXHR, _status, err) => {
+                Log.err(`Error loading ${SUBSET_DISPLAY_URL} ${err === undefined ? '' : ': ' + err}`)
+             }
+           } );
 }
 
 function setupSubsetPage() {

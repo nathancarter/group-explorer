@@ -75,17 +75,14 @@ function loadSubsetDisplay() {
       {handler: highlightByBorder, label: 'Border'},
       {handler: highlightByTop, label: 'Top'}
    ];
-   // Load subset display, and complete setup
-   SSD.load($('#subset-control'), highlighters, clearHighlights, group)
-      .then(completeSetup)
-      .catch( Log.err );
+   SSD.load($('#subset-control'), highlighters, clearHighlights, group);
+   completeSetup();
 }
 
 /* Now that subsetDisplay is loaded, complete the setup */
 function completeSetup() {
    // Create header from group name and queue MathJax to typeset it
    $('#header').html(MathML.sans('<mtext>Cycle Graph for&nbsp;</mtext>' + group.name));
-   MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
 
    // Create Cycle Graph, graphic context (it will be displayed in resizeBody below)
    Cycle_Graph_View = createLabelledCycleGraphView({container: $('#graphic')});

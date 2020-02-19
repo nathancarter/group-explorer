@@ -1,29 +1,28 @@
 // @flow
 
 import {Cayley_Diagram_View} from '../CayleyDiagram.js';
+import {CayleyDiagramView} from '../js/CayleyDiagramView.js';
+import Log from '../js/Log.js';
 
-export {load, fromJSON};
+export {load, updateFromView};
 
-const VIEW_PANEL_URL = 'cayleyViewController/view.html';
+const VIEW_PANEL_URL = './cayleyViewController/view.html';
 
 /*::
 import type {CayleyDiagramJSON} from '../js/CayleyDiagramView.js';
 */
 
-function load($viewWrapper /*: JQuery */) /*: Promise<void> */
-{
-   return new Promise( (resolve, reject) => {
-      $.ajax( { url: VIEW_PANEL_URL,
-                success: (data /*: html */) => {
-                   $viewWrapper.html(data);
-                   setupViewPage();
-                   resolve();
-                },
-                error: (_jqXHR, _status, err) => {
-                   reject(`Error loading ${VIEW_PANEL_URL} ${err === undefined ? '' : ': ' + err}`);
-                }
-              } )
-   } )
+function load($viewWrapper /*: JQuery */) {
+   $.ajax( { url: VIEW_PANEL_URL,
+             success: (data /*: html */) => {
+                $viewWrapper.html(data);
+                setupViewPage();
+                updateFromView();
+             },
+             error: (_jqXHR, _status, err) => {
+                Log.err(`Error loading ${VIEW_PANEL_URL} ${err === undefined ? '' : ': ' + err}`)
+             }
+           } );
 }
 
 function setupViewPage() {
@@ -38,41 +37,29 @@ function setupViewPage() {
 }
 
 /* Set sliders, check boxes in view panel:
- *   zoom level
- *   line thickness
- *   node radius
+ *   arrowhead placement
  *   use fog/fog level
  *   show labels/label size
- *   arrowhead placement
+ *   line thickness
+ *   node radius
+ *   zoom level
  */
-function fromJSON (jsonData /*: CayleyDiagramJSON */) {
-    Object.entries(jsonData).forEach( ([name, value]) => {
-        value = Number(value);
-        switch (name) {
-        case 'line_width':
-           $('#line-thickness').val(1 + (value - 1)/0.75);
-	   break;
-        case 'sphere_scale_factor':
-	   $('#node-radius').val( 10*Math.log(value) );
-	   break;
-        case 'arrowhead_placement':
-	   $('#arrowhead-placement').val(20*value);
-	   break;
-        case 'label_scale_factor':
-           $('#show-labels').prop('checked', value != 0);
-           $('#label-size').val( (value == 0) ? 5 : 10*Math.log(value) );
-           break;
-        case 'fog_level':
-           $('#use-fog').prop('checked', value != 0);
-           $('#fog-level').val(10*value);
-           break;
-        case 'zoom_level':
-           $('#zoom-level').val(10*Math.log(value));
-           break;
-        default:
-           return;
-        }
-    } )
+function updateFromView() {
+    $('#arrowhead-placement').val(20*Cayley_Diagram_View.arrowhead_placement);
+
+    const fog_level = Cayley_Diagram_View.fog_level;
+    $('#use-fog').prop('checked', fog_level != 0);
+    $('#fog-level').val( (fog_level == 0) ? 5 : 10*fog_level);
+
+    const label_scale_factor = Cayley_Diagram_View.label_scale_factor;
+    $('#show-labels').prop('checked', label_scale_factor != 0);
+    $('#label-size').val( (label_scale_factor == 0) ? 5 : 10*Math.log(label_scale_factor) );
+
+    $('#line-thickness').val(1 + (Cayley_Diagram_View.line_width - 1)/0.75);
+
+    $('#node-radius').val(10*Math.log(Cayley_Diagram_View.sphere_scale_factor));
+
+    $('#zoom-level').val(10*Math.log(Cayley_Diagram_View.zoom_level));
 }
 
 /* Slider handlers */

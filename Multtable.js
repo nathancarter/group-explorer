@@ -91,9 +91,8 @@ function loadSubsetDisplay() {
       {handler: highlightByCorner, label: 'Corner'}
    ];
    // Load subset display, and complete setup
-   SSD.load($('#subset-control'), highlighters, clearHighlights, Group)
-      .then(completeSetup)
-      .catch( Log.err );
+   SSD.load($('#subset-control'), highlighters, clearHighlights, Group);
+   completeSetup();
 }
 
 /* Now that subsetDisplay is loaded, complete the setup */

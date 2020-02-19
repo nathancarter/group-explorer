@@ -1,5 +1,6 @@
 // @flow
 
+import Log from '../js/Log.js';
 import XMLGroup from '../js/XMLGroup.js';
 
 import Arrow from './Arrow.js';
@@ -18,18 +19,16 @@ export {load, setup, update, clickHandler};
 const DIAGRAM_PANEL_URL /*: string */ = './diagramController/diagram.html';
 
 /* Load, initialize diagram control */
-function load($diagramWrapper /*: JQuery */) /*: Promise<void> */ {
-   return new Promise( (resolve, reject) => {
-      $.ajax( { url: DIAGRAM_PANEL_URL,
-                success: (data /*: string */) => {
-                   $diagramWrapper.html(data);
-                   resolve();
-                },
-                error: (_jqXHR, _status, err) => {
-                   reject(`Error loading ${DIAGRAM_PANEL_URL} ${err === undefined ? '' : ': ' + err}`);
-                }
-              } )
-   } )
+function load($diagramWrapper /*: JQuery */) {
+   $.ajax( { url: DIAGRAM_PANEL_URL,
+             success: (data /*: string */) => {
+                $diagramWrapper.html(data);
+                setup();
+             },
+             error: (_jqXHR, _status, err) => {
+                Log.err(`Error loading ${DIAGRAM_PANEL_URL} ${err === undefined ? '' : ': ' + err}`);
+             }
+           } )
 }
 
 function setup() {

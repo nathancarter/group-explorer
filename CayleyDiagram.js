@@ -86,9 +86,8 @@ function loadPanels (diagram_name /*: ?string */) {
    const subset_display_load = SSD.load($('#subset-control'), highlighters, clearHighlights, Group);
    const view_controller_load = CVC.load($('#view-control'));
    const diagram_controller_load = DC.load($('#diagram-control'));
-   Promise.all([subset_display_load, view_controller_load, diagram_controller_load])
-          .then( () => completeSetup(diagram_name) )
-          .catch( Log.err );
+
+   completeSetup(diagram_name);
 }
 
 /* Now that all the static HTML is loaded, complete the setup */
@@ -102,8 +101,7 @@ function completeSetup(diagram_name /*: ?string */) {
 
    // Create graphic context
    Cayley_Diagram_View.beginAnimation();
-   CVC.fromJSON(Cayley_Diagram_View.toJSON());
-   DC.setup();
+   CVC.updateFromView();
 
    // Register the splitter with jquery-resizable
    (($('#vert-container') /*: any */) /*: JQuery & {resizable: Function} */).resizable({
@@ -140,7 +138,7 @@ function receiveInitialSetup (event /*: MessageEvent */) {
    if (event_data.source == 'external') {
       const json_data = event_data.json;
       Cayley_Diagram_View.fromJSON(json_data);
-      CVC.fromJSON(json_data);
+      CVC.updateFromView();
       DC.update();
       window.postMessage( STATE_LOADED_MESSAGE, myDomain );
       VC.enableChangeBroadcast(() => Cayley_Diagram_View.toJSON());
