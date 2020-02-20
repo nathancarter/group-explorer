@@ -165,7 +165,7 @@ function showNoZnmIsomorphismSheet ( m /*: groupElement */, n /*: groupElement *
    const hmar = 20, vmar = 20, hsep = 20, vsep = 20,
          W = 300, H = W, hdrH = 50, txtH = 100;
    // build the group Z_m x Z_n and find it in the group library.
-   const elements = Array( {length: m * n}, ( _ /*: mixed */, i /*: number */ ) => i );
+   const elements = Array.from( {length: m * n}, ( _ /*: mixed */, i /*: number */ ) => i );
    const multtable = elements.map( (row /*: number */) => {
       const a1 = Math.floor( row / n );
       const b1 = row % n;
