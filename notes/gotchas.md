@@ -150,3 +150,7 @@ For the three.js Vector3.project function to work correctly, the scene needs to 
 Chrome (and others) cannot display more than 16 active WebGL contexts at once
 
 <hr>
+
+The Stack Overflow entry https://stackoverflow.com/questions/29221795/serializing-camera-state-in-threejs is not completely accurate -- you need to serialize camera.up as well as the decomposed matrix.
+
+<hr>

@@ -92,6 +92,7 @@ type ArrowDataJSON = {
 export type CayleyDiagramJSON = {
     background: css_color,
     camera_matrix: Array<number>,
+    camera_up: Array<number>,
     fog_level: float,
     line_width: number,
     sphere_base_radius: float,
@@ -901,6 +902,7 @@ export class CayleyDiagramView extends AbstractDiagramDisplay  /*:: implements V
         const tmp  = Object.assign( {}, {
             background: this.background,
             camera_matrix: this.camera.matrix.toArray(),
+            camera_up: this.camera.up.toArray(),
             fog_level: this.fog_level,
             line_width: this._line_width,
             sphere_base_radius: this.sphere_base_radius,
@@ -957,6 +959,7 @@ export class CayleyDiagramView extends AbstractDiagramDisplay  /*:: implements V
                                             this.camera.position,
                         		    this.camera.quaternion,
 			                    this.camera.scale);					break;
+            case 'camera_up':		this.camera.up.set(...json.camera_up);			break;
             case 'fog_level':           this.fog_level = json.fog_level;			break;
             case 'line_width':          this.line_width = json.line_width;			break;
             case 'sphere_base_radius':  this.sphere_base_radius = json.sphere_base_radius;	break;

@@ -1313,8 +1313,6 @@ export class CDElement extends VisualizerElement/*:: <CayleyDiagramJSON & Visual
     }
     getEditPage () {
         let url = './CayleyDiagram.html?';
-        if (this.vizdisplay.diagram != undefined)
-            url += 'diagram=' + encodeURIComponent(this.vizdisplay.diagram) + '&';  // to keep from turning some diagrams over in editor
         return url;
     }
     getClassName () { return 'CDElement'; }
