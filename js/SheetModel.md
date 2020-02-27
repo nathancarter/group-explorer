@@ -1175,7 +1175,6 @@ class WrappedCDView /*:: implements VizDisplay<CayleyDiagramJSON & VisualizerEle
     size: {w: number, h: number};
     unitSquarePositions: ?Array<{x: float, y: float}>;
     group: XMLGroup;
-    diagram: ?string;
     initialParameters: ?{group: XMLGroup, diagram: ?string, generatingJSON: VisualizerElementJSON};
     lastImage: ?Image;
 */
@@ -1195,17 +1194,18 @@ class WrappedCDView /*:: implements VizDisplay<CayleyDiagramJSON & VisualizerEle
             // Get WrappedCDView.view directly, without going through getView()
             WrappedCDView.view.wrapper = this;
             WrappedCDView.view.setSize(this.size.w, this.size.h);
-            this.group = initialParameters.group;
-            this.diagram = initialParameters.diagram;
+            const group = initialParameters.group;
+            const diagram = initialParameters.diagram;
             const generatingJSON = initialParameters.generatingJSON;
             this.initialParameters = undefined;  // initialization is over
+            this.group = group;
             if (generatingJSON == undefined) {
                 // CDElement created from button
-                this.setDiagram(this.group, this.diagram);
+                this.setDiagram(group, diagram);
             } else {
                 // CDElement created from CreateNewSheet call
                 if (  WrappedCDView.view.group != undefined
-                    && WrappedCDView.view.group.URL == this.group.URL
+                    && WrappedCDView.view.group.URL == group.URL
                     && generatingJSON.strategies == undefined)
                 {
                     // Can reuse WrappedCDView.view as is, with only the highlights changed
@@ -1215,8 +1215,8 @@ class WrappedCDView /*:: implements VizDisplay<CayleyDiagramJSON & VisualizerEle
                     WrappedCDView.view.drawColorHighlights();
                 } else {
                     // Can't reuse WrappedCDView.view as is, just initialize as usual
-                    WrappedCDView.view.group = this.group;
-                    WrappedCDView.view.generateFromJSON(generatingJSON, this.diagram);
+                    WrappedCDView.view.group = group;
+                    WrappedCDView.view.generateFromJSON(generatingJSON, diagram);
                 }
             }
             this.lastImage = WrappedCDView.view.getImage();  // See Image reuse discussion above
@@ -1262,7 +1262,6 @@ class WrappedCDView /*:: implements VizDisplay<CayleyDiagramJSON & VisualizerEle
             this.initialParameters.diagram = diagram;
         } else {
             this.group = group;
-            this.diagram = diagram;
             const view = this.getView();
             view.setDiagram(group, diagram);
             view.render();
@@ -1283,14 +1282,10 @@ class WrappedCDView /*:: implements VizDisplay<CayleyDiagramJSON & VisualizerEle
     // Set CayleyDiagramView from VisualizerElementJSON (during generation) or CayleyDiagramJSON (while editing)
     fromJSON (json /*: CayleyDiagramJSON & VisualizerElementJSON */) {
         if (this.initialParameters != undefined) {
-            this.initialParameters.generatingJSON = json;
+            this.initialParameters.generatingJSON = json;  // JSON for generation from CreateNewSheet
         } else {
             const view = this.getView();
-            if (json.hasOwnProperty('className')) {  // JSON for generation from CreateNewSheet
-                view.generateFromJSON( ((json /*: any */) /*: VisualizerElementJSON */), this.diagram );
-            } else {                                 // JSON for update from editor
-                view.fromJSON( ((json /*: any */) /*: CayleyDiagramJSON */) );
-            }
+            view.fromJSON( ((json /*: any */) /*: CayleyDiagramJSON */) );  // JSON received while editing
             this.json = view.toJSON();
             this.resetImage();
         }
