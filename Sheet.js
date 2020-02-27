@@ -231,8 +231,8 @@ function connectSelected () {
                              Model.elements[parseInt($( '#connectToList' ).val())] );
 }
 function morphismSelected () {
-   new SM.MorphismElement( Model, ((Model.selected() /*: any */) /*: SM.VisualizerElement<any, any, any> */),
-                          ((Model.elements[parseInt($( '#morphismToList' ).val())] /*: any */) /*: SM.VisualizerElement<any, any, any> */) );
+   new SM.MorphismElement( Model, ((Model.selected() /*: any */) /*: SM.VisualizerElement<any, any> */),
+                          ((Model.elements[parseInt($( '#morphismToList' ).val())] /*: any */) /*: SM.VisualizerElement<any, any> */) );
    handleSelectionChanged();
 }
 function deleteSelected () {

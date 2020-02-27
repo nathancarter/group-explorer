@@ -60,7 +60,7 @@ const ZOOM_STEP = 0.1;
 const MINIMUM_FONT = 2;
 const DEFAULT_BACKGROUND = '#F0F0F0';
 
-export class MulttableView /*:: implements VizDisplay<MulttableView, MulttableJSON> */ {
+export class MulttableView /*:: implements VizDisplay<MulttableJSON> */ {
 /*::
     is_minimal_view: boolean;
 
@@ -419,6 +419,7 @@ export class MulttableView /*:: implements VizDisplay<MulttableView, MulttableJS
     set group (group /*: XMLGroup */) {
         if (this._group != group) {
             this._group = group;
+            this.elements = [...this.group.elements];
             this.reset();
             this.showGraphic();
         }

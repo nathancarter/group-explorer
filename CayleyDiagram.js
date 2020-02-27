@@ -86,7 +86,7 @@ function completeSetup(diagram_name /*: ?string */) {
    $('#header').html(MathML.sans('<mtext>Cayley Diagram for&nbsp;</mtext>' + Group.name));
 
    // Start animating the main view
-   Cayley_Diagram_View.beginAnimation();
+   Cayley_Diagram_View.render();
 
    // Register the splitter with jquery-resizable
    (($('#vert-container') /*: any */) /*: JQuery & {resizable: Function} */).resizable({
@@ -227,7 +227,7 @@ class Tooltip {
    }
 
    static getObjectIDsAtLocation(location /*: eventLocation */) /*: Array<THREE.Object3D> */ {
-      const $graphic = $('#graphic'); // Cayley_Diagram_View.renderer.domElement;
+      const $graphic = $(Cayley_Diagram_View.renderer.domElement);
       const bounding_box = $graphic[0].getBoundingClientRect();
       const x = ( (location.clientX - bounding_box.left) / $graphic.width()) * 2 - 1;
       const y = -( (location.clientY - bounding_box.top) / $graphic.height()) * 2 + 1;

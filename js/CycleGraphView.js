@@ -11,14 +11,13 @@ import {THREE} from '../lib/externals.js';
 import {VizDisplay} from './SheetModel.js';
 
 type Highlights = {
-    background: Array<color>,
-    border: Array<color>,
-    top: Array<color>,
+    background: Array<css_color>,
+    border: Array<css_color>,
+    top: Array<css_color>,
 };
 export type CycleGraphJSON = {
     groupURL: string,
-    highlights: Highlights,
-    elements: Array<groupElement>,
+    highlights?: Highlights,
 };
 
 type CycleGraphOptions = {
@@ -47,7 +46,7 @@ const DEFAULT_CANVAS_HEIGHT = 50;
 
 const SOME_SETTING_NAME = 'its default value';
 
-export class CycleGraphView /*:: implements VizDisplay<CycleGraphView, CycleGraphJSON> */ {
+export class CycleGraphView /*:: implements VizDisplay<CycleGraphJSON> */ {
 /*::
     displays_labels: boolean;
     canvas: HTMLCanvasElement;
@@ -388,12 +387,11 @@ export class CycleGraphView /*:: implements VizDisplay<CycleGraphView, CycleGrap
         return {
             groupURL: this.group.URL,
             highlights: this.highlights,
-            elements: this.elements
         };
     }
     fromJSON(json /*: CycleGraphJSON */) {
-        this.highlights = json.highlights;
-        this.elements = json.elements;
+        if (json.highlights != undefined)
+            this.highlights = json.highlights;
     }
 
     
@@ -405,7 +403,6 @@ export class CycleGraphView /*:: implements VizDisplay<CycleGraphView, CycleGrap
         this._group = group;
         this.layoutElementsAndPaths();
         this.findClosestTwoPositions();
-        this.elements = this.group.elements.slice();
         this.SOME_SETTING_NAME = SOME_SETTING_NAME;
         this.showGraphic();
     }

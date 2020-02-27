@@ -42,7 +42,7 @@ export class AbstractDiagramDisplay {
     scene: THREE.Scene;
     camera: THREE.PerspectiveCamera;
     renderer: THREE.WebGLRenderer;
-    control: TrackballControls;
+    control: ?TrackballControls;
 
     _fog_level: float;  // in [0,1]
 
@@ -201,11 +201,12 @@ export class AbstractDiagramDisplay {
     }
 
     // Render graphics, recursing to animate
-    beginAnimation () {
+    render () {
         this.renderer.render(this.scene, this.camera);
-        if (this.control != undefined) {
-            window.requestAnimationFrame( () => this.beginAnimation() );
-            this.control.update();
+        const trackballControl = this.control;
+        if (trackballControl != undefined) {
+            trackballControl.update();
+            window.requestAnimationFrame( () => this.render() );
         }
     }
 
@@ -316,10 +317,10 @@ export class AbstractDiagramDisplay {
 
     get line_width () /*: float */ {
         if (this._line_width == undefined) {
-            this._line_width = (this.use_fat_lines) ? DEFAULT_LINE_WIDTH : 1;
+            this._line_width = DEFAULT_LINE_WIDTH;
         }
 
-        return this._line_width;
+        return this.use_fat_lines ? this._line_width : 1;
     }
     
     set line_width (line_width /*: float */) {

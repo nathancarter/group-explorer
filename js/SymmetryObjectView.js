@@ -72,7 +72,7 @@ export function createInteractiveSymmetryObjectView(options /*: SymmetryObjectVi
     const display = new SymmetryObjectView(options);
     display.use_fat_lines = true;
     display.enableTrackballControl();
-    display.beginAnimation();
+    display.render();
     return display;
 }
 

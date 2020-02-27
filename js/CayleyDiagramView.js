@@ -16,6 +16,7 @@ import {THREE, Line2, LineMaterial, LineGeometry} from '../lib/externals.js';
 /*::
 import type {Tree} from './GEUtils.js';
 import {VizDisplay} from './SheetModel.js';
+import type {VisualizerElementJSON} from './SheetModel.js';
 import type {XMLCayleyDiagram} from './XMLGroup.js';
 
 import type {Layout, Direction, StrategyParameters} from './CayleyGenerator.js';
@@ -100,19 +101,16 @@ export type CayleyDiagramJSON = {
     arrowhead_placement: float,
     label_scale_factor: float,
 
-    arrows?: Array<ArrowDataJSON>, 
-    arrow_generators?: Array<{|generator: groupElement, color: css_color|}>,
+    groupURL: string,
+    right_multiply: boolean, 
+    arrows: Array<ArrowDataJSON>, 
+    nodes: Array<NodeDataJSON>,
     chunk?: integer, 
     diagram_name?: string, 
-    groupURL: string,
-    nodes?: Array<NodeDataJSON>,
-    right_multiply?: boolean, 
     strategy_parameters?: Array<StrategyParameters>,
-    highlights?: {
-        background?: Array<css_color>,
-        ring?: Array<?css_color>,
-        square?: Array<?css_color>,
-    }
+    color_highlights?: Array<css_color>,
+    ring_highlights?: Array<?css_color>,
+    square_highlights?: Array<?css_color>,
 };
 
 export type CayleyDiagramViewOptions = {
@@ -124,13 +122,13 @@ const CAYLEY_DIAGRAM_DISPLAY_GROUP_NAMES = ['labels', 'arrowheads', 'highlights'
 
 const DEFAULT_ARC_OFFSET = 0.2;
 
-export class CayleyDiagramView extends AbstractDiagramDisplay  /*:: implements VizDisplay<CayleyDiagramView, CayleyDiagramJSON> */ {
+export class CayleyDiagramView extends AbstractDiagramDisplay  /*:: implements VizDisplay<CayleyDiagramJSON> */ {
 /*::
     display_labels: boolean;
     _label_scale_factor: float;
     _arrowhead_placement: float;
 
-    group: XMLGroup;
+    _group: XMLGroup;
     generator: CayleyDiagramGenerator;
     _right_multiply: boolean;
     color_highlights: Array<css_color> | void;
@@ -168,7 +166,6 @@ export class CayleyDiagramView extends AbstractDiagramDisplay  /*:: implements V
     }
 
     drawFromModel () {
-        this.sphere_base_radius = 0.3 / Math.sqrt(this.group.order);
         this.setCamera(this.nodes.map( (node) => node.position ));
         this.deleteAllObjects();
         this.createSpheres(this.nodes);
@@ -280,9 +277,18 @@ export class CayleyDiagramView extends AbstractDiagramDisplay  /*:: implements V
         this.redrawLines(affected_lines);
     }
 
-    unitSquarePosition (element /*: groupElement */) /* x: float, y: float */ {
+    unitSquarePosition (element /*: groupElement */) /* {x: float, y: float} */ {
         const point = this.nodes[element].position.clone().project(this.camera)
         return {x: point.x/2 + 1/2, y: -point.y/2 + 1/2};
+    }
+
+    unitSquarePositions () /* Array<{x: float, y: float}> */ {
+        this.renderer.render(this.scene, this.camera);  // need to render first
+        const points = this.group.elements.map( (element) => {
+            const point = this.nodes[element].position.clone().project(this.camera)
+            return {x: point.x/2 + 1/2, y: -point.y/2 + 1/2};
+        } );
+        return points;                                                
     }
 
     deleteAllSpheres () {
@@ -776,11 +782,18 @@ export class CayleyDiagramView extends AbstractDiagramDisplay  /*:: implements V
 
     /////////////////////   Cayley diagram routines   /////////////////////////////
 
+    get group () /*: XMLGroup */ {
+        return this._group;
+    }
+
+    set group (group /*: XMLGroup */) {
+        this.sphere_base_radius = 0.3 / Math.sqrt(group.order);
+        this._group = group;
+    }
+        
     setDiagram (group /*: XMLGroup */, diagram_name /*: ?string */, strategy_parameters /*: ?Array<StrategyParameters> */) {
-        if (this.group != group) {
-            this.clearHighlightDefinitions();
-            this.group = group;
-        }
+        this.group = group;
+        this.clearHighlightDefinitions();
 
         if (diagram_name != undefined) {
             this.generator = new CayleyGeneratorFromSpec(group, diagram_name);
@@ -889,7 +902,7 @@ export class CayleyDiagramView extends AbstractDiagramDisplay  /*:: implements V
             background: this.background,
             camera_matrix: this.camera.matrix.toArray(),
             fog_level: this.fog_level,
-            line_width: this.line_width,
+            line_width: this._line_width,
             sphere_base_radius: this.sphere_base_radius,
             sphere_scale_factor: this.sphere_scale_factor,
             zoom_level: this.zoom_level,
@@ -951,36 +964,106 @@ export class CayleyDiagramView extends AbstractDiagramDisplay  /*:: implements V
             case 'zoom_level':          this.zoom_level = json.zoom_level;			break;
             case 'arrowhead_placement':	this.arrowhead_placement = json.arrowhead_placement;	break;
             case 'label_scale_factor':	this.label_scale_factor = json.label_scale_factor;	break;
+            case 'right_multip;ly':	this.right_multiply = json.right_multiply;		break;
             default:										break;
             }
         } );
  
         this.deleteAllObjects();
 
-        this.right_multiply = (json.right_multiply != undefined) ? json.right_multiply : true;
-
+        // FIXME: keep generators from generating in constructor
         this.generator = (json.diagram_name == undefined)
             ? new CayleyGeneratorFromStrategy(this.group, json.strategy_parameters)
             : new CayleyGeneratorFromSpec(this.group, json.diagram_name);
 
-        if (json.nodes != undefined) {
-            json.nodes.forEach( (json_node) => {
-                const this_node = this.nodes[json_node.element];
-                for (const property in this_node) {
-                    if (json_node.hasOwnProperty(property)) {
-                        if (property == 'position') {
-                            const {x, y, z} = json_node.position;
-                            this_node.position = new THREE.Vector3(x, y, z);
+        json.nodes.forEach( (json_node) => {
+            const this_node = this.nodes[json_node.element];
+            for (const property in this_node) {
+                if (json_node.hasOwnProperty(property)) {
+                    if (property == 'position') {
+                        const {x, y, z} = json_node.position;
+                        this_node.position = new THREE.Vector3(x, y, z);
+                    } else {
+                        this_node[property] = json_node[property];
+                    }
+                }
+            }
+        } );
+
+        this.createSpheres(this.nodes);
+        if (this.display_labels) {
+            this.createLabels();
+        }
+
+        // check for highlights...
+        const {color_highlights, ring_highlights, square_highlights} = json;
+        if (color_highlights != undefined || ring_highlights != undefined || square_highlights != undefined) {
+            this.clearHighlights();
+            if (color_highlights != undefined) {
+                this.color_highlights = color_highlights;
+                this.drawColorHighlights();
+            }
+            if (ring_highlights != undefined) {
+                this.ring_highlights = ring_highlights;
+                this.drawShapedHighlights('ring');
+            }
+            if (square_highlights != undefined) {
+                this.square_highlights = square_highlights;
+                this.drawShapedHighlights('square');
+            }
+        }
+
+        const json_arrows = json.arrows;
+        // remove all arrows and replace them with arrows generated from JSON arrow generators
+        //   updated with potentially different thirdPoints, offset, colors, etc.
+        this.removeArrows();
+        const json_generators =
+              Array.from(json_arrows.reduce( (gen_set, json_arrow) => gen_set.add(json_arrow.generator), new Set() ));
+        this.arrows.push(...this.generator.createArrows(json_generators, this.right_multiply));
+        this.reColorArrows();
+
+        // set up map from arrow start and end elements to passed json.arrow
+        const json_arrow_map = json_arrows.reduce(
+            (map, json_arrow) => map.set(`${json_arrow.start_element}:${json_arrow.end_element}`, json_arrow), new Map() );
+
+        this.arrows.forEach( (this_arrow) => {
+            // $FlowFixMe
+            const json_arrow /*: any */ = json_arrow_map.get(`${this_arrow.start_node.element}:${this_arrow.end_node.element}`);
+            for (const property in this_arrow) {
+                if (json_arrow.hasOwnProperty(property)) {
+                    if (property != 'start_element' && property != 'end_element') {
+                        if (property == 'thirdPoint') {
+                            const {x, y, z} = json_arrow.thirdPoint;
+                            this_arrow.thirdPoint = new THREE.Vector3(x, y, z);
                         } else {
-                            this_node[property] = json_node[property];
+                            this_arrow[property] = json_arrow[property];
                         }
                     }
                 }
-            } );
+            }
+        } );
+        this.createLines(this.arrows);
+
+        if (json.chunk != undefined) {
+            this.chunk = json.chunk;
         }
-        if (json.camera_matrix == undefined) {
-            this.setCamera(this.nodes.map( (node) => node.position ));
+    }
+
+    generateFromJSON (json /*: VisualizerElementJSON */, diagram_name /*: ?string */) {
+        this.deleteAllObjects();
+
+        this.right_multiply = true;
+
+        if (json.strategies != undefined) {
+            this.generator = new CayleyGeneratorFromStrategy(this.group, json.strategies);
+        } else if (diagram_name != undefined) {
+            this.generator = new CayleyGeneratorFromSpec(this.group, diagram_name);
+        } else {
+            this.generator = new CayleyGeneratorFromStrategy(this.group);
         }
+
+        this.setCamera(this.nodes.map( (node) => node.position ));
+        
         this.createSpheres(this.nodes);
         if (this.display_labels) {
             this.createLabels();
@@ -988,72 +1071,27 @@ export class CayleyDiagramView extends AbstractDiagramDisplay  /*:: implements V
 
         // check for highlights...
         const json_highlights = json.highlights;
-        if (json_highlights != undefined
-            && (json_highlights.background != undefined || json_highlights.ring != undefined || json_highlights.square != undefined) ) {
-            this.clearHighlights();
-            if (json_highlights.background != undefined) {
-                this.color_highlights = json_highlights.background;
-                this.drawColorHighlights();
-            }
-            if (json_highlights.ring != undefined) {
-                this.ring_highlights = json_highlights.ring;
-                this.drawShapedHighlights('ring');
-            }
-            if (json_highlights.square != undefined) {
-                this.square_highlights = json_highlights.square;
-                this.drawShapedHighlights('square');
-            }
+        this.clearHighlights();
+        if (json_highlights != undefined) {
+            this.color_highlights = json_highlights.background;
+            this.drawColorHighlights();
         }
 
-        if (json.arrows != undefined) {
-            const json_arrows = json.arrows;
-            // remove all arrows and replace them with arrows generated from JSON arrow generators
-            //   updated with potentially different thirdPoints, offset, colors, etc.
+        const json_arrows = json.arrows;
+        const json_arrowColors = json.arrowColors;
+        if (json_arrows != undefined && json_arrowColors != undefined) {
+            // create map from generator element to color
+            const generator_to_color_map /*: Map<groupElement, css_color> */ =
+                  json_arrows.reduce( (map, generator, inx) => map.set(generator, json_arrowColors[inx]), new Map() );
+
+            // remove all arrows and replace them with arrows generated from JSON arrows
             this.removeArrows();
-            const json_generators =
-                  Array.from(json_arrows.reduce( (gen_set, json_arrow) => gen_set.add(json_arrow.generator), new Set() ));
-            this.arrows.push(...this.generator.createArrows(json_generators, this.right_multiply));
-            this.reColorArrows();
+            this.generator.arrows = this.generator.createArrows(json_arrows, this.right_multiply);
 
-            // set up map from arrow start and end elements to passed json.arrow
-            const json_arrow_map = json_arrows.reduce(
-                (map, json_arrow) => map.set(`${json_arrow.start_element}:${json_arrow.end_element}`, json_arrow), new Map() );
-
-            this.arrows.forEach( (this_arrow) => {
-                // $FlowFixMe
-                const json_arrow /*: any */ = json_arrow_map.get(`${this_arrow.start_node.element}:${this_arrow.end_node.element}`);
-                for (const property in this_arrow) {
-                    if (json_arrow.hasOwnProperty(property)) {
-                        if (property != 'start_element' && property != 'end_element') {
-                            if (property == 'thirdPoint') {
-                                const {x, y, z} = json_arrow.thirdPoint;
-                                this_arrow.thirdPoint = new THREE.Vector3(x, y, z);
-                            } else {
-                                this_arrow[property] = json_arrow[property];
-                            }
-                        }
-                    }
-                }
-            } );
-        } else if (json.arrow_generators != undefined) {
-            const arrow_generators = json.arrow_generators;
-            // remove all arrows and replace them with arrows generated from JSON arrow generators and specified colors
-            this.removeArrows();
-            const json_generators =
-                  Array.from(arrow_generators.reduce( (gen_set, arrow_gen) => gen_set.add(arrow_gen.generator), new Set() ));
-            this.arrows.push(...this.generator.createArrows(json_generators, this.right_multiply));
-            this.reColorArrows();
-
-            // set up map from json generators to json colors
-            const json_gen_color_map = arrow_generators.reduce(
-                (map, arrow_gen) => map.set(arrow_gen.generator, arrow_gen.color), new Map() );
-            this.arrows.forEach( (this_arrow) => this_arrow.color = json_gen_color_map.get(this_arrow.generator) );
+            // color the resulting arrows according to generator_to_color_map
+            this.arrows.forEach( (arrow) => arrow.color = generator_to_color_map.get(arrow.generator) );
         }
         this.createLines(this.arrows);
-
-        if (json.chunk != undefined) {
-            this.chunk = json.chunk;
-        }
     }
 }
 

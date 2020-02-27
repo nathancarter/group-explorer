@@ -113,24 +113,27 @@ function showZnmIsomorphismSheet ( m /*: groupElement */, n /*: groupElement */ 
          // rectangular CD of Z_m x Z_n with arrows for a,b shown
          className : 'CDElement', groupURL : group.URL,
          x : hmar, y : vmar+hdrH+vsep, w : W, h : H,
-         arrow_generators : [ {generator: a, color: '#660000'}, {generator: b, color: '#006600'} ],
-         strategy_parameters : [ {generator: a, layout: 'linear', direction: 'X', nestingLevel: 0},
-                                 {generator: b, layout: 'linear', direction: 'Y', nestingLevel: 1} ]
+         arrows : [ a, b ],
+         arrowColors : [ '#660000', '#006600' ],
+         strategies : [ {generator: a, layout: 'linear', direction: 'X', nestingLevel: 0},
+                        {generator: b, layout: 'linear', direction: 'Y', nestingLevel: 1} ]
       },
       {
          // same as previous, plus arrow for ab
          className : 'CDElement', groupURL : group.URL,
          x : hmar+hsep+W, y : vmar+hdrH+vsep, w : W, h : H,
-         arrow_generators : [ {generator: a, color: '#660000'}, {generator: b, color: '#006600'}, {generator: ab, color: '#000066'} ],
-         strategy_parameters : [ {generator: a, layout: 'linear', direction: 'X', nestingLevel: 0},
-                                 {generator: b, layout: 'linear', direction: 'Y', nestingLevel: 1} ]
+         arrows : [ a, b, ab ],
+         arrowColors : [ '#660000', '#006600', '#000066' ],
+         strategies : [ {generator: a, layout: 'linear', direction: 'X', nestingLevel: 0},
+                        {generator: b, layout: 'linear', direction: 'Y', nestingLevel: 1} ]
       },
       {
          // circular CD of Z_mn with arrow for ab shown only
          className : 'CDElement', groupURL : group.URL,
          x : hmar+2*hsep+2*W, y : vmar+hdrH+vsep, w : W, h : H,
-         arrow_generators : [ {generator: ab, color: '#000066'} ],
-         strategy_parameters : [ {generator: ab, layout: 'circular', direction: 'XY', nestingLevel: 0} ]
+         arrows : [ ab ],
+         arrowColors : [ '#000066' ],
+         strategies : [ {generator: ab, layout: 'circular', direction: 'XY', nestingLevel: 0} ]
       },
       {
          className : 'TextElement',
@@ -206,27 +209,28 @@ function showNoZnmIsomorphismSheet ( m /*: groupElement */, n /*: groupElement *
          // rectangular CD of Z_m x Z_n with arrows for a,b shown
          className : 'CDElement', groupURL : ZmxZn.URL,
          x : hmar, y : vmar+hdrH+vsep, w : W, h : H,
-         arrow_generators : [ {generator: a, color: '#660000'}, {generator: b, color: '#006600'} ],
-         strategy_parameters : [ {generator: a, layout: 'linear', direction: 'X', nestingLevel: 0},
-                                 {generator: b, layout: 'linear', direction: 'Y', nestingLevel: 1} ]
+         arrows : [ a, b ],
+         arrowColors : [ '#660000', '#006600' ],
+         strategies : [ {generator: a, layout: 'linear', direction: 'X', nestingLevel: 0},
+                        {generator: b, layout: 'linear', direction: 'Y', nestingLevel: 1} ]
       },
       {
          // same as previous, plus arrow for maxOrdElt
          className : 'CDElement', groupURL : ZmxZn.URL,
          x : hmar+hsep+W, y : vmar+hdrH+vsep, w : W, h : H,
-          arrow_generators : [ {generator: a, color: '#660000'},
-                               {generator: b, color: '#006600'},
-                               {generator: maxOrdElt, color: '#000066'} ],
-         strategy_parameters : [ {generator: a, layout: 'linear', direction: 'X', nestingLevel: 0},
-                                 {generator: b, layout: 'linear', direction: 'Y', nestingLevel: 1} ]
+         arrows : [ a, b, maxOrdElt ],
+         arrowColors : [ '#660000', '#006600', '#000066' ],
+         strategies : [ {generator: a, layout: 'linear', direction: 'X', nestingLevel: 0},
+                        {generator: b, layout: 'linear', direction: 'Y', nestingLevel: 1} ]
       },
       {
          // circular CD of Z_mn with arrow for maxOrdElt shown only
          className : 'CDElement', groupURL : ZmxZn.URL,
          x : hmar+2*hsep+2*W, y : vmar+hdrH+vsep, w : W, h : H,
-         arrow_generators : [ {generator: maxOrdElt, color: '#000066'} ],
-         strategy_parameters : [ {generator: maxOrdElt, layout: 'rotated', direction: 'XY', nestingLevel: 0 },
-                                 {generator: b, layout: 'linear', direction: 'Y', nestingLevel: 1} ]
+         arrows : [ maxOrdElt ],
+         arrowColors : [ '#000066' ],
+         strategies : [ {generator: maxOrdElt, layout: 'rotated', direction: 'XY', nestingLevel: 0 },
+                        {generator: b, layout: 'linear', direction: 'Y', nestingLevel: 1} ]
       },
       {
          className : 'TextElement',

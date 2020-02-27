@@ -140,4 +140,13 @@ As nearly as I can tell the problem stems from the browser being told to deal wi
 This seems a bit more fragile to me, and it requires a bit more js to manage, but it turns out to be easier to re-use the js code and menu structure across the application, since menus and sub-menus all look pretty much the same now.
 
 And, of course, it keeps Safari happy.
+
+<hr>
+
+For the three.js Vector3.project function to work correctly, the scene needs to be rendered after it's been created.
+
+<ht>
+
+Chrome (and others) cannot display more than 16 active WebGL contexts at once
+
 <hr>
