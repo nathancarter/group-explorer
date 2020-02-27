@@ -105,6 +105,7 @@ function receiveInitialSetup (event /*: MessageEvent */) {
    const event_data /*: MSG_external<CycleGraphJSON> */ = (event.data /*: any */);
    if (event_data.source == 'external') {
       Cycle_Graph_View.fromJSON(event_data.json);
+      Cycle_Graph_View.queueShowGraphic();
       VC.enableChangeBroadcast(() => Cycle_Graph_View.toJSON());
       window.postMessage( STATE_LOADED_MESSAGE, myDomain );
    } else if (   event_data.source == 'editor'
