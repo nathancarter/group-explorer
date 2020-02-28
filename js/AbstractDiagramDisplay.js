@@ -110,10 +110,14 @@ export class AbstractDiagramDisplay {
         return ((this.renderer.domElement.parentElement /*: any */) /*: HTMLElement */);
     }
 
+    set container (container /*: HTMLElement */) {
+        $(container).append(this.renderer.domElement);
+        this.resize();
+    }
+
     enableTrackballControl (container /*: ?HTMLElement */) {
         if (container != undefined) {
-            container.append(this.renderer.domElement);
-            this.resize();
+            this.container = container;
         }
 
         if (this.container != undefined) {

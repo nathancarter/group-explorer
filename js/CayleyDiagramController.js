@@ -214,7 +214,7 @@ class DiagramChoice {
 
    static selectDiagram(diagram /*: ?string */, andDisplay /*:: ?: boolean */ = true) {
       $('#bodyDouble').click();
-      Cayley_Diagram_View.setDiagram(Group, diagram);
+      Cayley_Diagram_View.diagram_name = diagram;
       Chunking.enable();
       DiagramChoice._showChoice();
       update();
@@ -493,11 +493,9 @@ function refineStrategies (strategies /*: Array<StrategyParameters> */) {
 
 function updateStrategies (new_strategies /*: Array<StrategyParameters> */) {
    const strategies = refineStrategies(new_strategies);
-   Cayley_Diagram_View.setDiagram(Group, undefined, strategies);
+   Cayley_Diagram_View.strategy_parameters = strategies;
    update();
 }
-
-
 
 
 /* Load, initialize diagram control */

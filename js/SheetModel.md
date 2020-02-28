@@ -1208,15 +1208,11 @@ class WrappedCDView /*:: implements VizDisplay<CayleyDiagramJSON & VisualizerEle
                     && WrappedCDView.view.group.URL == group.URL
                     && generatingJSON.strategies == undefined)
                 {
-                    // Can reuse WrappedCDView.view as is, with only the highlights changed
-                    WrappedCDView.view.clearHighlights();
-                    if (generatingJSON.highlights != undefined)
-                        WrappedCDView.view.color_highlights = generatingJSON.highlights.background;
-                    WrappedCDView.view.drawColorHighlights();
+                    // Can reuse WrappedCDView.view as is, just change the highlights
+                    WrappedCDView.view.generateHighlights(generatingJSON.highlights);
                 } else {
-                    // Can't reuse WrappedCDView.view as is, just initialize as usual
-                    WrappedCDView.view.group = group;
-                    WrappedCDView.view.generateFromJSON(generatingJSON, diagram);
+                    // Can't reuse WrappedCDView.view as is, initialize as usual
+                    WrappedCDView.view.generateFromJSON(group, diagram, generatingJSON);
                 }
             }
             this.lastImage = WrappedCDView.view.getImage();  // See Image reuse discussion above
@@ -1242,9 +1238,7 @@ class WrappedCDView /*:: implements VizDisplay<CayleyDiagramJSON & VisualizerEle
             WrappedCDView.view.wrapper = this;  // Shows that WrappedCDView.view is configured for this WrappedCDView instance
             // group and json may not be available during initialization
             if (this.group != undefined) {
-                WrappedCDView.view.group = this.group;
-                if (this.json != undefined)
-                    WrappedCDView.view.fromJSON(this.json);
+                WrappedCDView.view.fromJSON(this.group, this.json);
             }
         }
         WrappedCDView.view.setSize(this.size.w, this.size.h);
@@ -1285,7 +1279,7 @@ class WrappedCDView /*:: implements VizDisplay<CayleyDiagramJSON & VisualizerEle
             this.initialParameters.generatingJSON = json;  // JSON for generation from CreateNewSheet
         } else {
             const view = this.getView();
-            view.fromJSON( ((json /*: any */) /*: CayleyDiagramJSON */) );  // JSON received while editing
+            view.fromJSON(this.group, ((json /*: any */) /*: CayleyDiagramJSON */) );  // JSON received while editing
             this.json = view.toJSON();
             this.resetImage();
         }
@@ -1307,7 +1301,7 @@ export class CDElement extends VisualizerElement/*:: <CayleyDiagramJSON & Visual
         return new WrappedCDView(options);
     }
     getEditPage () {
-        let url = './CayleyDiagram.html?';
+        let url = './CayleyDiagram.html?waitForMessage&';
         return url;
     }
     getClassName () { return 'CDElement'; }

@@ -68,9 +68,12 @@ function load() {
 
 // Complete setup functions that depend on the Group and the MathML cache
 function completeSetup(diagram_name /*: ?string */) {
-   // Draw Cayley diagram in main panel, but don't animate it yet
-   Cayley_Diagram_View.enableTrackballControl($('#graphic')[0]);
-   Cayley_Diagram_View.setDiagram(Group, diagram_name);
+   // Set up Cayley diagram in main panel
+   Cayley_Diagram_View.container = $('#graphic')[0]; // append empty Cayley_Diagram_View to main #graphic panel
+   Cayley_Diagram_View.render();  // display the pink background during startup (less abrupt than a momentary jet black screen)
+   Cayley_Diagram_View.enableTrackballControl();     // enable drag-and-drop animation, but don't actually start it yet
+   Cayley_Diagram_View.group = Group;		     // set group and (optional) diagram name in Cayley_Diagram_View
+   Cayley_Diagram_View.diagram_name = diagram_name;  //   and generate their Cayley diagram
 
    // This just starts building these panels -- no need to wait until they complete
    const highlighters = [
@@ -85,9 +88,6 @@ function completeSetup(diagram_name /*: ?string */) {
    // Create header from group name
    $('#header').html(MathML.sans('<mtext>Cayley Diagram for&nbsp;</mtext>' + Group.name));
 
-   // Start animating the main view
-   Cayley_Diagram_View.render();
-
    // Register the splitter with jquery-resizable
    (($('#vert-container') /*: any */) /*: JQuery & {resizable: Function} */).resizable({
       handleSelector: '#splitter',
@@ -99,36 +99,52 @@ function completeSetup(diagram_name /*: ?string */) {
    // Register event handlers
    registerCallbacks();
 
-   // this happens only once, after initiation, doesn't it?
-   window.addEventListener('message', receiveInitialSetup, false);
+   // If there is a 'waitForMessage' search parameter in the URL as well as a 'groupURL',
+   //   this is an editor started by a Sheet.
+   //   Start a 'message' event handler and await the configuration message
+   const href_URL = new URL(window.location.href);
+   if (href_URL.searchParams.get('groupURL') != null && href_URL.searchParams.get('waitForMessage') != null) {
+      // this only happens once, right after initialization
+      window.addEventListener('message', receiveInitialSetup, false);
 
-   // let any GE window that spawned this know that we're ready to receive signals
-   window.postMessage( LISTENER_READY_MESSAGE, myDomain );
-   // or if any external program is using GE as a service, let it know we're ready, too
-   window.parent.postMessage( LISTENER_READY_MESSAGE, '*' );
+      // let any GE window that spawned this know that we're ready to receive signals
+      window.postMessage( LISTENER_READY_MESSAGE, myDomain );
+      // or if any external program is using GE as a service, let it know we're ready, too
+      window.parent.postMessage( LISTENER_READY_MESSAGE, '*' );
+   } else {
+      // Otherwise this is a normal Cayley diagram visualizer execution
+      // Start animating the main view
+      Cayley_Diagram_View.render();
+   }
 
    // Load icon strip in upper right-hand corner
    VC.load(Group, HELP_PAGE);
 }
 
-// FIXME: can this be invoked more than once with 'external' message?
-//   (what if there are two editors around?)
+// When functioning as an editor for a Sheet this receives the startup configuration
 function receiveInitialSetup (event /*: MessageEvent */) {
    if (event.data == undefined)
       return;
 
    const event_data /*: MSG_external<CayleyDiagramJSON> */ = (event.data /*: any */);
    if (event_data.source == 'external') {
+      // Get json from message and display it
       const json_data = event_data.json;
-      Cayley_Diagram_View.fromJSON(json_data);
+      Cayley_Diagram_View.fromJSON(Group, json_data);
       CVC.updateFromView();
       DC.update();
+      Cayley_Diagram_View.render();  // Starts automation
+
+      // Acknowledge message and remove 'message' listener  (this is the only consequential message it will get)
+      window.removeEventListener('message', receiveInitialSetup, false);
       window.postMessage( STATE_LOADED_MESSAGE, myDomain );
+
+      // Set up periodic check for changes and enable their broadcast
       VC.enableChangeBroadcast(() => Cayley_Diagram_View.toJSON());
       setInterval( () => VC.broadcastChange(), 1000);
    } else if (   event_data.source == 'editor'
-                 || ((event.data /*: any */) /*: string */) == LISTENER_READY_MESSAGE
-                 || ((event.data /*: any */) /*: string */) == STATE_LOADED_MESSAGE)
+              || ((event.data /*: any */) /*: string */) == LISTENER_READY_MESSAGE
+              || ((event.data /*: any */) /*: string */) == STATE_LOADED_MESSAGE)
    {
       // we're just receiving our own messages -- ignore them
    } else {

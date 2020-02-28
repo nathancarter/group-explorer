@@ -123,7 +123,7 @@ const CAYLEY_DIAGRAM_DISPLAY_GROUP_NAMES = ['labels', 'arrowheads', 'highlights'
 
 const DEFAULT_ARC_OFFSET = 0.2;
 
-export class CayleyDiagramView extends AbstractDiagramDisplay  /*:: implements VizDisplay<CayleyDiagramJSON> */ {
+export class CayleyDiagramView extends AbstractDiagramDisplay {
 /*::
     display_labels: boolean;
     _label_scale_factor: float;
@@ -413,6 +413,17 @@ export class CayleyDiagramView extends AbstractDiagramDisplay  /*:: implements V
 
     clearHighlightDefinitions () {
         this.color_highlights = this.ring_highlights = this.square_highlights = undefined;
+    }
+
+    generateHighlights (highlights /*: ?{background: Array<css_color> | void} */) {
+        this.clearHighlights();
+        if (highlights != undefined) {
+            this.color_highlights = highlights.background;
+            this.drawColorHighlights();
+        }        
+    }
+
+    setHighlightDefinitions (color_highlights /*: ?Array<css_color> */, ring_highlights /*: ?Array<?css_color> */, square_highlights /*: ?Array<?css_color> */) {
     }
 
     clearHighlights () {
@@ -783,29 +794,8 @@ export class CayleyDiagramView extends AbstractDiagramDisplay  /*:: implements V
 
     /////////////////////   Cayley diagram routines   /////////////////////////////
 
-    get group () /*: XMLGroup */ {
-        return this._group;
-    }
-
-    set group (group /*: XMLGroup */) {
-        this.sphere_base_radius = 0.3 / Math.sqrt(group.order);
-        this._group = group;
-    }
-        
-    setDiagram (group /*: XMLGroup */, diagram_name /*: ?string */, strategy_parameters /*: ?Array<StrategyParameters> */) {
-        this.group = group;
-        this.clearHighlightDefinitions();
-
-        if (diagram_name != undefined) {
-            this.generator = new CayleyGeneratorFromSpec(group, diagram_name);
-        } else {
-            this.generator = new CayleyGeneratorFromStrategy(group, strategy_parameters);
-        }
-        this.drawFromModel();
-    }
-
-    get isGenerated () /*: boolean */ {
-        return this.generator.generatesFromStrategy;
+    get arrows () {
+        return this.generator.arrows;
     }
 
     get chunk () /*: ?integer */ {
@@ -826,16 +816,45 @@ export class CayleyDiagramView extends AbstractDiagramDisplay  /*:: implements V
         return (this.isGenerated) ? undefined : ((this.generator /*: any */) /*: CayleyGeneratorFromSpec */).diagram_name;
     }
 
-    get strategy_parameters () /*: ?Array<StrategyParameters> */ {
-        return (this.isGenerated) ? ((this.generator /*: any */) /*: CayleyGeneratorFromStrategy */).strategy_parameters : undefined;
+    set diagram_name (diagram_name /*: ?string */) {
+        if (diagram_name == undefined) {
+            this.strategy_parameters = undefined;
+        } else {
+            this.generator = new CayleyGeneratorFromSpec(this.group, diagram_name);
+        }
+
+        this.drawFromModel();            
+    }
+        
+    setDiagram (group /*: XMLGroup */, diagram_name /*: ?string */, strategy_parameters /*: ?Array<StrategyParameters> */) {
+        this.group = group;
+
+        if (diagram_name != undefined) {
+            this.generator = new CayleyGeneratorFromSpec(group, diagram_name);
+        } else {
+            this.generator = new CayleyGeneratorFromStrategy(group, strategy_parameters);
+        }
+        this.drawFromModel();
     }
 
+    get group () /*: XMLGroup */ {
+        return this._group;
+    }
+
+    set group (group /*: XMLGroup */) {
+        this.sphere_base_radius = 0.3 / Math.sqrt(group.order);
+        if (this.group != group) {
+            this.clearHighlightDefinitions();
+        }            
+        this._group = group;
+    }
+
+    get isGenerated () /*: boolean */ {
+        return this.generator.generatesFromStrategy;
+    }
+    
     get nodes () {
         return this.generator.nodes;
-    }
-
-    get arrows () {
-        return this.generator.arrows;
     }
 
     get right_multiply () /*: boolean */ {
@@ -857,6 +876,16 @@ export class CayleyDiagramView extends AbstractDiagramDisplay  /*:: implements V
             this.removeArrows();
             this.addArrows(Array.from(generators));
         }
+    }
+
+    get strategy_parameters () /*: ?Array<StrategyParameters> */ {
+        return (this.isGenerated) ? ((this.generator /*: any */) /*: CayleyGeneratorFromStrategy */).strategy_parameters : undefined;
+    }
+
+    set strategy_parameters (strategy_parameters /*: ?Array<StrategyParameters> */) {
+        this.generator = new CayleyGeneratorFromStrategy(this.group, strategy_parameters);
+
+        this.drawFromModel();
     }
     
     // in model and view
@@ -899,58 +928,51 @@ export class CayleyDiagramView extends AbstractDiagramDisplay  /*:: implements V
     ////////////////////////////   JSON routines   ////////////////////////////////
 
    toJSON () /*: CayleyDiagramJSON */ {
-        const tmp  = Object.assign( {}, {
-            background: this.background,
-            camera_matrix: this.camera.matrix.toArray(),
-            camera_up: this.camera.up.toArray(),
-            fog_level: this.fog_level,
-            line_width: this._line_width,
-            sphere_base_radius: this.sphere_base_radius,
-            sphere_scale_factor: this.sphere_scale_factor,
-            zoom_level: this.zoom_level,
+       const tmp  = Object.assign( {}, {
+           background: this.background,
+           camera_matrix: this.camera.matrix.toArray(),
+           camera_up: this.camera.up.toArray(),
+           fog_level: this.fog_level,
+           line_width: this._line_width,
+           sphere_base_radius: this.sphere_base_radius,
+           sphere_scale_factor: this.sphere_scale_factor,
+           zoom_level: this.zoom_level,
 
-            arrowhead_placement: this.arrowhead_placement,
-            label_scale_factor: this.label_scale_factor,
+           arrowhead_placement: this.arrowhead_placement,
+           label_scale_factor: this.label_scale_factor,
 
-            groupURL: this.group.URL,
-            right_multiply: this.right_multiply,
-            nodes: this.nodes.map( (node) => {
-                const {position, element, label} = node;
-                const {x, y, z} = position;
-                return {position: {x, y, z}, element, label};
-            } ),
-            arrows: this.arrows.map( (arrow) => {
-                const {start_node, end_node, generator, thirdPoint, offset, color} = arrow;
-                const start_element = start_node.element;
-                const end_element = end_node.element;
-                return {start_element, end_element, generator, thirdPoint, offset, color};
-            } ),
-        } );
+           groupURL: this.group.URL,
+           right_multiply: this.right_multiply,
+           nodes: this.nodes.map( (node) => {
+               const {position, element, label} = node;
+               const {x, y, z} = position;
+               return {position: {x, y, z}, element, label};
+           } ),
+           arrows: this.arrows.map( (arrow) => {
+               const {start_node, end_node, generator, thirdPoint, offset, color} = arrow;
+               const start_element = start_node.element;
+               const end_element = end_node.element;
+               return {start_element, end_element, generator, thirdPoint, offset, color};
+           } ),
+       } );
 
-        if (this.isGenerated) {
-            tmp.strategy_parameters = ((this.strategy_parameters /*: any */) /*: Array<StrategyParameters> */);
-            tmp.chunk = ((this.chunk /*: any */) /*: integer */);
-        } else {
-            tmp.diagram_name = ((this.diagram_name /*: any */) /*: string */);
-        }
+       if (this.isGenerated) {
+           tmp.strategy_parameters = ((this.strategy_parameters /*: any */) /*: Array<StrategyParameters> */);
+           tmp.chunk = ((this.chunk /*: any */) /*: integer */);
+       } else {
+           tmp.diagram_name = ((this.diagram_name /*: any */) /*: string */);
+       }
 
-        if (this.color_highlights != undefined || this.ring_highlights != undefined || this.square_highlights != undefined) {
-            tmp.highlights = {};
-            if (this.color_highlights != undefined) {
-                tmp.highlights.background = this.color_highlights;
-            }
-            if (this.ring_highlights != undefined) {
-                tmp.highlights.ring = this.ring_highlights;
-            }
-            if (this.square_highlights != undefined) {
-                tmp.highlights.square = this.square_highlights;
-            }
-        }
-
-        return tmp;
+       tmp.color_highlights = this.color_highlights;
+       tmp.ring_highlights = this.ring_highlights;
+       tmp.square_highlights = this.square_highlights;
+       
+       return tmp;
     }
 
-    fromJSON (json /*: CayleyDiagramJSON */) {
+    fromJSON (group /*: XMLGroup */, json /*: CayleyDiagramJSON */ = {}) {
+        this.group = group;
+
         Object.keys(json).forEach( (name) => {
             switch (name) {
             case 'background':		this.background = json.background;;			break;
@@ -1052,7 +1074,9 @@ export class CayleyDiagramView extends AbstractDiagramDisplay  /*:: implements V
         }
     }
 
-    generateFromJSON (json /*: VisualizerElementJSON */, diagram_name /*: ?string */) {
+    generateFromJSON (group /*: XMLGroup */, diagram_name /*: ?string */, json /*: VisualizerElementJSON */) {
+        this.group = group;
+        
         this.deleteAllObjects();
 
         this.right_multiply = true;
