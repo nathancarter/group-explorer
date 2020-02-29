@@ -7,7 +7,7 @@
       <link rel="icon" type="image/png" href="./images/favicon.png"></link>
       <link rel="stylesheet" href="./style/fonts.css" type="text/css">
 
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
       <script type="text/x-mathjax-config">
        MathJax.Hub.Config({
       	  CommonHTML: {
@@ -15,14 +15,16 @@
           },
        });
       </script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=MML_CHTML"></script>
-      <script src="./build/allGroupExplorer.js"></script>
-      <script src="./CyclicInfo.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.6/MathJax.js?config=MML_CHTML"></script>
+      <script type="module">
+       import {load} from "./CyclicInfo.js";
+       window.addEventListener('load', load, {once: true});
+      </script>
    </head>
 
    <body>
       <template id="header">
-         <h3>${MathML.sans('<mtext>Results of &#8220;Cyclic group&#8221; computation for&nbsp;</mtext>' + group.name)}</h3>
+         <h3>${MathML.sans('<mtext>Results of “Cyclic group” computation for&nbsp;</mtext>' + group.name)}</h3>
       </template>
       <template id="cyclic">
          <p>${MathML.sans(group.name)} is <a href="./help/rf-groupterms/index.html#cyclic-group">cyclic</a>;

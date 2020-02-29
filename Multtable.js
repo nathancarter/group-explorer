@@ -1,36 +1,39 @@
 // @flow
 
-/*::
-import DisplayMulttable from './js/DisplayMulttable.js';
-import type {MulttableJSON} from './js/DisplayMulttable.js';
 import GEUtils from './js/GEUtils.js';
 import Library from './js/Library.js';
-import Log from './js/Log.md';
-import MathML from './js/MathML.md';
-import Menu from './js/Menu.md';
-import Multtable from './js/Multtable.js';
-import Template from './js/Template.md';
+import Log from './js/Log.js';
+import MathML from './js/MathML.js';
+import Menu from './js/Menu.js';
+import {MulttableView, createFullMulttableView} from './js/MulttableView.js';
+import {LISTENER_READY_MESSAGE, STATE_LOADED_MESSAGE} from './js/SheetModel.js';
+import Template from './js/Template.js';
 import XMLGroup from './js/XMLGroup.js';
 
-import VC from './visualizerFramework/visualizer.js';
-import SSD from './subsetDisplay/subsets.js';
+import * as SSD from './js/SubsetHighlightController.js';
 
-import type {MSG_listenerReady, MSG_stateLoaded, MSG_external, MSG_editor} from './js/SheetModel.js';
+import * as VC from './visualizerFramework/visualizer.js';
+export {broadcastChange} from './visualizerFramework/visualizer.js';
+
+// $FlowFixMe -- external module imports described in flow-typed directory
+import {THREE} from './lib/externals.js';
+
+export {load};
+
+/*::
+import type {MulttableJSON} from './js/MulttableView.js';
+import type {MSG_external, MSG_editor} from './js/SheetModel.js';
 
 declare type rowXcol = {row: number, col: number};
- */
+*/
 
-/* Global variables */
-var group		/*: XMLGroup */,		// group about which information will be displayed
-    multtable		/*: Multtable */,		// data being displayed in large diagram
-    graphicContext	/*: DisplayMulttable */,	// graphic context for large diagram
-    canEmit		/*: boolean */ = true;		// flag: whether to notify parent window of table changes
+/* Module variables */
+let Group		/*: XMLGroup */;		// group about which information will be displayed
+let Multtable_View	/*: MulttableView */;
+
 const HELP_PAGE = 'help/rf-um-mt-options/index.html';
 
 const myDomain = new URL(window.location.href).origin;
-
-/* Initial entry to javascript, called once after document load */
-window.addEventListener('load', load, {once: true});
 
 /* Register static event managers (called after document is assembled) */
 function registerCallbacks() {
@@ -41,6 +44,9 @@ function registerCallbacks() {
       GEUtils.cleanWindow();
       mouseEvent.preventDefault();
    });
+   $('#rainbow')[0].addEventListener('click', () => chooseColoration('rainbow'));
+   $('#grayscale')[0].addEventListener('click', () => chooseColoration('grayscale'));
+   $('#none')[0].addEventListener('click', () => chooseColoration('none'));
 
    // Large graphic events
    LargeGraphic.init();
@@ -52,55 +58,50 @@ function registerCallbacks() {
    $('#separation-slider')[0].addEventListener('input', separation);
 }
 
-/* Load the static components of the page */
+// Load group from invocation URL, then preload MathML cache, then complete setup
 function load() {
-   // Promise to load group from invocation URL
-   const groupLoad = Library
+   Library
       .loadFromURL()
-      .then( (_group) => group = _group )
+      .then( (_group) => {
+         Group = _group;
+         MathML.preload(Group)
+            .then( () => completeSetup() )
+            .catch( Log.err );
+      } )
       .catch( Log.err );
-
-   // Promise to load visualizer framework around visualizer-specific code in this file
-   const bodyLoad = VC.load();
-
-   // When group and framework are loaded, insert subset_page and complete rest of setup
-   Promise.all([groupLoad, bodyLoad])
-          .then( () => 
-             MathML.preload(group).then( () => { // Preload MathML cache for subsetDisplay
-                const highlighters = [
-                   {handler: highlightByBackground, label: 'Background'},
-                   {handler: highlightByBorder, label: 'Border'},
-                   {handler: highlightByCorner, label: 'Corner'}
-                ];
-                // Load subset display, and complete setup
-                SSD.load($('#subset-control'), highlighters).then(completeSetup)
-             } )
-          )
-          .catch( Log.err );
 }
 
-/* Now that subsetDisplay is loaded, complete the setup */
 function completeSetup() {
+   const highlighters = [
+      {handler: highlightByBackground, label: 'Background'},
+      {handler: highlightByBorder, label: 'Border'},
+      {handler: highlightByCorner, label: 'Corner'}
+   ];
+   // Load subset display, and complete setup
+   SSD.load($('#subset-control'), highlighters, clearHighlights, Group);
+
    // Create header from group name
-   $('#header').html(MathML.sans('<mtext>Multiplication Table for&nbsp;</mtext>' + group.name));
+   $('#header').html(MathML.sans('<mtext>Multiplication Table for&nbsp;</mtext>' + Group.name));
 
    // Create list of subgroups for Organize by subgroup menu:
    $('#organization-choices').html('').append(
-      $(`<li action="organizeBySubgroup(${group.subgroups.length-1})">`).html(MathML.sansText('none')));
-   for (let subgroupIndex = 1; subgroupIndex < group.subgroups.length-1; subgroupIndex++) {
-      const subgroup = group.subgroups[subgroupIndex];
+      $(`<li action="organizeBySubgroup(${Group.subgroups.length-1})">`).html(MathML.sansText('none')));
+   for (let subgroupIndex = 1; subgroupIndex < Group.subgroups.length-1; subgroupIndex++) {
+      const subgroup = Group.subgroups[subgroupIndex];
       const option /*: html */ =  eval(Template.HTML('organization-choice-template'));
       $('#organization-choices').append(option);
    }
-   MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'organization-choices'],
-                     () => {
-                        $('#organization-choice').html($('#organization-choices > li:first-of-type').html());
-                        $('#organization-choices').hide();
-                     });
+   MathJax.Hub.Queue(
+      ['Typeset', MathJax.Hub, 'organization-choices'],
+      () => {
+         $('#organization-choice').html($('#organization-choices > li:first-of-type').html());
+         $('#organization-choices').hide();
+      }
+   );
 
    // Draw Multtable in graphic
-   multtable = new Multtable(group);
-   graphicContext = new DisplayMulttable({container: $('#graphic')});
+   Multtable_View = createFullMulttableView({container: $('#graphic')});
+   Multtable_View.group = Group;
 
    // Register event handlers
    registerCallbacks();
@@ -111,51 +112,48 @@ function completeSetup() {
       handleSelector: '#splitter',
       resizeHeight: false,
       resizeWidthFrom: 'left',
-      onDrag: resizeGraphic,
+      onDrag: () => Multtable_View.resize(),
    });
 
    VC.showPanel('#subset-control');
 
    resizeBody();
 
-   window.addEventListener( 'message', function ( event /*: MessageEvent */ ) {
-      const event_data /*: MSG_external<MulttableJSON> */ = (event.data /*: any */);
-      if (typeof event_data == 'undefined' || event_data.source != 'external') {
-         Log.warn('unknown message received in Multtable.js:');
-         Log.warn(event.data);
-         return;
-      }
-      canEmit = false; // don't spam notifications of changes about to happen
-      graphicContext.fromJSON( event_data.json, multtable );
-      graphicContext.showLargeGraphic( multtable );
-      if ( event_data.json.separation != undefined )
-         $( '#separation-slider' ).val( event_data.json.separation * 100 );
-      if ( event_data.json.coloration != undefined )
-         $( '#' + event_data.json.coloration.toString() ).prop( 'checked', true );
-      if ( event_data.json.organizingSubgroup != undefined )
-         $( '#organization-select' ).val( event_data.json.organizingSubgroup );
-      canEmit = true; // restore default behavior
-      const msg /*: MSG_stateLoaded */ = 'state loaded';
-      window.postMessage( msg, myDomain )
-   }, false );
+   window.addEventListener('message', receiveInitialSetup, false);
 
-   const msg /*: MSG_listenerReady */ = 'listener ready';
    // let any GE window that spawned this know that we're ready to receive signals
-   window.postMessage( msg, myDomain );
+   window.postMessage( LISTENER_READY_MESSAGE, myDomain );
    // or if any external program is using GE as a service, let it know we're ready, too
-   window.parent.postMessage( msg, '*' );
+   window.parent.postMessage( LISTENER_READY_MESSAGE, '*' );
 
-   // No need to keep the "find group" icon visible if the group was loaded from a URL
-   if ( group.URL ) $( '#find-group' ).hide();
+   // Load icon strip in upper right-hand corner
+   VC.load(Group, HELP_PAGE);
 }
 
-function emitStateChange () {
-   if ( canEmit ) {
-      const msg /*: MSG_editor<MulttableJSON> */ = {
-         source : 'editor',
-         json : graphicContext.toJSON( multtable )
-      };
-      window.postMessage( msg, myDomain );
+function receiveInitialSetup (event /*: MessageEvent */) {
+   if (event.data == undefined)
+      return;
+
+   const event_data /*: MSG_external<MulttableJSON> */ = (event.data /*: any */);
+   if (event_data.source == 'external') {
+      const json_data = event_data.json;
+      if (json_data.separation != undefined)
+         $('#separation-slider').val(json_data.separation * 100);
+      if (json_data.coloration != undefined)
+         $('#' + json_data.coloration.toString()).prop('checked', true);
+      if (json_data.organizingSubgroup != undefined)
+          organizeBySubgroup(json_data.organizingSubgroup);
+      Multtable_View.fromJSON(json_data);
+      VC.enableChangeBroadcast(() => Multtable_View.toJSON());
+      window.postMessage( STATE_LOADED_MESSAGE, myDomain )
+   } else if (   event_data.source == 'editor'
+              || ((event.data /*: any */) /*: string */) == LISTENER_READY_MESSAGE
+              || ((event.data /*: any */) /*: string */) == STATE_LOADED_MESSAGE)
+   {
+      // we're just receiving our own messages -- ignore them
+   } else {
+      Log.warn('unknown message of origin $[event.orgin} received in Multtable.js:');
+      Log.warn(event.data);
    }
 }
 
@@ -179,31 +177,24 @@ function toggleOrganizationChoices() {
 }
 
 /* Display multtable grouped by group.subgroups[subgroupIndex]
- *   (Note that the group itself is group.subgroups[group.subgroups.length - 1] */
+ *   (Note that the group itself is Group.subgroups[Group.subgroups.length - 1] */
 function organizeBySubgroup(subgroupIndex /*: number */) {
-   multtable.organizeBySubgroup(subgroupIndex);
+   Multtable_View.organizeBySubgroup(subgroupIndex);
 
    // copy already-formatted text from menu
    $('#organization-choice').html(
-      $(`#organization-choices > li:nth-of-type(${(subgroupIndex == group.subgroups.length - 1) ? 1 : subgroupIndex+1})`).html());
+      $(`#organization-choices > li:nth-of-type(${(subgroupIndex == Group.subgroups.length - 1) ? 1 : subgroupIndex+1})`).html());
    $('#organization-choices').hide();
-   emitStateChange();
-   graphicContext.showLargeGraphic(multtable);
 }
 
 /* Set separation between cosets in multtable display, and re-draw graphic */
 function separation() {
-//   multtable.setSeparation( (($('#separation-slider')[0] /*: any */) /*: HTMLInputElement */).valueAsNumber/100 );
-   multtable.setSeparation( parseInt($('#separation-slider').val())/100 );
-   emitStateChange();
-   graphicContext.showLargeGraphic(multtable);
+   Multtable_View.separation = parseInt($('#separation-slider').val())/100;
 }
 
 /* Set coloration option in multtable, and re-draw graphic */
-function chooseColoration(coloration /*: 'Rainbow' | 'Grayscale' | 'None' */) {
-   multtable.coloration = coloration;
-   emitStateChange();
-   graphicContext.showLargeGraphic(multtable);
+function chooseColoration(coloration /*: 'rainbow' | 'grayscale' | 'none' */) {
+   Multtable_View.coloration = coloration;
 }
 
 // Resize the body, including the graphic
@@ -211,39 +202,26 @@ function resizeBody() {
    $('#bodyDouble').height(window.innerHeight);
    $('#bodyDouble').width(window.innerWidth);
 
-   resizeGraphic();
-}
-
-function resizeGraphic() {
-   graphicContext.canvas.width = $('#graphic').width();
-   graphicContext.canvas.height = $('#graphic').height();
-   graphicContext.showLargeGraphic(multtable);
+   Multtable_View.resize();
 }
 
 /* Highlighting routines */
 function highlightByBackground(elements /*: Array<Array<groupElement>> */) {
-   multtable.highlightByBackground(elements);
-   emitStateChange();
-   graphicContext.showLargeGraphic(multtable);
+   Multtable_View.highlightByBackground(elements);
 }
 
 function highlightByBorder(elements /*: Array<Array<groupElement>> */) {
-   multtable.highlightByBorder(elements);
-   emitStateChange();
-   graphicContext.showLargeGraphic(multtable);
+   Multtable_View.highlightByBorder(elements);
 }
 
 function highlightByCorner(elements /*: Array<Array<groupElement>> */) {
-   multtable.highlightByCorner(elements);
-   emitStateChange();
-   graphicContext.showLargeGraphic(multtable);
+   Multtable_View.highlightByCorner(elements);
 }
 
 function clearHighlights() {
-   multtable.clearHighlights();
-   emitStateChange();
-   graphicContext.showLargeGraphic(multtable);
+   Multtable_View.clearHighlights();
 }
+
 /*
  * Large graphic mouse events
  *   display/clear label -- click / tap
@@ -301,8 +279,7 @@ class LargeGraphic {
 
       case 'wheel':
          GEUtils.cleanWindow();
-         (((mouseEvent /*: any */) /*: WheelEvent */).deltaY < 0) ? graphicContext.zoomIn() : graphicContext.zoomOut();
-         graphicContext.showLargeGraphic(multtable);
+         (((mouseEvent /*: any */) /*: WheelEvent */).deltaY < 0) ? Multtable_View.zoomIn() : Multtable_View.zoomOut();
          break;
 
       case 'mousedown':
@@ -450,7 +427,7 @@ class LargeGraphic {
       const bounding_rectangle = $('#graphic')[0].getBoundingClientRect();
       const canvasX = event.clientX - bounding_rectangle.left;
       const canvasY = event.clientY - bounding_rectangle.top;
-      return graphicContext.xy2rowXcol(canvasX, canvasY);
+      return Multtable_View.xy2rowXcol(canvasX, canvasY);
    }
 
    static displayNewLabel(loc /*: eventLocation */) /*: ?HTMLElement */ {
@@ -460,7 +437,7 @@ class LargeGraphic {
       if (rowXcol == undefined || hasLabel) {
          return null;
       } else {
-         const element = group.mult(multtable.elements[rowXcol.row], multtable.elements[rowXcol.col]);
+         const element = Group.mult(Multtable_View.elements[rowXcol.row], Multtable_View.elements[rowXcol.col]);
          const $label = $(eval(Template.HTML('node-label-template')))
                           .appendTo('#graphic');
          Menu.setMenuLocation($label, loc);
@@ -493,22 +470,19 @@ class LargeGraphic {
       const [startCentroid, startDiameter] = LargeGraphic.centroidAndDiameter(LargeGraphic.touches(start)),
             [endCentroid, endDiameter] = LargeGraphic.centroidAndDiameter(LargeGraphic.touches(end)),
             zoomFactor = endDiameter / startDiameter;
-      graphicContext
+      Multtable_View
          .zoom(endDiameter / startDiameter)
          .move(endCentroid.clientX - startCentroid.clientX, endCentroid.clientY - startCentroid.clientY);
-      graphicContext.showLargeGraphic(multtable);
    }
 
    static mouseMove(start /*: MouseEvent */, end /*: MouseEvent */) {
       GEUtils.cleanWindow();
-      graphicContext.move(end.clientX - start.clientX, end.clientY - start.clientY);
-      graphicContext.showLargeGraphic(multtable);
+      Multtable_View.move(end.clientX - start.clientX, end.clientY - start.clientY);
    }
 
    static zoom2fit() {
       GEUtils.cleanWindow();
-      graphicContext.reset();
-      graphicContext.showLargeGraphic(multtable);
+      Multtable_View.resetZoom();
    }
 
    static dragStart(loc /*: eventLocation */) /*: ?HTMLElement */ {
@@ -520,12 +494,12 @@ class LargeGraphic {
 
       GEUtils.cleanWindow();
       
-      const canvas = graphicContext.canvas;
+      const canvas = Multtable_View.canvas;
 
       // find width of a single cell, and width of the entire table
       // make these the width and height of the img, bounded by canvas size
-      const cellSize = graphicContext.transform.elements[0];  // [0] is the scale in the transform matrix
-      const tableSize = multtable.size * cellSize;
+      const cellSize = Multtable_View.transform.elements[0];  // [0] is the scale in the transform matrix
+      const tableSize = Multtable_View.table_size * cellSize;
 
       let width, height, swapping, start;
       if (rowXcol.row == 0 && rowXcol.col != 0) {  // dragging column?
@@ -537,7 +511,7 @@ class LargeGraphic {
       }
       
       // upper left corner of clicked cell in canvas-relative coordinates
-      const position = new THREE.Vector3(rowXcol.col, rowXcol.row, 1).applyMatrix3(graphicContext.transform);
+      const position = new THREE.Vector3(rowXcol.col, rowXcol.row, 1).applyMatrix3(Multtable_View.transform);
 
       const style =
             'position: absolute; ' +
@@ -595,13 +569,10 @@ class LargeGraphic {
          return cleanup();
 
       if (swapping == 'row') {
-         multtable.swap(start, rowXcol.row);
+         Multtable_View.swap(start, rowXcol.row);
       } else {
-         multtable.swap(start, rowXcol.col);
+         Multtable_View.swap(start, rowXcol.col);
       }
-
-      graphicContext.showLargeGraphic(multtable);
-      emitStateChange();
 
       return cleanup();
    }

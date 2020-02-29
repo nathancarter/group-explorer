@@ -15,16 +15,16 @@ Nearly all mathematical text in GE is formatted with MathML and rendered into HT
 
 ```js
 */
-/*::
 import XMLGroup from './XMLGroup.js';
 
+/*::
 declare class XSLTProcessor {
    importStylesheet(Node): void;
    transformToFragment(Node, Document): DocumentFragment;
 }
+*/
 
 export default
- */
 class MathML {
 /*::
    static subscripts: {[key: string]: string};
@@ -32,6 +32,7 @@ class MathML {
    static MATHML_2_HTML: string;
    static xsltProcessor: XSLTProcessor;
    static Cache: Map<string, string>;
+   static UnicodeCache: Map<mathml, string>;
  */
 /*
 ```
@@ -132,12 +133,20 @@ class MathML {
    }
 
    static toUnicode(mathml /*: mathml */) /*: string */ {
-      const $html = $( MathML.toHTML(mathml) );
+      let result = MathML.UnicodeCache.get(mathml);
 
-      $html.find('sub').each( (_,el) => $(el).text($(el).text().split('').map(ch => MathML.subscripts[ch]).join('')) );
-      $html.find('sup').each( (_,el) => $(el).text($(el).text().split('').map(ch => MathML.superscripts[ch]).join('')));
+      if (result == undefined) {
+         const $html = $( MathML.toHTML(mathml) );
 
-      return $html.text();
+         $html.find('sub').each( (_,el) => $(el).text($(el).text().split('').map(ch => MathML.subscripts[ch]).join('')) );
+         $html.find('sup').each( (_,el) => $(el).text($(el).text().split('').map(ch => MathML.superscripts[ch]).join('')));
+
+         result = $html.text();
+
+         MathML.UnicodeCache.set(mathml, result);
+      }
+
+      return result;
    }
 /*
 ```
@@ -414,6 +423,7 @@ class MathML {
 
       // Create MathML.Cache
       MathML.Cache = new Map();
+      MathML.UnicodeCache = new Map();
    }
 
 }

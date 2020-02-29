@@ -1,8 +1,6 @@
 // @flow
 
-/*::
 export default
- */
 class GroupURLs {
 /*::
    static urls: Array<string>;

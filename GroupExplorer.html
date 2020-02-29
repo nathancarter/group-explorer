@@ -115,7 +115,7 @@
        }
       </style>
 
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
       <script type="text/x-mathjax-config">
        MathJax.Hub.Config({
           CommonHTML: {
@@ -123,10 +123,11 @@
           },
        });
       </script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=MML_CHTML"></script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/95/three.js"></script>
-      <script src="./build/allGroupExplorer.js"></script>
-      <script src="./GroupExplorer.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.6/MathJax.js?config=MML_CHTML"></script>
+      <script type="module">
+       import {load} from "./GroupExplorer.js";
+       window.addEventListener('load', load, {once: true});
+      </script>
    </head>
    <body>
       <table id="ScratchTable" style="width: 100%; display: none"></table>
@@ -154,7 +155,10 @@
                               <i title="Source on GitHub" class="fa fa-github fa-2x trm-blue"></i></a>
                      </div>
                      <div id="version" style="float: right; font-size: small; color: #2196f3;"></div>
-                     <script>document.getElementById("version").textContent = Version.label</script>
+                     <script type="module">
+                      import {Version} from './Version.js';
+                      document.getElementById("version").textContent = Version.label
+                     </script>
                   </div>
                </th>
             </tr>
@@ -200,7 +204,7 @@
                <a href="SymmetryObject.html?groupURL=${group.URL}" title="Open Symmetry Object visualizer"><div></div></a>
             </td>
             <td class="cycleGraph">
-               <a href="CycleDiagram.html?groupURL=${group.URL}" title="Open Cycle Graph visualizer"><div></div></a>
+               <a href="CycleGraph.html?groupURL=${group.URL}" title="Open Cycle Graph visualizer"><div></div></a>
             </td>
          </tr>
       </template>

@@ -4,15 +4,13 @@
  */
 
 /*::
-import XMLGroup from './XMLGroup.js';
-
 export type BitSetJSON = {
    len: number,
    arr: Array<number>
 };
+*/
 
 export default
- */
 class BitSet {
 /*::
    len: number;
@@ -211,10 +209,6 @@ class BitSet {
 	 str += this.get(i);
       }
       return str;
-   }
-
-   toRepString(group /*: XMLGroup */) /*: string */ {
-      return this.toArray().map( (el /*: groupElement */) => group.reps[el] ).join(', ');
    }
 
    *allElements() /*: Generator<number, void, void> */ {

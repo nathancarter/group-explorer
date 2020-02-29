@@ -3,21 +3,7 @@
 
 ## Assigned to Ray
 
-### To-dos related to tablet support
-
-Complete: Tablet support is comparable to desktop with no known feature gaps. Interface
-documentation is complete.
-
-Graphics performance on my iPad Pro is generally comparable to my desktop (6-core i5 cpu,
-entry level gaming accelerator). After the library is stored locally visualizer loads take
-1-2 sec; menu response (subgroup option menu) takes 20-50 ms, 100 ms worst case;
-and drag-and-drop (node placement in Cayley diagram) maintains 20-30 fps, 10-15 worst case.
-
 ### Bugs / Deficiencies
-
- * *Complete.* ~~On iPad, in Cayley diagram visualizer -> Diagram panel -> Generator menus, if a scrolling
-   submenu tries to open a scrolling submenu, the second submenu doesn't appear at all.
-   (no known workaround simpler than manual re-coding of menu behavior).~~
 
  * When you add a new subset in subset control, Group Explorer does not check whether it
    exists under another name or give you the option to cancel your addition, as GE2 does

@@ -17,7 +17,7 @@
        }
       </style>
 
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
       <script type="text/x-mathjax-config">
        MathJax.Hub.Config({
           CommonHTML: {
@@ -29,42 +29,47 @@
        MathJax.Hub.processSectionDelay = 0;   // no pause to let browser handle interaction -- only busy during loading
        MathJax.Hub.processUpdateDelay = 0;
       </script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=MML_CHTML"></script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/95/three.js"></script>
-      <script>module = { };</script>
-      <script src="https://cdn.jsdelivr.net/npm/three-trackballcontrols@0.0.7/index.js"></script>
-      <script>THREE.TrackballControls = module.exports;</script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.6/MathJax.js?config=MML_CHTML"></script>
       <script src="https://cdn.jsdelivr.net/npm/jquery-resizable-dom@0.32.0/dist/jquery-resizable.js"></script>
-      <script src="./lib/THREE.MeshLine.js"></script>
-      <script src="./build/allGroupExplorer.js"></script>
-      <script src="./build/allVisualizer.js"></script>
-      <script src="./SymmetryObject.js"></script>
+      <script type="module">
+       import {load} from './SymmetryObject.js';
+       window.addEventListener('load', load, {once: true});
+      </script>
    </head>
-   <body class="vert">
-      <div class="fill-vert control">
-         <br>
-         <p>View this symmetry object:</p>
-         <div id="diagram-select" class="faux-select" action="$('#diagram-choices').toggle()" style="margin-bottom: 25px">
-            <ul id="diagram-choices" class="faux-select-options hide-on-clean"></ul>
-            <span id="diagram-choice" class="faux-selection"></span>
-            <div class="faux-select-arrow"></div>
+   <body>
+      <div id="bodyDouble" class="vert">
+         <div id="header" class="horiz"></div>
+         <div id="horiz-container" class="horiz">
+            <div id="graphic"></div>
+            <div id="splitter"></div>
+            <div id="vert-container" class="vert">
+               <div class="fill-vert control">
+                  <br>
+                  <p>View this symmetry object:</p>
+                  <div id="diagram-select" class="faux-select" action="$('#diagram-choices').toggle()" style="margin-bottom: 25px">
+                     <ul id="diagram-choices" class="faux-select-options hide-on-clean"></ul>
+                     <span id="diagram-choice" class="faux-selection"></span>
+                     <div class="faux-select-arrow"></div>
+                  </div>
+                  <template id="diagram-choice-template">
+                     <li action="set_diagram_name(${index})">${MathML.sans('<mtext>' + Group.symmetryObjects[index].name + '</mtext>')}</li>
+                  </template>
+
+                  Zoom level:
+                  <input id="zoom-level" type="range" min="-10" max="10" value="0">
+
+                  Line thickness:
+                  <input id="line-thickness" type="range" min="1" max="20" value="10">
+
+                  Node radius:
+                  <input id="node-radius" type="range" min="-10" max="10" value="0">
+
+                  <input id="use-fog" type="checkbox">
+                  Use this much fog:
+                  <input id="fog-level" type="range" min="1" max="10" value="5">
+               </div>
+            </div>
          </div>
-         <template id="diagram-choice-template">
-            <li action="set_diagram_name(${index})">${MathML.sans('<mtext>' + group.symmetryObjects[index].name + '</mtext>')}</li>
-         </template>
-
-         Zoom level:
-         <input id="zoom-level" type="range" min="-10" max="10" value="0">
-
-         Line thickness:
-         <input id="line-thickness" type="range" min="1" max="20" value="10">
-
-         Node radius:
-         <input id="node-radius" type="range" min="-10" max="10" value="0">
-
-         <input id="use-fog" type="checkbox">
-         Use this much fog:
-         <input id="fog-level" type="range" min="1" max="10" value="5">
       </div>
    </body>
 </html>

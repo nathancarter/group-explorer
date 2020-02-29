@@ -1,25 +1,25 @@
 // @flow
 
-/*::
 import Library from './js/Library.js';
-import Log from './js/Log.md';
+import Log from './js/Log.js';
+import MathML from './js/MathML.js';
 import setUpGAPCells from './js/ShowGAPCode.js';
-import Template from './js/Template.md';
+import Template from './js/Template.js';
 import XMLGroup from './js/XMLGroup.js';
- */
 
-var group /*: XMLGroup */;
+export {loadGroup as load};
 
-$(window).on('load', load);	// like onload handler in body
+let group /*: XMLGroup */;
 
-
-function load() {
-   Library.loadFromURL()
-          .then( (_group) => {
-              group = _group;
-              formatGroup();
-          } )
-          .catch( Log.err );
+// Load group from invocation URL
+function loadGroup() {
+   Library
+      .loadFromURL()
+      .then( (_group) => {
+         group = _group;
+         formatGroup();
+      } )
+      .catch( Log.err );
 }
 
 function formatGroup() {
@@ -36,5 +36,5 @@ function formatGroup() {
    $('body').prepend($rslt);
    MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
 
-   setUpGAPCells();
+   setUpGAPCells(group);
 }

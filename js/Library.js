@@ -25,20 +25,23 @@
  *   resolveURL -- get full URL
  *   saveGroup -- serialize and store group by URL in Libary.map/localStorage
  */
-/*::
+
 import BasicGroup from './BasicGroup.js';
-import Log from './Log.md';
-import type {MSG_loadGroup} from './SheetModel.js';
+import Log from './Log.js';
+import {LISTENER_READY_MESSAGE, STATE_LOADED_MESSAGE} from './SheetModel.js';
 import XMLGroup from './XMLGroup.js';
+
+/*::
+import type {MSG_loadGroup} from './SheetModel.js';
 import type {XMLGroupJSON, BriefXMLGroupJSON} from './XMLGroup.js';
 
 type StoredLibraryValue = {
    rev: number,
    object: XMLGroup
 };
-   
+*/   
+
 export default
- */
 class Library {
 /*::
    static map: {[key: string]: XMLGroup};
@@ -222,24 +225,34 @@ class Library {
              * window, with the format { type: 'load group', group: G },
              * where G is the JSON data in question.
              */
-            document.addEventListener( 'message', function ( event /*: MessageEvent */ ) {
-               if (typeof event.data == undefined || ((event.data /*: any */) /*: Obj */).type != 'load group') {
-                  Log.err('unknown message received in Library.js:');
-                  Log.err(event.data);
-                  reject('unknown message received in Library.js');
-               }
-               const event_data = ((event.data /*: any */) /*: MSG_loadGroup */);
-               try {
-                  if (typeof event_data.group == 'string') {
-                     const group = Library._dataToGroup(event_data.group, 'json');
-                     if (group != undefined) {
-                        Library.map[group.shortName] = group;
-                        resolve(group);
+            window.addEventListener( 'message', function ( event /*: MessageEvent */ ) {
+               const event_data = (event.data /*: any */);
+               if (typeof event_data == undefined) {
+                  Log.err('empty message received in Library.js:');
+                  Log.err(event_data);
+                  reject('empty message received in Library.js');
+               } else if (   event_data.source == 'editor' || event_data.source == 'external'
+                          || event_data == LISTENER_READY_MESSAGE || event_data == STATE_LOADED_MESSAGE)
+               {
+                  // Sheet editor messages -- ignore them, they belong to CayleyDiagram.js : receiveInitialSetup
+               } else if ( event_data.type == 'load group' ) {
+                  const load_group_message /*: MSG_loadGroup */ = event_data;
+                  try {
+                     if (typeof load_group_message.group == 'object') {
+                        const group = Library._dataToGroup(load_group_message.group, 'json');
+                        if (group != undefined) {
+                           Library.map[group.shortName] = group;
+                           resolve(group);
+                        }
                      }
+                     reject('unable to understand load_group_message');
+                  } catch (error) {
+                     reject(error);
                   }
-                  reject('unable to understand data');
-               } catch (error) {
-                  reject(error);
+               } else {
+                  Log.err('unknown message received in Library.js:');
+                  Log.err(event_data);
+                  reject('unknown message received in Library.js');
                }
             }, false );
          } );

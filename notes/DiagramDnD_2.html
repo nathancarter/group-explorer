@@ -7,11 +7,9 @@
           border: 1px solid black;
        }
       </style>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/95/three.js"></script>
-      <script>module = { };</script>
-      <script src="https://cdn.jsdelivr.net/npm/three-trackballcontrols@0.0.7/index.js"></script>
-      <script>THREE.TrackballControls = module.exports;</script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/three@0.110.0/build/three.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/three@0.110.0/examples/js/controls/TrackballControls.js"></script>
       <script src="../lib/THREE.MeshLine.js"></script>
       <script>
        window.addEventListener('load', load, {once: true});
@@ -105,23 +103,23 @@
           scene.add(makeLabel(new THREE.Vector3(0, -0.01, 0).add(PICK), 'pick', 0.16, 'black', 24));
           scene.add(makeLabel(new THREE.Vector3(0, 0, 0).add(START), 'start', 0.25, 'black', 30));
           scene.add(makeLabel(new THREE.Vector3(0, 0.05, 0).add(END), 'end', -0.1, 'black', 40));
-          scene.add(makeLabel(new THREE.Vector3(0, -0.1, 0).add(CENTER), 'center', 0.1, 'black', 36));
+          scene.add(makeLabel(new THREE.Vector3(0, -0.1, 0).add(CENTER), 'third_point', 0.22, 'black', 36));
           scene.add(makeLabel(new THREE.Vector3(0.0, y(0.0, YMAX.y) + 0.09, 0), 'New Arc', -0.05, 'black', 36));
           scene.add(makeLabel(new THREE.Vector3(0.4, y(0.4, Y0.y) + 0.04, 0), 'Old Arc', -0.1, 'gray', 36));
 
           scene.add(obj =
-             makeText(new THREE.Vector3(-0.12, 0, 0).addScaledVector(PROJ, 0.6).addScaledVector(PICK, 0.4), 'pick_v', 'black', 20));
+             makeText(new THREE.Vector3(-0.12, 0, 0).addScaledVector(PROJ, 0.6).addScaledVector(PICK, 0.4), 'v_pick', 'black', 20));
           obj.quaternion.setFromAxisAngle(new THREE.Vector3(0, 0, 1), -Math.PI/2);
           scene.add(
-             makeText(new THREE.Vector3(0, 0.08, 0).addScaledVector(START, 0.55).addScaledVector(PROJ, 0.45), 'pick_u', 'black', 20));
+             makeText(new THREE.Vector3(0, 0.08, 0).addScaledVector(START, 0.55).addScaledVector(PROJ, 0.45), 'u_pick', 'black', 20));
           scene.add(
-             makeText(new THREE.Vector3(-0.15, -0.01, 0).add(MID), 'separation', 'black', 20));
+             makeText(new THREE.Vector3(-0.1, -0.01, 0).add(MID), 'chord', 'black', 20));
           scene.add(obj =
              makeText(new THREE.Vector3(-0.12, -0.05, 0).addScaledVector(MID, 0.5).addScaledVector(YMAX, 0.5), 'offset', 'black', 20));
           obj.quaternion.setFromAxisAngle(new THREE.Vector3(0, 0, 1), -Math.PI/2);
 
           // Trackball controls
-          camControls = new THREE.TrackballControls(camera, $('graphic')[0]);
+          camControls = new THREE.TrackballControls(camera, $('#graphic')[0]);
 
           // showAxes();
           render();

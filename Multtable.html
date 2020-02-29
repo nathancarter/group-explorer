@@ -12,7 +12,7 @@
       <link rel="stylesheet" href="./style/sliders.css" type="text/css"></link>
       <link rel="stylesheet" href="./visualizerFramework/visualizer.css" type="text/css"></link>
       <link rel="stylesheet" href="./style/menu.css" type="text/css"></link>
-      <link rel="stylesheet" href="./subsetDisplay/subsets.css" type="text/css"></link>
+      <link rel="stylesheet" href="./style/SubsetHighlightController.css" type="text/css"></link>
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css">
 
       <style>
@@ -40,7 +40,7 @@
        }
       </style>
 
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
       <script type="text/x-mathjax-config">
        MathJax.Hub.Config({
           CommonHTML: {
@@ -52,65 +52,75 @@
        MathJax.Hub.processSectionDelay = 0;   // no pause to let browser handle interaction -- only busy during loading
        MathJax.Hub.processUpdateDelay = 0;
       </script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=MML_CHTML"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.6/MathJax.js?config=MML_CHTML"></script>
       <script src="https://cdn.jsdelivr.net/npm/jquery-resizable-dom@0.32.0/dist/jquery-resizable.js"></script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/95/three.js"></script>
-      <script src="./build/allGroupExplorer.js"></script>
-      <script src="./build/allVisualizer.js"></script>
-      <script src="./Multtable.js"></script>
+      <script type="module">
+       import {load} from "./Multtable.js";
+       window.addEventListener('load', load, {once: true});
+      </script>
    </head>
-   <body class="vert">
-      <div id="control-options" class="horiz">
-         <button id="subset-button">Subsets</button>
-         <button id="table-button">Table</button>
-      </div>
+   <body>
+      <div id="bodyDouble" class="vert">
+         <div id="header" class="horiz"></div>
+         <div id="horiz-container" class="horiz">
+            <div id="graphic">
+               <template id="drag-image-template">
+                  <img id="drag-image" src="${Multtable_View.canvas.toDataURL()}" class="remove-on-clean" swapping="${swapping}"
+                       start="${start}" style="${style}">
+               </template>
 
-      <div id="subset-control" class="fill-vert">
-         <!-- This is filled in by subsetDisplay/subsets.html -->
-      </div>
+               <template id="node-label-template">
+                  <div id="node-label" class="tooltip remove-on-clean" row="${rowXcol.row}" col="${rowXcol.col}">
+                     ${MathML.sans(group.representation[element])}
+                  </div>
+               </template>
+            </div>
+            <div id="splitter"></div>
+            <div id="vert-container" class="vert">
+               <div id="control-options" class="horiz">
+                  <button id="subset-button">Subsets</button>
+                  <button id="table-button">Table</button>
+               </div>
 
-      <template id="drag-image-template">
-         <img id="drag-image" src="${graphicContext.canvas.toDataURL()}" class="remove-on-clean" swapping="${swapping}" start="${start}" style="${style}">
-      </template>
+               <div id="subset-control" class="fill-vert">
+                  <!-- This is filled in by subsetDisplay/subsets.html -->
+               </div>
 
-      <template id="node-label-template">
-         <div id="node-label" class="tooltip remove-on-clean" row="${rowXcol.row}" col="${rowXcol.col}">
-            ${MathML.sans(group.representation[element])}
+               <div id="table-control" class="fill-vert control hidden">
+                  <div class="graphic-lead">Organize by subgroup:</div>
+                  <div id="organization-select" class="faux-select" action="toggleOrganizationChoices()">
+                     <ul id="organization-choices" class="faux-select-options hide-on-clean" style="width: 13em"></ul>
+                     <span id="organization-choice" class="faux-selection">none</span>
+                     <div class="faux-select-arrow"></div>
+                  </div>
+                  <template id="organization-choice-template">
+                     <li action="organizeBySubgroup(${subgroupIndex})">
+                        ${MathML.sans(MathML.sub('H', subgroupIndex))}, ${MathML.sansText('a subgroup of order')}
+                        ${MathML.sans('<mn>' + subgroup.order + '</mn>')}
+                     </li>
+                  </template>
+
+                  <div class="graphic-lead" style="margin-top: 3em">Separate cosets by:</div>
+                  <input id="separation-slider" type="range" min="0" max="100" value="0"> <!-- [0-100] => [0,box width] -->
+
+                  <form id="coloration-choice" class="graphic-lead" style="margin-bottom: 0">
+                     Default coloration:
+                     <div>
+                        <input id="rainbow" name="coloration" type="radio" checked>
+                        <label for="rainbow">Spectrum/rainbow</label>
+                     </div>
+                     <div>
+                        <input id="grayscale" name="coloration" type="radio">
+                        <label for="grayscale">Grayscale</label>
+                     </div>
+                     <div>
+                        <input id="none" name="coloration" type="radio">
+                        <label for="none">None</label>
+                     </div>
+                  </form>
+               </div>
+            </div>
          </div>
-      </template>
-
-      <div id="table-control" class="fill-vert control hidden">
-         <div class="graphic-lead">Organize by subgroup:</div>
-         <div id="organization-select" class="faux-select" action="toggleOrganizationChoices()">
-            <ul id="organization-choices" class="faux-select-options hide-on-clean" style="width: 13em"></ul>
-            <span id="organization-choice" class="faux-selection">none</span>
-            <div class="faux-select-arrow"></div>
-         </div>
-         <template id="organization-choice-template">
-            <li action="organizeBySubgroup(${subgroupIndex})">
-               ${MathML.sans(MathML.sub('H', subgroupIndex))}, ${MathML.sansText('a subgroup of order')}
-               ${MathML.sans('<mn>' + subgroup.order + '</mn>')}
-            </li>
-         </template>
-
-         <div class="graphic-lead" style="margin-top: 3em">Separate cosets by:</div>
-         <input id="separation-slider" type="range" min="0" max="100" value="0"> <!-- [0-100] => [0,box width] -->
-
-         <form id="coloration-choice" class="graphic-lead" style="margin-bottom: 0">
-            Default coloration:
-            <div>
-               <input id="Rainbow" name="coloration" type="radio" onclick="chooseColoration(Multtable.COLORATION.RAINBOW)" checked>
-               <label for="Rainbow">Spectrum/rainbow</label>
-            </div>
-            <div>
-               <input id="Grayscale" name="coloration" type="radio" onclick="chooseColoration(Multtable.COLORATION.GRAYSCALE)">
-               <label for="Grayscale">Grayscale</label>
-            </div>
-            <div>
-               <input id="None" name="coloration" type="radio" onclick="chooseColoration(Multtable.COLORATION.NONE)">
-               <label for="None">None</label>
-            </div>
-         </form>
       </div>
    </body>
 </html>

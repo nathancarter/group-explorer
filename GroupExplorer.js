@@ -1,26 +1,27 @@
 // @flow
-/*::
-import CayleyDiagram from './js/CayleyDiagram.js';
-import CycleGraph from './js/CycleGraph.js';
-import DisplayCycleGraph from './js/DisplayCycleGraph.js';
-import DisplayDiagram from './js/DisplayDiagram.js';
-import DisplayMulttable from './js/DisplayMulttable.js';
+
+import {CayleyDiagramView, createUnlabelledCayleyDiagramView} from './js/CayleyDiagramView.js';
+import {CycleGraphView, createUnlabelledCycleGraphView} from './js/CycleGraphView.js';
 import GroupURLs from './GroupURLs.js';
 import Library from './js/Library.js';
-import Log from './js/Log.md';
-import Menu from './js/Menu.md';
-import Multtable from './js/Multtable.js';
-import SymmetryObject from './js/SymmetryObject.js';
-import Template from './js/Template.md';
+import Log from './js/Log.js';
+import MathML from './js/MathML.js';
+import Menu from './js/Menu.js';
+import {MulttableView, createMinimalMulttableView} from './js/MulttableView.js';
+import {SymmetryObjectView, createStaticSymmetryObjectView} from './js/SymmetryObjectView.js';
+import Template from './js/Template.js';
 import XMLGroup from './js/XMLGroup.js';
- */
 
-// Global variables
-var graphicContext /*: DisplayDiagram */;	// hidden scratchpad, re-used to reduce WebGL contexts
-var multtableContext /*: DisplayMulttable */;
-var cycleGraphContext /*: DisplayCycleGraph */;
+// $FlowFixMe -- external module imports described in flow-typed directory
+import {THREE} from './lib/externals.js';
 
-$(window).on('load', readLibrary);
+export {readLibrary as load};
+
+// Module variables
+let Cayley_Diagram_View		/*: CayleyDiagramView */;
+let Symmetry_Object_View	/*: SymmetryObjectView */;
+let Multtable_View		/*: MulttableView */;
+let Cycle_Graph_View		/*: CycleGraphView */;
 
 // Static event managers (setup after document is available)
 function registerEventHandlers() {
@@ -30,9 +31,10 @@ function registerEventHandlers() {
 
 // Load group library from urls
 function readLibrary() {
-   graphicContext = new DisplayDiagram({width: 50, height: 50, fog: false});
-   multtableContext = new DisplayMulttable({height: 32, width: 32});
-   cycleGraphContext = new DisplayCycleGraph({height: 32, width: 32});
+   Cayley_Diagram_View = createUnlabelledCayleyDiagramView({height: 32, width: 32});
+   Symmetry_Object_View = createStaticSymmetryObjectView({height: 32, width: 32});
+   Multtable_View = createMinimalMulttableView({height: 32, width: 32});
+   Cycle_Graph_View = createUnlabelledCycleGraphView({height: 32, width: 32});
 
    // create mathjax style element from localStorage (needed to display locally stored definitions)
    const styleHTML = localStorage.getItem('mathjax_stylesheet');
@@ -51,7 +53,7 @@ function readLibrary() {
    for (const url of urlsToDisplay) {
       const g = Library.getLocalGroup(url);
       if (g != undefined && g.CayleyThumbnail != undefined && g.rowHTML != undefined) {
-         const $img = $('<img>').attr('src', g.CayleyThumbnail).attr('height', 32).attr('width', 32);
+         const $img = $('<img>').attr({src: g.CayleyThumbnail, height: 32, width: 32});
          const $row = $(g.rowHTML);
          $row.find('td.cayleyDiagram a div').empty().append($img);
          $('#GroupTable tbody').append($row);
@@ -131,17 +133,16 @@ function displayGroup(group) {
 
    // draw Cayley diagram
    {
-      const graphicData = new CayleyDiagram(group, cayleyTitle);
-      const img = graphicContext.getImage(graphicData);
+      Cayley_Diagram_View.setDiagram(group, cayleyTitle);
+      const img = Cayley_Diagram_View.getImage();
       group.CayleyThumbnail = img.src;
-      img.height = img.width = 32;
       $row.find("td.cayleyDiagram a div").html(img.outerHTML);
    }
 
    // draw Multtable
    {
-      const graphicData = new Multtable(group);
-      const img = multtableContext.getImage(graphicData);
+      Multtable_View.group = group;
+      const img = Multtable_View.getImage();
       $row.find("td.multiplicationTable a div").html(img.outerHTML);
    }
 
@@ -149,16 +150,14 @@ function displayGroup(group) {
    if (symmetryTitle == undefined) {
       $row.find("td.symmetryObject").html('none').addClass('noDiagram').removeAttr('title');
    } else {
-      const graphicData = SymmetryObject.generate(group, symmetryTitle);
-      const img = graphicContext.getImage(graphicData);
-      img.height = img.width = 32;
+      const img = Symmetry_Object_View.setObject(group.symmetryObjects[0]).getImage();
       $row.find("td.symmetryObject a div").html(img.outerHTML);
    }
 
    // draw Cycle Graph
    {
-      const graphicData = new CycleGraph( group );
-      const img = cycleGraphContext.getImage( graphicData );
+      Cycle_Graph_View.group = group;
+      const img = Cycle_Graph_View.getImage();
       $row.find("td.cycleGraph a div").html(img.outerHTML);
    }
 

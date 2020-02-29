@@ -1,0 +1,297 @@
+<!-- subset layout -->
+<div id="subset_page">
+   <p class="subset_page_header" action="showHeaderMenu(event)">Subgroups</p>
+   <ul id="subgroups" class="subset_page_content"></ul>
+
+   <p class="subset_page_header" action="showHeaderMenu(event)">User-defined subsets</p>
+   <p id="subsets_placeholder" class="placeholder" action="showHeaderMenu(event)">
+      <i>(None)</i></p>
+   <ul id="subsets" class="subset_page_content"></ul>
+
+   <p class="subset_page_header" action="showHeaderMenu(event)">Partitions</p>
+   <p id="partitions_placeholder" class="placeholder" action="showHeaderMenu(event)">
+      <i>(None)</i></p>
+   <ul id="partitions" class="subset_page_content"></ul>
+</div>
+
+<!-- Templates -->
+<div id="subgroup_templates">
+   <template id="first-subgroup-template">
+      <li id="${this.id}" action="showMenu(event, ${this.id})">
+         ${this.name}
+         <b>&nbsp;=&nbsp;</b>
+         ${MathML.genList([group.representation[0]])}
+         ${MathML.sansText('is the trivial subgroup')}
+         ${MathML.setList([group.representation[0]])}.
+      </li>
+   </template>
+   <template id="subgroup-template">
+      <li id="${this.id}" action="showMenu(event, ${this.id})">
+         ${this.name}
+         <b>&nbsp;=&nbsp;</b>
+         ${MathML.genList(generators)}
+         ${MathML.sansText('is a subgroup of order')}
+         ${MathML.sans('<mn>' + group.subgroups[this.subgroupIndex].order + '</mn>')}.
+      </li>
+   </template>
+   <template id="last-subgroup-template">
+      <li id="${this.id}" action="showMenu(event, ${this.id})">
+         ${this.name}
+         <b>&nbsp;=&nbsp;</b>
+         ${MathML.genList(generators)}
+         ${MathML.sansText('is the group itself.')}
+      </li>
+   </template>
+</div>
+
+<template id="subset-template">
+   <li id="${this.id}" action="showMenu(event, ${this.id})">
+      ${this.name}
+      <b>&nbsp;=&nbsp;</b>
+      ${MathML.setList(items)}
+      ${MathML.sansText((numElements == 0 || numElements == group.order) ? 'is the subset of size' : 'is a subset of size')}
+      ${MathML.sans('<mn>' + numElements + '</mn>')}.
+   </li>
+</template>
+
+<template id="order-class-template">
+   <li id="${this.id}" class="orderClass" action="showMenu(event, ${this.id})">
+      ${this.name}
+      <b>&nbsp;=&nbsp;</b>
+      ${MathML.setList(this.elementRepresentations)}
+      ${MathML.sansText('is an order class of size')}
+      ${MathML.sans('<mn>' + this.elements.popcount() + '</mn>')}.
+   </li>
+</template>
+
+<template id="conjugacy-class-template">
+   <li id="${this.id}" class="conjugacyClass" action="showMenu(event, ${this.id})">
+      ${this.name}
+      <b>&nbsp;=&nbsp;</b>
+      ${MathML.setList(this.elementRepresentations)}
+      ${MathML.sansText('is a conjugacy class of size')}
+      ${MathML.sans('<mn>' + this.elements.popcount() + '</mn>')}.
+   </li>
+</template>
+
+<template id="coset-class-template">
+   <li id="${this.id}" class="${this.parent.side}coset${this.parent.subgroup.id}" action="showMenu(event, ${this.id})">
+      ${this.name}
+      <b>&nbsp;=&nbsp;</b>
+      ${MathML.setList(this.elementRepresentations)}
+      ${MathML.sansText(this.parent.isLeft ? 'is the left coset of' : 'is the right coset of')}
+      ${this.parent.subgroup.name}
+      ${MathML.sansText('by')}
+      ${MathML.sans(group.representation[this.elements.toArray()[0]])}.
+   </li>
+</template>
+
+<template id="subset-elements-template">
+   <div id="subset-elements" class="tooltip remove-on-clean">
+      <h3>${MathML.sansText('Elements of')} ${subsetName}:</h3>
+      ${MathML.csList(subsetElements)}
+   </div>
+</template>
+
+<template id="header-menu-template">
+   <ul id="header-menu" class="menu remove-on-clean" action="() => void 0">
+      <li action="SubsetEditor.open()">${MathML.sansText('Create')} ${Subset.nextName()}</li>
+      <hr>
+      ${(!showingOrderClasses() || !showingConjugacyClasses())
+      ? Menu.makeLink('Compute', 'compute-menu') : ''}
+      <li action="clearHighlights()">${MathML.sansText('Clear all highlighting')}</li>
+   </ul>
+   <ul id="compute-menu" class="menu remove-on-clean" action="() => void 0">
+      ${showingConjugacyClasses() ? '' : eval(Template.HTML('all-conjugacy-classes-template'))}
+      ${showingOrderClasses() ? '' : eval(Template.HTML('all-order-classes-template'))}
+   </ul>
+</template>
+
+<template id="subgroup-menu-template">
+   <ul id="subgroup-menu" class="menu remove-on-clean" action="() => void 0">
+      <li action="SubsetEditor.open()">${MathML.sansText('Create')} ${Subset.nextName()}</li>
+      <hr>
+      ${Menu.makeLink('Compute', 'compute-menu')}
+      ${Menu.makeLink('Highlight item by', 'highlight-item-menu')}
+      <li action="clearHighlights()">${MathML.sansText('Clear all highlighting')}</li>
+   </ul>
+   <ul id="compute-menu" class="menu remove-on-clean" action="() => void 0">
+      ${showingConjugacyClasses() ? '' : eval(Template.HTML('all-conjugacy-classes-template'))}
+      ${showingOrderClasses() ? '' : eval(Template.HTML('all-order-classes-template'))}
+      <li action="displayList[${this.id}].normalizer">
+         ${MathML.sansText('the normalizer of')} ${this.name}, ${MathML.sansText('Norm(')}${this.name}${MathML.sansText(')')}</li>
+      ${showingLeftCosets(this.id) ? '' : eval(Template.HTML('left-cosets-template'))}
+      ${showingRightCosets(this.id) ? '' : eval(Template.HTML('right-cosets-template'))}
+      ${Menu.makeLink('an intersection', 'intersection-menu')}
+      ${Menu.makeLink('a union', 'union-menu')}
+      ${Menu.makeLink('an elementwise product', 'elementwise-product-menu')}
+   </ul>
+   <ul id="intersection-menu" class="menu remove-on-clean" action="() => void 0">
+      ${ makeLongList(this.id, 'intersection-item-template') }
+   </ul>
+   <ul id="union-menu" class="menu remove-on-clean" action="() => void 0">
+      ${ makeLongList(this.id, 'union-item-template') }
+   </ul>
+   <ul id="elementwise-product-menu" class="menu remove-on-clean" action="() => void 0">
+      ${makeLongList(this.id, 'elementwise-product-item-template') }
+   </ul>
+   ${eval(Template.HTML('highlight-item-menu-template'))}
+</template>
+
+<template id="subset-menu-template">
+   <ul id="subset-menu" class="menu remove-on-clean" action="() => void 0">
+      <li action="SubsetEditor.open(${this.id})">${MathML.sansText('Edit list of elements in')} ${this.name}</li>
+      <li action="displayList[${this.id}].destroy()">${MathML.sansText('Delete')} ${this.name}</li>
+      <li action="SubsetEditor.open()">${MathML.sansText('Create')} ${Subset.nextName()}</li>
+      <hr>
+      ${Menu.makeLink('Compute', 'compute-menu')}
+      ${Menu.makeLink('Highlight item by', 'highlight-item-menu')}
+      <li action="clearHighlights()">${MathML.sansText('Clear all highlighting')}</li>
+   </ul>
+   <ul id="compute-menu" class="menu remove-on-clean" action="() => void 0">
+      ${showingConjugacyClasses() ? '' : eval(Template.HTML('all-conjugacy-classes-template'))}
+      ${showingOrderClasses() ? '' : eval(Template.HTML('all-order-classes-template'))}
+      <li action="displayList[${this.id}].closure">
+         ${MathML.sansText('the closure of')} ${name}, 
+         ${MathML.sans('<mtext mathvariant="bold">⟨</mtext>')}${name}${MathML.sans('<mtext mathvariant="bold">⟩</mtext>')}
+      </li>
+      ${Menu.makeLink('an intersection', 'intersection-menu')}
+      ${Menu.makeLink('a union', 'union-menu')}
+      ${Menu.makeLink('an elementwise product', 'elementwise-product-menu')}
+   </ul>
+   <ul id="intersection-menu" class="menu remove-on-clean" action="() => void 0">
+      ${makeLongList(this.id, 'intersection-item-template')}
+   </ul>
+   <ul id="union-menu" class="menu remove-on-clean" action="() => void 0">
+      ${makeLongList(this.id, 'union-item-template')}
+   </ul>
+   <ul id="elementwise-product-menu" class="menu remove-on-clean" action="() => void 0">
+      ${makeLongList(this.id, 'elementwise-product-item-template')}
+   </ul>
+   ${eval(Template.HTML('highlight-item-menu-template'))}
+</template>
+
+<template id="partition-menu-template">
+   <ul id="partition-menu" class="menu remove-on-clean" action="() => void 0">
+      <li action="displayList[${this.id}].parent.destroy()">
+         ${MathML.sansText('Delete partition')} ${this.parent.name}
+      </li>
+      <li action="SubsetEditor.open()">${MathML.sansText('Create')} ${Subset.nextName()}</li>
+      <hr>
+      ${Menu.makeLink('Compute', 'compute-menu')}
+      ${Menu.makeLink('Highlight item by', 'highlight-item-menu')}
+      ${Menu.makeLink('Highlight partition by', 'highlight-partition-menu')}
+      <li action="clearHighlights()">${MathML.sansText('Clear all highlighting')}</li>
+   </ul>
+   <ul id="compute-menu" class="menu remove-on-clean" action="() => void 0">
+      ${showingConjugacyClasses() ? '' : eval(Template.HTML('all-conjugacy-classes-template'))}
+      ${showingOrderClasses() ? '' : eval(Template.HTML('all-order-classes-template'))}
+      <li action="displayList[${this.id}].closure">
+         ${MathML.sansText('the closure of')} ${this.name}, 
+         ${MathML.sans('<mtext mathvariant="bold">⟨</mtext>')}${this.name}${MathML.sans('<mtext mathvariant="bold">⟩</mtext>')}
+      </li>
+      ${Menu.makeLink('an intersection', 'intersection-menu')}
+      ${Menu.makeLink('a union', 'union-menu')}
+      ${Menu.makeLink('an elementwise product', 'elementwise-product-menu')}
+   </ul>
+   <ul id="intersection-menu" class="menu remove-on-clean" action="() => void 0">
+      ${makeLongList(this.id, 'intersection-item-template')}
+   </ul>
+   <ul id="union-menu" class="menu remove-on-clean" action="() => void 0">
+      ${makeLongList(this.id, 'union-item-template')}
+   </ul>
+   <ul id="elementwise-product-menu" class="menu remove-on-clean" action="() => void 0">
+      ${makeLongList(this.id, 'elementwise-product-item-template')}
+   </ul>
+   ${eval(Template.HTML('highlight-item-menu-template'))}
+   ${eval(Template.HTML('highlight-partition-menu-template'))}
+</template>
+
+<template id="all-conjugacy-classes-template">
+   <li action="new ConjugacyClasses()">
+      ${MathML.sansText('all conjugacy classes')} ${MathML.sans(MathML.sub('CC', 'i'))}</li>
+</template>
+
+<template id="all-order-classes-template">
+   <li action="new OrderClasses()">
+      ${MathML.sansText('all order classes')} ${MathML.sans(MathML.sub('OC', 'i'))}</li>
+</template>
+
+<template id="intersection-item-template">
+   <li action="displayList[${id}].intersection(displayList[${other_id}])">
+      ${MathML.sansText('the intersection of')} ${displayList[id].name} ${MathML.sansText('with')} ${displayList[other_id].name}</li>
+</template>
+
+<template id="union-item-template">
+   <li action="displayList[${id}].union(displayList[${other_id}])">
+      ${MathML.sansText('the union of')} ${displayList[id].name} ${MathML.sansText('with')} ${displayList[other_id].name}</li>
+</template>
+
+<template id="elementwise-product-item-template">
+   <li action="displayList[${id}].elementwiseProduct(displayList[${other_id}])">
+      ${MathML.sansText('the elementwise product of')} ${displayList[id].name} ${MathML.sansText('with')} ${displayList[other_id].name}</li>
+</template>
+
+<template id="left-cosets-template">
+   <li action="displayList[${this.id}].leftCosets">
+      ${MathML.sansText('all left cosets')} ${MathML.sans('<mi>g</mi>')}${this.name} ${MathML.sansText('of')} ${this.name}</li>
+</template>
+
+<template id="right-cosets-template">
+   <li action="displayList[${this.id}].rightCosets">
+      ${MathML.sansText('all right cosets')} ${this.name}${MathML.sans('<mi>g</mi>')} ${MathML.sansText('of')} ${this.name}</li>
+</template>
+
+<template id="highlight-item-menu-template">
+   <ul id="highlight-item-menu" class="menu remove-on-clean" action="() => void 0">
+      <li action="highlighters[0].handler([${this.elementString}])">
+         <img src="./images/hightype-sphere-node.jpg"> ${MathML.sansText(highlighters[0].label)}
+      </li>
+      <li action="highlighters[1].handler([${this.elementString}])">
+         <img src="./images/hightype-sphere-node.jpg"> ${MathML.sansText(highlighters[1].label)}
+      </li>
+      <li action="highlighters[2].handler([${this.elementString}])">
+         <img src="./images/hightype-sphere-node.jpg"> ${MathML.sansText(highlighters[2].label)}
+      </li>
+   </ul>
+</template>
+
+<template id="highlight-partition-menu-template">
+   <ul id="highlight-partition-menu" class="menu remove-on-clean" action="() => void 0">
+      <li action="highlighters[0].handler(${this.parent.allElementString})">
+         <img src="./images/hightype-sphere-node.jpg"> ${MathML.sansText(highlighters[0].label)}
+      </li>
+      <li action="highlighters[1].handler(${this.parent.allElementString})">
+         <img src="./images/hightype-sphere-node.jpg"> ${MathML.sansText(highlighters[1].label)}
+      </li>
+      <li action="highlighters[2].handler(${this.parent.allElementString})">
+         <img src="./images/hightype-sphere-node.jpg"> ${MathML.sansText(highlighters[2].label)}
+      </li>
+   </ul>
+</template>
+
+<template id="subset-editor-template">
+   <div id="subset_editor">
+      <div id="ssedit_content" class="vert">
+         <div id="ssedit_title">Edit subset</div>
+         <div>${MathML.sansText('Customize the elements of')} ${setName}
+            ${MathML.sansText('by dragging elements into or out of it below.')}</div>
+         <div class="horiz ssedit_body">
+            <div id="ssedit_elementsIn_container" class="vert ssedit_panel_container">
+               <span>${MathML.sansText('Elements in')} ${setName}</span>
+               <div class="ssedit_panel">
+                  <ul id="elementsIn" class="ssedit_list"></ul>
+               </div>
+               <button id="ssedit_cancel_button" class="ssedit_button">Cancel</button>
+            </div>
+            <div id="ssedit_elementsNotIn_container" class="vert ssedit_panel_container">
+               <span>${MathML.sansText('Elements not in')} ${setName}</span>
+               <div class="ssedit_panel">
+                  <ul id="elementsNotIn" class="ssedit_list"></ul>
+               </div>
+               <button id="ssedit_ok_button" class="ssedit_button">OK</button>
+            </div>
+         </div>
+      </div>
+   </div>
+</template>

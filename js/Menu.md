@@ -28,7 +28,7 @@ seen by right-clicking on the <b>Subgroups</b> header in the Subsets panel:
     <li action="SSD.SubsetEditor.open()">Create S<sub>0</sub></li>
     <hr>
     <li action="Menu.pinSubMenu(event)" link="compute-menu">Compute <span class="menu-arrow"></span> </li>
-    <li action="clearHighlights()">Clear all highlighting</li>
+    <li action="SSD.clearHighlights()">Clear all highlighting</li>
 </ul>
 <ul id="compute-menu" class="menu remove-on-clean">
     <li action="new SSD.ConjugacyClasses()">all conjugacy classes <i>CC</i><sub>i</sub></li>
@@ -49,14 +49,15 @@ The styles found in [menus.css](../style/menu.css) are used throughout GE3, over
 in the individual modules.
 ```js
 */
-/*::
 import GEUtils from './GEUtils.js';
-import Template from './Template.md';
+import MathML from './MathML.js';
+import Template from './Template.js';
 
+/*::
 type MenuTree = {id: string, children?: Array<MenuTree>};
+*/
 
 export default
-*/
 class Menu {
 /*::
    static MARGIN: number;  // number of pixels to leave between the menu and the edge of the window
@@ -74,7 +75,10 @@ constraints: the menus are placed by [`Menu.setMenuLocation()`](#setmenulocation
 the browser window; and by `Menu._setMenuTreeLocation()` so that when a submenu is exposed it does not cover its parent.
 ```js
 */
-   static addMenus ($menus /*: JQuery */, location /*: eventLocation */) {
+   static addMenus ($menus /*: JQuery */,
+                    location /*: eventLocation */,
+                    clickHandler /*: MouseEventListener */ = Menu.actionClickHandler)
+   {
       // remove all other menus
       const $parent = $menus.first().parent();
       $menus.detach();
@@ -85,7 +89,7 @@ the browser window; and by `Menu._setMenuTreeLocation()` so that when a submenu 
       const $non_empty_menus = $menus.filter('.menu').filter( (_,list) => list.childElementCount != 0 );
 
       // set click handler for each menu
-      $non_empty_menus.each( (_inx, ul) => ul.addEventListener('click', Menu.actionClickHandler) );
+      $non_empty_menus.each( (_inx, ul) => ul.addEventListener('click', clickHandler) );
 
       const menu_tree = Menu._getMenuTree($non_empty_menus);
       Menu._setMenuTreeLocation(menu_tree, location);

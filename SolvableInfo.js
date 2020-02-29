@@ -1,18 +1,21 @@
 // @flow
 
-/*::
 import BasicGroup from './js/BasicGroup.js';
 import BitSet from './js/BitSet.js';
-import CayleyDiagram from './js/CayleyDiagram.js';
 import IsomorphicGroups from './js/IsomorphicGroups.js';
 import Library from './js/Library.js';
-import Log from './js/Log.md';
-import MathML from './js/MathML.md';
+import Log from './js/Log.js';
+import MathML from './js/MathML.js';
 import setUpGAPCells from './js/ShowGAPCode.js';
-import Template from './js/Template.md';
+import Template from './js/Template.js';
 import XMLGroup from './js/XMLGroup.js';
 
+import {DEFAULT_SPHERE_COLOR} from './js/AbstractDiagramDisplay.js';
 import {CreateNewSheet} from './js/SheetModel.js';
+
+export {loadGroup as load, showSolvableDecompositionSheet};
+
+/*::
 import type {
    JSONType,
    SheetElementJSON,
@@ -46,17 +49,17 @@ type BasicGroupWithDetails = {
 };
  */
 
-var group /*: XMLGroup */;
+let group /*: XMLGroup */;
 
-$(window).on('load', load);	// like onload handler in body
-
-function load() {
-   Library.loadFromURL()
-          .then( (_group) => {
-             group = _group;
-             formatGroup()
-          } )
-          .catch( Log.err );
+// Load group from invocation URL
+function loadGroup() {
+   Library
+      .loadFromURL()
+      .then( (_group) => {
+         group = _group;
+         formatGroup();
+      } )
+      .catch( Log.err );
 }
 
 function formatGroup() {
@@ -72,7 +75,7 @@ function formatGroup() {
             .reverse()
             .map( el => makeGroupRef(el) );
          decompositionDisplay.push(makeGroupRef(IsomorphicGroups.map[1][0]));
-         decompositionDisplay = decompositionDisplay.reverse().join(' &#x25c5; ');  // ◅ 'is normal in' character
+         decompositionDisplay = decompositionDisplay.reverse().join(' ⊲ ');  // 'normal subgroup of' character, #22b2
          $rslt.append(eval(Template.HTML('solvable')));
          for (let i = 0; i < decomposition.length - 1; i++) {
             let g = decomposition[i];
@@ -96,15 +99,15 @@ function formatGroup() {
    $('body').prepend($rslt);
    MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
 
-   setUpGAPCells();
+   setUpGAPCells(group);
 }
 
 function makeGroupRef(group /*: AugmentedGroup */) /*: string */ {
    const g = (group.hasOwnProperty('name') ? group : group.isIsomorphicTo);
    if (g != undefined && g.hasOwnProperty('name')) {
       const G = ((g /*: any */) /*: XMLGroup */);
-      return `<a href="javascript:Library.openWithGroupURL('GroupInfo.html', '${G.URL}')">${MathML.sans(G.name)}</a>`;
-   } else {
+      return eval(Template.HTML('group-reference-template'));
+  } else {
       return '';
    }
 }
@@ -219,7 +222,7 @@ function showSolvableDecompositionSheet ( type /*: VisualizerType */ ) {
       }
    ];
    const red = 'hsl(0, 100%, 80%)';
-   const notred = CayleyDiagram.NODE_COLOR;
+   const notred = DEFAULT_SPHERE_COLOR;
    var previous = null, previousIndex = -1;
    D.map( ( entry, index ) => {
       // put name of group atop each element in top row, the decomposition
@@ -278,7 +281,7 @@ function showSolvableDecompositionSheet ( type /*: VisualizerType */ ) {
          sheetElementsAsJSON.push( {
             className : 'TextElement',
             text : MathML.toUnicode( ((entry.group /*: any */) /*: {name?: string} */).name || '<mtext>(unnamed)</mtext>' ) + ' / '
-                 + MathML.toUnicode( ((previous.group /*: any */) /*: {name?: string} */).name || '<mtext>(unnamed)</mtext>' ) + ' &cong; '
+                 + MathML.toUnicode( ((previous.group /*: any */) /*: {name?: string} */).name || '<mtext>(unnamed)</mtext>' ) + ' ≅ '
                  + MathML.toUnicode( ((entry.quotientByPrevious /*: any */) /*: {name?: string} */).name || '<mtext>(unnamed)</mtext>'),
             x : L+index*W+index*hgap+bottomShift, y : T+2*H+vgap+txtH/2,
             w : W, h : txtH,

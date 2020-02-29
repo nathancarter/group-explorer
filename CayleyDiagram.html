@@ -12,8 +12,8 @@
       <link rel="stylesheet" href="./style/menu.css" type="text/css"></link>
       <link rel="stylesheet" href="./style/sliders.css" type="text/css"></link>
       <link rel="stylesheet" href="./visualizerFramework/visualizer.css" type="text/css"></link>
-      <link rel="stylesheet" href="./subsetDisplay/subsets.css" type="text/css"></link>
-      <link rel="stylesheet" href="./diagramController/diagram.css" type="text/css"></link>
+      <link rel="stylesheet" href="./style/SubsetHighlightController.css" type="text/css"></link>
+      <link rel="stylesheet" href="./style/CayleyDiagramController.css" type="text/css"></link>
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css">
 
       <style>
@@ -27,6 +27,7 @@
 
        #graphic {
           -webkit-user-select: none;  /* prevents cut-and-paste in graphic */
+          background-color: #E8C8C8;
        }
        
        .tooltip ul {
@@ -35,7 +36,7 @@
        }
       </style>
 
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
       <script type="text/x-mathjax-config">
        MathJax.Hub.Config({
           CommonHTML: {
@@ -47,34 +48,39 @@
        MathJax.Hub.processSectionDelay = 0;   // no pause to let browser handle interaction -- only busy during loading
        MathJax.Hub.processUpdateDelay = 0;
       </script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=MML_CHTML"></script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/95/three.js"></script>
-      <script>module = { };</script>
-      <script src="https://cdn.jsdelivr.net/npm/three-trackballcontrols@0.0.7/index.js"></script>
-      <script>THREE.TrackballControls = module.exports;</script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.6/MathJax.js?config=MML_CHTML"></script>
       <script src="https://cdn.jsdelivr.net/npm/jquery-resizable-dom@0.32.0/dist/jquery-resizable.js"></script>
-      <script src="./lib/THREE.MeshLine.js"></script>
-      <script src="./build/allGroupExplorer.js"></script>
-      <script src="./build/allVisualizer.js"></script>
-      <script src="./CayleyDiagram.js"></script>
+      <script type="module">
+       import {load} from "./CayleyDiagram.js";
+       window.addEventListener('load', load, {once: true});
+      </script>
    </head>
-   <body class="vert">
-      <div id="control-options" class="horiz">
-         <button id="subset-button">Subsets</button>
-         <button id="view-button">View</button>
-         <button id="diagram-button">Diagram</button>
-      </div>
+   <body>
+      <div id="bodyDouble" class="vert">
+         <div id="header" class="horiz"></div>
+         <div id="horiz-container" class="horiz">
+            <div id="graphic"></div>
+            <div id="splitter"></div>
+            <div id="vert-container" class="vert">
+               <div id="control-options" class="horiz">
+                  <button id="subset-button">Subsets</button>
+                  <button id="view-button">View</button>
+                  <button id="diagram-button">Diagram</button>
+               </div>
 
-      <div id="subset-control" class="fill-vert">
-         <!-- This is filled in by subsetDisplay/subsets.html -->
-      </div>
+               <div id="subset-control" class="fill-vert">
+                  <!-- This is filled in by subsetDisplay/subsets.html -->
+               </div>
 
-      <div id="view-control" class="vert fill-vert control">
-         <!-- This is filled in by cayleyViewController/view.html -->
-      </div>
+               <div id="view-control" class="vert fill-vert control">
+                  <!-- This is filled in by cayleyViewController/view.html -->
+               </div>
 
-      <div id="diagram-control" class="fill-vert control">
-         <!-- This is filled in by diagramController/diagram.html -->
+               <div id="diagram-control" class="fill-vert control">
+                  <!-- This is filled in by diagramController/diagram.html -->
+               </div>
+            </div>
+         </div>
       </div>
    </body>
 

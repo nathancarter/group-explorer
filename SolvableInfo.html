@@ -7,7 +7,7 @@
       <link rel="icon" type="image/png" href="./images/favicon.png"></link>
       <link rel="stylesheet" href="./style/fonts.css" type="text/css">
 
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
       <script type="text/x-mathjax-config">
        MathJax.Hub.Config({
       	  CommonHTML: {
@@ -15,15 +15,19 @@
           },
        });
       </script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=MML_CHTML"></script>
-      <script src="./build/allGroupExplorer.js"></script>
-      <script src="./build/allSheets.js"></script>
-      <script src="./SolvableInfo.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.6/MathJax.js?config=MML_CHTML"></script>
+      <script type="module">
+       import {load, showSolvableDecompositionSheet} from './SolvableInfo.js';
+       import Library from './js/Library.js';
+       window.addEventListener('load', load, {once: true});
+       window.showSolvableDecompositionSheet = showSolvableDecompositionSheet;
+       window.Library = Library;
+      </script>
    </head>
 
    <body>
       <template id="header">
-         <h3>${MathML.sans('<mtext>Results of &#8220;Solvable group&#8221; computation for&nbsp;</mtext>' + group.name)}</h3>
+         <h3>${MathML.sans('<mtext>Results of “Solvable group” computation for&nbsp;</mtext>' + group.name)}</h3>
       </template>
       <template id="abelian">
          ${MathML.sans(group.name)} is <a href="./help/rf-groupterms/index.html#solvable-group-solvable-decomposition">solvable</a>
@@ -79,6 +83,9 @@
             the library currently loaded.</p>
          <p>You will need to more groups loaded (see <a href="">options window</a> for starters)
             to make this computation possible.</p>
+      </template>
+      <template id="group-reference-template">
+         <a href="javascript:Library.openWithGroupURL('GroupInfo.html', '${G.URL}')">${MathML.sans(G.name)}</a>;
       </template>
       <div class="gapcode" data-built-in-code-type="is solvable"/>
    </body>

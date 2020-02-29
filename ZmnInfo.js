@@ -1,23 +1,24 @@
 // @flow
 
-/*::
 import BasicGroup from './js/BasicGroup.js';
-import type {StrategyArray, layout, direction} from './js/CayleyDiagram.js';
 import IsomorphicGroups from './js/IsomorphicGroups.js';
 import Library from './js/Library.js';
-import Log from './js/Log.md';
+import Log from './js/Log.js';
 import MathUtils from './js/MathUtils.js';
-import MathML from './js/MathML.md';
+import MathML from './js/MathML.js';
 import {CreateNewSheet} from './js/SheetModel.js';
-import Template from './js/Template.md';
+import Template from './js/Template.js';
 import XMLGroup from './js/XMLGroup.js';
- */
 
-var group /*: XMLGroup */;
+export {loadGroup as load};
 
-$(window).on('load', load);	// like onload handler in body
+/*::
+import type {StrategyParameters, Layout, Direction} from './js/CayleyDiagramView.js';
+*/
 
-function load() {
+let group /*: XMLGroup */;
+
+function loadGroup() {
    Library.loadFromURL()
           .then( (_group) => {
               group = _group;
@@ -66,14 +67,16 @@ function formatGroup() {
       const n = parseInt( target.getAttribute( 'data-n' ) );
       showNoZnmIsomorphismSheet( m, n );
    } );
+
+   MathJax.Hub.Queue(['Typeset', MathJax.Hub], () => void(0));
 }
 
 function statement ( m /*: number */, n /*: number */, bool /*: boolean */ ) {
-   return MathML.sans( MathML.sub( '&Zopf;', m * n ) )
+   return MathML.sans( MathML.sub( 'ℤ', m * n ) )
         + ` is ${bool ? '' : 'not '}isomorphic to `
-        + MathML.sans( `<msub><mi>&Zopf;</mi><mn>${m}</mn></msub>`
-                     + '<mo>&times;</mo>'
-                     + `<msub><mi>&Zopf;</mi><mn>${n}</mn></msub>` );
+        + MathML.sans( `<msub><mi>ℤ</mi><mn>${m}</mn></msub>`
+                     + '<mo>×</mo>'
+                     + `<msub><mi>ℤ</mi><mn>${n}</mn></msub>` );
 }
 
 function allOffers ( product /*: groupElement */ ) /*: html */ {
@@ -89,8 +92,8 @@ function allOffers ( product /*: groupElement */ ) /*: html */ {
 }
 
 function showZnmIsomorphismSheet ( m /*: groupElement */, n /*: groupElement */ ) {
-   const Z = ( k ) => `<msub><mi>&#8484;</mi><mn>${k}</mn></msub>`;
-   const prod = ( A, B ) => `<mrow>${A}<mo>&#215;</mo>${B}</mrow>`;
+   const Z = ( k ) => MathML.sub('ℤ', k); 
+   const prod = ( A, B ) => `<mrow>${A}<mo>×</mo>${B}</mrow>`;
    const a = group.elementOrders.indexOf( m );
    const b = group.elementOrders.indexOf( n );
    const ab = group.mult( a, b );
@@ -112,7 +115,8 @@ function showZnmIsomorphismSheet ( m /*: groupElement */, n /*: groupElement */ 
          x : hmar, y : vmar+hdrH+vsep, w : W, h : H,
          arrows : [ a, b ],
          arrowColors : [ '#660000', '#006600' ],
-         strategies : [ [ a, 0, 0, 0 ], [ b, 0, 1, 1 ] ]
+         strategies : [ {generator: a, layout: 'linear', direction: 'X', nestingLevel: 0},
+                        {generator: b, layout: 'linear', direction: 'Y', nestingLevel: 1} ]
       },
       {
          // same as previous, plus arrow for ab
@@ -120,7 +124,8 @@ function showZnmIsomorphismSheet ( m /*: groupElement */, n /*: groupElement */ 
          x : hmar+hsep+W, y : vmar+hdrH+vsep, w : W, h : H,
          arrows : [ a, b, ab ],
          arrowColors : [ '#660000', '#006600', '#000066' ],
-         strategies : [ [ a, 0, 0, 0 ], [ b, 0, 1, 1 ] ]
+         strategies : [ {generator: a, layout: 'linear', direction: 'X', nestingLevel: 0},
+                        {generator: b, layout: 'linear', direction: 'Y', nestingLevel: 1} ]
       },
       {
          // circular CD of Z_mn with arrow for ab shown only
@@ -128,7 +133,7 @@ function showZnmIsomorphismSheet ( m /*: groupElement */, n /*: groupElement */ 
          x : hmar+2*hsep+2*W, y : vmar+hdrH+vsep, w : W, h : H,
          arrows : [ ab ],
          arrowColors : [ '#000066' ],
-         strategies : [ [ ab, 1, 2, 0 ] ]
+         strategies : [ {generator: ab, layout: 'circular', direction: 'XY', nestingLevel: 0} ]
       },
       {
          className : 'TextElement',
@@ -160,8 +165,8 @@ function showZnmIsomorphismSheet ( m /*: groupElement */, n /*: groupElement */ 
 
 function showNoZnmIsomorphismSheet ( m /*: groupElement */, n /*: groupElement */ ) {
    // define constants similar to those in showZnmIsomorphismSheet()
-   const Z = ( k ) => `<msub><mi>&#8484;</mi><mn>${k}</mn></msub>`;
-   const prod = ( A, B ) => `<mrow>${A}<mo>&#215;</mo>${B}</mrow>`;
+   const Z = ( k ) => MathML.sub('ℤ', k); 
+   const prod = ( A, B ) => `<mrow>${A}<mo>×</mo>${B}</mrow>`;
    const hmar = 20, vmar = 20, hsep = 20, vsep = 20,
          W = 300, H = W, hdrH = 50, txtH = 100;
    // build the group Z_m x Z_n and find it in the group library.
@@ -206,7 +211,8 @@ function showNoZnmIsomorphismSheet ( m /*: groupElement */, n /*: groupElement *
          x : hmar, y : vmar+hdrH+vsep, w : W, h : H,
          arrows : [ a, b ],
          arrowColors : [ '#660000', '#006600' ],
-         strategies : [ [ a, 0, 0, 0 ], [ b, 0, 1, 1 ] ]
+         strategies : [ {generator: a, layout: 'linear', direction: 'X', nestingLevel: 0},
+                        {generator: b, layout: 'linear', direction: 'Y', nestingLevel: 1} ]
       },
       {
          // same as previous, plus arrow for maxOrdElt
@@ -214,7 +220,8 @@ function showNoZnmIsomorphismSheet ( m /*: groupElement */, n /*: groupElement *
          x : hmar+hsep+W, y : vmar+hdrH+vsep, w : W, h : H,
          arrows : [ a, b, maxOrdElt ],
          arrowColors : [ '#660000', '#006600', '#000066' ],
-         strategies : [ [ a, 0, 0, 0 ], [ b, 0, 1, 1 ] ]
+         strategies : [ {generator: a, layout: 'linear', direction: 'X', nestingLevel: 0},
+                        {generator: b, layout: 'linear', direction: 'Y', nestingLevel: 1} ]
       },
       {
          // circular CD of Z_mn with arrow for maxOrdElt shown only
@@ -222,7 +229,8 @@ function showNoZnmIsomorphismSheet ( m /*: groupElement */, n /*: groupElement *
          x : hmar+2*hsep+2*W, y : vmar+hdrH+vsep, w : W, h : H,
          arrows : [ maxOrdElt ],
          arrowColors : [ '#000066' ],
-         strategies : [ [ maxOrdElt, 2, 0, 0 ], [ b, 0, 1, 1 ] ]
+         strategies : [ {generator: maxOrdElt, layout: 'rotated', direction: 'XY', nestingLevel: 0 },
+                        {generator: b, layout: 'linear', direction: 'Y', nestingLevel: 1} ]
       },
       {
          className : 'TextElement',

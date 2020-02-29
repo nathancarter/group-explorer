@@ -25,7 +25,7 @@
        }
       </style>
 
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
       <script type="text/x-mathjax-config">
        MathJax.Hub.Config({
       	  CommonHTML: {
@@ -33,16 +33,19 @@
           },
        });
       </script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=MML_CHTML"></script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/95/three.js"></script>
-      <script src="./build/allGroupExplorer.js"></script>
-      <script src="./build/allSheets.js"></script>
-      <script src="./SubgroupInfo.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.6/MathJax.js?config=MML_CHTML"></script>
+      <script type="module">
+       import * as SUB from './SubgroupInfo.js';
+       window.addEventListener('load', SUB.load, {once: true});
+       window.showSubgroupLattice = SUB.showSubgroupLattice;
+       window.showEmbeddingSheet = SUB.showEmbeddingSheet;
+       window.showQuotientSheet = SUB.showQuotientSheet;
+      </script>
    </head>
 
    <body>
       <template id="header_template">
-         <h3>${MathML.sans('<mtext>Results of &#8220;Subgroup&#8221;computation for&nbsp;</mtext>' + group.name)}</h3>
+         <h3>${MathML.sans('<mtext>Results of “Subgroup” computation for&nbsp;</mtext>' + group.name)}</h3>
          <p>All <a href="./help/rf-groupterms/index.html#subgroup">subgroups</a> of
             ${MathML.sans(group.name)} are listed in the following table. Also, a link
             which exhibits the embedding for each subgroup is also provided, or in

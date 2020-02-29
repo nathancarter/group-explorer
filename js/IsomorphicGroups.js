@@ -1,5 +1,5 @@
 // @flow
-/*::
+
 import BasicGroup from './BasicGroup.js';
 import BitSet from './BitSet.js';
 import GEUtils from './GEUtils.js';
@@ -8,7 +8,6 @@ import Subgroup from './Subgroup.js';
 import XMLGroup from './XMLGroup.js';
 
 export default
-*/
 class IsomorphicGroups {
 /*::
    static map: Array<Array<XMLGroup>>;

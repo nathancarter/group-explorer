@@ -7,13 +7,17 @@
  * To create from JSON:
  *      XMLGroup.parseJSON(json)
  */
-/*::
+
 import BasicGroup from './BasicGroup.js';
+import BitSet from './BitSet.js';
+import MathML from './MathML.js';
+import Subgroup from './Subgroup.js';
+
+/*::
 import type {BasicGroupJSON} from './BasicGroup.js';
-import MathML from './MathML.md';
 
 // Cayley diagram from XML
-type XMLCayleyDiagram = {
+export type XMLCayleyDiagram = {
    name: string,
    arrows: Array<groupElement>,
    points: Array<Point>
@@ -21,8 +25,8 @@ type XMLCayleyDiagram = {
 
 // Symmetry object from XML
 type Point = [float, float, float];
-type Path = {color?: color, points: Array<Point>};
-type Sphere = {radius: float, color?: color, point: Point};
+type Path = {color: ?color, points: Array<Point>};
+type Sphere = {radius: float, color: ?color, point: Point};
 type Operation = {element: groupElement, degrees: float, point: Point};
 export type XMLSymmetryObject = {
    name: string,
@@ -47,7 +51,6 @@ export type XMLGroupJSON = {
    representationIndex: number,
    cayleyDiagrams: Array<XMLCayleyDiagram>,
    symmetryObjects: Array<XMLSymmetryObject>,
-   _labels: Array<Array<string>>,
 
    // XMLGroup properties set elsewhere
    lastModifiedOnServer: string,
@@ -69,9 +72,9 @@ export type BriefXMLGroupJSON = {
    symmetryObjects: Array<XMLSymmetryObject>,
    multtable: Array<Array<groupElement>>
 };
+*/
 
 export default
- */
 class XMLGroup extends BasicGroup {
 /*::
    name: string;
@@ -89,13 +92,16 @@ class XMLGroup extends BasicGroup {
    representationIndex: number;
    cayleyDiagrams: Array<XMLCayleyDiagram>;
    symmetryObjects: Array<XMLSymmetryObject>;
-   _labels: Array<Array<string>>;
+   _labels: ?Array<string>;
 
    lastModifiedOnServer: string;
    URL: string;
    CayleyThumbnail: string;
    rowHTML: string;
    userNotes: string;
+
+   CayleyThumbnail: string | void;
+   rowHTML: string | void;
  */
    constructor (text /*: void | string | Document */) {
       if (text === undefined) {
@@ -105,11 +111,11 @@ class XMLGroup extends BasicGroup {
 
       let $xml /*: JQuery */;
       if (typeof(text) == 'string') {
-         // Replacing named entities with values ensure that later fragment parsing succeeds...
-         const cleanText = text.replace(/&Zopf;/g, "&#8484;")
-                               .replace(/&times;/g, "&#215;")
-                               .replace(/&ltimes;/g, "&#8905;")
-                               .replace(/&rtimes;/g, "&#8906;")
+         // Replacing named entities with unicode characters to ensure that later fragments parse successfully...
+         const cleanText = text.replace(/&Zopf;/g, "ℤ")
+                               .replace(/&times;/g, "×")
+                               .replace(/&ltimes;/g, "⋉")
+                               .replace(/&rtimes;/g, "⋊")
                                .replace(/<br.>/g, "&lt;br/&gt;");  // hack to read fgb notes
          $xml = $($.parseXML(cleanText));
       } else {
@@ -219,25 +225,24 @@ class XMLGroup extends BasicGroup {
             this.representationIndex = inx + this.representations.length;
          }
       }
+      this._labels = undefined;  // representation has changed, invalidate labels
+   }
+
+   get representationIsUserDefined () {
+      return this.representationIndex >= this.representations.length;
    }
 
    get rep() /*: Array<mathml> */ {
       return (this.representationIndex < this.representations.length) ? this.reps[this.representationIndex] : this.representation;
    }
 
+   // unicode text for current representation
    get labels() /*: Array<string> */ {
-      if (this.representationIndex > this.representations.length) {
-         return this.representation.map( (rep) => MathML.toUnicode(rep) );
-      } else {
-         if (this._labels == undefined) {
-            this._labels = Array(this.representations.length).fill([]);
-         }
-         const labels /*: Array<Array<string>> */ = this._labels;
-         const representationIndex /*: number */ = this.representationIndex;
-         const result /*: Array<string> */ = labels[representationIndex];
-         labels[representationIndex] = (result.length == 0) ? this.representation.map( (rep) => MathML.toUnicode(rep) ) : result;
-         return labels[representationIndex];
+      if (this._labels == undefined) {
+         this._labels = this.representation.map( (rep) => MathML.toUnicode(rep) );
       }
+
+      return this._labels;
    }
 
    get longestLabel() /*: mathml */ {
@@ -246,7 +251,7 @@ class XMLGroup extends BasicGroup {
 
    get generators() /*: Array<Array<groupElement>> */ {
       const calculatedGenerators = super.generators;
-      if (this._XML_generators.length == 0) {
+      if (this._XML_generators == undefined || this._XML_generators.length == 0) {
          return calculatedGenerators;
       } else if (calculatedGenerators[0].length < this._XML_generators[0].length) {
          calculatedGenerators.push(...this._XML_generators);
@@ -320,35 +325,31 @@ class XMLGroup extends BasicGroup {
       let symmetryObjects = [];
       $xml.find('symmetryobject').each(
          (_, so) => {
-            const name = so.getAttribute('name') || '(unnamed)',
-                  operations = [],
-                  spheres = [],
-                  paths = [];
+            const name = so.getAttribute('name') || '(unnamed)';
+            const operations = [];
+            const spheres = [];
+            const paths = [];
             $(so).find('operation').each(
                (_, op) => {
-                  const element = Number(op.getAttribute('element')),
-                        degrees = Number(op.getAttribute('degrees')),
-                        point = getPoint(op.children[0]);
+                  const element = Number(op.getAttribute('element'));
+                  const degrees = Number(op.getAttribute('degrees'));
+                  const point = getPoint(op.children[0]);
                   operations.push({element: element, degrees: degrees, point: point});
                }
             );
             $(so).find('sphere').each(
                (_, sp) => {
-                  const radius = Number(sp.getAttribute('radius')),
-                        color = sp.getAttribute('color'),
-                        point = getPoint(sp.children[0]);
-                  const sphere /*: Sphere */ = {radius: radius, point: point};
-                  if (color != undefined)
-                     sphere.color = color;
+                  const radius = Number(sp.getAttribute('radius'));
+                  const color = sp.getAttribute('color');
+                  const point = getPoint(sp.children[0]);
+                  const sphere /*: Sphere */ = {radius: radius, color: color, point: point};
                   spheres.push(sphere);
                }
             );
             $(so).find('path').each(
                (_, pa) => {
-                  const path /*: Path */ = {points: []};
                   const color = pa.getAttribute('color');
-                  if (color != undefined)
-                     path.color = color;
+                  const path /*: Path */ = {points: [], color: color};
                   $(pa).find('point').each(
                      (_, pt) => {
                         path.points.push(getPoint(pt));
@@ -363,5 +364,14 @@ class XMLGroup extends BasicGroup {
          }
       )
       return symmetryObjects;
+   }
+
+   bitsetToRepString(bitset /*: BitSet */) /*: string */ {
+      return bitset.toArray().map( (el /*: groupElement */) => this.reps[el] ).join(', ');
+   }
+
+   subgroupToRepString(subgroup /*: Subgroup */) /*: string */ {
+      return `generators: ${this.bitsetToRepString(subgroup.generators)}}; ` +
+             `members: ${this.bitsetToRepString(subgroup.members)}`;
    }
 }
