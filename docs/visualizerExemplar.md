@@ -106,9 +106,9 @@ Other visualizers extend the exemplar with different displays in the graphic ele
 ```
 ### Asynchronous loading
 
-Asynchronous tasks are generally presented as ES6 Promises in GE. Since the [Library](../js/Library.js) will request the group definition from a server if it doesn't have a copy locally, the [loadFromURL()](../js/Library.js) method returns a Promise, not the group itself.
+Asynchronous tasks are generally presented as ES6 Promises in GE. Since the [Library](../js/Library.js) will request the group definition from a server if it doesn't have a copy locally, the [loadFromURL()](../js/Library.js#loadFromURL) method returns a Promise, not the group itself.
 
-Note the [MathML preload](../js/MathML.js#preload). This is often desirable since it avoids having to perform many small asynchronous activities in subsequent MathMLcalls, which together can take considerably longer than a single consolidated action at the start. 
+Note the [MathML preload](../js/MathML.js#preload). This is often desirable since it avoids having to perform many small asynchronous activities in subsequent MathML calls, which together with their wait times can take considerably longer than a single consolidated action at the start. 
 ```javascript
        /* Load the static components of the page */
        function load() {
