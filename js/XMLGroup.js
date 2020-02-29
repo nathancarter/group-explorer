@@ -251,7 +251,7 @@ class XMLGroup extends BasicGroup {
 
    get generators() /*: Array<Array<groupElement>> */ {
       const calculatedGenerators = super.generators;
-      if (this._XML_generators.length == 0) {
+      if (this._XML_generators == undefined || this._XML_generators.length == 0) {
          return calculatedGenerators;
       } else if (calculatedGenerators[0].length < this._XML_generators[0].length) {
          calculatedGenerators.push(...this._XML_generators);

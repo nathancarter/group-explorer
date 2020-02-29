@@ -128,10 +128,9 @@ function load() {
 
    window.addEventListener( 'message', function ( event /*: MessageEvent */ ) {
       const event_data /*: MSG_loadFromJSON */ = (event.data /*: any */);
-      const i = event_data.type == 'load from json';
-      if (typeof event.data != 'undefined' || event_data.type != 'load from json') {
+      if (typeof event_data == 'undefined' || event_data.type != 'load from json') {
          Log.warn('unknown message received in Sheet.js:');
-         Log.warn(event.data);
+         Log.warn(event_data);
          return;
       }
       loadSheetFromJSON( event_data.json );

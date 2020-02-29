@@ -163,7 +163,7 @@ type Coordinate = {x: float, y: float};
 
 ///// message formats
 
-// sent by ??? to create new Sheet.js using loadSheetFromJSON global function
+// sent in gap-pkg-groupexplorer to create new Sheet.js using loadSheetFromJSON global function
 export type MSG_loadFromJSON = {
    type: 'load from json',
    json: Array<JSONType>
@@ -1021,6 +1021,9 @@ export class VisualizerElement/*:: <VizDispJSON: Obj, VizDispType: VizDisplay<Vi
             this.setVisualizerGroup( this.group );
             this.vizdisplay.fromJSON(json);
             this.rerender();
+        } else {
+            this.vizdisplay.fromJSON(json);
+            this.rerender();
         }
     }
     // Generic reply that can be adjusted in subclasses
@@ -1204,7 +1207,8 @@ class WrappedCDView /*:: implements VizDisplay<CayleyDiagramJSON & VisualizerEle
                 this.setDiagram(group, diagram);
             } else {
                 // CDElement created from CreateNewSheet call
-                if (  WrappedCDView.view.group != undefined
+                if (   WrappedCDView.view.group != undefined
+                    && WrappedCDView.view.group.URL != undefined
                     && WrappedCDView.view.group.URL == group.URL
                     && generatingJSON.strategies == undefined)
                 {
@@ -1301,7 +1305,7 @@ export class CDElement extends VisualizerElement/*:: <CayleyDiagramJSON & Visual
         return new WrappedCDView(options);
     }
     getEditPage () {
-        let url = './CayleyDiagram.html?waitForMessage&';
+        let url = './CayleyDiagram.html?SheetEditor=true&';
         return url;
     }
     getClassName () { return 'CDElement'; }

@@ -99,11 +99,11 @@ function completeSetup(diagram_name /*: ?string */) {
    // Register event handlers
    registerCallbacks();
 
-   // If there is a 'waitForMessage' search parameter in the URL as well as a 'groupURL',
-   //   this is an editor started by a Sheet.
-   //   Start a 'message' event handler and await the configuration message
    const href_URL = new URL(window.location.href);
-   if (href_URL.searchParams.get('groupURL') != null && href_URL.searchParams.get('waitForMessage') != null) {
+   if (href_URL.searchParams.get('SheetEditor') == null) {  // This is a normal Cayley diagram visualizer execution
+      // Start animating the main view
+      Cayley_Diagram_View.render();
+   } else {  // This is an editor started by a Sheet -- start a 'message' event handler and await the configuration message
       // this only happens once, right after initialization
       window.addEventListener('message', receiveInitialSetup, false);
 
@@ -111,10 +111,6 @@ function completeSetup(diagram_name /*: ?string */) {
       window.postMessage( LISTENER_READY_MESSAGE, myDomain );
       // or if any external program is using GE as a service, let it know we're ready, too
       window.parent.postMessage( LISTENER_READY_MESSAGE, '*' );
-   } else {
-      // Otherwise this is a normal Cayley diagram visualizer execution
-      // Start animating the main view
-      Cayley_Diagram_View.render();
    }
 
    // Load icon strip in upper right-hand corner
