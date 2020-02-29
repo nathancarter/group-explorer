@@ -9,7 +9,7 @@
 all : Version.js docs
 
 clean :
-	rm -f *~ js/*~ subsetDisplay/*~ visualizerFramework/*~ diagramController/*~ docs/*~
+	rm -f *~ js/*~ visualizerFramework/*~ docs/*~
 	rm -f ${PRODUCTS} ${DOCS} Version.js
 
 #################
