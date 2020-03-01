@@ -276,7 +276,7 @@ class UDR {
 
    static create() {
       UDR.current_index = Group.userRepresentations.length;
-      UDR._showEditor(Array(Group.order).fill('<mtext>change me</mtext>'));
+      UDR._showEditor(Array(Group.order).fill(''));
    }
 
    static edit(index /*: number */) {
