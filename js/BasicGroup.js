@@ -115,7 +115,7 @@ class BasicGroup {
    get isSimple() /*: boolean */ {
       if (this._isSimple == undefined) {
          this._isSimple =
-            this._subgroups.length > 2 &&
+            this.subgroups.length > 2 &&
             !this.subgroups.some(
                (el, inx) => this.isNormal(el) && inx != 0 && inx != (this.subgroups.length - 1) );
       }
