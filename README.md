@@ -7,6 +7,9 @@ as a desktop application, but was rewritten in 2019 as a web app.
 
 ## Status
 
+**Release 3.0.0:** First official full-featured release! It's not done yet, though.
+We would still appreciate suggestions for enhancements or bug reports.
+
 **Beta:** We would appreciate any bug reports during summer 2019, so that we
 can have a polished and reliable version ready for students in Fall 2019
 courses.
