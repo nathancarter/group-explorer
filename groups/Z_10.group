@@ -2,9 +2,10 @@
 <group>
     <gapid>10,2</gapid>
     <gapname>C10</gapname>
-    <name text="Z_10"><mrow><msub><mi>&Zopf;</mi><mn>10</mn></msub></mrow></name>
+    <link>http://groupnames.org/1/C10.html</link>
+    <name text="Z_10"><mrow><msub><mi>ℤ</mi><mn>10</mn></msub></mrow></name>
     <definition text="&amp;lt; &lt;i&gt;a&lt;/i&gt; | &lt;i&gt;a&lt;/i&gt;&lt;sup&gt;10&lt;/sup&gt;=1 &amp;gt;">
-        <mfenced open="&#x27E8;" close="&#x27E9;" separators=":">
+        <mfenced open="⟨" close="⟩" separators=":">
             <mrow><mi>a</mi></mrow>
             <mrow><msup><mi>a</mi><mn>10</mn></msup><mo>=</mo><mn>1</mn></mrow>
         </mfenced>

@@ -2,7 +2,8 @@
 <group>
     <gapid>1,1</gapid>
     <gapname>1</gapname>
-    <name text="Z_1"><mrow><msub><mi>&Zopf;</mi><mn>1</mn></msub></mrow></name>
+    <link>http://groupnames.org/1/C1.html</link>
+    <name text="Z_1"><mrow><msub><mi>ℤ</mi><mn>1</mn></msub></mrow></name>
     <definition text="{ e }">
         <mfenced open="{" close="}" separators=":">
             <mrow><mi>e</mi></mrow>

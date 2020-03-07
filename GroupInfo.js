@@ -54,10 +54,14 @@ function displayStatic() {
 
    // Basic facts
    const basicFacts = [
-      {groupField: 'order',      displayName: 'Order',      formattedValue: '<mn>' + Group.order.toString() + '</mn>' },
-      {groupField: 'gapid',      displayName: 'GAP ID',     formattedValue: '<mtext>' + Group.gapid + '</mtext>' },
-      {groupField: 'gapname',    displayName: 'GAP name',   formattedValue: '<mtext>' + Group.gapname + '</mtext>' },
-      {groupField: 'definition', displayName: 'Definition', formattedValue: Group.definition },
+      {groupField: 'order',      displayName: 'Order',      formattedValue: Group.order },
+      {groupField: 'gapname',    displayName: 'GAP name',   formattedValue: Group.gapname },
+      {groupField: 'gapid',      displayName: 'GAP ID',     formattedValue: Group.gapid },
+      {groupField: 'other_names',displayName: 'Other names',
+       formattedValue: Group.other_names == undefined ? '' : Group.other_names.map( (name) => MathML.sans(name) ).join(', ') },
+      {groupField: 'definition', displayName: 'Definition', formattedValue: MathML.sans(Group.definition) },
+      {groupField: 'links',      displayName: 'More info',
+       formattedValue: Group.links == undefined ? '' : Group.links.map( (link) => `<a href="${link}">${link}</a>` ).join(', ') },
    ];
    for (const basicFact of basicFacts) {
       if ((Group /*: {[key: string]: mixed} */)[basicFact.groupField] != undefined) {

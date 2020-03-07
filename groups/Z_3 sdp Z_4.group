@@ -2,14 +2,15 @@
 <group>
     <gapid>12,1</gapid>
     <gapname>C3 : C4</gapname>
-    <name text="Z_3 sdp Z_4"><mrow><msub><mi>&Zopf;</mi><mn>3</mn></msub><mo>&rtimes;</mo><msub><mi>&Zopf;</mi><mn>4</mn></msub></mrow></name>
+    <link>http://groupnames.org/1/Dic3.html</link>
+    <name text="Z_3 sdp Z_4"><mrow><msub><mi>ℤ</mi><mn>3</mn></msub><mo>⋊</mo><msub><mi>ℤ</mi><mn>4</mn></msub></mrow></name>
     <definition text="&amp;lt; &lt;i&gt;a&lt;/i&gt;, &lt;i&gt;b&lt;/i&gt; | &lt;i&gt;a&lt;/i&gt;&lt;sup&gt;4&lt;/sup&gt;=&lt;i&gt;b&lt;/i&gt;&lt;sup&gt;3&lt;/sup&gt;=1, &lt;i&gt;bab&lt;/i&gt;=&lt;i&gt;a&lt;/i&gt; &amp;gt;">
-        <mfenced open="&#x27E8;" close="&#x27E9;" separators=":">
+        <mfenced open="⟨" close="⟩" separators=":">
             <mrow><mi>a</mi><mo>,</mo><mi>b</mi></mrow>
             <mrow><msup><mi>a</mi><mn>4</mn></msup><mo>=</mo><msup><mi>b</mi><mn>3</mn></msup><mo>=</mo><mn>1</mn><mo>,</mo><mi>b</mi><mi>a</mi><mi>b</mi><mo>=</mo><mi>a</mi></mrow>
         </mfenced>
     </definition>
-    <phrase>The semidirect product of &Zopf;&#x2083; and &Zopf;&#x2084;</phrase>
+    <phrase>The semidirect product of ℤ₃ and ℤ₄</phrase>
     <author>Nathan Carter (ncarter@bentley.edu)</author>
     <multtable>
         <row> 0 1 2 3 4 5 6 7 8 9 10 11 </row>

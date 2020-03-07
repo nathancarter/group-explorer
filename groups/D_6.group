@@ -2,14 +2,15 @@
 <group>
     <gapid>12,4</gapid>
     <gapname>D12</gapname>
+    <link>http://groupnames.org/1/D6.html</link>
     <name text="D_6"><mrow><msub><mi>D</mi><mn>6</mn></msub></mrow></name>
     <definition text="&amp;lt; &lt;i&gt;a&lt;/i&gt;, &lt;i&gt;b&lt;/i&gt; | &lt;i&gt;a&lt;/i&gt;&lt;sup&gt;2&lt;/sup&gt;=&lt;i&gt;b&lt;/i&gt;&lt;sup&gt;6&lt;/sup&gt;=1, &lt;i&gt;bab&lt;/i&gt;=&lt;i&gt;a&lt;/i&gt;&lt;sup&gt;-1&lt;/sup&gt; &amp;gt;">
-        <mfenced open="&#x27E8;" close="&#x27E9;" separators=":">
+        <mfenced open="⟨" close="⟩" separators=":">
             <mrow><mi>a</mi><mo>,</mo><mi>b</mi></mrow>
             <mrow><msup><mi>a</mi><mn>2</mn></msup><mo>=</mo><msup><mi>b</mi><mn>6</mn></msup><mo>=</mo><mn>1</mn><mo>,</mo><mi>b</mi><mi>a</mi><mi>b</mi><mo>=</mo><msup><mi>a</mi><mn>-1</mn></msup></mrow>
         </mfenced>
     </definition>
-    <name text="S_3 x Z_2"><mrow><msub><mi>S</mi><mn>3</mn></msub><mo>&times;</mo><msub><mi>&Zopf;</mi><mn>2</mn></msub></mrow></name>
+    <name text="S_3 x Z_2"><mrow><msub><mi>S</mi><mn>3</mn></msub><mo>×</mo><msub><mi>ℤ</mi><mn>2</mn></msub></mrow></name>
     <phrase>Dihedral group on 6 vertices</phrase>
     <author>Nathan Carter (ncarter@bentley.edu)</author>
     <multtable>

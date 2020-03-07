@@ -40,6 +40,8 @@ export type XMLGroupJSON = {
    gapname: string,
    gapid: string,
    shortName: string,
+   links: Array<string> | void;
+   other_names: Array<string> | void;
    definition: mathml,
    phrase: string,
    notes: string,
@@ -81,6 +83,8 @@ class XMLGroup extends BasicGroup {
    gapname: string;
    gapid: string;
    shortName: string;
+   links: Array<string> | void;
+   other_names: Array<string> | void;
    definition: string;
    phrase: string;
    notes: string;
@@ -112,11 +116,7 @@ class XMLGroup extends BasicGroup {
       let $xml /*: JQuery */;
       if (typeof(text) == 'string') {
          // Replacing named entities with unicode characters to ensure that later fragments parse successfully...
-         const cleanText = text.replace(/&Zopf;/g, "ℤ")
-                               .replace(/&times;/g, "×")
-                               .replace(/&ltimes;/g, "⋉")
-                               .replace(/&rtimes;/g, "⋊")
-                               .replace(/<br.>/g, "&lt;br/&gt;");  // hack to read fgb notes
+         const cleanText = text.replace(/<br.>/g, "&lt;br/&gt;");  // hack to read fgb notes
          $xml = $($.parseXML(cleanText));
       } else {
          $xml = $(text);
@@ -124,10 +124,14 @@ class XMLGroup extends BasicGroup {
 
       super(XMLGroup._multtable_from_xml($xml));
 
-      this.name = $xml.find('name').first().html();
+      this.name = $xml.find('group > name').first().html();
       this.gapname = $xml.find('gapname').first().html();
       this.gapid = $xml.find('gapid').first().html();
-      this.shortName = $xml.find('name').first().attr('text');
+      this.shortName = $xml.find('group > name').first().attr('text');
+      this.links =
+         $xml.find('link').length == 0 ? undefined : $xml.find('link').toArray().map( (link) => link.textContent );;
+      this.other_names =
+         $xml.find('group > name').length <= 1 ? undefined : $xml.find('group > name').toArray().slice(-1).map( (n) => n.innerHTML );
       this.definition = $xml.find('definition').first().html();
       this.phrase = $xml.find('phrase').text();
       this.notes = $xml.find('notes').text();

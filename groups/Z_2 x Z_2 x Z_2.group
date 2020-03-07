@@ -2,9 +2,10 @@
 <group>
     <gapid>8,5</gapid>
     <gapname>C2 x C2 x C2</gapname>
-    <name text="Z_2 x Z_2 x Z_2"><mrow><msub><mi>&Zopf;</mi><mn>2</mn></msub><mo>&times;</mo><msub><mi>&Zopf;</mi><mn>2</mn></msub><mo>&times;</mo><msub><mi>&Zopf;</mi><mn>2</mn></msub></mrow></name>
+    <link>http://groupnames.org/1/C2^3.html</link>
+    <name text="Z_2 x Z_2 x Z_2"><mrow><msub><mi>ℤ</mi><mn>2</mn></msub><mo>×</mo><msub><mi>ℤ</mi><mn>2</mn></msub><mo>×</mo><msub><mi>ℤ</mi><mn>2</mn></msub></mrow></name>
     <definition text="&amp;lt; &lt;i&gt;a&lt;/i&gt;, &lt;i&gt;b&lt;/i&gt;, &lt;i&gt;c&lt;/i&gt; | &lt;i&gt;a&lt;/i&gt;&lt;sup&gt;2&lt;/sup&gt;=&lt;i&gt;b&lt;/i&gt;&lt;sup&gt;2&lt;/sup&gt;=&lt;i&gt;c&lt;/i&gt;&lt;sup&gt;2&lt;/sup&gt;=1, &lt;i&gt;ab&lt;/i&gt;=&lt;i&gt;ba&lt;/i&gt;, &lt;i&gt;ac&lt;/i&gt;=&lt;i&gt;ca&lt;/i&gt;, &lt;i&gt;bc&lt;/i&gt;=&lt;i&gt;cb&lt;/i&gt; &amp;gt;">
-        <mfenced open="&#x27E8;" close="&#x27E9;" separators=":">
+        <mfenced open="⟨" close="⟩" separators=":">
             <mrow><mi>a</mi><mo>,</mo><mi>b</mi><mo>,</mo><mi>c</mi></mrow>
             <mrow><msup><mi>a</mi><mn>2</mn></msup><mo>=</mo><msup><mi>b</mi><mn>2</mn></msup><mo>=</mo><msup><mi>c</mi><mn>2</mn></msup><mo>=</mo><mn>1</mn><mo>,</mo><mi>a</mi><mi>b</mi><mo>=</mo><mi>b</mi><mi>a</mi><mo>,</mo><mi>a</mi><mi>c</mi><mo>=</mo><mi>c</mi><mi>a</mi><mo>,</mo><mi>b</mi><mi>c</mi><mo>=</mo><mi>c</mi><mi>b</mi></mrow>
         </mfenced>
@@ -22,34 +23,34 @@
     </multtable>
     <generators list="1 2 4"/>
     <representation>
-        <element text="&lt;e,e,e&gt;"><mfenced open="&#x27E8;" close="&#x27E9;"><mi>e</mi><mi>e</mi><mi>e</mi></mfenced></element>
-        <element text="&lt;a,e,e&gt;"><mfenced open="&#x27E8;" close="&#x27E9;"><mi>a</mi><mi>e</mi><mi>e</mi></mfenced></element>
-        <element text="&lt;e,a,e&gt;"><mfenced open="&#x27E8;" close="&#x27E9;"><mi>e</mi><mi>a</mi><mi>e</mi></mfenced></element>
-        <element text="&lt;a,a,e&gt;"><mfenced open="&#x27E8;" close="&#x27E9;"><mi>a</mi><mi>a</mi><mi>e</mi></mfenced></element>
-        <element text="&lt;e,e,a&gt;"><mfenced open="&#x27E8;" close="&#x27E9;"><mi>e</mi><mi>e</mi><mi>a</mi></mfenced></element>
-        <element text="&lt;a,e,a&gt;"><mfenced open="&#x27E8;" close="&#x27E9;"><mi>a</mi><mi>e</mi><mi>a</mi></mfenced></element>
-        <element text="&lt;e,a,a&gt;"><mfenced open="&#x27E8;" close="&#x27E9;"><mi>e</mi><mi>a</mi><mi>a</mi></mfenced></element>
-        <element text="&lt;a,a,a&gt;"><mfenced open="&#x27E8;" close="&#x27E9;"><mi>a</mi><mi>a</mi><mi>a</mi></mfenced></element>
+        <element text="&lt;e,e,e&gt;"><mfenced open="⟨" close="⟩"><mi>e</mi><mi>e</mi><mi>e</mi></mfenced></element>
+        <element text="&lt;a,e,e&gt;"><mfenced open="⟨" close="⟩"><mi>a</mi><mi>e</mi><mi>e</mi></mfenced></element>
+        <element text="&lt;e,a,e&gt;"><mfenced open="⟨" close="⟩"><mi>e</mi><mi>a</mi><mi>e</mi></mfenced></element>
+        <element text="&lt;a,a,e&gt;"><mfenced open="⟨" close="⟩"><mi>a</mi><mi>a</mi><mi>e</mi></mfenced></element>
+        <element text="&lt;e,e,a&gt;"><mfenced open="⟨" close="⟩"><mi>e</mi><mi>e</mi><mi>a</mi></mfenced></element>
+        <element text="&lt;a,e,a&gt;"><mfenced open="⟨" close="⟩"><mi>a</mi><mi>e</mi><mi>a</mi></mfenced></element>
+        <element text="&lt;e,a,a&gt;"><mfenced open="⟨" close="⟩"><mi>e</mi><mi>a</mi><mi>a</mi></mfenced></element>
+        <element text="&lt;a,a,a&gt;"><mfenced open="⟨" close="⟩"><mi>a</mi><mi>a</mi><mi>a</mi></mfenced></element>
     </representation>
     <representation>
-        <element text="&lt;0,0,0&gt;"><mfenced open="&#x27E8;" close="&#x27E9;"><mn>0</mn><mn>0</mn><mn>0</mn></mfenced></element>
-        <element text="&lt;1,0,0&gt;"><mfenced open="&#x27E8;" close="&#x27E9;"><mn>1</mn><mn>0</mn><mn>0</mn></mfenced></element>
-        <element text="&lt;0,1,0&gt;"><mfenced open="&#x27E8;" close="&#x27E9;"><mn>0</mn><mn>1</mn><mn>0</mn></mfenced></element>
-        <element text="&lt;1,1,0&gt;"><mfenced open="&#x27E8;" close="&#x27E9;"><mn>1</mn><mn>1</mn><mn>0</mn></mfenced></element>
-        <element text="&lt;0,0,1&gt;"><mfenced open="&#x27E8;" close="&#x27E9;"><mn>0</mn><mn>0</mn><mn>1</mn></mfenced></element>
-        <element text="&lt;1,0,1&gt;"><mfenced open="&#x27E8;" close="&#x27E9;"><mn>1</mn><mn>0</mn><mn>1</mn></mfenced></element>
-        <element text="&lt;0,1,1&gt;"><mfenced open="&#x27E8;" close="&#x27E9;"><mn>0</mn><mn>1</mn><mn>1</mn></mfenced></element>
-        <element text="&lt;1,1,1&gt;"><mfenced open="&#x27E8;" close="&#x27E9;"><mn>1</mn><mn>1</mn><mn>1</mn></mfenced></element>
+        <element text="&lt;0,0,0&gt;"><mfenced open="⟨" close="⟩"><mn>0</mn><mn>0</mn><mn>0</mn></mfenced></element>
+        <element text="&lt;1,0,0&gt;"><mfenced open="⟨" close="⟩"><mn>1</mn><mn>0</mn><mn>0</mn></mfenced></element>
+        <element text="&lt;0,1,0&gt;"><mfenced open="⟨" close="⟩"><mn>0</mn><mn>1</mn><mn>0</mn></mfenced></element>
+        <element text="&lt;1,1,0&gt;"><mfenced open="⟨" close="⟩"><mn>1</mn><mn>1</mn><mn>0</mn></mfenced></element>
+        <element text="&lt;0,0,1&gt;"><mfenced open="⟨" close="⟩"><mn>0</mn><mn>0</mn><mn>1</mn></mfenced></element>
+        <element text="&lt;1,0,1&gt;"><mfenced open="⟨" close="⟩"><mn>1</mn><mn>0</mn><mn>1</mn></mfenced></element>
+        <element text="&lt;0,1,1&gt;"><mfenced open="⟨" close="⟩"><mn>0</mn><mn>1</mn><mn>1</mn></mfenced></element>
+        <element text="&lt;1,1,1&gt;"><mfenced open="⟨" close="⟩"><mn>1</mn><mn>1</mn><mn>1</mn></mfenced></element>
     </representation>
     <representation>
-        <element text="&lt;(),(),()&gt;"><mfenced open="&#x27E8;" close="&#x27E9;"><mrow><mo>(</mo><mo>)</mo></mrow><mrow><mo>(</mo><mo>)</mo></mrow><mrow><mo>(</mo><mo>)</mo></mrow></mfenced></element>
-        <element text="&lt;(0 1),(),()&gt;"><mfenced open="&#x27E8;" close="&#x27E9;"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="0.3em"/><mn>1</mn></mrow><mo>)</mo></mrow><mrow><mo>(</mo><mo>)</mo></mrow><mrow><mo>(</mo><mo>)</mo></mrow></mfenced></element>
-        <element text="&lt;(),(0 1),()&gt;"><mfenced open="&#x27E8;" close="&#x27E9;"><mrow><mo>(</mo><mo>)</mo></mrow><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="0.3em"/><mn>1</mn></mrow><mo>)</mo></mrow><mrow><mo>(</mo><mo>)</mo></mrow></mfenced></element>
-        <element text="&lt;(0 1),(0 1),()&gt;"><mfenced open="&#x27E8;" close="&#x27E9;"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="0.3em"/><mn>1</mn></mrow><mo>)</mo></mrow><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="0.3em"/><mn>1</mn></mrow><mo>)</mo></mrow><mrow><mo>(</mo><mo>)</mo></mrow></mfenced></element>
-        <element text="&lt;(),(),(0 1)&gt;"><mfenced open="&#x27E8;" close="&#x27E9;"><mrow><mo>(</mo><mo>)</mo></mrow><mrow><mo>(</mo><mo>)</mo></mrow><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="0.3em"/><mn>1</mn></mrow><mo>)</mo></mrow></mfenced></element>
-        <element text="&lt;(0 1),(),(0 1)&gt;"><mfenced open="&#x27E8;" close="&#x27E9;"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="0.3em"/><mn>1</mn></mrow><mo>)</mo></mrow><mrow><mo>(</mo><mo>)</mo></mrow><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="0.3em"/><mn>1</mn></mrow><mo>)</mo></mrow></mfenced></element>
-        <element text="&lt;(),(0 1),(0 1)&gt;"><mfenced open="&#x27E8;" close="&#x27E9;"><mrow><mo>(</mo><mo>)</mo></mrow><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="0.3em"/><mn>1</mn></mrow><mo>)</mo></mrow><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="0.3em"/><mn>1</mn></mrow><mo>)</mo></mrow></mfenced></element>
-        <element text="&lt;(0 1),(0 1),(0 1)&gt;"><mfenced open="&#x27E8;" close="&#x27E9;"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="0.3em"/><mn>1</mn></mrow><mo>)</mo></mrow><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="0.3em"/><mn>1</mn></mrow><mo>)</mo></mrow><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="0.3em"/><mn>1</mn></mrow><mo>)</mo></mrow></mfenced></element>
+        <element text="&lt;(),(),()&gt;"><mfenced open="⟨" close="⟩"><mrow><mo>(</mo><mo>)</mo></mrow><mrow><mo>(</mo><mo>)</mo></mrow><mrow><mo>(</mo><mo>)</mo></mrow></mfenced></element>
+        <element text="&lt;(0 1),(),()&gt;"><mfenced open="⟨" close="⟩"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="0.3em"/><mn>1</mn></mrow><mo>)</mo></mrow><mrow><mo>(</mo><mo>)</mo></mrow><mrow><mo>(</mo><mo>)</mo></mrow></mfenced></element>
+        <element text="&lt;(),(0 1),()&gt;"><mfenced open="⟨" close="⟩"><mrow><mo>(</mo><mo>)</mo></mrow><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="0.3em"/><mn>1</mn></mrow><mo>)</mo></mrow><mrow><mo>(</mo><mo>)</mo></mrow></mfenced></element>
+        <element text="&lt;(0 1),(0 1),()&gt;"><mfenced open="⟨" close="⟩"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="0.3em"/><mn>1</mn></mrow><mo>)</mo></mrow><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="0.3em"/><mn>1</mn></mrow><mo>)</mo></mrow><mrow><mo>(</mo><mo>)</mo></mrow></mfenced></element>
+        <element text="&lt;(),(),(0 1)&gt;"><mfenced open="⟨" close="⟩"><mrow><mo>(</mo><mo>)</mo></mrow><mrow><mo>(</mo><mo>)</mo></mrow><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="0.3em"/><mn>1</mn></mrow><mo>)</mo></mrow></mfenced></element>
+        <element text="&lt;(0 1),(),(0 1)&gt;"><mfenced open="⟨" close="⟩"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="0.3em"/><mn>1</mn></mrow><mo>)</mo></mrow><mrow><mo>(</mo><mo>)</mo></mrow><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="0.3em"/><mn>1</mn></mrow><mo>)</mo></mrow></mfenced></element>
+        <element text="&lt;(),(0 1),(0 1)&gt;"><mfenced open="⟨" close="⟩"><mrow><mo>(</mo><mo>)</mo></mrow><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="0.3em"/><mn>1</mn></mrow><mo>)</mo></mrow><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="0.3em"/><mn>1</mn></mrow><mo>)</mo></mrow></mfenced></element>
+        <element text="&lt;(0 1),(0 1),(0 1)&gt;"><mfenced open="⟨" close="⟩"><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="0.3em"/><mn>1</mn></mrow><mo>)</mo></mrow><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="0.3em"/><mn>1</mn></mrow><mo>)</mo></mrow><mrow><mo>(</mo><mrow><mn>0</mn><mspace width="0.3em"/><mn>1</mn></mrow><mo>)</mo></mrow></mfenced></element>
     </representation>
     <symmetryobject name="Rectangular solid">
         <operation element="1" degrees="180.0"><point x="1.0" y="0.0" z="0.0"/></operation>
