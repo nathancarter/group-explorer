@@ -63,13 +63,6 @@ function load() {
    // Create header from group name and queue MathJax to typeset it
    $( '#header' ).html( 'Group Explorer Sheet' );
    MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'header']);
-   // Register the splitter with jquery-resizable, so you can resize the graphic horizontally
-   // by grabbing the border between the graphic and the subset control and dragging it
-   (($( '#vert-container' ) /*: any */) /*: JQuery & {resizable: Function} */).resizable( {
-      handleSelector: '#splitter',
-      resizeHeight: false,
-      resizeWidthFrom: 'left'
-   } );
 
    $sheet.css( { backgroundColor:'#f8f8f8' } )
       .append( '<canvas id="overlay"></canvas>' );
@@ -81,8 +74,6 @@ function load() {
    const canvas /*: HTMLCanvasElement */ = (($( '#overlay' )[0] /*: any */ ) /*: HTMLCanvasElement */);
    canvas.width = $sheet.width();
    canvas.height = $sheet.height();
-   show( '#sheet-control' );
-   resizeBody();
 
    if ( !localStorage.getItem( 'sheets' ) ) localStorage.setItem( 'sheets', '{}' );
    updateLoadList();

@@ -12,17 +12,20 @@ const VIEW_PANEL_URL = './html/CayleyViewController.html';
 import type {CayleyDiagramJSON} from '../js/CayleyDiagramView.js';
 */
 
-function load($viewWrapper /*: JQuery */) {
-   $.ajax( { url: VIEW_PANEL_URL,
-             success: (data /*: html */) => {
-                $viewWrapper.html(data);
-                setupViewPage();
-                updateFromView();
-             },
-             error: (_jqXHR, _status, err) => {
-                Log.err(`Error loading ${VIEW_PANEL_URL} ${err === undefined ? '' : ': ' + err}`)
-             }
-           } );
+function load ($viewWrapper /*: JQuery */) /*: Promise */ {
+   return new Promise( (resolve, reject) => {
+      $.ajax( { url: VIEW_PANEL_URL,
+                success: (data /*: html */) => {
+                   $viewWrapper.html(data);
+                   setupViewPage();
+                   updateFromView();
+                   resolve();
+                },
+                error: (_jqXHR, _status, err) => {
+                   reject(`Error loading ${VIEW_PANEL_URL} ${err === undefined ? '' : ': ' + err}`)
+                }
+              } );
+   } );
 }
 
 function setupViewPage() {

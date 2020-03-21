@@ -12,8 +12,10 @@
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css">
 
       <style>
-       #vert-container {
-          min-width: 20em;  /* Ensure same min width as CayleyDiagram page, for consistency */
+       /* Hide splitter (it's disabled in this visualizer) */
+       #splitter {
+          background-color: white;
+          cursor: default;
        }
       </style>
 
@@ -37,37 +39,38 @@
       </script>
    </head>
    <body>
-      <div id="bodyDouble" class="vert">
-         <div id="header" class="horiz"></div>
-         <div id="horiz-container" class="horiz">
-            <div id="graphic"></div>
-            <div id="splitter"></div>
-            <div id="vert-container" class="vert">
-               <div class="fill-vert control">
-                  <br>
-                  <p>View this symmetry object:</p>
-                  <div id="diagram-select" class="faux-select" action="$('#diagram-choices').toggle()" style="margin-bottom: 25px">
-                     <ul id="diagram-choices" class="faux-select-options hide-on-clean"></ul>
-                     <span id="diagram-choice" class="faux-selection"></span>
-                     <div class="faux-select-arrow"></div>
-                  </div>
-                  <template id="diagram-choice-template">
-                     <li action="set_diagram_name(${index})">${MathML.sans('<mtext>' + Group.symmetryObjects[index].name + '</mtext>')}</li>
-                  </template>
+      <div id="bodyDouble">
+         <div id="header"></div>
+         <div id="graphic"></div>
+         <div id="splitter"></div>
+         <div id="controls">
+            <div style="margin: 1em 0 0.5em 0">View this symmetry object:</div>
+            <div id="diagram-select" class="faux-select" action="toggleDiagramChoices()" style="margin-bottom: 1em">
+               <div style="display: inline-block; line-height: 1.5em">&nbsp;</div>
+               <div id="diagram-choice" class="faux-selection"></div>
+               <div class="faux-select-arrow"></div>
+               <ul id="diagram-choices" class="faux-select-options visibility-hidden-on-clean"></ul>
+            </div>
+            <template id="diagram-choice-template">
+               <li action="setDiagramName(${index})" style="white-space: nowrap; margin-right: 3em">
+                  ${MathML.sansText(Group.symmetryObjects[index].name)}
+               </li>
+            </template>
 
-                  Zoom level:
-                  <input id="zoom-level" type="range" min="-10" max="10" value="0">
+            <div>Zoom level:
+               <input id="zoom-level" type="range" min="-10" max="10" value="0">
+            </div>
 
-                  Line thickness:
-                  <input id="line-thickness" type="range" min="1" max="20" value="10">
+            <div>Line thickness:
+               <input id="line-thickness" type="range" min="1" max="20" value="10">
+            </div>
 
-                  Node radius:
-                  <input id="node-radius" type="range" min="-10" max="10" value="0">
+            <div>Node radius:
+               <input id="node-radius" type="range" min="-10" max="10" value="0">
+            </div>
 
-                  <input id="use-fog" type="checkbox">
-                  Use this much fog:
-                  <input id="fog-level" type="range" min="1" max="10" value="5">
-               </div>
+            <div><input id="use-fog" type="checkbox">Use this much fog:
+               <input id="fog-level" type="range" min="1" max="10" value="5">
             </div>
          </div>
       </div>

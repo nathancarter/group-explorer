@@ -17,6 +17,18 @@ type highlighterRoutines = Array<{handler: (Array<Array<groupElement>>) => void,
 
 const SUBSET_DISPLAY_URL /*: string */ = './html/SubsetHighlightController.html';
 
+const loadPromise =
+      new Promise( (resolve, reject) => {
+         $.ajax( { url: SUBSET_DISPLAY_URL,
+                   success: (data /*: html */) => {
+                      resolve(data);
+                   },
+                   error: (_jqXHR, _status, err) => {
+                      reject(`Error loading ${SUBSET_DISPLAY_URL} ${err === undefined ? '' : ': ' + err}`)
+                   }
+                 } );
+      } );
+
 let group /*: XMLGroup */ = new XMLGroup();
 let nextSubsetIndex /*: number*/ = 0;
 let nextId /*: number */ = 0;
@@ -382,17 +394,17 @@ class SubsetEditor {
       const elements = subset === undefined ? new BitSet(group.order) : subset.elements;
       const setName = subset === undefined ? Subset.nextName() : subset.name;
       const $subsetEditor = $('body').append(eval(Template.HTML('subset-editor-template')))
-                                     .find('#subset_editor').show();
-      $subsetEditor.find('#ssedit_cancel_button').on('click', SubsetEditor.close);
-      $subsetEditor.find('#ssedit_ok_button').on('click', SubsetEditor.accept);
-      $subsetEditor.find('.ssedit_panel_container').on('dragover', (ev /*: JQueryEventObject */) => ev.preventDefault());
-      $subsetEditor.find('#ssedit_elementsIn_container').on('drop', SubsetEditor.addElement);
-      $subsetEditor.find('#ssedit_elementsNotIn_container').on('drop', SubsetEditor.removeElement);
+                                     .find('#subset-editor').show();
+      $subsetEditor.find('#ssedit-cancel-button').on('click', SubsetEditor.close);
+      $subsetEditor.find('#ssedit-ok-button').on('click', SubsetEditor.accept);
+      $subsetEditor.find('#ssedit-content').on('dragover', (ev /*: JQueryEventObject */) => ev.preventDefault());
+      $subsetEditor.find('#ssedit-in-elements-list').on('drop', SubsetEditor.addElement);
+      $subsetEditor.find('#ssedit-not-in-elements-list').on('drop', SubsetEditor.removeElement);
 
       for (const el of group.elements) {
          const elementHTML =
             `<li element=${el} draggable="true">${MathML.sans(group.representation[el])}</li>`;
-         const listName = elements.isSet(el) ? 'elementsIn' : 'elementsNotIn';
+         const listName = elements.isSet(el) ? 'ssedit-in-elements-list' : 'ssedit-not-in-elements-list';
          $(elementHTML).appendTo($subsetEditor.find(`#${listName}`))
                        .on('dragstart', (event /*: JQueryEventObject */) => {
                           const dragEvent = ((event.originalEvent /*: any */) /*: DragEvent */);
@@ -403,10 +415,10 @@ class SubsetEditor {
       }
    }
 
-   // Create new subset from elementsIn list, make sure it's formatted, and close editor
+   // Create new subset from ssedit-in-elements-list, make sure it's formatted, and close editor
    static accept() {
       new Subset(
-         $('#elementsIn > li')
+         $('#ssedit-in-elements-list > li')
             .map( (_, el) => parseInt($(el).attr('element')) )
             .toArray()
       );
@@ -414,7 +426,7 @@ class SubsetEditor {
    }
 
    static close() {
-      $('#subset_editor').remove();
+      $('#subset-editor').remove();
    }
 
    static addElement(event /*: JQueryEventObject */) {
@@ -422,7 +434,7 @@ class SubsetEditor {
       const dragEvent = ((event.originalEvent /*: any */) /*: DragEvent */);
       if (dragEvent != undefined && dragEvent.dataTransfer != undefined) {
          const element = dragEvent.dataTransfer.getData("text");
-         $(`#elementsNotIn li[element=${element}]`).detach().appendTo($(`#elementsIn`));
+         $(`#ssedit-not-in-elements-list li[element=${element}]`).detach().appendTo($(`#ssedit-in-elements-list`));
       }
    }
 
@@ -431,7 +443,7 @@ class SubsetEditor {
       const dragEvent = ((event.originalEvent /*: any */) /*: DragEvent */);
       if (dragEvent != undefined && dragEvent.dataTransfer != undefined) {
          const element = dragEvent.dataTransfer.getData("text");
-         $(`#elementsIn li[element=${element}]`).detach().appendTo($(`#elementsNotIn`));
+         $(`#ssedit-in-elements-list li[element=${element}]`).detach().appendTo($(`#ssedit-not-in-elements-list`));
       }
    }
 }
@@ -552,10 +564,10 @@ function showMenu(event /*: MouseEvent */, id /*: number */) {
 }
 
 /* Load, initialize subset display */
-function load($subsetWrapper /*: JQuery */,
-              _highlighters /*: highlighterRoutines*/,
-              _clearHighlights /*: () => void */,
-              _group /*: XMLGroup */)
+function load ($subsetWrapper /*: JQuery */,
+               _highlighters /*: highlighterRoutines*/,
+               _clearHighlights /*: () => void */,
+               _group /*: XMLGroup */) /*: Promise */
 {
    group = _group;
    highlighters = _highlighters;
@@ -564,15 +576,15 @@ function load($subsetWrapper /*: JQuery */,
    nextId = 0;
    displayList = [];
 
-   $.ajax( { url: SUBSET_DISPLAY_URL,
-             success: (data /*: html */) => {
-                $subsetWrapper.html(data);
-                setupSubsetPage();
-             },
-             error: (_jqXHR, _status, err) => {
-                Log.err(`Error loading ${SUBSET_DISPLAY_URL} ${err === undefined ? '' : ': ' + err}`)
-             }
-           } );
+   return new Promise( (resolve, reject) => {
+      loadPromise
+         .then ( (data) => {
+            $subsetWrapper.html(data);
+            setupSubsetPage();
+            resolve();
+         } )
+         .catch( (err) => reject(err) );
+   } );
 }
 
 function setupSubsetPage() {

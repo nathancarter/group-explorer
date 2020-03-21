@@ -17,13 +17,14 @@
           -webkit-user-select: none;  /* prevents confusing cut-and-paste attempt */
        }
 
-       #vert-container {
-          min-width: 20em;  /* Ensure same min width as CayleyDiagram page, for consistency */
-       }
-
        #graphic {
-          overflow: hidden;
+          overflow-x: hidden;
           background-color: #C8C8F0;
+       }
+       #subset-control {
+          height: 100%;
+          padding: 2px;
+          overflow: auto;
        }
       </style>
 
@@ -47,21 +48,19 @@
       </script>
    </head>
    <body>
-      <div id="bodyDouble" class="vert">
-         <div id="header" class="horiz"></div>
-         <div id="horiz-container" class="horiz">
-            <div id="graphic"></div>
-            <div id="splitter"></div>
-            <div id="vert-container" class="vert">
-               <div id="subset-control" class="fill-vert">
-                  <!-- This is filled in by subsetDisplay/subsets.html -->
-               </div>
-               <template id="node-label-template">
-                  <div id="node-label" class="tooltip remove-on-clean">
-                     ${MathML.sans(group.representation[element])}
-                  </div>
-               </template>
+      <div id="bodyDouble">
+         <div id="header"></div>
+         <div id="graphic"></div>
+         <div id="splitter"></div>
+         <div id="controls">
+            <div id="subset-control">
+               <!-- This is filled in by subsetDisplay/subsets.html -->
             </div>
+            <template id="node-label-template">
+               <div id="node-label" class="tooltip remove-on-clean">
+                  ${MathML.sans(group.representation[element])}
+               </div>
+            </template>
          </div>
       </div>
    </body>

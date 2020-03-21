@@ -45,51 +45,54 @@ function registerCallbacks() {
    Tooltip.init();
 }
 
-// Load group from invocation URL, then preload MathML cache, find diagram name if there is one, and complete setup
+// The element that takes the longest to display is the SubsetHighlightPanel, due to the typesetting required.
+// We process along the critical path: load Group, preload MathML cache, generate SubsetHighlightPanel
 function load() {
-   Library
-      .loadFromURL()
-      .then( (group) => {
-         Group = group;
-         MathML.preload(Group)
-            .then( () => {
-               let diagram_name = new URL(window.location.href).searchParams.get('diagram');
-               if (   diagram_name != undefined
-                      && group.cayleyDiagrams.find( (cayleyDiagram) => cayleyDiagram.name == diagram_name) == undefined) {
-                  Log.err(`group ${group.shortName} has no Cayley diagram named ${diagram_name} -- generating diagram instead`);
-                  diagram_name = undefined;
-               }
-               completeSetup(diagram_name)
-            } )
-            .catch( Log.err );
-      } )
-      .catch( Log.err );
+   loadLibrary();
 }
 
-// Complete setup functions that depend on the Group and the MathML cache
-function completeSetup(diagram_name /*: ?string */) {
-   // Set up Cayley diagram in main panel
-   Cayley_Diagram_View.container = $('#graphic')[0]; // append empty Cayley_Diagram_View to main #graphic panel
-   Cayley_Diagram_View.render();  // display the pink background during startup (less abrupt than a momentary jet black screen)
-   Cayley_Diagram_View.enableTrackballControl();     // enable drag-and-drop animation, but don't actually start it yet
-   Cayley_Diagram_View.group = Group;		     // set group and (optional) diagram name in Cayley_Diagram_View
-   Cayley_Diagram_View.diagram_name = diagram_name;  //   and generate their Cayley diagram
+function loadLibrary () {
+   Library.loadFromURL()
+      .then( (group) => {
+         Group = group;
+         preloadMathMLCache();
+      } )
+      .catch(Log.err);
+}
 
-   // This just starts building these panels -- no need to wait until they complete
+function preloadMathMLCache () {
+   MathML.preload(Group)
+      .then( () => displaySubsetHighlightPanel() )
+      .catch(Log.err);
+}
+
+function displaySubsetHighlightPanel () {
    const highlighters = [
       {handler: highlightByNodeColor, label: 'Node color'},
       {handler: highlightByRingAroundNode, label: 'Ring around node'},
       {handler: highlightBySquareAroundNode, label: 'Square around node'}
    ];
-   SSD.load($('#subset-control'), highlighters, clearHighlights, Group);
-   DC.load($('#diagram-control'));
-   CVC.load($('#view-control'));
+   SSD.load($('#subset-control'), highlighters, clearHighlights, Group)
+      .then( () => completeSetup() )
+      .catch(Log.err);
+
+   // These activities can proceed before the main graphic is generated
+
+   // Generate Cayley diagram, but don't display in the main #graphic yet
+   let diagram_name = new URL(window.location.href).searchParams.get('diagram');
+   if (   diagram_name != undefined
+          && group.cayleyDiagrams.find( (cayleyDiagram) => cayleyDiagram.name == diagram_name) == undefined) {
+      Log.err(`group ${group.shortName} has no Cayley diagram named ${diagram_name} -- generating diagram instead`);
+      diagram_name = undefined;
+   }
+   Cayley_Diagram_View.group = Group;		     // set group and diagram name in Cayley_Diagram_View
+   Cayley_Diagram_View.diagram_name = diagram_name;  //   and generate their Cayley diagram
 
    // Create header from group name
    $('#header').html(MathML.sans('<mtext>Cayley Diagram for&nbsp;</mtext>' + Group.name));
 
    // Register the splitter with jquery-resizable
-   (($('#vert-container') /*: any */) /*: JQuery & {resizable: Function} */).resizable({
+   (($('#controls') /*: any */) /*: JQuery & {resizable: Function} */).resizable({
       handleSelector: '#splitter',
       resizeHeight: false,
       resizeWidthFrom: 'left',
@@ -99,22 +102,40 @@ function completeSetup(diagram_name /*: ?string */) {
    // Register event handlers
    registerCallbacks();
 
-   const href_URL = new URL(window.location.href);
-   if (href_URL.searchParams.get('SheetEditor') == null) {  // This is a normal Cayley diagram visualizer execution
-      // Start animating the main view
-      Cayley_Diagram_View.render();
-   } else {  // This is an editor started by a Sheet -- start a 'message' event handler and await the configuration message
-      // this only happens once, right after initialization
-      window.addEventListener('message', receiveInitialSetup, false);
-
-      // let any GE window that spawned this know that we're ready to receive signals
-      window.postMessage( LISTENER_READY_MESSAGE, myDomain );
-      // or if any external program is using GE as a service, let it know we're ready, too
-      window.parent.postMessage( LISTENER_READY_MESSAGE, '*' );
-   }
-
    // Load icon strip in upper right-hand corner
    VC.load(Group, HELP_PAGE);
+}
+
+// Complete setup functions once the main #graphic is sized correctly
+function completeSetup () {
+   // Is this an editor started by a Sheet? If so, set up communication with Sheet
+   if (window.isEditor) {
+      setupEditorCallback();
+   } else {
+      startVisualizer();
+   }      
+
+   // This starts building the other panels -- we won't wait until they complete
+   // They are initially created with display=none, then exposed when the panel is selected
+   DC.load($('#diagram-control'));
+   CVC.load($('#view-control'));
+}
+
+function startVisualizer () {
+   Cayley_Diagram_View.container = $('#graphic')[0]; // append Cayley_Diagram_View to main #graphic panel
+   Cayley_Diagram_View.enableTrackballControl();     // enable trackball animation
+   Cayley_Diagram_View.render();		     // start animation
+}
+
+// Set up message communication for Sheet editor
+function setupEditorCallback () {
+   // this only happens once, right after initialization
+   window.addEventListener('message', receiveInitialSetup, false);
+
+   // let any GE window that spawned this know that we're ready to receive signals
+   window.postMessage( LISTENER_READY_MESSAGE, myDomain );
+   // or if any external program is using GE as a service, let it know we're ready, too
+   window.parent.postMessage( LISTENER_READY_MESSAGE, '*' );
 }
 
 // When functioning as an editor for a Sheet this receives the startup configuration
@@ -124,12 +145,12 @@ function receiveInitialSetup (event /*: MessageEvent */) {
 
    const event_data /*: MSG_external<CayleyDiagramJSON> */ = (event.data /*: any */);
    if (event_data.source == 'external') {
-      // Get json from message and display it
+      // Get json from message and build Cayley diagram from it, then start visualizer
       const json_data = event_data.json;
       Cayley_Diagram_View.fromJSON(Group, json_data);
       CVC.updateFromView();
       DC.update();
-      Cayley_Diagram_View.render();  // Starts automation
+      startVisualizer();
 
       // Acknowledge message and remove 'message' listener  (this is the only consequential message it will get)
       window.removeEventListener('message', receiveInitialSetup, false);

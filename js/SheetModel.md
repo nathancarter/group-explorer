@@ -951,6 +951,7 @@ export class VisualizerElement/*:: <VizDispJSON: Obj, VizDispType: VizDisplay<Vi
                 'groupURL=' + encodeURIComponent( that.groupURL ) :
                 'waitForMessage=true';
             const otherWin = that.editWindow = window.open( editPageURL );
+            otherWin.isEditor = true;  // to let child know that it should function as editor for a Sheet
             if ( !that.groupURL ) {
                 otherWin.addEventListener( 'load', function ( event /*: ProgressEvent */ ) {
                     const msg /*: MSG_loadGroup */ = {
