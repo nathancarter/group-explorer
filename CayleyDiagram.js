@@ -81,8 +81,8 @@ function displaySubsetHighlightPanel () {
    // Generate Cayley diagram, but don't display in the main #graphic yet
    let diagram_name = new URL(window.location.href).searchParams.get('diagram');
    if (   diagram_name != undefined
-          && group.cayleyDiagrams.find( (cayleyDiagram) => cayleyDiagram.name == diagram_name) == undefined) {
-      Log.err(`group ${group.shortName} has no Cayley diagram named ${diagram_name} -- generating diagram instead`);
+          && Group.cayleyDiagrams.find( (cayleyDiagram) => cayleyDiagram.name == diagram_name) == undefined) {
+      Log.err(`group ${Group.shortName} has no Cayley diagram named ${diagram_name} -- generating diagram instead`);
       diagram_name = undefined;
    }
    Cayley_Diagram_View.group = Group;		     // set group and diagram name in Cayley_Diagram_View
