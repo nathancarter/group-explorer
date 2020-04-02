@@ -13,8 +13,8 @@ const SageCellURL = 'https://sagecell.sagemath.org/static/embedded_sagecell.js';
 /*
  * Define a few text constants for use below.
  */
-const showtext = 'Compute this in GAP \u25bc';
-const hidetext = 'Hide GAP code \u25b2';
+const showtext = 'Compute this in GAP ▼';
+const hidetext = 'Hide GAP code ▲';
 const GAPlink = '<a target="_blank" href="help/rf-um-gap">What is GAP?</a>';
 
 /*
@@ -29,19 +29,10 @@ import Log from './Log.js';
 // Module variables
 let group /*: XMLGroup */;
 
-export default function setUpGAPCells ( _group /*: XMLGroup */ ) {
+export default function setUpGAPCells ( _group /*: XMLGroup */, $cells = $('body') ) {
     group = _group;
-    // Import the Sage Cell script and wait until it has loaded.
-    // Note that the sequence of calls here is very important;
-    // we must create the script element, add it to the document,
-    // add its load event listener, then set its src property.
-    // Other sequences of these events do not do what you want.
-    const script = document.createElement( 'script' );
-    $( document.head ).append( script );
-    script.addEventListener( 'load', () => {
-        // Find all elements marked with the "gapcode" class
-        // and process each one as follows.
-        $( '.gapcode' ).each( function () {
+    // embedded_sagecell.js loaded in <script> tag on main GroupInfo page
+        $cells.find( '.gapcode' ).each( function () {
             const $block = $( this );
             $block.css( { position : 'relative' } );
             // Create a button for revealing the GAP code in the block
@@ -71,6 +62,7 @@ export default function setUpGAPCells ( _group /*: XMLGroup */ ) {
             // replace it with an editor and Run button that can send
             // the code to the Sage Cell Server for execution.
             window.sagecell.makeSagecell( {
+                editor: 'textarea',
                 inputLocation : $block.get(0),
                 evalButtonText : 'Run',
                 languages : [ 'gap' ],
@@ -104,9 +96,6 @@ export default function setUpGAPCells ( _group /*: XMLGroup */ ) {
                 }
             } );
         } );
-    } );
-    // Assign the script's src attribute last, as documented at the top.
-    script.src = SageCellURL;
 }
 
 /*

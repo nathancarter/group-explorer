@@ -1,156 +1,114 @@
-<html>
-   <head>
-      <title>Subgroup Info</title>
 
-      <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<template id="subgroups-header-template">
+    <p>All <a href="./help/rf-groupterms/index.html#subgroup">subgroups</a> of
+        ${MathML.sans(Group.name)} are listed in the following table. Also, a link
+        which exhibits the embedding for each subgroup is also provided, or in
+        some cases a reason why it is not possible right now. Subgroup
+        <a href="./help/rf-groupterms/index.html#order-of-a-subgroup">order</a> and
+        <a href="./help/rf-groupterms/index.html#index-of-a-subgroup">index</a> are also given.</p>
+    <p class='gapcode' data-built-in-code-type='all subgroups'></p>
+    <p>The column entitled "normal" reports whether the subgroup is
+        <a href="./help/rf-groupterms/index.html#normal-subgroup">normal</a>
+        in ${MathML.sans(Group.name)}, and if so, tries to provide a link to
+        showing that normality by means of a sheet showing a
+        short exact sequence (SES) which exhibits the
+        <a href="./help/rf-groupterms/index.html#first-isomorphism-theorem">First Isomorphism Theorem</a>
+        applied to the subgroup.</p>
+    <p class='gapcode' data-built-in-code-type='is normal'></p>
+    <p>The subgroups can also be shown arranged in a
+        <a href="./help/rf-groupterms/index.html#lattice-of-subgroups">lattice</a>, each shown as
+        highlighted portions of the whole group, connected by the identity (inclusion)
+        homomorphism. You may see that lattice by
+        <a href="" action="SubgroupInfo.showSubgroupLattice('CDElement')">Cayley diagram</a>,
+        <a href="" action="SubgroupInfo.showSubgroupLattice('CGElement')">cycle graph</a>, or
+        <a href="" action="SubgroupInfo.showSubgroupLattice('MTElement')">multiplication table</a>, or
+        by calculation:</p>
+    <p class='gapcode' data-built-in-code-type='subgroup lattice'></p>
+    <p id="simple">None of the subgroups on the list below is
+        <a href="./help/rf-groupterms/index.html#normal-subgroup">normal</a>.
+        For this reason, ${MathML.sans(Group.name)} is a
+        <a href="./help/rf-groupterms/index.html#simple-group">simple</a> group.</p>
+    <p id="not-simple">At least one of the subgroups on the list below is
+        <a href="./help/rf-groupterms/index.html#normal-subgroup">normal</a>.
+        For this reason, ${MathML.sans(Group.name)} is not a
+        <a href="./help/rf-groupterms/index.html#simple-group">simple</a> group.</p>
+    <p class='gapcode' data-built-in-code-type='is simple'></p>
+    <p></p>
+    <table>
+        <thead>
+            <tr>
+                <th>Image</th>
+                <th>Name</th>
+                <th>Order</th>
+                <th>Index</th>
+                <th>Normal</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+    <p id="subgroups-no-isomorphism-reason">* No group
+        <a href="./help/rf-groupterms/index.html#isomorphism-isomorphic">isomorphic</a>
+        to this subgroup appears in the group library. This makes it
+        impossible to draw embedding diagrams, or examples of the
+        <a href="./help/rf-groupterms/index.html#first-isomorphism-theorem')">First Isomorphism Theorem</a>.
+        You can choose what groups to include in your group library in the
+        <a href="">options window</a>.</p>
+    <p id="subgroups-no-quotient-group-reason">** No group
+        <a href="./help/rf-groupterms/index.html#isomorphism-isomorphic">isomorphic</a>
+        to the quotient of ${MathML.sans(Group.name)} by the normal subgroup appears
+        in the group library. This makes it impossible to illustrate the quotient
+        group. You can choose what groups to include in your group library in the
+        <a href="">options window</a>.</p>
+</template>
 
-      <link rel="icon" type="image/png" href="./images/favicon.png"></link>
-      <link rel="stylesheet" href="./style/fonts.css" type="text/css">
-      <style>
-       table {
-          width: 100%;
-       }
-       table, th, td {
-          border: 3px solid silver;
-          padding: 5px;
-          border-collapse: collapse;
-       }
-       ul {
-          margin: 0;
-          list-style-type: disc;
-       }
-       .intro {
-          margin-bottom: 6px;
-          width: 90%;
-       }
-      </style>
+<template id="subgroups-data-row-template">
+    <tr>
+        <td class="image">image</td>
+        <td>${MathML.sans(MathML.sub('H', index))}</td>
+        <td>${subgroup.order}</td>
+        <td>${subgroup.index}</td>
+        <td>${Group.isNormal(subgroup) ? 'yes' : 'no'}</td>
+    </tr>
+    <tr>
+        <td colspan="5">
+            <p class="intro">${MathML.sans(MathML.sub('H', index))}${optionalDescription} is
+                {&nbsp;${MathML.csList(element_representations)}&nbsp;}.</p>
+            <ul class="points">
+            </ul>
+        </td>
+    </tr>
+</template>
 
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-      <script type="text/x-mathjax-config">
-       MathJax.Hub.Config({
-      	  CommonHTML: {
-             scale: 90,
-          },
-       });
-      </script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.6/MathJax.js?config=MML_CHTML"></script>
-      <script type="module">
-       import * as SUB from './SubgroupInfo.js';
-       window.addEventListener('load', SUB.load, {once: true});
-       window.showSubgroupLattice = SUB.showSubgroupLattice;
-       window.showEmbeddingSheet = SUB.showEmbeddingSheet;
-       window.showQuotientSheet = SUB.showQuotientSheet;
-      </script>
-   </head>
+<template id="subgroups-isomorphism-template">
+    <li>It is
+        <a href="./help/rf-groupterms/index.html#isomorphism-isomorphic">isomorphic</a> to
+        ${MathML.sans(isomorphicGroup.name)}, and you can see the embedding by
+        <a href="" action="SubgroupInfo.showEmbeddingSheet(${index}, 'CDElement')">Cayley diagram</a>,
+        <a href="" action="SubgroupInfo.showEmbeddingSheet(${index}, 'CGElement')">cycle graph</a>,
+        <a href="" action="SubgroupInfo.showEmbeddingSheet(${index}, 'MTElement')">multiplication table</a>,
+    </li>
+</template>
 
-   <body>
-      <template id="header_template">
-         <h3>${MathML.sans('<mtext>Results of “Subgroup” computation for&nbsp;</mtext>' + group.name)}</h3>
-         <p>All <a href="./help/rf-groupterms/index.html#subgroup">subgroups</a> of
-            ${MathML.sans(group.name)} are listed in the following table. Also, a link
-            which exhibits the embedding for each subgroup is also provided, or in
-            some cases a reason why it is not possible right now. Subgroup
-            <a href="./help/rf-groupterms/index.html#order-of-a-subgroup">order</a> and
-            <a href="./help/rf-groupterms/index.html#index-of-a-subgroup">index</a> are also given.</p>
-         <p class='gapcode' data-built-in-code-type='all subgroups'></p>
-         <p>The column entitled "normal" reports whether the subgroup is
-            <a href="./help/rf-groupterms/index.html#normal-subgroup">normal</a>
-            in ${MathML.sans(group.name)}, and if so, tries to provide a link to
-            showing that normality by means of a sheet showing a
-            short exact sequence (SES) which exhibits the
-            <a href="./help/rf-groupterms/index.html#first-isomorphism-theorem">First Isomorphism Theorem</a>
-            applied to the subgroup.</p>
-         <p class='gapcode' data-built-in-code-type='is normal'></p>
-         <p>The subgroups can also be shown arranged in a
-            <a href="./help/rf-groupterms/index.html#lattice-of-subgroups">lattice</a>, each shown as
-            highlighted portions of the whole group, connected by the identity (inclusion)
-            homomorphism. You may see that lattice by
-            <a href="javascript:showSubgroupLattice('CDElement')">Cayley diagram</a>,
-            <a href="javascript:showSubgroupLattice('CGElement')">cycle graph</a>, or
-            <a href="javascript:showSubgroupLattice('MTElement')">multiplication table</a>, or</p>
-         <p class='gapcode' data-built-in-code-type='subgroup lattice'></p>
-         <p id="simple">None of the subgroups on the list below is
-            <a href="./help/rf-groupterms/index.html#normal-subgroup">normal</a>.
-            For this reason, ${MathML.sans(group.name)} is a
-            <a href="./help/rf-groupterms/index.html#simple-group">simple</a> group.</p>
-         <p id="not-simple">At least one of the subgroups on the list below is
-            <a href="./help/rf-groupterms/index.html#normal-subgroup">normal</a>.
-            For this reason, ${MathML.sans(group.name)} is not a
-            <a href="./help/rf-groupterms/index.html#simple-group">simple</a> group.</p>
-         <p class='gapcode' data-built-in-code-type='is simple'></p>
-         <p></p>
-         <table id="subgroup_table">
-            <thead>
-               <tr>
-                  <th>Image</th>
-                  <th>Name</th>
-                  <th>Order</th>
-                  <th>Index</th>
-                  <th>Normal</th>
-               </tr>
-            </thead>
-            <tbody>
-            </tbody>
-         </table>
-         <p id="no_isomorphism_reason">* No group
-            <a href="./help/rf-groupterms/index.html#isomorphism-isomorphic">isomorphic</a>
-            to this subgroup appears in the group library. This makes it
-            impossible to draw embedding diagrams, or examples of the
-            <a href="./help/rf-groupterms/index.html#first-isomorphism-theorem')">First Isomorphism Theorem</a>.
-            You can choose what groups to include in your group library in the
-            <a href="">options window</a>.</p>
-         <p id="no_quotient_group_reason">** No group
-            <a href="./help/rf-groupterms/index.html#isomorphism-isomorphic">isomorphic</a>
-            to the quotient of ${MathML.sans(group.name)} by the normal subgroup appears
-            in the group library. This makes it impossible to illustrate the quotient
-            group. You can choose what groups to include in your group library in the
-            <a href="">options window</a>.</p>
-      </template>
-      <template id="data_row_template">
-         <tr>
-            <td class="image">image</td>
-            <td>${MathML.sans(MathML.sub('H', index))}</td>
-            <td>${subgroup.order}</td>
-            <td>${subgroup.index}</td>
-            <td>${group.isNormal(subgroup) ? 'yes' : 'no'}</td>
-         </tr>
-         <tr>
-            <td colspan="5">
-               <p class="intro">${MathML.sans(MathML.sub('H', index))}${optionalDescription} is
-                  {&nbsp;${MathML.csList(element_representations)}&nbsp;}.</p>
-               <ul class="points">
-               </ul>
-            </td>
-         </tr>
-      </template>
-      <template id="isomorphism_template">
-         <li>It is
-            <a href="./help/rf-groupterms/index.html#isomorphism-isomorphic">isomorphic</a> to
-            ${MathML.sans(isomorphicGroup.name)}, and you can see the embedding by
-            <a href="javascript:showEmbeddingSheet(${index}, 'CDElement')">Cayley diagram</a>,
-            <a href="javascript:showEmbeddingSheet(${index}, 'CGElement')">cycle graph</a>,
-            <a href="javascript:showEmbeddingSheet(${index}, 'MTElement')">multiplication table</a>,
-         </li>
-      </template>
-      <template id="no_isomorphism_template">
-         <li class="no_isomorphism">I cannot show you the embedding
-            right now (see <a href="#no_isomorphism_reason">below*</a>).
-         </li>
-      </template>
-      <template id="quotient_group_template">
-         <li >See the <a href="./help/rf-groupterms/index.html#short-exact-sequence">short exact sequence</a>
-            exhibiting the
-            <a href="./help/rf-groupterms/index.html#quotient-group">quotient group</a>,
-            isomorphic to ${MathML.sans(isomorphicGroup.name)}, by
-            <a href="javascript:showQuotientSheet(${index}, 'CDElement')">Cayley diagram</a>,
-            <a href="javascript:showQuotientSheet(${index}, 'CGElement')">cycle graph</a>,
-            <a href="javascript:showQuotientSheet(${index}, 'MTElement')">multiplication table</a>,
-         </li>
-      </template>
-      <template id="no_quotient_group_template">
-         <li class="no_quotient_group">I cannot show you the quotient group
-            right now (see <a href="#no_quotient_group_reason">below**</a>).
-         </li>
-      </template>
-   </body>
-</html>
+<template id="subgroups-no-isomorphism-template">
+    <li class="subgroups-no-isomorphism">I cannot show you the embedding
+        right now (see <a href="#subgroups-no-isomorphism-reason">below*</a>).
+    </li>
+</template>
+
+<template id="subgroups-quotient-group-template">
+    <li >See the <a href="./help/rf-groupterms/index.html#short-exact-sequence">short exact sequence</a>
+        exhibiting the
+        <a href="./help/rf-groupterms/index.html#quotient-group">quotient group</a>,
+        isomorphic to ${MathML.sans(isomorphicGroup.name)}, by
+        <a href="" action="SubgroupInfo.showQuotientSheet(${index}, 'CDElement')">Cayley diagram</a>,
+        <a href="" action="SubgroupInfo.showQuotientSheet(${index}, 'CGElement')">cycle graph</a>,
+        <a href="" action="SubgroupInfo.showQuotientSheet(${index}, 'MTElement')">multiplication table</a>,
+    </li>
+</template>
+
+<template id="subgroups-no-quotient-group-template">
+    <li class="subgroups-no-quotient-group">I cannot show you the quotient group
+        right now (see <a href="#subgroups-no-quotient-group-reason">below**</a>).
+    </li>
+</template>

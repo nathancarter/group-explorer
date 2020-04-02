@@ -1,49 +1,19 @@
-<html>
-   <head>
-      <title>Order Class Info</title>
 
-      <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<template id="order-classes-single-template">
+    <p>In ${MathML.sans(Group.name)}, there is just one
+        <a href="./help/rf-groupterms/index.html#order-classes">order class</a>
+        containing all the elements of the group.</p>
+</template>
 
-      <link rel="icon" type="image/png" href="./images/favicon.png"></link>
-      <link rel="stylesheet" href="./style/fonts.css" type="text/css">
+<template id="order-classes-multiple-template">
+    <p>In ${MathML.sans(Group.name)} there are ${numOrderClasses}
+        <a href="./help/rf-groupterms/index.html#order-classes">order classes</a>.
+        Each is listed here:</p>
+    <ul id="order-classes-list"></ul>
+</template>
 
-      <style>
-       li {
-          margin-top: 0.2em;
-       }
-      </style>
-
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-      <script type="text/x-mathjax-config">
-       MathJax.Hub.Config({
-      	  CommonHTML: {
-             scale: 90,
-          },
-       });
-      </script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.6/MathJax.js?config=MML_CHTML"></script>
-      <script type="module">
-       import {load} from "./OrderClassesInfo.js";
-       window.addEventListener('load', load, {once: true});
-      </script>
-   </head>
-
-   <body>
-      <template id="header">
-         <h3>${MathML.sans('<mtext>Results of “Order classes” computation for&nbsp;</mtext>' + group.name)}</h3>
-      </template>
-      <template id="single">
-         <p>In ${MathML.sans(group.name)}, there is just one
-            <a href="./help/rf-groupterms/index.html#order-classes">order class</a>
-            containing all the elements of the group.
-      </template>
-      <template id="multiple">
-         <p>In ${MathML.sans(group.name)} there are ${numOrderClasses}
-            <a href="./help/rf-groupterms/index.html#order-classes">order classes</a>.
-            Each is listed here:
-            <ul id="order_class_list">
-            </ul>
-      </template>
-      <div class="gapcode" data-built-in-code-type="order classes"/>
-   </body>
-</html>
+<template id="order-classes-trailer-template">
+    <div class="gapcell hidden toggled">
+        <div class='gapcode' data-built-in-code-type='order classes'></div>
+    </div>
+</template>

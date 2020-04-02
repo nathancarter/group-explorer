@@ -1,429 +1,585 @@
 <html>
-   <head>
-      <title>Group Info</title>
+    <head>
+        <title>Group Info</title>
 
-      <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-      <link rel="icon" type="image/png" href="./images/favicon.png"></link>
+        <link rel="icon" type="image/png" href="./images/favicon.png"></link>
 
-      <link rel="STYLESHEET" href="./style/fonts.css" type="text/css">
-      <link rel="stylesheet" href="./style/menu.css" type="text/css"></link>
-      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css">
-      <style>
-       .hidden {
-          display: none;
-       }
-       table, th, td {
-          border: 3px solid silver;
-          padding: 5px;
-          border-collapse: collapse;
-       }
-       #notes-area {
-          font-size: 14pt;
-          width: 40em;
-       }
-       #notes-text {
-          background-color: #F2F2F2;
-          width: 100%;
-          margin-bottom: 10px;
-          display: block;
-       }
-       #notes-buttons > button {
-          font-size: 14pt;
-          background-image: linear-gradient(#DDDDDD, #C0C0C0);
-          float: right;
-          height: 1.5em;
-          width: 5em;
-          margin-left: 0.3em;
-       }
+        <link rel="STYLESHEET" href="./style/fonts.css" type="text/css">
+        <link rel="stylesheet" href="./style/menu.css" type="text/css"></link>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css">
+        <style>
+         p, ul {
+             margin-block-start: 0.5em;
+             margin-block-end: 0.5em;
+         }
+         ol {
+             margin-block-start: 0;
+             margin-block-end: -0.5em;
+             padding-inline-start: 1em;
+         }
+         ol > li {
+             margin-bottom: 0.5em;
+         }
+         table, th, td {
+             border: 3px solid silver;
+             padding: 5px;
+             border-collapse: collapse;
+         }
+         .hidden {
+             display: none;
+         }
+         .programLink{
+             color: #0000EE;
+             cursor: pointer;
+         }
 
-       .views {
-          border: none;
-          text-align: left;
-          min-width: 150px;
-       }
-       .thumbnail {
-          border: none;
-          height: 100%;
-          vertical-align: top;
-          text-align: center;
-       }
-       .programLink{
-          color: #0000EE;
-          cursor: pointer;
-       }
-       img {
-          display: block;
-          margin: auto;
-       }
-       .indent1 {
-          margin-left: 1cm;
-       }
-       .indent2 {
-          margin-left: 2cm;
-       }
+         /* Collapsible sections styling
+          *   elements in collapsible sections are placed according to the grid definitions in .collapsible
+          *   clicking on 'toggle' elements changes the visibility of 'toggled' items at this level
+          */
+         .heading1 > .toggle, .heading1 > .heading {
+             margin-top: 1em;
+             font-size: 1.5em;
+             font-weight: bold;
+         }
+         .heading2 > .toggle, .heading2 > .heading {
+             font-size: 1.17em;
+             font-weight: bold;
+         }
+         .collapsible {
+             display: grid;
+             grid-template-columns:
+                 [toggle] 1em [heading] 1em [toggle2] 1em [heading2 name content] auto 0.5em [summary value] 1fr [end];
+             grid-auto-rows: minmax(1.5em, auto);
+             align-items: baseline;
+         }
+         .collapsible > .toggle {
+             grid-column: toggle;
+             cursor: pointer;
+         }
+         .collapsible > .heading {
+             grid-column: heading / end;
+         }
+         .collapsible > .summary {
+             grid-column: summary;
+         }
+         .collapsible > .content, .collapsible > .gapcell {
+             grid-column: content / end;
+         }
 
-       /* Subset editor styling */
-       #naming-editor {
-          font-size: 11pt;
-          text-align: center;
-          position: fixed; /* Stay in place */
-          z-index: 1; /* Sit on top */
-          padding-top: 100px; /* Location of the box */
-          left: 0;
-          top: 0;
-          width: 100%; /* Full width */
-          height: 100%; /* Full height */
-          background-color: rgba(0,0,0,0.4); /* Gray mist */
-       }
+         .collapsible > .name-value-content {
+             display: contents;
+             align-items: center;
+         }
+         .collapsible > .name-value-content > .name {
+             grid-column: name;
+             font-weight: bold;
+         }
+         .collapsible > .name-value-content > .value {
+             grid-column: value;
+         }
 
-       #udr-edit-content {
-          background-color: #E4E4E4;		/* nearly white (~white smoke) */
-          margin: auto;
-          border: 1px solid #BFBFBF;		/* ~silver */
-          width: 49em;
-       }
+         .collapsible > .collapsible {
+             display: contents;
+         }
+         .collapsible > .collapsible > .toggle {
+             grid-column: toggle2;
+         }
+         .collapsible > .collapsible > .heading {
+             grid-column: heading2;
+         }
+         .collapsible > .collapsible > .content {
+             padding: 0 1em 0.5em 1em;
+             margin-top: -0.5em;
+         }
 
-       #udr-edit-header {
-          padding: 0.5em 0.3em;
-       }
+         /* Views */
+         .thumbnail {
+             border: none;
+             height: 100%;
+             vertical-align: top;
+             text-align: center;
+             margin-top: 0.5em;
+         }
+         #views {
+             display: grid;
+             grid-template-columns: [toggle] 1em [heading] 2em [content] auto [heading-end] 0.5em [summary] auto [content-end] 1fr [end];
+         }
 
-       #udr-edit-title {
-          background: #4D4D4d;		/* dark gray */
-          color: #FFFFFF;               /* white font */
-          padding: 0.3em;
-       }
+         #views > .toggle {
+             grid-column: toggle;
+             cursor: pointer;
+             font-size: 1.5em;
+             font-weight: bold;
+         }
+         #views > .heading {
+             grid-column: heading / heading-end;
+         }
 
-       #udr-edit-body {
-          overflow: hidden;
-          margin: 0 1em;
-       }
+         #views > .content {
+             grid-column: content / content-end;
+             display: grid;
+             grid-template-columns: [CD] 1fr 1em [CG] 1fr 1em [MT] 1fr 1em [OS] 1fr;
+         }
+         #views > .content > .heading-row, #views > .content > .data-row {
+             display: contents;
+         }
+         #views > .content > .comment {
+             grid-column: CD / end;
+         }
 
-       #udr-edit-table {
-          border-collapse: collapse;
-          border: none;
-          border-bottom: 1px solid black;
-          width: 100%;
-       }
+         #views > .content .CD {
+             grid-column: CD;
+         }
+         #views > .content .CG {
+             grid-column: CG;
+         }
+         #views > .content .MT {
+             grid-column: MT;
+         }
+         #views > .content .OS {
+             grid-column: OS;
+         }
 
-       #udr-edit-table thead tr {
-          display: block;
-          border: 2px solid black;
-       }
+         /* UDR, Notes editor styling */
+         .modal {
+             text-align: center;
+             position: fixed; /* Stay in place */
+             z-index: 1; /* Sit on top */
+             left: 0;
+             top: 0;
+             width: 100%; /* Full width */
+             height: 100%; /* Full height */
+             background-color: rgba(0,0,0,0.4); /* Gray mist */
+         }
 
-       #udr-edit-table thead th {
-          width: 100em;
-          padding: 5px;
-          background-color: #D2D2D2;
-          border: none;
-       }
+         #udr-editor {
+             font-size: 11pt;
+             display: grid;
+             grid-template-columns: 1fr minmax(auto, 50em) 1fr;
+             grid-template-rows: 1fr repeat(4, auto) 4fr;
+             grid-template-areas: '. . .' '. title .' '. header .' '. body .' '. buttons .' '. . .'
+         }
 
-       #udr-edit-table tbody {
-          display: block;
-          overflow: auto;
-          height: 15em;
-          width: 100%;
-       }
+         #udr-edit-title {
+             grid-area: title;
+             background: #4D4D4d;		/* dark gray */
+             color: #FFFFFF;               /* white font */
+             padding: 0.3em;
+         }
 
-       #udr-edit-table tbody td {
-          width: 100em;
-          padding: 2px;
-          background-color: #FFFFFF;
-          border: 1px solid black;
-          border-bottom: none;
-       }
+         #udr-edit-header {
+             grid-area: header;
+             background-color: #E4E4E4;
+             padding: 0.5em;
+         }
 
-       #udr-edit-table tbody textarea {
-          font-size: 12pt;
-          width: 100%;
-          height: 1.3em;
-          border: none;
-       }
+         #udr-edit-body {
+             grid-area: body;
+             background-color: #E4E4E4;
+             padding: 0 0.5em;
+         }
 
-       .udr-edit-button {
-          background-image: linear-gradient(#DDDDDD, #C0C0C0);
-          border: 1px solid #7E7E7E;
-          height: 26px;
-          width: 80px;
-          font-size: 12pt;
-          margin: 10px;
-          float: right;
-       }
-      </style>
+         #udr-edit-table {
+             border-collapse: collapse;
+             border: none;
+             border-bottom: 1px solid black;
+             width: 100%;
+             padding: 5px;
+         }
 
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-      <script type="text/x-mathjax-config">
-       MathJax.Hub.Config({
-      	  CommonHTML: {
-             scale: 90,
-          },
-       });
-      </script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.6/MathJax.js?config=MML_CHTML"></script>
-      <script type="module">
-       import {load} from "./GroupInfo.js";
-       window.addEventListener('load', load, {once: true});
-      </script>
-   </head>
+         #udr-edit-table thead tr {
+             display: block;
+             border: 2px solid black;
+         }
 
-   <body>
-      <h2 id="heading" align="center" style="margin-bottom: 1em">
-         <template id="heading_template">
-            ${MathML.sans(Group.name + ((Group.phrase == "") ? '' : '<mtext>&nbsp;- ' + Group.phrase + '</mtext>'))}
-         </template>
-      </h2>
-      <div class="top-right-menu">
-         <div>
-            <a href='index.html'>
-               <i title="Project Home" class="fa fa-home fa-2x trm-black"></i></a>
-            <a href='GroupExplorer.html'>
-               <i title="Group Library" class="fa fa-book fa-2x trm-black"></i></a>
-            <a href='Sheet.html' target='_blank'>
-               <i title="Sheets" class="fa fa-file trm-black" style="font-size:1.5em;vertical-align:10%;"></i></a>
-            <a href='help/rf-um-groupwindow/index.html'>
-               <i title="Help" class="fa fa-question-circle fa-2x trm-black"></i></a>
-            <a href='https://github.com/nathancarter/group-explorer'>
-               <i title="Source on GitHub" class="fa fa-github fa-2x trm-black"></i></a>
-         </div>
-         <div id="version" style="float: right; font-size: small"></div>
-         <script type="module">
-          import {Version} from './Version.js';
-          document.getElementById('version').textContent = Version.label
-         </script>
-      </div>
+         #udr-edit-table thead th {
+             width: 100em;
+             padding: 5px;
+             background-color: #D2D2D2;
+             border: none;
+         }
 
-      <div align="center">
-         Contents: &nbsp;
-         <a href="#Basic_facts">Facts</a> &nbsp; | &nbsp;
-         <a href="#Views">Views</a>  &nbsp; | &nbsp;
-         <a href="#Description">Description</a> &nbsp; | &nbsp;
-         <a href="#Computed_properties">Computed properties</a> &nbsp; | &nbsp;
-         <a href="#Related_sheets">Related sheets</a> &nbsp; | &nbsp;
-         <a href="#File_data">File data</a> &nbsp; | &nbsp;
-         <a href="#Other_definitions">Other definitions</a> &nbsp; | &nbsp;
-         <a href="#Generators">Generators</a> &nbsp; | &nbsp;
-         <a href="#Naming_schemes_header">Naming schemes</a> &nbsp; | &nbsp;
-         <a href="#Notes">Notes</a>
-      </div>
-      <hr>
+         #udr-edit-table tbody {
+             display: block;
+             overflow: auto;
+             max-height: 19.5em; /* so we don't get default 'almost' alignment of table cells with table border */
+         }
 
-      <h3 id="Basic_facts">Basic facts</h3>
-      <div class="indent1">
-         <table id="basic-fact-table">
-         </table>
-         <div class='gapcode' data-built-in-code-type='create group'></div>
-         <template id="basicFact-template">
-            <tr><th align="right">${basicFact.displayName}</th>
-               <td align="left">${basicFact.formattedValue}</td>
-            </tr>
-         </template>
-      </div>
+         #udr-edit-table tbody td {
+             width: 100em;
+             padding: 2px;
+             background-color: #FFFFFF;
+             border: 1px solid black;
+             border-bottom: none;
+         }
 
-      <h3 id="Views">Views</h3>
-      <div class="indent1">
-         Click any view to open a copy for exploration.
-         <br><br>
-         <table id="ViewTable" class="views">
-            <!-- 100x100 thumbnails for pictures -->
-            <tr>
-               <th class="views">Cayley Diagram</th>
-               <th class="views">Cycle Graph</th>
-               <th class="views">Multiplication Table</th>
-               <th class="views">Object of Symmetry</th>
-            </tr>
-            <tr>
-               <td class="views">
-                  <a href="help/rf-groupterms/index.html#cayley-diagrams">Help on this</a></td>
-               <td class="views">
-                  <a href="help/rf-groupterms/index.html#cycle-graph">Help on this</a></td>
-               <td class="views">
-                  <a href="help/rf-groupterms/index.html#multiplication-table">Help on this</a></td>
-               <td class="views">
-                  <a href="help/rf-groupterms/index.html#objects-of-symmetry">Help on this</a></td>
-            </tr>
-            <template id="view_row_template">
-               <tr>
-                  <td class="thumbnail"></td>
-                  <td class="thumbnail"></td>
-                  <td class="thumbnail"></td>
-                  <td class="thumbnail"></td>
-               </tr>
+         #udr-edit-table tbody textarea {
+             font-size: 12pt;
+             width: 100%;
+             height: 1.3em;
+             border: none;
+         }
+
+         .edit-buttons {
+             grid-area: buttons;
+             background-color: #E4E4E4;
+         }
+         .edit-button {
+             background-image: linear-gradient(#DDDDDD, #C0C0C0);
+             border: 1px solid #7E7E7E;
+             font-size: inherit;
+             height: 2em;
+             width: 5em;
+             margin: 0.5em;
+             float: right;
+         }
+
+         /* Notes editor */
+         #notes-editor {
+             font-size: 12pt;
+             display: grid;
+             grid-template-columns: 1fr minmax(auto, 50em) 1fr;
+             grid-template-rows: 1fr repeat(2, auto) 4fr;
+             grid-template-areas: '. . .' '. textarea .' '. buttons .' '. . .';
+         }
+         #notes-edit-textarea {
+             grid-area: textarea;
+             background-color: #E4E4E4;		/* nearly white (~white smoke) */
+             padding: 0.5em 0.5em 0;
+         }
+         #notes-textarea {
+             background-color: #F2F2F2;
+             border: 1px solid black;
+             width: 100%;
+         }
+
+         /* Naming schemes */
+         #naming-schemes > .collapsible > .content {
+             padding-top: 0.5em;
+         }
+        </style>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+        <script type="text/x-mathjax-config">
+         MathJax.Hub.Config({
+      	     CommonHTML: {
+                 scale: 90,
+             },
+             showMathMenu: false,   /* disable MathJax context menu (it interferes with subsetDisplay context menu) */
+         });
+         MathJax.Hub.processUpdateTime = 1000;  // allow MathJax to work longer at a stretch, improves initial load time
+         MathJax.Hub.processSectionDelay = 0;   // no pause to let browser handle interaction -- only busy during loading
+         MathJax.Hub.processUpdateDelay = 0;
+        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.6/MathJax.js?config=MML_CHTML"></script>
+        <script type="module">
+         import {load} from "./GroupInfo.js";
+         window.addEventListener('load', load, {once: true});
+        </script>
+        <script src="https://sagecell.sagemath.org/static/embedded_sagecell.js"></script>
+    </head>
+
+    <body>
+        <h1 id="heading" align="center">
+            <template id="heading_template">
+                ${MathML.sans(Group.name + ((Group.phrase == "") ? '' : '<mtext>&nbsp;- ' + Group.phrase + '</mtext>'))}
             </template>
-         </table>
-      </div>
-      <div class="indent1">
-         To see all of these visualizations shown together on a sheet,
-         <span action="showAllVisualizersSheet()" class="programLink">click here</span>.
-      </div>
-
-      <h3 id="Description">Description</h3>
-      <div id="description" class="indent1">
-         <i>None</i>
-      </div>
-
-      <h3 id="Computed_properties">Computed Properties</h3>
-      <div id="computed-properties" class="indent1">
-         <template id="computedProperties_template">
-            <table>
-               <tr>
-                  <th align="right">Abelian group</th>
-                  <td>${Group.isAbelian ? 'yes' : 'no'}</td>
-                  <td page="AbelianInfo.html" class="programLink">Tell me more</td>
-               </tr>
-               <tr>
-                  <th align="right">Class equation</th>
-                  <td>${displayClassEquation()}</td>
-                  <td page="ClassEquationInfo.html" class="programLink">Tell me more</td>
-               </tr>
-               <tr>
-                  <th align="right">Cyclic group</th>
-                  <td>${Group.isCyclic ? 'yes' : 'no'}</td>
-                  <td page="CyclicInfo.html" class="programLink">Tell me more</td>
-               </tr>
-               <tr>
-                  <th align="right">Subgroups</th>
-                  <td>${Group.subgroups.length}</td>
-                  <td page="SubgroupInfo.html" class="programLink">Tell me more</td>
-               </tr>
-               <tr>
-                  <th align="right">Order classes</th>
-                  <td>${displayOrderClasses()}</td>
-                  <td page="OrderClassesInfo.html" class="programLink">Tell me more</td>
-               </tr>
-               <tr>
-                  <th align="right">Solvable group</th>
-                  <td>${Group.isSolvable ? 'yes' : 'no'}</td>
-                  <td page="SolvableInfo.html" class="programLink">Tell me more</td>
-               </tr>
-            </table>
-         </template>
-         <template id="Z_mn-row-template">
-            <tr>
-               <th align="right">${MathML.sans(MathML.sub('ℤ', 'mn') + '<mtext>&nbsp;group</mtext>')}</th>
-               <td>= ${MathML.sans(MathML.sub('ℤ', m) + '<mo>×</mo>' + MathML.sub('ℤ', n))}</td>
-               <td page="ZmnInfo.html" class="programLink">Tell me more</td>
-            </tr>
-         </template>
-         <template id="not-Z_mn-row-template">
-            <tr>
-               <th align="right">${MathML.sans(MathML.sub('ℤ', 'mn') + '<mtext>&nbsp;group</mtext>')}</th>
-               <td>= no ${MathML.sans(MathML.sub('ℤ', 'm') + '<mo>×</mo>' + MathML.sub('ℤ', 'n'))}</td>
-               <td page="ZmnInfo.html" class="programLink">Tell me more</td>
-            </tr>
-         </template>
-      </div>
-
-      <h3 id="Related_sheets">Related Sheets</h3>
-      <div id="related-sheets" class="indent1">
-         <i>(Not implemented)</i>
-      </div>
-
-      <h3 id="File_data">File Data</h3>
-      <div id="file-data" class="indent1">
-         <template id="fileData_template">
-            <table>
-               <tr><th align="right">Author</th><td align="left">${Group.author}</td></tr>
-               <tr><th align="right">URL</th><td align="left">${Group.URL}</td></tr>
-               <tr><th align="right">Last modified</th><td align="left">${Group.lastModifiedOnServer}</td></tr>
-            </table>
-         </template>
-      </div>
-
-      <h3 id="Other_definitions">Other definitions</h3>
-      <div id="other-definitions" class="indent1">
-         <i>(Not implemented)</i>
-      </div>
-
-      <h3 id="Generators">Generators</h3>
-      <div id="generators" class="indent1">
-         There are no generators in this group, only the identity element.
-      </div>
-
-
-      <h3 id="Naming_schemes_header">Naming Schemes</h3>
-      <div id="Naming-schemes">
-
-         <h4 class="indent1">Default element names</h4>
-         <div id="default-element-names" class="indent2"></div>
-
-         <h4 class="indent1">Loaded naming schemes</h4>
-         <div id="loaded-naming-schemes" class="indent1"></div>
-         <template id="loadedSchemeChoice-template">
-            <li>${scheme}
-               <span action="setRep(${index})" class="programLink">Click here</span> to make this the default representation
-            </li>
-         </template>
-
-
-         <h4 class="indent1">User-defined naming schemes</h4>
-         <div id="no-user-defined-naming-schemes" class="indent1">
-            <i>none</i><br><br>
-         </div>
-         <div id="user-defined-naming-schemes" class="indent1 hidden">
-         </div>
-         <span action="UDR.create()" class="indent1 programLink">Click here</span> to add a new representation for this group.
-         </template>
-         <template id="userSchemeChoice-template">
-            <li>${scheme}
-               <span action="UDR.setRep(${index})" class="programLink">Click here</span> to make this the default representation.<br>
-               <span action="UDR.edit(${index})" class="programLink">Click here</span> to edit this representation.<br>
-               <span action="UDR.remove(${index})" class="programLink">Click here</span> to remove this representation.
-            </li>
-         </template>
-         <template id="inUseScheme-template">
-            <li>The default naming scheme shown above<br>
-               If you wish to edit or remove this representation, first make a different representation the default.
-            </li>
-         </template>
-         <template id="namingEditor-template">
-            <div id="naming-editor">
-               <div id="udr-edit-content">
-                  <div id="udr-edit-title">Edit naming scheme for ${MathML.sans(Group.name)}</div>
-                  <div id="udr-edit-header">
-                     Below are all the naming schemes for ${MathML.sans(Group.name)}.  Edit the Custom
-                     representation column by clicking on the entries you wish to change and typing any plain text.
-                  </div>
-                  <div id="udr-edit-body">
-                     <table id="udr-edit-table">
-                        <thead>
-                           <tr>
-                              <th>Default representation</th>
-                              <th>Custom representation</th>
-                           </tr>
-                        </thead>
-                        <tbody>
-                        </tbody>
-                     </table>
-                  </div>
-                  <div style="height: 3em">&nbsp;
-                     <button class="udr-edit-button" action="UDR.closeEdit()">Cancel</button>
-                     <button class="udr-edit-button" action="UDR.saveEdit()">OK</button>
-                  </div>
-               </div>
+        </h1>
+        <div class="top-right-menu">
+            <div>
+                <a href='index.html'>
+                    <i title="Project Home" class="fa fa-home fa-2x trm-black"></i></a>
+                <a href='GroupExplorer.html'>
+                    <i title="Group Library" class="fa fa-book fa-2x trm-black"></i></a>
+                <a href='Sheet.html' target='_blank'>
+                    <i title="Sheets" class="fa fa-file trm-black" style="font-size:1.5em;vertical-align:10%;"></i></a>
+                <a href='help/rf-um-groupwindow/index.html'>
+                    <i title="Help" class="fa fa-question-circle fa-2x trm-black"></i></a>
+                <a href='https://github.com/nathancarter/group-explorer'>
+                    <i title="Source on GitHub" class="fa fa-github fa-2x trm-black"></i></a>
+                <a href='' action="($('.toggled.content, .toggled.name-value-content, .gapcell.toggled, .less').show(), $('.summary.toggled, .more').hide())">
+                    <i title="Expand all" class="fa fa-chevron-circle-down fa-2x trm-black"></i></a>
+                <a href='' action="($('.toggled.content, .toggled.name-value-content, .gapcell.toggled, .less').hide(), $('.summary.toggled, .more').show())">
+                    <i title="Collapse all" class="fa fa-chevron-circle-up fa-2x trm-black"></i></a>
             </div>
-         </template>
-         <template id="udr-edit-template">
-            <tr>
-               <td>${MathML.sans(Group.representation[inx])}</td>
-               <td style="padding: 0px;"><textarea placeholder="change me" maxlength="50" rows="1">${rep.slice(7,-8)}</textarea></td>
-            </tr>
-         </template>
-      </div>
-      
-      <h3 id="Notes">Notes</h3>
-      <div id="notes-area" class="indent1">
-         <div id="notes-show">
-            <div id="notes-content"><i>none</i></div>
-            <br><span action="Notes.edit()" class="programLink">Click to edit notes</a>
-         </div>
-         <div id="notes-edit" class="hidden" >
-            <textarea id="notes-text" placeholder="Enter notes here..." maxlength="1000" rows="10"></textarea>
-            <div id="notes-buttons">
-               <button action="Notes.clear()">Clear</button>
-               <button action="Notes.show()">Cancel</button>
-               <button action="Notes.save()">Save</button>
+            <div id="version" style="float: right; font-size: small"></div>
+            <script type="module">
+             import {Version} from './Version.js';
+             document.getElementById('version').textContent = Version.label
+            </script>
+        </div>
+
+        <div id="basic-facts" class="collapsible heading1" style="align-items: center">
+            <span class="toggle" onclick="$('#basic-facts .toggled').toggle()">
+                <span class="toggled hidden more">+</span>
+                <span class="toggled less">-</span>
+            </span>
+            <span class="heading">Basic facts</span>
+            <div class="name-value-content toggled"></div>
+            <div class="gapcell toggled" style="margin-left: 1em">
+                <div class='gapcode' data-built-in-code-type='create group'></div>
             </div>
-         </div>
-      </div>
-   </body>
+            <template id="basic-fact-template">
+                <div class="name" style="text-align: right">${basic_fact.displayName}</div>
+                <div class="value">${basic_fact.formattedValue}</div>
+            </template>
+        </div>
+
+        <div id="views" class="collapsible heading1">
+            <span class="toggle" onclick="$('#views .toggled').toggle()">
+                <span class="toggled more">+</span>
+                <span class="toggled hidden less">-</span>
+            </span>
+            <span class="heading">Views</span>
+            <div class="content">
+                <div class="heading-row" style="text-align: center">
+                    <span class="CD"><a href="help/rf-groupterms/index.html#cayley-diagrams">Cayley Diagram</a></span>
+                    <span class="CG"><a href="help/rf-groupterms/index.html#cycle-graph">Cycle Graph</a></span>
+                    <span class="MT"><a href="help/rf-groupterms/index.html#multiplication-table">Multiplication Table</a></span>
+                    <span class="OS"><a href="help/rf-groupterms/index.html#objects-of-symmetry">Object of Symmetry</a></span>
+                </div>
+                <span class="comment toggle" onclick="$('#views .toggled').toggle()">
+                    <span class="programLink toggled more">...more</span>
+                    <span class="programLink toggled hidden less">...less</span>
+                </span>
+                <span class="comment" style="margin-top: 0.5em">Click any view to open a copy for exploration.</span>
+                <span class="comment">
+                    To see all of these visualizations shown together on a sheet,
+                    <span action="showAllVisualizersSheet()" class="programLink">click here</span>.
+                </span>
+            </div>
+            <template id="view-row-template">
+                <div class="data-row ${index == 0 ? '' : 'toggled'}" index="${index}">
+                    <span class="thumbnail CD"></span>
+                    <span class="thumbnail CG"></span>
+                    <span class="thumbnail MT"></span>
+                    <span class="thumbnail OS"></span>
+                </div>
+            </template>
+        </div>
+
+        <div id="computed-properties" class="collapsible heading1">
+            <span class="toggle" onclick="$('#computed-properties > .toggle > .toggled, #computed-properties > .toggled').toggle()">
+                <span class="toggled hidden more">+</span>
+                <span class="toggled less">-</span>
+            </span>
+            <span class="heading">Computed properties</span>
+
+            <div id="abelian" class="collapsible heading2 content toggled">
+                <span class="toggle" onclick="$('#abelian .toggled').toggle()">
+                    <span class="toggled more">+</span>
+                    <span class="toggled hidden less">-</span>
+                </span>
+                <span class="heading">Abelian group</span>
+                <span class="summary toggled"></span>
+                <div class="content hidden toggled"></div>
+            </div>
+
+            <div id="class-equation" class="collapsible heading2 content toggled">
+                <span class="toggle" onclick="$('#class-equation .toggled').toggle()">
+                    <span class="toggled more">+</span>
+                    <span class="toggled hidden less">-</span>
+                </span>
+                <span class="heading">Class equation</span>
+                <span class="summary toggled"></span>
+                <div class="content hidden toggled"></div>
+            </div>
+
+            <div id="cyclic-group" class="collapsible heading2 content toggled">
+                <span class="toggle" onclick="$('#cyclic-group .toggled').toggle()">
+                    <span class="toggled more">+</span>
+                    <span class="toggled hidden less">-</span>
+                </span>
+                <span class="heading">Cyclic group</span>
+                <span class="summary toggled"></span>
+                <div class="content hidden toggled"></div>
+            </div>
+
+            <div id="subgroups" class="collapsible heading2 content toggled">
+                <span class="toggle" onclick="$('#subgroups .toggled').toggle()">
+                    <span class="toggled more">+</span>
+                    <span class="toggled hidden less">-</span>
+                </span>
+                <span class="heading">Subgroups</span>
+                <span class="summary toggled"></span>
+                <div class="content hidden toggled"></div>
+            </div>
+
+            <div id="order-classes" class="collapsible heading2 content toggled">
+                <span class="toggle" onclick="$('#order-classes .toggled').toggle()">
+                    <span class="toggled more">+</span>
+                    <span class="toggled hidden less">-</span>
+                </span>
+                <span class="heading">Order classes</span>
+                <span class="summary toggled"></span>
+                <div class="content hidden toggled"></div>
+            </div>
+
+            <div id="solvable" class="collapsible heading2 content toggled">
+                <span class="toggle" onclick="$('#solvable .toggled').toggle()">
+                    <span class="toggled more">+</span>
+                    <span class="toggled hidden less">-</span>
+                </span>
+                <span class="heading">Solvable group</span>
+                <span class="summary toggled"></span>
+                <div class="content hidden toggled"></div>
+            </div>
+
+            <div id="zmn" class="collapsible heading2 content toggled">
+                <span class="toggle" onclick="$('#zmn .toggled').toggle()">
+                    <span class="toggled more">+</span>
+                    <span class="toggled hidden less">-</span>
+                </span>
+                <div class="heading">ℤ<sub>mn</sub> group</div>
+                <span class="summary toggled"></span>
+                <div class="content hidden toggled"></div>
+            </div>
+        </div>
+
+        <div id="file-data" class="collapsible heading1">
+            <span class="toggle" onclick="$('#file-data .toggled').toggle()">
+                <span class="toggled more">+</span>
+                <span class="toggled hidden less">-</span>
+            </span>
+            <span class="heading">File data</span>
+            <div class="name-value-content toggled"></div>
+            <template id="file-data-template">
+                <div class="name">${file_datum.display}</div>
+                <div class="value">${Group[file_datum.field]}</div>
+            </template>
+        </div>
+
+        <div id="generators" class="collapsible heading1">
+            <span class="toggle" onclick="$('#generators .toggled').toggle()">
+                <span class="toggled more">+</span>
+                <span class="toggled hidden less">-</span>
+            </span>
+            <span class="heading">Generators</span>
+            <div class="content toggled hidden"></div>
+        </div>
+
+        <div id="naming-schemes" class="collapsible heading1">
+            <span class="toggle" onclick="$('#naming-schemes > .toggle > .toggled, #naming-schemes > .toggled').toggle()">
+                <span class="toggled more">+</span>
+                <span class="toggled hidden less">-</span>
+            </span>
+            <span class="heading">Naming schemes</span>
+
+            <div id="default-names" class="collapsible heading2 content toggled">
+                <span class="toggle" onclick="$('#default-names .toggled').toggle()">
+                    <span class="toggled hidden more">+</span>
+                    <span class="toggled less">-</span>
+                </span>
+                <span class="heading">Default element names</span>
+                <div class="content toggled"></div>
+            </div>
+
+            <div id="loaded-names" class="collapsible heading2 content toggled">
+                <span class="toggle" onclick="$('#loaded-names .toggled').toggle()">
+                    <span class="toggled hidden more">+</span>
+                    <span class="toggled less">-</span>
+                </span>
+                <span class="heading">Loaded naming schemes</span>
+                <div class="content toggled"></div>
+                <template id="loadedSchemeChoice-template">
+                    <li>${scheme}
+                        <span action="setRep(${index})" class="programLink">Click here</span>
+                        to make this the default representation
+                    </li>
+                </template>
+            </div>
+
+            <div id="user-names" class="collapsible heading2 content toggled">
+                <span class="toggle" onclick="$('#user-names .toggled').toggle()">
+                    <span class="toggled hidden more">+</span>
+                    <span class="toggled less">-</span>
+                </span>
+                <span class="heading">User-defined naming schemes</span>
+                <div class="content toggled"></div>
+            </div>
+            <template id="user-names-no-user-defined-names-template">
+                <i>none</i><br>
+            </template>
+            <template id="user-names-choice-template">
+                <li>${scheme}
+                    <span action="UDR.setRep(${index})" class="programLink">Click here</span> to make this the default representation.<br>
+                    <span action="UDR.edit(${index})" class="programLink">Click here</span> to edit this representation.<br>
+                    <span action="UDR.remove(${index})" class="programLink">Click here</span> to remove this representation.
+                </li>
+            </template>
+            <template id="user-names-scheme-in-use-template">
+                <li>The default naming scheme shown above<br>
+                    If you wish to edit or remove this representation, first make a different representation the default.
+                </li>
+            </template>
+            <template id="user-names-trailer-template">
+                <br><span action="UDR.create()" class="programLink">Click here</span> to add a new representation for this group.
+            </template>
+
+            <template id="udr-editor-template">
+                <div id="udr-editor" class="modal">
+                    <div id="udr-edit-title">Edit naming scheme for ${MathML.sans(Group.name)}</div>
+                    <div id="udr-edit-header">
+                        Below are all the naming schemes for ${MathML.sans(Group.name)}.  Edit the Custom
+                        representation column by clicking on the entries you wish to change and typing any plain text.
+                    </div>
+                    <div id="udr-edit-body">
+                        <table id="udr-edit-table">
+                            <thead>
+                                <tr>
+                                    <th>Default representation</th>
+                                    <th>Custom representation</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="edit-buttons">
+                        <button class="edit-button" action="UDR.closeEdit()">Cancel</button>
+                        <button class="edit-button" action="UDR.saveEdit()">OK</button>
+                    </div>
+                </div>
+            </template>
+            <template id="udr-edit-item-template">
+                <tr>
+                    <td>${MathML.sans(Group.representation[inx])}</td>
+                    <td style="padding: 0px;">
+                        <textarea placeholder="change me" maxlength="50" rows="1">${rep.slice(7,-8)}</textarea>
+                    </td>
+                </tr>
+            </template>
+        </div>
+
+        <div id="notes" class="collapsible heading1">
+            <span class="toggle" onclick="$('#notes .toggled').toggle()">
+                <span class="toggled more">+</span>
+                <span class="toggled hidden less">-</span>
+            </span>
+            <span class="heading">Notes</span>
+            <div class="content toggled"></div>
+            <template id="notes-no-notes-template">
+                <i>none</i><br>
+            </template>
+            <template id="notes-trailer-template">
+                <br><span action="Notes.edit()" class="programLink">Click</span> to edit notes</span>
+            </template>
+            <template id="notes-editor-template">
+                <div id="notes-editor" class="modal">
+                    <div id="notes-edit-textarea">
+                        <textarea id="notes-textarea" placeholder="Enter notes here..." maxlength="1000" rows="10">
+                            ${Group.userNotes}
+                        </textarea>
+                    </div>
+                    <div class="edit-buttons">
+                        <button class="edit-button" action="Notes.close()">Cancel</button>
+                        <button class="edit-button" action="Notes.save()">Save</button>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </body>
 </html>

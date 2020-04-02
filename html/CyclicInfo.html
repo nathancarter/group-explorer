@@ -1,39 +1,16 @@
-<html>
-   <head>
-      <title>Cyclic Info</title>
 
-      <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<template id="cyclic-isCyclic-template">
+    <p>${MathML.sans(Group.name)} is <a href="./help/rf-groupterms/index.html#cyclic-group">cyclic</a>;
+        an element that generates the group is ${MathML.sans(Group.representation[generator])}.</p>
+</template>
 
-      <link rel="icon" type="image/png" href="./images/favicon.png"></link>
-      <link rel="stylesheet" href="./style/fonts.css" type="text/css">
+<template id="cyclic-nonCyclic-template">
+    <p>${MathML.sans(Group.name)} is not <a href="./help/rf-groupterms/index.html#cyclic-group">cyclic</a>;
+        no element generates the whole group.</p>
+</template>
 
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-      <script type="text/x-mathjax-config">
-       MathJax.Hub.Config({
-      	  CommonHTML: {
-             scale: 90,
-          },
-       });
-      </script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.6/MathJax.js?config=MML_CHTML"></script>
-      <script type="module">
-       import {load} from "./CyclicInfo.js";
-       window.addEventListener('load', load, {once: true});
-      </script>
-   </head>
-
-   <body>
-      <template id="header">
-         <h3>${MathML.sans('<mtext>Results of “Cyclic group” computation for&nbsp;</mtext>' + group.name)}</h3>
-      </template>
-      <template id="cyclic">
-         <p>${MathML.sans(group.name)} is <a href="./help/rf-groupterms/index.html#cyclic-group">cyclic</a>;
-            an element that generates the group is ${MathML.sans(group.representation[generator])}.</p>
-      </template>
-      <template id="non-cyclic">
-         <p>${MathML.sans(group.name)} is not <a href="./help/rf-groupterms/index.html#cyclic-group">cyclic</a>;
-            no element generates the whole group.</p>
-      </template>
-      <div class='gapcode' data-built-in-code-type='is cyclic'/>
-   </body>
-</html>
+<template id="cyclic-trailer-template">
+    <div class="gapcell hidden toggled">
+        <div class='gapcode' data-built-in-code-type='is cyclic'></div>
+    </div>
+</template>
