@@ -373,7 +373,7 @@ class MathML {
       <xsl:if test="position() != last()">
          <xsl:choose>
             <xsl:when test="../@separators">
-               <xsl:value-of select="../@separators"/>
+               <xsl:text> </xsl:text><xsl:value-of select="../@separators"/><xsl:text> </xsl:text>
             </xsl:when>
             <xsl:otherwise>
                <xsl:text>,</xsl:text>
