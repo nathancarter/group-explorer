@@ -1,7 +1,7 @@
 
 # Visualizer exemplar
 
-This is the pattern used to write the visualizers like CayleyDiagram and Multtable. The entire code of example is contained below, with comments
+This is the pattern used to write the visualizers like CayleyDiagram and Multtable. The entire code of the example is contained below, with comments
 interspersed.
 
 ## Visualizer invocation
@@ -51,7 +51,7 @@ Other visualizers extend the exemplar with different displays in the graphic ele
       <link rel="stylesheet" href="./style/sliders.css" type="text/css"></link>
       <link rel="stylesheet" href="./visualizerFramework/visualizer.css" type="text/css"></link>
       <link rel="stylesheet" href="./style/menu.css" type="text/css"></link>
-      <link rel="stylesheet" href="./subsetDisplay/subsets.css" type="text/css"></link>
+      <link rel="stylesheet" href="./style/SubsetHighlightController.css" type="text/css"></link>
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css">
 
       <style>
@@ -83,7 +83,7 @@ Other visualizers extend the exemplar with different displays in the graphic ele
        import MathML from './js/MathML.js';
        import Template from './js/Template.js';
        import * as VC from './visualizerFramework/visualizer.js';
-       import * as SSD from './subsetDisplay/subsets.js';
+       import * as SSD from './js/SubsetHighlightController.js';
        
        /* Global variables */
        var group;  // group about which information will be displayed
