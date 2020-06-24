@@ -1,5 +1,6 @@
 # Visualizer framework HTML
 
+Defines row of icons, version display in upper right-hand corner of visualizer pages.
 Used by CayleyDiagram.html, CycleGraph.html, Multtable.html, SymmetryObject.html, and Sheet.html
 ```html
 <div class="top-right-menu">

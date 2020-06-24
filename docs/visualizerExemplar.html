@@ -2,8 +2,7 @@
 <!--Markdown
 # Visualizer exemplar
 
-This is the pattern used to write the visualizers like CayleyDiagram and Multtable. The entire code of the example is contained below, with comments
-interspersed.
+This is the pattern used to write the visualizers like CayleyDiagram and Multtable. The entire code of example is contained below, with comments interspersed.
 
 ## Visualizer invocation
 
@@ -17,8 +16,7 @@ The visualizer exemplar may be viewed in the browser by entering a URL like
      ./visualizerExemplar.html?groupJSON=../groups/D_4.json),
 <br>which passes the visualizer the URL of a group definition in JSON format. (Note that this won't work with the current release -- there are no .json files in the library.)
 
-In the normal use of GE3 the visualizers are opened from the GroupInfo page by selecting one of the visualizer thumbnails. The GroupInfo
-page opens the visualizer with a URL of the form
+In the normal use of GE3 the visualizers are opened from the GroupInfo page by selecting one of the visualizer thumbnails. The GroupInfo page opens the visualizer with a URL of the form
      <br>&nbsp;&nbsp;&nbsp;&nbsp;
      [http://.../group-explorer/Multtable.html?groupURL=groups/D_4.group](
      ../Multtable.html?groupURL=groups/D_4.group),
@@ -57,9 +55,38 @@ Markdown-->
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css">
 
       <style>
+       /* Container for visualizer-specific controls */
+       #graphic {
+          background-color: #e8c8c8;  /*: Cayley diagram background color */
+       }
+       #controls {
+          display: grid;
+          grid-template-columns: auto;
+          grid-template-rows: auto 1fr;
+          grid-template-areas: 'options' 'panels';
+       }
+
+       /* buttons for choosing control panel */
+       #options {
+          grid-area: options;
+          background-color: var(--visualizer-body-background);
+          justify-self: stretch;
+          text-align: center;
+       }
+       #options > button {
+          margin: 0 2px 12px 0;
+          min-width: 15%;
+       }
+       #subset-control {
+          grid-area: panels;
+          padding: 2px;
+          overflow: auto;
+          visibility: visible;
+       }
        #view-control {
-          background: #E2E2E2;
-          display: none;
+          grid-area: panels;
+          background-color: var(--visualizer-controls-background);
+          visibility: hidden;
        }
       </style>
 
@@ -77,11 +104,12 @@ Markdown-->
 <!--Markdown
 ```
 ## Visualizer Javascript
-     
+
 (The following code would generally be found in a separate .js file, not in the .html file.)
 ```javascript
 Markdown-->
       <script type="module">
+       import GEUtils from './js/GEUtils.js';
        import Library from './js/Library.js';
        import Log from './js/Log.js';
        import MathML from './js/MathML.js';
@@ -90,7 +118,7 @@ Markdown-->
        import * as SSD from './js/SubsetHighlightController.js';
        
        /* Global variables */
-       var group;  // group about which information will be displayed
+       var Group;  // group about which information will be displayed
        const HELP_PAGE = 'help/index.html';
 
        /* Initial entry to javascript -- called once after document load */
@@ -101,27 +129,32 @@ Markdown-->
         *    (The .off(--).on(--) sequence is used to avoid accumulating event handlers after a reset.)
         */
        function registerEventHandlers() {
-          $('#subset-button').on('click', () => VC.showPanel('#subset-control') );
-          $('#view-button').on('click', () => VC.showPanel('#view-control') );
-          $(window).off('resize', resizeBody).on('resize', resizeBody);
+          window.addEventListener('resize', resizeBody);
+          $('#bodyDouble')[0].addEventListener('click', GEUtils.cleanWindow);
+          $('#subgroup-select')[0].addEventListener('click', actionClickHandler);
        }
-
 /*
 ```
 ### Asynchronous loading
 
 Asynchronous tasks are generally presented as ES6 Promises in GE. Since the [Library](../js/Library.js) will request the group definition from a server if it doesn't have a copy locally, the [loadFromURL()](../js/Library.js#loadFromURL) method returns a Promise, not the group itself.
 
-Note the [MathML preload](../js/MathML.js#preload). This is often desirable since it avoids having to perform many small asynchronous activities in subsequent MathML calls, which together with their wait times can take considerably longer than a single consolidated action at the start. 
+Note the call to [MathML preload](../js/MathML.md#caching) that loads the MathML cache. This is often desirable since it avoids having to perform many small asynchronous activities in subsequent MathML calls, which together with their wait times can take considerably longer than a single consolidated action at the start.
 ```javascript
-       /* Load the static components of the page */
+*/
+          /* Load the static components of the page */
        function load() {
+          // Check for groupURL
+          if (new URL(window.location.href).searchParams.get('groupURL') == undefined) {
+             alert('no group specified in URL, unable to proceed');
+             return;
+          }
           // Create a Promise to load group from invocation URL
           const groupLoad = Library
              .loadFromURL()
-             .then( (_group) => {
-                group = _group;
-                MathML.preload(group)  // Create a promise to preload the MathML cache
+             .then( (group) => {
+                Group = group;
+                MathML.preload(Group)  // Create a promise to preload the MathML cache
                       .then( () => completeSetup() )
                       .catch( Log.err );
              } )
@@ -130,56 +163,82 @@ Note the [MathML preload](../js/MathML.js#preload). This is often desirable sinc
 ```
 ### Exemplar initialization
 ```javascript
-       /* Now that all the static HTML is loaded, complete the setup */
+ */
        function completeSetup() {
-          SSD.load($('#subset-control'), undefined, undefined, group);
+          const dummy_highlighters = [
+             {handler: () => alert('Dummy highlighter #1'), label: 'Dummy highlighter #1'},
+             {handler: () => alert('Dummy highlighter #2'), label: 'Dummy highlighter #2'},
+             {handler: () => alert('Dummy highlighter #3'), label: 'Dummy highlighter #3'}
+          ];
+          const dummy_highlight_clearer = () => alert('Dummy highlight clearer');
+          SSD.load($('#subset-control'), dummy_highlighters, dummy_highlight_clearer, Group);
           
           // Document is assembled, register event handlers
           registerEventHandlers();
 
-          // Create header from group name and queue MathJax to typeset it
-          $('#header').html('Visualizer Example for&nbsp;' + MathML.sans(group.name));
-          MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'header']);
+          // Create header from group name
+          $('#heading').html(MathML.sans('<mtext>Visualizer Example for&nbsp;</mtext>' + Group.name));
+          MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'header']); // normally covered by preload, unneeded
 
-          $('#organization-choices').append(
-             $('<li onclick="choose(0)">').html(MathML.sans('<mtext>none</mtext>')));
-          for (let subgroupIndex = 1; subgroupIndex < group.subgroups.length-1; subgroupIndex++) {
-             const subgroup = group.subgroups[subgroupIndex];
-             const option = eval(Template.HTML('organization-choice-template'));
-             $('#organization-choices').append(option);
-          }
-          MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'organization-choices',
-                             () => $('#organization-choice').html($('#organization-choices > li:first-of-type').html())]);
-
+          // Populate 'faux-select' pulldown
+          $('#subgroup-choices')
+             .append( 
+                [...Array(Group.subgroups.length - 1).keys()]
+                   .reduce( ($frag, index) => {
+                      if (index == 0) {
+                         $frag.append(eval(Template.HTML('subgroup-choice-none-template')));
+                      } else {
+                         const subgroupIndex = index;
+                         const subgroup = Group.subgroups[subgroupIndex];
+                         $frag.append(eval(Template.HTML('subgroup-choice-template')));
+                      }
+                      return $frag;
+                   }, $(document.createDocumentFragment()) ))
+             .css('visibility', 'hidden');
+          choose(0);
           
           // Register the splitter with jquery-resizable, so you can resize the graphic horizontally
           // by grabbing the border between the graphic and the subset control and dragging it
-          $('#vert-container').resizable({
+          $('#controls').resizable({
              handleSelector: '#splitter',
              resizeHeight: false,
              resizeWidthFrom: 'left',
-             onDrag: function () {
-                // Code to resize the graphic goes here, if needed
-             }
+             onDrag: () => {
+                // resize graphic here
+             },
           });
 
-          resizeBody();
-
           // Load icon strip in upper right-hand corner
-          VC.load();
+          VC.load(Group, HELP_PAGE);
        }
 
-       /*
-        * Resize the body (including the graphic, if necessary).
-        */
+       // Resize body (including graphic, if necessary).
        function resizeBody() {
           $('body').height(window.innerHeight);
           $('body').width(window.innerWidth);
+
+          // resize the visualizer graphic here
        }
 
-       /* Example event handler, set up in registerCallback */
-       function choose(subgroupIndex) {
-          $('#organization-choice').html($(`#organization-choices > li:nth-of-type(${subgroupIndex+1})`).html());
+       function toggleSubgroupChoices () {
+          const choices = $('#subgroup-choices');
+          const new_visibility = choices.css('visibility') == 'visible' ? 'hidden' : 'visible';
+          choices.css('visibility', new_visibility);
+       }
+
+       function actionClickHandler (event /*: MouseEvent */) {
+          event.preventDefault();
+          const $action = $(event.target).closest('[action]');
+          if ($action.length != 0) {
+             event.stopPropagation();
+             eval($action.attr('action'));
+          }
+       }
+       
+       // Do-nothing event handler, set up in registerCallback
+       function choose (index) {
+          $('#subgroup-choice').html($(`#subgroup-choices > li:nth-of-type(${index+1})`).html());
+          GEUtils.cleanWindow();
        }
       </script>
    </head>
@@ -189,47 +248,51 @@ Note the [MathML preload](../js/MathML.js#preload). This is often desirable sinc
 
 The HTML lays out the visualizer elements in the [format](./visualizerLayout.md) used by GE3.
 
-A string of icons is placed in the upper right-hand corner of the screen by [VC.load()](../visualizerFramework/visualizer.md#vc-load-) during [initialization](#visualizer-framework-loading) and does not appear in the static HTML below.
+The string of icons in the upper right-hand corner of the screen is placed there by the [VC.load(group, HELP_PAGE)](../visualizerFramework/visualizer.md#load) call during [initialization](#exemplar-initialization). It is defined in [visualizerFramework.html](./visualizerFramework_html.md).
 
 Note the use of [faux-select](../visualizerFramework/visualizer_css.md#faux-select) and associated classes to simulate an HTML select element with HTML and MathML formatted text.
 ```html
 Markdown-->
    <body>
-      <div id="bodyDouble" class="vert">
-         <div id="header" class="horiz"></div>
-         <div id="horiz-container" class="horiz">
-            <div id="graphic"></div>
-            <div id="splitter"></div>
-            <div id="vert-container" class="vert">
-               <div id="control-options" class="horiz">
-                  <button id="subset-button">Subsets</button>
-                  <button id="view-button">View</button>
+      <div id="bodyDouble">
+         <div id="header">
+             <div id="heading"></div>
+         </div>
+         <div id="graphic"></div>
+         <div id="splitter"></div>
+         <div id="controls">
+            <div id="options">
+               <button id="subset-button" onclick="VC.showPanel('#subset-control')">Subsets</button>
+               <button id="view-button" onclick="VC.showPanel('#view-control')">View</button>
+            </div>
+
+            <div id="subset-control" class="panel">
+               <!-- This is filled in from html/SubsetHighlightController.html -->
+            </div>
+
+            <div id="view-control" class="panel">
+               <p>Choose subgroup:</p>
+               <div id="subgroup-select" class="faux-select" action="toggleSubgroupChoices()">
+                  <div style="display: inline-block; line-height: 1.5em">&nbsp;</div>
+                  <div id="subgroup-choice" class="faux-selection"></div>
+                  <div class="faux-select-arrow" ></div>
+                  <ul id="subgroup-choices" class="faux-select-options visibility-hidden-on-clean"></ul>
                </div>
+               <template id="subgroup-choice-none-template">
+                  <li action="choose(${index})" style="margin-right: 3em">${MathML.sansText('none')}</li>
+               </template>
+               <template id="subgroup-choice-template">
+                  <li action="choose(${index})" style="margin-right: 3em">
+                     ${MathML.sans(MathML.sub('H', subgroupIndex))}, ${MathML.sansText('a subgroup of order')}
+                     ${MathML.sans('<mn>' + subgroup.order + '</mn>')}
+                  </li>
+               </template>
 
-               <div id="subset-control" class="fill-vert">
-                  <!-- This is filled in by subsetDisplay/subsets.html -->
-               </div>
+               <p>Zoom level:</p>
+               <input id="zoom-level" type="range" min="-10" max="10" value="0">
 
-               <div id="view-control" class="fill-vert">
-                  <p>Organize by subgroup:</p>
-                  <div id="organization-select" class="faux-select" onclick="$('#organization-choices').toggle()">
-                     <ul id="organization-choices" class="faux-select-options hidden hide-on-clean"></ul>
-                     <span id="organization-choice" class="faux-selection">none</span>
-                     <div class="faux-select-arrow" ></div>
-                  </div>
-                  <template id="organization-choice-template">
-                     <li onclick="choose(${subgroupIndex})">
-                        ${MathML.sans(MathML.sub('H', subgroupIndex) + '<mo>,</mo><mtext>a subgroup of order&nbsp;</mtext><mn>' +
-                        subgroup.order + '</mn>')}
-                     </li>
-                  </template>
-
-                  <p>Zoom level:</p>
-                  <input id="zoom-level" type="range" min="-10" max="10" value="0">
-
-                  <p>Line thickness:</p>
-                  <input id="line-thickness" type="range" min="1" max="20" value="10">
-               </div>
+               <p>Line thickness:</p>
+               <input id="line-thickness" type="range" min="1" max="20" value="10">
             </div>
          </div>
       </div>

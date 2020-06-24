@@ -1,81 +1,57 @@
 <!--
-     This file generates the screens captured in visualizerLayout.png and visualizerLayoutKey.png.
-     These figures are used in visualizerLayout.md.
+     This file generates the screen captured in visualizerLayout.png and used in visualizerLayout.md.
 -->
 <html>
    <head>
       <meta charset="utf-8" />
-      <base href=".."></head>
 
-      <link rel="stylesheet" href="./style/fonts.css" type="text/css"></link>
-      <link rel="stylesheet" href="./visualizerFramework/visualizer.css" type="text/css"></style>
+      <link rel="stylesheet" href="../style/fonts.css" type="text/css"></link>
       <style>
        /* colors from https://sashat.me/2017/01/11/list-of-20-simple-distinct-colors */
        body {
+          height: 95%;
+          width: 96%;
           border: 6px solid #e6beff;  /* lavender */
+          font-size: 40px;
+          display: grid;
+          grid-template-columns: 1fr 0.8em 0.2fr;
+          grid-template-rows: auto 1fr;
+          grid-template-areas: "header header header" "graphic splitter controls";
        }
        #header {
+          grid-area: header;
+          background-color: #D0D0D0;
           border: 6px solid #000075;  /* navy */
        }
-       #horiz-container {
-          border: 6px solid #42d4f4;  /* cyan */
-       }
        #graphic {
+          grid-area: graphic;
+          background-color: #E8C8C8;
           border: 6px solid #800000;  /* maroon */
        }
        #splitter {
+          grid-area: splitter;
+          background-color: #ECECEC;
           border: 6px solid #bfef45;  /* lime */
        }
-       #vert-container {
-          border: 6px solid #000000;  /* black */
-       }
        #controls {
+          grid-area: controls;
+          background-color: #F0E68C;
           border: 6px solid #f58231;  /* orange */
        }
-       #help-reset {
-          border: 6px solid #f032e6;  /* magenta */
-       }
-       .center-text {
-          font-size: 40px;
+       .center {
           text-align: center;
-          line-height: 100px;
-       }
-       #splitter-text {
-          text-align: right;
-          position: absolute;
-          font-size: 30px;
-          width: 10px;   /* wider than real splitter, so you can see the text */
+          position: relative;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
        }
       </style>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-      <script>
-       $(window).one('load', resize);
-       $(window).on('resize', resize);
-
-       function resize() {
-          $('body').height(window.innerHeight - 2*6 - 15);  // 6px border
-          $('body').width(window.innerWidth - 2*6 - 15);  // 6px border
-
-          // move the vertical 'Splitter' text around on re-sizing
-          const {top: splitter_top, height: splitter_height} = $('#splitter')[0].getBoundingClientRect();
-          const splitter_text_height = $('#splitter-text')[0].getBoundingClientRect().height;
-          $('.center-text').each( (_inx, el) => $(el).css("line-height", 0.8*splitter_height + "px") );
-          $('#splitter-text')[0].style.top = splitter_top + 0.4*(splitter_height - splitter_text_height);
-       };
-      </script>
    </head>
-   <body class="vert">
-      <div id="header" class="horiz">Header</div>
-      <div id="horiz-container" class="horiz">
-         <div id="graphic" class="center-text">Graphic</div>
-         <div id="splitter"><div id="splitter-text">S p l i t t e r</div></div>
-         <div id="vert-container" class="vert">
-            <div id="controls" class="center-text fill-vert">Controls</div>
-            <div id="help-reset" class="horiz">
-               <button id="help">Help</button>
-               <button id="reset">Reset</button>
-            </div>
-         </div>
-      </div>
+   <body>
+      <div id="header"><div style="text-align: center; margin: 10px">Header</div></div>
+      <div id="graphic"><div class="center">Graphic</div></div>
+      <div id="splitter"><div class="center" style="font-size: 35px">S p l i t t e r</div></div>
+      <div id="controls"><div class="center">Controls</div>
    </body>
 </html>
