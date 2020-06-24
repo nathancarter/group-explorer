@@ -15,6 +15,10 @@ ul {
     -webkit-tap-highlight-color: transparent;
 }
 
+#subset_page li, #subset_page .subset_page_header {
+    white-space: nowrap;
+}
+
 p.subset_page_header {
    font-size: 24px;
    font-weight: bold;
@@ -44,7 +48,7 @@ ul.subset_page_content {
 }
 
 /* Subset editor styling */
-#subset_editor {
+#subset-editor {
    font-size: 12pt;
    font-weight: bold;
    text-align: center;
@@ -60,46 +64,66 @@ ul.subset_page_content {
    background-color: rgba(0,0,0,0.4); /* Gray mist */
 }
 
-#ssedit_content {
+#ssedit-content {
    background-color: #ECECEC;		/* nearly white (~white smoke) */
    margin: auto;
    border: 1px solid #BFBFBF;		/* ~silver */
    width: 500px;
+   display: grid;
+   grid-template-columns: 1fr 1fr;
+   grid-template-rows: auto auto auto 10em auto;
+   grid-template-areas:
+      "title title"
+      "heading heading"
+      "in-elements-heading not-in-elements-heading"
+      "in-elements-list not-in-elements-list"
+      "cancel-button ok-button";
 }
 
-#ssedit_title {
-   background: #D0D0D0;		/* light gray */
-   font-weight: lighter;
+#ssedit-title {
+   grid-area: title;
+   background-color: #D0D0D0 !important;	/* light gray */
+   margin: 0 !important;
 }
-
-.ssedit_body {
-   height: 200px;
-   padding: 5px;
+#ssedit-heading {
+   grid-area: heading;
 }
-
-.ssedit_panel_container {
-   width: 50%;
+#ssedit-in-elements-heading {
+   grid-area: in-elements-heading;
 }
-
-.ssedit_panel {
-   height: 100%;
+#ssedit-in-elements-list {
+   grid-area: in-elements-list;
+   margin: 0 2px 0 5px !important;
+}
+#ssedit-cancel-button {
+   grid-area: cancel-button;
+   margin: 5px 2px 5px 5px !important;
+}
+#ssedit-not-in-elements-heading {
+   grid-area: not-in-elements-heading;
+}
+#ssedit-not-in-elements-list {
+   grid-area: not-in-elements-list;
+   margin: 0 5px 0 2px !important;
+}
+#ssedit-ok-button {
+   grid-area: ok-button;
+   margin: 5px 5px 5px 2px !important;
+}
+#ssedit-content > ul {
    background-color: #FFFFFF;		/* white */
    border: 1px solid #BFBFBF;		/* ~silver */
-   margin: 3px;
    text-align: left;
    font-weight: normal;
    overflow: auto;
+   padding-left: 3px;
 }
-
-.ssedit_list {
-   margin-top: 0px;
-   padding-left: 0px;
-}
-
-.ssedit_button {
+#ssedit-content > button {
    border: 1px solid #BFBFBF;		/* ~silver */
-   margin: 3px;
-   text-align: center;
    font-size: inherit;
    font-weight: inherit;
+}
+#ssedit-content > * {
+   background-color: #ECECEC;		/* nearly white (~white smoke) */
+   margin: 2px;
 }

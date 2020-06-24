@@ -60,74 +60,88 @@ function registerCallbacks() {
 
 // Load group from invocation URL, then preload MathML cache, then complete setup
 function load() {
-   Library
-      .loadFromURL()
-      .then( (_group) => {
-         Group = _group;
-         MathML.preload(Group)
-            .then( () => completeSetup() )
-            .catch( Log.err );
-      } )
-      .catch( Log.err );
+   loadLibrary();
 }
 
-function completeSetup() {
+function loadLibrary () {
+   Library.loadFromURL()
+      .then( (group) => {
+         Group = group;
+         preloadMathMLCache();
+      } )
+      .catch(Log.err);
+}
+
+function preloadMathMLCache () {
+   MathML.preload(Group)
+      .then( () => generateSubsetHighlightPanel() )
+      .catch(Log.err);
+}
+
+// do this first to determine size of subset highlight panel, so we don't have to redraw main Mulattable graphic
+function generateSubsetHighlightPanel () {
    const highlighters = [
       {handler: highlightByBackground, label: 'Background'},
       {handler: highlightByBorder, label: 'Border'},
       {handler: highlightByCorner, label: 'Corner'}
    ];
-   // Load subset display, and complete setup
-   SSD.load($('#subset-control'), highlighters, clearHighlights, Group);
+   SSD.load($('#subset-control'), highlighters, clearHighlights, Group)
+      .then( () => setTimeout( () => completeSetup(), 10 ) )
+      .catch(Log.err);
+}
 
+function completeSetup() {
    // Create header from group name
-   $('#header').html(MathML.sans('<mtext>Multiplication Table for&nbsp;</mtext>' + Group.name));
-
-   // Create list of subgroups for Organize by subgroup menu:
-   $('#organization-choices').html('').append(
-      $(`<li action="organizeBySubgroup(${Group.subgroups.length-1})">`).html(MathML.sansText('none')));
-   for (let subgroupIndex = 1; subgroupIndex < Group.subgroups.length-1; subgroupIndex++) {
-      const subgroup = Group.subgroups[subgroupIndex];
-      const option /*: html */ =  eval(Template.HTML('organization-choice-template'));
-      $('#organization-choices').append(option);
-   }
-   MathJax.Hub.Queue(
-      ['Typeset', MathJax.Hub, 'organization-choices'],
-      () => {
-         $('#organization-choice').html($('#organization-choices > li:first-of-type').html());
-         $('#organization-choices').hide();
-      }
-   );
+   $('#heading').html(MathML.sans('<mtext>Multiplication Table for&nbsp;</mtext>' + Group.name ));
 
    // Draw Multtable in graphic
    Multtable_View = createFullMulttableView({container: $('#graphic')});
    Multtable_View.group = Group;
+
+   // Create list of subgroups for organize-by-subgroup menu:
+   $('#organization-choices').append( 
+      [...Array(Group.subgroups.length - 1).keys()].reduce( ($frag, index) => {
+         if (index == 0) {
+            $frag.append(eval(Template.HTML('organization-choice-none-template')));
+         } else {
+            const subgroupIndex = index;
+            const subgroup = Group.subgroups[subgroupIndex];
+            $frag.append(eval(Template.HTML('organization-choice-template')));
+         }
+         return $frag;
+      }, $(document.createDocumentFragment()) ))
+      .css('visibility', 'hidden');
+   organizeBySubgroup(0);
 
    // Register event handlers
    registerCallbacks();
 
    // Register the splitter with jquery-resizable, so you can resize the graphic horizontally
    // by grabbing the border between the graphic and the subset control and dragging it
-   (($('#vert-container') /*: any */) /*: JQuery & {resizable: Function} */).resizable({
+   (($('#controls') /*: any */) /*: JQuery & {resizable: Function} */).resizable({
       handleSelector: '#splitter',
       resizeHeight: false,
       resizeWidthFrom: 'left',
       onDrag: () => Multtable_View.resize(),
    });
 
-   VC.showPanel('#subset-control');
+   // Is this an editor started by a Sheet? If so, set up communication with Sheet
+   if (window.isEditor) {
+      setupEditorCallback();
+   }
 
-   resizeBody();
+   // Load icon strip in upper right-hand corner
+   VC.load(Group, HELP_PAGE);
+}
 
+function setupEditorCallback () {
+   // this only happens once, right after initialization
    window.addEventListener('message', receiveInitialSetup, false);
 
    // let any GE window that spawned this know that we're ready to receive signals
    window.postMessage( LISTENER_READY_MESSAGE, myDomain );
    // or if any external program is using GE as a service, let it know we're ready, too
    window.parent.postMessage( LISTENER_READY_MESSAGE, '*' );
-
-   // Load icon strip in upper right-hand corner
-   VC.load(Group, HELP_PAGE);
 }
 
 function receiveInitialSetup (event /*: MessageEvent */) {
@@ -160,31 +174,26 @@ function receiveInitialSetup (event /*: MessageEvent */) {
 /* Find subgroup index (the "value" attribute of the option selected) and display multtable accordingly */
 function organizationClickHandler(event /*: MouseEvent */) {
    const $curr = $(event.target).closest('[action]');
-   if ($curr.length == 0) {
-      $('#organization-choices').hide();
-   } else {
+   if ($curr.length != 0) {
       eval($curr.attr('action'));
       event.stopPropagation();
    }
 }
 
 function toggleOrganizationChoices() {
-   const hidingChoices = $('#organization-choices').css('display') == 'none';
-   GEUtils.cleanWindow();
-   if (hidingChoices) {
-      $('#organization-choices').show();
-   }
+   const choices = $('#organization-choices');
+   const new_visibility = choices.css('visibility') == 'visible' ? 'hidden' : 'visible';
+   choices.css('visibility', new_visibility);
 }
 
 /* Display multtable grouped by group.subgroups[subgroupIndex]
  *   (Note that the group itself is Group.subgroups[Group.subgroups.length - 1] */
-function organizeBySubgroup(subgroupIndex /*: number */) {
-   Multtable_View.organizeBySubgroup(subgroupIndex);
+function organizeBySubgroup (index /*: integer */) {
+   Multtable_View.organizeBySubgroup(index == 0 ? Group.subgroups.length - 1 : index);
 
    // copy already-formatted text from menu
-   $('#organization-choice').html(
-      $(`#organization-choices > li:nth-of-type(${(subgroupIndex == Group.subgroups.length - 1) ? 1 : subgroupIndex+1})`).html());
-   $('#organization-choices').hide();
+   $('#organization-choice').html($(`#organization-choices > li:nth-of-type(${index+1})`).html());
+   $('#organization-choices').css('visibility', 'hidden');
 }
 
 /* Set separation between cosets in multtable display, and re-draw graphic */

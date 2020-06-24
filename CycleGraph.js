@@ -23,7 +23,7 @@ import type {MSG_external, MSG_editor} from './js/SheetModel.js';
 */
 
 // Module variables
-let group		/*: XMLGroup */;		// group about which information will be displayed
+let Group		/*: XMLGroup */;		// group about which information will be displayed
 let Cycle_Graph_View	/*: CycleGraphView */;		// graphic context for large diagram
 
 const HELP_PAGE = 'help/rf-um-cg-options/index.html';
@@ -45,57 +45,73 @@ function registerCallbacks() {
 
 // Load group from invocation URL, then preload MathML cache, then complete setup
 function load() {
-   Library
-      .loadFromURL()
-      .then( (_group) => {
-         group = _group;
-         MathML.preload(group)
-            .then( () => completeSetup() )
-            .catch( Log.err );
-      } )
-      .catch( Log.err );
+   loadLibrary();
 }
 
-// Complete setup functions that depend on the Group and the MathML cache
-function completeSetup() {
-   // This just starts building the subset display -- no need to wait until it completes
+function loadLibrary () {
+   Library.loadFromURL()
+      .then( (group) => {
+         Group = group;
+         preloadMathMLCache();
+      } )
+      .catch(Log.err);
+}
+
+function preloadMathMLCache () {
+   MathML.preload(Group)
+      .then( () => generateSubsetHighlightPanel() )
+      .catch(Log.err);
+}
+
+// do this first to determine size of subset highlight panel, so we don't have to redraw main CycleGraph graphic
+function generateSubsetHighlightPanel () {
    const highlighters = [
       {handler: highlightByBackground, label: 'Background'},
       {handler: highlightByBorder, label: 'Border'},
       {handler: highlightByTop, label: 'Top'}
    ];
-   SSD.load($('#subset-control'), highlighters, clearHighlights, group);
+   SSD.load($('#subset-control'), highlighters, clearHighlights, Group)
+      .then( () => completeSetup() )
+      .catch(Log.err);
+}
 
+// Complete setup functions
+function completeSetup() {
    // Create header from group name
-   $('#header').html(MathML.sans('<mtext>Cycle Graph for&nbsp;</mtext>' + group.name));
+   $('#heading').html(MathML.sans('<mtext>Cycle Graph for&nbsp;</mtext>' + Group.name));
 
    // Create Cycle Graph, graphic context (it will be displayed in resizeBody below)
    Cycle_Graph_View = createLabelledCycleGraphView({container: $('#graphic')});
-   Cycle_Graph_View.group = group;
+   Cycle_Graph_View.group = Group;
 
    // Register event handlers
    registerCallbacks();
 
    // Register the splitter with jquery-resizable, so you can resize the graphic horizontally
    // by grabbing the border between the graphic and the subset control and dragging it
-   (($('#vert-container') /*: any */) /*: JQuery & {resizable: Function} */).resizable({
+   (($('#controls') /*: any */) /*: JQuery & {resizable: Function} */).resizable({
       handleSelector: '#splitter',
       resizeHeight: false,
       resizeWidthFrom: 'left',
       onDrag: () => Cycle_Graph_View.resize(),
    });
 
-   resizeBody();
+   // Is this an editor started by a Sheet? If so, set up communication with Sheet
+   if (window.isEditor) {
+      setupEditorCallback();
+   }
 
+   // Load icon strip in upper right-hand corner
+   VC.load(Group, HELP_PAGE);
+}
+
+function setupEditorCallback () {
    window.addEventListener('message', receiveInitialSetup, false);
 
    // let any GE window that spawned this know that we're ready to receive signals
    window.postMessage( LISTENER_READY_MESSAGE, myDomain );
    // or if any external program is using GE as a service, let it know we're ready, too
    window.parent.postMessage( LISTENER_READY_MESSAGE, '*' );
-
-   // Load icon strip in upper right-hand corner
-   VC.load(group, HELP_PAGE);
 }
 
 function receiveInitialSetup (event /*: MessageEvent */) {

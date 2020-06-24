@@ -271,27 +271,19 @@
 </template>
 
 <template id="subset-editor-template">
-   <div id="subset_editor">
-      <div id="ssedit_content" class="vert">
-         <div id="ssedit_title">Edit subset</div>
-         <div>${MathML.sansText('Customize the elements of')} ${setName}
+   <div id="subset-editor">
+      <div id="ssedit-content">
+         <div id="ssedit-title">Edit subset</div>
+         <div id="ssedit-heading">${MathML.sansText('Customize the elements of')} ${setName}
             ${MathML.sansText('by dragging elements into or out of it below.')}</div>
-         <div class="horiz ssedit_body">
-            <div id="ssedit_elementsIn_container" class="vert ssedit_panel_container">
-               <span>${MathML.sansText('Elements in')} ${setName}</span>
-               <div class="ssedit_panel">
-                  <ul id="elementsIn" class="ssedit_list"></ul>
-               </div>
-               <button id="ssedit_cancel_button" class="ssedit_button">Cancel</button>
-            </div>
-            <div id="ssedit_elementsNotIn_container" class="vert ssedit_panel_container">
-               <span>${MathML.sansText('Elements not in')} ${setName}</span>
-               <div class="ssedit_panel">
-                  <ul id="elementsNotIn" class="ssedit_list"></ul>
-               </div>
-               <button id="ssedit_ok_button" class="ssedit_button">OK</button>
-            </div>
-         </div>
+         
+         <span id="ssedit-in-elements-heading">${MathML.sansText('Elements in')} ${setName}</span>
+         <ul id="ssedit-in-elements-list"></ul>
+         <button id="ssedit-cancel-button">Cancel</button>
+
+         <span id="ssedit-not-in-elements-heading">${MathML.sansText('Elements not in')} ${setName}</span>
+         <ul id="ssedit-not-in-elements-list"></ul>
+         <button id="ssedit-ok-button">OK</button>
       </div>
    </div>
 </template>

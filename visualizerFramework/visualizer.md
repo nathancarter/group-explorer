@@ -39,7 +39,7 @@ It returns the just-started ajax load as an ES6 Promise
 
 ```javascript
 */
-export function load(group /*: ?XMLGroup */, help_page /*: string */) {
+export function load (group /*: ?XMLGroup */, help_page /*: string */) {
    window.VC = this;
    if (group != undefined)
       Group = group;
@@ -47,7 +47,7 @@ export function load(group /*: ?XMLGroup */, help_page /*: string */) {
 
    $.ajax( { url: VISUALIZER_LAYOUT_URL,
              success: (data /*: html */) => {
-                $('body').append(data); // append the top right-hand icon strip, etc. to existing body
+                $('#header').append(data);  // append the top right-hand icon strip, etc. to header
                 $('#show-controls').hide();  // Hide top right-hand 'hide-controls' icon initially
                 if (group != undefined && group.URL != undefined)
                    $('#find-group').hide();
@@ -66,7 +66,7 @@ Hides visualizer-specific control panels and resizes the main graphic
 export function hideControls () {
    $( '#hide-controls' ).hide();
    $( '#show-controls' ).show();
-   $( '#vert-container' ).hide().resize();
+   $( '#controls' ).hide().resize();
 }
 /*
 ```
@@ -77,7 +77,7 @@ Exposes visualizer-specific control panels and resizes the main graphic to fit
 export function showControls () {
    $( '#hide-controls' ).show();
    $( '#show-controls' ).hide();
-   $( '#vert-container' ).show().resize();
+   $( '#controls' ).show().resize();
 }
 /*
 ```
@@ -85,13 +85,16 @@ export function showControls () {
 Switches among visualizer-specific control panels by showing the desired panel and hiding the rest
 ```javascript
 */
-export function showPanel(panel_name /*: string */) {
-   $('#vert-container > .fill-vert').each( (_, control) => {
+export function showPanel (panel_name /*: string */) {
+   $('#controls > .panel').each( (_, control) => {
       const control_name = '#' + $(control).attr('id');
       if (control_name == panel_name) {
-         $(control_name).show();
+         if ($(control_name).css('display', 'none')) {
+            $(control_name).show().resize();
+         }
+         $(control_name).css('visibility', 'visible');
       } else {
-         $(control_name).hide();
+         $(control_name).css('visibility', 'hidden');
       }
    } )
 }
@@ -101,7 +104,7 @@ export function showPanel(panel_name /*: string */) {
 Link to visualizer-specific help page
 ```javascript
 */
-export function help() {
+export function help () {
    window.open(Help_Page);
 }
 /*
@@ -110,7 +113,7 @@ export function help() {
 Try to find this group in the Library based only on its structure
 ```javascript
 */
-export function findGroup() {
+export function findGroup () {
    const found = IsomorphicGroups.find( Group );
    if ( found ) {
       window.open( `./GroupInfo.html?groupURL=${encodeURIComponent( found.URL )}` );

@@ -1,5 +1,6 @@
 // @flow
 
+import GEUtils from './js/GEUtils.js';
 import Library from './js/Library.js';
 import Log from './js/Log.js';
 import MathML from './js/MathML.js';
@@ -23,7 +24,7 @@ const HELP_PAGE = 'help/rf-um-os-options/index.html';
 /* Register static event managers (called after document is assembled) */
 function registerCallbacks() {
    window.onresize = resizeBody;
-   $('#bodyDouble')[0].addEventListener('click', cleanWindow);
+   $('#bodyDouble')[0].addEventListener('click', GEUtils.cleanWindow);
 
    $('#diagram-select')[0].addEventListener('click', diagramClickHandler);
    $('#zoom-level')[0].addEventListener('input', set_zoom_level);
@@ -39,8 +40,16 @@ function load() {
       .loadFromURL()
       .then( (group) => {
          Group = group;
-         const diagram_name = getDiagramName();
-         completeSetup(diagram_name);
+         // Preload the few strings used in this visualizer, makes it easier to sync MathJax and browser display
+         const mathml_strings =
+               Group.symmetryObjects.map( (symmetryObject) => MathML._2mtext(symmetryObject.name) );
+         mathml_strings.push(`<mtext>Object of Symmetry for&nbsp;</mtext>${Group.name}`);
+         MathML.cacheStrings(mathml_strings)
+            .then( () => {
+               const diagram_name = getDiagramName();
+               completeSetup(diagram_name);
+            } )
+            .catch( Log.err );
       } )
       .catch( Log.err );
 }
@@ -50,7 +59,7 @@ function getDiagramName() /*: string */ {
    let diagram_name;
    // Check that this group has a symmetry object
    if (Group.symmetryObjects.length == 0) {
-      // Throws exception is group has no symmetry objects
+      // Throws exception if group has no symmetry objects
       throw `The group ${MathML.toUnicode(Group.name)} has no symmetry objects.`;
    } else {
       // If so, use the diagram name from the URL search string
@@ -79,60 +88,51 @@ function completeSetup(diagram_name /*: string */) {
    // Register event handlers
    registerCallbacks();
 
-   // Create header from group name and queue MathJax to typeset it
-   $('#header').html(MathML.sans('<mtext>Object of Symmetry for&nbsp;</mtext>' + Group.name));
-   MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'header']);
+   // Create header from group name
+   $('#heading').html(MathML.sans(`<mtext>Object of Symmetry for&nbsp;</mtext>${Group.name}`));
 
-   // Create list of symmetry object option for faux-select
-   for (let index = 0; index < Group.symmetryObjects.length; index++) {
-      $('#diagram-choices').append(eval(Template.HTML('diagram-choice-template'))).hide();
-   };
-   MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'diagram-choices',
-                      () => $('#diagram-choice').html($('#diagram-choices > li:first-of-type').html())]);
+    // Create list of symmetry object option for faux-select
+   Group.symmetryObjects.reduce( ($frag, symmetryObject, index) => {
+      return $frag.append(eval(Template.HTML('diagram-choice-template')));
+   }, $(document.createDocumentFragment()) ).appendTo($('#diagram-choices'));
+   $('#diagram-choice').html($('#diagram-choices > li:first-of-type').html());
 
    // Draw symmetry object in graphic
    Symmetry_Object_View = createInteractiveSymmetryObjectView({container: $('#graphic')});
-   set_diagram_name(Group.symmetryObjects.findIndex( (symmetry_object) => symmetry_object.name == diagram_name ));
+   setDiagramName(Group.symmetryObjects.findIndex( (symmetry_object) => symmetry_object.name == diagram_name ));
    $('#line-thickness').val(1 + (Symmetry_Object_View.line_width - 1)/0.75);
 
-   (($('#vert-container') /*: any */) /*: JQuery & {resizable: Function} */).resizable({
-      handleSelector: '#splitter',
-      resizeHeight: false,
-      resizeWidthFrom: 'left',
-      onDrag: () => Symmetry_Object_View.resize(), // resizeGraphic,
-   })
-
    // Load icon strip in upper right-hand corner
-   VC.load(Group, HELP_PAGE)
+   VC.load(Group, HELP_PAGE);
 }
 
 // Resize the body, including the graphic
 function resizeBody() {
-   $('#bodyDouble').height(window.innerHeight);
-   $('#bodyDouble').width(window.innerWidth);
+   $('body, #bodyDouble').height(window.innerHeight);
+   $('body, #bodyDouble').width(window.innerWidth);
 
    Symmetry_Object_View.resize(); // resizeGraphic();
 };
 
-function cleanWindow() {
-   $('#diagram-choices').hide();
-}
-
 /* Change diagram */
 function diagramClickHandler(event /*: MouseEvent */) {
    const $curr = $(event.target).closest('[action]');
-   if ($curr.length == 0) {
-      $('#diagram-choices').hide();
-   } else {
+   if ($curr.length != 0) {
       eval($curr.attr('action'));
       event.stopPropagation();
    }
 }
 
-function set_diagram_name(index /*: number */) {
+function toggleDiagramChoices () {
+   const choices = $('#diagram-choices');
+   const new_visibility = choices.css('visibility') == 'visible' ? 'hidden' : 'visible';
+   choices.css('visibility', new_visibility);
+}
+
+function setDiagramName(index /*: number */) {
    const diagram_name = Group.symmetryObjects[index].name;
    $('#diagram-choice').html($(`#diagram-choices > li:nth-of-type(${index+1})`).html());
-   $('#diagram-choices').hide();
+   $('#diagram-choices').css('visibility', 'hidden');
    Symmetry_Object_View.setObject(Group.symmetryObjects[index]);
 }
 

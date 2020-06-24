@@ -49,13 +49,15 @@ class GEUtils {
     *
     * Actions taken are determined from the following classes applied to DOM elements:
     *    highlighted -- remove highlighting from list elements
-    *    hide-on-clean -- hide statically generated lists, like faux-select options
+    *    display-none-on-clean -- hide structures so they don't take up space
+    *    visibility-hidden-on-clean -- hide structures but let them continue to occupy space
     *    remove-on-clean -- remove dynamically-generated temporary artifacts, like menus and tooltips
     *    disable-on-clean -- disable buttons
     */
    static cleanWindow() {
       $('.highlighted').each( (_inx, el) => $(el).removeClass('highlighted') );
-      $('.hide-on-clean').hide();
+      $('.display-none-on-clean').hide();
+      $('.visibility-hidden-on-clean').css('visibility', 'hidden');       
       $('.remove-on-clean').remove();
       $('.disable-on-clean').each( (_inx, el) => $(el).prop('disabled', true) );
    }

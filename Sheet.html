@@ -13,10 +13,6 @@
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css">
 
       <style>
-       #view-control {
-          background: #E2E2E2;
-          display: none;
-       }
        .selected-for-moving-and-sizing {
           border: 2px dotted #aaf;
        }
@@ -48,17 +44,61 @@
           transform: translate3d(0,0,1px);  /* works around an iPad z-level bug */
        }
 
-       .narrow-control { width: 31%; }
-       .normal-control { width: 47%; }
-       .wide-control { width: 65%; }
-       .huge-control { width: 96%; }
+       #controls {
+          z-index: 999999999;
 
-       #sheet-control {
-          z-index: 999999999;
-          background-color: white;
+          display: grid;
+          grid-template-columns: repeat(6, 1fr);
+          grid-template-rows: auto auto 1em auto auto auto 1em auto auto 1em auto auto 1em auto auto 1fr;
+          grid-template-areas:
+             "loadButton loadButton savedSheetsList savedSheetsList savedSheetsList savedSheetsList"
+             "saveButton saveButton filenameInput filenameInput filenameInput filenameInput"
+             ". . . . . ."
+             "addRectangleButton addRectangleButton addRectangleButton addTextButton addTextButton addTextButton"
+             "addVisualizerButton addVisualizerButton addVisualizerButton addVisualizerButton addVisualizerButton addVisualizerButton"
+             "visualizerList visualizerList visualizerList groupList groupList groupList"
+             ". . . . . ."
+             "copyButton copyButton pasteButton pasteButton deleteButton deleteButton"
+             "undoButton undoButton undoButton redoButton redoButton redoButton"
+             ". . . . . ."
+             "morphismButton morphismButton morphismToList morphismToList morphismToList morphismToList"
+             "connectButton connectButton connectToList connectToList connectToList connectToList"
+             ". . . . . ."
+             "moveUpButton moveUpButton moveUpButton moveDownButton moveDownButton moveDownButton"
+             "moveToTopButton moveToTopButton moveToTopButton moveToBottomButton moveToBottomButton moveToBottomButton";
+          padding: 3px;
        }
+       #controls > *{
+          margin: 2px;
+       }
+       #controls > select, #controls > input {
+          font-size: 11pt;
+       }
+       #loadButton	{ grid-area: loadButton; }
+       #savedSheetsList	{ grid-area: savedSheetsList; }
+       #saveButton	{ grid-area: saveButton; }
+       #filenameInput	{ grid-area: filenameInput; }
+       #addRectangleButton { grid-area: addRectangleButton; }
+       #addTextButton	{ grid-area: addTextButton; }
+       #addVisualizerButton { grid-area: addVisualizerButton; }
+       #visualizerList	{ grid-area: visualizerList; margin: 8px 2.5px; }
+       #groupList	{ grid-area: groupList; margin: 8px 2.5px;}
+       #copyButton	{ grid-area: copyButton; }
+       #pasteButton	{ grid-area: pasteButton; }
+       #deleteButton	{ grid-area: deleteButton; }
+       #undoButton	{ grid-area: undoButton; }
+       #redoButton	{ grid-area: redoButton; }
+       #morphismButton	{ grid-area: morphismButton; }
+       #morphismToList	{ grid-area: morphismToList; }
+       #connectButton	{ grid-area: connectButton; }
+       #connectToList	{ grid-area: connectToList; }
+       #moveUpButton	{ grid-area: moveUpButton; }
+       #moveDownButton	{ grid-area: moveDownButton; }
+       #moveToTopButton	{ grid-area: moveToTopButton; }
+       #moveToBottomButton { grid-area: moveToBottomButton; }
+
        #splitter {
-          z-index: 999999999;
+          display: none;
        }
       </style>
 
@@ -97,94 +137,49 @@
    </head>
 
    <body>
-      <div id="bodyDouble" class="vert">
-         <div id="header" class="horiz"></div>
-         <div id="horiz-container" class="horiz">
-            <div id="graphic"></div>
-            <div id="splitter"></div>
-            <div id="vert-container" class="vert">
-               <div id="sheet-control" class="fill-vert">
-                  <p class="button-row">
-                     <button id="loadButton" onclick="loadChosen();"
-                             class="narrow-control">Load sheet:</button>
-                     <select id="savedSheetsList" class="wide-control"></select>
-                  </p>
-                  <p class="button-row">
-                     <button id="saveButton" onclick="saveAs();"
-                             class="narrow-control">Save as:</button>
-                     <input type="text" id="filenameInput" value="My Sheet"
-                            class="wide-control"/>
-                  </p>
+      <div id="bodyDouble">
+         <div id="header">
+             <div id="heading"></div>
+         </div>
+         <div id="graphic"></div>
+         <div id="splitter"></div>
+         <div id="controls">
+            <button id="loadButton" onclick="loadChosen();">Load sheet:</button>
+            <select id="savedSheetsList"></select>
 
-                  <hr/>
+            <button id="saveButton" onclick="saveAs();">Save as:</button>
+            <input type="text" id="filenameInput" value="My Sheet"/>
 
-                  <p class="button-row">
-                     <button id="addRectangleButton" onclick="addRectangle();"
-                             class="normal-control">Add rectangle</button>
-                     <button id="addTextButton" onclick="addText();"
-                             class="normal-control">Add text box</button>
-                  </p>
-                  <p class="button-row">
-                     <button id="addVisualizerButton" onclick="addVisualizer();"
-                             class="huge-control">Add this visualizer:</button>
-                  </p>
-                  <p>
-                     <select id="visualizerList" class="normal-control">
-                        <option value="CD">Cayley diagram</option>
-                        <option value="MT">multiplication table</option>
-                        <option value="CG">cycle graph</option>
-                     </select>
-                     <select id="groupList" class="normal-control"></select>
-                  </p>
+            <button id="addRectangleButton" onclick="addRectangle();">Add rectangle</button>
+            <button id="addTextButton" onclick="addText();">Add text box</button>
 
-                  <hr/>
+            <button id="addVisualizerButton" onclick="addVisualizer();">Add this visualizer:</button>
 
-                  <p class="button-row">
-                     <button id="copyButton" onclick="copySelected();"
-                             class="for-selected-element narrow-control">Copy</button>
-                     <button id="pasteButton" onclick="pasteItem();"
-                             class="narrow-control">Paste</button>
-                     <button id="deleteButton" onclick="deleteSelected();"
-                             class="for-selected-element narrow-control">Delete</button>
-                  </p>
-                  <p class="button-row">
-                     <button id="undoButton" onclick="undo();"
-                             class="normal-control">Undo</button>
-                     <button id="redoButton" onclick="redo();"
-                             class="normal-control">Redo</button>
-                  </p>
+            <select id="visualizerList">
+               <option value="CD">Cayley diagram</option>
+               <option value="MT">multiplication table</option>
+               <option value="CG">cycle graph</option>
+            </select>
+            <select id="groupList"></select>
 
-                  <hr/>
+            <button id="copyButton" onclick="copySelected();" class="for-selected-element">Copy</button>
+            <button id="pasteButton" onclick="pasteItem();">Paste</button>
+            <button id="deleteButton" onclick="deleteSelected();" class="for-selected-element">Delete</button>
 
-                  <p class="button-row">
-                     <button id="morphismButton" class="narrow-control"
-                             onclick="morphismSelected();">Map to:</button>
-                     <select id="morphismToList">
-                     </select>
-                  </p>
-                  <p class="button-row">
-                     <button id="connectButton" class="narrow-control"
-                             onclick="connectSelected();">Connect to:</button>
-                     <select id="connectToList">
-                     </select>
-                  </p>
+            <button id="undoButton" onclick="undo();">Undo</button>
+            <button id="redoButton" onclick="redo();">Redo</button>
 
-                  <hr/>
+            <button id="morphismButton" onclick="morphismSelected();">Map to:</button>
+            <select id="morphismToList"></select>
 
-                  <p class="button-row">
-                     <button id="moveUpButton" onclick="moveSelectedUp();"
-                             class="for-selected-element normal-control">Move forward</button>
-                     <button id="moveDownButton" onclick="moveSelectedDown();"
-                             class="for-selected-element normal-control">Move backward</button>
-                  </p>
-                  <p class="button-row">
-                     <button id="moveToTopButton" onclick="moveSelectedToTop();"
-                             class="for-selected-element normal-control">Move to front</button>
-                     <button id="moveToBottomButton" onclick="moveSelectedToBottom();"
-                             class="for-selected-element normal-control">Move to back</button>
-                  </p>
-               </div>
-            </div>
+            <button id="connectButton" onclick="connectSelected();">Connect to:</button>
+            <select id="connectToList"></select>
+
+            <button id="moveUpButton" onclick="moveSelectedUp();" class="for-selected-element">Move forward</button>
+            <button id="moveDownButton" onclick="moveSelectedDown();" class="for-selected-element">Move backward</button>
+
+            <button id="moveToTopButton" onclick="moveSelectedToTop();" class="for-selected-element">Move to front</button>
+            <button id="moveToBottomButton" onclick="moveSelectedToBottom();" class="for-selected-element">Move to back</button>
          </div>
       </div>
    </body>

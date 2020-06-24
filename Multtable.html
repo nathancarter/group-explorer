@@ -16,16 +16,42 @@
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css">
 
       <style>
-       #vert-container {
-          min-width: 20em;  /* Ensure same min width as CayleyDiagram page, for consistency */
-       }
-
        #graphic {
           overflow-x: hidden;
           -webkit-user-drag: none;      /* prevents default drag behavior */
           -webkit-user-select: none;    /* prevents confusing cut-and-paste attempt in graphic */
        }
 
+       #controls {
+          display: grid;
+          grid-template-columns: auto;
+          grid-template-rows: auto 1fr;
+          grid-template-areas: 'options' 'panels';
+       }
+       #options {
+          grid-area: options;
+          background-color: var(--visualizer-body-background);
+          justify-self: stretch;
+          text-align: center;
+       }
+       #options > button {
+          margin: 0 2px 12px 0;
+          min-width: 15%;
+       }
+       #controls .panel {
+          grid-area: panels;
+       }
+       #subset-control {
+          padding: 2px;
+          overflow: auto;
+          visibility: visible;
+       }
+       #table-control {
+          background-color: var(--visualizer-controls-background);
+          visibility: hidden;
+          display: none;
+       }
+       
        #drag-image {
           -webkit-user-drag: none;      /* prevents annoying default drag behavior */
        }
@@ -60,65 +86,69 @@
       </script>
    </head>
    <body>
-      <div id="bodyDouble" class="vert">
-         <div id="header" class="horiz"></div>
-         <div id="horiz-container" class="horiz">
-            <div id="graphic">
-               <template id="drag-image-template">
-                  <img id="drag-image" src="${Multtable_View.canvas.toDataURL()}" class="remove-on-clean" swapping="${swapping}"
-                       start="${start}" style="${style}">
-               </template>
+      <div id="bodyDouble">
+         <div id="header">
+             <div id="heading"></div>
+         </div>
+         <div id="graphic">
+            <template id="drag-image-template">
+               <img id="drag-image" src="${Multtable_View.canvas.toDataURL()}" class="remove-on-clean" swapping="${swapping}"
+                    start="${start}" style="${style}">
+            </template>
 
-               <template id="node-label-template">
-                  <div id="node-label" class="tooltip remove-on-clean" row="${rowXcol.row}" col="${rowXcol.col}">
-                     ${MathML.sans(group.representation[element])}
-                  </div>
-               </template>
+            <template id="node-label-template">
+               <div id="node-label" class="tooltip remove-on-clean" row="${rowXcol.row}" col="${rowXcol.col}">
+                  ${MathML.sans(Group.representation[element])}
+               </div>
+            </template>
+         </div>
+         <div id="splitter"></div>
+         <div id="controls">
+            <div id="options">
+               <button id="subset-button" onclick="VC.showPanel('#subset-control')">Subsets</button>
+               <button id="table-button" onclick="VC.showPanel('#table-control')">Table</button>
             </div>
-            <div id="splitter"></div>
-            <div id="vert-container" class="vert">
-               <div id="control-options" class="horiz">
-                  <button id="subset-button">Subsets</button>
-                  <button id="table-button">Table</button>
-               </div>
 
-               <div id="subset-control" class="fill-vert">
-                  <!-- This is filled in by subsetDisplay/subsets.html -->
-               </div>
+            <div id="subset-control" class="panel">
+               <!-- This is filled in by subsetDisplay/subsets.html -->
+            </div>
 
-               <div id="table-control" class="fill-vert control hidden">
-                  <div class="graphic-lead">Organize by subgroup:</div>
-                  <div id="organization-select" class="faux-select" action="toggleOrganizationChoices()">
-                     <ul id="organization-choices" class="faux-select-options hide-on-clean" style="width: 13em"></ul>
-                     <span id="organization-choice" class="faux-selection">none</span>
-                     <div class="faux-select-arrow"></div>
+            <div id="table-control" class="panel">
+               <div class="graphic-lead">Organize by subgroup:</div>
+               <div id="organization-select" class="faux-select" action="toggleOrganizationChoices()">
+                  <div style="display: inline-block; line-height: 1.5em">&nbsp;</div>
+                  <div id="organization-choice" class="faux-selection"></div>
+                  <div class="faux-select-arrow" ></div>
+                  <ul id="organization-choices" class="faux-select-options visibility-hidden-on-clean"></ul>
+               </div>
+               <template id="organization-choice-none-template">
+                  <li action="organizeBySubgroup(0)" style="margin-right: 3em">${MathML.sansText('none')}</li>
+               </template>
+               <template id="organization-choice-template">
+                  <li action="organizeBySubgroup(${subgroupIndex})" style="white-space: nowrap; margin-right: 3em">
+                     ${MathML.sans(MathML.sub('H', subgroupIndex))}, ${MathML.sansText('a subgroup of order')}
+                     ${MathML.sans('<mn>' + subgroup.order + '</mn>')}
+                  </li>
+               </template>
+
+               <div class="graphic-lead" style="margin-top: 3em">Separate cosets by:</div>
+               <input id="separation-slider" type="range" min="0" max="100" value="0"> <!-- [0-100] => [0,box width] -->
+
+               <form id="coloration-choice" class="graphic-lead" style="margin-bottom: 0">
+                  Default coloration:
+                  <div>
+                     <input id="rainbow" name="coloration" type="radio" checked>
+                     <label for="rainbow">Spectrum/rainbow</label>
                   </div>
-                  <template id="organization-choice-template">
-                     <li action="organizeBySubgroup(${subgroupIndex})">
-                        ${MathML.sans(MathML.sub('H', subgroupIndex))}, ${MathML.sansText('a subgroup of order')}
-                        ${MathML.sans('<mn>' + subgroup.order + '</mn>')}
-                     </li>
-                  </template>
-
-                  <div class="graphic-lead" style="margin-top: 3em">Separate cosets by:</div>
-                  <input id="separation-slider" type="range" min="0" max="100" value="0"> <!-- [0-100] => [0,box width] -->
-
-                  <form id="coloration-choice" class="graphic-lead" style="margin-bottom: 0">
-                     Default coloration:
-                     <div>
-                        <input id="rainbow" name="coloration" type="radio" checked>
-                        <label for="rainbow">Spectrum/rainbow</label>
-                     </div>
-                     <div>
-                        <input id="grayscale" name="coloration" type="radio">
-                        <label for="grayscale">Grayscale</label>
-                     </div>
-                     <div>
-                        <input id="none" name="coloration" type="radio">
-                        <label for="none">None</label>
-                     </div>
-                  </form>
-               </div>
+                  <div>
+                     <input id="grayscale" name="coloration" type="radio">
+                     <label for="grayscale">Grayscale</label>
+                  </div>
+                  <div>
+                     <input id="none" name="coloration" type="radio">
+                     <label for="none">None</label>
+                  </div>
+               </form>
             </div>
          </div>
       </div>

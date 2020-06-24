@@ -1,21 +1,23 @@
 
 <!-- Diagram-page layout -->
 <div id="diagram-page">
+
    <div id="diagram-select" class="faux-select" action="DiagramChoice.toggleChoices()">
-      <ul id="diagram-choices" class="faux-select-options hide-on-clean"></ul>
-      <span id="diagram-choice" class="faux-selection">Generate diagram</span>
+      <div style="display: inline-block; line-height: 1.5em">&nbsp;</div>
+      <div id="diagram-choice" class="faux-selection"></div>
       <div class="faux-select-arrow"></div>
+      <ul id="diagram-choices" class="faux-select-options visibility-hidden-on-clean" style="position: absolute"></ul>
    </div>
-   <template id="diagram-select-first-template">
-      <li action="DiagramChoice.selectDiagram()">${MathML.sansText('Generate diagram')}</li>
+   <template id="diagram-generate-diagram-template">
+      <li action="DiagramChoice.selectDiagram()" style="margin-right: 3em">${MathML.sansText('Generate diagram')}</li>
    </template>
-   <template id="diagram-select-other-template">
-      <li action="DiagramChoice.selectDiagram('${diagram.name}')">${MathML.sansText(diagram.name)}</li>
+   <template id="diagram-choice-template">
+      <li action="DiagramChoice.selectDiagram('${diagram.name}')" style="margin-right: 3em">${MathML.sansText(diagram.name)}</li>
    </template>
 
    <div id="generation-control">
       <div class="graphic-lead">Generate diagram this way:</div>
-      <div id="generation-strategy" style="position: relative">
+      <div id="generation-strategy" style="position: relative; min-width: 300px;">
          <table>
             <thead>
                <tr>
@@ -100,29 +102,23 @@
    </div>
 
    <div id="arrow-control">
-      <div class="graphic-lead">Show these arrows:</div>
-      <div id="arrow-selections" class="horiz">
-         <div id="arrow-display">
-            <ul id="arrow-list"></ul>
-            <template id="arrow-list-item-template">
-               <li arrow="${element}" color="${color}" action="Arrow.selectArrow(${element})"><hr style="border: 2px solid ${color}">
-                  ${MathML.sans(Group.representation[element])}</li>
-            </template>
-         </div>
-         <div id="arrow-buttons" class="vert">
-            <button id="add-arrow-button" action="Arrow.showArrowMenu(event)">Add</button>
-            <button id="remove-arrow-button" action="Arrow.removeArrow()" disabled class="disable-on-clean">Remove</button>
-         </div>
+      <div id="arrow-heading">Show these arrows:</div>
+      <ul id="arrow-list"></ul>
+      <button id="arrow-add-button" action="Arrow.showArrowMenu(event)">Add</button>
+      <button id="arrow-remove-button" action="Arrow.removeArrow()" disabled class="disable-on-clean">Remove</button>
 
-         <template id="arrow-menu-template">
-            <ul id="arrow-menu" class="menu remove-on-clean" style="min-width: 80px">
-               ${makeArrowList()}
-            </ul>
-         </template>
-         <template id="arrow-menu-item-template">
-            <li action="Arrow.addArrow(${element})">${MathML.sans(Group.representation[element])}</li>
-         </template>
-      </div>
+      <template id="arrow-list-item-template">
+         <li arrow="${element}" color="${color}" action="Arrow.selectArrow(${element})">
+            <hr style="border: 2px solid ${color}">${MathML.sans(Group.representation[element])}</li>
+      </template>
+      <template id="arrow-menu-template">
+         <ul id="arrow-menu" class="menu remove-on-clean" style="min-width: 80px">
+            ${makeArrowList()}
+         </ul>
+      </template>
+      <template id="arrow-menu-item-template">
+         <li action="Arrow.addArrow(${element})">${MathML.sans(Group.representation[element])}</li>
+      </template>
    </div>
 
    <form id="multiplication-control" class="graphic-lead" style="margin-bottom: 0">
@@ -140,22 +136,22 @@
    <div id="chunk-control" style="position: relative">
       <div class="graphic-lead">Chunk this subgroup:</div>
       <div id="chunk-select" class="faux-select" action="Chunking.toggleChoices()">
-         <ul id="chunk-choices" class="faux-select-options hide-on-clean"></ul>
-         <span id="chunk-choice" class="faux-selection">(no chunking)</span>
+         <div style="display: inline-block; line-height: 1.5em">&nbsp;</div>
+         <div id="chunk-choice" class="faux-selection">(no chunking)</div>
          <div class="faux-select-arrow"></div>
+         <ul id="chunk-choices" class="faux-select-options visibility-hidden-on-clean"></ul>
       </div>
-
-      <template id="chunk-select-first-template">
+      <template id="chunk-no-chunking-template">
          <li action="Chunking.selectChunk(0)">${MathML.sansText('(no chunking)')}</li>
       </template>
-      <template id="chunk-select-other-template">
+      <template id="chunk-select-subgroup-template">
          <li action="Chunking.selectChunk(${subgroup_index})">
             ${MathML.sans(MathML.sub('H', subgroup_index))}, ${MathML.sansText('generated by')}
             ${MathML.setList(generators)}
 
          </li>
       </template>
-      <template id="chunk-select-last-template">
+      <template id="chunk-select-whole-group-template">
          <li action="Chunking.selectChunk(${Group.subgroups.length-1})">${MathML.sansText('The whole group')}</li>
       </template>
 

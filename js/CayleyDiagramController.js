@@ -29,8 +29,8 @@ class Arrow {
       GEUtils.cleanWindow();
       $('#arrow-list li').removeClass('highlighted');
       $(`#arrow-list li[arrow=${element}]`).addClass('highlighted');
-      $('#remove-arrow-button').attr('action', `Arrow.removeArrow(${element})`);
-      $('#remove-arrow-button').prop('disabled', false);
+      $('#arrow-remove-button').attr('action', `Arrow.removeArrow(${element})`);
+      $('#arrow-remove-button').prop('disabled', false);
    }
 
    // returns all arrows displayed in arrow-list as an array
@@ -60,7 +60,7 @@ class Arrow {
 
       GEUtils.cleanWindow();
       const $menus = $(eval(Template.HTML('arrow-menu-template')))
-            .appendTo('#add-arrow-button');
+            .appendTo('#arrow-add-button');
       Menu.addMenus($menus, event, clickHandler);
    }
 
@@ -111,12 +111,12 @@ class Arrow {
 
    // disable Add button
    static enable() {
-      $('#add-arrow-button').prop('disabled', false);
+      $('#arrow-add-button').prop('disabled', false);
    }
 
    // enable Add button
    static disable() {
-      $('#add-arrow-button').prop('disabled', true);
+      $('#arrow-add-button').prop('disabled', true);
    }
 }
 
@@ -129,14 +129,14 @@ class Chunking {
           && generator.strategies.every( (strategy, inx) => strategy.nesting_level == inx ) ) {
          Chunking.enable();
 
-         $('#chunk-choices').html(eval(Template.HTML('chunk-select-first-template')));
+         $('#chunk-choices').html(eval(Template.HTML('chunk-no-chunking-template')));
          generator.strategies.slice(0, -1).reduce( (generators, strategy, inx) => {
             generators.push(Group.representation[strategy.generator]);
             const subgroup_index = Group.subgroups.findIndex( (subgroup) => subgroup.members.equals(strategy.elements) );
-            $('#chunk-choices').append(eval(Template.HTML('chunk-select-other-template')));
+            $('#chunk-choices').append(eval(Template.HTML('chunk-select-subgroup-template')));
             return generators;
          }, [] );
-         $('#chunk-choices').append(eval(Template.HTML('chunk-select-last-template')));
+         $('#chunk-choices').append(eval(Template.HTML('chunk-select-whole-group-template')));
          Chunking.selectChunk(generator.chunk);
       } else {
          Chunking.disable();
@@ -144,11 +144,9 @@ class Chunking {
    }
 
    static toggleChoices() {
-      const choicesDisplay = $('#chunk-choices').css('display');
-      $('#bodyDouble').click();
-      if (choicesDisplay == 'none') {
-         $('#chunk-choices').show();
-      }         
+      const choices = $('#chunk-choices');
+      const new_visibility = choices.css('visibility') == 'visible' ? 'hidden' : 'visible';
+      choices.css('visibility', new_visibility);
    }
 
    static selectChunk(subgroup_index /*: number */) {
@@ -189,27 +187,33 @@ class Chunking {
 class DiagramChoice {
    /* Populate diagram select element, show selected diagram */
    static setupDiagramSelect() {
-      $('#diagram-choices').html(eval(Template.HTML('diagram-select-first-template'))).hide();
-      Group.cayleyDiagrams.forEach( (diagram, index) => {
-         $('#diagram-choices').append(eval(Template.HTML('diagram-select-other-template'))).hide();
-      } );
+      $('#diagram-choices')
+         .html( 
+            [...Array(Group.cayleyDiagrams.length + 1).keys()]
+               .reduce( ($frag, index) => {
+                  if (index == 0) {
+                     $frag.append(eval(Template.HTML('diagram-generate-diagram-template')));
+                  } else {
+                     const diagram = Group.cayleyDiagrams[index - 1];
+                     $frag.append(eval(Template.HTML('diagram-choice-template')));
+                  }
+                  return $frag;
+               }, $(document.createDocumentFragment()) ))
+         .css('visibility', 'hidden');
       DiagramChoice._showChoice();
    }
 
    static _showChoice() {
-      $('#diagram-choices').hide();
+      $('#diagram-choices').css('visibility', 'hidden');
       const index = Group.cayleyDiagrams.findIndex( (cd) => cd.name == Cayley_Diagram_View.diagram_name );
       $('#diagram-choice')
-         .html($(`#diagram-choices > li:nth-of-type(${index+2})`).html())
-         .show();
+         .html($(`#diagram-choices > li:nth-of-type(${index+2})`).html());
    }
 
    static toggleChoices() {
-      const choicesDisplay = $('#diagram-choices').css('display');
-      $('#bodyDouble').click();
-      if (choicesDisplay == 'none') {
-         $('#diagram-choices').show();
-      }         
+      const choices = $('#diagram-choices');
+      const new_visibility = choices.css('visibility') == 'visible' ? 'hidden' : 'visible';
+      choices.css('visibility', new_visibility);
    }
 
    static selectDiagram(diagram /*: ?string */, andDisplay /*:: ?: boolean */ = true) {
@@ -499,16 +503,19 @@ function updateStrategies (new_strategies /*: Array<StrategyParameters> */) {
 
 
 /* Load, initialize diagram control */
-function load($diagramWrapper /*: JQuery */) {
-   $.ajax( { url: DIAGRAM_PANEL_URL,
-             success: (data /*: string */) => {
-                $diagramWrapper.html(data);
-                setup();
-             },
-             error: (_jqXHR, _status, err) => {
-                Log.err(`Error loading ${DIAGRAM_PANEL_URL} ${err === undefined ? '' : ': ' + err}`);
-             }
-           } )
+function load ($diagramWrapper /*: JQuery */) /*: Promise */ {
+   return new Promise( (resolve, reject) => {
+      $.ajax( { url: DIAGRAM_PANEL_URL,
+                success: (data /*: string */) => {
+                   $diagramWrapper.html(data);
+                   setup();
+                   resolve();
+                },
+                error: (_jqXHR, _status, err) => {
+                   reject(`Error loading ${DIAGRAM_PANEL_URL} ${err === undefined ? '' : ': ' + err}`);
+                }
+              } )
+   } );
 }
 
 function setup() {

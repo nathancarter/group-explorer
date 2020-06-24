@@ -12,14 +12,6 @@
    --visualizer-button-border:		#7E7E7E;
 }
 
-/* Make the web page to fill the window */
-body, #bodyDouble {
-   margin: 0;
-   overflow: hidden;
-   height: 100%;
-   width: 100%;
-}
-
 /* General element styles in visualizer */
 button {
    background-image: var(--visualizer-button-gradient);
@@ -31,68 +23,63 @@ button:focus {
    outline: 0;
 }
 
-/* identifies vertical and horizontal flex containers */
-.vert {
-   display: flex;
-   flex-direction: column;
+/* Make the web page fill the window */
+body, #bodyDouble {
+   margin: 0;
+   overflow: hidden;
+   height: 100%;
+   width: 100%;
 }
-.horiz {
-   display: flex;
-   flex-direction: row;
+
+/* Container for the entire grid display */
+#bodyDouble {
+   display: grid;
+   grid-template-columns: minmax(0, 1fr) 8px auto;
+   grid-template-rows: auto minmax(0, 1fr);
+   grid-template-areas: "header header header" "graphic splitter controls";
 }
 
 /* header format, like <H1> in a graphical context */
 #header {
+   grid-area: header;
    background-color: var(--visualizer-header-background);
-   justify-content: center;
-   align-items: center;
+   display: grid;
+   grid-template-columns: 1fr auto;
+   grid-template-areas: "heading top-right-menu";
+}
+
+#heading {
+   grid-area: heading;
+   background-color: rgba(0,0,0,0);
    font-size: 40px;
-   height: 60px;
-   flex: 0 0 60px;
+   padding: 10px 0;
+   text-align: center;
+   overflow-x: hidden;
 }
 
-/* horizontal container for everything but the header; stretches to fill the height available */
-#horiz-container {
-   flex: 1 1 auto;
-   height: 100px;
-   xtouch-action: none;   /* for splitter */
+#top-right-menu {
+   grid-area: top-right-menu;
+   background-color: rgba(0, 0, 0, 0);
+   margin: 10px 10px 0 0;
 }
 
-/* container for main graphic, generally a <canvas>; flexes to fill the width available */
+/* container for main graphic, generally a <canvas>; fills the width available */
 #graphic {
-   flex: 1 1 auto;
+   grid-area: graphic;
    background-color: var(--visualizer-body-background);
-   width: 100px;
 }
 
 /* grab here to resize graphic; changes cursor */
 #splitter {
-   flex: 0 0 auto;
-   width: 8px;
+   grid-area: splitter;
    background: var(--visualizer-body-background);
+   width: 8px;
    cursor: col-resize;
 }
 
-/* container for arranging visualizer-specific controls and the help/reset buttons in vertical stack */
-#vert-container {
-   flex: 0 0 auto;
-   width: 400px;
-}
-
-/* buttons for choosing control panel (may convert to tabs) */
-#control-options {
-   background-color: var(--visualizer-body-background);
-   justify-content: center;
-   height: 42px;
-}
-#control-options > button {
-   min-width: 15%;
-}
-
-/* element stretches to fill vertical spaces, and adds scroll bar if needed */
-.fill-vert {
-   height: 100%;
-   overflow: auto;
+/* container for visualizer-specific controls */
+#controls {
+    grid-area: controls;
 }
 
 /* background for visualizer-specific controls */
@@ -118,33 +105,27 @@ Faux-select and associated classes are used to style a select-like structure. Fa
     width: 90%;
     height: 1.5em;
     margin: 0 5% 0 5%;
+    position: relative;
+    display: inline-block;
 }
 
 .faux-selection {
     display: inline-block;
-    position: relative;
-    top: 55%;
-    padding-left: 0.5em;
-    transform: translateY(-50%);
+    white-space: nowrap;
 }
 
 .faux-select-arrow {
-    top: 50%;
-    transform: translateY(-50%);
+    top: 4;
+    right: 0;
     border-top: 16px solid #000000;
     border-right: 6px solid rgba(0,0,0,0);
     border-left: 6px solid rgba(0,0,0,0);
     margin-right: 4px;
-    content: '';
-    float: right;
-    height: 0;
-    width: 0;
-    position: relative;
+    position: absolute;
 }
 
 .faux-select-options {
-    margin: 1.6em 0 0 -1;
-    position: absolute;
+    transform: translate(-1px, -1em);
     background-color: #EEEEEE;		/* very light gray (~gainsboro)*/
     border: 1px solid #CFCFCF;		/* ~silver */
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);	/* gray mist */
@@ -154,6 +135,7 @@ Faux-select and associated classes are used to style a select-like structure. Fa
     list-style-type: none;
     max-height: 40em;
     overflow-y: auto;
+    position: absolute;
 }
 /*
 ```
