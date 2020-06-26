@@ -1,48 +1,65 @@
 // @flow
 
-import Library from './js/Library.js';
-import Log from './js/Log.js';
-import MathML from './js/MathML.js';
-import setUpGAPCells from './js/ShowGAPCode.js';
-import Template from './js/Template.js';
-import XMLGroup from './js/XMLGroup.js';
+import Log from './Log.js';
+import MathML from './MathML.js';
+import setUpGAPCells from './ShowGAPCode.js';
+import Template from './Template.js';
+import XMLGroup from './XMLGroup.js';
 
-export {loadGroup as load};
+export {summary, display};
 
-let group /*: XMLGroup */;
+// Load templates
+const ORDER_CLASSES_INFO_URL = './html/OrderClassesInfo.html';
+const Load_Promise =
+      new Promise( (resolve, reject) => {
+          $.ajax( { url: ORDER_CLASSES_INFO_URL,
+                    success: (data /*: html */) => {
+                        resolve(data);
+                    },
+                    error: (_jqXHR, _status, err) => {
+                        reject(`Error loading ${ORDER_CLASSES_INFO_URL} ${err === undefined ? '' : ': ' + err}`)
+                    }
+                  } );
+      } );
 
-// Load group from invocation URL
-function loadGroup() {
-   Library
-      .loadFromURL()
-      .then( (_group) => {
-         group = _group;
-         formatGroup();
-      } )
-      .catch( Log.err );
+function summary (Group /*: XMLGroup */) /*: string */ {
+    const numOrderClasses = new Set(Group.elementOrders).size;
+    return `${numOrderClasses} order class${(Group.order == 1) ? '' : 'es'}`;
 }
 
-function formatGroup() {
-   let $rslt = $(document.createDocumentFragment())
-      .append(eval(Template.HTML('header')));
-   const numOrderClasses = group.orderClasses.reduce( (num, bitset) => bitset.popcount() != 0 ? num+1 : num, 0);
-   if (numOrderClasses == 1) {
-      $rslt.append(eval(Template.HTML('single')));
-   } else {
-      $rslt.append(eval(Template.HTML('multiple')));
-      group.orderClasses.forEach( (members, order) => {
-         if (members.popcount() != 0) {
-            $rslt.find('#order_class_list')
-               .append($('<li>').html(
-                    `Elements of order ${order}:&nbsp;` +
-                     MathML.csList(members.toArray().map( (el) => group.representation[el] ))
-               ))
-         }
-      } )
-   }
+function  display (Group /*: XMLGroup */, $wrapper /*: jQuery */) {
+    Load_Promise
+        .then( (templates) => {
+            if ($('template[id|="order-classes"]').length == 0) {
+                $('body').append(templates);
+            }
 
-   $('body').prepend($rslt);
-   MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'conjugacy_list']);
+            $wrapper.empty().append(formatOrderClasses(Group));
 
-   setUpGAPCells(group);
+            MathJax.Hub.Queue(['Typeset', MathJax.Hub, $wrapper[0]]);
+            setUpGAPCells(Group, $wrapper);
+        } )
+        .catch (Log.err)
+}
+
+function formatOrderClasses (Group /*: XMLGroup */) /*: DocumentFragment */ {
+    const $frag = $(document.createDocumentFragment());
+    const numOrderClasses = new Set(Group.elementOrders).size;
+    if (numOrderClasses == 1) {
+        $frag.append(eval(Template.HTML('order-classes-single-template')));
+    } else {
+        $frag.append(eval(Template.HTML('order-classes-multiple-template')));
+        Group.orderClasses.forEach( (members, order) => {
+            if (members.popcount() != 0) {
+                $frag.find('#order-classes-list')
+                    .append($('<li>').html(
+                        `Elements of order ${order}:&nbsp;` +
+                            MathML.csList(members.toArray().map( (el) => Group.representation[el] ))
+                    ))
+            }
+        } )
+    };
+    $frag.append(eval(Template.HTML('order-classes-trailer-template')));
+
+    return $frag;
 }

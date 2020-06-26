@@ -7,6 +7,9 @@ as a desktop application, but was rewritten in 2019 as a web app.
 
 ## Status
 
+**Release 3.1.0:** A new Group Info page look.
+Let us know what you think!
+
 **Release 3.0.0:** First official full-featured release! It's not done yet, though.
 We would still appreciate suggestions for enhancements or bug reports.
 

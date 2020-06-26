@@ -61,13 +61,7 @@ img { border: 1px solid black; }
                           href="#views">Views</a></li>
                 
                     <li><a style="text-decoration: none;"
-                          href="#description">Description</a></li>
-                
-                    <li><a style="text-decoration: none;"
                           href="#computed-properties">Computed properties</a></li>
-                
-                    <li><a style="text-decoration: none;"
-                          href="#other-definitions">Other definitions</a></li>
                 
                     <li><a style="text-decoration: none;"
                           href="#generators">Generators</a></li>
@@ -77,6 +71,9 @@ img { border: 1px solid black; }
                 
                     <li><a style="text-decoration: none;"
                           href="#notes">Notes</a></li>
+                
+                    <li><a style="text-decoration: none;"
+                          href="#file-data">File data</a></li>
                 
                 </ul>
 
@@ -146,48 +143,51 @@ img { border: 1px solid black; }
             </div>
         </div>
         <div class="w3-threequarter w3-container">
-            <p>Group Info pages are the presentation to the user of all information <em>Group
-Explorer</em> has about a given group. It may help you to open <a href="http://nathancarter.github.io/group-explorer/GroupInfo.html?groupURL=groups/Z_5.group">an example group
-info page
-now</a>
-and read it alongside this help page.</p>
-<p>Let us consider each section that appears in a Group Info page separately.
-(The header and footer of each Group Info page list these sections, as links
-to help you navigate quickly within that page.)</p>
+            <p>The Group Info page is the presentation to the user of all information <em>Group
+Explorer</em> has about a given group. </p>
+<p>It consists of several sections, each with a heading and a body.  On first
+visiting the page most of the bodies are hidden, as indicated by a &lsquo;+&rsquo; sign to
+the left of the heading. Clicking the &lsquo;+&rsquo; sign expands the body, and changes the
+&lsquo;+&rsquo; sign to a &lsquo;-&lsquo;. Clicking the &lsquo;-&lsquo; sign hides the body again. You can also
+hide/expose all the section together by clicking on the &lsquo;v&rsquo; and &lsquo;^&rsquo; icons in the
+upper right-hand corner of the page.</p>
+<p>Let us consider each section that appears in a Group Info page separately.  It
+may help you to open <a href="../../GroupInfo.html?groupURL=groups/Z_5.group">an example group info page
+now</a> and read it alongside this
+help page.</p>
 <h2 id="facts">Facts</h2>
-<p>The basic facts about a group are its
-<a href="../rf-groupterms/#gensrels">definition</a>, <a href="../rf-groupterms/#order">order</a>,
-and any other names it has besides its primary name (which is the title of
-each Group Info page).</p>
+<p>The section presents basic facts about a group such as its
+<a href="../rf-groupterms/#definition-of-a-group-via-generators-and-relations">definition</a>,
+<a href="../rf-groupterms/#order">order</a>, and any other names it has besides its primary
+name (which is the title of each Group Info page).  Some (but not all) groups
+contain notes with a description of the group, which appears in this
+section.</p>
 <h2 id="views">Views</h2>
-<p><em>Group Explorer</em> is all about visualization. Thus the Views section receives
-high priority, showing previews of every way to visualize a group,
-including <a href="../rf-groupterms/#cayley-diagrams">Cayley diagrams</a>, a
-<a href="../rf-groupterms/#multtable">multiplication table</a>, a <a href="../rf-groupterms/#cycle-graph">cycle
+<p><em>Group Explorer</em> is all about visualization, and thus the Views section receives
+high priority. To the right of the heading a row of small thumbnails shows a
+sample of the various ways to visualize the group. Expanding this section by
+clicking the &lsquo;+&rsquo; sign to the left of the heading exposes larger previews of
+every way to visualize the group, including all the <a href="../rf-groupterms/#cayley-diagrams">Cayley
+diagrams</a>, a <a href="../rf-groupterms/#multtable">multiplication
+table</a>, a <a href="../rf-groupterms/#cycle-graph">cycle
 graph</a>, and any <a href="../rf-groupterms/#objects-of-symmetry">objects of
 symmetry</a> the group has.</p>
-<h2 id="description">Description</h2>
-<p>Some (but not all) groups contain a description of the group, which appears
-in this section.</p>
 <h2 id="computed-properties">Computed properties</h2>
-<p><em>Group Explorer</em> computes information about each group it loads. For
-example, it computes all of its subgroups, which ones are normal,
-information about conjugacy classes, and more. A summary of this
-information appears in the Computed properties section of the Group Info
-window, but <strong>much</strong> more information is available than it may seem from
-the summaries. Users are encouraged to click the &ldquo;tell me more&rdquo; links which
-appear in this section to find out reasons for the computations, and often
-many additional helpful illustrations and computations.</p>
-<h2 id="other-definitions">Other definitions</h2>
-<p>If the group can be <a href="../rf-groupterms/#gensrels">defined</a> multiple ways, then
-only the primary definition was listed in the Facts section (above), and all
-other definitions appear here.</p>
+<p><em>Group Explorer</em> computes information about each group it loads. For example, it
+computes all of its subgroups, which ones are normal, information about
+conjugacy classes, and more. A summary of this information is shown to the right
+of each subheading in this section, but <strong>much</strong> more information is available
+than it may seem from the summaries. Users are encouraged to expand the bodies
+by clicking on the &lsquo;+&rsquo; sign to the left of each subheading to find out reasons
+for the computations, and often many additional helpful illustrations and
+computations.</p>
 <h2 id="generators">Generators</h2>
-<p>Groups can be <a href="../rf-groupterms/#generators-for-a-group-or-subgroup">generated</a> in many ways and some
-groups come with a few different commonly-used sets of generators chosen. If
-the group has no pre-selected set of generators built in, <em>Group Explorer</em>
-computes one such (minimum-size) set when the group is loaded. Each list of
-generators is given in this section.</p>
+<p>Groups can be <a href="../rf-groupterms/#generators-for-a-group-or-subgroup">generated</a>
+in many ways and some groups come with a few different commonly-used
+sets of generators chosen. If the group has no pre-selected set of
+generators built in, <em>Group Explorer</em> computes one such (minimum-size)
+set when the group is loaded. Each list of generators is given in this
+section.</p>
 <p>CITE(VGT-1.4 VGT-2.3)</p>
 <h2 id="naming-schemes">Naming schemes</h2>
 <p>The structure of a group is independent of whatever symbols we use to
@@ -222,6 +222,10 @@ group in <em>Group Explorer</em> are uneditable by the end user.</p>
 information in any way they see fit. Such information appears in this
 section, with controls for editing it. It is text only (not HTML) and will
 be stored in the user&rsquo;s browser.</p>
+<h2 id="file-data">File data</h2>
+<p>This section presents information about the group definition, as opposed to
+mathematical information about the group itself.  It includes such items as URL
+from which the group definition was downloaded, and its author.</p>
         </div>
     </div>
 </div>

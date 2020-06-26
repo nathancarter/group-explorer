@@ -5,5 +5,5 @@
 
 export
 const Version = {
-   label : 'GE 3.0.0' // string displayed in the upper right-hand corner of the main GE3 web pages
+   label : 'GE 3.1.0' // string displayed in the upper right-hand corner of the main GE3 web pages
 };

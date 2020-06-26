@@ -1,57 +1,34 @@
-<html>
-   <head>
-      <title>Class Equation Info</title>
 
-      <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<template id="class-equation-header-template">
+    <p>The <a href="./help/rf-groupterms/index.html#class-equation">class equation</a>
+        describes the partitioning of the group by its
+        <a href="./help/rf-groupterms/index.html#conjugacy-classes">conjugacy classes</a>:
+        the sum of of the size of the conjugacy classes equals the
+        <a href="./help/rf-groupterms/index.html#order-of-a-group">order of the group</a>.
+        The class equation for ${MathML.sans(group.name)} is
+    <p style="text-indent: 3em">${displayClassEquation()}        
+</template>
 
-      <link rel="icon" type="image/png" href="./images/favicon.png"></link>
-      <link rel="stylesheet" href="./style/fonts.css" type="text/css">
+<template id="class-equation-isAbelian-template">
+    <p>Each of the ${Group.order} elements in the group is in a conjugacy class of its own,
+        because the group is abelian.</p>
+</template>
 
-      <style>
-       li {
-          margin-top: 0.2em;
-       }
-      </style>
+<template id="class-equation-isNonAbelian-template">
+    <p>The <a href="./help/rf-groupterms/index.html#conjugacy-classes">conjugacy classes</a>
+        used in the class equation are listed here:</p>
+    <ul id="conjugacy_list"></ul>
+</template>
 
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-      <script type="text/x-mathjax-config">
-       MathJax.Hub.Config({
-      	  CommonHTML: {
-             scale: 90,
-          },
-       });
-      </script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.6/MathJax.js?config=MML_CHTML"></script>
-      <script type="module">
-       import {load} from "./ClassEquationInfo.js";
-       window.addEventListener('load', load, {once: true});
-      </script>
-   </head>
-
-   <body>
-      <template id="header">
-         <h3>${MathML.sans('<mtext>Results of “Class equation” computation for&nbsp;</mtext>' + group.name)}</h3>
-         <p>The <a href="./help/rf-groupterms/index.html#class-equation">class equation</a>
-            for ${MathML.sans(group.name)} is ${formatClassEquation(group)}.</p>
-      </template>
-      <template id="abelian">
-         <p>Each of the ${group.order} elements in the group is in a conjugacy class of its own,
-            because the group is abelian.</p>
-      </template>
-      <template id="non-abelian">
-         <p>The <a href="./help/rf-groupterms/index.html#conjugacy-classes">conjugacy classes</a>
-            used in the class equation are listed here:</p>
-         <ul id="conjugacy_list">
-         </ul>
-      </template>
-      <template id="trailer">
-         To see a visual representation of this class equation, click one of the following links:
-         <br>
-         Using
-         <a href="" class="show-class-equation-sheet" data-type="CDElement">Cayley diagrams</a>,
-         <a href="" class="show-class-equation-sheet" data-type="MTElement">multiplication tables</a>,
-         or <a href="" class="show-class-equation-sheet" data-type="CGElement">cycle graphs</a>.
-      </template>
-      <div class='gapcode' data-built-in-code-type='class equation'/>
-   </body>
-</html>
+<template id="class-equation-trailer-template">
+    <p>To see a visual representation of this class equation, click one of the following links:
+        <br>
+        Show me by
+        <a href="" class="show-class-equation-sheet" data-type="CDElement">Cayley diagrams</a>,
+        <a href="" class="show-class-equation-sheet" data-type="MTElement">multiplication tables</a>,
+        or <a href="" class="show-class-equation-sheet" data-type="CGElement">cycle graphs</a>.
+    </p>
+    <div class="gapcell hidden toggled">
+        <div class='gapcode' data-built-in-code-type='class equation'></div>
+    </div>
+</template>

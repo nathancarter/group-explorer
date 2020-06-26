@@ -195,7 +195,7 @@
                </a>
             </td>
             <td class="cayleyDiagram">
-               <a href="CayleyDiagram.html?groupURL=${group.URL}" title="Open Cayley Diagram visualizer"><div></div></a>
+               <a href="CayleyDiagram.html?groupURL=${group.URL}${(cayleyTitle == undefined)?'':'&diagram='+encodeURIComponent(cayleyTitle)}" title="Open Cayley Diagram visualizer"><div></div></a>
             </td>
             <td class="multiplicationTable">
                <a href="Multtable.html?groupURL=${group.URL}" title="Open Multiplication Table visualizer"><div></div></a>
