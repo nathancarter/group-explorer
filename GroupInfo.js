@@ -174,7 +174,6 @@ function displayViews () {
     $('#views .content .data-row[index=0] .thumbnail img')
         .toArray()
         .forEach( (img) => $('#view-minis').append($(`<img src="${img.src}" height="32" width="32" style="margin-left: 20px">`)) );
-    $('#views .content').hide();
 }
 
 // Computed property displays are created in js/XXXInfo.js modules,

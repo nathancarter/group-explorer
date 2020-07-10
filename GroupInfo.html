@@ -332,11 +332,11 @@
 
         <div id="views" class="collapsible heading1">
             <span class="toggle" onclick="$('#views .toggled').toggle()">
-                <span class="toggled more">+</span>
-                <span class="toggled hidden less">-</span>
+                <span class="toggled hidden more">+</span>
+                <span class="toggled less">-</span>
             </span>
             <span class="heading">Views</span>
-            <div id="view-minis" class="toggled" style="grid-column: summary / end; align-self: end"></div>
+            <div id="view-minis" class="hidden toggled" style="grid-column: summary / end; align-self: end"></div>
             <div class="content toggled">
                 <div class="heading-row" style="text-align: center">
                     <span class="CD"><a href="help/rf-groupterms/index.html#cayley-diagrams">Cayley Diagram</a></span>
@@ -348,6 +348,9 @@
                 <span class="comment">
                     To see all of these visualizations shown together on a sheet,
                     <span action="showAllVisualizersSheet()" class="programLink">click here</span>.
+                </span>
+                <span class="comment toggle" onclick="$('#views .toggled').toggle()" style="margin-top: 0.5em">
+                    <span class="programLink less">...less</span>
                 </span>
             </div>
             <template id="view-row-template">
