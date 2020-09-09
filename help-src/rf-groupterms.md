@@ -632,9 +632,10 @@ via a short exact sequence.
 
 ### Simple group
 
-A simple group is a non-[abelian group](#abelian-group) with no
+A simple group is a non-[trivial](#trivial-groupsubgroup) group with no
 non-[trivial](#trivial-groupsubgroup), [proper](#proper-subgroup), [normal
-subgroups](#normal-subgroup). The smallest simple group is
+subgroups](#normal-subgroup). Among [abelian](#abelian-group) groups, the only simple groups are the
+[cyclic](#cyclic-group) groups of prime order. The smallest non-[abelian](#abelian-group) simple group is
 [\(A_5\)](http://nathancarter.github.io/group-explorer/GroupInfo.html?groupURL=groups/A_5.group).
 
 CITE(MM-5.7 TJ-10.2)
