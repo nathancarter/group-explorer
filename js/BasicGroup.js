@@ -115,7 +115,7 @@ class BasicGroup {
    get isSimple() /*: boolean */ {
       if (this._isSimple == undefined) {
          this._isSimple =
-            this.subgroups.length = 2 ||  /* nontrivial prime cyclic */
+            this.subgroups.length == 2 ||  /* nontrivial prime cyclic */
             (this.subgroups.length > 2 && !this.subgroups.some( /* a normal subgroup exists that is proper and nontrivial */
                (el, inx) => this.isNormal(el) && inx != 0 && inx != (this.subgroups.length - 1) ) );
       }
