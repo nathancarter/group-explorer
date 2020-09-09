@@ -29,6 +29,10 @@ courses.
     * developed the original version
     * added sheets and some miscellany to the web version
 
+If you're interested in adding anything to this app, please talk to us!  It's all in pure JS, so you may already know everything you need to start coding.
+
+If you have a request for particular groups you'd like to see added:  On the one hand, we've already added lots (all?) of the groups that are small enough to visualize sensibly (and a few that aren't!).  But we're still happy to discuss adding more if it would help your teaching or learning; it's easy to do by exporting the data from GAP.
+
 ## License
 
 [LGPL v3.0](https://www.gnu.org/licenses/lgpl-3.0.en.html)
