@@ -106,6 +106,10 @@ export class AbstractDiagramDisplay {
         this.scene.fog.color.set(color);  // set Fog color to background
     }
 
+    get canvas () /*: HTMLCanvasElement */ {
+	return this.renderer.domElement;
+    }
+
     get container () /*: HTMLElement */ {
         return ((this.renderer.domElement.parentElement /*: any */) /*: HTMLElement */);
     }

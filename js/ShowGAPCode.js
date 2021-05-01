@@ -29,7 +29,7 @@ import Log from './Log.js';
 // Module variables
 let group /*: XMLGroup */;
 
-export default function setUpGAPCells ( _group /*: XMLGroup */, $cells = $('body') ) {
+export default function setUpGAPCells ( _group /*: XMLGroup */, $cells /*: JQuery */ = $('body') ) {
     group = _group;
     // embedded_sagecell.js loaded in <script> tag on main GroupInfo page
         $cells.find( '.gapcode' ).each( function () {

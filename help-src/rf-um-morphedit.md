@@ -18,6 +18,13 @@ rectangular label on the morphism arrow in the sheet, as shown below.
 
 ![A screenshot of a homomorphism](illustration-morph1.png)
 
+The morphism name is displayed as HTML, so, as described
+[here](#rf-um-sheetwindow.md#text-and-html-input), if you would like the
+morphism name to appear as "f<sub>2</sub>", you may enter "f&lt;sub>2&lt;/sub>",
+and the following will be displayed:
+
+![A screenshot of a homomorphism with subscripted name](illustration-morph1a.png)
+
 ### Show domain and codomain
 
 If the checkbox beneath it, "Show domain and codomain," is checked, then the
@@ -65,6 +72,16 @@ elements to the identity.
 
 ![A homomorphism with an arrow shown for each element of the domain](illustration-morph5.png)
 
+### Arrows margin
+
+The arrows margin adjustment determines how far from the center of the
+visualizers' representations of the source and target group elements the arrows
+should begin and end.  This can keep the arrowheads from obscuring the target
+element name in a complicated group. The units represent the percentage of the
+distance between the two elements to move the arrowheads away from the
+target. The number and the slider are synchronized, as described
+[here](rf-um-sheetwindow.md#dialog-inputs).
+
 ## Mathematical definition of the homomorphism
 
 The bottom half of the homomorphism edit window allows you to specify the
@@ -101,9 +118,13 @@ those elements will show up in the domain drop-down list, because none are
 assignable any longer.
 
 When the domain elements of the pairs in the map don't generate the entire
-domain, *Group Explorer* searches for any homomorphism extending the pairs
-in the table and uses that.  You can click the "Preview" button to see
-exactly which homomorphism was chosen, or simply add pairs to the map to
+domain, *Group Explorer* searches for any homomorphism extending the pairs in
+the table and uses that. The display window is continuously updated with the
+current mapping, including *Group Explorer's* choices for unmapped elements, so
+the arrows shown always represent the current definition. (You may need to
+select "Draw multiple arrows" to see the full details.) You can also click on
+"Full morphism mapping" to see a synchronized display of the entire homomorphism
+in tabular form.  Then you can simply continue to add pairs to the map to
 specify exactly the one you want.
 
 The codomain drop-down list contains only elements that could legitimately
@@ -115,7 +136,9 @@ homomorphisms, not any other kind of function between groups.
 
 ### Other buttons
 
-The OK button saves your changes to the morphism and closes the dialog.
+The "OK" button saves your changes to the morphism and closes the dialog.
 
-The Cancel button closes the dialog without saving your changes into the
+The "Cancel" button closes the dialog without saving your changes into the
 sheet.
+
+The "Delete morphism" button deletes the morphism and closes the dialog.

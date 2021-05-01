@@ -26,14 +26,14 @@ function summary (Group /*: XMLGroup */) /*: string */ {
     return Group.isAbelian ? 'yes' : 'no';
 }
 
-function display (Group /*: XMLGroup */, $wrapper /*: jQuery */) {
+function display (Group /*: XMLGroup */, $wrapper /*: JQuery */) {
     Load_Promise
         .then( (templates) => {
             if ($('template[id|="abelian"]').length == 0) {
                 $('body').append(templates);
             }
 
-            $wrapper.empty().append(formatAbelianInfo(Group));
+            $wrapper.html(formatAbelianInfo(Group));
 
             MathJax.Hub.Queue(['Typeset', MathJax.Hub, $wrapper[0]]);
             setUpGAPCells(Group, $wrapper);
@@ -47,10 +47,11 @@ function formatAbelianInfo (Group /*: XMLGroup */) /*: DocumentFragment */ {
     if (Group.isAbelian) {
         $frag.append(eval(Template.HTML('abelian-isAbelian-template')));
     } else {
+        // $FlowFixMe -- flow doesn't understand deconstruction
         const [i,j] = Group.nonAbelianExample;
         $frag.append(eval(Template.HTML('abelian-isNonAbelian-template')));
     }
     $frag.append(eval(Template.HTML('abelian-gapcell-template')));
 
-    return $frag;
+    return (($frag[0] /*: any */) /*: DocumentFragment */);
 }

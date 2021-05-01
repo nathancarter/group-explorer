@@ -1513,7 +1513,7 @@ declare class JQuery {
    *
    * @param htmlString A string of HTML to set as the content of each matched element.
    */
-  html(htmlString: string): JQuery;
+   html(htmlString: string | DocumentFragment): JQuery;
   /**
    * Get the HTML contents of the first element in the set of matched elements.
    */
@@ -3086,7 +3086,7 @@ declare class JQuery {
    * param content2 One or more additional DOM elements, arrays of elements, HTML strings, or jQuery objects to insert at the end of each element in the set of matched elements.
    */
   append(
-    content1: JQuery | any[] | Element | Text | string,
+    content1: JQuery | any[] | Element | Text | string | DocumentFragment,
     ...content2: any[]
   ): JQuery;
   /**

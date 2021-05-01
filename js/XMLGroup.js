@@ -94,6 +94,7 @@ class XMLGroup extends BasicGroup {
    representations: Array<Array<mathml>>;
    userRepresentations: Array<Array<string>>;
    representationIndex: number;
+   _longest20pxHTMLLabel: number;
    cayleyDiagrams: Array<XMLCayleyDiagram>;
    symmetryObjects: Array<XMLSymmetryObject>;
    _labels: ?Array<string>;
@@ -251,6 +252,21 @@ class XMLGroup extends BasicGroup {
 
    get longestLabel() /*: mathml */ {
       return this.labels.reduce/*:: <mathml> */( (longest, label) => (label.length > longest.length) ? label : longest, '' );
+   }
+
+   // length of longest label, rendered as HTML at font-size = 20px
+   get longest20pxHTMLLabel () /*: number */ {
+      if (this._longest20pxHTMLLabel == null) {
+         const $div = this.representation
+            .map((rep) => MathML.toHTMLString(rep))
+            .reduce(($div, label) => $div.append(label + '<br>'), $('<div>'))
+            .css({ left: 0, top: '-50em', position: 'absolute', 'font-size': '20px' })
+            .appendTo($('#bodyDouble'))
+         this._longest20pxHTMLLabel = $div.width()
+         $div.remove()
+      }
+
+      return this._longest20pxHTMLLabel
    }
 
    get generators() /*: Array<Array<groupElement>> */ {

@@ -325,8 +325,8 @@
                 <div class='gapcode' data-built-in-code-type='create group'></div>
             </div>
             <template id="basic-fact-template">
-                <div class="name" style="text-align: right">${basic_fact.displayName}</div>
-                <div class="value">${basic_fact.formattedValue}</div>
+                <div class="name" style="text-align: right">${basic_fact.name}</div>
+                <div class="value">${basic_fact.value}</div>
             </template>
         </div>
 
@@ -579,8 +579,8 @@
             <span class="heading">File data</span>
             <div class="name-value-content toggled"></div>
             <template id="file-data-template">
-                <div class="name">${file_datum.display}</div>
-                <div class="value">${Group[file_datum.field]}</div>
+                <div class="name">${file_datum.name}</div>
+                <div class="value">${file_datum.value}</div>
             </template>
         </div>
     </body>

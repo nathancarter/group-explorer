@@ -5,7 +5,7 @@ import IsomorphicGroups from './IsomorphicGroups.js';
 import Log from './Log.js';
 import MathUtils from './MathUtils.js';
 import MathML from './MathML.js';
-import {CreateNewSheet} from './SheetModel.js';
+import * as SheetModel from './SheetModel.js';
 import Template from './Template.js';
 import XMLGroup from './XMLGroup.js';
 
@@ -34,7 +34,7 @@ function summary (Group /*: XMLGroup */) /*: string */ {
     return (new Set(MathUtils.getFactors(Group.order)).size == 2 ? 'yes' : 'no');
 }
 
-function display (group /*: XMLGroup */, $wrapper /*: jQuery */) {
+function display (group /*: XMLGroup */, $wrapper /*: JQuery */) {
     Load_Promise
         .then( (templates) => {
             if ($('template[id|="zmn"]').length == 0) {
@@ -42,7 +42,7 @@ function display (group /*: XMLGroup */, $wrapper /*: jQuery */) {
             }
 
             Group = group;
-            $wrapper.empty().append(formatZmnInfo());
+            $wrapper.html(formatZmnInfo());
 
             MathJax.Hub.Queue(['Typeset', MathJax.Hub, $wrapper[0]]);
         } )
@@ -50,7 +50,7 @@ function display (group /*: XMLGroup */, $wrapper /*: jQuery */) {
 }
 
 function formatZmnInfo () /*: DocumentFragment */ {
-    const $rslt = $(document.createDocumentFragment());
+    const $frag = $(document.createDocumentFragment());
 
     const factors = MathUtils.getFactors(Group.order);
     const [m, n, _] =
@@ -65,22 +65,22 @@ function formatZmnInfo () /*: DocumentFragment */ {
           }, [1, 1, 0] );
     const isZmn = (factors.length != 1) && (n != 1);
     if (factors.length == 1) {
-        $rslt.append(eval(Template.HTML('zmn-prime-template')));
+        $frag.append(eval(Template.HTML('zmn-prime-template')));
     } else if (n == 1) {
         const facs = factors.slice(0,-1).join(', ') + ' and ' + factors.slice(-1).toString();
-        $rslt.append(eval(Template.HTML('zmn-nonZmnGroup-template')));
+        $frag.append(eval(Template.HTML('zmn-nonZmnGroup-template')));
         for (let m = 2; m <= Math.sqrt(Group.order); m++) {
             if (Group.order % m == 0) {
                 const n = Group.order / m;
-                $rslt.append(eval(Template.HTML('zmn-illustration-template')));
+                $frag.append(eval(Template.HTML('zmn-illustration-template')));
             }
         }
     } else {
-        $rslt.append(eval(Template.HTML('zmn-template')));
-        $rslt.append(eval(Template.HTML('zmn-illustration-template')));
+        $frag.append(eval(Template.HTML('zmn-template')));
+        $frag.append(eval(Template.HTML('zmn-illustration-template')));
     }
 
-    return $rslt;
+    return (($frag[0] /*: any */) /*: DocumentFragment */);
 }
 
 function showZmnIsomorphismSheet ( m /*: groupElement */, n /*: groupElement */ ) {
@@ -95,8 +95,8 @@ function showZmnIsomorphismSheet ( m /*: groupElement */, n /*: groupElement */ 
         {
             className : 'TextElement',
             text : 'Illustration of the isomorphism between '
-                + MathML.toUnicode( prod(Z(m),Z(n)) )
-                + ' and ' + MathML.toUnicode( Z(m*n) ),
+                + MathML.toHTMLString( prod(Z(m),Z(n)) )
+                + ' and ' + MathML.toHTMLString( Z(m*n) ),
             x : hmar, y : vmar,
             w : 3*W + 2*hsep, h : hdrH,
             fontSize : '20pt', alignment : 'center'
@@ -129,10 +129,10 @@ function showZmnIsomorphismSheet ( m /*: groupElement */, n /*: groupElement */ 
         },
         {
             className : 'TextElement',
-            text : `A Cayley diagram of ${MathML.toUnicode( prod(Z(m),Z(n)) )}, `
+            text : `A Cayley diagram of ${MathML.toHTMLString( prod(Z(m),Z(n)) )}, `
                 + `with generators of order ${m} and ${n} shown in `
                 + `red and green, respectively.`,
-            x : hmar, y : vmar+hdrH+H+2*vsep, w : W, h : H,
+            x : hmar, y : vmar+hdrH+H+2*vsep, w : W,
             alignment : 'center'
         },
         {
@@ -140,7 +140,7 @@ function showZmnIsomorphismSheet ( m /*: groupElement */, n /*: groupElement */ 
             text : `The same Cayley diagram as on the left, but now `
                 + `with the product of the red and green generators `
                 + `also shown, colored blue.`,
-            x : hmar+hsep+W, y : vmar+hdrH+H+2*vsep, w : W, h : H,
+            x : hmar+hsep+W, y : vmar+hdrH+H+2*vsep, w : W,
             alignment : 'center'
         },
         {
@@ -149,7 +149,7 @@ function showZmnIsomorphismSheet ( m /*: groupElement */, n /*: groupElement */ 
                 + `with the red and green generators removed.  `
                 + `The blue generator traverses all ${m*n} nodes, `
                 + `so we can arrange it in a cycle.`,
-            x : hmar+2*hsep+2*W, y : vmar+hdrH+H+2*vsep, w : W, h : H,
+            x : hmar+2*hsep+2*W, y : vmar+hdrH+H+2*vsep, w : W,
             alignment : 'center'
         }
     ] );
@@ -191,8 +191,8 @@ function showNoZmnIsomorphismSheet ( m /*: groupElement */, n /*: groupElement *
         {
             className : 'TextElement',
             text : 'Why there is no isomorphism between '
-                + MathML.toUnicode( prod(Z(m),Z(n)) )
-                + ' and ' + MathML.toUnicode( Z(m*n) ),
+                + MathML.toHTMLString( prod(Z(m),Z(n)) )
+                + ' and ' + MathML.toHTMLString( Z(m*n) ),
             x : hmar, y : vmar,
             w : 3*W + 2*hsep, h : hdrH,
             fontSize : '20pt', alignment : 'center'
@@ -226,10 +226,10 @@ function showNoZmnIsomorphismSheet ( m /*: groupElement */, n /*: groupElement *
         },
         {
             className : 'TextElement',
-            text : `A Cayley diagram of ${MathML.toUnicode( prod(Z(m),Z(n)) )}, `
+            text : `A Cayley diagram of ${MathML.toHTMLString( prod(Z(m),Z(n)) )}, `
                 + `with generators of order ${m} and ${n} shown in `
                 + `red and green, respectively.`,
-            x : hmar, y : vmar+hdrH+H+2*vsep, w : W, h : H,
+            x : hmar, y : vmar+hdrH+H+2*vsep, w : W,
             alignment : 'center'
         },
         {
@@ -237,7 +237,7 @@ function showNoZmnIsomorphismSheet ( m /*: groupElement */, n /*: groupElement *
             text : `The same Cayley diagram as on the left, but now `
                 + `with the largest-order element of that group `
                 + `also shown, colored blue.`,
-            x : hmar+hsep+W, y : vmar+hdrH+H+2*vsep, w : W, h : H,
+            x : hmar+hsep+W, y : vmar+hdrH+H+2*vsep, w : W,
             alignment : 'center'
         },
         {
@@ -246,8 +246,13 @@ function showNoZmnIsomorphismSheet ( m /*: groupElement */, n /*: groupElement *
                 + `with the red and green generators removed.  `
                 + `The blue generator creates ${m*n/maxOrd} cycles, `
                 + `not one.`,
-            x : hmar+2*hsep+2*W, y : vmar+hdrH+H+2*vsep, w : W, h : H,
+            x : hmar+2*hsep+2*W, y : vmar+hdrH+H+2*vsep, w : W,
             alignment : 'center'
         }
     ] );
+}
+
+function CreateNewSheet (oldJSONArray /*: Array<Obj> */) {
+    const newJSONArray = SheetModel.convertFromOldJSON(oldJSONArray)
+    SheetModel.createNewSheet(newJSONArray)
 }

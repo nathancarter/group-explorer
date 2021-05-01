@@ -91,8 +91,8 @@ type ArrowDataJSON = {
 
 export type CayleyDiagramJSON = {
     background: css_color,
-    camera_matrix: Array<number>,
-    camera_up: Array<number>,
+    cameraJSON: Obj,
+    cameraUp: {x: float, y: float, z: float},
     fog_level: float,
     line_width: number,
     sphere_base_radius: float,
@@ -283,11 +283,10 @@ export class CayleyDiagramView extends AbstractDiagramDisplay {
         return {x: point.x/2 + 1/2, y: -point.y/2 + 1/2};
     }
 
-    unitSquarePositions () /* Array<{x: float, y: float}> */ {
-        this.renderer.render(this.scene, this.camera);  // need to render first
-        const points = this.group.elements.map( (element) => {
-            const point = this.nodes[element].position.clone().project(this.camera)
-            return {x: point.x/2 + 1/2, y: -point.y/2 + 1/2};
+    unitSquarePositions () /* Array<THREE.Vector2> */ {
+        const points = this.group.elements.map/*:: <THREE.Vector2> */( (element) => {
+            const point = this.nodes[element].position.clone().project(this.camera);
+            return new THREE.Vector2(point.x/2 + 1/2, -point.y/2 + 1/2);
         } );
         return points;                                                
     }
@@ -930,8 +929,6 @@ export class CayleyDiagramView extends AbstractDiagramDisplay {
    toJSON () /*: CayleyDiagramJSON */ {
        const tmp  = Object.assign( {}, {
            background: this.background,
-           camera_matrix: this.camera.matrix.toArray(),
-           camera_up: this.camera.up.toArray(),
            fog_level: this.fog_level,
            line_width: this._line_width,
            sphere_base_radius: this.sphere_base_radius,
@@ -954,6 +951,8 @@ export class CayleyDiagramView extends AbstractDiagramDisplay {
                const end_element = end_node.element;
                return {start_element, end_element, generator, thirdPoint, offset, color};
            } ),
+           cameraJSON: this.camera.toJSON(),
+           cameraUp: this.camera.up
        } );
 
        if (this.isGenerated) {
@@ -970,18 +969,16 @@ export class CayleyDiagramView extends AbstractDiagramDisplay {
        return tmp;
     }
 
-    fromJSON (group /*: XMLGroup */, json /*: CayleyDiagramJSON */ = {}) {
-        this.group = group;
+    fromJSON (json /*: CayleyDiagramJSON */) {
+       this.group = ((Library.getLocalGroup(json.groupURL) /*: any */) /*: XMLGroup */);
 
         Object.keys(json).forEach( (name) => {
             switch (name) {
-            case 'background':		this.background = json.background;;			break;
-            case 'camera_matrix':	this.camera.matrix.fromArray(json.camera_matrix);
-					this.camera.matrix.decompose(
-                                            this.camera.position,
-                        		    this.camera.quaternion,
-			                    this.camera.scale);					break;
-            case 'camera_up':		this.camera.up.set(...json.camera_up);			break;
+            case 'background':		this.background = json.background;			break;
+            case 'cameraJSON':		this.camera =
+		                          new THREE.ObjectLoader().parse(json.cameraJSON);	break;
+            case 'cameraUp':            const {x, y, z} = json.cameraUp;
+                                          this.camera.up.set(x, y, z);                          break;
             case 'fog_level':           this.fog_level = json.fog_level;			break;
             case 'line_width':          this.line_width = json.line_width;			break;
             case 'sphere_base_radius':  this.sphere_base_radius = json.sphere_base_radius;	break;
@@ -989,11 +986,11 @@ export class CayleyDiagramView extends AbstractDiagramDisplay {
             case 'zoom_level':          this.zoom_level = json.zoom_level;			break;
             case 'arrowhead_placement':	this.arrowhead_placement = json.arrowhead_placement;	break;
             case 'label_scale_factor':	this.label_scale_factor = json.label_scale_factor;	break;
-            case 'right_multip;ly':	this.right_multiply = json.right_multiply;		break;
+            case 'right_multiply':	this.right_multiply = json.right_multiply;		break;
             default:										break;
             }
         } );
- 
+
         this.deleteAllObjects();
 
         // FIXME: keep generators from generating in constructor
@@ -1072,6 +1069,8 @@ export class CayleyDiagramView extends AbstractDiagramDisplay {
         if (json.chunk != undefined) {
             this.chunk = json.chunk;
         }
+
+        return this;
     }
 
     generateFromJSON (group /*: XMLGroup */, diagram_name /*: ?string */, json /*: VisualizerElementJSON */) {
@@ -1119,6 +1118,8 @@ export class CayleyDiagramView extends AbstractDiagramDisplay {
             this.arrows.forEach( (arrow) => arrow.color = generator_to_color_map.get(arrow.generator) );
         }
         this.createLines(this.arrows);
+
+        return this;
     }
 }
 

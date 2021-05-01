@@ -33,6 +33,7 @@ class MathML {
    static xsltProcessor: XSLTProcessor;
    static Cache: Map<string, string>;
    static UnicodeCache: Map<mathml, string>;
+   static HTMLCache: Map<mathml, html>;
  */
 /*
 ```
@@ -75,7 +76,7 @@ class MathML {
 */
    static sans(mathml /*: string */) /*: string */ {
       return MathML.Cache.get(mathml)
-          || '<math xmlns="http://www.w3.org/1998/Math/MathML" mathvariant="sans-serif">' +
+          || '<math mathvariant="sans-serif">' +
              mathml.replace(/<mi>/g, '<mi mathvariant="sans-serif-italic">') +
              '</math>';
    }
@@ -130,6 +131,17 @@ class MathML {
 */
    static toHTML(mathml /*: mathml */) /*: DocumentFragment */ {
       return MathML.xsltProcessor.transformToFragment($.parseXML(mathml), document);
+   }
+
+   static toHTMLString(mathml /*: mathml */) /*: string */ {
+      let result = MathML.HTMLCache.get(mathml)
+
+      if (result == null) {
+         result = $('<div>').html(MathML.toHTML(mathml)).html()
+         MathML.HTMLCache.set(mathml, result)
+      }
+
+      return result
    }
 
    static toUnicode(mathml /*: mathml */) /*: string */ {
@@ -424,8 +436,138 @@ class MathML {
       // Create MathML.Cache
       MathML.Cache = new Map();
       MathML.UnicodeCache = new Map();
+      MathML.HTMLCache = new Map();
    }
 
+   static mathmlToCanvas (element /*: HTMLElement */, canvas /*: HTMLCanvasElement */ = document.createElement('canvas')) /*: Promise<HTMLCanvasElement> */ {
+      return new Promise( (resolve, _reject) => {
+         MathJax.Hub.Queue(
+            ['Typeset', MathJax.Hub, element],
+            () => {
+               $(element).find('> .mjx-chtml .MJX_Assistive_MathML').remove();
+               this.htmlToCanvas(element, canvas);
+               resolve(canvas);
+            });
+      } );
+   }
+
+   // writes the text content contained in source element to a canvas, preserving layout/positioning/spacing,
+   //   text alignment, font (style, size, family), and color (font, background) 
+   static htmlToCanvas (source /*: HTMLElement */ , options /*: Obj */ = {}) /*: HTMLCanvasElement */ {
+      const canvas = (options.canvas == undefined) ? document.createElement('canvas') : options.canvas;
+
+      // find all text nodes in source element
+      const walker = document.createTreeWalker(source, NodeFilter.SHOW_TEXT);
+      const text_nodes = [];
+      for (let next_node = walker.nextNode(); next_node != undefined; next_node = walker.nextNode()) {
+         text_nodes.push(next_node);
+      }
+
+      // find {x, y} X {min, max} over all rects of all text nodes
+      //    (sub and superscript child elements may overflow parent bounding rect)
+      const range = document.createRange();
+      const nodes_and_rects =
+            Array.from(text_nodes)
+            .reduce( (nodes, node) => {
+               range.selectNodeContents(node);
+               const rects = Array.from(range.getClientRects());
+               if (rects.length != 0) {
+                  const original_text = node.textContent;
+                  nodes.push(...rects.map( (rect) => { return {node: node, rect: rect, original_text: original_text, text: []}; } ));
+               }
+               return nodes;
+            }, [] )
+      
+      const source_rect = source.getBoundingClientRect();
+      const x_min = Math.min(source_rect.left, ...nodes_and_rects.map( ({rect}) => rect.left ));
+      const x_max = Math.max(source_rect.right, ...nodes_and_rects.map( ({rect}) => rect.right ));
+      const y_min = Math.min(source_rect.top, ...nodes_and_rects.map( ({rect}) => rect.top ));
+      const y_max = Math.max(source_rect.bottom, ...nodes_and_rects.map( ({rect}) => rect.bottom ));
+
+       // set size to match actual text_node bounds
+      const {width, height} = source.getBoundingClientRect();
+      //const width = $(source).width(); // x_max - x_min;
+      //const height = $(source).height(); // y_max - y_min;
+      canvas.width = (options.width == undefined) ? width : options.width;
+      canvas.height = (options.height == undefined) ? height : options.height;
+
+      // set up canvas context
+      const context = canvas.getContext('2d');
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      context.fillStyle = 'rgba(0, 0, 0, 0)';
+      context.fillRect(0, 0, canvas.width, canvas.height);
+      if (source.style.backgroundColor != undefined && source.style.backgroundColor != '') {
+         context.fillStyle = source.style.backgroundColor;
+         context.fillRect(0, 0, width, height);
+      }
+      context.fillStyle = (source.style.color != undefined && source.style.color != '') ? source.style.color : 'black';
+      context.textAlign = 'start';
+      context.textBaseline = 'bottom';
+      if (source.style.border != '') {
+         context.lineWidth = parseInt(source.style.borderWidth);
+         context.strokeStyle = source.style.borderColor;
+         context.rect(0, 0, width, height);
+         context.stroke();
+      }
+
+      // clear all text content, and begin rebuilding it one character at a time
+      for (const {node} of nodes_and_rects) {
+         node.textContent = '';
+      }
+
+      // inx = node_index
+      for (let inx = 0; inx < nodes_and_rects.length; ) {
+         const node = nodes_and_rects[inx].node;
+         const original_text = nodes_and_rects[inx].original_text;
+
+         // get font info
+         const $parent = $(node.parentElement);
+         context.font = `${$parent.css('font-style')} ${$parent.css('font-weight')} ${$parent.css('font-size')} ${$parent.css('font-family')}`;
+
+         // associate text to each rect
+         const trimmed_text = original_text.replace(/(\s)+/g, ' ');
+         const curr_text_array = [];
+         // jnx = rect_index
+         // knx = char_index
+         for (let jnx = 0, knx = 0; knx < trimmed_text.length; knx++) {
+            const curr_char = trimmed_text[knx];
+            curr_text_array.push(curr_char);
+            node.textContent = curr_text_array.join('');
+
+            range.selectNodeContents(node);
+            const curr_rects = range.getClientRects();
+            if (curr_rects.length == 0) {
+               if (inx + jnx > 0 && nodes_and_rects[inx+jnx-1].rect.bottom >= nodes_and_rects[inx+jnx].rect.top) {
+                  nodes_and_rects[inx+jnx].text.push(curr_char);
+               }
+               continue;
+            }
+
+            // start assigning chars to next rect if:
+            //     text just wrapped and a new rect created
+            //  or text just overfilled, start assigning text to next rect
+            //       (1.01 is a fudge factor so italicized text doesn't automatically look like overflow)
+            if (   curr_rects.length == jnx + 2
+                || (   curr_rects.length == jnx + 1
+                    && curr_rects[curr_rects.length-1].width > 1.01*nodes_and_rects[inx+jnx].rect.width) ) {
+               jnx++;
+            }
+            nodes_and_rects[inx+jnx].text.push(curr_char);
+         }
+
+         // return this node's content to its original
+         node.textContent = original_text;
+
+         // write out the text we've just analyzed, and go to next new node
+         while (inx < nodes_and_rects.length && nodes_and_rects[inx].node == node) {
+            const {text, rect} = nodes_and_rects[inx];
+            context.fillText(text.join(''), rect.left - x_min, rect.top + rect.height - y_min);
+            inx++;
+         }
+      }
+      
+      return canvas;
+   }
 }
 
 MathML._init();

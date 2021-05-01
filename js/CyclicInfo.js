@@ -28,14 +28,14 @@ function summary (Group /*: XMLGroup */) /*: string */ {
     return Group.isCyclic ? 'yes' : 'no';
 }
 
-function display (Group /*: XMLGroup */, $wrapper /*: jQuery */) {
+function display (Group /*: XMLGroup */, $wrapper /*: JQuery */) {
     Load_Promise
         .then( (templates) => {
             if ($('template[id|="cyclic"]').length == 0) {
                 $('body').append(templates);
             }
 
-            $wrapper.empty().append(formatCyclicInfo(Group));
+            $wrapper.html(formatCyclicInfo(Group));
 
             MathJax.Hub.Queue(['Typeset', MathJax.Hub, $wrapper[0]]);
             setUpGAPCells(Group, $wrapper);
@@ -53,5 +53,5 @@ function formatCyclicInfo (Group /*: XMLGroup */) /*: DocumentFragment */ {
     }
     $frag.append(eval(Template.HTML('cyclic-trailer-template')));
 
-    return $frag;
+    return (($frag[0] /*: any */) /*: DocumentFragment */);
 }

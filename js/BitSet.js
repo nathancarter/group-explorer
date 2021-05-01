@@ -163,7 +163,8 @@ class BitSet {
    }
 
    // contains: intersection == other
-   contains(other /*: BitSet */) /*: boolean */ {
+   contains(otherElements /*: BitSet | Array<groupElement> */) /*: boolean */ {
+      const other = (Array.isArray(otherElements)) ? new BitSet(this.len, otherElements) : otherElements;
       for (let i = 0; i < this.arr.length; i++) {
 	 if (((this.arr[i] & other.arr[i]) >>> 0) != (other.arr[i] >>> 0)) {
 	    return false;

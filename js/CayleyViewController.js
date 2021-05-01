@@ -12,7 +12,7 @@ const VIEW_PANEL_URL = './html/CayleyViewController.html';
 import type {CayleyDiagramJSON} from '../js/CayleyDiagramView.js';
 */
 
-function load ($viewWrapper /*: JQuery */) /*: Promise */ {
+function load ($viewWrapper /*: JQuery */) /*: Promise<void> */ {
    return new Promise( (resolve, reject) => {
       $.ajax( { url: VIEW_PANEL_URL,
                 success: (data /*: html */) => {

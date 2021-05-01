@@ -1,4 +1,4 @@
- // @flow
+// @flow
 
 import {DEFAULT_SPHERE_COLOR} from './js/AbstractDiagramDisplay.js';
 import BasicGroup from './js/BasicGroup.js';
@@ -13,7 +13,7 @@ import MathML from './js/MathML.js';
 import MathUtils from './js/MathUtils.js';
 import Menu from './js/Menu.js';
 import {MulttableView, createMinimalMulttableView} from './js/MulttableView.js';
-import {CreateNewSheet} from './js/SheetModel.js';
+import * as SheetModel from './js/SheetModel.js';
 import setUpGAPCells from './js/ShowGAPCode.js';
 import {SymmetryObjectView, createStaticSymmetryObjectView} from './js/SymmetryObjectView.js';
 import Template from './js/Template.js';
@@ -81,18 +81,16 @@ function displayDynamic () {
 
 function displayBasicFacts () {
     const basic_fact_info = [
-        {groupField: 'order',      displayName: 'Order',      formattedValue: Group.order },
-        {groupField: 'gapname',    displayName: 'GAP name',   formattedValue: Group.gapname },
-        {groupField: 'gapid',      displayName: 'GAP ID',     formattedValue: Group.gapid },
-        {groupField: 'other_names',displayName: 'Other names',formattedValue:
-       	 Group.other_names == undefined ? '' : Group.other_names.map( (name) => MathML.sans(name) ).join(', ') },
-        {groupField: 'definition', displayName: 'Definition', formattedValue: MathML.sans(Group.definition) },
-        {groupField: 'notes',      displayName: 'Notes',      formattedValue: Group.notes },
-        {groupField: 'links',      displayName: 'More info',  formattedValue:
-         Group.links == undefined ? '' : Group.links.map( (link) => `<a href="${link}">${link}</a>` ).join(', ') },
+        {name: 'Order',      value: Group.order },
+        {name: 'GAP name',   value: Group.gapname },
+        {name: 'GAP ID',     value: Group.gapid },
+        {name: 'Other names',value: Group.other_names == undefined ? '' : Group.other_names.map( (name) => MathML.sans(name) ).join(', ') },
+        {name: 'Definition', value: MathML.sans(Group.definition) },
+        {name: 'Notes',      value: Group.notes },
+        {name: 'More info',  value: Group.links == undefined ? '' : Group.links.map( (link) => `<a href="${link}">${link}</a>` ).join(', ') },
     ];
     const $frag = basic_fact_info.reduce( ($frag, basic_fact) => {
-        if (Group[basic_fact.groupField] != undefined && Group[basic_fact.groupField] != '') {
+        if (basic_fact.value != undefined && basic_fact.value !== '') {
             $frag.append(eval(Template.HTML('basic-fact-template')));
         }
         return $frag;
@@ -207,12 +205,12 @@ function displayComputedProperties () {
 
 function displayFileData () {
     const file_data_info = [
-        {field: 'author',		display: 'Author'},
-        {field: 'URL',			display: 'URL'},
-        {field: 'lastModifiedOnServer',	display: 'Last modified'},
+        {name: 'Author',	value: Group.author },
+        {name: 'URL',		value: Group.URL },
+        {name: 'Last modified',	value: Group.lastModifiedOnServer },
     ];
     const $frag = file_data_info.reduce( ($frag, file_datum) => {
-        if (Group[file_datum.field] != undefined) {
+        if (file_datum.value != undefined) {
             $frag.append(eval(Template.HTML('file-data-template')));
         }
         return $frag;
@@ -247,14 +245,14 @@ function displayNamingSchemes () {
 
     // Default element names
     if (Group.representation.length != 0) {
-        const $rslt = $(document.createDocumentFragment());
-        $rslt.append(MathML.csList(Group.elements.map( (el) => Group.representation[el] )));
+        const $frag = $(document.createDocumentFragment());
+        $frag.append(MathML.csList(Group.elements.map( (el) => Group.representation[el] )));
         if (Group.representationIsUserDefined) {
-            $rslt.append('<br>This representation is user-defined; see below.');
+            $frag.append('<br>This representation is user-defined; see below.');
         } else {
-            $rslt.append('<br>This representation was loaded from the group file.');
+            $frag.append('<br>This representation was loaded from the group file.');
         }
-        $('#default-names > .content').html($rslt);
+        $('#default-names > .content').html( (($frag[0] /*: any */) /*: DocumentFragment */) );
     }
 
     // Loaded element names
@@ -421,7 +419,7 @@ function showAllVisualizersSheet () {
         {
             className : 'TextElement',
             x : 50, y : 50, w : 800, h : 50,
-            text : `All Visualizers for the Group ${MathML.toUnicode(Group.name)}`,
+            text : `All Visualizers for the Group ${MathML.toHTMLString(Group.name)}`,
             fontSize : '20pt', alignment : 'center'
         },
         {
@@ -457,14 +455,19 @@ function showAllVisualizersSheet () {
         {
             className : `MorphismElement`,
             fromIndex : 4, toIndex : 5,
-            name : MathML.toUnicode( '<msub><mi>id</mi><mn>1</mn></msub>' ),
+            name : MathML.toHTMLString( '<msub><mi>id</mi><mn>1</mn></msub>' ),
             showInjSurj : true, showManyArrows : true, definingPairs : iso
         },
         {
             className : `MorphismElement`,
             fromIndex : 5, toIndex : 6,
-            name : MathML.toUnicode( '<msub><mi>id</mi><mn>2</mn></msub>' ),
+            name : MathML.toHTMLString( '<msub><mi>id</mi><mn>2</mn></msub>' ),
             showInjSurj : true, showManyArrows : true, definingPairs : iso
         }
     ] );
+}
+
+function CreateNewSheet (oldJSONArray /*: Array<Obj> */) {
+    SheetModel.convertFromOldJSON(oldJSONArray)
+    SheetModel.createNewSheet(oldJSONArray)
 }

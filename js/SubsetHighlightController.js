@@ -567,7 +567,7 @@ function showMenu(event /*: MouseEvent */, id /*: number */) {
 function load ($subsetWrapper /*: JQuery */,
                _highlighters /*: highlighterRoutines*/,
                _clearHighlights /*: () => void */,
-               _group /*: XMLGroup */) /*: Promise */
+               _group /*: XMLGroup */) /*: Promise<void> */
 {
    group = _group;
    highlighters = _highlighters;

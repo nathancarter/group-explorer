@@ -6,6 +6,7 @@
 ```js
  */
 import BitSet from './BitSet.js';
+import * as DefiningRelations from './DefiningRelations.js';
 import MathUtils from './MathUtils.js';
 import Subgroup from './Subgroup.js';
 import SubgroupFinder from './SubgroupFinder.js';
@@ -43,6 +44,7 @@ class BasicGroup {
    _isSimple: boolean;
    _cosetIndices: Array<groupElement>;  // _cosetIndices[element in parent group] = coset index / element in quotient group)
    _indexInParentGroup: Array<groupElement>; // _indexInParentGroup[element index in subgroup] = element index in parent group
+   relations: Array<Array<groupElement>>;
  */
    constructor(multtable /*: ?Array<Array<groupElement>> */) {
       if (multtable != undefined) {
@@ -64,6 +66,7 @@ class BasicGroup {
       this.isCyclic = this.elementOrders.some((el /*: number */) => el == this.order);
       this.orderClasses = this.getOrderClasses(this.elementOrders);
       this.conjugacyClasses = this.getConjugacyClasses(this.elements);
+      this.relations = DefiningRelations.findRelations(this);
    }
 
    static parseJSON(json /*: BasicGroupJSON & Obj */) /*: BasicGroup */ {
@@ -115,9 +118,9 @@ class BasicGroup {
    get isSimple() /*: boolean */ {
       if (this._isSimple == undefined) {
          this._isSimple =
-            this.subgroups.length == 2 ||  /* nontrivial prime cyclic */
-            (this.subgroups.length > 2 && !this.subgroups.some( /* a normal subgroup exists that is proper and nontrivial */
-               (el, inx) => this.isNormal(el) && inx != 0 && inx != (this.subgroups.length - 1) ) );
+            this.subgroups.length > 2 &&
+            !this.subgroups.some(
+               (el, inx) => this.isNormal(el) && inx != 0 && inx != (this.subgroups.length - 1) );
       }
       return this._isSimple;
    }
@@ -334,7 +337,7 @@ class BasicGroup {
    }
 
    mult(a /*: groupElement */, b /*: groupElement */) /*: groupElement */ {
-      return this.multtable[a][b];
+      return this.multtable[a % this.order][b % this.order];
    }
 
    // returns closure of passed generators as an array of arrays of ...

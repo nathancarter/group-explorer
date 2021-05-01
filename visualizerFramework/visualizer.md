@@ -23,6 +23,7 @@ from a visualizer to a Sheet.
 import IsomorphicGroups from '../js/IsomorphicGroups.js';
 import Log from '../js/Log.js';
 import XMLGroup from '../js/XMLGroup.js';
+import {Version} from '../Version.js';
 
 const VISUALIZER_LAYOUT_URL /*: string */ = './visualizerFramework/visualizer.html';
 
@@ -39,23 +40,32 @@ It returns the just-started ajax load as an ES6 Promise
 
 ```javascript
 */
-export function load (group /*: ?XMLGroup */, help_page /*: string */) {
-   window.VC = this;
+export function load (group /*: ?XMLGroup */, help_page /*: string */) /*: Promise<void> */ {
+   window.VC = this
    if (group != undefined)
-      Group = group;
-   Help_Page = help_page;
+      Group = group
+   Help_Page = help_page
 
-   $.ajax( { url: VISUALIZER_LAYOUT_URL,
-             success: (data /*: html */) => {
-                $('#header').append(data);  // append the top right-hand icon strip, etc. to header
-                $('#show-controls').hide();  // Hide top right-hand 'hide-controls' icon initially
-                if (group != undefined && group.URL != undefined)
-                   $('#find-group').hide();
-             },
-             error: (_jqXHR, _status, err) => {
-                Log.err(`Error loading ${VISUALIZER_LAYOUT_URL} ${err === undefined ? '' : ': ' + err}`);
-             }
-           } );
+  const result = new Promise/*:: <void> */(
+    (resolve, reject) => {
+      $.ajax(
+        { url: VISUALIZER_LAYOUT_URL,
+          success: (data /*: html */) => {
+            $('#header').append(data) // append the top right-hand icon strip, etc. to header
+            $('#show-controls').hide() // Hide top right-hand 'hide-controls' icon initially
+            if (group != undefined && group.URL != undefined)
+              $('#find-group').hide()
+            $('#version').text(Version.label)
+            resolve()
+          },
+          error: (_jqXHR, _status, err) => {
+            Log.err(`Error loading ${VISUALIZER_LAYOUT_URL} ${err === undefined ? '' : ': ' + err}`)
+            reject(err)
+          }
+        } )
+    })
+
+  return result;
 }
 /*
 ```

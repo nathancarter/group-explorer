@@ -28,58 +28,60 @@ and
 
     This creates a new sheet.
 
- * On the right hand side of the sheet, choose the "Cycle graph" type of
-   visualizer from the drop-down list and the group \(\mathbb{Z}_6\).
-   Then click the "Add this visualizer" button.  You should see a small
-   copy of the cycle graph for \(\mathbb{Z}_6\) appear on the left of the
-   sheet.  I resized mine slightly and the result was as follows.
-   (To resize a visualizer, click to select it, then drag a corner.)
+ * In the control window on the right hand side of the sheet, select
+   \(\mathbb{Z}_6\) from the "Group" drop-down list and click the "Cycle graph"
+   button above it. You should see a small cycle graph for \(\mathbb{Z}_6\)
+   appear in the upper left-hand corner of the left side of the sheet. I resized
+   mine slightly and the result was as follows. (To move a visualizer just drag
+   it with the mouse or your finger; to resize it right-click [tap] it and
+   select 'Resize' from the resulting context menu. A light blue outline will
+   appear around the visualizer. Then drag starting outside the element in the
+   direction you'd like it to grow. A short click [tap] will dismiss the blue
+   outline. See [here](rf-um-sheetwindow.md#resizing) for more details.)
 
 ![Sheet containing one cycle graph](illustration-sheettut1.png)
 
- * But that's just one visualizer; we want to have at least two.
-   So let's repeat the same steps for inserting a cycle graph for
-   \(S_3\) as well, but move it a little to the right of the first one,
-   as shown below.
+ * But that's just one visualizer; we want to have at least two.  So let's
+   repeat the same steps for inserting a cycle graph for \(S_3\) as well, but
+   move it a little to the right of the first one, as shown below.
 
 ![Sheet containing two cycle graphs](illustration-sheettut2.png)
 
- * Now let's start comparing these groups.
-   In group theory, the means of examining relationships between groups
-   is via [homomorphisms](rf-groupterms.md#homomorphism).
-   So let's create one in this sheet, as follows:
-    * Click the left cycle graph to select it.
-    * Click the "Map to" button (which by default assumes you're creating
-      a "map" (homomorphism) to the other visualizer in the sheet).
+ * Now let's start comparing these groups.  In group theory, the means of
+   examining relationships between groups is via
+   [homomorphisms](rf-groupterms.md#homomorphism).  So let's create one in this
+   sheet, as follows:
+    * Right-click [tap] the left cycle graph element to open its context
+      menu
+    * Select the "Create Map" option from menu
+    * Click [tap] the other cycle graph, the homomorphism target.
     * You should see a new function \(f\) appear, connecting the two graphs.
-
+ 
 ![Sheet containing two cycle graphs connected by a homomorphism f](illustration-sheettut3.png)
 
- * So far this isn't very informative, but if we double-click the
-   homomorphism we can do all sorts of interesting things.
-   For instance, you can decide which elements from \(\mathbb{Z}_6\)
-   should correspond to which elements from \(S_3\).
-   Furthermore, *Group Explorer* will not let you mess this up
-   (you cannot define a non-homomorphism.)  The morphism editing dialog
-   is shown below.
+ * So far this isn't very informative, but if we right-click [tap] the
+   morphism label box to open its context menu and select "Edit", we can do all
+   sorts of interesting things. For instance, you can decide which elements from
+   \(\mathbb{Z}_6\) should correspond to which elements from \(S_3\).
+   Furthermore, *Group Explorer* will not let you mess this up (you cannot
+   define a non-homomorphism.)  The morphism editing dialog is shown below.
 
 ![Homomorphism editing dialog](illustration-sheettut4.png)
 
- * The homomorphism defaults to the zero map
-   (all elements map to the identity, in this case \(e\))
-   but you can change it, of course. I will map \(a\) to \(r\)
-   and then check the "Draw multiple arrows" box above.
-   The result is the following illustration of one way to map
-   \(\mathbb{Z}_6\) to \(S_3\).
+ * The homomorphism defaults to the zero map (all elements map to the identity,
+   in this case \(e\)) but you can change it, of course. I will map \(a\) to
+   \(r\) and then check the "Draw multiple arrows" box above.  The result is the
+   following illustration of one way to map \(\mathbb{Z}_6\) to \(S_3\).
 
 ![Homomorphism from Z_6 to S_3](illustration-sheettut5.png)
 
-The arrows require some attention to follow carefully, but you can see how
-the six-element circle marches around the little three-element circle twice.
-I've taken the liberty of highlighting \(\mathbb{Z}_6\) red and its
-[image](rf-groupterms.md#image-of-a-subset-under-a-morphism) in \(S_3\) red also. (To do so,
-double-click either of the visualizers and play with its subsets [as
-documented here](rf-um-subsetlistbox.md).)
+The arrows require some attention to follow carefully, but you can see how the
+six-element circle marches around the little three-element circle twice.  I've
+taken the liberty of highlighting \(\mathbb{Z}_6\) red and its
+[image](rf-groupterms.md#image-of-a-subset-under-a-morphism) in \(S_3\) red
+also. (To do so, open the element context menu for the visualizer you'd like to
+highligh and select "Edit". Then play with its subsets [as documented
+here](rf-um-subsetlistbox.md).)
 
 ![Homomorphism from Z_6 to S_3 with domain and image highlighted](illustration-sheettut6.png)
 
@@ -98,8 +100,7 @@ providing links for you to browse further yourself.
    [normality](rf-groupterms.md#normal-subgroup) of a
    [subgroup](rf-groupterms.md#subgroup)
    (and the [quotient group](rf-groupterms.md#quotient-group) it computes):
-    * Try the "tell me more" link next to "Subgroups" in the
-      "Computated Properties" section of the
+    * Expand the "Subgroups" section under "Computated Properties" in the
       [group info page](rf-um-groupwindow.md#computed-properties).
     * Then find the subgroup in question on the list and follow the link
       provided.
@@ -109,8 +110,7 @@ providing links for you to browse further yourself.
 
  * To see a [lattice of subgroups](rf-groupterms.md#lattice-of-subgroups)
    for a given group:
-    * Again, go to the "tell me more" link next to "Subgroups"
-      in the group info page.
+    * Again, expand the "Subgroups" section of the group info page.
     * Follow the link provided at the top of the resulting page,
       offering to create a sheet showing the lattice of subgroups.
     * The illustration below shows all subgroups of \(S_3\).
@@ -119,9 +119,8 @@ providing links for you to browse further yourself.
 
  * To see the [solvable decomposition](rf-groupterms.md#solvable-group-solvable-decomposition) of any
    [solvable group](rf-groupterms.md#solvable-group-solvable-decomposition):
-    * Follow the "tell me more" link next to "Solvable"
-      in the group info page.
-    * The decomposition will be reported in text and you can click and of
+    * Expand the "Solvable" section of the group info page.
+    * The decomposition will be reported in text and you can click any of
       several links on that page to see it illustrated in various ways.
     * The illustration below shows the solvable decomposition for \(S_4\).
 

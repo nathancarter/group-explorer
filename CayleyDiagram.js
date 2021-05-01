@@ -147,7 +147,7 @@ function receiveInitialSetup (event /*: MessageEvent */) {
    if (event_data.source == 'external') {
       // Get json from message and build Cayley diagram from it, then start visualizer
       const json_data = event_data.json;
-      Cayley_Diagram_View.fromJSON(Group, json_data);
+      Cayley_Diagram_View.fromJSON(json_data);
       CVC.updateFromView();
       DC.update();
       startVisualizer();

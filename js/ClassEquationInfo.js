@@ -3,7 +3,7 @@
 import GEUtils from './GEUtils.js';
 import Log from './Log.js';
 import MathML from './MathML.js';
-import {CreateNewSheet} from './SheetModel.js';
+import * as SheetModel from './SheetModel.js';
 import setUpGAPCells from './ShowGAPCode.js';
 import Template from './Template.js';
 import XMLGroup from './XMLGroup.js';
@@ -44,14 +44,21 @@ function summary (group /*: XMLGroup */) /*: string */ {
     return displayClassEquation();
 }
 
-function display (group /*: XMLGroup */, $wrapper /*: jQuery */) {
+function display (group /*: XMLGroup */, $wrapper /*: JQuery */) {
     Load_Promise
         .then( (templates) => {
             if ($('template[id|="class-equation"]').length == 0) {
                 $('body').append(templates);
             }
 
-            $wrapper.empty().append(formatClassEquation(group));
+            $wrapper.html(formatClassEquation(group));
+
+            $('.show-class-equation-sheet').on('click', (event /*: JQueryEventObject */) => {
+                event.preventDefault();
+                const target = ((event.target /*: any */) /*: HTMLElement */);
+                const type = target.getAttribute( 'data-type' );
+                showAsSheet( ((type /*: any */) /*: VisualizerType */) );
+            } );
 
             MathJax.Hub.Queue(['Typeset', MathJax.Hub, $wrapper[0]]);
             setUpGAPCells(group, $wrapper);
@@ -77,14 +84,7 @@ function formatClassEquation (group /*: XMLGroup */) /*: DocumentFragment */ {
 
     $frag.append(eval(Template.HTML('class-equation-trailer-template')));
 
-    $('#class-equation .content').append($frag);
-
-    $('.show-class-equation-sheet').on('click', (event /*: JQueryEventObject */) => {
-        event.preventDefault();
-        const target = ((event.target /*: any */) /*: HTMLElement */);
-        const type = target.getAttribute( 'data-type' );
-        showAsSheet( ((type /*: any */) /*: VisualizerType */) );
-    } );
+    return (($frag[0] /*: any */) /*: DocumentFragment */);
 }
 
 function displayClassEquation () {
@@ -114,7 +114,7 @@ function showAsSheet ( type /*: VisualizerType*/ ) {
         {
             className : 'TextElement',
             x : 50, y : 50, w : 150*fakeN+100, h : 50,
-            text : `Class Equation for the Group ${MathML.toUnicode(Group.name)}`,
+            text : `Class Equation for the Group ${MathML.toHTMLString(Group.name)}`,
             fontSize : '20pt', alignment : 'center'
         }
     ];
@@ -179,4 +179,9 @@ function showAsSheet ( type /*: VisualizerType*/ ) {
     } );
     // Show it:
     CreateNewSheet( sheetElementsAsJSON );
+}
+
+function CreateNewSheet (oldJSONArray /*: Array<Obj> */) {
+    const newJSONArray = SheetModel.convertFromOldJSON(oldJSONArray)
+    SheetModel.createNewSheet(newJSONArray)
 }

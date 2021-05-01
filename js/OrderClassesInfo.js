@@ -27,14 +27,14 @@ function summary (Group /*: XMLGroup */) /*: string */ {
     return `${numOrderClasses} order class${(Group.order == 1) ? '' : 'es'}`;
 }
 
-function  display (Group /*: XMLGroup */, $wrapper /*: jQuery */) {
+function  display (Group /*: XMLGroup */, $wrapper /*: JQuery */) {
     Load_Promise
         .then( (templates) => {
             if ($('template[id|="order-classes"]').length == 0) {
                 $('body').append(templates);
             }
 
-            $wrapper.empty().append(formatOrderClasses(Group));
+            $wrapper.html(formatOrderClasses(Group));
 
             MathJax.Hub.Queue(['Typeset', MathJax.Hub, $wrapper[0]]);
             setUpGAPCells(Group, $wrapper);
@@ -61,5 +61,5 @@ function formatOrderClasses (Group /*: XMLGroup */) /*: DocumentFragment */ {
     };
     $frag.append(eval(Template.HTML('order-classes-trailer-template')));
 
-    return $frag;
+    return (($frag[0] /*: any */) /*: DocumentFragment */);
 }

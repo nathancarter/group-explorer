@@ -85,7 +85,7 @@ Registers event handlers for touch or non-touch devices, as appropriate.
       this.canvas = cayley_diagram_view.renderer.domElement;
       this.eventLocation = new THREE.Vector2();
       this.raycaster = new THREE.Raycaster();
-      this.raycaster.linePrecision = 0.02;
+      this.raycaster.params.Line.threshold = 0.02;
       this.async_painter = null;
       this.picked_object = null;
 

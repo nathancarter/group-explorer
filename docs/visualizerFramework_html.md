@@ -3,7 +3,7 @@
 Defines row of icons, version display in upper right-hand corner of visualizer pages.
 Used by CayleyDiagram.html, CycleGraph.html, Multtable.html, SymmetryObject.html, and Sheet.html
 ```html
-<div class="top-right-menu">
+<div id="top-right-menu">
    <div>
       <a href='index.html'>
          <i title="Project Home" class="fa fa-home fa-2x trm-black"></i></a>
@@ -23,11 +23,6 @@ Used by CayleyDiagram.html, CycleGraph.html, Multtable.html, SymmetryObject.html
          <i title="Show controls" class="fa fa-chevron-circle-left fa-2x trm-black"></i></a>
    </div>
    <div id="version" style="float: right; font-size: small"></div>
-   <script type="module">
-    import {Version} from './Version.js';
-
-    document.getElementById('version').textContent = Version.label;
-   </script>
 </div>
 ```
 #### Menu-Submenu Link Template
@@ -44,4 +39,3 @@ It refers to the following variables when eval'd (see [Template](../js/Template.
       ${MathML.sansText(label)} <span class="menu-arrow"></span> </li>
 </template>
 ```
-

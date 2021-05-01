@@ -187,18 +187,11 @@ class Chunking {
 class DiagramChoice {
    /* Populate diagram select element, show selected diagram */
    static setupDiagramSelect() {
+      const $choices = Group.cayleyDiagrams.reduce(
+         ($frag, diagram) => $frag.append(eval(Template.HTML('diagram-choice-template'))),
+         $(document.createDocumentFragment()).append(eval(Template.HTML('diagram-generate-diagram-template'))))
       $('#diagram-choices')
-         .html( 
-            [...Array(Group.cayleyDiagrams.length + 1).keys()]
-               .reduce( ($frag, index) => {
-                  if (index == 0) {
-                     $frag.append(eval(Template.HTML('diagram-generate-diagram-template')));
-                  } else {
-                     const diagram = Group.cayleyDiagrams[index - 1];
-                     $frag.append(eval(Template.HTML('diagram-choice-template')));
-                  }
-                  return $frag;
-               }, $(document.createDocumentFragment()) ))
+         .html((($choices /*: any */) /*: DocumentFragment */))
          .css('visibility', 'hidden');
       DiagramChoice._showChoice();
    }
@@ -503,8 +496,8 @@ function updateStrategies (new_strategies /*: Array<StrategyParameters> */) {
 
 
 /* Load, initialize diagram control */
-function load ($diagramWrapper /*: JQuery */) /*: Promise */ {
-   return new Promise( (resolve, reject) => {
+function load ($diagramWrapper /*: JQuery */) /*: Promise<void> */ {
+    return new Promise( (resolve, reject) => {
       $.ajax( { url: DIAGRAM_PANEL_URL,
                 success: (data /*: string */) => {
                    $diagramWrapper.html(data);

@@ -137,6 +137,7 @@ export class MulttableView /*:: implements VizDisplay<MulttableJSON> */ {
     }
 
     getImage () /*: Image */ {
+        this.showGraphic();
         const image = new Image();
         image.src = this.canvas.toDataURL();
         return image;
@@ -212,15 +213,16 @@ export class MulttableView /*:: implements VizDisplay<MulttableJSON> */ {
                            0,     0,     1);
         const UL = new THREE.Vector2(0, 0).applyMatrix3(new THREE.Matrix3().getInverse(this.transform));
         const LR = new THREE.Vector2(this.canvas.width, this.canvas.height).applyMatrix3(new THREE.Matrix3().getInverse(this.transform));
+
         const minX = this.index(UL.x) || 0;
         const minY = this.index(UL.y) || 0;
-        const maxX = (this.index(LR.x) + 1) || this.group.order;
-        const maxY = (this.index(LR.y) + 1) || this.group.order;
+        const maxX = (((this.index(LR.x) /*: any */) /*: number */) + 1) || this.group.order;
+        const maxY = (((this.index(LR.y) /*: any */) /*: number */) + 1) || this.group.order;
 
         for (let inx = minX; inx < maxX; inx++) {
             for (let jnx = minY; jnx < maxY; jnx++) {
-                const x /*: number */ = this.position(inx) || 0;
-                const y /*: number */ = this.position(jnx) || 0;
+                const x = this.position(inx);
+                const y = this.position(jnx);
 
                 const product = this.group.mult(this.elements[jnx], this.elements[inx]);
 
@@ -259,8 +261,8 @@ export class MulttableView /*:: implements VizDisplay<MulttableJSON> */ {
 
         for (let inx = minX; inx < maxX; inx++) {
             for (let jnx = minY; jnx < maxY; jnx++) {
-                const x = this.position(inx) || 0;
-                const y = this.position(jnx) || 0;
+                const x = this.position(inx);
+                const y = this.position(jnx);
                 const product = this.group.mult(this.elements[jnx], this.elements[inx]);
                 this._drawLabel(x, y, product, scale, fontScale);
             }
@@ -410,6 +412,17 @@ export class MulttableView /*:: implements VizDisplay<MulttableJSON> */ {
         return { x: 0.5 / max, y: ( this.position( index ) + 0.5 ) / max };
     }
 
+    unitSquarePositions () /*: Array<THREE.Vector2> */ {
+        const max = this.position( this.group.order - 1 ) + 1;
+
+        const unit_square_positions = this.group.elements.map( (element) => {
+            const index = this.elements.indexOf( element );
+            return new THREE.Vector2(0.5 / max, ( this.position( index ) + 0.5 ) / max);
+        } );
+        
+        return unit_square_positions;
+    }
+
     ////////////////////////////////////////////////////////////////////////////////
 
     get group () {
@@ -512,13 +525,19 @@ export class MulttableView /*:: implements VizDisplay<MulttableJSON> */ {
         this._colors = null;
     }
 
-    position (index /*: number */) /*: void | number */ {
-        return (index < 0 || index > this.group.order) ? undefined : index + this.separation * Math.floor(index/this.stride);
+    // assumes index is in range [0, group.order]
+    position (index /*: number */) /*: number */ {
+        return index + this.separation * Math.floor(index/this.stride);
     }
 
     index (position /*: number */) /*: void | number */ {
         const inx = Math.floor(position - this.separation * Math.floor(position / (this.stride + this.separation)));
         return (inx < 0 || inx > this.group.order - 1) ? undefined : inx;
+    }
+
+    clampedIndex (position /*: number */) /*: number */ {
+        const inx = Math.floor(position - this.separation * Math.floor(position / (this.stride + this.separation)));
+        return Math.max(0, Math.min(this.group.order, inx));
     }
 
     /*
@@ -606,13 +625,13 @@ export class MulttableView /*:: implements VizDisplay<MulttableJSON> */ {
 
 
 // no labels, no separation, no zoom, no translate, no highlights
-export function createMinimalMulttableView (options /*: MulttableViewOptions */) /*: MulttableView */ {
+export function createMinimalMulttableView (options /*: MulttableViewOptions */ = {}) /*: MulttableView */ {
     const view = new MulttableView(options);
     view.is_minimal_view = true;
     return view;
 }
 
-export function createFullMulttableView (options /*: MulttableViewOptions */)  /*: MulttableView */ {
+export function createFullMulttableView (options /*: MulttableViewOptions */ = {})  /*: MulttableView */ {
     const view = new MulttableView(options);
     view.is_minimal_view = false;
     return view;

@@ -1,186 +1,690 @@
 <html>
-   <head>
-      <title>Sheet</title>
+    <head>
+        <title>Sheet</title>
 
-      <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-      <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta charset="utf-8" />
 
-      <link rel="icon" type="image/png" href="./images/favicon.png"></link>
-      <link rel="stylesheet" href="./style/fonts.css" type="text/css"></link>
-      <link rel="stylesheet" href="./style/sliders.css" type="text/css"></link>
-      <link rel="stylesheet" href="./visualizerFramework/visualizer.css" type="text/css"></link>
-      <link rel="stylesheet" href="./style/menu.css" type="text/css"></link>
-      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css">
+        <link rel="icon" type="image/png" href="./images/favicon.png"></link>
+        <link rel="stylesheet" href="./style/menu.css"  type="text/css"></link>
+        <link rel="stylesheet" href="./style/fonts.css" type="text/css"></link>
+        <link rel="stylesheet" href="./style/sliders.css" type="text/css"></link>
+        <link rel="stylesheet" href="./style/menu.css" type="text/css"></link>
+        <link rel="stylesheet" href="./visualizerFramework/visualizer.css" type="text/css"></link>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css">
 
-      <style>
-       .selected-for-moving-and-sizing {
-          border: 2px dotted #aaf;
-       }
-       .button-row {
-          margin: 5px;
-       }
-       #graphic {
-          -webkit-touch-callout : none;
-          -khtml-user-select: none;
-          -moz-user-select: none;
-          -ms-user-select: none;
-          user-select: none;
-       }
-       #overlay {
-          pointer-events: none;
-          background-color: rgba(0,0,0,0);
-          position: absolute;
-          z-index: 999999;
-       }
+        <style>
+         :root {
+             /*
+                --visualizer-header-background:	#D0D0D0;
+                --visualizer-body-background:	#E5E5E5;
+              */
 
-       #tooltip {
-          background-color: black;
-          color: white;
-          position: fixed;
-          z-index: 1000000;  /* just enough to show over mapping arrows and such */
-          font-size: medium;
-          font-weight: bolder;
-          padding: 4px 8px;
-          transform: translate3d(0,0,1px);  /* works around an iPad z-level bug */
-       }
+             --gray1: #f8f8f8;
+             --gray2: #ececec;
+             --gray3: #dddddd;
+             --gray4: #d1d1d1;
+             --gray5: #c8c8c8;
+             --gray6: #bfbfbf;
 
-       #controls {
-          z-index: 999999999;
+             --light-background: #f8f8f8;
+             --darker-background: #e0e0e0;
+             --dark-gradient: linear-gradient(#e0e0e0, #bcbcbc);
+             --light-gradient: linear-gradient(#f0f0f0, #d1d1d1);
+             --light-border: #989898;
+         }
 
-          display: grid;
-          grid-template-columns: repeat(6, 1fr);
-          grid-template-rows: auto auto 1em auto auto auto 1em auto auto 1em auto auto 1em auto auto 1fr;
-          grid-template-areas:
-             "loadButton loadButton savedSheetsList savedSheetsList savedSheetsList savedSheetsList"
-             "saveButton saveButton filenameInput filenameInput filenameInput filenameInput"
-             ". . . . . ."
-             "addRectangleButton addRectangleButton addRectangleButton addTextButton addTextButton addTextButton"
-             "addVisualizerButton addVisualizerButton addVisualizerButton addVisualizerButton addVisualizerButton addVisualizerButton"
-             "visualizerList visualizerList visualizerList groupList groupList groupList"
-             ". . . . . ."
-             "copyButton copyButton pasteButton pasteButton deleteButton deleteButton"
-             "undoButton undoButton undoButton redoButton redoButton redoButton"
-             ". . . . . ."
-             "morphismButton morphismButton morphismToList morphismToList morphismToList morphismToList"
-             "connectButton connectButton connectToList connectToList connectToList connectToList"
-             ". . . . . ."
-             "moveUpButton moveUpButton moveUpButton moveDownButton moveDownButton moveDownButton"
-             "moveToTopButton moveToTopButton moveToTopButton moveToBottomButton moveToBottomButton moveToBottomButton";
-          padding: 3px;
-       }
-       #controls > *{
-          margin: 2px;
-       }
-       #controls > select, #controls > input {
-          font-size: 11pt;
-       }
-       #loadButton	{ grid-area: loadButton; }
-       #savedSheetsList	{ grid-area: savedSheetsList; }
-       #saveButton	{ grid-area: saveButton; }
-       #filenameInput	{ grid-area: filenameInput; }
-       #addRectangleButton { grid-area: addRectangleButton; }
-       #addTextButton	{ grid-area: addTextButton; }
-       #addVisualizerButton { grid-area: addVisualizerButton; }
-       #visualizerList	{ grid-area: visualizerList; margin: 8px 2.5px; }
-       #groupList	{ grid-area: groupList; margin: 8px 2.5px;}
-       #copyButton	{ grid-area: copyButton; }
-       #pasteButton	{ grid-area: pasteButton; }
-       #deleteButton	{ grid-area: deleteButton; }
-       #undoButton	{ grid-area: undoButton; }
-       #redoButton	{ grid-area: redoButton; }
-       #morphismButton	{ grid-area: morphismButton; }
-       #morphismToList	{ grid-area: morphismToList; }
-       #connectButton	{ grid-area: connectButton; }
-       #connectToList	{ grid-area: connectToList; }
-       #moveUpButton	{ grid-area: moveUpButton; }
-       #moveDownButton	{ grid-area: moveDownButton; }
-       #moveToTopButton	{ grid-area: moveToTopButton; }
-       #moveToBottomButton { grid-area: moveToBottomButton; }
+         button {
+             background-image: var(--light-gradient);
+         }
+         
+         .hidden {
+             display: none;
+         }
 
-       #splitter {
-          display: none;
-       }
-      </style>
+         .highlighted, .choice:hover {
+             background-color: rgba(255, 184, 134, 0.6);  /* rgba(255, 255, 0, 0.3); */
+         }
 
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-      <script type="text/x-mathjax-config">
-       MathJax.Hub.Config({
-          CommonHTML: {
-             scale: 95,   /* scale MathJax to match the HTML around it */
-          },
-          showMathMenu: false,   /* disable MathJax context menu (it interferes with subsetDisplay context menu) */
-       });
-      </script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.6/MathJax.js?config=MML_CHTML"></script>
-      <script src="https://cdn.jsdelivr.net/npm/jquery-resizable-dom@0.32.0/dist/jquery-resizable.js"></script>
-      <script type="module">
-       import * as Sheet from './Sheet.js';
-       window.addEventListener('load', Sheet.load, {once: true});
-       window.loadChosen = Sheet.loadChosen;
-       window.saveAs = Sheet.saveAs;
-       window.addRectangle = Sheet.addRectangle;
-       window.addText = Sheet.addText;
-       window.addVisualizer = Sheet.addVisualizer;
-       window.copySelected = Sheet.copySelected;
-       window.pasteItem = Sheet.pasteItem;
-       window.deleteSelected = Sheet.deleteSelected;
-       window.undo = Sheet.undo;
-       window.redo = Sheet.redo;
-       window.morphismSelected = Sheet.morphismSelected;
-       window.connectSelected = Sheet.connectSelected;
-       window.moveSelectedUp = Sheet.moveSelectedUp;
-       window.moveSelectedDown = Sheet.moveSelectedDown;
-       window.moveSelectedToTop = Sheet.moveSelectedToTop;
-       window.moveSelectedToBottom = Sheet.moveSelectedToBottom;
-       window.loadSheetFromJSON = Sheet.loadSheetFromJSON;
-      </script>
-   </head>
+         body, #bodyDouble {
+             -webkit-touch-callout : none !important;
+             -webkit-user-select : none !important;
+             -khtml-user-select: none;
+             -moz-user-select: none;
+             -ms-user-select: none;
+             user-select: none !important;
 
-   <body>
-      <div id="bodyDouble">
-         <div id="header">
-             <div id="heading"></div>
-         </div>
-         <div id="graphic"></div>
-         <div id="splitter"></div>
-         <div id="controls">
-            <button id="loadButton" onclick="loadChosen();">Load sheet:</button>
-            <select id="savedSheetsList"></select>
+             margin: 0;
+             overflow: hidden;
+             height: 100%;
+             width: 100%;
+         }
 
-            <button id="saveButton" onclick="saveAs();">Save as:</button>
-            <input type="text" id="filenameInput" value="My Sheet"/>
+         #bodyDouble {
+             display: grid;
+             grid-template-columns: minmax(0, 1fr) auto;
+             grid-template-rows: auto minmax(0, 1fr);
+             grid-template-areas: "header header" "graphic controls";
+         }
 
-            <button id="addRectangleButton" onclick="addRectangle();">Add rectangle</button>
-            <button id="addTextButton" onclick="addText();">Add text box</button>
+         #header {
+             grid-area: header;
+             display: flex;
+             flex-flow: row nowrap;
+             background-color: var(--gray3);
+         }
 
-            <button id="addVisualizerButton" onclick="addVisualizer();">Add this visualizer:</button>
+         #heading {
+             flex: 1;
+             margin: auto 0;
+             text-align: center;
+             font-size: 40px;
+             overflow-x: hidden;
+         }       
 
-            <select id="visualizerList">
-               <option value="CD">Cayley diagram</option>
-               <option value="MT">multiplication table</option>
-               <option value="CG">cycle graph</option>
-            </select>
-            <select id="groupList"></select>
+         #top-right-menu {
+             background-color: rgba(0, 0, 0, 0);
+             margin: 10px 10px 0 0;
+         }
+         
+         #graphic {
+             grid-area: graphic;
+             position: relative;
+             overflow: hidden;
+             background-color: var(--gray1);
+         }
 
-            <button id="copyButton" onclick="copySelected();" class="for-selected-element">Copy</button>
-            <button id="pasteButton" onclick="pasteItem();">Paste</button>
-            <button id="deleteButton" onclick="deleteSelected();" class="for-selected-element">Delete</button>
+         .context-menu {
+             display: none;
+             background-color: var(--gray2);
+             border: 1px solid var(--gray5);
+             box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);	/* gray mist */
+             font-size: medium;
+             font-style: normal;
+             font-weight: normal;
+             padding: 0.25em 0.5em;
+             min-width: 10em;
+             position: fixed;
+         }
+         .context-menu > div {
+             cursor: pointer;
+         }
 
-            <button id="undoButton" onclick="undo();">Undo</button>
-            <button id="redoButton" onclick="redo();">Redo</button>
+         .editor {
+             display: none;
+             position: fixed;
+             background-color: white;
+         }
 
-            <button id="morphismButton" onclick="morphismSelected();">Map to:</button>
-            <select id="morphismToList"></select>
+         #linking-indicator {
+             position: fixed;
+             left: 1000;
+             top: 1000;
+             background-color: white;
+             z-index: 1000;
+             width: 8em;
+             padding: 0.5em;
+             font-size: x-large;
+             box-shadow: 0px 8px 16px 0px rgb(0 0 0 / 20%);
+         }
 
-            <button id="connectButton" onclick="connectSelected();">Connect to:</button>
-            <select id="connectToList"></select>
+         #linking-indicator > button {
+             font-size: large;
+             height: auto;
+             display: block;
+             margin:1em auto 0;
+             width: 7em;
+         }
 
-            <button id="moveUpButton" onclick="moveSelectedUp();" class="for-selected-element">Move forward</button>
-            <button id="moveDownButton" onclick="moveSelectedDown();" class="for-selected-element">Move backward</button>
+         /* Add defining pair
+          */
+         #domain-select, #codomain-select {
+             margin: 0 4px;
+         }
 
-            <button id="moveToTopButton" onclick="moveSelectedToTop();" class="for-selected-element">Move to front</button>
-            <button id="moveToBottomButton" onclick="moveSelectedToBottom();" class="for-selected-element">Move to back</button>
-         </div>
-      </div>
-   </body>
+         #domain-select .faux-selection, #codomain-select .faux-selection {
+             line-height: calc(1.5em - 4px);
+         }
+         
+         /* Defining pairs, morphism preview table formatting
+          */
+         #defining-pair-table, #morphism-preview-table {
+             border-collapse: collapse;
+             margin-left: auto;
+             margin-right: auto;
+             border: 1px solid var(--light-border);
+         }
+         #defining-pair-table thead, #morphism-preview-table thead {
+             border-bottom: 1px solid var(--light-border);
+         }
+         #defining-pair-table th, #morphism-preview-table th {
+             font-weight: normal;
+         }
+         #defining-pair-table tbody, #morphism-preview-table tbody {
+             background-color: var(--light-background);
+         }
+         #defining-pair-table tbody tr, #morphism-preview-table tbody tr {
+             border-bottom: 1px solid var(--light-border);
+         }
+         #morphism-preview-table tbody tr:last-child {
+             border-bottom: none;
+         }
+         #defining-pair-table td:first-child, #morphism-preview-table td:first-child {
+             border-right: 1px solid var(--light-border);
+         }
+         #defining-pair-table td, #defining-pair-table th {
+             width: auto;
+             text-align: center;
+             padding: 0 0.5em;
+         }
+
+         #morphism-preview-table thead tr {
+             position: relative;
+             display: inline-block;
+         }
+
+         #morphism-preview-table thead th {
+             display: block;
+             padding: 0 0.5em;
+             float: left;
+             text-align: center;
+         }
+
+         #morphism-preview-table tbody {
+             display: block;
+             max-height: 15em;
+             overflow-y: auto;
+             overflow-x: hidden;
+         }
+
+         #morphism-preview-table tbody tr {
+             display: inline-block;
+         }
+
+         #morphism-preview-table tbody td {
+             display: inline-block;
+             padding: 0 0.5em;
+             float: left;
+             text-align: center;
+         }
+
+         #halo {
+             border: 2px dotted #aaaaff;
+             position: fixed;
+             pointer-events: none;
+             z-index: 10000;
+             background-color: rgba(0,0,0,0);
+         }
+
+
+         /* Sheet Control Panel */
+
+         #controls {
+             width: 20em;
+             border-left: 1px solid black;
+             background-color: white;
+             padding: 0.2em;
+             overflow-y: auto;
+             display: flex;
+             flex-direction: column;
+             justify-content: flex-start;
+         }       
+
+         #controls > * {
+             padding:0 0.3em 0 1em;
+         }
+
+         #controls > * > p {
+             font-size: x-large;
+             margin-block-end: 0.3em;
+             margin-left: -0.5em;
+         }
+
+         #controls button {
+             font-size: inherit;
+             height: auto;
+             width: auto;
+             margin: 0 0.3em;             
+             padding: 0.3em;             
+         }
+
+         #visualizer-select-group {
+             display: grid;
+             grid-template-columns: 1em auto 1.5em 1fr 1em;
+             grid-template-areas: ". label . selection .";
+             font-size: medium;
+             margin: 0.3em auto 0.7em;
+         }
+         #visualizer-select-group > span {
+             font-size: large;
+             align-self: center;
+             grid-area: label;
+         }
+         #visualizer-select-group .faux-selection {
+             grid-area: selection;
+         }
+         .faux-selection {
+             position: relative;
+             float: right;
+             padding: 1 0;
+             background-image: var(--light-gradient);
+             border: 1px solid var(--gray6);
+             height: calc(1.5em - 4px);
+             line-height: calc(1.5em - 4px);
+         }
+         .faux-selection-value {
+             float: left;
+             padding-left: 0.5em;
+             padding-right: 1em;
+         }
+         .faux-selection-arrow {
+             margin-top: calc(calc(1.5em - 18px) / 2);
+             margin-right: 4px;
+             border-top: 16px solid #000000;
+             border-right: 6px solid rgba(0,0,0,0);
+             border-left: 6px solid rgba(0,0,0,0);
+             float: right;
+         }
+         .faux-choices {
+             position: absolute;
+             list-style: none;
+             left: -1px;
+             top: -1px;
+             width: calc(100% - 0.5em); /* allow for 0.5em padding at start */
+             padding-inline-start: 0.5em;
+             margin-block-start: 1.4em; /* to align with bottom of selection */
+             z-index: 100;
+             max-height: 20em;
+             overflow-y: auto;
+             background-color: var(--gray1);
+             border: 1px solid var(--gray5);
+             box-shadow: 0px 8px 16px 8px rgba(0, 0, 0, 0.2);
+         }
+
+         #stored-sheets {
+             flex-grow: 1;
+         }
+         
+         #stored-sheet-list {
+             list-style: none;
+             margin: 0.8em 0.3em 0;
+             max-height: 20em;
+             min-height: 5em;
+             overflow-y: auto;
+             padding-inline-start: 0;
+             background-color: var(--gray1);
+             border: 1px solid var(--gray6);
+         }
+        </style>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+        <script type="module" src="./Sheet.js"></script>
+    </head>
+
+    <body>
+        <div id="bodyDouble">
+            <div id="header">
+                <div id="heading">Group Explorer Sheet</div>
+            </div>
+            <div id="graphic" onchange="$(event.target).filter('.echoed').siblings().val($(event.target).val())">
+                <div id="halo" class="hidden"></div>
+
+                <div id="element-context-menu" data-action="() => void 0" class="context-menu">
+                    <div  data-action="listener = new MoveResizeSelectedNode(this.modelElement, event)"
+                          class="Node choice">Resize</div>
+                    <div data-action="this.createEditor(event)" class="choice">Edit</div>
+                    <div data-action="this.openInfo(event)" class="Visualizer choice">Group Info</div>
+                    <div data-action="this.modelElement.copy(), this.exit()" class="Node choice">Copy</div>
+                    <hr class="Node">
+                    <div data-action="this.createLink(event, 'Connector')" class="Node choice">Create Connection</div>
+                    <div data-action="this.createLink(event, 'Morphism')" class="Visualizer choice">Create Map</div>
+                    <hr class="Node">
+                    <div data-action="this.modelElement.moveForward()" class="Node choice">Move Forward</div>
+                    <div data-action="this.modelElement.moveBackward()" class="Node choice">Move Backward</div>
+                    <div data-action="this.modelElement.moveToFront()" class="Node choice">Move to Front</div>
+                    <div data-action="this.modelElement.moveToBack()" class="Node choice">Move to Back</div>
+                    <hr>
+                    <div data-action="this.modelElement.destroy(), this.exit()" class="choice">Delete</div>
+                </div>
+            </div>
+
+            <div id="controls">
+                <div id="add-element">
+                    <p>Add element:</p>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; margin-bottom: 1em">
+                        <button data-action="this.addElement('RectangleElement')">Rectangle</button>
+                        <button data-action="this.addElement('TextElement')">Text box</button>
+                    </div>
+                </div>
+
+                <div id="add-visualizer">
+                    <p>Add visualizer:</p>
+
+                    <div id="visualizer-select-group"
+                         data-action="$('#visualizer-select-group .faux-choices').toggle()">
+                        <span>Group:</span>
+                        <div class="faux-selection">
+                            <div class="faux-selection-arrow"></div>
+                            <span class="faux-selection-value"></span>
+                            <ol class="faux-choices hidden display-none-on-clean"></ol>
+                            <template id="visualizer-group-list-entry">
+                                <span data-value="${group.URL}">${MathML.toHTMLString(group.name)}</span>
+                            </template>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; margin-bottom: 0.5em">
+                        <button data-action="this.addElement('CDElement')">Cayley<br>diagram</button>
+                        <button data-action="this.addElement('MTElement')">Multiplication<br>table</button>
+                        <button data-action="this.addElement('CGElement')">Cycle<br>graph</button>
+                    </div>
+                </div>
+
+                <p style="font-size: large; margin-block-start: 2em">Right-click/tap any object in the sheet for more options</p>
+
+                <div id="stored-sheets">
+                    <p>Stored sheets:</p>
+                    <ul id="stored-sheet-list" data-action="this.showStoredSheetMenu(event)"></ul>
+                    <template id="stored-sheets-list-empty-entry-template">
+                        <li style="padding: 0 1em"><i>(None)</i></li>
+                    </template>
+                    <template id="stored-sheets-list-entry-template">
+                        <li style="padding: 0 1em" class="choice">${sheetName}</li>
+                    </template>
+
+                    <div id="new-sheet-dialog" class="draggable hidden controls-modal" data-action="() => void 0"
+                         style="position: fixed; padding: 1em; background-color: white; z-index: 1000">
+                        <div>Enter new stored sheet name (may have HTML):</div>
+                        <input id="new-sheet-value" type="text" placeholder="My new sheet" minlength="1" maxlength="120"
+                               onkeydown="if (event.key == 'Enter') $('#new-sheet-dialog button:first-of-type').click()"
+                               style="font-size: inherit; margin: 0.5em 0; width: 25em">
+                        <div style="padding: 0.5em 2em 0">
+                            <button data-action="this.saveNewSheet()" style="width: 5em">OK</button>
+                            <button style="width: 5em; float: right" data-action="this.exit()">Cancel</button>
+                        </div>
+                    </div>
+
+                    <div id="import-sheet-dialog" class="draggable hidden controls-modal"
+                         data-action="() => void 0"
+                         style="position: fixed; padding: 1em; background-color: white">
+                        <div>Enter sheet data to import (JSON):</div>
+                        <textarea id="import-sheet-value" cols="40" rows="5"
+                                  style="font-size: inherit; margin: 0.5em 0; resize: none"></textarea>
+                        </textarea>
+                        <div style="padding: 0.5em 2em 0">
+                            <button style="width: 5em" data-action="this.importSheetData()">OK</button>
+                            <button style="width: 5em; float: right" data-action="this.exit()">Cancel</button>
+                        </div>
+                    </div>
+
+                    <div id="export-sheet-dialog" class="draggable hidden controls-modal"
+                         data-action="() => void 0"
+                         style="position: fixed; padding: 1em; background-color: white">
+                        <div>Sheet export data (JSON):</div>
+                        <textarea id="export-sheet-value" cols="40" rows="5"
+                                  style="font-size: inherit; margin: 0.5em 0; resize: none">
+                        </textarea>
+                        <div style="padding: 0.5em 2em 0">
+                            <button data-action="this.exit()"
+                                    style="width: 5em; display: block; margin: auto">OK</button>
+                        </div>
+                    </div>
+
+                    <div id="stored-sheets-menu" class="context-menu hidden display-none-on-clean"
+                         style="position: fixed; left: 4em">
+                        <ul style="list-style: none; margin-block-start: 0; margin-block-end: 0; padding-inline-start: 0; ">
+                            <li data-action="this.loadSheet(event)" class="choice">Load to current sheet</li>
+                            <li data-action="this.saveSheet(event)" class="choice">Update from current sheet</li>
+                            <li data-action="this.deleteSheet(event)" class="choice">Delete</li>
+                            <hr>
+                            <li data-action="this.createSheet(event)" class="choice">Save current sheet</li>
+                            <li data-action="this.exportSheet(event)" class="choice">Export current sheet as JSON</li>
+                            <li data-action="this.importSheet(event)" class="choice">Import JSON to current sheet</li>
+                            <li data-action="Controls.loadStoredSheets(event); this.exit()" class="choice">Refresh list</li>
+                        </ul>
+                    </div>
+
+                    <div id="empty-stored-sheets-menu" class="context-menu hidden display-none-on-clean"
+                         style="position: fixed; left: 4em">
+                        <ul style="list-style: none; margin-block-start: 0; margin-block-end: 0; padding-inline-start: 0; ">
+                            <li data-action="this.createSheet(event)" class="choice">Save current sheet</li>
+                            <li data-action="this.exportSheet(event)" class="choice">Export current sheet as JSON</li>
+                            <li data-action="this.importSheet(event)" class="choice">Import JSON to current sheet</li>
+                            <li data-action="Controls.loadStoredSheets(event); this.exit()" class="choice">Refresh list</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div id="redisplay-sheets" style="margin-bottom: 2em">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr">
+                        <button data-action="View.redrawAll(); this.exit()">Redraw</button>
+                        <button data-action="Model.clear(); this.exit()">Clear</button>
+                    </div>
+                </div>                    
+            </div>
+
+            <!-- Model element editors
+
+                 data-onload and data-onupdate contain javascript that is execuated (eval'd) in a context where:
+                 'this' refers to the HTML element containing the data-* attributes, and
+                 'model' refers to the model element being edited
+            -->
+            <div id="rectangle-editor" class="editor draggable" style="padding: 0 1em">
+                <p>Background color:
+                    <input type="color" style="margin-left: 1em"
+                           data-onload="$(this).val(`#${new THREE.Color(model.color).getHexString()}`)"
+                           data-onupdate="model.color = $(this).val()">
+                </p>
+                <p><button data-action="this.commit()">OK</button>
+                    <button data-action="this.rollback()">Cancel</button>
+                </p>
+            </div>
+
+            <div id="text-editor" class="editor draggable" style="padding: 0 1em">
+                <p>Text:<br>
+                    <textarea rows="4" cols="50"
+                              data-onload="$(this).val(model.text)"
+                              data-onupdate="model.text = $(this).val().trim()"></textarea><br>
+                    <input id="displayAsHTML" type="checkbox"
+                           data-onload="$(this).prop('checked', model.isPlainText)"
+                           data-onupdate="model.isPlainText = $(this).prop('checked')">
+                    <label for="displayAsHTML">Display as plain text (not HTML)</label>
+                </p>
+                <p>Text color:
+                    <input type="color" style="margin-left: 1em"
+                           data-onload="$(this).val(`#${new THREE.Color(model.fontColor).getHexString()}`)"
+                           data-onupdate="model.fontColor = $(this).val()">
+                </p>
+                <p>Text size:
+                    <input id="font-size" class="echoed" type="text" size="3"
+                           style="margin-left: 1em; text-align: right"
+                           data-onload="$(this).val(`${parseInt(model.fontSize)}`)"
+                           data-onupdate="model.fontSize = $(this).val() + $('#font-size-units').text()">
+                    <label id="font-size-units" for="font-size"
+                           data-onload="$(this).text(model.fontSize.match(/[a-z]+/g) == undefined ?
+                               'px' : model.fontSize.match(/[a-z]+/g)[0])"></label>
+                    <br>
+                    <input class="echoed" type="range" min="8" max="64" style="margin: 0 5%"
+                           data-onload="$(this).val(`${parseInt(model.fontSize)}`)">
+                </p>
+                <p style="margin-block-end: 0">Alignment:<br>
+                    <input id="alignLeft" value="left" name="alignment" type="radio" style="margin-left: 3em"
+                           data-onload="$(this).prop('checked', model.alignment == this.value)"
+                           data-onupdate="model.alignment = $(this).prop('checked') ? this.value : model.alignment">
+                    <label for="alignLeft">left</label>
+                    <input id="alignCenter" value="center" name="alignment" type="radio"
+                           data-onload="$(this).prop('checked', model.alignment == this.value)"
+                           data-onupdate="model.alignment = $(this).prop('checked') ? this.value : model.alignment">
+                    <label for="alignCenter">center</label>
+                    <input id="alignRight" value="right" name="alignment" type="radio"
+                           data-onload="$(this).prop('checked', model.alignment == this.value)"
+                           data-onupdate="model.alignment = $(this).prop('checked') ? this.value : model.alignment">
+                    <label for="alignRight">right</label>
+                </p>
+                <p>Background color:
+                    <input type="color" style="margin-left: 1em"
+                           data-onload="$(this).val(`#${new THREE.Color(model.color).getHexString()}`)"
+                           data-onupdate="model.color = $(this).val()">
+                </p>
+                <p>Background opacity:
+                    <input class="echoed" type="text" size="3" style="margin-left: 1em; text-align: center"
+                           data-onload="$(this).val(`${model.opacity}`)"
+                           data-onupdate="model.opacity = $(this).val()"><br>
+                    <input class="echoed" type="range" min="0" max="1" step="0.01" style="margin: 0 5%"
+                           data-onload="$(this).val(`${model.opacity}`)">
+                </p>
+                <p><button data-action="this.commit()">OK</button>
+                    <button data-action="this.rollback()">Cancel</button></p>
+            </div>
+
+            <div id="connecting-editor" class="editor draggable" style="padding: 0 1em; min-width: 15em">
+                <p>Line color:
+                    <input type="color" style="margin-left: 1em"
+                           data-onload="$(this).val(`#${new THREE.Color(model.color).getHexString()}`)"
+                           data-onupdate="model.color = $(this).val()">
+                </p>
+                <p>Line thickness:
+                    <input class="echoed" type="text" size="3" value="5" style="margin-left: 1em; text-align: center"
+                           data-onload="$(this).val(`${model.thickness}`)"
+                           data-onupdate="model.thickness = parseInt($(this).val())"><br>
+                    <input class="echoed" type="range" min="1" max="20" style="margin: 0 5%"
+                           data-onload="$(this).val(`${model.thickness}`)">
+                </p>
+                <p><input id="drawArrowhead" type="checkbox"
+                          data-onload="$(this).prop('checked', model.hasArrowhead)"
+                          data-onupdate="model.hasArrowhead = $(this).prop('checked')">
+                    <label for="drawArrowhead">Draw arrowhead</label>
+                </p>
+                <p><button data-action="this.commit()">OK</button>
+                    <button data-action="this.rollback()">Cancel</button>
+                    <button data-action="this.destroy()" style="float: right">Delete</button>
+                </p>
+            </div>
+
+            <div id="morphism-editor" class="editor draggable" style="padding: 0.5em; min-width: 30em;"
+                 onclick="event.stopPropagation(), $('#codomain-choices').hide(), $('#domain-choices').hide()">
+                <p>Morphism name:
+                    <input type="text"
+                           data-onload="$(this).val(model.name)"
+                           data-onupdate="model.name = $(this).val().trim(); $('#morphism-name').html(model.name)">
+                </p>
+                <p><input id="showDomainCodomain" type="checkbox"
+                          data-onload="$(this).prop('checked', model.showDomainAndCodomain)"
+                          data-onupdate="model.showDomainAndCodomain = $(this).prop('checked')">
+                    <label for="showDomainCodomain">Show domain and codomain</label>
+                </p>
+                <p><input id="showDefiningPairs" type="checkbox"
+                          data-onload="$(this).prop('checked', model.showDefiningPairs)"
+                          data-onupdate="model.showDefiningPairs = $(this).prop('checked')">
+                    <label for="showDefiningPairs">Show defining pairs</label>
+                </p>
+                <p><input id ="showInjectiveSurjective" type="checkbox"
+                          data-onload="$(this).prop('checked', model.showInjectionSurjection)"
+                          data-onupdate="model.showInjectionSurjection = $(this).prop('checked')">
+                    <label for="showInjectiveSurjective">Show injective/surjective</label>
+                </p>
+                <p><input id="showManyArrows" type="checkbox"
+                          data-onload="$(this).prop('checked', model.showManyArrows)"
+                          data-onupdate="model.showManyArrows = $(this).prop('checked')">
+                    <label for="showManyArrows">Draw multiple arrows</label>
+                </p>
+                <p>Arrows margin:
+                    <input class="echoed" type="text" size="3" style="margin-left: 1em; text-align: center"
+                           data-onload="$(this).val(`${100*model.arrowMargin}`)"
+                           data-onupdate="model.arrowMargin = $(this).val()/100"><br>
+                    <input class="echoed" type="range" min="0" max="5" step="0.1" style="margin: 0 5%; width: min(90%, 40em)"
+                           data-onload="$(this).val(`${100*model.arrowMargin}`)">
+                </p>
+                <hr>
+                <p>Define homomorphism:</p>
+                <table id="defining-pair-table">
+                    <thead>
+                        <tr>
+                            <th>This element</th>
+                            <th>Maps to this</th>
+                            <th style="width: 3em"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="morphism-defining-pairs" data-onload="model.fillDefiningPairs(this)">
+                        <tr id="empty-morphism-state">
+                            <td colspan="3"><center><i>No pairs added yet</i></center></td>
+                        </tr>
+                    </tbody>
+                    <template id="morphism-editor-defining-pair-template">
+                        <tr id="defining-pair-${domainElement}">
+                            <td>${MathML.toHTMLString(this.source.group.representation[domainElement])}</td>
+                            <td>${MathML.toHTMLString(this.destination.group.representation[codomainElement])}</td>
+                            <td style="padding: 0">
+                                <button data-action="this.modelElement.removeDefiningPair(${domainElement})"
+                                        style="float: right">Remove</button></td>
+                        </tr>
+                    </template>
+                </table>
+                <br>
+                <div id="morphism-add-defining-pair"
+                     style="display: flex; align-items: center; justify-content: center">
+                    <button data-action="this.modelElement.addDefiningPair()" style="margin-right: 0.5em">Add</button>
+                    <span id="morphism-name" data-onload="$(this).html(model.name)"></span>
+                    (<div id="domain-select"
+                          onclick="$('#domain-choices').toggle(); $('#codomain-choices').hide(); event.stopPropagation()">
+                        <div class="faux-selection">
+                            <div class="faux-selection-arrow"></div>
+                            <span id="domain-selection" class="faux-selection-value"></span>
+                            <ol id="domain-choices" class="faux-choices hidden display-none-on-clean"></ol>
+                        </div>
+                        <template id="morphism-domain-choice-template">
+                            <li class="choice" data-action="this.modelElement.setDomain(${element})">
+                                ${MathML.toHTMLString(this.source.group.representation[element])}
+                            </li>
+                        </template>
+                    </div>)
+                    =
+                    <div id="codomain-select" style="margin-left: 0.5em"
+                         onclick="$('#codomain-choices').toggle(); $('#domain-choices').hide(); event.stopPropagation()">
+                        <div class="faux-selection">
+                            <div class="faux-selection-arrow"></div>
+                            <span id="codomain-selection" class="faux-selection-value"></span>
+                            <ol id="codomain-choices" class="faux-choices hidden display-none-on-clean"></ol>
+                        </div>
+                        <template id="morphism-codomain-choice-template">
+                            <li class="choice" data-action="this.modelElement.setCodomain(${element})">
+                                ${MathML.toHTMLString(this.destination.group.representation[element])}
+                            </li>
+                        </template>
+                    </div>
+                </div>
+                <div id="morphism-preview">
+                    <p data-action="$('#morphism-preview .toggled').toggle(), this.modelElement.displayPreview()">
+                        <span class="toggled">+</span>
+                        <span class="toggled hidden">-</span>
+                        Full morphism mapping:
+                    </p>
+                    <table id="morphism-preview-table" class="toggled hidden">
+                        <thead>
+                            <tr>
+                                <th>This element</th>
+                                <th>Maps to this</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                        <template id="morphism-preview-row-template">
+                            <tr>
+                                <td>${MathML.toHTMLString(this.source.group.representation[domainElement])}</td>
+                                <td>${MathML.toHTMLString(this.destination.group.representation[codomainElement])}</td>
+                            </tr>
+                        </template>
+                    </table>
+                </div>
+                <p><button data-action="this.commit()">OK</button>
+                    <button data-action="this.rollback()">Cancel</button>
+                    <button data-action="this.destroy()" style="float: right">Delete morphism</button>
+                </p>
+            </div>
+
+            <div id="linking-indicator" class="draggable hidden">
+                <center>Select target</center>
+                <button id="linking-indicator-cancel">Cancel</button>
+            </div>
+        </div>
+    </body>
 </html>

@@ -378,8 +378,23 @@ export class CycleGraphView /*:: implements VizDisplay<CycleGraphJSON> */ {
                   x: this.transform.elements[6] + untranslatedCanvasCoords.x,
                   y: this.transform.elements[7] + untranslatedCanvasCoords.y
               };
+        
         return { x: translatedCanvasCoords.x / this.canvas.width,
                  y: translatedCanvasCoords.y / this.canvas.height };
+    }
+
+    // Answer the question of where in the diagram each element is drawn.
+    // We answer in normalized coordinates, [0,1]x[0,1].
+    unitSquarePositions () /*: Array<THREE.Vector2> */ {
+        const scaled_transform = new THREE.Matrix3()
+              .set(1/this.canvas.width, 0, 0, 0, 1/this.canvas.height, 0, 0, 0, 1)
+              .multiply(this.transform);
+
+        const unit_square_positions = this.group.elements.map( (element) => {
+            return new THREE.Vector2(this.positions[element].x, this.positions[element].y).applyMatrix3(scaled_transform)
+        } );
+
+        return unit_square_positions;
     }
 
     // two serialization functions
@@ -759,13 +774,13 @@ function mutate(x /*: float */, y /*: float */, alpha /*: float */, beta /*: flo
 }
 
 
-export function createUnlabelledCycleGraphView (options /*: CycleGraphOptions */) {
+export function createUnlabelledCycleGraphView (options /*: CycleGraphOptions */ = {}) {
     const view = new CycleGraphView(options);
     view.displays_labels = false;
     return view;
 }
 
-export function createLabelledCycleGraphView (options /*: CycleGraphOptions */) {
+export function createLabelledCycleGraphView (options /*: CycleGraphOptions */ = {}) {
     const view = new CycleGraphView(options);
     view.displays_labels = true;
     return view;

@@ -13,7 +13,7 @@ import XMLGroup from './XMLGroup.js';
 
 import {actionClickHandler} from '../GroupInfo.js';
 
-import {CreateNewSheet} from './SheetModel.js';
+import * as SheetModel from './SheetModel.js';
 
 export {summary, display, showSubgroupLattice, showEmbeddingSheet, showQuotientSheet};
 
@@ -54,14 +54,14 @@ function summary (group /*: XMLGroup */) {
     return `${group.subgroups.length} subgroups`;
 }
 
-function display (group /*: XMLGroup */, $wrapper /*: jQuery */) {
+function display (group /*: XMLGroup */, $wrapper /*: JQuery */) {
     Load_Promise
         .then( (templates) => {
             if ($('template[id|="subgroups"]').length == 0) {
                 $('body').append(templates);
             }
 
-            $wrapper.empty().append(formatSubgroupInfo(group));
+            $wrapper.html(formatSubgroupInfo(group));
 
             MathJax.Hub.Queue(['Typeset', MathJax.Hub, $wrapper[0]]);
             setUpGAPCells(group, $wrapper);
@@ -73,27 +73,27 @@ function formatSubgroupInfo (group /*: XMLGroup */) /*: DocumentFragment */ {
     Group = group;
     Cayley_Diagram_View = createUnlabelledCayleyDiagramView( { width : 50, height : 50 } );
 
-    const $rslt = $(document.createDocumentFragment())
+    const $frag = $(document.createDocumentFragment())
           .append(eval(Template.HTML('subgroups-header-template')));
 
     if (Group.isSimple) {
-        $rslt.find('#not-simple').remove();
+        $frag.find('#not-simple').remove();
     } else {
-        $rslt.find('#simple').remove();
+        $frag.find('#simple').remove();
     }
 
     for (let inx = 0; inx < Group.subgroups.length; inx++) {
-        $rslt.find('tbody').append(subgroupInfo(inx)).html();
+        $frag.find('tbody').append(subgroupInfo(inx)).html();
     }
 
-    if ($rslt.find('li.subgroups-no-isomorphism').length == 0) {
-        $rslt.find('#subgroups-no-isomorphism-reason').remove();
+    if ($frag.find('li.subgroups-no-isomorphism').length == 0) {
+        $frag.find('#subgroups-no-isomorphism-reason').remove();
     }
-    if ($rslt.find('li.subgroups-no-quotient-group').length == 0) {
-        $rslt.find('#subgroups-no-quotient-group-reason').remove();
+    if ($frag.find('li.subgroups-no-quotient-group').length == 0) {
+        $frag.find('#subgroups-no-quotient-group-reason').remove();
     }
 
-    return $rslt;
+    return (($frag[0] /*: any */) /*: DocumentFragment */);
 }
 
 function subgroupInfo (index /*: number */) {
@@ -217,7 +217,7 @@ function showSubgroupLattice ( type /*: VisualizerType */ ) {
          // Find the tier containing the next subgroup we can walk to.
          var result /*: Array<Array<null | DecoratedSubgroup>> */ = [ ];
          var initialSegment /*: Array<null | DecoratedSubgroup> */ = [ H ];
-         for ( var tierIdx = H._tierIndex + 1 ; tierIdx < subgroupTiers.length ; tierIdx++ ) {
+         for ( var tierIdx = ((H._tierIndex /*: any */) /*: integer */) + 1 ; tierIdx < subgroupTiers.length ; tierIdx++ ) {
             subgroupTiers[tierIdx]
                .filter( (K /*: DecoratedSubgroup */) => subset( H, K ) && !K._used )
                .map( (K) => {
@@ -237,11 +237,12 @@ function showSubgroupLattice ( type /*: VisualizerType */ ) {
    // Now we write a function that uses the chains structure to compute a position on
    // the sheet for a visualizer of the subgroup.
    const hSize = chains.length, vSize = chains[0].length,
-         cellWidth = Math.min( 300, Math.ceil( 800 / hSize ) ),
+         cellWidth = Math.min( 300, Math.ceil( 0.9 * Math.min(window.innerWidth / hSize, window.innerHeight / (1.5 * vSize)) ) ),
          cellHeight = cellWidth * 1.5,
          hMargin = Math.ceil( cellWidth * 0.1 ),
          vMargin = hMargin + ( cellHeight - cellWidth ) / 2,
-         latticeTop = 100, latticeLeft = 50;
+         latticeTop = 100, latticeLeft = 50,
+         zz = 3;
    function subgroupPosition ( H  /*: Subgroup */ ) /*: {x: number, y: number} */ {
       var x, y;
       if ( ( H.order == 1 ) || ( H.order == Group.order ) ) {
@@ -266,6 +267,30 @@ function showSubgroupLattice ( type /*: VisualizerType */ ) {
          w : cellWidth - 2 * hMargin, h : cellHeight - 2 * vMargin,
          highlights : { background : highlightSubgroup( H ) }
       } );
+            
+      
+/* Haas diagram?
+      if (type === 'TextElement') {
+         const subgroupIndex = Group.subgroups.findIndex((g) => g == H)
+         const caption = `<span display="inline-block"><i>H</i><sub>${subgroupIndex}</sub>&nbsp;=&nbsp⟨ </span>` +
+            H.generators.toArray().map((gen) => '<span display="inline-block">' + MathML.toHTMLString(Group.representation[gen])).join(', </span>') +
+            '</span>&nbsp;⟩'
+         console.log(caption)
+         const myHMargin = hMargin
+         sheetElement = {
+            className: 'TextElement',
+            text: caption,
+            fontColor: 'black',
+            color: '#d8d8d8',
+            alignment: 'center',
+            fontSize: cellHeight/15 + 'px',
+            x: pos.x + myHMargin,
+            y: pos.y + vMargin,
+            w: cellWidth - 2 * myHMargin,
+            h: 0
+         }
+*/
+
    } );
    // Connect every pair of subgroups that don't have an intermediate connection.
    function existsIntermediateSubgroup ( H /*: Subgroup */, K /*: Subgroup */ ) /*: boolean */ {
@@ -281,7 +306,8 @@ function showSubgroupLattice ( type /*: VisualizerType */ ) {
       Group.subgroups.map( ( K, j ) => {
          if ( ( H != K ) && subset( H, K ) && !existsIntermediateSubgroup( H, K ) ) {
             sheetElementsAsJSON.push( {
-               className : 'ConnectingElement', fromIndex : i, toIndex : j
+               className : 'ConnectingElement', fromIndex : i, toIndex : j,
+                thickness : 2, hasArrowhead : false
             } );
          }
       } );
@@ -289,7 +315,7 @@ function showSubgroupLattice ( type /*: VisualizerType */ ) {
    // Add a title.
    sheetElementsAsJSON.push( {
       className : 'TextElement',
-      text : `Subgroup Lattice for the Group ${MathML.toUnicode( Group.name )}`,
+      text : `Subgroup Lattice for the Group ${MathML.toHTMLString( Group.name )}`,
       x : latticeLeft, y : latticeTop / 2,
       w : hSize * cellWidth, h : latticeTop / 2,
       fontSize : '20pt', alignment : 'center'
@@ -304,9 +330,9 @@ function showEmbeddingSheet ( indexOfH /*: number */, type /*: VisualizerType */
    CreateNewSheet( [
       {
          className : 'TextElement',
-         text : `Embedding ${MathML.toUnicode( libraryH.name )} as `
-              + MathML.toUnicode( `<msub><mi>H</mi><mn>${indexOfH}</mn></msub>` )
-              + ` in ${MathML.toUnicode( Group.name )}`,
+         text : `Embedding ${MathML.toHTMLString( libraryH.name )} as `
+              + MathML.toHTMLString( `<msub><mi>H</mi><mn>${indexOfH}</mn></msub>` )
+              + ` in ${MathML.toHTMLString( Group.name )}`,
          x : 50, y : 50, w : 500, h : 40,
          fontSize : '20pt', alignment : 'center'
       },
@@ -327,7 +353,7 @@ function showEmbeddingSheet ( indexOfH /*: number */, type /*: VisualizerType */
       },
       {
          className : 'MorphismElement',
-         fromIndex : 1, toIndex : 2, name : MathML.toUnicode( '<mi>e</mi>' ),
+         fromIndex : 1, toIndex : 2, name : MathML.toHTMLString( '<mi>e</mi>' ),
          definingPairs : libraryH.generators[0].map( gen =>
             [ gen, embedding[gen] ] ),
          showManyArrows : true, showInjSurj : true
@@ -336,10 +362,11 @@ function showEmbeddingSheet ( indexOfH /*: number */, type /*: VisualizerType */
 }
 
 function showQuotientSheet ( indexOfN /*: number */, type /*: VisualizerType */) {
+   const adj = Math.min(window.innerWidth, window.innerHeight)/1100
    const N = Group.subgroups[indexOfN],
          [ libraryQ, quotientMap ] = ((IsomorphicGroups.findQuotient( Group, N ) /*: any */) /*: [XMLGroup, Array<groupElement>] */),
          [ libraryN, embedding ] = ((IsomorphicGroups.findEmbedding( Group, N ) /*: any */) /*: [XMLGroup, Array<groupElement>] */),
-         L = 25, T = 150, W = 120, H = W, gap = 100;
+         L = 25*adj, T = 150*adj, W = 120*adj, H = W, gap = 100*adj;
    function shrink ( order, x, y, w, h ) {
       const factor = 0.5 * ( 1 + order / Group.order ),
             hMargin = ( w - factor * w ) / 2,
@@ -370,18 +397,18 @@ function showQuotientSheet ( indexOfN /*: number */, type /*: VisualizerType */)
    CreateNewSheet( [
       {
          className : 'TextElement',
-         x : L, y : T-100, w : 5*W+4*gap, h : 50,
+         x : L, y : T-100*adj, w : 5*W+4*gap, h : 50,
          text : 'Short Exact Sequence showing '
-              + MathML.toUnicode( Group.name ) + ' / '
-              + MathML.toUnicode( libraryN.name ) + ' ≅ '
-              + MathML.toUnicode( libraryQ.name ),
-         fontSize : '20pt', alignment : 'center'
+              + MathML.toHTMLString( Group.name ) + ' / '
+              + MathML.toHTMLString( libraryN.name ) + ' ≅ '
+              + MathML.toHTMLString( libraryQ.name ),
+         fontSize : `${20*adj}pt`, alignment : 'center'
       },
       {
          className : 'TextElement',
          x : L, y : T-50, w : W, h : 50,
-         text : MathML.toUnicode( '<msub><mi>Z</mi><mn>1</mn></msub>' ),
-         alignment : 'center'
+         text : MathML.toHTMLString( '<msub><mi>Z</mi><mn>1</mn></msub>' ),
+         alignment : 'center', fontSize : `${12*adj}pt`
       },
       {
          className : type, groupURL : './groups/Trivial.group',
@@ -391,7 +418,7 @@ function showQuotientSheet ( indexOfN /*: number */, type /*: VisualizerType */)
       {
          className : 'TextElement',
          x : L+W+gap, y : T-50, w : W, h : 50,
-         text : MathML.toUnicode( libraryN.name ), alignment : 'center'
+         text : MathML.toHTMLString( libraryN.name ), alignment : 'center', fontSize : `${12*adj}pt`
       },
       {
          className : type, groupURL : libraryN.URL,
@@ -401,7 +428,7 @@ function showQuotientSheet ( indexOfN /*: number */, type /*: VisualizerType */)
       {
          className : 'TextElement',
          x : L+2*W+2*gap, y : T-50, w : W, h : 50,
-         text : MathML.toUnicode( Group.name ), alignment : 'center'
+         text : MathML.toHTMLString( Group.name ), alignment : 'center', fontSize : `${12*adj}pt`
       },
       {
          className : type, groupURL : Group.URL,
@@ -411,7 +438,7 @@ function showQuotientSheet ( indexOfN /*: number */, type /*: VisualizerType */)
       {
          className : 'TextElement',
          x : L+3*W+3*gap, y : T-50, w : W, h : 50,
-         text : MathML.toUnicode( libraryQ.name ), alignment : 'center'
+         text : MathML.toHTMLString( libraryQ.name ), alignment : 'center', fontSize : `${12*adj}pt`
       },
       {
          className : type, groupURL : libraryQ.URL,
@@ -421,8 +448,8 @@ function showQuotientSheet ( indexOfN /*: number */, type /*: VisualizerType */)
       {
          className : 'TextElement',
          x : L+4*W+4*gap, y : T-50, w : W, h : 50,
-         text : MathML.toUnicode( '<msub><mi>Z</mi><mn>1</mn></msub>' ),
-         alignment : 'center'
+         text : MathML.toHTMLString( '<msub><mi>Z</mi><mn>1</mn></msub>' ),
+         alignment : 'center', fontSize : `${12*adj}pt`
       },
       {
          className : type, groupURL : './groups/Trivial.group',
@@ -432,32 +459,32 @@ function showQuotientSheet ( indexOfN /*: number */, type /*: VisualizerType */)
       {
          className : 'TextElement',
          x : L+W+gap, y : T+H+25, w : W, h : 50,
-         text : MathML.toUnicode(
+         text : MathML.toHTMLString(
             '<mrow>'
             + '<mi>Im</mi><mfenced open="(" close=")"><mi>id</mi></mfenced>'
             + '<mo>=</mo>'
             + '<mi>Ker</mi><mfenced open="(" close=")"><mi>e</mi></mfenced>'
-            + '</mrow>' ), alignment : 'center'
+            + '</mrow>' ), alignment : 'center', fontSize : `${12*adj}pt`
       },
       {
          className : 'TextElement',
          x : L+2*W+2*gap, y : T+H+25, w : W, h : 50,
-         text : MathML.toUnicode(
+         text : MathML.toHTMLString(
             '<mrow>'
             + '<mi>Im</mi><mfenced open="(" close=")"><mi>e</mi></mfenced>'
             + '<mo>=</mo>'
             + '<mi>Ker</mi><mfenced open="(" close=")"><mi>q</mi></mfenced>'
-            + '</mrow>' ), alignment : 'center'
+            + '</mrow>' ), alignment : 'center', fontSize : `${12*adj}pt`
       },
       {
          className : 'TextElement',
          x : L+3*W+3*gap, y : T+H+25, w : W, h : 50,
-         text : MathML.toUnicode(
+         text : MathML.toHTMLString(
             '<mrow>'
             + '<mi>Im</mi><mfenced open="(" close=")"><mi>q</mi></mfenced>'
             + '<mo>=</mo>'
             + '<mi>Ker</mi><mfenced open="(" close=")"><mi>z</mi></mfenced>'
-            + '</mrow>' ), alignment : 'center'
+            + '</mrow>' ), alignment : 'center', fontSize : `${12*adj}pt`
       },
       {
          className : 'MorphismElement', name : 'id',
@@ -484,4 +511,9 @@ function showQuotientSheet ( indexOfN /*: number */, type /*: VisualizerType */)
          definingPairs : libraryQ.generators[0].map( gen => [ gen, 0 ] )
       }
    ] );
+}
+
+function CreateNewSheet (oldJSONArray /*: Array<Obj> */) {
+    const newJSONArray = SheetModel.convertFromOldJSON(oldJSONArray)
+    SheetModel.createNewSheet(newJSONArray)
 }

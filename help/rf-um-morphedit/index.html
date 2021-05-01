@@ -140,6 +140,11 @@ appearance of the homomorphism as an object in a
 <p>This is filled with some default text, which will be shown in a small
 rectangular label on the morphism arrow in the sheet, as shown below.</p>
 <p><img alt="A screenshot of a homomorphism" src="../illustration-morph1.png" /></p>
+<p>The morphism name is displayed as HTML, so, as described
+<a href="#rf-um-sheetwindow.md#text-and-html-input">here</a>, if you would like the
+morphism name to appear as &ldquo;f<sub>2</sub>&ldquo;, you may enter &ldquo;f&lt;sub&gt;2&lt;/sub&gt;&rdquo;,
+and the following will be displayed:</p>
+<p><img alt="A screenshot of a homomorphism with subscripted name" src="../illustration-morph1a.png" /></p>
 <h3 id="show-domain-and-codomain">Show domain and codomain</h3>
 <p>If the checkbox beneath it, &ldquo;Show domain and codomain,&rdquo; is checked, then the
 label will be slightly larger, including the specified information, as shown
@@ -175,6 +180,14 @@ multiplication table is used. The endpoint of the arrows is determined by
 the map; in the example below, the map <script type="math/tex">z</script> is the zero map, mapping all
 elements to the identity.</p>
 <p><img alt="A homomorphism with an arrow shown for each element of the domain" src="../illustration-morph5.png" /></p>
+<h3 id="arrows-margin">Arrows margin</h3>
+<p>The arrows margin adjustment determines how far from the center of the
+visualizers&rsquo; representations of the source and target group elements the arrows
+should begin and end.  This can keep the arrowheads from obscuring the target
+element name in a complicated group. The units represent the percentage of the
+distance between the two elements to move the arrowheads away from the
+target. The number and the slider are synchronized, as described
+<a href="../rf-um-sheetwindow/#dialog-inputs">here</a>.</p>
 <h2 id="mathematical-definition-of-the-homomorphism">Mathematical definition of the homomorphism</h2>
 <p>The bottom half of the homomorphism edit window allows you to specify the
 homomorphism as a function, a map from one group to another.</p>
@@ -203,9 +216,13 @@ subgroup <script type="math/tex">\langle a_1,a_2 \rangle</script> have been dete
 those elements will show up in the domain drop-down list, because none are
 assignable any longer.</p>
 <p>When the domain elements of the pairs in the map don&rsquo;t generate the entire
-domain, <em>Group Explorer</em> searches for any homomorphism extending the pairs
-in the table and uses that.  You can click the &ldquo;Preview&rdquo; button to see
-exactly which homomorphism was chosen, or simply add pairs to the map to
+domain, <em>Group Explorer</em> searches for any homomorphism extending the pairs in
+the table and uses that. The display window is continuously updated with the
+current mapping, including <em>Group Explorer&rsquo;s</em> choices for unmapped elements, so
+the arrows shown always represent the current definition. (You may need to
+select &ldquo;Draw multiple arrows&rdquo; to see the full details.) You can also click on
+&ldquo;Full morphism mapping&rdquo; to see a synchronized display of the entire homomorphism
+in tabular form.  Then you can simply continue to add pairs to the map to
 specify exactly the one you want.</p>
 <p>The codomain drop-down list contains only elements that could legitimately
 be the image of the element chosen in the domain drop-down list.  By &ldquo;could
@@ -214,9 +231,10 @@ contains the pairs already added to the map plus the new pair you might add.
 Thus this constraint ensures that you can use the editor to define only
 homomorphisms, not any other kind of function between groups.</p>
 <h3 id="other-buttons">Other buttons</h3>
-<p>The OK button saves your changes to the morphism and closes the dialog.</p>
-<p>The Cancel button closes the dialog without saving your changes into the
+<p>The &ldquo;OK&rdquo; button saves your changes to the morphism and closes the dialog.</p>
+<p>The &ldquo;Cancel&rdquo; button closes the dialog without saving your changes into the
 sheet.</p>
+<p>The &ldquo;Delete morphism&rdquo; button deletes the morphism and closes the dialog.</p>
         </div>
     </div>
 </div>

@@ -60,9 +60,11 @@ Mouse-driven and touch-driven displays have some conceptual differences between 
         * only if event.preventDefault() is not called on either event
 * Double click:
     * On a mouse-only machine a double-click causes the event sequence "mousedown-mouseup-click-mousedown-mouseup-click-dblclick"
-        * unless the mouse moves
-        * unless the clicks are sustained
-        * unless the interval between the clicks is too long
+        * a rapid mousedown-mouseup-click-mousedown always results in a dblclick, even if followed by a mousemove or pause
+        * you just get two separate mousedown-mouseup-click sequences if
+            * the mouse moves more than a few pixels after the first mousedown
+            * there is a pause between the mousedown and the following mouseup
+            * there is a pause between the first click and the following mousedown
         * even if you call event.preventDefault() on all the events
     * On the iPad a double-tap never produces a dblclick event -- you have to implement that in javascript
         * it causes the event sequence "touchstart-touchend-touchstart-touchend" if the taps are in rapid succession

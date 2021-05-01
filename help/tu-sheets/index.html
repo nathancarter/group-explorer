@@ -155,60 +155,62 @@ and
 <p>This creates a new sheet.</p>
 </li>
 <li>
-<p>On the right hand side of the sheet, choose the &ldquo;Cycle graph&rdquo; type of
-   visualizer from the drop-down list and the group <script type="math/tex">\mathbb{Z}_6</script>.
-   Then click the &ldquo;Add this visualizer&rdquo; button.  You should see a small
-   copy of the cycle graph for <script type="math/tex">\mathbb{Z}_6</script> appear on the left of the
-   sheet.  I resized mine slightly and the result was as follows.
-   (To resize a visualizer, click to select it, then drag a corner.)</p>
+<p>In the control window on the right hand side of the sheet, select
+   <script type="math/tex">\mathbb{Z}_6</script> from the &ldquo;Group&rdquo; drop-down list and click the &ldquo;Cycle graph&rdquo;
+   button above it. You should see a small cycle graph for <script type="math/tex">\mathbb{Z}_6</script>
+   appear in the upper left-hand corner of the left side of the sheet. I resized
+   mine slightly and the result was as follows. (To move a visualizer just drag
+   it with the mouse or your finger; to resize it right-click [tap] it and
+   select &lsquo;Resize&rsquo; from the resulting context menu. A light blue outline will
+   appear around the visualizer. Then drag starting outside the element in the
+   direction you&rsquo;d like it to grow. A short click [tap] will dismiss the blue
+   outline. See <a href="../rf-um-sheetwindow/#resizing">here</a> for more details.)</p>
 </li>
 </ul>
 <p><img alt="Sheet containing one cycle graph" src="../illustration-sheettut1.png" /></p>
 <ul>
-<li>But that&rsquo;s just one visualizer; we want to have at least two.
-   So let&rsquo;s repeat the same steps for inserting a cycle graph for
-   <script type="math/tex">S_3</script> as well, but move it a little to the right of the first one,
-   as shown below.</li>
+<li>But that&rsquo;s just one visualizer; we want to have at least two.  So let&rsquo;s
+   repeat the same steps for inserting a cycle graph for <script type="math/tex">S_3</script> as well, but
+   move it a little to the right of the first one, as shown below.</li>
 </ul>
 <p><img alt="Sheet containing two cycle graphs" src="../illustration-sheettut2.png" /></p>
 <ul>
-<li>Now let&rsquo;s start comparing these groups.
-   In group theory, the means of examining relationships between groups
-   is via <a href="../rf-groupterms/#homomorphism">homomorphisms</a>.
-   So let&rsquo;s create one in this sheet, as follows:<ul>
-<li>Click the left cycle graph to select it.</li>
-<li>Click the &ldquo;Map to&rdquo; button (which by default assumes you&rsquo;re creating
-  a &ldquo;map&rdquo; (homomorphism) to the other visualizer in the sheet).</li>
+<li>Now let&rsquo;s start comparing these groups.  In group theory, the means of
+   examining relationships between groups is via
+   <a href="../rf-groupterms/#homomorphism">homomorphisms</a>.  So let&rsquo;s create one in this
+   sheet, as follows:<ul>
+<li>Right-click [tap] the left cycle graph element to open its context
+  menu</li>
+<li>Select the &ldquo;Create Map&rdquo; option from menu</li>
+<li>Click [tap] the other cycle graph, the homomorphism target.</li>
 <li>You should see a new function <script type="math/tex">f</script> appear, connecting the two graphs.</li>
 </ul>
 </li>
 </ul>
 <p><img alt="Sheet containing two cycle graphs connected by a homomorphism f" src="../illustration-sheettut3.png" /></p>
 <ul>
-<li>So far this isn&rsquo;t very informative, but if we double-click the
-   homomorphism we can do all sorts of interesting things.
-   For instance, you can decide which elements from <script type="math/tex">\mathbb{Z}_6</script>
-   should correspond to which elements from <script type="math/tex">S_3</script>.
-   Furthermore, <em>Group Explorer</em> will not let you mess this up
-   (you cannot define a non-homomorphism.)  The morphism editing dialog
-   is shown below.</li>
+<li>So far this isn&rsquo;t very informative, but if we right-click [tap] the
+   morphism label box to open its context menu and select &ldquo;Edit&rdquo;, we can do all
+   sorts of interesting things. For instance, you can decide which elements from
+   <script type="math/tex">\mathbb{Z}_6</script> should correspond to which elements from <script type="math/tex">S_3</script>.
+   Furthermore, <em>Group Explorer</em> will not let you mess this up (you cannot
+   define a non-homomorphism.)  The morphism editing dialog is shown below.</li>
 </ul>
 <p><img alt="Homomorphism editing dialog" src="../illustration-sheettut4.png" /></p>
 <ul>
-<li>The homomorphism defaults to the zero map
-   (all elements map to the identity, in this case <script type="math/tex">e</script>)
-   but you can change it, of course. I will map <script type="math/tex">a</script> to <script type="math/tex">r</script>
-   and then check the &ldquo;Draw multiple arrows&rdquo; box above.
-   The result is the following illustration of one way to map
-   <script type="math/tex">\mathbb{Z}_6</script> to <script type="math/tex">S_3</script>.</li>
+<li>The homomorphism defaults to the zero map (all elements map to the identity,
+   in this case <script type="math/tex">e</script>) but you can change it, of course. I will map <script type="math/tex">a</script> to
+   <script type="math/tex">r</script> and then check the &ldquo;Draw multiple arrows&rdquo; box above.  The result is the
+   following illustration of one way to map <script type="math/tex">\mathbb{Z}_6</script> to <script type="math/tex">S_3</script>.</li>
 </ul>
 <p><img alt="Homomorphism from Z_6 to S_3" src="../illustration-sheettut5.png" /></p>
-<p>The arrows require some attention to follow carefully, but you can see how
-the six-element circle marches around the little three-element circle twice.
-I&rsquo;ve taken the liberty of highlighting <script type="math/tex">\mathbb{Z}_6</script> red and its
-<a href="../rf-groupterms/#image-of-a-subset-under-a-morphism">image</a> in <script type="math/tex">S_3</script> red also. (To do so,
-double-click either of the visualizers and play with its subsets <a href="../rf-um-subsetlistbox/">as
-documented here</a>.)</p>
+<p>The arrows require some attention to follow carefully, but you can see how the
+six-element circle marches around the little three-element circle twice.  I&rsquo;ve
+taken the liberty of highlighting <script type="math/tex">\mathbb{Z}_6</script> red and its
+<a href="../rf-groupterms/#image-of-a-subset-under-a-morphism">image</a> in <script type="math/tex">S_3</script> red
+also. (To do so, open the element context menu for the visualizer you&rsquo;d like to
+highligh and select &ldquo;Edit&rdquo;. Then play with its subsets <a href="../rf-um-subsetlistbox/">as documented
+here</a>.)</p>
 <p><img alt="Homomorphism from Z_6 to S_3 with domain and image highlighted" src="../illustration-sheettut6.png" /></p>
 <p>This is only the beginning of the potential of sheets. The next section
 shows much more.</p>
@@ -223,8 +225,7 @@ providing links for you to browse further yourself.</p>
    <a href="../rf-groupterms/#normal-subgroup">normality</a> of a
    <a href="../rf-groupterms/#subgroup">subgroup</a>
    (and the <a href="../rf-groupterms/#quotient-group">quotient group</a> it computes):<ul>
-<li>Try the &ldquo;tell me more&rdquo; link next to &ldquo;Subgroups&rdquo; in the
-  &ldquo;Computated Properties&rdquo; section of the
+<li>Expand the &ldquo;Subgroups&rdquo; section under &ldquo;Computated Properties&rdquo; in the
   <a href="../rf-um-groupwindow/#computed-properties">group info page</a>.</li>
 <li>Then find the subgroup in question on the list and follow the link
   provided.</li>
@@ -236,8 +237,7 @@ providing links for you to browse further yourself.</p>
 <ul>
 <li>To see a <a href="../rf-groupterms/#lattice-of-subgroups">lattice of subgroups</a>
    for a given group:<ul>
-<li>Again, go to the &ldquo;tell me more&rdquo; link next to &ldquo;Subgroups&rdquo;
-  in the group info page.</li>
+<li>Again, expand the &ldquo;Subgroups&rdquo; section of the group info page.</li>
 <li>Follow the link provided at the top of the resulting page,
   offering to create a sheet showing the lattice of subgroups.</li>
 <li>The illustration below shows all subgroups of <script type="math/tex">S_3</script>.</li>
@@ -248,9 +248,8 @@ providing links for you to browse further yourself.</p>
 <ul>
 <li>To see the <a href="../rf-groupterms/#solvable-group-solvable-decomposition">solvable decomposition</a> of any
    <a href="../rf-groupterms/#solvable-group-solvable-decomposition">solvable group</a>:<ul>
-<li>Follow the &ldquo;tell me more&rdquo; link next to &ldquo;Solvable&rdquo;
-  in the group info page.</li>
-<li>The decomposition will be reported in text and you can click and of
+<li>Expand the &ldquo;Solvable&rdquo; section of the group info page.</li>
+<li>The decomposition will be reported in text and you can click any of
   several links on that page to see it illustrated in various ways.</li>
 <li>The illustration below shows the solvable decomposition for <script type="math/tex">S_4</script>.</li>
 </ul>
