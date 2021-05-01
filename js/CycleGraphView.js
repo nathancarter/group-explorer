@@ -1,6 +1,7 @@
 // @flow
 
 import {broadcastChange} from '../CycleGraph.js';
+import * as GEUtils from './GEUtils.js'
 import Log from './Log.js';
 import XMLGroup from './XMLGroup.js';
 
@@ -40,7 +41,7 @@ type Path = {
 const DEFAULT_MIN_CANVAS_HEIGHT = 200;
 const DEFAULT_MIN_CANVAS_WIDTH = 200;
 const DEFAULT_MIN_RADIUS = 30; 
-const DEFAULT_ZOOM_STEP = 0.1;
+const DEFAULT_ZOOM_STEP = 0.002
 const DEFAULT_CANVAS_WIDTH = 50;
 const DEFAULT_CANVAS_HEIGHT = 50;
 
@@ -76,7 +77,7 @@ export class CycleGraphView /*:: implements VizDisplay<CycleGraphJSON> */ {
         let width = (options.width === undefined) ? DEFAULT_CANVAS_WIDTH : options.width;
         let height = (options.height === undefined) ? DEFAULT_CANVAS_HEIGHT : options.height;
         const container = options.container;
-        if (container != undefined) {
+        if (container != null) {
             // take canvas dimensions from container (if specified), option, or default
             width = container.width();
             height = container.height();
@@ -282,27 +283,31 @@ export class CycleGraphView /*:: implements VizDisplay<CycleGraphJSON> */ {
         }
 
         // pick sensible font size and style for node labels
-        // find longest rep, find it's size in 14pt font, and choose a font size that lets rep fit within the default node
-        // (this is done in screen coordinates because scaling text from cycleGraph coordinates had too many gotchas -- rwe)
         this.context.setTransform(1,0,0,1,0,0);
-        this.context.font = '14pt Arial';
-        const longest_label_length = this.context.measureText(this.group.longestLabel).width;
 
-        // "1" is to make short, tall names (like g^2) fit heightwise
-        // "22" is a magic number that combines diameter/radius, effect of curved edges, point/pixel ratio, etc.
-        //   -- but don't make font bigger than 50pt in any case
-        const fontScale = Math.min(50, scale * this.radius * Math.min(1, 22 / longest_label_length));
-
-        // skip out if this font would be too small to see anyhow
-        if (fontScale < 1.5) {
+        // find diameter of longest label in 20px font: Math.sqrt(length^2 + height^2) = Math.sqrt(length^2 + 20^2)
+        // scale font size so that label diameter ~ 0.8 * scaled diameter
+        const maxLabelLength = this.group.longestHTMLLabel // longest label in 1px font
+        const fontScale = Math.min(150, 1.6 * scale * this.radius / Math.sqrt(1 + maxLabelLength * maxLabelLength))
+        
+        // skip out if this font would be too read
+        if (fontScale < 6) {
             return;
         }
 
         // now draw all the labels, skipping nodes outside of the pre_image
-        this.context.font = `${fontScale.toFixed(6)}pt Arial`;
         this.context.textAlign = 'center';
         this.context.textBaseline = 'middle';
         this.context.fillStyle = '#000';
+
+        const $scratch = $('<div>')
+              .css({
+                  position: 'relative',
+                  textAlign: 'center',
+                  top: '-2em',
+                  'z-index': -1,
+                  'font-size': fontScale,
+              }).appendTo('#graphic')
 
         const pos_vector = new THREE.Vector2();
         this.positions.forEach( ( pos, elt ) => {
@@ -314,8 +319,13 @@ export class CycleGraphView /*:: implements VizDisplay<CycleGraphJSON> */ {
 
             // write the element name inside it
             const loc = pos_vector.set(pos.x, pos.y).applyMatrix3(this.transform);
-            this.context.fillText( this.group.labels[elt], loc.x, loc.y );
+
+            // element has nodes, (stroke) color, font-style, font-weight, font-size, font-family
+            const label = $scratch.html(this.group.representation[elt])[0]
+            GEUtils.htmlToContext(label, this.context, loc)
         } );
+
+        $scratch.remove()
     }
 
     // interface for zoom-to-fit GUI command
@@ -326,13 +336,13 @@ export class CycleGraphView /*:: implements VizDisplay<CycleGraphJSON> */ {
     }
 
     // increase magnification proportional to its current value,
-    zoomIn() {
-        this._centeredZoom((1 + DEFAULT_ZOOM_STEP) - 1);
+    zoomIn (deltaY /*: number */) {
+        this._centeredZoom((1 - deltaY * DEFAULT_ZOOM_STEP) - 1);
     }
 
-    // decrease magnification in a way that allows you to zoom in and out and return to its original value
-    zoomOut() {
-        this._centeredZoom(1/(1 + DEFAULT_ZOOM_STEP) - 1);
+    // decrease magnification so that you can to zoom in and out and return to its original value
+    zoomOut (deltaY /*: number */) {
+        this._centeredZoom(1/(1 + deltaY * DEFAULT_ZOOM_STEP) - 1);
     }
 
     zoom(factor /*: number */) {
@@ -419,7 +429,7 @@ export class CycleGraphView /*:: implements VizDisplay<CycleGraphJSON> */ {
         this.layoutElementsAndPaths();
         this.findClosestTwoPositions();
         this.SOME_SETTING_NAME = SOME_SETTING_NAME;
-        this.showGraphic();
+        this.queueShowGraphic() // showGraphic() at this point causes problem with Chrome v90
     }
 
     // orbit of an element in the group, but skipping the identity

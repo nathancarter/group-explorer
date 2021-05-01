@@ -29,18 +29,6 @@
       </style>
 
       <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-      <script type="text/x-mathjax-config">
-       MathJax.Hub.Config({
-          CommonHTML: {
-             scale: 100,   /* scale MathJax to match the HTML around it */
-          },
-          showMathMenu: false,
-       });
-       MathJax.Hub.processUpdateTime = 1000;  // allow MathJax to work longer at a stretch, improves initial load time
-       MathJax.Hub.processSectionDelay = 0;   // no pause to let browser handle interaction -- only busy during loading
-       MathJax.Hub.processUpdateDelay = 0;
-      </script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.6/MathJax.js?config=MML_CHTML"></script>
       <script src="https://cdn.jsdelivr.net/npm/jquery-resizable-dom@0.32.0/dist/jquery-resizable.js"></script>
       <script type="module">
        import {load} from "./CycleGraph.js";
@@ -60,7 +48,7 @@
             </div>
             <template id="node-label-template">
                <div id="node-label" class="tooltip remove-on-clean">
-                  ${MathML.sans(group.representation[element])}
+                  ${Group.representation[element]}
                </div>
             </template>
          </div>

@@ -5,7 +5,6 @@ import {CycleGraphView, createUnlabelledCycleGraphView} from './js/CycleGraphVie
 import GroupURLs from './GroupURLs.js';
 import Library from './js/Library.js';
 import Log from './js/Log.js';
-import MathML from './js/MathML.js';
 import Menu from './js/Menu.js';
 import {MulttableView, createMinimalMulttableView} from './js/MulttableView.js';
 import {SymmetryObjectView, createStaticSymmetryObjectView} from './js/SymmetryObjectView.js';
@@ -15,7 +14,7 @@ import XMLGroup from './js/XMLGroup.js';
 // $FlowFixMe -- external module imports described in flow-typed directory
 import {THREE} from './lib/externals.js';
 
-export {readLibrary as load};
+export {load};
 
 // Module variables
 let Cayley_Diagram_View		/*: CayleyDiagramView */;
@@ -30,17 +29,11 @@ function registerEventHandlers() {
 };
 
 // Load group library from urls
-function readLibrary() {
+function load () {
    Cayley_Diagram_View = createUnlabelledCayleyDiagramView({height: 32, width: 32});
    Symmetry_Object_View = createStaticSymmetryObjectView({height: 32, width: 32});
    Multtable_View = createMinimalMulttableView({height: 32, width: 32});
    Cycle_Graph_View = createUnlabelledCycleGraphView({height: 32, width: 32});
-
-   // create mathjax style element from localStorage (needed to display locally stored definitions)
-   const styleHTML = localStorage.getItem('mathjax_stylesheet');
-   if (styleHTML != undefined) {
-      $('head').append(styleHTML);
-   }
 
    // only read in a few groups if URL specifies 'debug' (for impatient programmers)
    const urlDebug = new URL(window.location.href).searchParams.get('debug');
@@ -60,63 +53,41 @@ function readLibrary() {
       }
    }
 
-   finish(urlsToDisplay);
-}
+   // update locally stored group definitions, if needed
+   $( '#loadingMessage' ).show();
 
-function finish(urlsToDisplay) {
-   const exitOrUpdateMessage = () => {
-      if (++urlsCompleted == urlsToDisplay.length) {
+   // check that the locally stored definitions currently displayed are the latest; refresh if not
+   urlsToDisplay.forEach(async (url, urlIndex) => {
+      const localGroup = Library.getLocalGroup(url)
+      const latestGroup = await Library.getLatestGroup(url)
+
+      // if we don't have the latest group in the Library, format it in display and add to Library
+      if (localGroup == null ||
+          localGroup != latestGroup ||
+          localGroup.CayleyThumbnail == null ||
+          localGroup.rowHTML == null
+         ) {
+         // format new group
+         const $row = displayGroup(latestGroup)
+         const $cayleyDiagram = $row.find('td.cayleyDiagram img').detach();
+         latestGroup.rowHTML = $row[0].outerHTML;
+         $row
+            .find('td.cayleyDiagram a div')
+            .empty()
+            .append($cayleyDiagram)
+         $row.appendTo('#GroupTable tbody');
+         Library.saveGroup(latestGroup);
+      }
+
+      if (urlIndex + 1 == urlsToDisplay.length) {
          registerEventHandlers();   
          $( '#loadingMessage' ).hide();
          $('#GroupTableHeaders th.sort-down').triggerHandler('click');
-
-         // store stylesheet in localStorage
-         const mathjaxStylesheet = ($('style').toArray() /*: Array<HTMLStyleElement> */)
-                                              .filter( (s) => s.textContent.trim().startsWith('.mjx-chtml') )[0];
-         if (mathjaxStylesheet != undefined) {
-            localStorage.setItem('mathjax_stylesheet', mathjaxStylesheet.outerHTML);
-         }
       } else {
-         const pct = ( urlsCompleted * 100 / urlsToDisplay.length ) | 0;
+         const pct = ( (urlIndex + 1) * 100 / urlsToDisplay.length ) | 0;
          $( '#loadingMessage i' ).html( `Loading groups (${pct}%)...` );
       }
-   };
-
-   $( '#loadingMessage' ).show();
-
-   let urlsCompleted = 0;
-   // check that the locally stored definitions currently displayed are the latest; refresh if not
-   urlsToDisplay.forEach( (url) => {
-      const localGroup = Library.getLocalGroup(url);
-      Library.getLatestGroup(url)
-             .then( (group) => {
-                // if we already have the latest group in the Library, just check to see if we're done
-                if (localGroup && localGroup == group && localGroup.CayleyThumbnail != undefined && localGroup.rowHTML != undefined) {
-                   exitOrUpdateMessage();
-                } else {
-                   // format new group
-                   const row = displayGroup(group)[0];
-                   $('#ScratchTable').append(row);
-
-                   const afterTypesetting = () => {
-                      // remove un-needed spans from mathjax output
-                      $(row).find('span.MathJax_Preview, span.MJX_Assistive_MathML, script[type="math/mml"]').remove();
-                      const $cayleyDiagram = $(row).find('td.cayleyDiagram img').detach();
-                      group.rowHTML = row.outerHTML;
-                      $(row).find('td.cayleyDiagram a div').empty().append($cayleyDiagram);
-                      $(row).detach().appendTo('#GroupTable tbody');
-                      Library.saveGroup(group);
-                      exitOrUpdateMessage();
-                   };
-                   // typeset this row
-                   MathJax.Hub.Queue(['Typeset', MathJax.Hub, $(`#ScratchTable > tr[group="${url}"]`)[0]],
-                                     afterTypesetting);
-                } } )
-             .catch( (err) => {
-                Log.err(err);
-                exitOrUpdateMessage();
-             } );
-   } );
+   })
 }
 
 // add row to table that displays this name, order, etc. of group

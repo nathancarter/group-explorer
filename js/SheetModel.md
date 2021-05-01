@@ -7,7 +7,6 @@ import { createFullMulttableView } from './MulttableView.js'
 import { createLabelledCayleyDiagramView } from './CayleyDiagramView.js'
 import Library from './Library.js'
 import Log from './Log.js'
-import MathML from './MathML.js'
 import * as SheetView from './SheetView.js'
 import Template from './Template.js'
 import { THREE } from '../lib/externals.js'
@@ -624,15 +623,15 @@ export class MorphismElement extends LinkElement {
   getLabel () /*: string */ {
     let html = this.name
     if (this.showDomainAndCodomain) {
-      html += ` : ${MathML.toHTMLString(this.source.group.name)} ⟶ ${MathML.toHTMLString(this.destination.group.name)}`
+      html += ` : ${this.source.group.name} ⟶ ${this.destination.group.name}`
     }
 
     if (this.showDefiningPairs) {
       html += this.mapping
         .definingPairs
-        .map(([g, h]) =>
-             `<br>${this.name}(${MathML.toHTMLString(this.source.group.representation[g])})` +
-             ` = ${MathML.toHTMLString(this.destination.group.representation[h])}`)
+        .map(([g, h]) => {
+          return `<br>${this.name}(${this.source.group.representation[g]}) = ${this.destination.group.representation[h]}`
+        })
         .join('')
     }
 
@@ -651,8 +650,9 @@ export class MorphismElement extends LinkElement {
       $('#morphism-preview .toggled').toggle()
     }
 
-    const domainDisplaySize = this.source.group.longest20pxHTMLLabel
-    const codomainDisplaySize = this.destination.group.longest20pxHTMLLabel
+    const DISPLAY_FONT_SIZE = 20
+    const domainDisplaySize = this.source.group.longestHTMLLabel * DISPLAY_FONT_SIZE
+    const codomainDisplaySize = this.destination.group.longestHTMLLabel * DISPLAY_FONT_SIZE
 
     $('#defining-pair-table > thead > tr > th:first-child').css('min-width', domainDisplaySize)
     $('#defining-pair-table > thead > tr > th:nth-child(2)').css('min-width', codomainDisplaySize)
@@ -771,7 +771,7 @@ export class MorphismElement extends LinkElement {
     // set domain-selection element
     $('#domain-selection')
       .attr('data-value', domainSelection)
-      .html(MathML.toHTML(this.source.group.representation[domainSelection]))
+      .html(this.source.group.representation[domainSelection])
 
     // set codomain-choices
     const validTargets = this.mapping.validTargets(domainSelection)
@@ -789,14 +789,14 @@ export class MorphismElement extends LinkElement {
       : validTargets[0]
     $('#codomain-selection')
       .attr('data-value', codomainSelection)
-      .html(((MathML.toHTML(this.destination.group.representation[codomainSelection]) /*: any */) /*: DocumentFragment */))
+      .html(((this.destination.group.representation[codomainSelection] /*: any */) /*: DocumentFragment */))
   }
 
   setCodomain (codomainSelection /*: groupElement */) {
     // set codomain-selection element
     $('#codomain-selection')
       .attr('data-value', codomainSelection)
-      .html(MathML.toHTML(this.destination.group.representation[codomainSelection]))
+      .html(this.destination.group.representation[codomainSelection])
 
     // set domain-choices
     const validSources = this.mapping.validSources(codomainSelection)
@@ -814,7 +814,7 @@ export class MorphismElement extends LinkElement {
       : validSources[0]
     $('#domain-selection')
       .attr('data-value', domainSelection)
-      .html(MathML.toHTML(this.source.group.representation[domainSelection]))
+      .html(this.source.group.representation[domainSelection])
   }
 }
 

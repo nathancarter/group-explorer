@@ -40,13 +40,19 @@
           *   clicking on 'toggle' elements changes the visibility of 'toggled' items at this level
           */
          .heading1 > .toggle, .heading1 > .heading {
-             margin-top: 1em;
-             font-size: 1.5em;
+             margin: 1em 0 0.2em;
+             font-size: x-large;
              font-weight: bold;
          }
+         .heading1 .toggle {
+             font-size: large;
+         }
          .heading2 > .toggle, .heading2 > .heading {
-             font-size: 1.17em;
+             font-size: large;
              font-weight: bold;
+         }
+         .heading2 .toggle {
+             font-size: medium;
          }
          .collapsible {
              display: grid;
@@ -58,6 +64,17 @@
          .collapsible > .toggle {
              grid-column: toggle;
              cursor: pointer;
+             position: relative;
+         }
+         .collapsible > .toggle > .more, .collapsible > .toggle > .less {
+             position: absolute;
+             top: -1.25em;
+         }
+         .collapsible > .toggle > .more::after {
+             content: "▶";
+         }
+         .collapsible > .toggle > .less::after {
+             content: "▼";
          }
          .collapsible > .heading {
              grid-column: heading / end;
@@ -111,8 +128,6 @@
          #views > .toggle {
              grid-column: toggle;
              cursor: pointer;
-             font-size: 1.5em;
-             font-weight: bold;
          }
          #views > .heading {
              grid-column: heading / heading-end;
@@ -263,18 +278,6 @@
         </style>
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-        <script type="text/x-mathjax-config">
-         MathJax.Hub.Config({
-      	     CommonHTML: {
-                 scale: 90,
-             },
-             showMathMenu: false,   /* disable MathJax context menu (it interferes with subsetDisplay context menu) */
-         });
-         MathJax.Hub.processUpdateTime = 1000;  // allow MathJax to work longer at a stretch, improves initial load time
-         MathJax.Hub.processSectionDelay = 0;   // no pause to let browser handle interaction -- only busy during loading
-         MathJax.Hub.processUpdateDelay = 0;
-        </script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.6/MathJax.js?config=MML_CHTML"></script>
         <script type="module">
          import {load} from "./GroupInfo.js";
          window.addEventListener('load', load, {once: true});
@@ -285,9 +288,9 @@
     <body>
         <table id="ScratchTable" style="width: 100%; display: none"></table>
 
-        <h1 id="heading" align="center">
+        <h1 id="heading" align="center" style="font-weight: normal">
             <template id="heading_template">
-                ${MathML.sans(Group.name + ((Group.phrase == "") ? '' : '<mtext>&nbsp;- ' + Group.phrase + '</mtext>'))}
+                ${Group.name + ((Group.phrase == "") ? '' : ('&nbsp;-' + Group.phrase))}
             </template>
         </h1>
         <div class="top-right-menu">
@@ -314,10 +317,10 @@
             </script>
         </div>
 
-        <div id="basic-facts" class="collapsible heading1" style="align-items: center">
+        <div id="basic-facts" class="collapsible heading1">
             <span class="toggle" onclick="$('#basic-facts .toggled').toggle()">
-                <span class="toggled hidden more">+</span>
-                <span class="toggled less">-</span>
+                <span class="toggled hidden more"></span>
+                <span class="toggled less"></span>
             </span>
             <span class="heading">Basic facts</span>
             <div class="name-value-content toggled"></div>
@@ -326,17 +329,17 @@
             </div>
             <template id="basic-fact-template">
                 <div class="name" style="text-align: right">${basic_fact.name}</div>
-                <div class="value">${basic_fact.value}</div>
+                <div class="value">${basic_fact.value}&nbsp;</div>
             </template>
         </div>
 
         <div id="views" class="collapsible heading1">
             <span class="toggle" onclick="$('#views .toggled').toggle()">
-                <span class="toggled hidden more">+</span>
-                <span class="toggled less">-</span>
+                <span class="toggled hidden more"></span>
+                <span class="toggled less"></span>
             </span>
             <span class="heading">Views</span>
-            <div id="view-minis" class="hidden toggled" style="grid-column: summary / end; align-self: end"></div>
+            <div id="view-minis" class="summary hidden toggled" style="grid-column: summary / end; align-self: end"></div>
             <div class="content toggled">
                 <div class="heading-row" style="text-align: center">
                     <span class="CD"><a href="help/rf-groupterms/index.html#cayley-diagrams">Cayley Diagram</a></span>
@@ -365,75 +368,75 @@
 
         <div id="computed-properties" class="collapsible heading1">
             <span class="toggle" onclick="$('#computed-properties > .toggle > .toggled, #computed-properties > .toggled').toggle()">
-                <span class="toggled hidden more">+</span>
-                <span class="toggled less">-</span>
+                <span class="toggled hidden more"></span>
+                <span class="toggled less"></span>
             </span>
             <span class="heading">Computed properties</span>
 
             <div id="abelian" class="collapsible heading2 content toggled">
                 <span class="toggle" onclick="$('#abelian .toggled').toggle()">
-                    <span class="toggled more">+</span>
-                    <span class="toggled hidden less">-</span>
+                    <span class="toggled more"></span>
+                    <span class="toggled hidden less"></span>
                 </span>
-                <span class="heading">Abelian group</span>
+                <span class="heading">Abelian group&nbsp;</span>
                 <span class="summary toggled"></span>
                 <div class="content hidden toggled"></div>
             </div>
 
             <div id="class-equation" class="collapsible heading2 content toggled">
                 <span class="toggle" onclick="$('#class-equation .toggled').toggle()">
-                    <span class="toggled more">+</span>
-                    <span class="toggled hidden less">-</span>
+                    <span class="toggled more"></span>
+                    <span class="toggled hidden less"></span>
                 </span>
-                <span class="heading">Class equation</span>
+                <span class="heading">Class equation&nbsp;</span>
                 <span class="summary toggled"></span>
                 <div class="content hidden toggled"></div>
             </div>
 
             <div id="cyclic-group" class="collapsible heading2 content toggled">
                 <span class="toggle" onclick="$('#cyclic-group .toggled').toggle()">
-                    <span class="toggled more">+</span>
-                    <span class="toggled hidden less">-</span>
+                    <span class="toggled more"></span>
+                    <span class="toggled hidden less"></span>
                 </span>
-                <span class="heading">Cyclic group</span>
+                <span class="heading">Cyclic group&nbsp;</span>
                 <span class="summary toggled"></span>
                 <div class="content hidden toggled"></div>
             </div>
 
             <div id="subgroups" class="collapsible heading2 content toggled">
                 <span class="toggle" onclick="$('#subgroups .toggled').toggle()">
-                    <span class="toggled more">+</span>
-                    <span class="toggled hidden less">-</span>
+                    <span class="toggled more"></span>
+                    <span class="toggled hidden less"></span>
                 </span>
-                <span class="heading">Subgroups</span>
+                <span class="heading">Subgroups&nbsp;</span>
                 <span class="summary toggled"></span>
                 <div class="content hidden toggled"></div>
             </div>
 
             <div id="order-classes" class="collapsible heading2 content toggled">
                 <span class="toggle" onclick="$('#order-classes .toggled').toggle()">
-                    <span class="toggled more">+</span>
-                    <span class="toggled hidden less">-</span>
+                    <span class="toggled more"></span>
+                    <span class="toggled hidden less"></span>
                 </span>
-                <span class="heading">Order classes</span>
+                <span class="heading">Order classes&nbsp;</span>
                 <span class="summary toggled"></span>
                 <div class="content hidden toggled"></div>
             </div>
 
             <div id="solvable" class="collapsible heading2 content toggled">
                 <span class="toggle" onclick="$('#solvable .toggled').toggle()">
-                    <span class="toggled more">+</span>
-                    <span class="toggled hidden less">-</span>
+                    <span class="toggled more"></span>
+                    <span class="toggled hidden less"></span>
                 </span>
-                <span class="heading">Solvable group</span>
+                <span class="heading">Solvable group&nbsp;</span>
                 <span class="summary toggled"></span>
                 <div class="content hidden toggled"></div>
             </div>
 
             <div id="zmn" class="collapsible heading2 content toggled">
                 <span class="toggle" onclick="$('#zmn .toggled').toggle()">
-                    <span class="toggled more">+</span>
-                    <span class="toggled hidden less">-</span>
+                    <span class="toggled more"></span>
+                    <span class="toggled hidden less"></span>
                 </span>
                 <div class="heading">ℤ<sub>mn</sub> group</div>
                 <span class="summary toggled"></span>
@@ -443,8 +446,8 @@
 
         <div id="generators" class="collapsible heading1">
             <span class="toggle" onclick="$('#generators .toggled').toggle()">
-                <span class="toggled more">+</span>
-                <span class="toggled hidden less">-</span>
+                <span class="toggled more"></span>
+                <span class="toggled hidden less"></span>
             </span>
             <span class="heading">Generators</span>
             <div class="content toggled hidden"></div>
@@ -452,15 +455,15 @@
 
         <div id="naming-schemes" class="collapsible heading1">
             <span class="toggle" onclick="$('#naming-schemes > .toggle > .toggled, #naming-schemes > .toggled').toggle()">
-                <span class="toggled more">+</span>
-                <span class="toggled hidden less">-</span>
+                <span class="toggled more"></span>
+                <span class="toggled hidden less"></span>
             </span>
             <span class="heading">Naming schemes</span>
 
             <div id="default-names" class="collapsible heading2 content toggled">
                 <span class="toggle" onclick="$('#default-names .toggled').toggle()">
-                    <span class="toggled hidden more">+</span>
-                    <span class="toggled less">-</span>
+                    <span class="toggled hidden more"></span>
+                    <span class="toggled less"></span>
                 </span>
                 <span class="heading">Default element names</span>
                 <div class="content toggled"></div>
@@ -468,8 +471,8 @@
 
             <div id="loaded-names" class="collapsible heading2 content toggled">
                 <span class="toggle" onclick="$('#loaded-names .toggled').toggle()">
-                    <span class="toggled hidden more">+</span>
-                    <span class="toggled less">-</span>
+                    <span class="toggled hidden more"></span>
+                    <span class="toggled less"></span>
                 </span>
                 <span class="heading">Loaded naming schemes</span>
                 <div class="content toggled"></div>
@@ -483,8 +486,8 @@
 
             <div id="user-names" class="collapsible heading2 content toggled">
                 <span class="toggle" onclick="$('#user-names .toggled').toggle()">
-                    <span class="toggled hidden more">+</span>
-                    <span class="toggled less">-</span>
+                    <span class="toggled hidden more"></span>
+                    <span class="toggled less"></span>
                 </span>
                 <span class="heading">User-defined naming schemes</span>
                 <div class="content toggled"></div>
@@ -510,9 +513,9 @@
 
             <template id="udr-editor-template">
                 <div id="udr-editor" class="modal">
-                    <div id="udr-edit-title">Edit naming scheme for ${MathML.sans(Group.name)}</div>
+                    <div id="udr-edit-title">Edit naming scheme for ${Group.name}</div>
                     <div id="udr-edit-header">
-                        Below are all the naming schemes for ${MathML.sans(Group.name)}.  Edit the Custom
+                        Below are all the naming schemes for ${Group.name}.  Edit the Custom
                         representation column by clicking on the entries you wish to change and typing any plain text.
                     </div>
                     <div id="udr-edit-body">
@@ -535,7 +538,7 @@
             </template>
             <template id="udr-edit-item-template">
                 <tr>
-                    <td>${MathML.sans(Group.representation[inx])}</td>
+                    <td>${Group.htmlRepresentation[inx]}</td>
                     <td style="padding: 0px;">
                         <textarea placeholder="change me" maxlength="50" rows="1">${rep.slice(7,-8)}</textarea>
                     </td>
@@ -545,8 +548,8 @@
 
         <div id="notes" class="collapsible heading1">
             <span class="toggle" onclick="$('#notes .toggled').toggle()">
-                <span class="toggled more">+</span>
-                <span class="toggled hidden less">-</span>
+                <span class="toggled more"></span>
+                <span class="toggled hidden less"></span>
             </span>
             <span class="heading">Notes</span>
             <div class="content toggled"></div>
@@ -573,14 +576,14 @@
 
         <div id="file-data" class="collapsible heading1">
             <span class="toggle" onclick="$('#file-data .toggled').toggle()">
-                <span class="toggled more">+</span>
-                <span class="toggled hidden less">-</span>
+                <span class="toggled more"></span>
+                <span class="toggled hidden less"></span>
             </span>
             <span class="heading">File data</span>
             <div class="name-value-content toggled"></div>
             <template id="file-data-template">
                 <div class="name">${file_datum.name}</div>
-                <div class="value">${file_datum.value}</div>
+                <div class="value">${file_datum.value}&nbsp;</div>
             </template>
         </div>
     </body>

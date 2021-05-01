@@ -7,14 +7,12 @@ import BitSet from '../js/BitSet.js';
 import {CayleyGeneratorFromStrategy, DIRECTION_INDEX, AXIS_NAME} from '../js/CayleyGenerator.js';
 import GEUtils from '../js/GEUtils.js';
 import Log from '../js/Log.js';
-import MathML from '../js/MathML.js';
 import Menu from '../js/Menu.js';
 import Template from '../js/Template.js';
-import XMLGroup from '../js/XMLGroup.js';
 
-export {load, setup, update};
+export {load, update};
 
-const DIAGRAM_PANEL_URL /*: string */ = './html/CayleyDiagramController.html';
+const DIAGRAM_PANEL_URL /*: string */ = './html/CayleyDiagramController.html'
 
 class Arrow {
    // actions:  show menu; select from menu; select from list; remove
@@ -231,15 +229,15 @@ class Generator {
    static init () {
       // layout choices (linear/circular/rotated), direction (X/Y/Z)
       Generator.axis_label = {
-         linear:   { X: MathML.sans('<mtext>Linear in&nbsp;</mtext><mi>x</mi>'),
-                     Y: MathML.sans('<mtext>Linear in&nbsp;</mtext><mi>y</mi>'),
-                     Z: MathML.sans('<mtext>Linear in&nbsp;</mtext><mi>z</mi>') },
-         circular: { YZ: MathML.sans('<mtext>Circular in&nbsp;</mtext><mi>y</mi><mo>,</mo><mi>z</mi>'),
-                     XZ: MathML.sans('<mtext>Circular in&nbsp;</mtext><mi>x</mi><mo>,</mo><mi>z</mi>'),
-                     XY: MathML.sans('<mtext>Circular in&nbsp;</mtext><mi>x</mi><mo>,</mo><mi>y</mi>') },
-         rotated:  { YZ: MathML.sans('<mtext>Rotated in&nbsp;</mtext><mi>y</mi><mo>,</mo><mi>z</mi>'),
-                     XZ: MathML.sans('<mtext>Rotated in&nbsp;</mtext><mi>x</mi><mo>,</mo><mi>z</mi>'),
-                     XY: MathML.sans('<mtext>Rotated in&nbsp;</mtext><mi>x</mi><mo>,</mo><mi>y</mi>') },
+         linear:   { X: 'Linear in <i>x</i>',
+                     Y: 'Linear in <i>y</i>',
+                     Z: 'Linear in <i>z</i>' },
+         circular: { YZ: 'Circular in <i>y</i>, <i>z</i>',
+                     XZ: 'Circular in <i>x</i>, <i>z</i>',
+                     XY: 'Circular in <i>x</i>, <i>y</i>' },
+         rotated:  { YZ: 'Rotated in <i>y</i>, <i>z</i>',
+                     XZ: 'Rotated in <i>x</i>, <i>z</i>',
+                     XY: 'Rotated in <i>x</i>, <i>y</i>' },
       };
 
       Generator.axis_image = {
@@ -250,22 +248,11 @@ class Generator {
 
       // wording for nesting order
       Generator.orders = [
-         [],
-         [MathML.sans('<mtext>N/A</mtext>')],
-         [MathML.sans('<mtext>inside</mtext>'),
-          MathML.sans('<mtext>outside</mtext>')],
-         [MathML.sans('<mtext>innermost</mtext>'),
-          MathML.sans('<mtext>middle</mtext>'),
-          MathML.sans('<mtext>outermost</mtext>')],
-         [MathML.sans('<mtext>innermost</mtext>'),
-          MathML.sans('<mtext>second innermost</mtext>'),
-          MathML.sans('<mtext>second outermost</mtext>'),
-          MathML.sans('<mtext>outermost</mtext>')],
-         [MathML.sans('<mtext>innermost</mtext>'),
-          MathML.sans('<mtext>second innermost</mtext>'),
-          MathML.sans('<mtext>middle</mtext>'),
-          MathML.sans('<mtext>second outermost</mtext>'),
-          MathML.sans('<mtext>outermost</mtext>')]
+         ['N/A'],
+         ['inside', 'outside'],
+         ['innermost', 'middle', 'outermost'],
+         ['innermost', 'second innermost', 'second outermost', 'outermost'],
+         ['innermost', 'second innermost', 'middle', 'second outermost', 'outermost']
       ];
 
       $('#multiplication-control input').each(
@@ -496,22 +483,11 @@ function updateStrategies (new_strategies /*: Array<StrategyParameters> */) {
 
 
 /* Load, initialize diagram control */
-function load ($diagramWrapper /*: JQuery */) /*: Promise<void> */ {
-    return new Promise( (resolve, reject) => {
-      $.ajax( { url: DIAGRAM_PANEL_URL,
-                success: (data /*: string */) => {
-                   $diagramWrapper.html(data);
-                   setup();
-                   resolve();
-                },
-                error: (_jqXHR, _status, err) => {
-                   reject(`Error loading ${DIAGRAM_PANEL_URL} ${err === undefined ? '' : ': ' + err}`);
-                }
-              } )
-   } );
-}
+async function load ($diagramWrapper /*: JQuery */) /*: Promise<void> */ {
+  const data = await GEUtils.ajaxLoad(DIAGRAM_PANEL_URL)
 
-function setup() {
+  $diagramWrapper.html(data)
+
    Generator.init();
 
    $('#diagram-select')[0].addEventListener('click', clickHandler);

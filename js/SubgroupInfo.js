@@ -2,14 +2,13 @@
 
 import BasicGroup from './BasicGroup.js';
 import {CayleyDiagramView, createUnlabelledCayleyDiagramView} from './CayleyDiagramView.js';
+import GEUtils from './GEUtils.js'
 import IsomorphicGroups from './IsomorphicGroups.js';
 import Log from './Log.js';
-import MathML from './MathML.js';
 import MathUtils from './MathUtils.js';
 import setUpGAPCells from './ShowGAPCode.js';
 import Subgroup from './Subgroup.js';
 import Template from './Template.js';
-import XMLGroup from './XMLGroup.js';
 
 import {actionClickHandler} from '../GroupInfo.js';
 
@@ -18,6 +17,8 @@ import * as SheetModel from './SheetModel.js';
 export {summary, display, showSubgroupLattice, showEmbeddingSheet, showQuotientSheet};
 
 /*::
+import XMLGroup from './XMLGroup.js'
+
 import type {
     JSONType,
     SheetElementJSON,
@@ -34,17 +35,7 @@ type DecoratedSubgroup = Subgroup & {_tierIndex?: number, _used?: boolean};
 
 // Load templates
 const SUBGROUP_INFO_URL = './html/SubgroupInfo.html';
-const Load_Promise =
-      new Promise( (resolve, reject) => {
-         $.ajax( { url: SUBGROUP_INFO_URL,
-                   success: (data /*: html */) => {
-                      resolve(data);
-                   },
-                   error: (_jqXHR, _status, err) => {
-                      reject(`Error loading ${SUBGROUP_INFO_URL} ${err === undefined ? '' : ': ' + err}`)
-                   }
-                 } );
-      } );
+const LoadPromise = GEUtils.ajaxLoad(SUBGROUP_INFO_URL)
 
 // Module variables
 let Group /*: XMLGroup */;
@@ -54,19 +45,16 @@ function summary (group /*: XMLGroup */) {
     return `${group.subgroups.length} subgroups`;
 }
 
-function display (group /*: XMLGroup */, $wrapper /*: JQuery */) {
-    Load_Promise
-        .then( (templates) => {
-            if ($('template[id|="subgroups"]').length == 0) {
-                $('body').append(templates);
-            }
+async function display (group /*: XMLGroup */, $wrapper /*: JQuery */) {
+  const templates = await LoadPromise
 
-            $wrapper.html(formatSubgroupInfo(group));
+  if ($('template[id|="subgroups"]').length == 0) {
+    $('body').append(templates);
+  }
 
-            MathJax.Hub.Queue(['Typeset', MathJax.Hub, $wrapper[0]]);
-            setUpGAPCells(group, $wrapper);
-        } )
-        .catch (Log.err)
+  $wrapper.html(formatSubgroupInfo(group));
+
+  setUpGAPCells(group, $wrapper);
 }
 
 function formatSubgroupInfo (group /*: XMLGroup */) /*: DocumentFragment */ {
@@ -273,7 +261,7 @@ function showSubgroupLattice ( type /*: VisualizerType */ ) {
       if (type === 'TextElement') {
          const subgroupIndex = Group.subgroups.findIndex((g) => g == H)
          const caption = `<span display="inline-block"><i>H</i><sub>${subgroupIndex}</sub>&nbsp;=&nbsp⟨ </span>` +
-            H.generators.toArray().map((gen) => '<span display="inline-block">' + MathML.toHTMLString(Group.representation[gen])).join(', </span>') +
+            H.generators.toArray().map((gen) => '<span display="inline-block">' + Group.representation[gen]).join(', </span>') +
             '</span>&nbsp;⟩'
          console.log(caption)
          const myHMargin = hMargin
@@ -315,7 +303,7 @@ function showSubgroupLattice ( type /*: VisualizerType */ ) {
    // Add a title.
    sheetElementsAsJSON.push( {
       className : 'TextElement',
-      text : `Subgroup Lattice for the Group ${MathML.toHTMLString( Group.name )}`,
+      text : `Subgroup Lattice for the Group ${Group.name}`,
       x : latticeLeft, y : latticeTop / 2,
       w : hSize * cellWidth, h : latticeTop / 2,
       fontSize : '20pt', alignment : 'center'
@@ -330,9 +318,7 @@ function showEmbeddingSheet ( indexOfH /*: number */, type /*: VisualizerType */
    CreateNewSheet( [
       {
          className : 'TextElement',
-         text : `Embedding ${MathML.toHTMLString( libraryH.name )} as `
-              + MathML.toHTMLString( `<msub><mi>H</mi><mn>${indexOfH}</mn></msub>` )
-              + ` in ${MathML.toHTMLString( Group.name )}`,
+         text : `Embedding ${libraryH.name} as <i>H</i><sub>${indexOfH}</sub> in ${Group.name}`,
          x : 50, y : 50, w : 500, h : 40,
          fontSize : '20pt', alignment : 'center'
       },
@@ -353,7 +339,7 @@ function showEmbeddingSheet ( indexOfH /*: number */, type /*: VisualizerType */
       },
       {
          className : 'MorphismElement',
-         fromIndex : 1, toIndex : 2, name : MathML.toHTMLString( '<mi>e</mi>' ),
+         fromIndex : 1, toIndex : 2, name : '<i>e</i>',
          definingPairs : libraryH.generators[0].map( gen =>
             [ gen, embedding[gen] ] ),
          showManyArrows : true, showInjSurj : true
@@ -398,16 +384,13 @@ function showQuotientSheet ( indexOfN /*: number */, type /*: VisualizerType */)
       {
          className : 'TextElement',
          x : L, y : T-100*adj, w : 5*W+4*gap, h : 50,
-         text : 'Short Exact Sequence showing '
-              + MathML.toHTMLString( Group.name ) + ' / '
-              + MathML.toHTMLString( libraryN.name ) + ' ≅ '
-              + MathML.toHTMLString( libraryQ.name ),
+         text : `Short Exact Sequence showing ${Group.name} / ${libraryN.name} ≅ ${libraryQ.name}`,
          fontSize : `${20*adj}pt`, alignment : 'center'
       },
       {
          className : 'TextElement',
          x : L, y : T-50, w : W, h : 50,
-         text : MathML.toHTMLString( '<msub><mi>Z</mi><mn>1</mn></msub>' ),
+         text : 'ℤ<sub>1</sub>',
          alignment : 'center', fontSize : `${12*adj}pt`
       },
       {
@@ -418,7 +401,7 @@ function showQuotientSheet ( indexOfN /*: number */, type /*: VisualizerType */)
       {
          className : 'TextElement',
          x : L+W+gap, y : T-50, w : W, h : 50,
-         text : MathML.toHTMLString( libraryN.name ), alignment : 'center', fontSize : `${12*adj}pt`
+         text : libraryN.name, alignment : 'center', fontSize : `${12*adj}pt`
       },
       {
          className : type, groupURL : libraryN.URL,
@@ -428,7 +411,7 @@ function showQuotientSheet ( indexOfN /*: number */, type /*: VisualizerType */)
       {
          className : 'TextElement',
          x : L+2*W+2*gap, y : T-50, w : W, h : 50,
-         text : MathML.toHTMLString( Group.name ), alignment : 'center', fontSize : `${12*adj}pt`
+         text : Group.name, alignment : 'center', fontSize : `${12*adj}pt`
       },
       {
          className : type, groupURL : Group.URL,
@@ -438,7 +421,7 @@ function showQuotientSheet ( indexOfN /*: number */, type /*: VisualizerType */)
       {
          className : 'TextElement',
          x : L+3*W+3*gap, y : T-50, w : W, h : 50,
-         text : MathML.toHTMLString( libraryQ.name ), alignment : 'center', fontSize : `${12*adj}pt`
+         text : libraryQ.name, alignment : 'center', fontSize : `${12*adj}pt`
       },
       {
          className : type, groupURL : libraryQ.URL,
@@ -448,7 +431,7 @@ function showQuotientSheet ( indexOfN /*: number */, type /*: VisualizerType */)
       {
          className : 'TextElement',
          x : L+4*W+4*gap, y : T-50, w : W, h : 50,
-         text : MathML.toHTMLString( '<msub><mi>Z</mi><mn>1</mn></msub>' ),
+         text : 'ℤ<sub>1</sub>',
          alignment : 'center', fontSize : `${12*adj}pt`
       },
       {
@@ -459,32 +442,20 @@ function showQuotientSheet ( indexOfN /*: number */, type /*: VisualizerType */)
       {
          className : 'TextElement',
          x : L+W+gap, y : T+H+25, w : W, h : 50,
-         text : MathML.toHTMLString(
-            '<mrow>'
-            + '<mi>Im</mi><mfenced open="(" close=")"><mi>id</mi></mfenced>'
-            + '<mo>=</mo>'
-            + '<mi>Ker</mi><mfenced open="(" close=")"><mi>e</mi></mfenced>'
-            + '</mrow>' ), alignment : 'center', fontSize : `${12*adj}pt`
+         text : '<i>Im(id)</i> = <i>Ker(e)</i>',
+         alignment : 'center', fontSize : `${12*adj}pt`
       },
       {
          className : 'TextElement',
          x : L+2*W+2*gap, y : T+H+25, w : W, h : 50,
-         text : MathML.toHTMLString(
-            '<mrow>'
-            + '<mi>Im</mi><mfenced open="(" close=")"><mi>e</mi></mfenced>'
-            + '<mo>=</mo>'
-            + '<mi>Ker</mi><mfenced open="(" close=")"><mi>q</mi></mfenced>'
-            + '</mrow>' ), alignment : 'center', fontSize : `${12*adj}pt`
+         text : '<i>Im(e)</i> = <i>Ker(q)</i>',
+         alignment : 'center', fontSize : `${12*adj}pt`
       },
       {
          className : 'TextElement',
          x : L+3*W+3*gap, y : T+H+25, w : W, h : 50,
-         text : MathML.toHTMLString(
-            '<mrow>'
-            + '<mi>Im</mi><mfenced open="(" close=")"><mi>q</mi></mfenced>'
-            + '<mo>=</mo>'
-            + '<mi>Ker</mi><mfenced open="(" close=")"><mi>z</mi></mfenced>'
-            + '</mrow>' ), alignment : 'center', fontSize : `${12*adj}pt`
+         text : '<i>Im(q)</i> = <i>Ker(z)</i>',
+         alignment : 'center', fontSize : `${12*adj}pt`
       },
       {
          className : 'MorphismElement', name : 'id',

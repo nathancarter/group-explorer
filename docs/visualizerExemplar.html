@@ -177,7 +177,7 @@ Note the call to [MathML preload](../js/MathML.md#caching) that loads the MathML
           registerEventHandlers();
 
           // Create header from group name
-          $('#heading').html(MathML.sans('<mtext>Visualizer Example for&nbsp;</mtext>' + Group.name));
+          $('#heading').html(`Visualizer Example for ${Group.name}`);
           MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'header']); // normally covered by preload, unneeded
 
           // Populate 'faux-select' pulldown

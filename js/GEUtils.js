@@ -1,7 +1,14 @@
 // @flow
+
+/* global $ */
+
 /*::
 export type Tree<T> = Array< T | Tree<T> >;
  */
+
+import { THREE } from '../lib/externals.js'
+
+export { htmlToContext }
 
 export default
 class GEUtils {
@@ -61,4 +68,59 @@ class GEUtils {
       $('.remove-on-clean').remove();
       $('.disable-on-clean').each( (_inx, el) => $(el).prop('disabled', true) );
    }
+
+  static ajaxLoad (url /*: string */) /*: Promise<string> */ {
+    return new Promise((resolve, reject) => {
+      $.ajax({
+        url: url,
+//      cache: false, // need this during development (and maybe migration?) to keep from loading stale .html pages
+        success: (data /*: string */) => {
+          resolve(data)
+        },
+        error: (_jqXHR, _status, err) => {
+          const error = new Error(`Error loading ${url} ${err === undefined ? '' : ': ' + err}`)
+          reject(error)
+        }
+      })
+    })
+  }
+}
+
+// Here we take advantage of the fact all our labels are on a single line
+function htmlToContext (source /*: HTMLElement */, context /*: CanvasRenderingContext2D */, center /*: THREE.Vector2 */) {
+  // find all text nodes in source element
+  const walker = document.createTreeWalker(source, NodeFilter.SHOW_TEXT)
+  const textNodes = []
+  for (let nextNode = walker.nextNode(); nextNode != undefined; nextNode = walker.nextNode()) {
+    textNodes.push(nextNode)
+  }
+
+  const range = document.createRange()
+  const nodesAndRects =
+    Array.from(textNodes)
+      .reduce((nodes, node) => {
+        range.selectNodeContents(node)
+        const rects = Array.from(range.getClientRects())
+        if (rects.length != 0) {
+          nodes.push(...rects.map((rect) => { return {node: node, rect: rect} }))
+        }
+        return nodes
+      }, [])
+      
+  const {left: xMin, top: yMin, right: xMax, bottom: yMax} = source.getBoundingClientRect()
+
+  // set up canvas context
+  context.fillStyle = (source.style.color != undefined && source.style.color != '') ? source.style.color : 'black'
+  context.textAlign = 'start'
+  context.textBaseline = 'bottom'
+
+  // copy node text into context at rect location, offset to place center of text at specified point
+  for (const {node, rect} of nodesAndRects) {
+    const $parent = $(node.parentElement)
+    context.font = `${$parent.css('font-style')} ${$parent.css('font-weight')} ${$parent.css('font-size')} ${$parent.css('font-family')}`
+
+    const x = rect.left - xMin + center.x - (xMax - xMin) / 2
+    const y = rect.top + rect.height - yMin + center.y - (yMax - yMin) / 2
+    context.fillText(node.textContent, x, y)
+  }
 }

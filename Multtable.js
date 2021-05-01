@@ -3,7 +3,6 @@
 import GEUtils from './js/GEUtils.js';
 import Library from './js/Library.js';
 import Log from './js/Log.js';
-import MathML from './js/MathML.js';
 import Menu from './js/Menu.js';
 import {MulttableView, createFullMulttableView} from './js/MulttableView.js';
 import {LISTENER_READY_MESSAGE, STATE_LOADED_MESSAGE} from './js/SheetModel.js';
@@ -58,41 +57,20 @@ function registerCallbacks() {
    $('#separation-slider')[0].addEventListener('input', separation);
 }
 
-// Load group from invocation URL, then preload MathML cache, then complete setup
-function load() {
-   loadLibrary();
-}
+// Load group from invocation URL and complete setup
+async function load() {
+   Group = await Library.loadFromURL()
 
-function loadLibrary () {
-   Library.loadFromURL()
-      .then( (group) => {
-         Group = group;
-         preloadMathMLCache();
-      } )
-      .catch(Log.err);
-}
-
-function preloadMathMLCache () {
-   MathML.preload(Group)
-      .then( () => generateSubsetHighlightPanel() )
-      .catch(Log.err);
-}
-
-// do this first to determine size of subset highlight panel, so we don't have to redraw main Mulattable graphic
-function generateSubsetHighlightPanel () {
    const highlighters = [
       {handler: highlightByBackground, label: 'Background'},
       {handler: highlightByBorder, label: 'Border'},
       {handler: highlightByCorner, label: 'Corner'}
    ];
-   SSD.load($('#subset-control'), highlighters, clearHighlights, Group)
-      .then( () => setTimeout( () => completeSetup(), 10 ) )
-      .catch(Log.err);
-}
 
-function completeSetup() {
+   await SSD.load($('#subset-control'), highlighters, clearHighlights, Group)
+
    // Create header from group name
-   $('#heading').html(MathML.sans('<mtext>Multiplication Table for&nbsp;</mtext>' + Group.name ));
+   $('#heading').html(`Multiplication Table for ${Group.name}`)
 
    // Draw Multtable in graphic
    Multtable_View = createFullMulttableView({container: $('#graphic')});
@@ -288,7 +266,8 @@ class LargeGraphic {
 
       case 'wheel':
          GEUtils.cleanWindow();
-         (((mouseEvent /*: any */) /*: WheelEvent */).deltaY < 0) ? Multtable_View.zoomIn() : Multtable_View.zoomOut();
+         const deltaY = ((mouseEvent /*: any */) /*: WheelEvent */).deltaY;
+         (deltaY < 0) ? Multtable_View.zoomIn(deltaY) : Multtable_View.zoomOut(deltaY);
          break;
 
       case 'mousedown':
@@ -450,7 +429,6 @@ class LargeGraphic {
          const $label = $(eval(Template.HTML('node-label-template')))
                           .appendTo('#graphic');
          Menu.setMenuLocation($label, loc);
-         MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'node-label']);
          return $label[0];
       }
    }

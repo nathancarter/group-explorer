@@ -36,6 +36,6 @@ It refers to the following variables when eval'd (see [Template](../js/Template.
 ```html
 <template id="link-template">
    <li action="Menu.pinSubMenu(event)" link="${link}">
-      ${MathML.sansText(label)} <span class="menu-arrow"></span> </li>
+      ${label} <span class="menu-arrow"></span> </li>
 </template>
 ```

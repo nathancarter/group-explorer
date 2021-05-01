@@ -1,9 +1,10 @@
 // @flow
 
+/* global $ */
+
 import GEUtils from './js/GEUtils.js';
 import Library from './js/Library.js';
 import Log from './js/Log.js';
-import MathML from './js/MathML.js';
 import {SymmetryObjectView, createInteractiveSymmetryObjectView} from './js/SymmetryObjectView.js';
 import Template from './js/Template.js';
 import * as VC from './visualizerFramework/visualizer.js';
@@ -35,23 +36,33 @@ function registerCallbacks() {
 }
 
 // Load group from invocation URL, then get diagram name and complete setup
-function load() {
-   Library
-      .loadFromURL()
-      .then( (group) => {
-         Group = group;
-         // Preload the few strings used in this visualizer, makes it easier to sync MathJax and browser display
-         const mathml_strings =
-               Group.symmetryObjects.map( (symmetryObject) => MathML._2mtext(symmetryObject.name) );
-         mathml_strings.push(`<mtext>Object of Symmetry for&nbsp;</mtext>${Group.name}`);
-         MathML.cacheStrings(mathml_strings)
-            .then( () => {
-               const diagram_name = getDiagramName();
-               completeSetup(diagram_name);
-            } )
-            .catch( Log.err );
-      } )
-      .catch( Log.err );
+async function load () {
+  Group = await Library.loadFromURL()
+
+  // Get diagram name from URL
+  const diagramName = getDiagramName()
+
+  // Register event handlers
+  registerCallbacks()
+
+  // Create header from group name
+  $('#heading').html(`Object of Symmetry for ${Group.name}`)
+
+  // Create list of symmetry object option for faux-select
+  Group.symmetryObjects
+    .reduce(($frag, symmetryObject, index) => {
+      return $frag.append(eval(Template.HTML('diagram-choice-template')))
+    }, $(document.createDocumentFragment()))
+    .appendTo($('#diagram-choices'))
+  $('#diagram-choice').html($('#diagram-choices > li:first-of-type').html())
+
+  // Draw symmetry object in graphic
+  Symmetry_Object_View = createInteractiveSymmetryObjectView({ container: $('#graphic') })
+  setDiagramName(Group.symmetryObjects.findIndex((symmetryObject) => symmetryObject.name === diagramName))
+  $('#line-thickness').val(1 + (Symmetry_Object_View.line_width - 1) / 0.75)
+
+  // Load icon strip in upper right-hand corner
+  VC.load(Group, HELP_PAGE)
 }
 
 /* Get diagram name from URL; throw exception when group has no symmetry object */
@@ -60,7 +71,7 @@ function getDiagramName() /*: string */ {
    // Check that this group has a symmetry object
    if (Group.symmetryObjects.length == 0) {
       // Throws exception if group has no symmetry objects
-      throw `The group ${MathML.toUnicode(Group.name)} has no symmetry objects.`;
+      throw `The group ${Group.shortName} has no symmetry objects.`;
    } else {
       // If so, use the diagram name from the URL search string
       const urlDiagramName = new URL(window.location.href).searchParams.get('diagram');
@@ -71,7 +82,7 @@ function getDiagramName() /*: string */ {
          // or it does not match one of the symmetryObjects
          if (!Group.symmetryObjects.some( (symmetryObject) => symmetryObject.name == urlDiagramName )) {
             // Name is passed but there is no matching symmetryObject -- alert user and continue
-            Log.warn(`The group ${MathML.toUnicode(Group.name)} has no symmetry object named ${urlDiagramName}. ` +
+            Log.warn(`The group ${Group.shortName} has no symmetry object named ${urlDiagramName}. ` +
                      `Using ${Group.symmetryObjects[0].name} instead.`);
             diagram_name = Group.symmetryObjects[0].name;
          } else {
@@ -81,29 +92,6 @@ function getDiagramName() /*: string */ {
    }
 
    return diagram_name;
-}
-
-/* Now that Group has loaded, complete the setup */
-function completeSetup(diagram_name /*: string */) {
-   // Register event handlers
-   registerCallbacks();
-
-   // Create header from group name
-   $('#heading').html(MathML.sans(`<mtext>Object of Symmetry for&nbsp;</mtext>${Group.name}`));
-
-    // Create list of symmetry object option for faux-select
-   Group.symmetryObjects.reduce( ($frag, symmetryObject, index) => {
-      return $frag.append(eval(Template.HTML('diagram-choice-template')));
-   }, $(document.createDocumentFragment()) ).appendTo($('#diagram-choices'));
-   $('#diagram-choice').html($('#diagram-choices > li:first-of-type').html());
-
-   // Draw symmetry object in graphic
-   Symmetry_Object_View = createInteractiveSymmetryObjectView({container: $('#graphic')});
-   setDiagramName(Group.symmetryObjects.findIndex( (symmetry_object) => symmetry_object.name == diagram_name ));
-   $('#line-thickness').val(1 + (Symmetry_Object_View.line_width - 1)/0.75);
-
-   // Load icon strip in upper right-hand corner
-   VC.load(Group, HELP_PAGE);
 }
 
 // Resize the body, including the graphic

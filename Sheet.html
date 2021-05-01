@@ -368,7 +368,7 @@
                             <span class="faux-selection-value"></span>
                             <ol class="faux-choices hidden display-none-on-clean"></ol>
                             <template id="visualizer-group-list-entry">
-                                <span data-value="${group.URL}">${MathML.toHTMLString(group.name)}</span>
+                                <span data-value="${group.URL}">${group.name}</span>
                             </template>
                         </div>
                     </div>
@@ -612,8 +612,8 @@
                     </tbody>
                     <template id="morphism-editor-defining-pair-template">
                         <tr id="defining-pair-${domainElement}">
-                            <td>${MathML.toHTMLString(this.source.group.representation[domainElement])}</td>
-                            <td>${MathML.toHTMLString(this.destination.group.representation[codomainElement])}</td>
+                            <td>${this.source.group.representation[domainElement]}</td>
+                            <td>${this.destination.group.representation[codomainElement]}</td>
                             <td style="padding: 0">
                                 <button data-action="this.modelElement.removeDefiningPair(${domainElement})"
                                         style="float: right">Remove</button></td>
@@ -634,7 +634,7 @@
                         </div>
                         <template id="morphism-domain-choice-template">
                             <li class="choice" data-action="this.modelElement.setDomain(${element})">
-                                ${MathML.toHTMLString(this.source.group.representation[element])}
+                                ${this.source.group.representation[element]}
                             </li>
                         </template>
                     </div>)
@@ -648,7 +648,7 @@
                         </div>
                         <template id="morphism-codomain-choice-template">
                             <li class="choice" data-action="this.modelElement.setCodomain(${element})">
-                                ${MathML.toHTMLString(this.destination.group.representation[element])}
+                                ${this.destination.group.representation[element]}
                             </li>
                         </template>
                     </div>
@@ -669,8 +669,8 @@
                         <tbody></tbody>
                         <template id="morphism-preview-row-template">
                             <tr>
-                                <td>${MathML.toHTMLString(this.source.group.representation[domainElement])}</td>
-                                <td>${MathML.toHTMLString(this.destination.group.representation[codomainElement])}</td>
+                                <td>${this.source.group.representation[domainElement]}</td>
+                                <td>${this.destination.group.representation[codomainElement]}</td>
                             </tr>
                         </template>
                     </table>

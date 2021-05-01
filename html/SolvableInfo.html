@@ -1,11 +1,11 @@
 
 <template id="solvable-abelian-template">
-    <p>${MathML.sans(Group.name)} is <a href="./help/rf-groupterms/index.html#solvable-group-solvable-decomposition">solvable</a>
+    <p>${Group.name} is <a href="./help/rf-groupterms/index.html#solvable-group-solvable-decomposition">solvable</a>
         because it is <a href="./help/rf-groupterms/index.html#abelian-group">abelian</a>.</p>
 </template>
 
 <template id="solvable-isSolvable-template">
-    <p>${MathML.sans(Group.name)} is a <a href="./help/rf-groupterms/index.html#solvable-group-solvable-decomposition">solvable</a>
+    <p>${Group.name} is a <a href="./help/rf-groupterms/index.html#solvable-group-solvable-decomposition">solvable</a>
         group by the following solvable decomposition:</p>
 
     <ul id="solvable-decomposition" style="list-style-type: none"></ul>
@@ -24,7 +24,7 @@
     <li>The <a href="./help/rf-groupterms/index.html#quotient-group">quotient</a> of
         ${makeGroupRef(g)}</a> by its
         <a href="./help/rf-groupterms/index.html#normal-subgroup">normal subgroup</a>
-        ${MathML.sans(MathML.sub('H', g.subgroupIndex))}
+        <i>H</i><sub>${g.subgroupIndex}</sub>
         (<a href="./help/rf-groupterms/index.html#isomorphism-isomorphic">isomorphic</a> to
         ${makeGroupRef(g.subgroupIsomorphicTo)}) gives
         ${makeGroupRef(g.quotientIsomorphicTo)}.</li>
@@ -36,7 +36,7 @@
 </template>
 
 <template id="solvable-unsolvable-template">
-    <p>${MathML.sans(Group.name)} is not a
+    <p>${Group.name} is not a
         <a href="./help/rf-groupterms/index.html#solvable-group-solvable-decomposition">solvable</a> group.</p>
 </template>
 
@@ -48,7 +48,7 @@
 </template>
 
 <template id="solvable-failure-template">
-    <p>Group Explorer is currently unable to determine whether ${MathML.sans(Group.name)} is a
+    <p>Group Explorer is currently unable to determine whether ${Group.name} is a
         <a href="./help/rf-groupterms/index.html#solvable-group-solvable-decomposition">solvable</a> group because it does
         not have access to all the groups it needs. For example, there is a
         <a href="./help/rf-groupterms/index.html#normal-subgroup">normal subgroup</a>
@@ -68,5 +68,5 @@
 </template>
 
 <template id="group-reference-template">
-    <a href="" action="Library.openWithGroupURL('GroupInfo.html', '${G.URL}')">${MathML.sans(G.name)}</a>
+    <a href="" style="text-decoration: none" action="Library.openWithGroupURL('GroupInfo.html', '${G.URL}')">${G.name}</a>
 </template>

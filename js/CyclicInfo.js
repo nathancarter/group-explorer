@@ -1,26 +1,19 @@
 // @flow
 
+import GEUtils from './GEUtils.js'
 import Log from './Log.js';
-import MathML from './MathML.js';
 import setUpGAPCells from './ShowGAPCode.js';
 import Template from './Template.js';
-import XMLGroup from './XMLGroup.js';
 
 export {summary, display};
 
+/*::
+import XMLGroup from './XMLGroup.js';
+*/
+
 // Load templates
-const CYCLIC_INFO_URL = './html/CyclicInfo.html';
-const Load_Promise =
-      new Promise( (resolve, reject) => {
-          $.ajax( { url: CYCLIC_INFO_URL,
-                    success: (data /*: html */) => {
-                        resolve(data);
-                    },
-                    error: (_jqXHR, _status, err) => {
-                        reject(`Error loading ${CYCLIC_INFO_URL} ${err === undefined ? '' : ': ' + err}`)
-                    }
-                  } );
-      } );
+const CYCLIC_INFO_URL = './html/CyclicInfo.html'
+const LoadPromise = GEUtils.ajaxLoad(CYCLIC_INFO_URL)
 
 let group /*: XMLGroup */;
 
@@ -28,19 +21,16 @@ function summary (Group /*: XMLGroup */) /*: string */ {
     return Group.isCyclic ? 'yes' : 'no';
 }
 
-function display (Group /*: XMLGroup */, $wrapper /*: JQuery */) {
-    Load_Promise
-        .then( (templates) => {
-            if ($('template[id|="cyclic"]').length == 0) {
-                $('body').append(templates);
-            }
+async function display (Group /*: XMLGroup */, $wrapper /*: JQuery */) {
+  const templates = await LoadPromise
 
-            $wrapper.html(formatCyclicInfo(Group));
+  if ($('template[id|="cyclic"]').length == 0) {
+    $('body').append(templates);
+  }
 
-            MathJax.Hub.Queue(['Typeset', MathJax.Hub, $wrapper[0]]);
-            setUpGAPCells(Group, $wrapper);
-        } )
-        .catch (Log.err)
+  $wrapper.html(formatCyclicInfo(Group));
+
+  setUpGAPCells(Group, $wrapper);
 }
 
 function formatCyclicInfo (Group /*: XMLGroup */) /*: DocumentFragment */ {

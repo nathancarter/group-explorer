@@ -2,30 +2,23 @@
 
 import {Cayley_Diagram_View} from '../CayleyDiagram.js';
 import {CayleyDiagramView} from '../js/CayleyDiagramView.js';
+import GEUtils from './GEUtils.js'
 import Log from '../js/Log.js';
 
 export {load, updateFromView};
 
-const VIEW_PANEL_URL = './html/CayleyViewController.html';
+const VIEW_PANEL_URL = './html/CayleyViewController.html'
 
 /*::
 import type {CayleyDiagramJSON} from '../js/CayleyDiagramView.js';
 */
 
-function load ($viewWrapper /*: JQuery */) /*: Promise<void> */ {
-   return new Promise( (resolve, reject) => {
-      $.ajax( { url: VIEW_PANEL_URL,
-                success: (data /*: html */) => {
-                   $viewWrapper.html(data);
-                   setupViewPage();
-                   updateFromView();
-                   resolve();
-                },
-                error: (_jqXHR, _status, err) => {
-                   reject(`Error loading ${VIEW_PANEL_URL} ${err === undefined ? '' : ': ' + err}`)
-                }
-              } );
-   } );
+async function load ($viewWrapper /*: JQuery */) /*: Promise<void> */ {
+  const data = await GEUtils.ajaxLoad(VIEW_PANEL_URL)
+
+  $viewWrapper.html(data);
+  setupViewPage();
+  updateFromView();
 }
 
 function setupViewPage() {

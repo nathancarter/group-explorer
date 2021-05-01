@@ -1,52 +1,40 @@
 // @flow
 
 import BasicGroup from './BasicGroup.js';
+import GEUtils from './GEUtils.js'
 import IsomorphicGroups from './IsomorphicGroups.js';
 import Log from './Log.js';
 import MathUtils from './MathUtils.js';
-import MathML from './MathML.js';
 import * as SheetModel from './SheetModel.js';
 import Template from './Template.js';
-import XMLGroup from './XMLGroup.js';
 
 export {summary, display, showZmnIsomorphismSheet, showNoZmnIsomorphismSheet};
 
 /*::
+import XMLGroup from './XMLGroup.js';
+
 import type {StrategyParameters, Layout, Direction} from './CayleyDiagramView.js';
 */
 
 // Load templates
-const ZMN_INFO_URL = './html/ZmnInfo.html';
-const Load_Promise =
-      new Promise( (resolve, reject) => {
-         $.ajax( { url: ZMN_INFO_URL,
-                   success: (data /*: html */) => {
-                      resolve(data);
-                   },
-                   error: (_jqXHR, _status, err) => {
-                      reject(`Error loading ${ZMN_INFO_URL} ${err === undefined ? '' : ': ' + err}`)
-                   }
-                 } );
-      } );
+const ZMN_INFO_URL = './html/ZmnInfo.html'
+const LoadPromise = GEUtils.ajaxLoad(ZMN_INFO_URL)
+
 let Group;
 
 function summary (Group /*: XMLGroup */) /*: string */ {
     return (new Set(MathUtils.getFactors(Group.order)).size == 2 ? 'yes' : 'no');
 }
 
-function display (group /*: XMLGroup */, $wrapper /*: JQuery */) {
-    Load_Promise
-        .then( (templates) => {
-            if ($('template[id|="zmn"]').length == 0) {
-                $('body').append(templates);
-            }
+async function display (group /*: XMLGroup */, $wrapper /*: JQuery */) {
+  const templates = await LoadPromise
 
-            Group = group;
-            $wrapper.html(formatZmnInfo());
+  if ($('template[id|="zmn"]').length == 0) {
+    $('body').append(templates);
+  }
 
-            MathJax.Hub.Queue(['Typeset', MathJax.Hub, $wrapper[0]]);
-        } )
-        .catch (Log.err)
+  Group = group;
+  $wrapper.html(formatZmnInfo());
 }
 
 function formatZmnInfo () /*: DocumentFragment */ {
@@ -84,8 +72,8 @@ function formatZmnInfo () /*: DocumentFragment */ {
 }
 
 function showZmnIsomorphismSheet ( m /*: groupElement */, n /*: groupElement */ ) {
-    const Z = ( k ) => MathML.sub('ℤ', k);
-    const prod = ( A, B ) => `<mrow>${A}<mo>×</mo>${B}</mrow>`;
+    const Z = ( k ) => `ℤ<sub>${k}</sub>`
+    const prod = ( A, B ) => `${A} × ${B}`
     const a = Group.elementOrders.indexOf( m );
     const b = Group.elementOrders.indexOf( n );
     const ab = Group.mult( a, b );
@@ -94,9 +82,7 @@ function showZmnIsomorphismSheet ( m /*: groupElement */, n /*: groupElement */ 
     CreateNewSheet( [
         {
             className : 'TextElement',
-            text : 'Illustration of the isomorphism between '
-                + MathML.toHTMLString( prod(Z(m),Z(n)) )
-                + ' and ' + MathML.toHTMLString( Z(m*n) ),
+            text : `Illustration of the isomorphism between ${prod(Z(m), Z(n))} and ${Z(m*n)}`,
             x : hmar, y : vmar,
             w : 3*W + 2*hsep, h : hdrH,
             fontSize : '20pt', alignment : 'center'
@@ -129,26 +115,19 @@ function showZmnIsomorphismSheet ( m /*: groupElement */, n /*: groupElement */ 
         },
         {
             className : 'TextElement',
-            text : `A Cayley diagram of ${MathML.toHTMLString( prod(Z(m),Z(n)) )}, `
-                + `with generators of order ${m} and ${n} shown in `
-                + `red and green, respectively.`,
+            text : `A Cayley diagram of ${prod(Z(m), Z(n))} with generators of order ${m} and ${n} shown in red and green, respectively.`,
             x : hmar, y : vmar+hdrH+H+2*vsep, w : W,
             alignment : 'center'
         },
         {
             className : 'TextElement',
-            text : `The same Cayley diagram as on the left, but now `
-                + `with the product of the red and green generators `
-                + `also shown, colored blue.`,
+            text : `The same Cayley diagram as on the left, but now with the product of the red and green generators also shown, colored blue.`,
             x : hmar+hsep+W, y : vmar+hdrH+H+2*vsep, w : W,
             alignment : 'center'
         },
         {
             className : 'TextElement',
-            text : `The same Cayley diagram as in the middle, but now `
-                + `with the red and green generators removed.  `
-                + `The blue generator traverses all ${m*n} nodes, `
-                + `so we can arrange it in a cycle.`,
+            text : `The same Cayley diagram as in the middle, but now with the red and green generators removed. The blue generator traverses all ${m*n} nodes, so we can arrange it in a cycle.`,
             x : hmar+2*hsep+2*W, y : vmar+hdrH+H+2*vsep, w : W,
             alignment : 'center'
         }
@@ -157,8 +136,8 @@ function showZmnIsomorphismSheet ( m /*: groupElement */, n /*: groupElement */ 
 
 function showNoZmnIsomorphismSheet ( m /*: groupElement */, n /*: groupElement */ ) {
     // define constants similar to those in showZmnIsomorphismSheet()
-    const Z = ( k ) => MathML.sub('ℤ', k);
-    const prod = ( A, B ) => `<mrow>${A}<mo>×</mo>${B}</mrow>`;
+    const Z = ( k ) => `ℤ<sub>${k}</sub>`
+    const prod = ( A, B ) => `${A} × ${B}`
     const hmar = 20, vmar = 20, hsep = 20, vsep = 20,
           W = 300, H = W, hdrH = 50, txtH = 100;
     // build the group Z_m x Z_n and find it in the group library.
@@ -190,9 +169,7 @@ function showNoZmnIsomorphismSheet ( m /*: groupElement */, n /*: groupElement *
     CreateNewSheet( [
         {
             className : 'TextElement',
-            text : 'Why there is no isomorphism between '
-                + MathML.toHTMLString( prod(Z(m),Z(n)) )
-                + ' and ' + MathML.toHTMLString( Z(m*n) ),
+          text : `Why there is no isomorphism between ${prod(Z(m), Z(n))} and ${Z(m*n)}`,
             x : hmar, y : vmar,
             w : 3*W + 2*hsep, h : hdrH,
             fontSize : '20pt', alignment : 'center'
@@ -226,26 +203,19 @@ function showNoZmnIsomorphismSheet ( m /*: groupElement */, n /*: groupElement *
         },
         {
             className : 'TextElement',
-            text : `A Cayley diagram of ${MathML.toHTMLString( prod(Z(m),Z(n)) )}, `
-                + `with generators of order ${m} and ${n} shown in `
-                + `red and green, respectively.`,
+            text : `A Cayley diagram of ${prod(Z(m), Z(n))} with generators of order ${m} and ${n} shown in red and green, respectively.`,
             x : hmar, y : vmar+hdrH+H+2*vsep, w : W,
             alignment : 'center'
         },
         {
             className : 'TextElement',
-            text : `The same Cayley diagram as on the left, but now `
-                + `with the largest-order element of that group `
-                + `also shown, colored blue.`,
+            text : `The same Cayley diagram as on the left, but now with the largest-order element of that group also shown, colored blue.`,
             x : hmar+hsep+W, y : vmar+hdrH+H+2*vsep, w : W,
             alignment : 'center'
         },
         {
             className : 'TextElement',
-            text : `The same Cayley diagram as in the middle, but now `
-                + `with the red and green generators removed.  `
-                + `The blue generator creates ${m*n/maxOrd} cycles, `
-                + `not one.`,
+            text : `The same Cayley diagram as in the middle, but now with the red and green generators removed. The blue generator creates ${m*n/maxOrd} cycles, not one.`,
             x : hmar+2*hsep+2*W, y : vmar+hdrH+H+2*vsep, w : W,
             alignment : 'center'
         }

@@ -90,7 +90,7 @@ body, #bodyDouble {
 /*
 ```
 ### faux-select
-Faux-select and associated classes are used to style a select-like structure. Faux-select-options can contain not just text but HTML and therefore MathML, making them better suited for mathematical text than simple HTML select options.
+Faux-select and associated classes are used to style a select-like structure. Faux-select-options can contain not just text but HTML, making them better suited for mathematical text than simple HTML select options.
   * .faux-select: &lt;div&gt; which contains the entire structure
   * .faux-selection: &lt;div&gt; which contains the current selection
   * .faux-select-arrow: a css down-arrow to the right of the selection

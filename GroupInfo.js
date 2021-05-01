@@ -9,7 +9,6 @@ import GEUtils from './js/GEUtils.js';
 import IsomorphicGroups from './js/IsomorphicGroups.js';
 import Library from './js/Library.js';
 import Log from './js/Log.js';
-import MathML from './js/MathML.js';
 import MathUtils from './js/MathUtils.js';
 import Menu from './js/Menu.js';
 import {MulttableView, createMinimalMulttableView} from './js/MulttableView.js';
@@ -27,7 +26,7 @@ import * as SolvableInfo from './js/SolvableInfo.js';
 import * as SubgroupInfo from './js/SubgroupInfo.js';
 import * as ZmnInfo from './js/ZmnInfo.js';
 
-export {loadGroup as load, actionClickHandler};
+export {load, actionClickHandler};
 
 // Global variables
 let Group			/*: XMLGroup */;		// group this page displays information about
@@ -42,15 +41,10 @@ $(function() {
 });
 
 // read in library, group from invocation
-function loadGroup() {
-    Library
-        .loadFromURL()
-        .then( (_group) => {
-            Group = _group;
-            displayStatic();
-            displayDynamic();
-        } )
-        .catch( Log.err );
+async function load () {
+  Group = await Library.loadFromURL()
+  displayStatic()
+  displayDynamic()
 }
 
 // displays group information that is independent of the representation
@@ -75,8 +69,6 @@ function displayDynamic () {
     displayComputedProperties();
     displayGenerators();
     displayNamingSchemes();
-
-    MathJax.Hub.Queue(['Typeset', MathJax.Hub]);
 }
 
 function displayBasicFacts () {
@@ -84,8 +76,8 @@ function displayBasicFacts () {
         {name: 'Order',      value: Group.order },
         {name: 'GAP name',   value: Group.gapname },
         {name: 'GAP ID',     value: Group.gapid },
-        {name: 'Other names',value: Group.other_names == undefined ? '' : Group.other_names.map( (name) => MathML.sans(name) ).join(', ') },
-        {name: 'Definition', value: MathML.sans(Group.definition) },
+        {name: 'Other names',value: Group.other_names == undefined ? '' : Group.other_names.join(', ') },
+        {name: 'Definition', value: Group.definition },
         {name: 'Notes',      value: Group.notes },
         {name: 'More info',  value: Group.links == undefined ? '' : Group.links.map( (link) => `<a href="${link}">${link}</a>` ).join(', ') },
     ];
@@ -223,7 +215,7 @@ function displayGenerators () {
         const generator_display = Group.generators.map(
             (gen) => gen.reduce(
                 (acc, el, inx) => {
-                    const rep = MathML.sans(Group.representation[el]);
+                    const rep = Group.representation[el];
                     if (gen.length == 1) {
                         return `The element ${rep} generates the group.`;
                     } else if (inx == 0) {
@@ -246,7 +238,7 @@ function displayNamingSchemes () {
     // Default element names
     if (Group.representation.length != 0) {
         const $frag = $(document.createDocumentFragment());
-        $frag.append(MathML.csList(Group.elements.map( (el) => Group.representation[el] )));
+        $frag.append(Group.elements.map((el) => Group.representation[el]).join(', '))
         if (Group.representationIsUserDefined) {
             $frag.append('<br>This representation is user-defined; see below.');
         } else {
@@ -255,16 +247,19 @@ function displayNamingSchemes () {
         $('#default-names > .content').html( (($frag[0] /*: any */) /*: DocumentFragment */) );
     }
 
+    const rowList = (representation) => {
+      return Group.elements.map((el) => `${Group.representation[el]} = ${representation[el]} <br>`).join('')
+    }
+
     // Loaded element names
     $('#loaded-names > .content').empty();
     if (Group.representations.length > 1 || Group.representationIsUserDefined) {
         const $frag = Group
               .representations
-              .reduce( ($frag, rep, index) => {
+              .reduce( ($frag, representation, index) => {
                   if (Group.representations[index] != Group.representation) {
-                      const scheme =
-                            MathML.rowList(Group.elements.map( (el) => Group.representation[el] + '<mo>=</mo>' + rep[el] ));
-                      $frag.append(eval(Template.HTML('loadedSchemeChoice-template')));
+                    const scheme = rowList(representation)
+                    $frag.append(eval(Template.HTML('loadedSchemeChoice-template')));
                   }
                   return $frag;
               }, $('<ol>') );
@@ -281,13 +276,12 @@ function displayNamingSchemes () {
             $frag.append(
                 Group
                     .userRepresentations
-                    .reduce( ($frag, rep, index) => {
+                    .reduce( ($frag, representation, index) => {
                         if (Group.userRepresentations[index] == Group.representation) {
                             $frag.append(eval(Template.HTML('user-names-scheme-in-use-template')));
                         } else {
-                            const scheme =
-                                  MathML.rowList(Group.elements.map( (el) => Group.representation[el] + '<mo>=</mo>' + rep[el] ));
-                            $frag.append(eval(Template.HTML('user-names-choice-template')));
+                          const scheme = rowList(representation)
+                          $frag.append(eval(Template.HTML('user-names-choice-template')));
                         }
                         return $frag;
                     }, $('<ol>') ) );
@@ -352,12 +346,11 @@ class UDR {
         UDR._showEditor(Group.userRepresentations[index]);
     }
 
-    static _showEditor(representation /*: Array<mathml> */) {
+    static _showEditor(representation /*: Array<html> */) {
         const editor = $(eval(Template.HTML('udr-editor-template')));
         const tableBody = editor.find('tbody');
         representation.forEach( (rep, inx) => tableBody.append(eval(Template.HTML('udr-edit-item-template'))) );
         $('body').append(editor).find('#udr-editor').show();
-        MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'udr-editor']);
     }
 
     static closeEdit() {
@@ -419,7 +412,7 @@ function showAllVisualizersSheet () {
         {
             className : 'TextElement',
             x : 50, y : 50, w : 800, h : 50,
-            text : `All Visualizers for the Group ${MathML.toHTMLString(Group.name)}`,
+            text : `All Visualizers for the Group ${Group.name}`,
             fontSize : '20pt', alignment : 'center'
         },
         {
@@ -455,13 +448,13 @@ function showAllVisualizersSheet () {
         {
             className : `MorphismElement`,
             fromIndex : 4, toIndex : 5,
-            name : MathML.toHTMLString( '<msub><mi>id</mi><mn>1</mn></msub>' ),
+            name : '<i>id</i><sub>1</sub>',
             showInjSurj : true, showManyArrows : true, definingPairs : iso
         },
         {
             className : `MorphismElement`,
             fromIndex : 5, toIndex : 6,
-            name : MathML.toHTMLString( '<msub><mi>id</mi><mn>2</mn></msub>' ),
+            name : '<i>id</i><sub>2</sub>',
             showInjSurj : true, showManyArrows : true, definingPairs : iso
         }
     ] );

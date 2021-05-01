@@ -3,7 +3,6 @@
 import BitSet from '../js/BitSet.js';
 import GEUtils from '../js/GEUtils.js';
 import Log from '../js/Log.js';
-import MathML from '../js/MathML.js';
 import Menu from '../js/Menu.js';
 import SubgroupFinder from '../js/SubgroupFinder.js';
 import Template from '../js/Template.js';
@@ -15,19 +14,9 @@ export {load};
 type highlighterRoutines = Array<{handler: (Array<Array<groupElement>>) => void, label: string}>;
 */
 
-const SUBSET_DISPLAY_URL /*: string */ = './html/SubsetHighlightController.html';
+const SUBSET_DISPLAY_URL = './html/SubsetHighlightController.html'
 
-const loadPromise =
-      new Promise( (resolve, reject) => {
-         $.ajax( { url: SUBSET_DISPLAY_URL,
-                   success: (data /*: html */) => {
-                      resolve(data);
-                   },
-                   error: (_jqXHR, _status, err) => {
-                      reject(`Error loading ${SUBSET_DISPLAY_URL} ${err === undefined ? '' : ': ' + err}`)
-                   }
-                 } );
-      } );
+const LoadPromise = GEUtils.ajaxLoad(SUBSET_DISPLAY_URL)
 
 let group /*: XMLGroup */ = new XMLGroup();
 let nextSubsetIndex /*: number*/ = 0;
@@ -122,8 +111,8 @@ class Subgroup extends AbstractSubset {
       this.elements = group.subgroups[subgroupIndex].members;
    }
 
-   get name() {
-      return MathML.sans(MathML.sub('H', this.subgroupIndex));
+   get name () /*: html */ {
+      return `<i>H</i><sub>${this.subgroupIndex}</sub>`
    }
 
    get displayLine() {
@@ -183,26 +172,22 @@ class Subset extends AbstractSubset {
       }
       this.subsetIndex = getNextSubsetIndex();
 
-      // cache formatted MathML for next two subset instances
-      MathML.cacheStrings([MathML.sub('S', nextSubsetIndex),
-                           MathML.sub('S', nextSubsetIndex + 1)]);
-
       $('#subsets_placeholder').hide();
       $('#subsets').append(this.displayLine).show();
    }
 
-   get name() /*: mathml */ {
-      return MathML.sans(MathML.sub('S', this.subsetIndex));
+   get name () /*: html */ {
+      return `<i>S</i><sub>${this.subsetIndex}</sub>`
    }
 
    get displayLine() /*: html */ {
       const numElements = this.elements.popcount();
-      let items = this.elements
-                      .toArray()
-                      .slice(0, 3)
-                      .map( (el) => group.representation[el] );
+      let elements = this.elements
+          .toArray()
+          .slice(0, 3)
+          .map((el) => group.representation[el]);
        if (numElements > 3) {
-         items.push('<mtext>...</mtext>');
+         elements.push('...');
       }
       return eval(Template.HTML('subset-template'));
    }
@@ -221,8 +206,8 @@ class Subset extends AbstractSubset {
       }
    }
 
-   static nextName() /*: string */ {
-      return MathML.sans(MathML.sub('S', nextSubsetIndex));
+   static nextName () /*: html */ {
+      return `<i>S</i><sub>${nextSubsetIndex}</sub>`
    }
 }
 
@@ -239,12 +224,7 @@ class AbstractPartition {
    }
 
    get name() {
-      return [MathML.sans('<mtext>{</mtext>'),
-              this.subsets[0].name,
-              MathML.sans('<mtext>...</mtext>'), 
-              this.subsets[this.subsets.length - 1].name,
-              MathML.sans('<mtext>}</mtext>')]
-         .join('&nbsp;');
+      return `{ ${this.subsets[0].name} ... ${this.subsets[this.subsets.length-1].name} }`
    }
 
    destroy() {
@@ -290,7 +270,7 @@ class PartitionSubset extends AbstractSubset {
          }
       }
       if (this.elements.popcount() > 3) {
-         result.push('<mtext>...</mtext>');
+         result.push('...');
       }
       return result;
    }
@@ -310,7 +290,7 @@ class ConjugacyClasses extends AbstractPartition {
       super();
 
       this.subsets = group.conjugacyClasses.map( (conjugacyClass, inx) =>
-          new PartitionSubset(this, inx, conjugacyClass, MathML.sans(MathML.sub('CC', inx)), 'conjugacy-class') );
+          new PartitionSubset(this, inx, conjugacyClass, `<i>CC</i><sub>${inx}</sub>`, 'conjugacy-class') );
 
       $('#partitions_placeholder').hide();
       $('#partitions').append(
@@ -334,7 +314,7 @@ class OrderClasses extends AbstractPartition {
          .orderClasses
          .filter( (orderClass) => orderClass.popcount() != 0 )
          .map( (orderClass, inx) => 
-            new PartitionSubset(this, inx, orderClass, MathML.sans(MathML.sub('OC', inx)), 'order-class')
+            new PartitionSubset(this, inx, orderClass, `<i>OC</i><sub>${inx}</sub>`, 'order-class')
          );
 
       $('#partitions_placeholder').hide();
@@ -369,8 +349,8 @@ class Cosets extends AbstractPartition {
          .map( (coset, inx) => {
             const rep = group.representation[((coset.first() /*: any */) /*: groupElement */)];
             const name = this.isLeft ?
-                         MathML.sans(rep) + this.subgroup.name :
-                         this.subgroup.name + MathML.sans(rep);
+                         rep + this.subgroup.name :
+                         this.subgroup.name + rep;
             return new PartitionSubset(this, inx, coset, name, 'coset-class');
          } );
 
@@ -403,7 +383,7 @@ class SubsetEditor {
 
       for (const el of group.elements) {
          const elementHTML =
-            `<li element=${el} draggable="true">${MathML.sans(group.representation[el])}</li>`;
+            `<li element=${el} draggable="true">${group.representation[el]}</li>`;
          const listName = elements.isSet(el) ? 'ssedit-in-elements-list' : 'ssedit-not-in-elements-list';
          $(elementHTML).appendTo($subsetEditor.find(`#${listName}`))
                        .on('dragstart', (event /*: JQueryEventObject */) => {
@@ -564,7 +544,7 @@ function showMenu(event /*: MouseEvent */, id /*: number */) {
 }
 
 /* Load, initialize subset display */
-function load ($subsetWrapper /*: JQuery */,
+async function load ($subsetWrapper /*: JQuery */,
                _highlighters /*: highlighterRoutines*/,
                _clearHighlights /*: () => void */,
                _group /*: XMLGroup */) /*: Promise<void> */
@@ -576,15 +556,10 @@ function load ($subsetWrapper /*: JQuery */,
    nextId = 0;
    displayList = [];
 
-   return new Promise( (resolve, reject) => {
-      loadPromise
-         .then ( (data) => {
-            $subsetWrapper.html(data);
-            setupSubsetPage();
-            resolve();
-         } )
-         .catch( (err) => reject(err) );
-   } );
+  const data = await LoadPromise
+
+  $subsetWrapper.html(data);
+  setupSubsetPage();
 }
 
 function setupSubsetPage() {

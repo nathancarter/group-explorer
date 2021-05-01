@@ -34,12 +34,12 @@ When executed, `Template.HTML` produces the template contents as a string litera
 Note the back ticks ` at the start and end of the string: this is an ES6 template literal.  When it is eval'd in a scope which has the referenced values defined, as excerpted from [SSD.Subgroups](../subsetDisplay/Subgroup.js):
 
 ```js
-const generators = this.generators.toArray().map( el => MathML.sans(group.representation[el]) );
+const generators = this.generators.toArray().map(el => group.representation[el]);
 const subgroupOrder = this.subgroup.order;
 const subgroupLine = eval(Template.HTML('subgroup_template');
 ```
 
-The expressions enclosed by curly braces ${...} are evaluated and replaced in the string. At this point (for one of the subgroups of <i>D</i><sub>4</sub>), `subgroupLine` will be a string of HTML like the following (using an HTML equivalent of the actual MathML):
+The expressions enclosed by curly braces ${...} are evaluated and replaced in the string. At this point (for one of the subgroups of <i>D</i><sub>4</sub>), `subgroupLine` will be a string of HTML like the following:
 
 ```html
 <li id="1">
@@ -62,7 +62,7 @@ While this example may seem too simple to provide much justification for introdu
 
 ## Template retrieval caching
 
-Since template retrieval is done repeatedly, the actual template retrieval code caches results by template id in a class static variable, as you can see here: [Template.md](../js/Template.md).
+Since template retrieval is done repeatedly, the actual template retrieval code caches results by template id in a class static variable, as you can see below.
 
 ```js
  */

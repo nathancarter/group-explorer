@@ -5,7 +5,6 @@
 import GEUtils from './GEUtils.js'
 import Library from './Library.js'
 import Log from './Log.js'
-import MathML from './MathML.js' // used in html action
 import * as Model from './SheetModel.js'
 import { THREE } from '../lib/externals.js' // used in html action
 import * as View from './SheetView.js'

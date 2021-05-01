@@ -2,8 +2,6 @@
 
 import BitSet from './BitSet.js';
 import GEUtils from './GEUtils.js';
-import MathML from './MathML.js';
-import XMLGroup from './XMLGroup.js';
 import {CayleyDiagramView} from './CayleyDiagramView.js';
 
 // $FlowFixMe -- external module imports described in flow-typed directory
@@ -11,6 +9,7 @@ import {THREE} from '../lib/externals.js';
 
 /*::
 import type {Tree} from './GEUtils.js';
+import XMLGroup from './XMLGroup.js';
 import type {XMLCayleyDiagram} from './XMLGroup.js';
 import type {NodeData, ArrowData, ChunkData} from './CayleyDiagramView.js';
 import {CayleyDiagramGenerator} from './CayleyDiagramView.js';
@@ -430,7 +429,7 @@ export class CayleyGeneratorFromStrategy /*:: implements CayleyDiagramGenerator 
                         }
                     }
                     results[0].chunk = {
-                        name: results[0].label + MathML.sub('H', this.chunk),
+                        name: results[0].label + `<i>H</i><sub>${this.chunk}</sub>`,
                         o: centroid,
                         x: new THREE.Vector3(1, 0, 0).add(centroid),
                         y: new THREE.Vector3(0, 1, 0).add(centroid),

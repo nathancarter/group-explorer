@@ -1,9 +1,12 @@
 
-// un-analyzed 3rd party library
-declare var MathJax : any
-
 // Generic object
 type Obj = {[key: string]: any}
+
+// XSLTProcessor
+declare class XSLTProcessor {
+   importStylesheet(Node): void;
+   transformToFragment(Node, Document): DocumentFragment;
+}
 
 // types that indicate the use of the string/number
 declare type integer = number

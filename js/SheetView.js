@@ -356,7 +356,6 @@ export class TextView extends NodeView {
         'background-color': backgroundCss,
         color: this.modelElement.fontColor,
         'font-size': this.modelElement.fontSize,
-        'font-family': 'Arial',
         'text-align': this.modelElement.alignment,
         padding: `0 ${TEXT_PADDING}px`
       })
@@ -408,10 +407,7 @@ export class VisualizerView extends NodeView {
     unitSquarePositions: Array<THREE.Vector2>
     lastZoom: float
   */
-  constructor (
-    modelElement /*: SheetModel.VisualizerElement */,
-    domElement /*: HTMLElement */ = modelElement.visualizer.canvas
-  ) {
+  constructor (modelElement /*: SheetModel.VisualizerElement */, domElement /*: HTMLElement */) {
     super(modelElement, domElement)
 
     $(this.domElement)
@@ -438,7 +434,7 @@ export class CGView extends VisualizerView {
     +modelElement: SheetModel.CGElement
   */
   constructor (modelElement /*: SheetModel.CGElement */) {
-    super(modelElement)
+    super(modelElement, modelElement.visualizer.canvas)
     this.redraw()
   }
 }
@@ -448,7 +444,7 @@ export class MTView extends VisualizerView {
     +modelElement: SheetModel.MTElement
   */
   constructor (modelElement /*: SheetModel.MTElement */) {
-    super(modelElement)
+    super(modelElement, modelElement.visualizer.canvas)
     this.redraw()
   }
 }
@@ -712,7 +708,6 @@ export class MorphismView extends LinkView {
       .css('padding', '5px 10px')
       .css('color', 'black')
       .css('font-size', '16px')
-      .css('font-family', 'Arial')
       .css('text-align', 'center')
       .css('white-space', 'nowrap')
       .css('position', 'absolute')

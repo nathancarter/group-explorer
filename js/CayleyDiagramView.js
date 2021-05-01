@@ -5,15 +5,16 @@ import {AbstractDiagramDisplay} from './AbstractDiagramDisplay.js';
 import {DEFAULT_LINE_COLOR, DEFAULT_SPHERE_COLOR as DEFAULT_NODE_COLOR} from './AbstractDiagramDisplay.js';
 import {CayleyGeneratorFromStrategy, CayleyGeneratorFromSpec} from './CayleyGenerator.js';
 import GEUtils from './GEUtils.js';
+import { htmlToContext } from './GEUtils.js'
 import Library from './Library.js';
-import MathML from './MathML.js';
-import XMLGroup from './XMLGroup.js';
+import * as MathML from './MathML.js';
 
 export {DEFAULT_SPHERE_COLOR as DEFAULT_NODE_COLOR} from './AbstractDiagramDisplay.js';
 
 import {THREE, Line2, LineMaterial, LineGeometry} from '../lib/externals.js';
 
 /*::
+import XMLGroup from './XMLGroup.js';
 import type {Tree} from './GEUtils.js';
 import {VizDisplay} from './SheetModel.js';
 import type {VisualizerElementJSON} from './SheetModel.js';
@@ -28,7 +29,7 @@ export type {LineType} from './AbstractDiagramDisplay.js';
 export type NodeData = {
     position: THREE.Vector3,
     element: groupElement,
-    label: mathml,
+    label: html,
     centers: Array<THREE.Vector3>,
     chunk?: ChunkData,
 } & Obj;
@@ -57,7 +58,7 @@ export type LineUserData = {
 };
 
 export type ChunkData = {
-   name: mathml,
+   name: html,
    o: THREE.Vector3,
    x: THREE.Vector3,
    y: THREE.Vector3,
@@ -77,7 +78,7 @@ export interface CayleyDiagramGenerator {
 type NodeDataJSON = {
     position: {x: float, y: float, z: float},
     element: groupElement,
-    label: mathml,
+    label: html,
 };
 
 type ArrowDataJSON = {
@@ -507,31 +508,43 @@ export class CayleyDiagramView extends AbstractDiagramDisplay {
         const radius = spheres[0].scale.x;
         const big_node_limit = 0.1, small_node_limit = 0.05;
         const {canvas_width, canvas_height, label_font} =
-              (radius >= big_node_limit)   ? {canvas_width: 4096, canvas_height: 256, label_font: '120pt Arial'} :
-              (radius <= small_node_limit) ? {canvas_width: 1024, canvas_height: 64,  label_font: '32pt Arial'} :
-                                             {canvas_width: 2048, canvas_height: 128, label_font: '64pt Arial'};
+              (radius >= big_node_limit)   ? {canvas_width: 4096, canvas_height: 256, label_font: '120pt'} :
+              (radius <= small_node_limit) ? {canvas_width: 1024, canvas_height: 64,  label_font: '32pt'} :
+                                             {canvas_width: 2048, canvas_height: 128, label_font: '64pt'};
         const scale = label_scale_factor * radius * 8.197 * 2;  // factor to make label size ~ radius
 
-        spheres.forEach( (sphere) => {
+        const $scratch = $('<div id="scratch">')
+              .css({
+                  position: 'fixed',
+                  width: canvas_width,
+                  height: canvas_height,
+                  top: -2 * canvas_height,
+                  'font-size': `${parseInt(label_font)}pt`,
+              })
+              .appendTo('#graphic')
+
+        spheres.forEach( (sphere, inx) => {
             const node = ((sphere.userData /*: any */) /*: SphereUserData */).node;
             if (node.label === undefined || node.label == '') {
                 return;
             };
 
             // make canvas big enough for any label and offset it to clear the node while still being close
-            const canvas = document.createElement('canvas');
-            canvas.id = `label_${node.element}`;
+            const canvas = (($('<canvas>')
+              .attr({
+                  id: `label_${node.element}`,
+                  width: canvas_width,
+                  height: canvas_height,
+              })[0] /*: any */) /*: HTMLCanvasElement */)
+
             const context = canvas.getContext('2d');
 
-            const text_label = MathML.toUnicode(node.label);
-            canvas.width =  canvas_width;
-            canvas.height = canvas_height;
-            // debug -- paint label background
-            //   context.fillStyle = 'rgba(0, 0, 100, 0.5)';
-            //   context.fillRect(0, 0, canvas.width, canvas.height);
-            context.font = label_font;
-            context.fillStyle = 'rgba(0, 0, 0, 1)';
-            context.fillText(text_label, 0, 0.7*canvas.height);
+            // DEBUG:  paint label background
+            // context.fillStyle = 'rgba(0, 0, 100, 0.5)';
+            // context.fillRect(0, 0, canvas.width, canvas.height);
+
+            $scratch.html(node.label)
+            /* GEUtils */ htmlToContext($scratch[0], context, new THREE.Vector2(canvas_width/2, canvas_height/2))
 
             const texture = new THREE.Texture(canvas);
             texture.needsUpdate = true;
@@ -545,6 +558,8 @@ export class CayleyDiagramView extends AbstractDiagramDisplay {
 
             label_group.add(label);
         } )
+
+        $scratch.remove()
     }
 
     updateLabelRadius (old_sphere_radius /*: float */, new_sphere_radius /*: float */) {

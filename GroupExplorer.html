@@ -27,8 +27,9 @@
        .diagramHeader {
           min-width: 100px;
        }
-       .groupName {
+       .groupName > a, .definition > a {
           font-size: large;
+          text-decoration: none;
        }
        .groupOrder {
           text-align: center;
@@ -116,14 +117,6 @@
       </style>
 
       <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-      <script type="text/x-mathjax-config">
-       MathJax.Hub.Config({
-          CommonHTML: {
-             scale: 90,
-          },
-       });
-      </script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.6/MathJax.js?config=MML_CHTML"></script>
       <script type="module">
        import {load} from "./GroupExplorer.js";
        window.addEventListener('load', load, {once: true});
@@ -185,13 +178,13 @@
          <tr group="${group.URL}">
             <td class="groupName">
                <a href="GroupInfo.html?groupURL=${group.URL}" title="Open Group Info page">
-                  <div>${MathML.sans(group.name)}</div>
+                  <div>${group.name}</div>
                </a>
             </td>
             <td class="groupOrder noDiagram">${ group.order }</td>
             <td class="definition">
                <a href="GroupInfo.html?groupURL=${group.URL}" title="Open Group Info page">
-                  <div>${MathML.sans(group.definition)}</div>
+                  <div>${group.definition}</div>
                </a>
             </td>
             <td class="cayleyDiagram">

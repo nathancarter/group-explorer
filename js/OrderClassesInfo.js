@@ -1,45 +1,35 @@
 // @flow
 
+import GEUtils from './GEUtils.js'
 import Log from './Log.js';
-import MathML from './MathML.js';
 import setUpGAPCells from './ShowGAPCode.js';
 import Template from './Template.js';
-import XMLGroup from './XMLGroup.js';
 
 export {summary, display};
 
+/*::
+import XMLGroup from './XMLGroup.js';
+*/
+
 // Load templates
-const ORDER_CLASSES_INFO_URL = './html/OrderClassesInfo.html';
-const Load_Promise =
-      new Promise( (resolve, reject) => {
-          $.ajax( { url: ORDER_CLASSES_INFO_URL,
-                    success: (data /*: html */) => {
-                        resolve(data);
-                    },
-                    error: (_jqXHR, _status, err) => {
-                        reject(`Error loading ${ORDER_CLASSES_INFO_URL} ${err === undefined ? '' : ': ' + err}`)
-                    }
-                  } );
-      } );
+const ORDER_CLASSES_INFO_URL = './html/OrderClassesInfo.html'
+const LoadPromise = GEUtils.ajaxLoad(ORDER_CLASSES_INFO_URL)
 
 function summary (Group /*: XMLGroup */) /*: string */ {
     const numOrderClasses = new Set(Group.elementOrders).size;
     return `${numOrderClasses} order class${(Group.order == 1) ? '' : 'es'}`;
 }
 
-function  display (Group /*: XMLGroup */, $wrapper /*: JQuery */) {
-    Load_Promise
-        .then( (templates) => {
-            if ($('template[id|="order-classes"]').length == 0) {
-                $('body').append(templates);
-            }
+async function  display (Group /*: XMLGroup */, $wrapper /*: JQuery */) {
+  const templates = await LoadPromise
 
-            $wrapper.html(formatOrderClasses(Group));
+  if ($('template[id|="order-classes"]').length == 0) {
+    $('body').append(templates);
+  }
 
-            MathJax.Hub.Queue(['Typeset', MathJax.Hub, $wrapper[0]]);
-            setUpGAPCells(Group, $wrapper);
-        } )
-        .catch (Log.err)
+  $wrapper.html(formatOrderClasses(Group));
+
+  setUpGAPCells(Group, $wrapper);
 }
 
 function formatOrderClasses (Group /*: XMLGroup */) /*: DocumentFragment */ {
@@ -52,9 +42,8 @@ function formatOrderClasses (Group /*: XMLGroup */) /*: DocumentFragment */ {
         Group.orderClasses.forEach( (members, order) => {
             if (members.popcount() != 0) {
                 $frag.find('#order-classes-list')
-                    .append($('<li>').html(
-                        `Elements of order ${order}:&nbsp;` +
-                            MathML.csList(members.toArray().map( (el) => Group.representation[el] ))
+                    .append($('<li>').html(`Elements of order ${order}: ` +
+                       members.toArray().map((el) => Group.representation[el]).join(', ')
                     ))
             }
         } )

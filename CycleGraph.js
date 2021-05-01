@@ -4,7 +4,6 @@ import {CycleGraphView, createLabelledCycleGraphView} from './js/CycleGraphView.
 import GEUtils from './js/GEUtils.js';
 import Library from './js/Library.js';
 import Log from './js/Log.js';
-import MathML from './js/MathML.js';
 import Menu from './js/Menu.js';
 import {LISTENER_READY_MESSAGE, STATE_LOADED_MESSAGE} from './js/SheetModel.js';
 import Template from './js/Template.js';
@@ -43,42 +42,20 @@ function registerCallbacks() {
    LargeGraphic.init();
 }
 
-// Load group from invocation URL, then preload MathML cache, then complete setup
-function load() {
-   loadLibrary();
-}
+// Load group from invocation URL and complete setup
+async function load () {
+  Group = await Library.loadFromURL()
 
-function loadLibrary () {
-   Library.loadFromURL()
-      .then( (group) => {
-         Group = group;
-         preloadMathMLCache();
-      } )
-      .catch(Log.err);
-}
+  const highlighters = [
+    {handler: highlightByBackground, label: 'Background'},
+    {handler: highlightByBorder, label: 'Border'},
+    {handler: highlightByTop, label: 'Top'}
+  ];
+  
+  await SSD.load($('#subset-control'), highlighters, clearHighlights, Group)
 
-function preloadMathMLCache () {
-   MathML.preload(Group)
-      .then( () => generateSubsetHighlightPanel() )
-      .catch(Log.err);
-}
-
-// do this first to determine size of subset highlight panel, so we don't have to redraw main CycleGraph graphic
-function generateSubsetHighlightPanel () {
-   const highlighters = [
-      {handler: highlightByBackground, label: 'Background'},
-      {handler: highlightByBorder, label: 'Border'},
-      {handler: highlightByTop, label: 'Top'}
-   ];
-   SSD.load($('#subset-control'), highlighters, clearHighlights, Group)
-      .then( () => completeSetup() )
-      .catch(Log.err);
-}
-
-// Complete setup functions
-function completeSetup() {
    // Create header from group name
-   $('#heading').html(MathML.sans('<mtext>Cycle Graph for&nbsp;</mtext>' + Group.name));
+   $('#heading').html(`Cycle Graph for ${Group.name}`);
 
    // Create Cycle Graph, graphic context (it will be displayed in resizeBody below)
    Cycle_Graph_View = createLabelledCycleGraphView({container: $('#graphic')});
@@ -195,7 +172,8 @@ class LargeGraphic {
 
       case 'wheel':
          GEUtils.cleanWindow();
-         (((mouseEvent /*: any */) /*: WheelEvent */).deltaY < 0) ? Cycle_Graph_View.zoomIn() : Cycle_Graph_View.zoomOut();
+         const deltaY = ((mouseEvent /*: any */) /*: WheelEvent */).deltaY;
+         (deltaY < 0) ? Cycle_Graph_View.zoomIn(deltaY) : Cycle_Graph_View.zoomOut(deltaY);
          break;
 
       case 'mousedown':
@@ -287,7 +265,6 @@ class LargeGraphic {
          const $label = $(eval(Template.HTML('node-label-template')))
                           .appendTo('#graphic');
          Menu.setMenuLocation($label, event);
-         MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'nodeLabel']);
       }
    }
 

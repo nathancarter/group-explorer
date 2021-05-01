@@ -7,7 +7,6 @@ import DiagramDnD from './js/DiagramDnD.js';
 import GEUtils from './js/GEUtils.js';
 import Library from './js/Library.js';
 import Log from './js/Log.js';
-import MathML from './js/MathML.js';
 import Menu from './js/Menu.js';
 import {LISTENER_READY_MESSAGE, STATE_LOADED_MESSAGE} from './js/SheetModel.js';
 import Template from './js/Template.js';
@@ -46,37 +45,23 @@ function registerCallbacks() {
 }
 
 // The element that takes the longest to display is the SubsetHighlightPanel, due to the typesetting required.
-// We process along the critical path: load Group, preload MathML cache, generate SubsetHighlightPanel
-function load() {
-   loadLibrary();
-}
+// We process along the critical path: load Group, generate SubsetHighlightPanel
+async function load () {
+  Group = await Library.loadFromURL()
 
-function loadLibrary () {
-   Library.loadFromURL()
-      .then( (group) => {
-         Group = group;
-         preloadMathMLCache();
-      } )
-      .catch(Log.err);
-}
+  // Create header from group name
+  $('#heading').html(`Cayley Diagram for ${Group.name}`)
 
-function preloadMathMLCache () {
-   MathML.preload(Group)
-      .then( () => displaySubsetHighlightPanel() )
-      .catch(Log.err);
-}
+  // load subset highlighting control (do this before starting visualizer, to determine size of #graphic)
+  const highlighters = [
+    {handler: highlightByNodeColor, label: 'Node color'},
+    {handler: highlightByRingAroundNode, label: 'Ring around node'},
+    {handler: highlightBySquareAroundNode, label: 'Square around node'}
+  ];
 
-function displaySubsetHighlightPanel () {
-   const highlighters = [
-      {handler: highlightByNodeColor, label: 'Node color'},
-      {handler: highlightByRingAroundNode, label: 'Ring around node'},
-      {handler: highlightBySquareAroundNode, label: 'Square around node'}
-   ];
-   SSD.load($('#subset-control'), highlighters, clearHighlights, Group)
-      .then( () => completeSetup() )
-      .catch(Log.err);
+  await SSD.load($('#subset-control'), highlighters, clearHighlights, Group)
 
-   // These activities can proceed before the main graphic is generated
+   // The following (up to >>>) can be completed before SSD displays -- do we still need to do this?
 
    // Generate Cayley diagram, but don't display in the main #graphic yet
    let diagram_name = new URL(window.location.href).searchParams.get('diagram');
@@ -87,9 +72,6 @@ function displaySubsetHighlightPanel () {
    }
    Cayley_Diagram_View.group = Group;		     // set group and diagram name in Cayley_Diagram_View
    Cayley_Diagram_View.diagram_name = diagram_name;  //   and generate their Cayley diagram
-
-   // Create header from group name
-   $('#heading').html(MathML.sans('<mtext>Cayley Diagram for&nbsp;</mtext>' + Group.name));
 
    // Register the splitter with jquery-resizable
    (($('#controls') /*: any */) /*: JQuery & {resizable: Function} */).resizable({
@@ -104,10 +86,9 @@ function displaySubsetHighlightPanel () {
 
    // Load icon strip in upper right-hand corner
    VC.load(Group, HELP_PAGE);
-}
 
-// Complete setup functions once the main #graphic is sized correctly
-function completeSetup () {
+  // >>> Complete setup functions once the main #graphic is sized correctly
+
    // Is this an editor started by a Sheet? If so, set up communication with Sheet
    if (window.isEditor) {
       setupEditorCallback();
@@ -270,7 +251,7 @@ class Tooltip {
 
    static createTooltip(location /*: eventLocation */) {
       const objects = Tooltip.getObjectIDsAtLocation(location);
-      const object_names = objects.map( (obj) => MathML.sans(obj.name) );
+      const object_names = objects.map((obj) => obj.name);
       const objectIDs_string = objects.map( (obj) => obj.id ).join(', ');
 
       // create tooltip
@@ -283,7 +264,6 @@ class Tooltip {
       const $tooltip = $(eval(Template.HTML(template_name)))
                           .appendTo('#graphic');
       Menu.setMenuLocation($tooltip, location);
-      MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'tooltip']);
 
       return $tooltip;
    }

@@ -20,6 +20,7 @@ Sheet functions:
 */
 
 import GEUtils from './GEUtils.js';
+import * as GEUtilz from './GEUtils.js'
 import Log from './Log.js';
 import {broadcastChange} from '../Multtable.js';
 import Subgroup from './Subgroup.js';
@@ -56,8 +57,8 @@ type MulttableViewOptions = {
 
 const DEFAULT_CANVAS_HEIGHT = 100;
 const DEFAULT_CANVAS_WIDTH = 100;
-const ZOOM_STEP = 0.1;
-const MINIMUM_FONT = 2;
+const ZOOM_STEP = 0.002
+const MINIMUM_FONT = 6
 const DEFAULT_BACKGROUND = '#F0F0F0';
 
 export class MulttableView /*:: implements VizDisplay<MulttableJSON> */ {
@@ -82,11 +83,13 @@ export class MulttableView /*:: implements VizDisplay<MulttableJSON> */ {
     corners: void | Array<color | void>;
 
     show_request: boolean;
+
+    labelCache: Array<HTMLCanvasElement>
  */
     constructor (options /*: MulttableViewOptions */ = {}) {
         // take canvas dimensions from container (if specified), option, or default
         let width, height;
-        const container = options.container;
+        const container = options.container
         if (container !== undefined) {
             width = container.width();
             height = container.height();
@@ -107,6 +110,8 @@ export class MulttableView /*:: implements VizDisplay<MulttableJSON> */ {
         this.transform = new THREE.Matrix3();  // current multtable -> screen transformation
 
         this.show_request = false;
+
+        this.labelCache = []
     }
 
     get size () /*: {w: number, h: number} */ {
@@ -242,30 +247,85 @@ export class MulttableView /*:: implements VizDisplay<MulttableJSON> */ {
             }
         }
 
-        // calculate font size to fit longest label
+        // make scratch div that centers text horizontally and vertically
+        // find longest label length
+        // if permutation (starts with '(') then
+        //   if longest label fits in 80% with font >= 12 use it just like non-permutation
+        //   else
+        //     estimate font size based on area of characters = area of box
+        //     then correct for fact that number of lines is an integer:
+        //       font box dimension: dim = (80% scale) = 0.8 * scale
+        //       length of longest label, in 1px font characters: longest = this.group.longestHTMLLabel
+        //       area of font box: area = estFontSize^2 longest = dim^2
+        //          => estFontSize = dim / Math.sqrt(longest)
+        //       estLineCount = Math.floor(dim / estFontSize)
+        //       adjusted fontSize = estLineCount * (dim / longest)
+        // else
+        //   find font size that makes it 80% of box width (but not too big)?
+        //   or has fontSize = scale / 3?
+        //   fontSize = Math.min(50pt, 0.8 * width * / longest label, scale / 3)
+
         this.context.setTransform(1, 0, 0, 1, 0, 0);
-        this.context.font = '14pt Arial';
-        const longestLabelWidth =  this.context.measureText(this.group.longestLabel).width;
-        const labelBoxWidth = (this.permutationLabels === undefined) ? longestLabelWidth : Math.sqrt(50*longestLabelWidth);
-        const fontScale = Math.min(50, 11 * scale/labelBoxWidth, scale / 3);
+
+        let fontSize = Math.min(1.33 * 50, scale / 3)
+        if (this.permutationLabels) {
+            const dim = 0.8 * scale
+            const longest = this.group.longestHTMLLabel
+            const estFontSize = dim / Math.sqrt(longest)
+            const estLineCount = Math.max(4, Math.floor(dim / estFontSize))
+            const estFontSize2 = 0.8 * Math.min(dim / estLineCount, estLineCount * dim / longest)
+            fontSize = Math.min(fontSize, estFontSize2)
+        } else {
+            // fontSize ~ 80% width
+            fontSize = Math.min(fontSize, 0.8 * scale / this.group.longestHTMLLabel)
+        }
+        
 
         // don't render labels if font is too small
-        if (fontScale < MINIMUM_FONT) {
+        if (fontSize < MINIMUM_FONT) {
             return;
         }
 
-        this.context.font = `${fontScale.toFixed(6)}pt Arial`;
         this.context.textAlign = (this.permutationLabels === undefined) ? 'center' : 'left';
         this.context.fillStyle = 'black';
         this.context.textBaseline = 'middle';  // fillText y coordinate is center of upper-case letter
+        this.context.font = `${fontSize}px ${$(this.canvas).css('font-family')}`
+
+        let $scratch
+        if (this.permutationLabels == null) {
+            if (this.labelCache.length != 0 &&
+                parseInt($(this.labelCache.filter(() => true)[0]).css('font-size')) != fontSize) {
+                this.labelCache = []
+            }
+
+            $scratch = $('<div>')
+                .css({
+                    position: 'absolute',
+                    textAlign: 'center',
+                    width: 'auto',
+                    height: 'auto',
+                    top: 0,
+                    'z-index': -1,
+                    'font-size': fontSize
+                })
+                .appendTo(this.canvas.parentElement)
+        }
 
         for (let inx = minX; inx < maxX; inx++) {
             for (let jnx = minY; jnx < maxY; jnx++) {
                 const x = this.position(inx);
                 const y = this.position(jnx);
                 const product = this.group.mult(this.elements[jnx], this.elements[inx]);
-                this._drawLabel(x, y, product, scale, fontScale);
+                if (this.permutationLabels == null) {
+                    this._drawLabel(x, y, product, scale, fontSize, $scratch);
+                } else {
+                    this._drawPermutationLabel(x, y, product, scale, fontSize);
+                }
             }
+        }
+
+        if ($scratch != null) {
+            $scratch.remove()
         }
     }
 
@@ -299,60 +359,87 @@ export class MulttableView /*:: implements VizDisplay<MulttableJSON> */ {
         this.context.fill();
     }
 
-    _drawLabel (x /*: number */, y /*: number */, element /*: number */, scale /*: number */, fontScale /*: number */) {
+    _drawLabel (x /*: number */, y /*: number */, element /*: number */, scale /*: number */, fontScale /*: number */, $scratch) {
+        const label = this.group.representation[element];
+
+        if (this.labelCache[element] == null) {
+            $scratch.html(label)
+
+            const $canvas = $('<canvas>')
+                  .attr({
+                      width: scale,
+                      height: scale,
+                  })
+                  .css({
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: scale,
+                      height: scale,
+                      'z-index': -1,
+                  })
+                  .appendTo(this.canvas.parentElement)
+
+            const labelCenter = new THREE.Vector2(scale / 2, scale / 2)
+            GEUtilz.htmlToContext($scratch[0], $canvas[0].getContext('2d'), labelCenter)
+
+            this.labelCache[element] = $canvas.remove()[0]
+        }
+
+        const source = this.labelCache[element]
+        const destLocation = new THREE.Vector2(x, y).applyMatrix3(this.transform)
+        this.context.drawImage(source, ...destLocation.toArray())
+    }
+
+    _drawPermutationLabel (x /*: number */, y /*: number */, element /*: number */, scale /*: number */, fontScale /*: number */) {
         const width = (text /*: string */) => (text === undefined) ? 0 : this.context.measureText(text).width;
 
-        const label = this.group.labels[element];
-        const permutationLabels = this.permutationLabels;
-        if (permutationLabels === undefined) {
-            const labelLocation = new THREE.Vector2(x+1/2, y+1/2).applyMatrix3(this.transform);
-            this.context.fillText(label, labelLocation.x, labelLocation.y);
-        } else {    // break permutations into multiple lines
-            let permutationLabel = permutationLabels[element];
-            if (permutationLabel === undefined) {   // seen this label before?
-                // split whole label into multiple lines if needed
-                const cycles = ((label.match(/[(][^)]*[)]/g) /*: any */) /*: RegExp$matchResult */);
-                const lines /*: Array<string> */ = [];
-                let last = 0;
-                for (const cycle of cycles) {
-                    if (width(lines[last]) + width(cycle) < 0.8 * scale) {
-                        lines[last] = (lines[last] == undefined) ? cycle : lines[last].concat(cycle);
+        const label = this.group.representation[element];
+        const permutationLabels = ((this.permutationLabels /*: any */) /*: Array<void | Array<string>> */)
+        let permutationLabel = permutationLabels[element];
+        if (permutationLabel === undefined) {   // seen this label before?
+            // store multi-line permutation label so it doesn't have to be calculated again
+            // split whole label into multiple lines if needed
+            const cycles = ((label.match(/[(][^)]*[)]/g) /*: any */) /*: RegExp$matchResult */);
+            const lines /*: Array<string> */ = [];
+            let last = 0;
+            for (const cycle of cycles) {
+                if (width(lines[last]) + width(cycle) < 0.8 * scale) {
+                    lines[last] = (lines[last] == undefined) ? cycle : lines[last].concat(cycle);
+                } else {
+                    if (lines[last] != undefined) {
+                        last++;
+                    }
+                    if (width(cycle) < 0.8 * scale) {
+                        lines[last] = cycle;
                     } else {
-                        if (lines[last] != undefined) {
-                            last++;
-                        }
-                        if (width(cycle) < 0.8 * scale) {
-                            lines[last] = cycle;
-                        } else {
-                            // cut cycle up into row-sized pieces
-                            const widthPerCharacter = width(cycle) / cycle.length;
-                            const charactersPerLine = Math.ceil(0.8 * scale / widthPerCharacter);
-                            for (let c = cycle;;) {
-                                if (width(c) < 0.8 * scale) {
-                                    lines[last++] = c;
-                                    break;
-                                } else {
-                                    lines[last++] = c.slice(0, c.lastIndexOf(' ', charactersPerLine));
-                                    c = c.slice(c.lastIndexOf(' ', charactersPerLine)).trim();
-                                }
+                        // cut cycle up into row-sized pieces
+                        const widthPerCharacter = width(cycle) / cycle.length;
+                        const charactersPerLine = Math.ceil(0.8 * scale / widthPerCharacter);
+                        for (let c = cycle;;) {
+                            if (width(c) < 0.8 * scale) {
+                                lines[last++] = c;
+                                break;
+                            } else {
+                                lines[last++] = c.slice(0, c.lastIndexOf(' ', charactersPerLine));
+                                c = c.slice(c.lastIndexOf(' ', charactersPerLine)).trim();
                             }
                         }
                     }
                 }
-
-                // store multi-line permutation label so it doesn't have to be calculated again
-                permutationLabels[element] = permutationLabel = lines;
             }
 
-            const fontHeight = fontScale * 19 / 14;
-            const labelLocation = new THREE.Vector2(x+1/2, y+1/2).applyMatrix3(this.transform);
-            const maxLineWidth = permutationLabel.reduce( (max, line /*: string */) => Math.max(max, width(line)), 0 );
-            let xStart = labelLocation.x - maxLineWidth/2;
-            let yStart = labelLocation.y - fontHeight*(permutationLabel.length - 1)/2;
-            for (const line /*: string */ of permutationLabel) {
-                this.context.fillText(line, xStart, yStart);
-                yStart += fontHeight;
-            }
+            permutationLabels[element] = permutationLabel = lines;
+        }
+
+        const fontHeight = fontScale
+        const labelLocation = new THREE.Vector2(x+1/2, y+1/2).applyMatrix3(this.transform);
+        const maxLineWidth = permutationLabel.reduce( (max, line /*: string */) => Math.max(max, width(line)), 0 );
+        let xStart = labelLocation.x - maxLineWidth/2;
+        let yStart = labelLocation.y - fontHeight*(permutationLabel.length - 1)/2;
+        for (const line /*: string */ of permutationLabel) {
+            this.context.fillText(line, xStart, yStart);
+            yStart += fontHeight;
         }
     }
 
@@ -364,15 +451,15 @@ export class MulttableView /*:: implements VizDisplay<MulttableJSON> */ {
     }
 
     // increase magnification proportional to its current value,
-    zoomIn () {
+    zoomIn (deltaY /*: number */) { // called with deltaY < 0
         this.queueShowGraphic();
-        this._centeredZoom((1 + ZOOM_STEP) - 1);
+        this._centeredZoom((1 - deltaY * ZOOM_STEP) - 1);
     }
 
     // decrease magnification in a way that allows you to zoom in and out and return to its original value
-    zoomOut () {
+    zoomOut (deltaY /*: number */) {
         this.queueShowGraphic();
-        this._centeredZoom(1/(1 + ZOOM_STEP) - 1);
+        this._centeredZoom(1/(1 + deltaY * ZOOM_STEP) - 1);
     }
 
     zoom (factor /*: number */) {
@@ -439,7 +526,7 @@ export class MulttableView /*:: implements VizDisplay<MulttableJSON> */ {
     }
 
     reset() {
-        this.permutationLabels = (this.group.longestLabel[0] == '(') ? Array(this.group.order) : undefined;
+        this.permutationLabels = this.group.representation[0].startsWith('(') ? Array(this.group.order) : undefined;
         this.separation = 0;
         this.organizeBySubgroup(this.group.subgroups.length - 1);
         this.coloration = 'rainbow';

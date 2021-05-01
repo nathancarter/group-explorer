@@ -3,12 +3,11 @@
 import BasicGroup from './BasicGroup.js';
 import BitSet from './BitSet.js';
 import IsomorphicGroups from './IsomorphicGroups.js';
+import GEUtils from './GEUtils.js'
 import Library from './Library.js';
 import Log from './Log.js';
-import MathML from './MathML.js';
 import setUpGAPCells from './ShowGAPCode.js';
 import Template from './Template.js';
-import XMLGroup from './XMLGroup.js';
 
 import {DEFAULT_SPHERE_COLOR} from './AbstractDiagramDisplay.js';
 import * as SheetModel from './SheetModel.js';
@@ -16,6 +15,8 @@ import * as SheetModel from './SheetModel.js';
 export {summary, display, showSolvableDecompositionSheet};
 
 /*::
+import XMLGroup from './XMLGroup.js';
+
 import type {
     JSONType,
     SheetElementJSON,
@@ -51,36 +52,24 @@ type BasicGroupWithDetails = {
 
 // Load templates
 const SOLVABLE_GROUP_INFO_URL = './html/SolvableInfo.html';
-const Load_Promise =
-      new Promise( (resolve, reject) => {
-          $.ajax( { url: SOLVABLE_GROUP_INFO_URL,
-                    success: (data /*: html */) => {
-                        resolve(data);
-                    },
-                    error: (_jqXHR, _status, err) => {
-                        reject(`Error loading ${SOLVABLE_GROUP_INFO_URL} ${err === undefined ? '' : ': ' + err}`)
-                    }
-                  } );
-      } );
+const LoadPromise = GEUtils.ajaxLoad(SOLVABLE_GROUP_INFO_URL)
+
 let Group;
 
 function summary (Group /*: XMLGroup */) /*: string */ {
     return Group.isSolvable ? 'yes' : 'no';
 }
 
-function display (Group /*: XMLGroup */, $wrapper /*: JQuery */) {
-    Load_Promise
-        .then( (templates) => {
-            if ($('template[id|="solvable"]').length == 0) {
-                $('body').append(templates);
-            }
+async function display (Group /*: XMLGroup */, $wrapper /*: JQuery */) {
+  const templates = await LoadPromise
 
-            $wrapper.html(formatSolvableInfo(Group));
+  if ($('template[id|="solvable"]').length == 0) {
+    $('body').append(templates);
+  }
 
-            MathJax.Hub.Queue(['Typeset', MathJax.Hub, $wrapper[0]]);
-            setUpGAPCells(Group, $wrapper);
-        } )
-        .catch (Log.err)
+  $wrapper.html(formatSolvableInfo(Group));
+
+  setUpGAPCells(Group, $wrapper);
 }
 
 function formatSolvableInfo (group /*: XMLGroup */) /*: DocumentFragment */ {
@@ -228,7 +217,7 @@ function showSolvableDecompositionSheet ( type /*: VisualizerType */ ) {
     var sheetElementsAsJSON = [
         {
             className : 'TextElement',
-            text : `Solvable Decomposition for the group ${MathML.toHTMLString( Group.name )}`,
+            text : `Solvable Decomposition for the group ${Group.name}`,
             x : L, y : T - 3*txtH, w : n*W + (n-1)*hgap, h : txtH,
             fontSize : '20pt', alignment : 'center'
         },
@@ -245,10 +234,10 @@ function showSolvableDecompositionSheet ( type /*: VisualizerType */ ) {
     var previous = null, previousIndex = -1;
     D.map( ( entry, index ) => {
         // put name of group atop each element in top row, the decomposition
-        const groupName = ((entry.group /*: any */) /*: {name?: string} */).name || '<mtext>(unnamed)</mtext>';
+        const groupName = ((entry.group /*: any */) /*: {name?: string} */).name || '(unnamed)';
         sheetElementsAsJSON.push( {
             className : 'TextElement',
-            text : MathML.toHTMLString( groupName ),
+            text : groupName,
             x : L+index*W+index*hgap, y : T-txtH, w : W, h : txtH,
             alignment : 'center'
         } );
@@ -279,7 +268,7 @@ function showSolvableDecompositionSheet ( type /*: VisualizerType */ ) {
             // embedding from previous
             sheetElementsAsJSON.push( {
                 className : 'MorphismElement',
-                name : MathML.toHTMLString( `<msub><mi>e</mi><mn>${index}</mn></msub>` ),
+                name : `<i>e</i><sub>${index}</sub>`,
                 fromIndex : previousIndex, toIndex : thisIndex,
                 showManyArrows : true,
                 definingPairs : previous.group.generators[0].map( gen =>
@@ -299,9 +288,9 @@ function showSolvableDecompositionSheet ( type /*: VisualizerType */ ) {
             // quotient group name
             sheetElementsAsJSON.push( {
                 className : 'TextElement',
-                text : MathML.toHTMLString( ((entry.group /*: any */) /*: {name?: string} */).name || '<mtext>(unnamed)</mtext>' ) + ' / '
-                    + MathML.toHTMLString( ((previous.group /*: any */) /*: {name?: string} */).name || '<mtext>(unnamed)</mtext>' ) + ' ≅ '
-                    + MathML.toHTMLString( ((entry.quotientByPrevious /*: any */) /*: {name?: string} */).name || '<mtext>(unnamed)</mtext>'),
+                text : (((entry.group /*: any */) /*: {name?: string} */).name || '(unnamed)') + ' / '
+                    + (((previous.group /*: any */) /*: {name?: string} */).name || '(unnamed)') + ' ≅ '
+                    + (((entry.quotientByPrevious /*: any */) /*: {name?: string} */).name || '(unnamed)'),
                 x : L+index*W+index*hgap+bottomShift, y : T+2*H+vgap+txtH/2,
                 w : W, h : txtH,
                 alignment : 'center'
@@ -309,7 +298,7 @@ function showSolvableDecompositionSheet ( type /*: VisualizerType */ ) {
             // quotient map
             sheetElementsAsJSON.push( {
                 className : 'MorphismElement',
-                name : MathML.toHTMLString( `<msub><mi>q</mi><mn>${index}</mn></msub>` ),
+                name : `<i>q</i><sub>${index}</sub>`,
                 fromIndex : thisIndex, toIndex : quotientIndex,
                 showManyArrows : true,
                 definingPairs : entry.group.generators[0].map( gen =>

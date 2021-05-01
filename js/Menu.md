@@ -36,7 +36,6 @@ seen by right-clicking on the <b>Subgroups</b> header in the Subsets panel:
 </ul>
 ```
 (Note that:
-* the MathJax formatting for the displayed text is replaced by an HTML approximation
 * the 'remove-on-clean' class that both menus have indicates to [GEUtils.cleanWindow()](./GEUtils.js#geutilscleanwindow) this it is to remove this menu (as opposed to hiding it, or doing nothing with it)
 * the &lt;span class="menu-arrow"&gt;&lt;/span&gt; element, defined in [menu.css](../style/menus.css), displays a gray right-pointing arrow at the right end of the label)
 
@@ -50,7 +49,6 @@ in the individual modules.
 ```js
 */
 import GEUtils from './GEUtils.js';
-import MathML from './MathML.js';
 import Template from './Template.js';
 
 /*::

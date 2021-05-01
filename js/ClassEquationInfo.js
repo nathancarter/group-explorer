@@ -2,15 +2,15 @@
 
 import GEUtils from './GEUtils.js';
 import Log from './Log.js';
-import MathML from './MathML.js';
 import * as SheetModel from './SheetModel.js';
 import setUpGAPCells from './ShowGAPCode.js';
 import Template from './Template.js';
-import XMLGroup from './XMLGroup.js';
 
 export {summary, display};
 
 /*::
+import XMLGroup from './XMLGroup.js'
+
 import type {
     JSONType,
     SheetElementJSON,
@@ -24,18 +24,8 @@ import type {
 */
 
 // Load templates
-const CLASS_EQUATION_INFO_URL = './html/ClassEquationInfo.html';
-const Load_Promise =
-      new Promise( (resolve, reject) => {
-          $.ajax( { url: CLASS_EQUATION_INFO_URL,
-                    success: (data /*: html */) => {
-                        resolve(data);
-                    },
-                    error: (_jqXHR, _status, err) => {
-                        reject(`Error loading ${CLASS_EQUATION_INFO_URL} ${err === undefined ? '' : ': ' + err}`)
-                    }
-                  } );
-      } );
+const CLASS_EQUATION_INFO_URL = './html/ClassEquationInfo.html'
+const LoadPromise = GEUtils.ajaxLoad(CLASS_EQUATION_INFO_URL)
 
 let Group /*: XMLGroup */;
 
@@ -44,26 +34,23 @@ function summary (group /*: XMLGroup */) /*: string */ {
     return displayClassEquation();
 }
 
-function display (group /*: XMLGroup */, $wrapper /*: JQuery */) {
-    Load_Promise
-        .then( (templates) => {
-            if ($('template[id|="class-equation"]').length == 0) {
-                $('body').append(templates);
-            }
+async function display (group /*: XMLGroup */, $wrapper /*: JQuery */) {
+  const templates = await LoadPromise
 
-            $wrapper.html(formatClassEquation(group));
+  if ($('template[id|="class-equation"]').length == 0) {
+    $('body').append(templates);
+  }
 
-            $('.show-class-equation-sheet').on('click', (event /*: JQueryEventObject */) => {
-                event.preventDefault();
-                const target = ((event.target /*: any */) /*: HTMLElement */);
-                const type = target.getAttribute( 'data-type' );
-                showAsSheet( ((type /*: any */) /*: VisualizerType */) );
-            } );
+  $wrapper.html(formatClassEquation(group));
 
-            MathJax.Hub.Queue(['Typeset', MathJax.Hub, $wrapper[0]]);
-            setUpGAPCells(group, $wrapper);
-        } )
-        .catch (Log.err)
+  $('.show-class-equation-sheet').on('click', (event /*: JQueryEventObject */) => {
+    event.preventDefault();
+    const target = ((event.target /*: any */) /*: HTMLElement */);
+    const type = target.getAttribute( 'data-type' );
+    showAsSheet( ((type /*: any */) /*: VisualizerType */) );
+  } );
+
+  setUpGAPCells(group, $wrapper);
 }
 
 function formatClassEquation (group /*: XMLGroup */) /*: DocumentFragment */ {
@@ -77,8 +64,8 @@ function formatClassEquation (group /*: XMLGroup */) /*: DocumentFragment */ {
     } else {
         $frag.append(eval(Template.HTML('class-equation-isNonAbelian-template')));
         for (const conjugacyClass of Group.conjugacyClasses) {
-            $('<li>').html(MathML.csList(conjugacyClass.toArray().map( (el) => Group.representation[el] )))
-                .appendTo($frag.find('#conjugacy_list'));
+          $('<li>').html(conjugacyClass.toArray().map((el) => Group.representation[el]).join(', '))
+            .appendTo($frag.find('#conjugacy_list'));
         }
     }
 
@@ -114,7 +101,7 @@ function showAsSheet ( type /*: VisualizerType*/ ) {
         {
             className : 'TextElement',
             x : 50, y : 50, w : 150*fakeN+100, h : 50,
-            text : `Class Equation for the Group ${MathML.toHTMLString(Group.name)}`,
+            text : `Class Equation for the Group ${Group.name}`,
             fontSize : '20pt', alignment : 'center'
         }
     ];
