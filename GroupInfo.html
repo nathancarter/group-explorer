@@ -64,16 +64,13 @@
          .collapsible > .toggle {
              grid-column: toggle;
              cursor: pointer;
-             position: relative;
-         }
-         .collapsible > .toggle > .more, .collapsible > .toggle > .less {
-             position: absolute;
-             top: -1.25em;
          }
          .collapsible > .toggle > .more::after {
+             vertical-align: 0.25em;
              content: "▶";
          }
          .collapsible > .toggle > .less::after {
+             vertical-align: 0.15em;
              content: "▼";
          }
          .collapsible > .heading {
