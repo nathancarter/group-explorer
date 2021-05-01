@@ -693,7 +693,7 @@ sometimes called an [epimorphism](#epimorphism).
 
 ### Sylow p-subgroup
 
-A Sylow [\(p\)\-subgroup](#p45subgroup) is a maximal \(p\)\-subgroup; that
+A Sylow [\(p\)\-subgroup](#p-subgroup) is a maximal \(p\)\-subgroup; that
 is, no subgroup properly containing this one is still a \(p\)\-subgroup.
 
 If you click "tell me more" next to Subgroups in the Computations section of

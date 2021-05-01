@@ -13,3 +13,4 @@ source files from this folder (following the plan in the
 `mkdocs.yml` file in the repository root) into the `help` folder
 (a sibling of this folder).
 
+RWE 3/4/2021 update -- Using mkdocs version 1.1.2
