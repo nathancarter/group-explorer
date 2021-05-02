@@ -248,6 +248,7 @@ class Generator {
 
       // wording for nesting order
       Generator.orders = [
+         [],
          ['N/A'],
          ['inside', 'outside'],
          ['innermost', 'middle', 'outermost'],
