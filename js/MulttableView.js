@@ -89,22 +89,21 @@ export class MulttableView /*:: implements VizDisplay<MulttableJSON> */ {
     constructor (options /*: MulttableViewOptions */ = {}) {
         // take canvas dimensions from container (if specified), option, or default
         let width, height;
-        const container = options.container
-        if (container !== undefined) {
+        const $container = options.container || $('<div>')
+        if (options.container == null) {
+            width = options.width || DEFAULT_CANVAS_WIDTH
+            height = options.height || DEFAULT_CANVAS_HEIGHT
+        } else {
             width = container.width();
             height = container.height();
-        } else {
-            width = (options.width === undefined) ? DEFAULT_CANVAS_WIDTH : options.width;
-            height = (options.height === undefined) ? DEFAULT_CANVAS_HEIGHT : options.height;
         }
 
         this.canvas = (($(`<canvas/>`)[0] /*: any */) /*: HTMLCanvasElement */);  // Narrowing for Flow
         this.setSize( width, height );
         this.context = this.canvas.getContext('2d');
 
-        if (container != undefined) {
-            container.append(this.canvas);
-        }
+        $container.append(this.canvas);
+
         this.zoomFactor = 1;  // user-supplied scale factor multiplier
         this.translate = {dx: 0, dy: 0};  // user-supplied translation, in screen coordinates
         this.transform = new THREE.Matrix3();  // current multtable -> screen transformation
@@ -308,7 +307,7 @@ export class MulttableView /*:: implements VizDisplay<MulttableJSON> */ {
                     'z-index': -1,
                     'font-size': fontSize
                 })
-                .appendTo(this.canvas.parentElement)
+                .appendTo(((this.canvas.parentElement /*: any */) /*: HTMLElement */))
         }
 
         for (let inx = minX; inx < maxX; inx++) {
@@ -317,7 +316,7 @@ export class MulttableView /*:: implements VizDisplay<MulttableJSON> */ {
                 const y = this.position(jnx);
                 const product = this.group.mult(this.elements[jnx], this.elements[inx]);
                 if (this.permutationLabels == null) {
-                    this._drawLabel(x, y, product, scale, fontSize, $scratch);
+                    this._drawLabel(x, y, product, scale, fontSize, (($scratch /*: any */) /*: JQuery */));
                 } else {
                     this._drawPermutationLabel(x, y, product, scale, fontSize);
                 }
@@ -359,13 +358,14 @@ export class MulttableView /*:: implements VizDisplay<MulttableJSON> */ {
         this.context.fill();
     }
 
-    _drawLabel (x /*: number */, y /*: number */, element /*: number */, scale /*: number */, fontScale /*: number */, $scratch) {
+    _drawLabel (x /*: number */, y /*: number */, element /*: number */, scale /*: number */, fontScale /*: number */, $scratch /*: JQuery */) {
         const label = this.group.representation[element];
 
         if (this.labelCache[element] == null) {
             $scratch.html(label)
 
-            const $canvas = $('<canvas>')
+            const canvas = ((
+                $('<canvas>')
                   .attr({
                       width: scale,
                       height: scale,
@@ -378,12 +378,13 @@ export class MulttableView /*:: implements VizDisplay<MulttableJSON> */ {
                       height: scale,
                       'z-index': -1,
                   })
-                  .appendTo(this.canvas.parentElement)
+                  .appendTo(((this.canvas.parentElement /*: any */) /*: HTMLElement */))[0]
+                /*: any */) /*: HTMLCanvasElement */)
 
             const labelCenter = new THREE.Vector2(scale / 2, scale / 2)
-            GEUtilz.htmlToContext($scratch[0], $canvas[0].getContext('2d'), labelCenter)
+            GEUtilz.htmlToContext($scratch[0], canvas.getContext('2d'), labelCenter)
 
-            this.labelCache[element] = $canvas.remove()[0]
+            this.labelCache[element] = (($(canvas).remove()[0] /*: any */) /*: HTMLCanvasElement */)
         }
 
         const source = this.labelCache[element]
