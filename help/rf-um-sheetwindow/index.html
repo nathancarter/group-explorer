@@ -377,7 +377,15 @@ creates the a new map and brings up the morphism editor. For more details, visit
 <h4 id="move-forward-backward">Move forward, backward</h4>
 <p>To move an item forward or backwards on the sheet (i.e. farther into the
 background, or closer to the foreground), open the element context menu and
-choose &ldquo;Move forward,&rdquo; &ldquo;Move backward&rdquo;, &ldquo;Move to Front,&rdquo; or &ldquo;Move to Back&rdquo;.</p>
+choose &ldquo;Move forward,&rdquo; &ldquo;Move backward&rdquo;, &ldquo;Move to Front,&rdquo; or &ldquo;Move to Back&rdquo;.
+Only nodes can be positioned in this way: the position of a link between nodes
+is determined by the positions of the nodes it connects. All connecting lines
+lie at the same level below (farther away than) the lowest of any connected
+node, so they don&rsquo;t obscure the nodes they connect in a busy sheet like a
+<a href="../rf-groupterms/#lattice-of-subgroups">subgroup lattice</a>. (Connecting lines can
+be positioned over an unconnected node, however.) By contrast,
+<a href="../rf-groupterms/#homomorphism">Morphism</a> lines are positioned just on top of the
+nodes they connect, so you can see the elements they map.</p>
 <h4 id="delete_1">Delete</h4>
 <p>This removes the selected item from the sheet. </p>
 <p>Note that if you delete an item that is connected to another item via a

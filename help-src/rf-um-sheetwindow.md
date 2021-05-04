@@ -327,6 +327,14 @@ creates the a new map and brings up the morphism editor. For more details, visit
 To move an item forward or backwards on the sheet (i.e. farther into the
 background, or closer to the foreground), open the element context menu and
 choose "Move forward," "Move backward", "Move to Front," or "Move to Back".
+Only nodes can be positioned in this way: the position of a link between nodes
+is determined by the positions of the nodes it connects. All connecting lines
+lie at the same level below (farther away than) the lowest of any connected
+node, so they don't obscure the nodes they connect in a busy sheet like a
+[subgroup lattice](rf-groupterms.md#lattice-of-subgroups). (Connecting lines can
+be positioned over an unconnected node, however.) By contrast,
+[Morphism](rf-groupterms.md#homomorphism) lines are positioned just on top of the
+nodes they connect, so you can see the elements they map.
 
 #### Delete
 

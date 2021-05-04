@@ -300,53 +300,54 @@ export class NodeElement extends SheetElement {
     this.links.forEach((link) => link.redraw())
   }
 
-  updateZ () {
-    super.updateZ()
-    this.links.forEach((link) => link.updateZ())
-  }
-
-  // tries to move element up or down compared to other elements, and returns whether a move was possible
-  moveZ (comparator /*: (a: SheetElement, b: SheetElement) => number */) /*: boolean */ {
-    // sort nodes by increasing z
-    const sortedNodeElements = Array
+  // tries to move element up or down compared to other elements, and returns whether a move was made
+  moveZ (comparator /*: (a: SheetElement, b: SheetElement) => number */, repeat /*: boolean */) {
+    // sort nodes according to comparator
+    const sortedNodes = ((Array
       .from(sheetElements.values())
       .filter((el) => el instanceof NodeElement)
-      .sort(comparator)
-
-    // find current node
-    const thisIndex = sortedNodeElements.findIndex((el) => el.id === this.id)
+      .sort(comparator) /*: any */) /*: Array<NodeElement> */)
 
     // swap current node z value with next node in sort (unless this is the last node in the sort)
-    if (thisIndex < sortedNodeElements.length - 1) {
-      const thisNodeElement = sortedNodeElements[thisIndex]
-      const nextNodeElement = sortedNodeElements[thisIndex + 1];
+    const updatedNodes = new Set/*:: <NodeElement> */()
+    for (let inx = sortedNodes.findIndex((el) => el.id === this.id); inx < sortedNodes.length - 1; inx++) {
+      const thisNodeElement = sortedNodes[inx]
+      const nextNodeElement = sortedNodes[inx + 1];
+
+      // swap z values of this node and next
       // $FlowFixMe -- Flow doesn't support this idiomatic variable swap
       [thisNodeElement.z, nextNodeElement.z] = [nextNodeElement.z, thisNodeElement.z]
-      thisNodeElement.updateZ()
-      nextNodeElement.updateZ()
-      return true
+      updatedNodes.add(thisNodeElement)
+      updatedNodes.add(nextNodeElement)
+
+      if (!repeat) {
+        break
+      }
+
+      // repair sortedNodes for next iteration
+      // $FlowFixMe -- Flow doesn't support this idiomatic variable swap
+      [sortedNodes[inx], sortedNodes[inx + 1]] = [sortedNodes[inx + 1], sortedNodes[inx]]
     }
-    return false
+
+    updatedNodes.forEach((node) => node.updateZ())
+
+    ConnectingElement.updateZ()
   }
 
   moveForward () {
-    this.moveZ((a, b) => a.z - b.z)
+    this.moveZ((a, b) => a.z - b.z, false)
   }
 
   moveBackward () {
-    this.moveZ((a, b) => b.z - a.z)
+    this.moveZ((a, b) => b.z - a.z, false)
   }
 
   moveToFront () {
-    while (this.moveZ((a, b) => a.z - b.z)) {
-      continue
-    }
+    this.moveZ((a, b) => a.z - b.z, true)
   }
 
   moveToBack () {
-    while (this.moveZ((a, b) => b.z - a.z)) {
-      continue
-    }
+    this.moveZ((a, b) => b.z - a.z, true)
   }
 }
 
@@ -398,6 +399,18 @@ export class VisualizerElement extends NodeElement {
    +viewElement: SheetView.VisualizerView
     isClean: boolean
 */
+  get morphisms () {
+    const morphisms = Array
+      .from(sheetElements.values())
+      .filter((el) => el instanceof MorphismElement && (el.source === this || el.destination === this))
+    return ((morphisms /*: any */) /*: Array<LinkElement> */)
+  }
+
+  updateZ () {
+    super.updateZ()
+    this.morphisms.forEach((morphism) => morphism.updateZ())
+  }
+
   toJSON (_ /*: mixed */, customKeys /*: Array<string> */ = []) /*: Obj */ {
     customKeys.push('group', 'visualizer')
     const jsonObject = super.toJSON(_, customKeys)
@@ -535,6 +548,7 @@ export class LinkElement extends SheetElement {
 
 export class ConnectingElement extends LinkElement {
 /*::
+    static z: number
     thickness: number;
     color: color;
     hasArrowhead: boolean;
@@ -545,10 +559,28 @@ export class ConnectingElement extends LinkElement {
   }
 
   get z () /*: integer */ {
-    return Math.min(this.source.z, this.destination.z) - 1 // put ConnectingElement just under lower of two ends
+    return ConnectingElement.z
   }
 
   set z (z /*: integer */) { /* covers up nonkosher OO in Flow */ }
+
+  static updateZ (newZ /*: ?number */) {
+    // find all connecting elements, find smallest z of any source or destination, and set ConnectingElement z to one less
+    // if this changes the ConnectingElement z then re-draw all connecting elements
+    const connectingElements = ((Array
+      .from(sheetElements.values())
+      .filter((el) => el instanceof ConnectingElement) /*: any */) /*: Array<ConnectingElement> */)
+    if (connectingElements.length > 0) {
+      const zMin = connectingElements.reduce((zMin, connector) => {
+        return Math.min(zMin, connector.source.z, connector.destination.z)
+      }, newZ || Number.MAX_VALUE)
+
+      if (ConnectingElement.z !== zMin - 1) {
+        ConnectingElement.z = zMin - 1
+        connectingElements.forEach((conn) => conn.updateZ())
+      }
+    }
+  }
 
   fromJSON (jsonObject /*: Obj */, customKeys /*: Array<string> */ = []) /*: ConnectingElement */ {
     customKeys.push('source', 'destination')
@@ -556,6 +588,11 @@ export class ConnectingElement extends LinkElement {
 
     if (!(this.source instanceof NodeElement && this.destination instanceof NodeElement)) {
       Log.err('Illegal source/destination objects in ConnectingElement.fromJSON')
+    }
+
+    if (this.className === 'ConnectingElement') {
+      const zMin = Math.min(this.destination.z, this.source.z)
+      ConnectingElement.updateZ(zMin)
     }
 
     return this
