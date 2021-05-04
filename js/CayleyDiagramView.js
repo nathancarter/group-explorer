@@ -990,8 +990,10 @@ export class CayleyDiagramView extends AbstractDiagramDisplay {
         Object.keys(json).forEach( (name) => {
             switch (name) {
             case 'background':		this.background = json.background;			break;
-            case 'cameraJSON':		this.camera =
-		                          new THREE.ObjectLoader().parse(json.cameraJSON);	break;
+            case 'cameraJSON':		this.camera = (
+                                           (new THREE.ObjectLoader()
+                                              .parse(json.cameraJSON) /*: any */)
+                                                         /*: THREE.PerspectiveCamera */);	break;
             case 'cameraUp':            const {x, y, z} = json.cameraUp;
                                           this.camera.up.set(x, y, z);                          break;
             case 'fog_level':           this.fog_level = json.fog_level;			break;

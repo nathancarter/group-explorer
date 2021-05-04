@@ -94,8 +94,8 @@ export class MulttableView /*:: implements VizDisplay<MulttableJSON> */ {
             width = options.width || DEFAULT_CANVAS_WIDTH
             height = options.height || DEFAULT_CANVAS_HEIGHT
         } else {
-            width = container.width();
-            height = container.height();
+            width = $container.width();
+            height = $container.height();
         }
 
         this.canvas = (($(`<canvas/>`)[0] /*: any */) /*: HTMLCanvasElement */);  // Narrowing for Flow
