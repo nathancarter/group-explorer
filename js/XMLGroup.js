@@ -139,9 +139,11 @@ class XMLGroup extends BasicGroup {
       this.representations = XMLGroup._representations_from_xml($xml);
       this.userRepresentations = [];
       /*
-       * representations and userRepresentations are treated together as a contiguous array,
-       *   and representationIndex is the index of the default representation into that virtual array
-       *   (representationIndex is an integer and not an object reference so XMLGroup can be easily serialized)
+       * A convenient hack:
+       *   representationIndex >= 0 => representation = representations[index]
+       *   representationIndex < 0 => representation = userRepresentation[-(representationIndex + 1)]
+       *
+       * (representationIndex is an integer, not an object reference, so XMLGroup can be easily serialized)
        */
       this.representationIndex = 0;
       this.cayleyDiagrams = XMLGroup._cayley_diagrams_from_xml($xml);
@@ -200,37 +202,36 @@ class XMLGroup extends BasicGroup {
       };
    }
 
-   deleteUserRepresentation(userIndex /*: number */) {
-      const savedRepresentation =
-         (userIndex + this.representations.length == this.representationIndex) ? this.representations[0] : this.representation;
+   deleteUserRepresentation (userIndex /*: number */) {
       this.userRepresentations.splice(userIndex, 1);
-      this.representation = savedRepresentation;
-   }
-
-   get representation() /*: Array<html> */ {
-      if (this.representationIndex < this.representations.length) {
-         return this.representations[this.representationIndex];
-      } else if (this.representationIndex - this.representations.length < this.userRepresentations.length) {
-         return this.userRepresentations[this.representationIndex - this.representations.length];
-      } else {
-         return this.representations[0];
+      if (-(userIndex + 1) > this.representationIndex) {
+         this.representationIndex += 1
+      } else if (-(userIndex + 1) ===  this.representationIndex) {
+         this.representationIndex = 0
       }
    }
 
-   set representation(representation /*: Array<string> */) {
-      let inx = this.representations.findIndex( (el) => el == representation );
+   get representation () /*: Array<html> */ {
+      const inx = this.representationIndex
+      return (inx < 0) ? this.userRepresentations[-(inx + 1)] : this.representations[inx]
+   }
+
+   set representation (representation /*: Array<string> */) {
+      const inx = this.representations.findIndex((el) => el == representation)
       if (inx >= 0) {
-         this.representationIndex = inx;
+         this.representationIndex = inx
       } else {
-         inx = this.userRepresentations.findIndex( (el) => el == representation );
-         if (inx >= 0) {
-            this.representationIndex = inx + this.representations.length;
+         const jnx = this.userRepresentations.findIndex((el) => el == representation)
+         if (jnx >= 0) {
+            this.representationIndex = -(jnx + 1)
+         } else {
+            this.representationIndex = 0
          }
       }
    }
 
    get representationIsUserDefined () {
-      return this.representationIndex >= this.representations.length;
+      return this.representationIndex < 0
    }
 
    // length of longest label, rendered as HTML at font-size = 20px

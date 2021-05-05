@@ -360,7 +360,7 @@ class UDR {
 
     static saveEdit() {
         Group.userRepresentations[((UDR.current_index /*: any */) /*: number */)] =
-            $('#udr-edit-table tbody textarea').map( (_, el) => '<mtext>' + ((el /*: any */) /*: HTMLTextAreaElement */).value + '</mtext>' ).toArray();
+            $('#udr-edit-table tbody textarea').map((_, el) => ((el /*: any */) /*: HTMLTextAreaElement */).value).toArray();
         Library.saveGroup(Group);
         UDR.closeEdit();
         displayDynamic();
