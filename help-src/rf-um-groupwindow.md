@@ -3,9 +3,9 @@ The Group Info page is the presentation to the user of all information *Group
 Explorer* has about a given group. 
 
 It consists of several sections, each with a heading and a body.  On first
-visiting the page most of the bodies are hidden, as indicated by a '+' sign to
-the left of the heading. Clicking the '+' sign expands the body, and changes the
-'+' sign to a '-'. Clicking the '-' sign hides the body again. You can also
+visiting the page most of the bodies are hidden, as indicated by a '▶' sign to
+the left of the heading. Clicking the '▶' sign expands the body, and changes the
+'▶' sign to a '▼'. Clicking the '▼' sign hides the body again. You can also
 hide/expose all the section together by clicking on the 'v' and '^' icons in the
 upper right-hand corner of the page.
 
@@ -28,7 +28,7 @@ section.
 *Group Explorer* is all about visualization, and thus the Views section receives
 high priority. To the right of the heading a row of small thumbnails shows a
 sample of the various ways to visualize the group. Expanding this section by
-clicking the '+' sign to the left of the heading exposes larger previews of
+clicking the '▶' sign to the left of the heading exposes larger previews of
 every way to visualize the group, including all the [Cayley
 diagrams](rf-groupterms.md#cayley-diagrams), a [multiplication
 table](rf-groupterms.md#multtable), a [cycle
@@ -42,7 +42,7 @@ computes all of its subgroups, which ones are normal, information about
 conjugacy classes, and more. A summary of this information is shown to the right
 of each subheading in this section, but **much** more information is available
 than it may seem from the summaries. Users are encouraged to expand the bodies
-by clicking on the '+' sign to the left of each subheading to find out reasons
+by clicking on the '▶' sign to the left of each subheading to find out reasons
 for the computations, and often many additional helpful illustrations and
 computations.
 
