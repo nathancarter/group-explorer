@@ -3,7 +3,7 @@
 /* global $ */
 
 import GEUtils from './js/GEUtils.js';
-import Library from './js/Library.js';
+import * as Library from './js/Library.js';
 import Log from './js/Log.js';
 import {SymmetryObjectView, createInteractiveSymmetryObjectView} from './js/SymmetryObjectView.js';
 import Template from './js/Template.js';

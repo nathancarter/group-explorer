@@ -1,7 +1,7 @@
 // @flow
 
 import GEUtils from './js/GEUtils.js';
-import Library from './js/Library.js';
+import * as Library from './js/Library.js';
 import Log from './js/Log.js';
 import Menu from './js/Menu.js';
 import {MulttableView, createFullMulttableView} from './js/MulttableView.js';

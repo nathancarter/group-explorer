@@ -5,7 +5,7 @@
 import { createLabelledCycleGraphView } from './CycleGraphView.js'
 import { createFullMulttableView } from './MulttableView.js'
 import { createLabelledCayleyDiagramView } from './CayleyDiagramView.js'
-import Library from './Library.js'
+import * as Library from './Library.js'
 import Log from './Log.js'
 import * as SheetView from './SheetView.js'
 import Template from './Template.js'
@@ -1066,21 +1066,44 @@ export class StoredSheets {
 /*::
   static indexedDb: IDBDatabase
   static displayedSheetName: ?string
- */
+*/
   static async init () {
     const openRequest = window.indexedDB.open('GE3', 1)
 
+    let migrationNeeded = false
     const openPromise = new Promise((resolve, reject) => {
       openRequest.onupgradeneeded = () => {
         const result = ((openRequest.result /*: any */) /*: IDBDatabase */)
         result.createObjectStore('StoredSheets')
-        resolve(result)
+        migrationNeeded = true // migrate sheets after this completes
       }
       openRequest.onsuccess = () => resolve(((openRequest.result /*: any */) /*: IDBDatabase */))
       openRequest.onerror = () => reject(openRequest.error)
     })
 
     StoredSheets.indexedDb = await openPromise
+
+    if (migrationNeeded) {
+      await StoredSheets.migrateSheets()
+    }
+  }
+
+  static async migrateSheets () {
+    // get old stored sheets from localStorage
+    // convert each stored sheet and save it to IndexedDB
+    const oldSheetStore = localStorage.getItem('sheets')
+    if (oldSheetStore != null) {
+      const storedSheets = StoredSheets.getStore('readwrite')
+      const oldSheets = JSON.parse(oldSheetStore)
+      for (const [sheetName, oldSheet] of Object.entries(oldSheets)) {
+        const newSheet = convertFromOldJSON(oldSheet)
+        const putRequest = storedSheets.put(JSON.stringify(newSheet), sheetName)
+        await new Promise((resolve, reject) => {
+          putRequest.onsuccess = () => resolve(putRequest.result)
+          putRequest.onerror = () => reject(putRequest.error)
+        })
+      }
+    }
   }
 
   static getStore (type /*: 'readonly' | 'readwrite' | 'versionchange' */ = 'readonly') /*: IDBObjectStore */ {

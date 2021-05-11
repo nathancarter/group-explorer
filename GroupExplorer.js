@@ -3,7 +3,7 @@
 import {CayleyDiagramView, createUnlabelledCayleyDiagramView} from './js/CayleyDiagramView.js';
 import {CycleGraphView, createUnlabelledCycleGraphView} from './js/CycleGraphView.js';
 import GroupURLs from './GroupURLs.js';
-import Library from './js/Library.js';
+import * as Library from './js/Library.js';
 import Log from './js/Log.js';
 import Menu from './js/Menu.js';
 import {MulttableView, createMinimalMulttableView} from './js/MulttableView.js';

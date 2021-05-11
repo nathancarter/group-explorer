@@ -7,7 +7,7 @@ import {CayleyDiagramView, createUnlabelledCayleyDiagramView} from './js/CayleyD
 import {CycleGraphView, createUnlabelledCycleGraphView} from './js/CycleGraphView.js';
 import GEUtils from './js/GEUtils.js';
 import IsomorphicGroups from './js/IsomorphicGroups.js';
-import Library from './js/Library.js';
+import * as Library from './js/Library.js';
 import Log from './js/Log.js';
 import MathUtils from './js/MathUtils.js';
 import Menu from './js/Menu.js';

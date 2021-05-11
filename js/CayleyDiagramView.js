@@ -6,7 +6,7 @@ import {DEFAULT_LINE_COLOR, DEFAULT_SPHERE_COLOR as DEFAULT_NODE_COLOR} from './
 import {CayleyGeneratorFromStrategy, CayleyGeneratorFromSpec} from './CayleyGenerator.js';
 import GEUtils from './GEUtils.js';
 import { htmlToContext } from './GEUtils.js'
-import Library from './Library.js';
+import * as Library from './Library.js';
 import * as MathML from './MathML.js';
 
 export {DEFAULT_SPHERE_COLOR as DEFAULT_NODE_COLOR} from './AbstractDiagramDisplay.js';

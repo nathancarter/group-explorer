@@ -2,7 +2,7 @@
 
 import {CycleGraphView, createLabelledCycleGraphView} from './js/CycleGraphView.js';
 import GEUtils from './js/GEUtils.js';
-import Library from './js/Library.js';
+import * as Library from './js/Library.js';
 import Log from './js/Log.js';
 import Menu from './js/Menu.js';
 import {LISTENER_READY_MESSAGE, STATE_LOADED_MESSAGE} from './js/SheetModel.js';

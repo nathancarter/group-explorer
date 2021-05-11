@@ -69,8 +69,9 @@
       <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
       <script src="https://cdn.jsdelivr.net/npm/jquery-resizable-dom@0.32.0/dist/jquery-resizable.js"></script>
       <script type="module">
-       import {load} from "./Multtable.js";
-       window.addEventListener('load', load, {once: true});
+       import {check} from './js/Migration.js'
+       import {load} from './Multtable.js'
+       window.addEventListener('load', () => check().then(load))
       </script>
    </head>
    <body>

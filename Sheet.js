@@ -11,10 +11,10 @@ import * as SheetModel from './js/SheetModel.js'
 import * as SheetView from './js/SheetView.js'
 import * as SheetController from './js/SheetController.js'
 
+export { load }
+
 // Globals
 const HELP_PAGE /*: string */ = 'help/rf-um-sheetwindow/index.html'
-
-window.addEventListener('load', () => load().then(), { once: true })
 
 async function load () {
   // load upper-right corner buttons

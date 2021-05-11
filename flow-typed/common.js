@@ -44,5 +44,6 @@ declare class Window extends EventTarget {
   indexedDB: IDBFactory;
   alert(string): void;
   confirm(string): boolean;
+  fetch(url: string, options: ?Obj): any;
 }
 declare var window: Window

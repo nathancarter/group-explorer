@@ -3,7 +3,7 @@
 import BasicGroup from './BasicGroup.js';
 import BitSet from './BitSet.js';
 import GEUtils from './GEUtils.js';
-import Library from './Library.js';
+import * as Library from './Library.js';
 import Subgroup from './Subgroup.js';
 import XMLGroup from './XMLGroup.js';
 

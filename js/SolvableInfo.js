@@ -4,7 +4,7 @@ import BasicGroup from './BasicGroup.js';
 import BitSet from './BitSet.js';
 import IsomorphicGroups from './IsomorphicGroups.js';
 import GEUtils from './GEUtils.js'
-import Library from './Library.js';
+import * as Library from './Library.js';
 import Log from './Log.js';
 import setUpGAPCells from './ShowGAPCode.js';
 import Template from './Template.js';

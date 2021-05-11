@@ -5,7 +5,7 @@ import {THREE} from './lib/externals.js';
 import {CayleyDiagramView, createInteractiveCayleyDiagramView} from './js/CayleyDiagramView.js';
 import DiagramDnD from './js/DiagramDnD.js';
 import GEUtils from './js/GEUtils.js';
-import Library from './js/Library.js';
+import * as Library from './js/Library.js';
 import Log from './js/Log.js';
 import Menu from './js/Menu.js';
 import {LISTENER_READY_MESSAGE, STATE_LOADED_MESSAGE} from './js/SheetModel.js';

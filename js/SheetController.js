@@ -3,7 +3,7 @@
 /* global alert $ performance TouchEvent */
 
 import GEUtils from './GEUtils.js'
-import Library from './Library.js'
+import * as Library from './Library.js'
 import Log from './Log.js'
 import * as Model from './SheetModel.js'
 import { THREE } from '../lib/externals.js' // used in html action
