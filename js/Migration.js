@@ -4,7 +4,7 @@
 
 // final: keep list of pages that need to be loaded, make reference from Library to Migration to load module
 // GE-version -> Version
-// GE-todo -> space-separated page files (like GroupInfo.html)
+// migration-todo -> space-separated page files (like GroupInfo.html)
 
 // $FlowFixMe -- flow doesn't recognize the Version module because of the query string
 import { Version } from '../Version.js?version=3.2.0' // use query string to make sure we get the latest Version
@@ -102,15 +102,15 @@ function parseLocation () /*: [string, string] */ {
 }
 
 function checkForReload (pageName /*: string */) {
-  const todoList = localStorage.getItem('GE-todo')
+  const todoList = localStorage.getItem('migration-todo')
   if (todoList != null) {
     const todoPages = todoList.split(' ')
     if (todoPages.includes(pageName)) {
       todoPages.splice(todoPages.indexOf(pageName), 1)
       if (todoPages.length === 0) {
-        localStorage.removeItem('GE-todo')
+        localStorage.removeItem('migration-todo')
       } else {
-        localStorage.setItem('GE-todo', todoPages.join(' '))
+        localStorage.setItem('migration-todo', todoPages.join(' '))
       }
 
       window.location.reload(true)
@@ -125,7 +125,7 @@ export async function check () {
   const versionString = localStorage.getItem('GE-version')
   if (versionString !== Version.label) { // haven't installed this version
     localStorage.setItem('GE-version', Version.label)
-    localStorage.setItem('GE-todo', pagesToReload.join(' '))
+    localStorage.setItem('migration-todo', pagesToReload.join(' '))
 
     await Promise.all([...filesToReload.map(async (url) => { // Replace files cached by the browser with fresh copies
       return await window

@@ -299,49 +299,59 @@ export function saveGroup (group /*: XMLGroup */, key /*: string */ = group.URL)
 }
 
 // Convert v3.1 groups to v3.2 format:
-//   copy group definitions to 'groups' entry
-//     convert mathml fields to html: name, other_names, definition, representations, userRepresentations
-//     save user-defined fields: notes, user-defined representations, representationIndex preference
-//     replace MathML-generated columns in rowHTML with plain HTML
-//   delete http*, MathJax_stylesheet entries
+//   convert MathML fields to html: name, other_names, definition, representations, userRepresentations
+//   save user-defined fields: notes, user-defined representations, representationIndex preference
+//   replace MathML-generated columns in rowHTML with plain HTML
+//   delete http*, mathjax_stylesheet entries
+//   write new group definitions to 'groups' entry in localStorage
 function migrate3v1To3v2 () /*: string */ {
-  const oldGroups = {}
-  const numKeys = localStorage.length
-  for (let inx = numKeys - 1; inx >= 0; inx--) {
+  // gather all the keys we're going to migrate
+  const keys = []
+  for (let inx = 0; inx < localStorage.length; inx++) {
     const key = localStorage.key(inx)
     if (key != null && (key.startsWith('http') || key === 'mathjax_stylesheet')) {
-      if (key.startsWith('http')) {
-        const value = localStorage.getItem(key)
-        // migrate previous group definitions
-        if (value != null) {
-          // convert name, other_names, definition, representations, userRepresentations to html
-          const oldGroup = XMLGroup.parseJSON(JSON.parse(value).object)
-          oldGroup.name = MathML.toHTML(oldGroup.name)
-          oldGroup.other_names =
-            (oldGroup.other_names == null) ? [] : oldGroup.other_names.map((name) => MathML.toHTML(name))
-          oldGroup.definition = MathML.toHTML(oldGroup.definition)
-          oldGroup.representations = oldGroup.representations.map((rep) => rep.map((el) => MathML.toHTML(el)))
-          oldGroup.userRepresentations = oldGroup.userRepresentations.map((rep) => rep.map((el) => MathML.toHTML(el)))
-          if (oldGroup.representationIndex >= oldGroup.representations.length) {
-            oldGroup.representationIndex = -(oldGroup.representationIndex - oldGroup.representations.length + 1)
-          }
-
-          // replace oldGroup.rowHTML MathML-generated name and definition columns with HTML
-          const rowHTML = oldGroup.rowHTML
-          if (rowHTML != null) {
-            const $row = $('<div>').html(rowHTML)
-            $row.find('tr > td:nth-of-type(1) > a > div').html(oldGroup.name)
-            $row.find('tr > td:nth-of-type(3) > a > div').html(oldGroup.definition)
-            oldGroup.rowHTML = $row.html()
-          }
-
-          // add oldGroup to oldGroups object
-          oldGroups[key] = oldGroup
-        }
-      }
-      localStorage.removeItem(key)
+      keys.push(key)
     }
   }
-  const groupsString = JSON.stringify(oldGroups)
-  return groupsString
+
+  // migrate and store groups in groups
+  const groups = {}
+  for (const key of keys) {
+    if (key.startsWith('http')) {
+      const value = localStorage.getItem(key)
+
+      // migrate previous group definitions
+      if (value != null) {
+        // convert name, other_names, definition, representations, userRepresentations to html
+        const group = XMLGroup.parseJSON(JSON.parse(value).object)
+        group.name = MathML.toHTML(group.name)
+        group.other_names =
+          (group.other_names == null) ? [] : group.other_names.map((name) => MathML.toHTML(name))
+        group.definition = MathML.toHTML(group.definition)
+        group.representations = group.representations.map((rep) => rep.map((el) => MathML.toHTML(el)))
+        group.userRepresentations = group.userRepresentations.map((rep) => rep.map((el) => MathML.toHTML(el)))
+        if (group.representationIndex >= group.representations.length) {
+          group.representationIndex = -(group.representationIndex - group.representations.length + 1)
+        }
+
+        // replace group.rowHTML MathML-generated name and definition columns with HTML
+        const rowHTML = group.rowHTML
+        if (rowHTML != null) {
+          const $row = $('<div>').html(rowHTML)
+          $row.find('tr > td:nth-of-type(1) > a > div').html(group.name)
+          $row.find('tr > td:nth-of-type(3) > a > div').html(group.definition)
+          group.rowHTML = $row.html()
+        }
+
+        // add group to groups object
+        groups[key] = group
+      }
+    }
+
+    localStorage.removeItem(key)
+  }
+
+  const groupsJSON = JSON.stringify(groups)
+  localStorage.setItem('groups', groupsJSON)
+  return groupsJSON
 }

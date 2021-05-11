@@ -1095,13 +1095,17 @@ export class StoredSheets {
     if (oldSheetStore != null) {
       const storedSheets = StoredSheets.getStore('readwrite')
       const oldSheets = JSON.parse(oldSheetStore)
-      for (const [sheetName, oldSheet] of Object.entries(oldSheets)) {
-        const newSheet = convertFromOldJSON(oldSheet)
-        const putRequest = storedSheets.put(JSON.stringify(newSheet), sheetName)
-        await new Promise((resolve, reject) => {
-          putRequest.onsuccess = () => resolve(putRequest.result)
-          putRequest.onerror = () => reject(putRequest.error)
-        })
+      if (Object.keys(oldSheets).length === 0) {
+        localStorage.removeItem('sheets')
+      } else {
+        for (const [sheetName, oldSheet] of Object.entries(oldSheets)) {
+          const newSheet = convertFromOldJSON(oldSheet)
+          const putRequest = storedSheets.put(JSON.stringify(newSheet), sheetName)
+          await new Promise((resolve, reject) => {
+            putRequest.onsuccess = () => resolve(putRequest.result)
+            putRequest.onerror = () => reject(putRequest.error)
+          })
+        }
       }
     }
   }

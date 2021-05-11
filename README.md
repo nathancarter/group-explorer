@@ -7,6 +7,9 @@ as a desktop application, but was rewritten in 2019 as a web app.
 
 ## Status
 
+**Release 3.2.0:** A new Sheets page, with improved stored sheets capabilies.
+Tell us what you think!
+
 **Release 3.1.0:** A new Group Info page look.
 Let us know what you think!
 
