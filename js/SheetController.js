@@ -296,6 +296,7 @@ class TopSheetController extends AbstractController {
       const movement = this.downPosition.sub(newPosition)
       View.pan(-movement.x, -movement.y)
       View.zoom(newSpan / ((this.lastSpan /*: any */) /*: float */))
+      this.scheduleRedraw()
 
       this.downPosition = newPosition
       this.lastSpan = newSpan
