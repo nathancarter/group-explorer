@@ -601,11 +601,11 @@ class ElementContextMenuController extends AbstractController {
 class RemoteEditor {
   static start (modelElement /*: Model.VisualizerElement */) {
     const editPageURLs = {
-      MTElement: './Multtable.html?',
-      CGElement: './CycleGraph.html?',
-      CDElement: './CayleyDiagram.html?SheetEditor=true&'
+      MTElement: './Multtable.html',
+      CGElement: './CycleGraph.html',
+      CDElement: './CayleyDiagram.html'
     }
-    const editPageURL = editPageURLs[modelElement.className] +
+    const editPageURL = editPageURLs[modelElement.className] + '?SheetEditor=true&' +
       ((modelElement.group == null) ? 'waitForMessage=true' : 'groupURL=' + modelElement.group.URL)
     const myDomain = new URL(window.location.href).origin
 

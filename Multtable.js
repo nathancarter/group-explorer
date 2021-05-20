@@ -104,7 +104,7 @@ async function load() {
    });
 
    // Is this an editor started by a Sheet? If so, set up communication with Sheet
-   if (window.isEditor) {
+   if (window.location.href.includes('SheetEditor=true')) {
       setupEditorCallback();
    }
 
