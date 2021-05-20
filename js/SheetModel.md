@@ -7,6 +7,7 @@ import { createFullMulttableView } from './MulttableView.js'
 import { createLabelledCayleyDiagramView } from './CayleyDiagramView.js'
 import * as Library from './Library.js'
 import Log from './Log.js'
+import * as MathML from './MathML.js'
 import * as SheetView from './SheetView.js'
 import Template from './Template.js'
 import { THREE } from '../lib/externals.js'
@@ -59,6 +60,7 @@ const DEFAULT = {
 }
 
 /*::
+import { CayleyDiagramView } from './CayleyDiagramView.js'
 import XMLGroup from './XMLGroup.js';
 
 export type VisualizerName = 'CDElement' | 'CGElement' | 'MTElement';
@@ -100,6 +102,7 @@ export function clear () {
       el.destroy()
     }
   })
+  SheetView.redrawAll()
 }
 
 export function toJSON () /*: Array<Obj> */ {
@@ -112,8 +115,8 @@ export function fromJSON (jsonString /*: string */) {
 
 export function fromJSONObject (jsonObjects /*: JSONType */) {
   // remove existing elements
-  sheetElements.forEach((sheetElement) => sheetElement.destroy())
-  sheetElements.clear()
+  clear()
+  CDElement.activeElement = null
 
   // load all URLs
   const groupURLs = Array.from(
@@ -126,12 +129,7 @@ export function fromJSONObject (jsonObjects /*: JSONType */) {
       }, new Set()))
 
   Promise
-    .all(
-      groupURLs.reduce(
-        (promises, URL) => {
-          promises.push(Library.getGroupOrDownload(URL))
-          return promises
-        }, []))
+    .all(groupURLs.map((url) => Library.getGroupOrDownload(url)))
     .then(() => {
       for (let inx = 0; inx < jsonObjects.length; inx++) {
         addElement(jsonObjects[inx])
@@ -139,7 +137,7 @@ export function fromJSONObject (jsonObjects /*: JSONType */) {
     })
 }
 
-export function addElement (options /*: Obj */, type /*: string */ = options.className) {
+export function addElement (options /*: Obj */, type /*: string */ = options.className) /*: SheetElement */ {
   const newElement = new (eval(type))().fromJSON(options)
   sheetElements.set(newElement.id, newElement)
   newElement.viewElement = SheetView.createViewElement(newElement)
@@ -397,7 +395,6 @@ export class VisualizerElement extends NodeElement {
     URL: string
    _visualizer: any
    +viewElement: SheetView.VisualizerView
-    isClean: boolean
 */
   get morphisms () {
     const morphisms = Array
@@ -429,7 +426,6 @@ export class VisualizerElement extends NodeElement {
     super.fromJSON(jsonObject, customKeys)
 
     this.group = ((Library.getLocalGroup(jsonObject.groupURL) /*: any */) /*: XMLGroup */)
-    this.isClean = true
 
     return this
   }
@@ -438,6 +434,7 @@ export class VisualizerElement extends NodeElement {
 export class CDElement extends VisualizerElement {
 /*::
   static activeElement: CDElement
+  static visualizer: CayleyDiagramView
   visualizerJSON: Obj
   isClean: boolean
 */
@@ -447,24 +444,29 @@ export class CDElement extends VisualizerElement {
       // check whether visualizer can be reused
       if (this.group.URL === CDElement.activeElement.group.URL && this.isClean && CDElement.activeElement.isClean) {
         this.moveVisualizerToThis()
-        if (this.visualizerJSON.color_highlights != null) {
-          this._visualizer.generateHighlights({ background: this.visualizerJSON.color_highlights })
-        }
+        CDElement.visualizer.setHighlightDefinitions(this.visualizerJSON)
+        CDElement.visualizer.drawAllHighlights()
       } else {
         this.moveVisualizerToThis()
-        this._visualizer.fromJSON(this.visualizerJSON)
+        CDElement.visualizer.fromJSON(this.visualizerJSON)
       }
     }
 
-    return this._visualizer
+    return CDElement.visualizer
   }
 
   moveVisualizerToThis () {
-    const activeElement = CDElement.activeElement
-    activeElement.visualizerJSON = activeElement._visualizer.toJSON()
-    this._visualizer = activeElement._visualizer
-    activeElement._visualizer = undefined
+    if (CDElement.activeElement != null) {
+      CDElement.activeElement.visualizerJSON = CDElement.visualizer.toJSON()
+    }
     CDElement.activeElement = this
+  }
+
+  toJSON (_ /*: mixed */, customKeys /*: Array<string> */ = []) /*: Obj */ {
+    customKeys.push('visualizerJSON')
+    const jsonObject = super.toJSON(_, customKeys)
+
+    return jsonObject
   }
 
   fromJSON (jsonObject /*: Obj */, customKeys /*: Array<string> */ = []) /*: CDElement */ {
@@ -474,25 +476,48 @@ export class CDElement extends VisualizerElement {
     // find element with visualizer
     const activeElement = CDElement.activeElement
 
-    this.isClean = (jsonObject.strategies === undefined)
-    if (activeElement !== undefined &&
-        activeElement._visualizer.group.URL === jsonObject.groupURL &&
-        jsonObject.strategies === undefined) {
-      this.moveVisualizerToThis()
-      this.visualizerJSON = jsonObject
-      this._visualizer.generateHighlights(jsonObject.highlights)
-    } else {
-      if (activeElement === undefined) {
-        this._visualizer = createLabelledCayleyDiagramView({ width: Math.floor(this.w), height: Math.floor(this.h) })
-        CDElement.activeElement = this
-      } else {
-        this.moveVisualizerToThis()
-      }
+    this.isClean = (jsonObject.isClean != null) ? jsonObject.isClean : (jsonObject.strategies == null)
+
+    const isVisualizerElementJSON = () => {
+      return jsonObject.visualizer == null
+    }
+    const canReuseCayleyDiagramView = () => {
+      return activeElement != null &&
+        activeElement.isClean &&
+        this.isClean &&
+        activeElement.visualizerJSON.groupURL === jsonObject.groupURL
+    }
+    const generateCayleyDiagram = () => {
       const diagramName = (this.group.cayleyDiagrams.length === 0) ? undefined : this.group.cayleyDiagrams[0].name
-      this._visualizer.generateFromJSON(this.group, diagramName, jsonObject)
-      this.visualizerJSON = this._visualizer.toJSON()
+      CDElement.visualizer.generateFromJSON(this.group, diagramName, jsonObject)
+      if (jsonObject.visualizer != null) {
+        CDElement.visualizer.fromJSON(jsonObject.visualizer)
+      }
     }
 
+    // if a CayleyDiagramView instance hasn't been created yet, create one and associate it with this element
+    if (CDElement.visualizer == null) {
+      CDElement.visualizer = createLabelledCayleyDiagramView({ width: this.w, height: this.h })
+      CDElement.activeElement = this
+      generateCayleyDiagram()
+      const visualizer = CDElement.visualizer
+      visualizer.renderer.render(visualizer.scene, visualizer.camera) // need to render once to get camera right
+    }
+
+    if (canReuseCayleyDiagramView()) { // can this instance reuse the activeElement visualizer state?
+      this.moveVisualizerToThis()
+      if (isVisualizerElementJSON()) {
+        CDElement.visualizer.generateHighlights(jsonObject.highlights)
+      } else {
+        CDElement.visualizer.setHighlightDefinitions(jsonObject.visualizer)
+        CDElement.visualizer.drawAllHighlights()
+      }
+    } else { // can't reuse CDElement.visualizer state from activeElement; generate CayleyDiagram from scratch
+      this.moveVisualizerToThis()
+      generateCayleyDiagram()
+    }
+
+    this.visualizerJSON = CDElement.visualizer.toJSON()
     return this
   }
 }
@@ -1193,7 +1218,8 @@ export function createNewSheet (jsonObjects /*: Array<Obj> */) { // FIXME -- mak
 }
 
 export function loadPassedSheet () {
-  // load passed sheet, then delete it? or just let it be overridden next time?
+  // load passed sheet
+  // (don't delete it, just let it get overwritten -- good for debugging, and lets user show it again)
   const jsonString = localStorage.getItem('passedSheet')
   if (typeof jsonString === 'string') {
     fromJSON(jsonString)
@@ -1217,6 +1243,10 @@ export function convertFromOldJSON (oldJSONArray /*: Array<Obj> */) /*: Array<Ob
   const pixelsPerModelUnit = Math.min(window.innerWidth, window.innerHeight - 71)
   for (let inx = 0; inx < oldJSONArray.length; inx++) {
     const json = oldJSONArray[inx]
+
+    // account for padding in old wrapper, #graphic offset from window, different padding in heading
+    json.x += 10
+    json.y += 10 - SheetView.graphicRect.y - 6
 
     // convert arrowMargin from pixels offset to percentage of center-to-center distance
     if (json.arrowMargin !== undefined) {
@@ -1254,6 +1284,75 @@ export function convertFromOldJSON (oldJSONArray /*: Array<Obj> */) /*: Array<Ob
     if (json.showDomAndCod !== undefined) {
       json.showDomainAndCodomain = json.showDomAndCod
       delete json.showDomAndCod
+    }
+
+    // convert node labels from MathML to HTML
+    if (json.nodes != null) {
+      for (const node of json.nodes) {
+        node.label = MathML.toHTML(node.label)
+      }
+    }
+
+    // convert old CDElement JSON
+    if (json.className === 'CDElement' && json.camera_matrix != null) {
+      const visualizer = {
+        arrowhead_placement: json.arrowhead_placement,
+        arrows: json.arrows,
+        background: json.background,
+        cameraJSON: {
+          metadata: {
+            type: 'Object'
+          },
+          object: {
+            aspect: 1,
+            far: 2000,
+            filmGauge: 35,
+            filmOffset: 0,
+            focus: 10,
+            fov: 45,
+            layers: 1,
+            matrix: json.camera_matrix,
+            near: 0.1,
+            type: 'PerspectiveCamera',
+            zoom: 1
+          }
+        },
+        cameraUp: new THREE.Vector3(...json.camera_up),
+        chunk: json.chunk,
+        color_highlights: json.color_highlights,
+        fog_level: json.fog_level,
+        groupURL: json.groupURL,
+        label_scale_factor: json.label_scale_factor,
+        line_width: json.line_width,
+        nodes: json.nodes,
+        right_multiply: json.right_multiply,
+        ring_highlights: json.ring_highlights,
+        sphere_base_radius: json.sphere_base_radius,
+        sphere_scale_factor: json.sphere_scale_factor,
+        square_highlights: json.square_highlights,
+        strategy_parameters: json.strategy_parameters,
+        zoom_level: json.zoom_level
+      }
+      json.visualizer = visualizer
+      json.isClean = false
+      delete json.arrowhead_placement
+      delete json.arrows
+      delete json.background
+      delete json.camera_matrix
+      delete json.camera_up
+      delete json.chunk
+      delete json.color_highlights
+      delete json.fog_level
+      delete json.label_scale_factor
+      delete json.line_width
+      delete json.nodes
+      delete json.right_multiply
+      delete json.ring_highlights
+      delete json.sphere_base_radius
+      delete json.sphere_scale_factor
+      delete json.square_highlights
+      delete json.strategy_parameters
+      delete json.zoom_level
     }
   }
 

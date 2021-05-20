@@ -609,7 +609,6 @@ class RemoteEditor {
     const myDomain = new URL(window.location.href).origin
 
     const otherWin = window.open(editPageURL)
-    otherWin.isEditor = true // to let child know that it should function as editor for a Sheet
     if (!modelElement.group.URL) {
       otherWin.addEventListener('load', function (event /*: ProgressEvent */) {
         const msg /*: Model.MSG_loadGroup */ = {

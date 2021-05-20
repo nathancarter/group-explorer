@@ -423,7 +423,14 @@ export class CayleyDiagramView extends AbstractDiagramDisplay {
         }        
     }
 
-    setHighlightDefinitions (color_highlights /*: ?Array<css_color> */, ring_highlights /*: ?Array<?css_color> */, square_highlights /*: ?Array<?css_color> */) {
+    setHighlightDefinitions ({color_highlights, ring_highlights, square_highlights}
+    /*: {color_highlights: ?Array<css_color>, ring_highlights: ?Array<?css_color>, square_highlights: ?Array<?css_color>} */
+    ) {
+        if (color_highlights != null) {
+          this.color_highlights = color_highlights.map((color) => (color === '') ? DEFAULT_NODE_COLOR : color)
+        }
+        this.ring_highlights = ring_highlights || undefined
+        this.square_highlights = square_highlights || undefined
     }
 
     clearHighlights () {

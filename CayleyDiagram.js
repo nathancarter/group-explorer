@@ -90,7 +90,7 @@ async function load () {
   // >>> Complete setup functions once the main #graphic is sized correctly
 
    // Is this an editor started by a Sheet? If so, set up communication with Sheet
-   if (window.isEditor) {
+   if (window.location.href.includes('SheetEditor=true')) {
       setupEditorCallback();
    } else {
       startVisualizer();
