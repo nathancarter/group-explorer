@@ -35,7 +35,6 @@ It refers to the following variables when eval'd (see [Template](../js/Template.
 
 ```html
 <template id="link-template">
-   <li action="Menu.pinSubMenu(event)" link="${link}">
-      ${label} <span class="menu-arrow"></span> </li>
+   <li action="Menu.pinSubMenu(event)" link="${link}">${label}<span class="menu-arrow"></span></li>
 </template>
 ```

@@ -10,6 +10,9 @@ ul {
 #subset_page {
     -webkit-user-select: none;
     -webkit-tap-highlight-color: transparent;
+    padding: 0.2em;
+    background-color:white;
+    height: calc(100% - 0.4em); /* leave room for top & bottom padding */
 }
 
 #subset_page li, #subset_page .subset_page_header {

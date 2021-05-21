@@ -43,11 +43,9 @@ diagram.
 
 Every large visualizer page is split into two halves, like the one shown
 above. The left half will always have the picture--the visualization. The
-right half will be controls that allow you to edit the picture. The boundary
-between these two is movable; if you hover your mouse over it you will see
-your mouse cursor change to indicate that it can be slid left and right. You
-can also hide it entirely with one of the controls on the top right of the
-window.
+right half will be controls that allow you to edit the picture. You
+can hide the right half with the [hide/show](#hideshow) control on the
+top right of the window.
 
 If you perform any of the edits described with the controls below but then
 wish to undo them and reset the large visualizer to its original state, just

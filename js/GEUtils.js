@@ -73,7 +73,7 @@ class GEUtils {
     return new Promise((resolve, reject) => {
       $.ajax({
         url: url,
-//      cache: false, // need this during development (and maybe migration?) to keep from loading stale .html pages
+      cache: false, // need this during development (and maybe migration?) to keep from loading stale .html pages
         success: (data /*: string */) => {
           resolve(data)
         },

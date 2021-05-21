@@ -33,57 +33,65 @@ body, #bodyDouble {
 
 /* Container for the entire grid display */
 #bodyDouble {
-   display: grid;
-   grid-template-columns: minmax(0, 1fr) 8px auto;
-   grid-template-rows: auto minmax(0, 1fr);
-   grid-template-areas: "header header header" "graphic splitter controls";
+   display: flex;
+   flex-direction: column;
 }
 
 /* header format, like <H1> in a graphical context */
 #header {
-   grid-area: header;
-   background-color: var(--visualizer-header-background);
    display: grid;
    grid-template-columns: 1fr auto;
    grid-template-areas: "heading top-right-menu";
+   padding: 10px 10px 3px;
+   background-color: var(--visualizer-header-background);
 }
 
 #heading {
    grid-area: heading;
+   margin: auto 0;
    background-color: rgba(0,0,0,0);
    font-size: 40px;
-   padding: 10px 0;
    text-align: center;
    overflow-x: hidden;
 }
 
 #top-right-menu {
    grid-area: top-right-menu;
+   margin: auto 0;
    background-color: rgba(0, 0, 0, 0);
-   margin: 10px 10px 0 0;
 }
 
 /* container for main graphic, generally a <canvas>; fills the width available */
 #graphic {
-   grid-area: graphic;
+   position: relative;
+   flex-grow: 1;
+   overflow: hidden;
    background-color: var(--visualizer-body-background);
-}
-
-/* grab here to resize graphic; changes cursor */
-#splitter {
-   grid-area: splitter;
-   background: var(--visualizer-body-background);
-   width: 8px;
-   cursor: col-resize;
 }
 
 /* container for visualizer-specific controls */
 #controls {
-    grid-area: controls;
+   position: absolute;
+   top: 0;
+   right: 0;
+   bottom: 0;
+   display: flex;
+   flex-direction: column;
+   min-width: 300px;
+   border-left: 1px solid #aaa;
 }
-
-/* background for visualizer-specific controls */
-.control {
+#options {
+   background-color: var(--visualizer-body-background);
+   text-align: center;
+   border-bottom: 1px solid #aaa;
+}
+#options > button {
+   margin: 0 0.2em 0.5em;
+   min-width: 15%;
+}
+#control {
+   flex-grow: 1;
+   overflow-y: auto;
    background-color: var(--visualizer-controls-background);
 }
 

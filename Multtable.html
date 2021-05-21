@@ -16,49 +16,13 @@
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css">
 
       <style>
-       #graphic {
-          overflow-x: hidden;
-          -webkit-user-drag: none;      /* prevents default drag behavior */
-          -webkit-user-select: none;    /* prevents confusing cut-and-paste attempt in graphic */
-       }
-
-       #controls {
-          display: grid;
-          grid-template-columns: auto;
-          grid-template-rows: auto 1fr;
-          grid-template-areas: 'options' 'panels';
-       }
-       #options {
-          grid-area: options;
-          background-color: var(--visualizer-body-background);
-          justify-self: stretch;
-          text-align: center;
-       }
-       #options > button {
-          margin: 0 2px 12px 0;
-          min-width: 15%;
-       }
-       #controls .panel {
-          grid-area: panels;
-       }
-       #subset-control {
-          padding: 2px;
-          overflow: auto;
-          visibility: visible;
-       }
-       #table-control {
-          background-color: var(--visualizer-controls-background);
-          visibility: hidden;
-          display: none;
-       }
-       
-       #drag-image {
-          -webkit-user-drag: none;      /* prevents annoying default drag behavior */
-       }
-
        .graphic-lead {
           margin-top: 1.5em;
           margin-bottom: 0.5em;
+       }
+
+       #table-control {
+           padding: 0.2em;
        }
 
        #coloration-choice > div {
@@ -67,7 +31,6 @@
       </style>
 
       <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-      <script src="https://cdn.jsdelivr.net/npm/jquery-resizable-dom@0.32.0/dist/jquery-resizable.js"></script>
       <script type="module">
        import {check} from './js/Migration.js'
        import {load} from './Multtable.js'
@@ -90,53 +53,57 @@
                   ${Group.representation[element]}
                </div>
             </template>
-         </div>
-         <div id="splitter"></div>
-         <div id="controls">
-            <div id="options">
-               <button id="subset-button" onclick="VC.showPanel('#subset-control')">Subsets</button>
-               <button id="table-button" onclick="VC.showPanel('#table-control')">Table</button>
-            </div>
 
-            <div id="subset-control" class="panel">
-               <!-- This is filled in by subsetDisplay/subsets.html -->
-            </div>
+            <div id="controls">
+                <div id="options">
+                    <button id="subset-button"
+                            onclick="$('#control > *').hide(); $('#subset-control').show()">Subsets</button>
+                    <button id="table-button"
+                            onclick="$('#control > *').hide(); $('#table-control').show()">Table</button>
+                </div>
 
-            <div id="table-control" class="panel">
-               <div class="graphic-lead">Organize by subgroup:</div>
-               <div id="organization-select" class="faux-select" action="toggleOrganizationChoices()">
-                  <div style="display: inline-block; line-height: 1.5em">&nbsp;</div>
-                  <div id="organization-choice" class="faux-selection"></div>
-                  <div class="faux-select-arrow" ></div>
-                  <ul id="organization-choices" class="faux-select-options visibility-hidden-on-clean"></ul>
-               </div>
-               <template id="organization-choice-none-template">
-                  <li action="organizeBySubgroup(0)" style="margin-right: 3em">none</li>
-               </template>
-               <template id="organization-choice-template">
-                  <li action="organizeBySubgroup(${subgroupIndex})" style="white-space: nowrap; margin-right: 3em">
-                      <i>H</i><sub>${subgroupIndex}</sub>, a subgroup of order ${subgroup.order}.
-                  </li>
-               </template>
+                <div id="control">
+                    <div id="subset-control">
+                        <!-- This is filled in by subsetDisplay/subsets.html -->
+                    </div>
 
-               <div class="graphic-lead" style="margin-top: 3em">Separate cosets by:</div>
-               <input id="separation-slider" type="range" min="0" max="100" value="0"> <!-- [0-100] => [0,box width] -->
+                    <div id="table-control" class="hidden">
+                        <div class="graphic-lead">Organize by subgroup:</div>
+                        <div id="organization-select" class="faux-select" action="toggleOrganizationChoices()">
+                            <div style="display: inline-block; line-height: 1.5em">&nbsp;</div>
+                            <div id="organization-choice" class="faux-selection"></div>
+                            <div class="faux-select-arrow" ></div>
+                            <ul id="organization-choices" class="faux-select-options visibility-hidden-on-clean"></ul>
+                        </div>
+                        <template id="organization-choice-none-template">
+                            <li action="organizeBySubgroup(0)" style="margin-right: 1em">none</li>
+                        </template>
+                        <template id="organization-choice-template">
+                            <li action="organizeBySubgroup(${subgroupIndex})" style="white-space: nowrap; margin-right: 1em">
+                                <i>H</i><sub>${subgroupIndex}</sub>, a subgroup of order ${subgroup.order}.
+                            </li>
+                        </template>
 
-               <form id="coloration-choice" class="graphic-lead" style="margin-bottom: 0">
-                  Default coloration:
-                  <div>
-                     <input id="rainbow" name="coloration" type="radio" checked>
-                     <label for="rainbow">Spectrum/rainbow</label>
-                  </div>
-                  <div>
-                     <input id="grayscale" name="coloration" type="radio">
-                     <label for="grayscale">Grayscale</label>
-                  </div>
-                  <div>
-                     <input id="none" name="coloration" type="radio">
-                     <label for="none">None</label>
-                  </div>
-               </form>
+                        <div class="graphic-lead" style="margin-top: 3em">Separate cosets by:</div>
+                        <input id="separation-slider" type="range" min="0" max="100" value="0"> <!-- [0-100] => [0,box width] -->
+
+                        <form id="coloration-choice" class="graphic-lead" style="margin-bottom: 0">
+                            Default coloration:
+                            <div>
+                                <input id="rainbow" name="coloration" type="radio" checked>
+                                <label for="rainbow">Spectrum/rainbow</label>
+                            </div>
+                            <div>
+                                <input id="grayscale" name="coloration" type="radio">
+                                <label for="grayscale">Grayscale</label>
+                            </div>
+                            <div>
+                                <input id="none" name="coloration" type="radio">
+                                <label for="none">None</label>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
          </div>
       </div>

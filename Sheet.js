@@ -20,6 +20,8 @@ async function load () {
   // load upper-right corner buttons
   await VC.load(null, HELP_PAGE)
   $('#find-group').remove()
+  $('#hide-controls').attr('onclick', 'VC.hideControls("#control-panel")')
+  $('#show-controls').attr('onclick', 'VC.showControls("#control-panel")')
 
   // initialize Sheet components
   SheetView.init()

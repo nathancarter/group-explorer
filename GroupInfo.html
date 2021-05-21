@@ -8,6 +8,7 @@
 
         <link rel="STYLESHEET" href="./style/fonts.css" type="text/css">
         <link rel="stylesheet" href="./style/menu.css" type="text/css"></link>
+        <link rel="stylesheet" href="./visualizerFramework/visualizer.css" type="text/css"></link>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css">
         <style>
          p, ul {
@@ -33,6 +34,11 @@
          .programLink{
              color: #0000EE;
              cursor: pointer;
+         }
+
+         body {
+             overflow: auto;
+             background-color: #fafafa;
          }
 
          /* Collapsible sections styling
@@ -286,33 +292,32 @@
     <body>
         <table id="ScratchTable" style="width: 100%; display: none"></table>
 
-        <h1 id="heading" align="center" style="font-weight: normal">
-            <template id="heading_template">
-                ${Group.name + ((Group.phrase == "") ? '' : ('&nbsp;-' + Group.phrase))}
-            </template>
-        </h1>
-        <div class="top-right-menu">
-            <div>
-                <a href='index.html'>
-                    <i title="Project Home" class="fa fa-home fa-2x trm-black"></i></a>
-                <a href='GroupExplorer.html'>
-                    <i title="Group Library" class="fa fa-book fa-2x trm-black"></i></a>
-                <a href='Sheet.html' target='_blank'>
-                    <i title="Sheets" class="fa fa-file trm-black" style="font-size:1.5em;vertical-align:10%;"></i></a>
-                <a href='help/rf-um-groupwindow/index.html'>
-                    <i title="Help" class="fa fa-question-circle fa-2x trm-black"></i></a>
-                <a href='https://github.com/nathancarter/group-explorer'>
-                    <i title="Source on GitHub" class="fa fa-github fa-2x trm-black"></i></a>
-                <a href='' action="($('.toggled.content, .toggled.name-value-content, .gapcell.toggled, .less').show(), $('.summary.toggled, .more').hide())">
-                    <i title="Expand all" class="fa fa-chevron-circle-down fa-2x trm-black"></i></a>
-                <a href='' action="($('.toggled.content, .toggled.name-value-content, .gapcell.toggled, .less').hide(), $('.summary.toggled, .more').show())">
-                    <i title="Collapse all" class="fa fa-chevron-circle-up fa-2x trm-black"></i></a>
+        <div id="header">
+            <div id="heading"></div>
+
+            <div id="top-right-menu">
+                <div>
+                    <a href='index.html'>
+                        <i title="Project Home" class="fa fa-home fa-2x trm-black"></i></a>
+                    <a href='GroupExplorer.html'>
+                        <i title="Group Library" class="fa fa-book fa-2x trm-black"></i></a>
+                    <a href='Sheet.html' target='_blank'>
+                        <i title="Sheets" class="fa fa-file trm-black" style="font-size:1.5em;vertical-align:10%;"></i></a>
+                    <a href='help/rf-um-groupwindow/index.html'>
+                        <i title="Help" class="fa fa-question-circle fa-2x trm-black"></i></a>
+                    <a href='https://github.com/nathancarter/group-explorer'>
+                        <i title="Source on GitHub" class="fa fa-github fa-2x trm-black"></i></a>
+                    <a href='' action="($('.toggled.content, .toggled.name-value-content, .gapcell.toggled, .less').show(), $('.summary.toggled, .more').hide())">
+                        <i title="Expand all" class="fa fa-chevron-circle-down fa-2x trm-black"></i></a>
+                    <a href='' action="($('.toggled.content, .toggled.name-value-content, .gapcell.toggled, .less').hide(), $('.summary.toggled, .more').show())">
+                        <i title="Collapse all" class="fa fa-chevron-circle-up fa-2x trm-black"></i></a>
+                </div>
+                <div id="version" style="float: right; font-size: small"></div>
+                <script type="module">
+                 import {Version} from './Version.js'
+                 document.getElementById('version').textContent = Version.label
+                </script>
             </div>
-            <div id="version" style="float: right; font-size: small"></div>
-            <script type="module">
-             import {Version} from './Version.js';
-             document.getElementById('version').textContent = Version.label
-            </script>
         </div>
 
         <div id="basic-facts" class="collapsible heading1">

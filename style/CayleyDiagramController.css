@@ -2,6 +2,7 @@
 #diagram-control {
     -webkit-user-select: none;                   /* prevents cut-and-paste */
     -webkit-tap-highlight-color: transparent;    /* prevents highlight/flash when item is selected */
+    padding: 0.5em;
 }
 
 .fog {
@@ -15,10 +16,6 @@
 .graphic-lead {
     margin-top: 1.5em;
     margin-bottom: 0.5em;
-}
-
-#diagram-control {
-    padding: 1em;  /* margin around all elements of diagram-control */
 }
 
 /* Generation control */

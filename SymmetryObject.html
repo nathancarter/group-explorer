@@ -12,15 +12,12 @@
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css">
 
       <style>
-       /* Hide splitter (it's disabled in this visualizer) */
-       #splitter {
-          background-color: white;
-          cursor: default;
+       #control {
+           padding: 0.2em;
        }
       </style>
 
       <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-      <script src="https://cdn.jsdelivr.net/npm/jquery-resizable-dom@0.32.0/dist/jquery-resizable.js"></script>
       <script type="module">
        import {check} from './js/Migration.js'
        import {load} from './SymmetryObject.js'
@@ -32,9 +29,8 @@
          <div id="header">
              <div id="heading"></div>
          </div>
-         <div id="graphic"></div>
-         <div id="splitter"></div>
-         <div id="controls">
+         <div id="graphic">
+         <div id="controls"><div id="control">
             <div style="margin: 1em 0 0.5em 0">View this symmetry object:</div>
             <div id="diagram-select" class="faux-select" action="toggleDiagramChoices()" style="margin-bottom: 1em">
                <div style="display: inline-block; line-height: 1.5em">&nbsp;</div>
@@ -64,6 +60,7 @@
                <input id="fog-level" type="range" min="1" max="10" value="5">
             </div>
          </div>
+         </div></div>
       </div>
    </body>
 </html>

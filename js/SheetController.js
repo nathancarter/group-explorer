@@ -263,7 +263,7 @@ class TopSheetController extends AbstractController {
   }
 
   onClick (event /*: MouseEvent */) {
-    if ($(event.target).closest('#controls')[0] != null) {
+    if ($(event.target).closest('#control-panel')[0] != null) {
       listener = new Controls()
       listener.onClick(event)
     }
@@ -1068,14 +1068,14 @@ class Controls extends AbstractController {
   onClick (event /*: MouseEvent */) {
     const $target = $(event.target)
 
-    if ($('#controls .controls-modal:visible').length !== 0 &&
-        $target.closest('#controls .controls-modal:visible').length === 0) {
+    if ($('#control-panel .controls-modal:visible').length !== 0 &&
+        $target.closest('#control-panel .controls-modal:visible').length === 0) {
       // clicked outside a modal dialog box -- do nothing
-    } else if ($('#controls .context-menu:visible').length !== 0 &&
-               $target.closest('#controls .context-menu:visible').length === 0) {
+    } else if ($('#control-panel .context-menu:visible').length !== 0 &&
+               $target.closest('#control-panel .context-menu:visible').length === 0) {
       this.exit() // clicked outside a menu -- dismiss menu and return to top level controller
-    } else if ($('#controls .faux-choices:visible').length !== 0 &&
-               $target.closest('#controls .faux-choices:visible').length === 0) {
+    } else if ($('#control-panel .faux-choices:visible').length !== 0 &&
+               $target.closest('#control-panel .faux-choices:visible').length === 0) {
       this.exit() // clicked outside a faux-choice pulldown -- dismiss and return to top level controller
     } else if ($target.closest('[data-action]').length !== 0) {
       const action = $target.closest('[data-action]').attr('data-action')

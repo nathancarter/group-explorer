@@ -51,6 +51,16 @@ function registerCallbacks() {
    LargeGraphic.init();
 
    // Control panel events
+   if (GEUtils.isTouchDevice()) {
+      $('#controls')[0].addEventListener('touchstart', (event) => event.stopPropagation())
+      $('#controls')[0].addEventListener('touchmove', (event) => event.stopPropagation())
+      $('#controls')[0].addEventListener('touchend', (event) => event.stopPropagation())
+   } else { // must be mouse device
+      $('#controls')[0].addEventListener('mousedown', (event) => event.stopPropagation())
+      $('#controls')[0].addEventListener('mousemove', (event) => event.stopPropagation())
+      $('#controls')[0].addEventListener('mouseup', (event) => event.stopPropagation())
+   }
+
    $('#subset-button')[0].addEventListener('click', () => VC.showPanel('#subset-control') );
    $('#table-button')[0].addEventListener('click', () => VC.showPanel('#table-control') );
    $('#organization-select')[0].addEventListener('click', organizationClickHandler);
@@ -93,15 +103,6 @@ async function load() {
 
    // Register event handlers
    registerCallbacks();
-
-   // Register the splitter with jquery-resizable, so you can resize the graphic horizontally
-   // by grabbing the border between the graphic and the subset control and dragging it
-   (($('#controls') /*: any */) /*: JQuery & {resizable: Function} */).resizable({
-      handleSelector: '#splitter',
-      resizeHeight: false,
-      resizeWidthFrom: 'left',
-      onDrag: () => Multtable_View.resize(),
-   });
 
    // Is this an editor started by a Sheet? If so, set up communication with Sheet
    if (window.location.href.includes('SheetEditor=true')) {

@@ -64,15 +64,6 @@ async function load () {
    // Register event handlers
    registerCallbacks();
 
-   // Register the splitter with jquery-resizable, so you can resize the graphic horizontally
-   // by grabbing the border between the graphic and the subset control and dragging it
-   (($('#controls') /*: any */) /*: JQuery & {resizable: Function} */).resizable({
-      handleSelector: '#splitter',
-      resizeHeight: false,
-      resizeWidthFrom: 'left',
-      onDrag: () => Cycle_Graph_View.resize(),
-   });
-
    // Is this an editor started by a Sheet? If so, set up communication with Sheet
    if (window.location.href.includes('SheetEditor=true')) {
       setupEditorCallback();

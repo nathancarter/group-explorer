@@ -59,7 +59,7 @@ const DEFAULT_CANVAS_HEIGHT = 100;
 const DEFAULT_CANVAS_WIDTH = 100;
 const ZOOM_STEP = 0.002
 const MINIMUM_FONT = 6
-const DEFAULT_BACKGROUND = '#F0F0F0';
+const DEFAULT_BACKGROUND = '#E5E5E5';
 
 export class MulttableView /*:: implements VizDisplay<MulttableJSON> */ {
 /*::

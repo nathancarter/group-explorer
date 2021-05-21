@@ -36,6 +36,17 @@ const myDomain = new URL(window.location.href).origin;
 /* Register static event managers (called after document is assembled) */
 function registerCallbacks() {
     window.onresize = resizeBody;
+
+   if (GEUtils.isTouchDevice()) {
+      $('#controls')[0].addEventListener('touchstart', (event) => event.stopPropagation())
+      $('#controls')[0].addEventListener('touchmove', (event) => event.stopPropagation())
+      $('#controls')[0].addEventListener('touchend', (event) => event.stopPropagation())
+   } else { // must be mouse device
+      $('#controls')[0].addEventListener('mousedown', (event) => event.stopPropagation())
+      $('#controls')[0].addEventListener('mousemove', (event) => event.stopPropagation())
+      $('#controls')[0].addEventListener('mouseup', (event) => event.stopPropagation())
+   }
+
    $('#bodyDouble')[0].addEventListener('click', GEUtils.cleanWindow);
    $('#subset-button')[0].addEventListener('click', () => VC.showPanel('#subset-control') );
    $('#view-button')[0].addEventListener('click', () => VC.showPanel('#view-control') );
@@ -72,14 +83,6 @@ async function load () {
    }
    Cayley_Diagram_View.group = Group;		     // set group and diagram name in Cayley_Diagram_View
    Cayley_Diagram_View.diagram_name = diagram_name;  //   and generate their Cayley diagram
-
-   // Register the splitter with jquery-resizable
-   (($('#controls') /*: any */) /*: JQuery & {resizable: Function} */).resizable({
-      handleSelector: '#splitter',
-      resizeHeight: false,
-      resizeWidthFrom: 'left',
-      onDrag: () => Cayley_Diagram_View.resize(),
-   });
 
    // Register event handlers
    registerCallbacks();

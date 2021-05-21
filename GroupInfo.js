@@ -56,7 +56,7 @@ function displayStatic () {
     Multtable_View = createMinimalMulttableView(thumbnail_size);
 
     // Header
-    $('#heading').html(eval(Template.HTML('heading_template')));
+    $('#heading').html(`${Group.name + ((Group.phrase == "") ? '' : (' - ' + Group.phrase))}`)
 
     displayBasicFacts();
     displayViews();

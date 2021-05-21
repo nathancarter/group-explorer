@@ -27,6 +27,16 @@ function registerCallbacks() {
    window.onresize = resizeBody;
    $('#bodyDouble')[0].addEventListener('click', GEUtils.cleanWindow);
 
+  if (GEUtils.isTouchDevice()) {
+    $('#controls')[0].addEventListener('touchstart', (event) => event.stopPropagation())
+    $('#controls')[0].addEventListener('touchmove', (event) => event.stopPropagation())
+    $('#controls')[0].addEventListener('touchend', (event) => event.stopPropagation())
+  } else { // must be mouse device
+    $('#controls')[0].addEventListener('mousedown', (event) => event.stopPropagation())
+    $('#controls')[0].addEventListener('mousemove', (event) => event.stopPropagation())
+    $('#controls')[0].addEventListener('mouseup', (event) => event.stopPropagation())
+  }
+
    $('#diagram-select')[0].addEventListener('click', diagramClickHandler);
    $('#zoom-level')[0].addEventListener('input', set_zoom_level);
    $('#line-thickness')[0].addEventListener('input', set_line_thickness);

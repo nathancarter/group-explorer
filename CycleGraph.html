@@ -18,18 +18,11 @@
        }
 
        #graphic {
-          overflow-x: hidden;
           background-color: #C8C8F0;
-       }
-       #subset-control {
-          height: 100%;
-          padding: 2px;
-          overflow: auto;
        }
       </style>
 
       <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-      <script src="https://cdn.jsdelivr.net/npm/jquery-resizable-dom@0.32.0/dist/jquery-resizable.js"></script>
       <script type="module">
        import {check} from './js/Migration.js'
        import {load} from "./CycleGraph.js";
@@ -41,9 +34,8 @@
          <div id="header">
              <div id="heading"></div>
          </div>
-         <div id="graphic"></div>
-         <div id="splitter"></div>
-         <div id="controls">
+         <div id="graphic">
+            <div id="controls"><div id="control">
             <div id="subset-control">
                <!-- This is filled in by subsetDisplay/subsets.html -->
             </div>
@@ -52,6 +44,7 @@
                   ${Group.representation[element]}
                </div>
             </template>
+            </div></div>
          </div>
       </div>
    </body>
