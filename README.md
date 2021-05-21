@@ -1,5 +1,5 @@
 
-# Group Explorer 3.0
+# Group Explorer 3.2
 
 Group Explorer is visualization software for students and instructors of
 abstract algebra, specifically group theory.  It has been around since 2005
@@ -31,6 +31,7 @@ courses.
  * Nathan Carter
     * developed the original version
     * added sheets and some miscellany to the web version
+    * authored the built-in help system
 
 If you're interested in adding anything to this app, please talk to us!  It's all in pure JS, so you may already know everything you need to start coding.
 
