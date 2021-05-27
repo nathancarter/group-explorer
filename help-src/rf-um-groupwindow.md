@@ -96,8 +96,9 @@ group in *Group Explorer* are uneditable by the end user.
 
 Users can add their own personal notes to a group to supplement the default
 information in any way they see fit. Such information appears in this
-section, with controls for editing it. It is text only (not HTML) and will
-be stored in the user's browser.
+section, with controls for editing it. Notes will be displayed as HTML,
+as done in several [other dialog inputs](../rf-um-sheetwindow#dialog-inputs)
+in *Group Explorer*, and stored in the user's browser.
 
 ## File data
 

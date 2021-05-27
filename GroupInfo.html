@@ -562,11 +562,14 @@
             <template id="notes-editor-template">
                 <div id="notes-editor" class="modal">
                     <div id="notes-edit-textarea">
-                        <textarea id="notes-textarea" placeholder="Enter notes here..." maxlength="1000" rows="10">
-                            ${Group.userNotes}
-                        </textarea>
+                        <textarea id="notes-textarea" maxlength="1000" rows="10"
+                                  placeholder="Enter notes here..." >${Group.userNotes}</textarea>
                     </div>
                     <div class="edit-buttons">
+                        <span style="display: inline-block; text-align: left; margin-top: 0.8em">
+                            Notes are formatted as HTML:
+                            "&lt;i&gt;H&lt;/i&gt;&lt;sub&gt;2&lt;/sub&gt;" will display as "<i>H</i><sub>2</sub>".
+                        </span>
                         <button class="edit-button" action="Notes.close()">Cancel</button>
                         <button class="edit-button" action="Notes.save()">Save</button>
                     </div>

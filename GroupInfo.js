@@ -379,7 +379,7 @@ class Notes {
         if (Group.userNotes.length == 0) {
             $frag.append(eval(Template.HTML('notes-no-notes-template')));
         } else {
-            $frag.append($('<div>').text(Group.userNotes));
+            $frag.append($('<div>').html(Group.userNotes));
         }
         $frag.append(eval(Template.HTML('notes-trailer-template')));
         $('#notes > .content').empty().append($frag);
