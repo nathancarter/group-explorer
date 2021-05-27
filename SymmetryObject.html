@@ -32,16 +32,14 @@
          <div id="graphic">
          <div id="controls"><div id="control">
             <div style="margin: 1em 0 0.5em 0">View this symmetry object:</div>
-            <div id="diagram-select" class="faux-select" action="toggleDiagramChoices()" style="margin-bottom: 1em">
-               <div style="display: inline-block; line-height: 1.5em">&nbsp;</div>
-               <div id="diagram-choice" class="faux-selection"></div>
+            <div id="diagram-select" class="faux-select" style="margin-bottom: 1em"
+                 onclick="$(this).find('.faux-select-options').toggle(); event.stopPropagation()">
                <div class="faux-select-arrow"></div>
-               <ul id="diagram-choices" class="faux-select-options visibility-hidden-on-clean"></ul>
+               <div id="diagram-choice" class="faux-select-value"></div>
+               <ol id="diagram-choices" class="faux-select-options hidden display-none-on-clean"></ol>
             </div>
             <template id="diagram-choice-template">
-               <li action="setDiagramName(${index})" style="white-space: nowrap; margin-right: 3em">
-                  ${Group.symmetryObjects[index].name}
-               </li>
+                <span data-symmetry-object-index="${index}">${symmetryObject.name}</span>
             </template>
 
             <div>Zoom level:

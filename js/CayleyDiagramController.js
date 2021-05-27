@@ -123,38 +123,28 @@ class Chunking {
    static updateChunkingSelect() {
       // check that first generator is innermost, second is middle, etc.
       const generator = ((Cayley_Diagram_View.generator /*: any */) /*: CayleyGeneratorFromStrategy */);
-      if (   Cayley_Diagram_View.isGenerated
-          && generator.strategies.every( (strategy, inx) => strategy.nesting_level == inx ) ) {
+      if (Cayley_Diagram_View.isGenerated &&
+          generator.strategies.every((strategy, inx) => strategy.nesting_level == inx)) {
          Chunking.enable();
-
-         $('#chunk-choices').html(eval(Template.HTML('chunk-no-chunking-template')));
-         generator.strategies.slice(0, -1).reduce( (generators, strategy, inx) => {
-            generators.push(Group.representation[strategy.generator]);
-            const subgroup_index = Group.subgroups.findIndex( (subgroup) => subgroup.members.equals(strategy.elements) );
-            $('#chunk-choices').append(eval(Template.HTML('chunk-select-subgroup-template')));
-            return generators;
-         }, [] );
-         $('#chunk-choices').append(eval(Template.HTML('chunk-select-whole-group-template')));
-         Chunking.selectChunk(generator.chunk);
+         const [choices, _] = generator.strategies.slice(0, -1).reduce(([choices, generators], strategy) => {
+            generators.push(Group.representation[strategy.generator])
+            const subgroupIndex = Group.subgroups.findIndex((subgroup) => subgroup.members.equals(strategy.elements));
+            choices.push(eval(Template.HTML('chunk-select-subgroup-template')))
+            return [choices, generators]
+         }, [[eval(Template.HTML('chunk-no-chunking-template'))], []])
+         choices.push(eval(Template.HTML('chunk-select-whole-group-template')))
+         GEUtils.setupFauxSelect($('#chunk-select')[0], choices, 0)
       } else {
          Chunking.disable();
       }
    }
 
-   static toggleChoices() {
-      const choices = $('#chunk-choices');
-      const new_visibility = choices.css('visibility') == 'visible' ? 'hidden' : 'visible';
-      choices.css('visibility', new_visibility);
-   }
-
-   static selectChunk(subgroup_index /*: number */) {
-      if (Chunking.isDisabled()) return;
-      $('#bodyDouble').click();
-      const generator = ((Cayley_Diagram_View.generator /*: any */) /*: CayleyGeneratorFromStrategy */);
-      const subgroup_members = Group.subgroups[subgroup_index].members;
-      const strategy_index = generator.strategies.findIndex( (strategy) => strategy.elements.equals(subgroup_members) );
-      $('#chunk-choice').html($(`#chunk-choices > li:nth-of-type(${strategy_index + 2})`).html());
-      Cayley_Diagram_View.chunk = (strategy_index == -1) ? 0 : subgroup_index;
+   static changeHandler (changeEvent /*: Event */) {
+      const choice = $(changeEvent.target).children()[0]
+      if (choice != null) {
+         const chunk = parseInt($(choice).attr('data-chunk'))
+         Cayley_Diagram_View.chunk = chunk
+      }
    }
 
    static enable() {
@@ -185,34 +175,22 @@ class Chunking {
 class DiagramChoice {
    /* Populate diagram select element, show selected diagram */
    static setupDiagramSelect() {
-      const $choices = Group.cayleyDiagrams.reduce(
-         ($frag, diagram) => $frag.append(eval(Template.HTML('diagram-choice-template'))),
-         $(document.createDocumentFragment()).append(eval(Template.HTML('diagram-generate-diagram-template'))))
-      $('#diagram-choices')
-         .html((($choices /*: any */) /*: DocumentFragment */))
-         .css('visibility', 'hidden');
-      DiagramChoice._showChoice();
+      const choices = Group.cayleyDiagrams.reduce((choices, diagram) => {
+         choices.push(eval(Template.HTML('diagram-choice-template')))
+         return choices
+      }, [eval(Template.HTML('diagram-generate-diagram-template'))])
+      const choiceIndex = Group.cayleyDiagrams.findIndex(({name}) => name === Cayley_Diagram_View.diagram_name) + 1
+      GEUtils.setupFauxSelect($('#diagram-select')[0], choices, choiceIndex)
    }
 
-   static _showChoice() {
-      $('#diagram-choices').css('visibility', 'hidden');
-      const index = Group.cayleyDiagrams.findIndex( (cd) => cd.name == Cayley_Diagram_View.diagram_name );
-      $('#diagram-choice')
-         .html($(`#diagram-choices > li:nth-of-type(${index+2})`).html());
-   }
-
-   static toggleChoices() {
-      const choices = $('#diagram-choices');
-      const new_visibility = choices.css('visibility') == 'visible' ? 'hidden' : 'visible';
-      choices.css('visibility', new_visibility);
-   }
-
-   static selectDiagram(diagram /*: ?string */, andDisplay /*:: ?: boolean */ = true) {
-      $('#bodyDouble').click();
-      Cayley_Diagram_View.diagram_name = diagram;
-      Chunking.enable();
-      DiagramChoice._showChoice();
-      update();
+   static changeHandler (changeEvent /*: Event */) {
+      const choice = $(changeEvent.target).children()[0]
+      if (choice != null) {
+         const diagramName = $(choice).attr('data-diagram-name')
+         Cayley_Diagram_View.diagram_name = diagramName
+         Chunking.enable()
+         update()
+      }
    }
 }
 
@@ -488,10 +466,9 @@ async function load ($diagramWrapper /*: JQuery */) /*: Promise<void> */ {
   const data = await GEUtils.ajaxLoad(DIAGRAM_PANEL_URL)
 
   $diagramWrapper.html(data)
-
    Generator.init();
 
-   $('#diagram-select')[0].addEventListener('click', clickHandler);
+   $('#diagram-select')[0].addEventListener('change', DiagramChoice.changeHandler);
 
    $('#generation-control')[0].addEventListener('click', clickHandler);
    $('#generation-table')[0].addEventListener('dragstart', Generator.dragStart);
@@ -500,7 +477,7 @@ async function load ($diagramWrapper /*: JQuery */) /*: Promise<void> */ {
 
    $('#arrow-control')[0].addEventListener('click', clickHandler);
 
-   $('#chunk-select')[0].addEventListener('click', clickHandler);
+   $('#chunk-select')[0].addEventListener('change', Chunking.changeHandler);
 
    update();
 }

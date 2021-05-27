@@ -197,6 +197,7 @@ class TopSheetController extends AbstractController {
     }
     addEventListener('mousemove')
     addEventListener('mouseup')
+    const i = 3
   }
 
   // entered the scene
@@ -822,35 +823,6 @@ function placeMenu ($menu, event) /*: JQuery */ {
     })
 }
 
-function initFauxSelect (
-  htmlElement /*: HTMLElement */,
-  choices /*: Array<html> */,
-  initialChoice /*: integer */
-) /*: HTMLElement */ {
-  const $selectionValue = $(htmlElement).find('.faux-selection-value')
-  $selectionValue.html(choices[initialChoice] || '')
-
-  // set selectionValue id to a unique value if it doesn't have one
-  if ($selectionValue[0].id === '') {
-    let inx = 0
-    while ($(`#faux-select-${++inx}`).length !== 0) { /* continue */ ; }
-    $selectionValue[0].id = `faux-select-${inx}`
-  }
-
-  const onClick =
-    'event.stopPropagation();' +
-    `$('#${$selectionValue[0].id}').html($(this).html())[0].dispatchEvent(new Event('change', { bubbles: true }));` +
-    '$(this).parent().hide()'
-  const listElementHtml = `<li onclick="${onClick}" class="choice">`
-  choices
-    .reduce(
-      ($frag, choice) => $frag.append($(listElementHtml).html(choice)),
-      $(document.createDocumentFragment()))
-    .appendTo($(htmlElement).find('.faux-choices').empty())
-
-  return htmlElement
-}
-
 class DragAndDrop {
   /*::
     static enabled: boolean
@@ -1034,7 +1006,7 @@ class Controls extends AbstractController {
   }
 
   static init () {
-    if ($('#visualizer-select-group .faux-choices').children().length === 0) {
+    if ($('#visualizer-select-group .faux-select-options').children().length === 0) {
       Controls.loadGroups()
       Controls.loadStoredSheets()
     }
@@ -1047,7 +1019,7 @@ class Controls extends AbstractController {
     const groupChoices = groups.map((group) => eval(groupListEntryTemplate).trim())
     const trivialIndex = groups.findIndex((g) => g.order === 1)
     const initialIndex = (trivialIndex === -1) ? 0 : trivialIndex
-    initFauxSelect($('#visualizer-select-group')[0], groupChoices, initialIndex)
+    GEUtils.setupFauxSelect($('#visualizer-select-group')[0], groupChoices, initialIndex)
   }
 
   static async loadStoredSheets () {
@@ -1074,9 +1046,9 @@ class Controls extends AbstractController {
     } else if ($('#control-panel .context-menu:visible').length !== 0 &&
                $target.closest('#control-panel .context-menu:visible').length === 0) {
       this.exit() // clicked outside a menu -- dismiss menu and return to top level controller
-    } else if ($('#control-panel .faux-choices:visible').length !== 0 &&
-               $target.closest('#control-panel .faux-choices:visible').length === 0) {
-      this.exit() // clicked outside a faux-choice pulldown -- dismiss and return to top level controller
+    } else if ($('#control-panel .faux-select-options:visible').length !== 0 &&
+               $target.closest('#control-panel .faux-select-options:visible').length === 0) {
+      this.exit() // clicked outside a faux-select-options pulldown -- dismiss and return to top level controller
     } else if ($target.closest('[data-action]').length !== 0) {
       const action = $target.closest('[data-action]').attr('data-action')
       eval(action) // execute any data-action found
@@ -1185,7 +1157,7 @@ class Controls extends AbstractController {
   /* *********************** Add elements *********************************/
 
   addElement (className /*: string */) {
-    const groupURL = $('#visualizer-select-group .faux-selection-value [data-value]').attr('data-value')
+    const groupURL = $('#visualizer-select-group .faux-select-value [data-groupURL]').attr('data-groupURL')
     const { width, height } = View.graphicRect
     const scale = Math.min(width, height)
     const { x, y } = new View.GraphicUnits().toSheetUnits() // upper-left corner of #graphic

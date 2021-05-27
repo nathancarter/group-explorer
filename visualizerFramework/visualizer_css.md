@@ -12,6 +12,10 @@
    --visualizer-button-border:		#7E7E7E;
 }
 
+.hidden {
+   display: none;
+}
+
 /* General element styles in visualizer */
 button {
    background-image: var(--visualizer-button-gradient);
@@ -94,57 +98,67 @@ body, #bodyDouble {
    overflow-y: auto;
    background-color: var(--visualizer-controls-background);
 }
-
 /*
 ```
 ### faux-select
-Faux-select and associated classes are used to style a select-like structure. Faux-select-options can contain not just text but HTML, making them better suited for mathematical text than simple HTML select options.
-  * .faux-select: &lt;div&gt; which contains the entire structure
-  * .faux-selection: &lt;div&gt; which contains the current selection
-  * .faux-select-arrow: a css down-arrow to the right of the selection
-  * .faux-select-options: &lt;ul&gt; with &lt;li&gt; options
+Faux-select and associated classes are used to style a select-like structure.
+Faux-select-options can contain not just text but HTML, making them better suited
+for mathematical text than basic HTML select options.
+ * .faux-select: &lt;div&gt; which contains the entire structure
+ * .faux-select-value: &lt;span&gt; which contains the current selection
+ * .faux-select-arrow: a css down-arrow to the right of the selection
+ * .faux-select-options: &lt;ol&gt; with &lt;li&gt; options
 
 ```css
- */
+*/
 .faux-select {
-    border: 1px solid var(--visualizer-button-border);
-    background-image: var(--visualizer-button-gradient);
-    font-size: 12pt;
-    width: 90%;
-    height: 1.5em;
-    margin: 0 5% 0 5%;
-    position: relative;
-    display: inline-block;
+   position: relative;
+   line-height: 1.4em;
+   height: 1.4em;
+   padding-top: 1px;
+
+   /* These values can be customized  */
+   border: 1px solid var(--visualizer-button-border);
+   background-image: var(--visualizer-button-gradient);
+   width: 90%;
+   margin: 0 5%;
 }
 
-.faux-selection {
-    display: inline-block;
-    white-space: nowrap;
+.faux-select-value {
+   float: left;
+   padding-left: 0.5em;
 }
 
 .faux-select-arrow {
-    top: 4;
-    right: 0;
-    border-top: 16px solid #000000;
-    border-right: 6px solid rgba(0,0,0,0);
-    border-left: 6px solid rgba(0,0,0,0);
-    margin-right: 4px;
-    position: absolute;
+   margin-top: 0.2em;
+   margin-right: 0.25em;
+   border-top: 1em solid #000000;
+   border-right: 0.375em solid rgba(0,0,0,0);
+   border-left: 0.375em solid rgba(0,0,0,0);
+   float: right;
 }
 
 .faux-select-options {
-    transform: translate(-1px, -1em);
-    background-color: #EEEEEE;		/* very light gray (~gainsboro)*/
-    border: 1px solid #CFCFCF;		/* ~silver */
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);	/* gray mist */
-    color: #000000;	
-    padding: 4px 8px;
-    z-index: 20;
-    list-style-type: none;
-    max-height: 40em;
-    overflow-y: auto;
-    position: absolute;
+   position: absolute;
+   list-style: none;
+   transform: translate(-1px, 0.43em);
+   width: calc(100% - 0.5em); /* allow for 0.5em padding at start */
+   padding-inline-start: 0.5em;
+   z-index: 100;
+   max-height: 20em;
+   overflow-y: auto;
+   box-shadow: 0px 8px 16px 8px rgba(0, 0, 0, 0.2);
+
+   /* These values can be customized  */
+   background-color: var(--visualizer-body-background);
+   border: 1px solid var(--visualizer-button-border);
+   border-top: none;
 }
+
+.faux-select-option {
+   height: 1.5em;
+}
+
 /*
 ```
  */

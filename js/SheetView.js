@@ -422,10 +422,6 @@ export class VisualizerView extends NodeView {
   redraw () {
     this.lastZoom = zoomFactor
     this.updateTransform()
-
-    this.modelElement.visualizer.setSize(this.size.x * zoomFactor, this.size.y * zoomFactor)
-    this.modelElement.visualizer.showGraphic()
-    this.unitSquarePositions = this.modelElement.visualizer.unitSquarePositions()
   }
 }
 
@@ -437,6 +433,15 @@ export class CGView extends VisualizerView {
     super(modelElement, modelElement.visualizer.canvas)
     this.redraw()
   }
+
+  redraw () {
+    super.redraw()
+
+    this.modelElement.visualizer.setSize(this.size.x * zoomFactor, this.size.y * zoomFactor)
+    this.modelElement.visualizer.showGraphic()
+
+    this.unitSquarePositions = this.modelElement.visualizer.unitSquarePositions()
+  }    
 }
 
 export class MTView extends VisualizerView {
@@ -446,6 +451,15 @@ export class MTView extends VisualizerView {
   constructor (modelElement /*: SheetModel.MTElement */) {
     super(modelElement, modelElement.visualizer.canvas)
     this.redraw()
+  }
+
+  redraw () {
+    super.redraw()
+
+    this.modelElement.visualizer.setSize(this.size.x * zoomFactor, this.size.y * zoomFactor)
+    this.modelElement.visualizer.showGraphic()
+
+    this.unitSquarePositions = this.modelElement.visualizer.unitSquarePositions()
   }
 }
 
@@ -459,8 +473,7 @@ export class CDView extends VisualizerView {
   }
 
   redraw () {
-    this.lastZoom = zoomFactor
-    this.updateTransform()
+    super.redraw()
 
     const size = this.size.clone().multiplyScalar(zoomFactor)
 

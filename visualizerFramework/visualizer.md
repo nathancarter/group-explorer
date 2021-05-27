@@ -60,7 +60,7 @@ export async function load (group /*: ?XMLGroup */, help_page /*: string */) /*:
 Hides visualizer-specific control panels and resizes the main graphic
 ```javascript
 */
-export function hideControls (element = '#controls') {
+export function hideControls (element /*: string */ = '#controls') {
    $( '#hide-controls' ).hide();
    $( '#show-controls' ).show();
    $(element).hide();
@@ -71,7 +71,7 @@ export function hideControls (element = '#controls') {
 Exposes visualizer-specific control panels and resizes the main graphic to fit
 ```javascript
 */
-export function showControls (element = '#controls') {
+export function showControls (element /*: string */ = '#controls') {
    $( '#hide-controls' ).show();
    $( '#show-controls' ).hide();
    $(element).show();

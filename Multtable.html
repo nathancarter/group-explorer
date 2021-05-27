@@ -69,19 +69,19 @@
 
                     <div id="table-control" class="hidden">
                         <div class="graphic-lead">Organize by subgroup:</div>
-                        <div id="organization-select" class="faux-select" action="toggleOrganizationChoices()">
-                            <div style="display: inline-block; line-height: 1.5em">&nbsp;</div>
-                            <div id="organization-choice" class="faux-selection"></div>
+                        <div id="organization-select" class="faux-select"
+                             onclick="$('#organization-choices').toggle(); event.stopPropagation()">
                             <div class="faux-select-arrow" ></div>
-                            <ul id="organization-choices" class="faux-select-options visibility-hidden-on-clean"></ul>
+                            <span id="organization-choice" class="faux-select-value"></span>
+                            <ol id="organization-choices" class="faux-select-options display-none-on-clean"></ul>
                         </div>
                         <template id="organization-choice-none-template">
-                            <li action="organizeBySubgroup(0)" style="margin-right: 1em">none</li>
+                            <span data-subgroup-index="0">none</span>
                         </template>
                         <template id="organization-choice-template">
-                            <li action="organizeBySubgroup(${subgroupIndex})" style="white-space: nowrap; margin-right: 1em">
+                            <span data-subgroup-index="${subgroupIndex}">
                                 <i>H</i><sub>${subgroupIndex}</sub>, a subgroup of order ${subgroup.order}.
-                            </li>
+                            </span>
                         </template>
 
                         <div class="graphic-lead" style="margin-top: 3em">Separate cosets by:</div>

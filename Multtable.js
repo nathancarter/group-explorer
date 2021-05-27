@@ -52,18 +52,18 @@ function registerCallbacks() {
 
    // Control panel events
    if (GEUtils.isTouchDevice()) {
-      $('#controls')[0].addEventListener('touchstart', (event) => event.stopPropagation())
-      $('#controls')[0].addEventListener('touchmove', (event) => event.stopPropagation())
-      $('#controls')[0].addEventListener('touchend', (event) => event.stopPropagation())
+      $('#controls')[0].addEventListener('touchstart', (event /*: Event */) => event.stopPropagation())
+      $('#controls')[0].addEventListener('touchmove', (event /*: Event */) => event.stopPropagation())
+      $('#controls')[0].addEventListener('touchend', (event /*: Event */) => event.stopPropagation())
    } else { // must be mouse device
-      $('#controls')[0].addEventListener('mousedown', (event) => event.stopPropagation())
-      $('#controls')[0].addEventListener('mousemove', (event) => event.stopPropagation())
-      $('#controls')[0].addEventListener('mouseup', (event) => event.stopPropagation())
+      $('#controls')[0].addEventListener('mousedown', (event /*: Event */) => event.stopPropagation())
+      $('#controls')[0].addEventListener('mousemove', (event /*: Event */) => event.stopPropagation())
+      $('#controls')[0].addEventListener('mouseup', (event /*: Event */) => event.stopPropagation())
    }
 
    $('#subset-button')[0].addEventListener('click', () => VC.showPanel('#subset-control') );
    $('#table-button')[0].addEventListener('click', () => VC.showPanel('#table-control') );
-   $('#organization-select')[0].addEventListener('click', organizationClickHandler);
+   $('#organization-select')[0].addEventListener('change', organizationChangeHandler);
    $('#separation-slider')[0].addEventListener('input', separation);
 }
 
@@ -87,18 +87,13 @@ async function load() {
    Multtable_View.group = Group;
 
    // Create list of subgroups for organize-by-subgroup menu:
-   $('#organization-choices').append( 
-      [...Array(Group.subgroups.length - 1).keys()].reduce( ($frag, index) => {
-         if (index == 0) {
-            $frag.append(eval(Template.HTML('organization-choice-none-template')));
-         } else {
-            const subgroupIndex = index;
-            const subgroup = Group.subgroups[subgroupIndex];
-            $frag.append(eval(Template.HTML('organization-choice-template')));
-         }
-         return $frag;
-      }, $(document.createDocumentFragment()) ))
-      .css('visibility', 'hidden');
+  const choices = Group.subgroups.slice(0, -1).map((subgroup, subgroupIndex) => {
+      const choice = (subgroupIndex === 0) ?
+         eval(Template.HTML('organization-choice-none-template')) :
+         eval(Template.HTML('organization-choice-template'))
+      return choice.trim()
+   })
+   GEUtils.setupFauxSelect($('#organization-select')[0], choices, 0)
    organizeBySubgroup(0);
 
    // Register event handlers
@@ -150,29 +145,21 @@ function receiveInitialSetup (event /*: MessageEvent */) {
    }
 }
 
-/* Find subgroup index (the "value" attribute of the option selected) and display multtable accordingly */
-function organizationClickHandler(event /*: MouseEvent */) {
-   const $curr = $(event.target).closest('[action]');
-   if ($curr.length != 0) {
-      eval($curr.attr('action'));
-      event.stopPropagation();
+/* Organize subgroups by data-subgroup-index value of #organization-choice child */
+function organizationChangeHandler(changeEvent /*: Event */) {
+   const organizationChoice = $(changeEvent.target).children()[0]
+   if (organizationChoice != null) {
+      const subgroupIndexChoice = $(organizationChoice).attr('data-subgroup-index')
+      if (subgroupIndexChoice != null) {
+         organizeBySubgroup(parseInt(subgroupIndexChoice))
+      }
    }
-}
-
-function toggleOrganizationChoices() {
-   const choices = $('#organization-choices');
-   const new_visibility = choices.css('visibility') == 'visible' ? 'hidden' : 'visible';
-   choices.css('visibility', new_visibility);
 }
 
 /* Display multtable grouped by group.subgroups[subgroupIndex]
  *   (Note that the group itself is Group.subgroups[Group.subgroups.length - 1] */
 function organizeBySubgroup (index /*: integer */) {
    Multtable_View.organizeBySubgroup(index == 0 ? Group.subgroups.length - 1 : index);
-
-   // copy already-formatted text from menu
-   $('#organization-choice').html($(`#organization-choices > li:nth-of-type(${index+1})`).html());
-   $('#organization-choices').css('visibility', 'hidden');
 }
 
 /* Set separation between cosets in multtable display, and re-draw graphic */

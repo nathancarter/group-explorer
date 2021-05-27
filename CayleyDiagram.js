@@ -38,13 +38,13 @@ function registerCallbacks() {
     window.onresize = resizeBody;
 
    if (GEUtils.isTouchDevice()) {
-      $('#controls')[0].addEventListener('touchstart', (event) => event.stopPropagation())
-      $('#controls')[0].addEventListener('touchmove', (event) => event.stopPropagation())
-      $('#controls')[0].addEventListener('touchend', (event) => event.stopPropagation())
+      $('#controls')[0].addEventListener('touchstart', (event /*: Event */) => event.stopPropagation())
+      $('#controls')[0].addEventListener('touchmove', (event /*: Event */) => event.stopPropagation())
+      $('#controls')[0].addEventListener('touchend', (event /*: Event */) => event.stopPropagation())
    } else { // must be mouse device
-      $('#controls')[0].addEventListener('mousedown', (event) => event.stopPropagation())
-      $('#controls')[0].addEventListener('mousemove', (event) => event.stopPropagation())
-      $('#controls')[0].addEventListener('mouseup', (event) => event.stopPropagation())
+      $('#controls')[0].addEventListener('mousedown', (event /*: Event */) => event.stopPropagation())
+      $('#controls')[0].addEventListener('mousemove', (event /*: Event */) => event.stopPropagation())
+      $('#controls')[0].addEventListener('mouseup', (event /*: Event */) => event.stopPropagation())
    }
 
    $('#bodyDouble')[0].addEventListener('click', GEUtils.cleanWindow);
@@ -93,16 +93,19 @@ async function load () {
   // >>> Complete setup functions once the main #graphic is sized correctly
 
    // Is this an editor started by a Sheet? If so, set up communication with Sheet
-   if (window.location.href.includes('SheetEditor=true')) {
-      setupEditorCallback();
-   } else {
+   if (!window.location.href.includes('SheetEditor=true')) {
       startVisualizer();
    }      
 
-   // This starts building the other panels -- we won't wait until they complete
+   // This starts building the other panels -- we won't wait for completion unless we have to
    // They are initially created with display=none, then exposed when the panel is selected
-   DC.load($('#diagram-control'));
-   CVC.load($('#view-control'));
+   const dcPromise = DC.load($('#diagram-control'));
+   const cvcPromise = CVC.load($('#view-control'));
+
+   if (window.location.href.includes('SheetEditor=true')) {
+      await Promise.all([dcPromise, cvcPromise]) // have to wait so we don't call XX.upate() before it's ready
+      setupEditorCallback();
+   }
 }
 
 function startVisualizer () {

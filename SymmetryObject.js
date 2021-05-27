@@ -28,16 +28,16 @@ function registerCallbacks() {
    $('#bodyDouble')[0].addEventListener('click', GEUtils.cleanWindow);
 
   if (GEUtils.isTouchDevice()) {
-    $('#controls')[0].addEventListener('touchstart', (event) => event.stopPropagation())
-    $('#controls')[0].addEventListener('touchmove', (event) => event.stopPropagation())
-    $('#controls')[0].addEventListener('touchend', (event) => event.stopPropagation())
+    $('#controls')[0].addEventListener('touchstart', (event /*: Event */) => event.stopPropagation())
+    $('#controls')[0].addEventListener('touchmove', (event /*: Event */) => event.stopPropagation())
+    $('#controls')[0].addEventListener('touchend', (event /*: Event */) => event.stopPropagation())
   } else { // must be mouse device
-    $('#controls')[0].addEventListener('mousedown', (event) => event.stopPropagation())
-    $('#controls')[0].addEventListener('mousemove', (event) => event.stopPropagation())
-    $('#controls')[0].addEventListener('mouseup', (event) => event.stopPropagation())
+    $('#controls')[0].addEventListener('mousedown', (event /*: Event */) => event.stopPropagation())
+    $('#controls')[0].addEventListener('mousemove', (event /*: Event */) => event.stopPropagation())
+    $('#controls')[0].addEventListener('mouseup', (event /*: Event */) => event.stopPropagation())
   }
 
-   $('#diagram-select')[0].addEventListener('click', diagramClickHandler);
+   $('#diagram-select')[0].addEventListener('change', diagramChangeHandler);
    $('#zoom-level')[0].addEventListener('input', set_zoom_level);
    $('#line-thickness')[0].addEventListener('input', set_line_thickness);
    $('#node-radius')[0].addEventListener('input', set_node_radius);
@@ -59,16 +59,13 @@ async function load () {
   $('#heading').html(`Object of Symmetry for ${Group.name}`)
 
   // Create list of symmetry object option for faux-select
-  Group.symmetryObjects
-    .reduce(($frag, symmetryObject, index) => {
-      return $frag.append(eval(Template.HTML('diagram-choice-template')))
-    }, $(document.createDocumentFragment()))
-    .appendTo($('#diagram-choices'))
-  $('#diagram-choice').html($('#diagram-choices > li:first-of-type').html())
+  const choices = Group.symmetryObjects.map((symmetryObject, index) => eval(Template.HTML('diagram-choice-template')).trim())
+  const choiceIndex = Group.symmetryObjects.findIndex(({name}) => name === diagramName)
+  GEUtils.setupFauxSelect($('#diagram-select')[0], choices, choiceIndex)
 
   // Draw symmetry object in graphic
   Symmetry_Object_View = createInteractiveSymmetryObjectView({ container: $('#graphic') })
-  setDiagramName(Group.symmetryObjects.findIndex((symmetryObject) => symmetryObject.name === diagramName))
+  Symmetry_Object_View.setObject(Group.symmetryObjects[choiceIndex])
   $('#line-thickness').val(1 + (Symmetry_Object_View.line_width - 1) / 0.75)
 
   // Load icon strip in upper right-hand corner
@@ -113,25 +110,12 @@ function resizeBody() {
 };
 
 /* Change diagram */
-function diagramClickHandler(event /*: MouseEvent */) {
-   const $curr = $(event.target).closest('[action]');
-   if ($curr.length != 0) {
-      eval($curr.attr('action'));
-      event.stopPropagation();
+function diagramChangeHandler(changeEvent /*: Event */) {
+   const choice = $(changeEvent.target).children()[0];
+   if (choice != null) {
+      const symmetryObjectIndex = $(choice).attr('data-symmetry-object-index')
+      Symmetry_Object_View.setObject(Group.symmetryObjects[parseInt(symmetryObjectIndex)])
    }
-}
-
-function toggleDiagramChoices () {
-   const choices = $('#diagram-choices');
-   const new_visibility = choices.css('visibility') == 'visible' ? 'hidden' : 'visible';
-   choices.css('visibility', new_visibility);
-}
-
-function setDiagramName(index /*: number */) {
-   const diagram_name = Group.symmetryObjects[index].name;
-   $('#diagram-choice').html($(`#diagram-choices > li:nth-of-type(${index+1})`).html());
-   $('#diagram-choices').css('visibility', 'hidden');
-   Symmetry_Object_View.setObject(Group.symmetryObjects[index]);
 }
 
 /* Slider handlers */

@@ -61,6 +61,8 @@ const DEFAULT = {
 
 /*::
 import { CayleyDiagramView } from './CayleyDiagramView.js'
+import { CycleGraphView } from './CycleGraphView.js'
+import { MulttableView } from './MulttableView.js'
 import XMLGroup from './XMLGroup.js';
 
 export type VisualizerName = 'CDElement' | 'CGElement' | 'MTElement';
@@ -116,7 +118,6 @@ export function fromJSON (jsonString /*: string */) {
 export function fromJSONObject (jsonObjects /*: JSONType */) {
   // remove existing elements
   clear()
-  CDElement.activeElement = null
 
   // load all URLs
   const groupURLs = Array.from(
@@ -393,7 +394,7 @@ export class VisualizerElement extends NodeElement {
 /*::
     group: XMLGroup
     URL: string
-   _visualizer: any
+   _visualizer: CayleyDiagramView | CycleGraphView | MulttableView
    +viewElement: SheetView.VisualizerView
 */
   get morphisms () {
@@ -530,6 +531,10 @@ export class CGElement extends VisualizerElement {
     this.visualizer.fromJSON(jsonObject)
     return this
   }
+
+  get visualizer () {
+    return ((this._visualizer /*: any */) /*: CycleGraphView */)
+  }
 }
 
 export class MTElement extends VisualizerElement {
@@ -539,6 +544,10 @@ export class MTElement extends VisualizerElement {
     this.visualizer.group = this.group
     this.visualizer.fromJSON(jsonObject)
     return this
+  }
+
+  get visualizer () {
+    return ((this._visualizer /*: any */) /*: MulttableView */)
   }
 }
 
@@ -1124,7 +1133,7 @@ export class StoredSheets {
         localStorage.removeItem('sheets')
       } else {
         for (const [sheetName, oldSheet] of Object.entries(oldSheets)) {
-          const newSheet = convertFromOldJSON(oldSheet)
+          const newSheet = convertFromOldJSON(((oldSheet /*: any */) /*: Array<Obj> */))
           const putRequest = storedSheets.put(JSON.stringify(newSheet), sheetName)
           await new Promise((resolve, reject) => {
             putRequest.onsuccess = () => resolve(putRequest.result)

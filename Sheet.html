@@ -38,10 +38,6 @@
              background-image: var(--light-gradient);
          }
          
-         .hidden {
-             display: none;
-         }
-
          .highlighted, .choice:hover {
              background-color: rgba(255, 184, 134, 0.6);  /* rgba(255, 255, 0, 0.3); */
          }
@@ -62,6 +58,7 @@
 
          #graphic-container {
              position: relative;
+             flex-grow: 1;
              width: 100%;
              height: 100%;
          }
@@ -119,10 +116,6 @@
           */
          #domain-select, #codomain-select {
              margin: 0 4px;
-         }
-
-         #domain-select .faux-selection, #codomain-select .faux-selection {
-             line-height: calc(1.5em - 4px);
          }
          
          /* Defining pairs, morphism preview table formatting
@@ -242,45 +235,18 @@
              align-self: center;
              grid-area: label;
          }
-         #visualizer-select-group .faux-selection {
+         #visualizer-select-group .faux-select {
              grid-area: selection;
          }
-         .faux-selection {
-             position: relative;
+
+         .faux-select {
+             width: 100%;
+             margin: 0;
              float: right;
-             padding: 1 0;
              background-image: var(--light-gradient);
-             border: 1px solid var(--gray6);
-             height: calc(1.5em - 4px);
-             line-height: calc(1.5em - 4px);
          }
-         .faux-selection-value {
-             float: left;
-             padding-left: 0.5em;
-             padding-right: 1em;
-         }
-         .faux-selection-arrow {
-             margin-top: calc(calc(1.5em - 18px) / 2);
-             margin-right: 4px;
-             border-top: 16px solid #000000;
-             border-right: 6px solid rgba(0,0,0,0);
-             border-left: 6px solid rgba(0,0,0,0);
-             float: right;
-         }
-         .faux-choices {
-             position: absolute;
-             list-style: none;
-             left: -1px;
-             top: -1px;
-             width: calc(100% - 0.5em); /* allow for 0.5em padding at start */
-             padding-inline-start: 0.5em;
-             margin-block-start: 1.4em; /* to align with bottom of selection */
-             z-index: 100;
-             max-height: 20em;
-             overflow-y: auto;
+         .faux-select-options {
              background-color: var(--gray1);
-             border: 1px solid var(--gray5);
-             box-shadow: 0px 8px 16px 8px rgba(0, 0, 0, 0.2);
          }
 
          #stored-sheets {
@@ -348,16 +314,16 @@
                     <p>Add visualizer:</p>
 
                     <div id="visualizer-select-group"
-                         data-action="$('#visualizer-select-group .faux-choices').toggle()">
+                         onclick="$('#visualizer-select-group .faux-select-options').toggle(); event.stopPropagation()">
                         <span>Group:</span>
-                        <div class="faux-selection">
-                            <div class="faux-selection-arrow"></div>
-                            <span class="faux-selection-value"></span>
-                            <ol class="faux-choices hidden display-none-on-clean"></ol>
-                            <template id="visualizer-group-list-entry">
-                                <span data-value="${group.URL}">${group.name}</span>
-                            </template>
+                        <div class="faux-select">
+                            <div class="faux-select-arrow"></div>
+                            <span class="faux-select-value"></span>
+                            <ol class="faux-select-options hidden display-none-on-clean"></ol>
                         </div>
+                        <template id="visualizer-group-list-entry">
+                            <span data-groupURL="${group.URL}">${group.name}</span>
+                        </template>
                     </div>
 
                     <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; margin-bottom: 0.5em">
@@ -615,10 +581,10 @@
                     <span id="morphism-name" data-onload="$(this).html(model.name)"></span>
                     (<div id="domain-select"
                           onclick="$('#domain-choices').toggle(); $('#codomain-choices').hide(); event.stopPropagation()">
-                        <div class="faux-selection">
-                            <div class="faux-selection-arrow"></div>
-                            <span id="domain-selection" class="faux-selection-value"></span>
-                            <ol id="domain-choices" class="faux-choices hidden display-none-on-clean"></ol>
+                        <div class="faux-select">
+                            <div class="faux-select-arrow"></div>
+                            <span id="domain-selection" class="faux-select-value"></span>
+                            <ol id="domain-choices" class="faux-select-options hidden display-none-on-clean"></ol>
                         </div>
                         <template id="morphism-domain-choice-template">
                             <li class="choice" data-action="this.modelElement.setDomain(${element})">
@@ -629,10 +595,10 @@
                     =
                     <div id="codomain-select" style="margin-left: 0.5em"
                          onclick="$('#codomain-choices').toggle(); $('#domain-choices').hide(); event.stopPropagation()">
-                        <div class="faux-selection">
-                            <div class="faux-selection-arrow"></div>
-                            <span id="codomain-selection" class="faux-selection-value"></span>
-                            <ol id="codomain-choices" class="faux-choices hidden display-none-on-clean"></ol>
+                        <div class="faux-select">
+                            <div class="faux-select-arrow"></div>
+                            <span id="codomain-selection" class="faux-select-value"></span>
+                            <ol id="codomain-choices" class="faux-select-options hidden display-none-on-clean"></ol>
                         </div>
                         <template id="morphism-codomain-choice-template">
                             <li class="choice" data-action="this.modelElement.setCodomain(${element})">
