@@ -69,7 +69,7 @@ function dataToGroup (data /*: any */, contentType /*: ?string */) /*: void | XM
 
 // get base URL from window.location.href
 //   (maybe we should eliminate the origin field, since all the data in localStorage is common origin?)
-function getBaseURL () /*: string */ {
+export function getBaseURL () /*: string */ {
   let baseURL = new URL(window.location.href)
   baseURL = baseURL.origin + baseURL.pathname // trim off search string
   baseURL = baseURL.slice(0, baseURL.lastIndexOf('/') + 1) // trim off page

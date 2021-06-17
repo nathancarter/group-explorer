@@ -6,7 +6,8 @@
         some cases a reason why it is not possible right now. Subgroup
         <a href="./help/rf-groupterms/index.html#order-of-a-subgroup">order</a> and
         <a href="./help/rf-groupterms/index.html#index-of-a-subgroup">index</a> are also given.</p>
-    <p class='gapcode' data-built-in-code-type='all subgroups'></p>
+    <button class="gap-compute" style="grid-column: content / end; margin-left: 1em"
+            action="ShowGAPCode.setup('getting the list of all subgroups of a group', Group)">Compute this in GAP</button>
     <p style="width: min(100%, 80em)">The column entitled "normal" reports whether the subgroup is
         <a href="./help/rf-groupterms/index.html#normal-subgroup">normal</a>
         in ${Group.name}, and if so, tries to provide a link to
@@ -14,7 +15,8 @@
         short exact sequence (SES) which exhibits the
         <a href="./help/rf-groupterms/index.html#first-isomorphism-theorem">First Isomorphism Theorem</a>
         applied to the subgroup.</p>
-    <p class='gapcode' data-built-in-code-type='is normal'></p>
+    <button class="gap-compute" style="grid-column: content / end; margin-left: 1em"
+            action="ShowGAPCode.setup('checking whether a subgroup is normal', Group)">Compute this in GAP</button>
     <p style="width: min(100%, 80em)">The subgroups can also be shown arranged in a
         <a href="./help/rf-groupterms/index.html#lattice-of-subgroups">lattice</a>, each shown as
         highlighted portions of the whole group, connected by the identity (inclusion)
@@ -23,7 +25,8 @@
         <a href="" action="SubgroupInfo.showSubgroupLattice('CGElement')">cycle graph</a>, or
         <a href="" action="SubgroupInfo.showSubgroupLattice('MTElement')">multiplication table</a>, or
         by calculation:</p>
-    <p class='gapcode' data-built-in-code-type='subgroup lattice'></p>
+    <button class="gap-compute" style="grid-column: content / end; margin-left: 1em"
+            action="ShowGAPCode.setup('getting the lattice of subgroups of a group', Group)">Compute this in GAP</button>
     <p id="simple">None of the subgroups on the list below is
         <a href="./help/rf-groupterms/index.html#normal-subgroup">normal</a>.
         For this reason, ${Group.name} is a
@@ -32,7 +35,8 @@
         <a href="./help/rf-groupterms/index.html#normal-subgroup">normal</a>.
         For this reason, ${Group.name} is not a
         <a href="./help/rf-groupterms/index.html#simple-group">simple</a> group.</p>
-    <p class='gapcode' data-built-in-code-type='is simple'></p>
+    <button class="gap-compute" style="grid-column: content / end; margin-left: 1em"
+            action="ShowGAPCode.setup('checking if a group is simple', Group)">Compute this in GAP</button>
     <p></p>
     <div style="overflow: hidden; width: min(100%, 80em); border: 3px solid silver;">
         <table style="border: 0; border-spacing: 0; border-collapse: collapse; padding: 0; width: 100%;">

@@ -13,8 +13,7 @@
         ${Group.representation[Group.multtable[j][i]]}.</p>
 </template>
 
-<template id="abelian-gapcell-template">
-    <div class="gapcell">
-        <div class='gapcode' data-built-in-code-type='is abelian'></div>
-    </div>
+<template id="abelian-gap-compute-template">
+    <button class="gap-compute" style="grid-column: content / end; margin-left: 1em;"
+            action="ShowGAPCode.setup('checking if a group is abelian', Group)">Compute this in GAP</button>
 </template>

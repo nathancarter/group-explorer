@@ -62,9 +62,8 @@
 </template>
 
 <template id="solvable-trailer-template">
-    <div class="gapcell">
-        <div class='gapcode' data-built-in-code-type='is solvable'></div>
-    </div>
+    <button class="gap-compute" style="grid-column: content / end; margin-left: 1em"
+            action="ShowGAPCode.setup('checking if a group is solvable', Group)">Compute this in GAP</button>
 </template>
 
 <template id="group-reference-template">

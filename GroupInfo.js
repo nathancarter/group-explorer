@@ -13,7 +13,7 @@ import MathUtils from './js/MathUtils.js';
 import Menu from './js/Menu.js';
 import {MulttableView, createMinimalMulttableView} from './js/MulttableView.js';
 import * as SheetModel from './js/SheetModel.js';
-import setUpGAPCells from './js/ShowGAPCode.js';
+import * as ShowGAPCode from './js/ShowGAPCode.js'
 import {SymmetryObjectView, createStaticSymmetryObjectView} from './js/SymmetryObjectView.js';
 import Template from './js/Template.js';
 import XMLGroup from './js/XMLGroup.js';
@@ -88,9 +88,6 @@ function displayBasicFacts () {
         return $frag;
     }, $(document.createDocumentFragment()) );
     $('#basic-facts > .name-value-content').prepend($frag);
-
-    jQuery.noConflict(true);  // restore jQuery version loaded with app, overwriting version used in sagecell
-    setUpGAPCells(Group, $('#basic-facts'));
 }
 
 // Display rows of visualizer thumbnails, hiding all but the first row until toggled

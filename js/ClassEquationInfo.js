@@ -3,7 +3,6 @@
 import GEUtils from './GEUtils.js';
 import Log from './Log.js';
 import * as SheetModel from './SheetModel.js';
-import setUpGAPCells from './ShowGAPCode.js';
 import Template from './Template.js';
 
 export {summary, display};
@@ -49,8 +48,6 @@ async function display (group /*: XMLGroup */, $wrapper /*: JQuery */) {
     const type = target.getAttribute( 'data-type' );
     showAsSheet( ((type /*: any */) /*: VisualizerType */) );
   } );
-
-  setUpGAPCells(group, $wrapper);
 }
 
 function formatClassEquation (group /*: XMLGroup */) /*: DocumentFragment */ {

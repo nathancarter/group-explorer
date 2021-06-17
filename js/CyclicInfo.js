@@ -2,7 +2,6 @@
 
 import GEUtils from './GEUtils.js'
 import Log from './Log.js';
-import setUpGAPCells from './ShowGAPCode.js';
 import Template from './Template.js';
 
 export {summary, display};
@@ -29,8 +28,6 @@ async function display (Group /*: XMLGroup */, $wrapper /*: JQuery */) {
   }
 
   $wrapper.html(formatCyclicInfo(Group));
-
-  setUpGAPCells(Group, $wrapper);
 }
 
 function formatCyclicInfo (Group /*: XMLGroup */) /*: DocumentFragment */ {

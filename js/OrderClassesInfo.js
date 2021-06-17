@@ -2,7 +2,6 @@
 
 import GEUtils from './GEUtils.js'
 import Log from './Log.js';
-import setUpGAPCells from './ShowGAPCode.js';
 import Template from './Template.js';
 
 export {summary, display};
@@ -28,8 +27,6 @@ async function  display (Group /*: XMLGroup */, $wrapper /*: JQuery */) {
   }
 
   $wrapper.html(formatOrderClasses(Group));
-
-  setUpGAPCells(Group, $wrapper);
 }
 
 function formatOrderClasses (Group /*: XMLGroup */) /*: DocumentFragment */ {

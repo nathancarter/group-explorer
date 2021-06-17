@@ -2,7 +2,6 @@
 
 import GEUtils from './GEUtils.js'
 import Log from './Log.js';
-import setUpGAPCells from './ShowGAPCode.js';
 import Template from './Template.js';
 
 export {summary, display};
@@ -27,8 +26,6 @@ async function display (Group /*: XMLGroup */, $wrapper /*: JQuery */) {
   }
 
   $wrapper.html(formatAbelianInfo(Group));
-
-  setUpGAPCells(Group, $wrapper);
 }
 
 function formatAbelianInfo (Group /*: XMLGroup */) /*: DocumentFragment */ {
@@ -41,7 +38,7 @@ function formatAbelianInfo (Group /*: XMLGroup */) /*: DocumentFragment */ {
         const [i,j] = Group.nonAbelianExample;
         $frag.append(eval(Template.HTML('abelian-isNonAbelian-template')));
     }
-    $frag.append(eval(Template.HTML('abelian-gapcell-template')));
+    $frag.append(eval(Template.HTML('abelian-gap-compute-template')));
 
     return (($frag[0] /*: any */) /*: DocumentFragment */);
 }

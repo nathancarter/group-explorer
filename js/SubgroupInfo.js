@@ -6,7 +6,6 @@ import GEUtils from './GEUtils.js'
 import IsomorphicGroups from './IsomorphicGroups.js';
 import Log from './Log.js';
 import MathUtils from './MathUtils.js';
-import setUpGAPCells from './ShowGAPCode.js';
 import Subgroup from './Subgroup.js';
 import Template from './Template.js';
 
@@ -53,8 +52,6 @@ async function display (group /*: XMLGroup */, $wrapper /*: JQuery */) {
   }
 
   $wrapper.html(formatSubgroupInfo(group));
-
-  setUpGAPCells(group, $wrapper);
 }
 
 function formatSubgroupInfo (group /*: XMLGroup */) /*: DocumentFragment */ {

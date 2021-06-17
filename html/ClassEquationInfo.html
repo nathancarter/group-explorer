@@ -6,7 +6,7 @@
         the sum of of the size of the conjugacy classes equals the
         <a href="./help/rf-groupterms/index.html#order-of-a-group">order of the group</a>.
         The class equation for ${group.name} is
-    <p style="text-indent: 3em">${displayClassEquation()}        
+        <p style="text-indent: 3em">${displayClassEquation()}        
 </template>
 
 <template id="class-equation-isAbelian-template">
@@ -28,7 +28,7 @@
         <a href="" class="show-class-equation-sheet" data-type="MTElement">multiplication tables</a>,
         or <a href="" class="show-class-equation-sheet" data-type="CGElement">cycle graphs</a>.
     </p>
-    <div class="gapcell">
-        <div class='gapcode' data-built-in-code-type='class equation'></div>
+    <button class="gap-compute" style="grid-column: content / end; margin-left: 1em"
+            action="ShowGAPCode.setup('computing the numbers in a class equation', Group)">Compute this in GAP</button>
     </div>
 </template>

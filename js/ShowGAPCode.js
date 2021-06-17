@@ -1,305 +1,382 @@
-//@flow
+// @flow
+/* global $ DOMRect TouchEvent */
+
 /*
  * The functions in this script file define how Group Explorer
  * displays and lets users interact with GAP code throughout
  * the application.
  */
 
+import * as Library from './Library.js'
+import Log from './Log.js'
+
+/*::
+import XMLGroup from './XMLGroup.js'
+*/
+
 /*
  * We give access to live GAP execution online through the
  * Sage Cell Server, at the following URL.
  */
-const SageCellURL = 'https://sagecell.sagemath.org/static/embedded_sagecell.js';
+const SageCellURL = 'https://sagecell.sagemath.org/static/embedded_sagecell.js'
+
 /*
  * Define a few text constants for use below.
  */
-const showtext = 'Compute this in GAP ▼';
-const hidetext = 'Hide GAP code ▲';
-const GAPlink = '<a target="_blank" href="help/rf-um-gap">What is GAP?</a>';
+const GAPlink = '<a target="_blank" href="help/rf-um-gap">What is GAP?</a>'
 
-/*
- * Any Group Explorer page can call this function after it has done all
- * the work of setting up the page, including such things as instantiating
- * templates.
- */
+// purpose -> code map
+// note that the code contains template string expressions which will be expanded
+// when the code is wrapped in back tics '`' and eval'd in getCode
+const codeForPurpose = new Map/*:: <string, string> */([
+  ['creating this group',
+   `# In GAP's Small Groups library, of all the groups
+    # of order $\{ord}, this one is number $\{idx}:
+    $\{G} := $\{gpdef};`],
 
-import XMLGroup from './XMLGroup.js';
-import Log from './Log.js';
+  ['checking if a group is abelian',
+   `# Create the group:
+    $\{G} := $\{gpdef};;
 
-// Module variables
-let group /*: XMLGroup */;
+    # Ask if it is abelian:
+    IsAbelian( $\{G} );`],
 
-export default function setUpGAPCells ( _group /*: XMLGroup */, $cells /*: JQuery */ = $('body') ) {
-    group = _group;
-    // embedded_sagecell.js loaded in <script> tag on main GroupInfo page
-        $cells.find( '.gapcode' ).each( function () {
-            const $block = $( this );
-            $block.css( { position : 'relative' } );
-            // Create a button for revealing the GAP code in the block
-            // and place it before the block.
-            const $button = $( `<input type="button"/>` );
-            (($button.get(0) /*: any */) /*: HTMLInputElement */).value = showtext;
-            $button.css( { margin : '5px 0px 0px 10px' } );
-            const $div = $( '<div></div>' );
-            $div.append( $button );
-            $div.insertBefore( $block );
-            // Hide the code, then let the user use the button
-            // to show the code and/or hide it again.
-            $block.hide();
-            $button.on( 'click', event => {
-                if ( (($button.get(0) /*: any */) /*: HTMLInputElement */).value == showtext ) {
-                    $block.show();
-                    (($button.get(0) /*: any */) /*: HTMLInputElement */).value = hidetext;
-                } else {
-                    $block.hide();
-                    (($button.get(0) /*: any */) /*: HTMLInputElement */).value = showtext;
-                }
-            } );
-            // For each .gapcode element, do any pre-processing necessary
-            // to generate the code and properties it's supposed to have.
-            prepareGAPCodeBlock( this );
-            // While the block is hidden, have the Sage Cell script
-            // replace it with an editor and Run button that can send
-            // the code to the Sage Cell Server for execution.
-            window.sagecell.makeSagecell( {
-                editor: 'textarea',
-                inputLocation : $block.get(0),
-                evalButtonText : 'Run',
-                languages : [ 'gap' ],
-                hide : [ 'language', 'fullScreen' ],
-                callback : () => {
-                    // Style it so that it's obviously separate from
-                    // the surrounding content.
-                    $block.css( {
-                        border : '3px solid blue',
-                        borderRadius : '10px',
-                        padding : '10px',
-                        margin : '0px 10px 10px 10px'
-                    } );
-                    // Add a heading
-                    var heading = 'GAP code';
-                    if ( this.dataset.purpose )
-                        heading += ' for ' + this.dataset.purpose;
-                    const $hdr = $( `<h2>${heading}</h2>` );
-                    $hdr.css( { marginTop : 0, marginBottom : '10px' } );
-                    $block.prepend( $hdr );
-                    // Add a link to the GE help page on GAP integration
-                    const $whatIsGAP = $( `<p>${GAPlink}</p>` );
-                    $whatIsGAP.css( {
-                        position : 'absolute',
-                        right : 0,
-                        top : 0,
-                        margin : '10px',
-                        fontSize : '0.7em'
-                    } );
-                    $block.prepend( $whatIsGAP );
-                }
-            } );
-        } );
+  ['computing the numbers in a class equation',
+   `# Create the group:
+    $\{G} := $\{gpdef};;
+
+    # Get the sizes of all conjugacy classes:
+    List( ConjugacyClasses( $\{G} ), Size );`],
+
+  ['checking if a group is cyclic',
+   `# Create the group:
+    $\{G} := $\{gpdef};;
+
+    # Ask if it is cyclic:
+    IsCyclic( $\{G} );`],
+
+  ['getting the list of all subgroups of a group',
+   `# Create the group:
+    $\{G} := $\{gpdef};;
+
+    # Ask for the list of subgroups:
+    AllSubgroups( $\{G} );`],
+
+  ['checking whether a subgroup is normal',
+   `# Create the group:
+    $\{G} := $\{gpdef};;
+
+    # Pick a random subgroup as an example:
+    S := Random( AllSubgroups( $\{G} ) );
+
+    # Ask whether it is normal:
+    IsNormal( $\{G}, S );`],
+
+  ['getting the lattice of subgroups of a group',
+   `# Create the group:
+    $\{G} := $\{gpdef};;
+
+    # Ask for the lattice of subgroups:
+    LatticeSubgroups( $\{G} );
+
+    # (See the GAP manual for how to manipulate the resulting object.)`],
+
+  ['checking if a group is simple',
+   `# Create the group:
+    $\{G} := $\{gpdef};;
+
+    # Ask if it is simple:
+    IsSimple( $\{G} );`],
+
+  ['computing how many order classes a group has',
+   `# Create the group:
+    $\{G} := $\{gpdef};;
+
+    # Compute all element orders and make a set of those results:
+    Set( $\{G}, Order );`],
+
+  ['checking if a group is solvable',
+   `# Create the group:
+    $\{G} := $\{gpdef};;
+
+    # Ask if it is solvable:
+    IsSolvable( $\{G} );`]
+])
+
+const iframeSourceCode =
+`<html>
+  <head>
+    <base href="${Library.getBaseURL()}">
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden; /* prevents scroll bars on iframe content -- adjustSize changes size to fit content */
+        touch-action: none; /* prevents browser scrolling while dragging iframe */
+      }
+      #gap-window {
+        border: 3px solid blue;
+        border-radius: 10px;
+        padding: 10px;
+        background-color: #e4e4e4;
+        cursor: move;
+      }
+      #gap-window button {
+        background-image: linear-gradient(#e0e0e0, #c0c0c0) !important;
+        border: 1px solid #606060 !important;         
+      }
+      #gap-code-heading {
+        margin: 0 0 10px;
+      }
+      #gap-link {
+        position: absolute;
+        top: 0;
+        right: 0;
+        margin: 1.5em 3em;
+        font-size: 0.8em;
+      }
+      .sagecell_sessionOutput {
+         background-color: white;
+         cursor: auto;
+      }
+    </style>
+    <script src="${SageCellURL}"></script>
+    <script src="./js/ShowGAPCode.js" type="module"></script>
+  </head>
+  <body>
+  </body>
+</html>`
+
+// executed in parent context: setup iframe in wrapper, invoke iframe routine to show code
+export async function setup (purpose /*: string */, group /*: XMLGroup */) {
+  const iframeElement = (($('#gap-iframe')[0] /*: any */) /*: HTMLIFrameElement */)
+
+  // load iframe on first time through
+  if (iframeElement.contentWindow.GAPCell == null) {
+    $(iframeElement)
+      .attr('srcdoc', eval('`' + iframeSourceCode + '`'))
+      .css({
+        'max-width': window.innerWidth,
+        'max-height': window.innerHeight
+      })
+
+    await new Promise((resolve, reject) => {
+      iframeElement.addEventListener('load', () => resolve(), { once: true })
+    })
+  }
+
+  // get the GAP code to accomplish the purpose for this group and show it in iframeElement
+  const code = getCode(purpose, group)
+  iframeElement.contentWindow.GAPCell.show(purpose, code)
 }
 
-/*
- * For now, this function is a stub.
- * More later.
- */
-function prepareGAPCodeBlock ( elt ) {
-    /*
-     * Declare some private functions
-     */
+function getCode (purpose /*: string */, group /*: XMLGroup */) /*: string */ {
+  // converting an arbitrary string to a JS identifier (not injective)
+  function toIdent (str) {
+    if (!/^[a-zA-Z_]/.test(str)) str = '_' + str
+    return str.replace(/[^a-zA-Z0-9_]/g, '')
+  }
 
-    // converting an arbitrary string to a JS identifier (not injective)
-    function toIdent ( str ) {
-        if ( !/^[a-zA-Z_]/.test( str ) ) str = '_' + str;
-        return str.replace( /[^a-zA-Z0-9_]/g, '' );
-    }
-    // convert a permutation represented as \sigma(i)=array[i]
-    // into cycle notation as an array of arrays
-    function cycleNotation ( array ) {
-        var todo = array.map( ( _, index ) => index );
-        var result = [ ];
-        while ( todo.length > 0 ) {
-            var start = todo[0];
-            var cycle = [ ];
-            for ( var walk = start ; todo.indexOf( walk ) > -1 ; walk = array[walk] ) {
-                cycle.push( walk );
-                const index = todo.indexOf( walk );
-                todo.splice( index, 1 );
-            }
-            if ( cycle.length > 1 ) result.push( cycle );
+  const G = toIdent(group.shortName)
+  const [ord, idx] = group.gapid.split(',')
+  const gpdef = `SmallGroup( ${ord}, ${idx} )`
+
+  const code = ((codeForPurpose.get(purpose) /*: any */) /*: string */)
+  const newCode = eval('`' + code.split('\n').map((line) => line.trim()).join('\n') + '`')
+
+  return newCode
+}
+
+/***************************** Executed in iframe context ************************************/
+
+class GAPCell {
+  /*::
+    listeners: Array<[MouseEventTypes | TouchEventTypes, (MouseEvent | TouchEvent) => void]>
+    $iframe: JQuery
+    iFrameSize: {width: float, height: float}
+    startRect: DOMRect
+    startDrag: {x: float, y: float}
+    cellInfo: mixed
+    textareaPad: number
+  */
+  constructor () {
+    this.listeners = []
+    this.$iframe = window.parent.$('#gap-iframe')
+  }
+
+  // display GAP code in window
+  async show (purpose /*: string */, code /*: string */) {
+    // close existing sagecell (if this isn't the first time through)
+    this.closeSagecell()
+
+    // create new #gap-window (any previous one is removed by sagecell.deleteSagecell)
+    const display = $('<div id="gap-window"></div>').appendTo('body')[0]
+
+    // create new sagecell loaded with input code
+    await new Promise((resolve, reject) => {
+      this.cellInfo = window.sagecell.makeSagecell({
+        editor: 'textarea',
+        inputLocation: display,
+        evalButtonText: 'Run',
+        languages: ['gap'],
+        hide: ['language', 'fullScreen'],
+        code: code,
+        callback: () => resolve()
+      })
+    })
+
+    // Add a heading containing the purpose
+    $(`<h2 id="gap-code-heading">GAP code for ${purpose}</h2>`)
+      .prependTo(display)
+
+    // Add a link to the GE help page on GAP integration
+    $(`<p id="gap-link">${GAPlink}</p>`)
+      .prependTo(display)
+
+    // Add an Exit button next the the Run button and make them look similar
+    $('<button class="ui-button ui-corner-all ui-state-default">Exit</button>')
+      .css('font-size', $('.sagecell_evalButton').css('font-size'))
+      .appendTo($(display).find('.sagecell_input'))[0]
+      .addEventListener('click', () => {
+        this.closeSagecell()
+        this.$iframe.hide()
+      })
+
+    /** check for body size change and adjust iframe size to match
+     *
+     *  note that we don't explicitly resize the iframe:
+     *   if the size of the iframe content changes this routine changes the iframe to match
+     *   this happens when the user explicitly resizes the textarea,
+     *   and when a calculation is run and the results are presented (thus increasing
+     *   the content size)
+     */
+    const adjustSize = (timeStamp) => {
+      // calculate current frame size and padding around textarea on first time through
+      if (this.iFrameSize == null) { // first time through?
+        const currentRect = this.$iframe[0].getBoundingClientRect()
+        this.iFrameSize = { width: currentRect.width, height: currentRect.height }
+        // use offsetWidth to make sure we capture the effect of scroll bars
+        this.textareaPad = window.innerWidth - $('textarea')[0].offsetWidth
+      }
+      const targetIFrameHeight = $('body').height() // body has no padding or border
+      const $textarea = $('textarea.sagecell_commands')
+      if ($textarea.length !== 0) {
+        const targetIFrameWidth = $textarea[0].offsetWidth + this.textareaPad
+        if (targetIFrameWidth !== this.iFrameSize.width || targetIFrameHeight !== this.iFrameSize.height) {
+          this.$iframe.css({
+            width: targetIFrameWidth,
+            height: targetIFrameHeight
+          })
+          this.iFrameSize.width = targetIFrameWidth
+          this.iFrameSize.height = targetIFrameHeight
         }
-        return result;
+      }
+      window.requestAnimationFrame(adjustSize)
     }
-    // converting an arbitrary group element to a GAP permutation
-    function toGAPPerm ( G, g ) {
-        return cycleNotation( G.elements.map( e => G.mult( e, g ) ) ).map( cycle =>
-            `(${cycle.map( i => i+1 ).join( ',' )})` ).join( '' );
+    window.requestAnimationFrame(adjustSize)
+
+    this.$iframe.css('display', 'block')
+
+    this.restartListeners()
+  }
+
+  closeSagecell () {
+    if (this.cellInfo != null) {
+      window.sagecell.deleteSagecell(this.cellInfo)
+      this.cellInfo = null
     }
-    // create a GAP code string that will construct the group
-    function GAPConstructor ( G ) {
-        if ( G.order == 1 ) return 'Group( [ () ] )';
-        const gens = G.generators[0].map( gen => toGAPPerm( G, gen ) );
-        return `Group( [ ${gens.join( ', ' )} ] )`;
+  }
+
+  restartListeners () {
+    this.removeEventListeners()
+    this.addEventListeners('touchstart', 'mousedown')
+  }
+
+  addEventListeners (...eventTypes /*: Array<MouseEventTypes | TouchEventTypes> */) {
+    const listener = (event /*: MouseEvent | TouchEvent */) => this.eventListener(event)
+    eventTypes.forEach((eventType) => {
+      this.listeners.push([eventType, listener])
+      $('body')[0].addEventListener(eventType, listener)
+    })
+  }
+
+  removeEventListeners () {
+    while (this.listeners.length > 0) {
+      const [eventType, listener] = this.listeners.pop()
+      $('body')[0].removeEventListener(eventType, listener)
     }
-    // fill the DIV with text, removing indentation that was here only for
-    // making the code look pretty in this file
-    function setCode ( code /*: string */ ) {
-        const lines = code.split( '\n' );
-        while ( /^\s*$/.test( lines[0] ) ) lines.shift();
-        while ( /^\s*$/.test( lines[lines.length-1] ) ) lines.pop();
-        const indents = lines.reduce( (indents, line) => {
-            if ( /\S/.test( line ) )
-                indents.push( ((/\S/.exec( line ) /*: any */) /*: RegExp$matchResult */).index );
-            return indents;
-        }, [] );
-        const minIndent = indents.reduce( ( a, b ) => Math.min( a, b ) );
-        elt.textContent =
-            lines.map( line => line.substr( minIndent ) ).join( '\n' );
+  }
+
+  eventListener (event /*: MouseEvent | TouchEvent */) {
+    if (event instanceof TouchEvent &&
+        ((event.type === 'touchstart' && event.touches.length !== 1) ||
+         (event.type === 'touchmove' && event.touches.length !== 1) ||
+         (event.type === 'touchend' && (event.changedTouches.length !== 1 || event.touches.length !== 0)))) {
+      this.restartListeners()
     }
 
-    /*
-     * Now consider each type of code we know how to generate.
-     */
-    const G = toIdent( group.shortName );
-    // const gens = group.generators[0].map( gen => toGAPPerm( group, gen ) );
-    const [ ord, idx ] = group.gapid.split( ',' );
-    const gpdef = `SmallGroup( ${ord}, ${idx} )`;
-    // window.DUMP = function () {
-    //     var strs = [ ];
-    //  ******* out of date -- see Library.js ********
-    //     [...Library.map.keys()].sort().map( ( key ) => {
-    //         const G = Library.map.get( key );
-    //         const Gname = toIdent( G.shortName );
-    //         strs.push( `Print( "${key}\\n" );;` );
-    //         strs.push( `tmp := IdGroup( ${GAPConstructor( G )} );;` );
-    //         strs.push( `Print( "    <gapid>", tmp[1], ",", tmp[2], "</gapid>\\n" );;` );
-    //         strs.push( `tmp := SmallGroup( tmp[1], tmp[2] );;` );
-    //         strs.push( `Print( "    <gapname>", StructureDescription( tmp ), "</gapname>\\n" );;` );
-    //     } );
-    //     Log.debug( strs.join( '\n' ) );
-    // };
-    const goal = elt.dataset.builtInCodeType;
-    let code = '';
-    if ( goal == 'create group' ) {
-        setCode( `
-            # In GAP's Small Groups library, of all the groups
-            # of order ${ord}, this one is number ${idx}:
-            ${G} := ${gpdef};
-        ` );
-        elt.dataset.purpose = 'creating this group';
-    } else if ( goal == 'is abelian' ) {
-        code = `
-            # Create the group:
-            ${G} := ${gpdef};;
-
-            # Ask if it is abelian:
-            IsAbelian( ${G} );
-        `;
-        //// omitting this because the name means nothing in GE
-        // if ( !group.isAbelian ) code += `
-        //     # Ask for example elements that do not commute:
-        //     a := First( ${G}, a -> ForAny( ${G}, b -> a*b <> b*a ) );
-        //     b := First( ${G}, b -> a*b <> b*a );
-        //     `;
-        setCode( code );
-        elt.dataset.purpose = 'checking if a group is abelian';
-    } else if ( goal == 'class equation' ) {
-        setCode( `
-            # Create the group:
-            ${G} := ${gpdef};;
-
-            # Get the sizes of all conjugacy classes:
-            List( ConjugacyClasses( ${G} ), Size );
-        ` );
-        elt.dataset.purpose = 'computing the numbers in a class equation';
-    } else if ( goal == 'is cyclic' ) {
-        code = `
-            # Create the group:
-            ${G} := ${gpdef};;
-
-            # Ask if it is cyclic:
-            IsCyclic( ${G} );
-        `;
-        //// omitting this because the name means nothing in GE
-        // if ( group.isCyclic ) code += `
-        //     # Ask for an element that generates the group:
-        //     First( ${G}, g -> Order( g ) = Order( ${G} ) );
-        //     `;
-        setCode( code );
-        elt.dataset.purpose = 'checking if a group is cyclic';
-    } else if ( goal == 'all subgroups' ) {
-        setCode( `
-            # Create the group:
-            ${G} := ${gpdef};;
-
-            # Ask for the list of subgroups:
-            AllSubgroups( ${G} );
-        ` );
-        elt.dataset.purpose = 'getting the list of all subgroups of a group';
-    } else if ( goal == 'is normal' ) {
-        setCode( `
-            # Create the group:
-            ${G} := ${gpdef};;
-
-            # Pick a random subgroup as an example:
-            S := Random( AllSubgroups( ${G} ) );
-
-            # Ask whether it is normal:
-            IsNormal( ${G}, S );
-        ` );
-        elt.dataset.purpose = 'checking whether a subgroup is normal';
-    } else if ( goal == 'subgroup lattice' ) {
-        setCode( `
-            # Create the group:
-            ${G} := ${gpdef};;
-
-            # Ask for the lattice of subgroups:
-            LatticeSubgroups( ${G} );
-
-            # (See the GAP manual for how to manipulate the resulting object.)
-        ` );
-        elt.dataset.purpose = 'getting the lattice of subgroups of a group';
-    } else if ( goal == 'is simple' ) {
-        code = `
-            # Create the group:
-            ${G} := ${gpdef};;
-
-            # Ask if it is simple:
-            IsSimple( ${G} );
-        `;
-        //// omitting this because the name means nothing in GE
-        // if ( !group.isSimple ) code += `
-        //     # Ask for a normal subgroup:
-        //     First( AllSubgroups( ${G} ), S -> IsNormal( ${G}, S ) );
-        //     `;
-        setCode( code );
-        elt.dataset.purpose = 'checking if a group is simple';
-    } else if ( goal == 'order classes' ) {
-        setCode( `
-            # Create the group:
-            ${G} := ${gpdef};;
-
-            # Compute all element orders and make a set of those results:
-            Set( ${G}, Order );
-        ` );
-        elt.dataset.purpose = 'computing how many order classes a group has';
-    } else if ( goal == 'is solvable' ) {
-        setCode( `
-            # Create the group:
-            ${G} := ${gpdef};;
-
-            # Ask if it is solvable:
-            IsSolvable( ${G} );
-        ` );
-        elt.dataset.purpose = 'checking if a group is solvable';
-    } else if ( goal == 'all computed properties' ) {
-        if ( group.isCyclic ) code += `
-            # Is it decomposable as a product of smaller cyclic groups?
-            # (That is, are there relatively prime n,m with n*m=${group.order}?)
-            First( [2..Size(G)-1], n -> Gcd(n,Size(G)/n) = 1 );
-            `;
-        setCode( code );
-        elt.dataset.purpose = 'computing group properties';
-    } else {
-        Log.info( 'Would not prepare this:', elt );
+    // event stopPropagation, preventDefault?
+    switch (event.type) {
+      case 'mousedown':
+        if (this.dragStart(((event /*: any */) /*: MouseEvent */))) {
+          this.removeEventListeners()
+          this.addEventListeners('mousemove', 'mouseup', 'mouseleave')
+        }
+        break
+      case 'mousemove':
+        this.drag(((event /*: any */) /*: MouseEvent */))
+        event.preventDefault()
+        break
+      case 'mouseup':
+        this.drag(((event /*: any */) /*: MouseEvent */))
+        event.preventDefault()
+        this.restartListeners()
+        break
+      case 'mouseleave':
+        this.restartListeners()
+        break
+      case 'touchstart':
+        if (this.dragStart(((event /*: any */) /*: TouchEvent */).touches[0])) {
+          event.preventDefault()
+          this.addEventListeners('touchmove', 'touchend')
+        }
+        break
+      case 'touchmove':
+        event.preventDefault()
+        this.drag(((event /*: any */) /*: TouchEvent */).touches[0])
+        break
+      case 'touchend':
+        event.preventDefault()
+        this.drag(((event /*: any */) /*: TouchEvent */).changedTouches[0])
+        this.restartListeners()
+        break
+      default:
+        Log.info(`unexpected event type ${event.type} in GAPCell`)
+        break
     }
+  }
+
+  dragStart ({ clientX, clientY, target }) {
+    if ($(target).css('cursor') !== 'move') {
+      return false
+    }
+    this.startRect = DOMRect.fromRect(((this.$iframe[0].getBoundingClientRect() /*: any */) /*: DOMRect */))
+    this.startDrag = { x: clientX + this.startRect.left, y: clientY + this.startRect.top }
+    return true
+  }
+
+  drag ({ clientX, clientY }) {
+    const { left, top } = this.$iframe[0].getBoundingClientRect()
+    const currentPosition = { x: clientX + left, y: clientY + top }
+    const movement = { x: currentPosition.x - this.startDrag.x, y: currentPosition.y - this.startDrag.y }
+    const x = movement.x + this.startRect.x
+    const y = movement.y + this.startRect.y
+    this.$iframe.css({ left: x, top: y })
+  }
+}
+
+// copy a new GAPCell instance to the iframe window (iframe.contentWindow, to the parent)
+// the parent invokes the GAPCell.show() in the iframe to change its content
+if (window.parent !== window) {
+  // $FlowFixMe
+  window.GAPCell = new GAPCell()
 }

@@ -37,6 +37,14 @@
              overflow: auto;
              background-color: #fafafa;
          }
+         
+         button.gap-compute {
+             font-size: 10pt;
+             width: 12em;
+             height: 1.5em;
+             background-color: #efefef;
+             background-image: none;
+         }
 
          /* Collapsible sections styling
           *   elements in collapsible sections are placed according to the grid definitions in .collapsible
@@ -168,6 +176,16 @@
              width: 100%; /* Full width */
              height: 100%; /* Full height */
              background-color: rgba(0,0,0,0.4); /* Gray mist */
+         }
+
+         #gap-iframe {
+             position: fixed; /* Stay in place when underlying document is scrolled */
+             z-index: 1; /* Sit on top */
+             left: 20%;
+             top: 20%;
+             width: 50em;
+             border-style: none;
+             display: none;
          }
 
          #udr-editor {
@@ -323,9 +341,9 @@
                 <span class="toggled less"></span>
             </span>
             <span class="heading">Basic facts</span>
-            <div class="name-value-content toggled"></div>
-            <div class="gapcell toggled" style="margin-left: 1em">
-                <div class='gapcode' data-built-in-code-type='create group'></div>
+            <div class="name-value-content toggled">
+                <button class="gap-compute" style="grid-column: name / end; margin: 0.3em 0 0 2em"
+                        action="ShowGAPCode.setup('creating this group', Group)">Compute this in GAP</button>
             </div>
             <template id="basic-fact-template">
                 <div class="name" style="text-align: right">${basic_fact.name}</div>
@@ -583,11 +601,13 @@
                 <span class="toggled hidden less"></span>
             </span>
             <span class="heading">File data</span>
-            <div class="name-value-content toggled"></div>
+                <div class="name-value-content toggled"></div>
             <template id="file-data-template">
                 <div class="name">${file_datum.name}</div>
                 <div class="value">${file_datum.value}&nbsp;</div>
             </template>
-        </div>
+         </div>
+
+         <iframe id="gap-iframe"></iframe>
     </body>
 </html>

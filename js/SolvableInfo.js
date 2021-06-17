@@ -6,7 +6,6 @@ import IsomorphicGroups from './IsomorphicGroups.js';
 import GEUtils from './GEUtils.js'
 import * as Library from './Library.js';
 import Log from './Log.js';
-import setUpGAPCells from './ShowGAPCode.js';
 import Template from './Template.js';
 
 import {DEFAULT_SPHERE_COLOR} from './AbstractDiagramDisplay.js';
@@ -68,8 +67,6 @@ async function display (Group /*: XMLGroup */, $wrapper /*: JQuery */) {
   }
 
   $wrapper.html(formatSolvableInfo(Group));
-
-  setUpGAPCells(Group, $wrapper);
 }
 
 function formatSolvableInfo (group /*: XMLGroup */) /*: DocumentFragment */ {
