@@ -7,7 +7,7 @@
         <a href="./help/rf-groupterms/index.html#order-of-a-subgroup">order</a> and
         <a href="./help/rf-groupterms/index.html#index-of-a-subgroup">index</a> are also given.</p>
     <button class="gap-compute" style="grid-column: content / end; margin-left: 1em"
-            action="ShowGAPCode.setup('getting the list of all subgroups of a group', Group)">Compute this in GAP</button>
+            data-action="ShowGAPCode.setup('getting the list of all subgroups of a group', Group)">Compute this in GAP</button>
     <p style="width: min(100%, 80em)">The column entitled "normal" reports whether the subgroup is
         <a href="./help/rf-groupterms/index.html#normal-subgroup">normal</a>
         in ${Group.name}, and if so, tries to provide a link to
@@ -16,17 +16,17 @@
         <a href="./help/rf-groupterms/index.html#first-isomorphism-theorem">First Isomorphism Theorem</a>
         applied to the subgroup.</p>
     <button class="gap-compute" style="grid-column: content / end; margin-left: 1em"
-            action="ShowGAPCode.setup('checking whether a subgroup is normal', Group)">Compute this in GAP</button>
+            data-action="ShowGAPCode.setup('checking whether a subgroup is normal', Group)">Compute this in GAP</button>
     <p style="width: min(100%, 80em)">The subgroups can also be shown arranged in a
         <a href="./help/rf-groupterms/index.html#lattice-of-subgroups">lattice</a>, each shown as
         highlighted portions of the whole group, connected by the identity (inclusion)
         homomorphism. You may see that lattice by
-        <a href="" action="SubgroupInfo.showSubgroupLattice('CDElement')">Cayley diagram</a>,
-        <a href="" action="SubgroupInfo.showSubgroupLattice('CGElement')">cycle graph</a>, or
-        <a href="" action="SubgroupInfo.showSubgroupLattice('MTElement')">multiplication table</a>, or
+        <a href="" data-action="SubgroupInfo.showSubgroupLattice('CDElement')">Cayley diagram</a>,
+        <a href="" data-action="SubgroupInfo.showSubgroupLattice('CGElement')">cycle graph</a>, or
+        <a href="" data-action="SubgroupInfo.showSubgroupLattice('MTElement')">multiplication table</a>, or
         by calculation:</p>
     <button class="gap-compute" style="grid-column: content / end; margin-left: 1em"
-            action="ShowGAPCode.setup('getting the lattice of subgroups of a group', Group)">Compute this in GAP</button>
+            data-action="ShowGAPCode.setup('getting the lattice of subgroups of a group', Group)">Compute this in GAP</button>
     <p id="simple">None of the subgroups on the list below is
         <a href="./help/rf-groupterms/index.html#normal-subgroup">normal</a>.
         For this reason, ${Group.name} is a
@@ -36,7 +36,7 @@
         For this reason, ${Group.name} is not a
         <a href="./help/rf-groupterms/index.html#simple-group">simple</a> group.</p>
     <button class="gap-compute" style="grid-column: content / end; margin-left: 1em"
-            action="ShowGAPCode.setup('checking if a group is simple', Group)">Compute this in GAP</button>
+            data-action="ShowGAPCode.setup('checking if a group is simple', Group)">Compute this in GAP</button>
     <p></p>
     <div style="overflow: hidden; width: min(100%, 80em); border: 3px solid silver;">
         <table style="border: 0; border-spacing: 0; border-collapse: collapse; padding: 0; width: 100%;">
@@ -90,9 +90,9 @@
     <li>It is
         <a href="./help/rf-groupterms/index.html#isomorphism-isomorphic">isomorphic</a> to
         ${isomorphicGroup.name}, and you can see the embedding by
-        <a href="" action="SubgroupInfo.showEmbeddingSheet(${index}, 'CDElement')">Cayley diagram</a>,
-        <a href="" action="SubgroupInfo.showEmbeddingSheet(${index}, 'CGElement')">cycle graph</a>,
-        <a href="" action="SubgroupInfo.showEmbeddingSheet(${index}, 'MTElement')">multiplication table</a>,
+        <a href="" data-action="SubgroupInfo.showEmbeddingSheet(${index}, 'CDElement')">Cayley diagram</a>,
+        <a href="" data-action="SubgroupInfo.showEmbeddingSheet(${index}, 'CGElement')">cycle graph</a>,
+        <a href="" data-action="SubgroupInfo.showEmbeddingSheet(${index}, 'MTElement')">multiplication table</a>,
     </li>
 </template>
 
@@ -107,9 +107,9 @@
         exhibiting the
         <a href="./help/rf-groupterms/index.html#quotient-group">quotient group</a>,
         isomorphic to ${isomorphicGroup.name}, by
-        <a href="" action="SubgroupInfo.showQuotientSheet(${index}, 'CDElement')">Cayley diagram</a>,
-        <a href="" action="SubgroupInfo.showQuotientSheet(${index}, 'CGElement')">cycle graph</a>,
-        <a href="" action="SubgroupInfo.showQuotientSheet(${index}, 'MTElement')">multiplication table</a>,
+        <a href="" data-action="SubgroupInfo.showQuotientSheet(${index}, 'CDElement')">Cayley diagram</a>,
+        <a href="" data-action="SubgroupInfo.showQuotientSheet(${index}, 'CGElement')">cycle graph</a>,
+        <a href="" data-action="SubgroupInfo.showQuotientSheet(${index}, 'MTElement')">multiplication table</a>,
     </li>
 </template>
 

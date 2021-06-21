@@ -35,9 +35,8 @@
 
          body {
              overflow: auto;
-             background-color: #fafafa;
          }
-         
+
          button.gap-compute {
              font-size: 10pt;
              width: 12em;
@@ -68,8 +67,7 @@
          .collapsible {
              display: grid;
              grid-template-columns:
-                 [toggle] 1em [heading] 1em [toggle2] 1em [heading2 name content] auto 0.5em [summary value] 1fr [end];
-             grid-auto-rows: minmax(1.5em, auto);
+                 [toggle] 1em [heading] 1em [toggle2] 1em [heading2 name content] auto [summary value] 1fr [end];
              align-items: baseline;
          }
          .collapsible > .toggle {
@@ -89,6 +87,7 @@
          }
          .collapsible > .summary {
              grid-column: summary;
+             margin-left: 0.5em;
          }
          .collapsible > .content, .collapsible > .gapcell {
              grid-column: content / end;
@@ -102,8 +101,12 @@
              grid-column: name;
              font-weight: bold;
          }
+         .collapsible > .name-value-content > .name::after {
+             content: "\000A0";
+         }
          .collapsible > .name-value-content > .value {
              grid-column: value;
+             margin-left: 0.2em;
          }
 
          .collapsible > .collapsible {
@@ -115,9 +118,23 @@
          .collapsible > .collapsible > .heading {
              grid-column: heading2;
          }
+         .collapsible > .collapsible > .heading::after {
+             content: "\000A0";
+         }
          .collapsible > .collapsible > .content {
              padding: 0 1em 0.5em 1em;
              margin-top: -0.5em;
+         }
+
+         /* GAP cell styling */
+         #gap-iframe {
+             position: fixed; /* Stay in place when underlying document is scrolled */
+             z-index: 1; /* Sit on top */
+             left: 20%;
+             top: 20%;
+             width: 50em;
+             border-style: none;
+             display: none;
          }
 
          /* Views */
@@ -166,132 +183,27 @@
              grid-column: OS;
          }
 
-         /* UDR, Notes editor styling */
-         .modal {
-             text-align: center;
-             position: fixed; /* Stay in place */
-             z-index: 1; /* Sit on top */
-             left: 0;
-             top: 0;
-             width: 100%; /* Full width */
-             height: 100%; /* Full height */
-             background-color: rgba(0,0,0,0.4); /* Gray mist */
+         /* Naming schemes */
+         .default-name {
+             white-space: nowrap;
          }
 
-         #gap-iframe {
-             position: fixed; /* Stay in place when underlying document is scrolled */
-             z-index: 1; /* Sit on top */
-             left: 20%;
-             top: 20%;
-             width: 50em;
-             border-style: none;
-             display: none;
+         #naming-schemes > .collapsible > .content {
+             padding-top: 0.5em;
          }
 
-         #udr-editor {
-             font-size: 11pt;
-             display: grid;
-             grid-template-columns: 1fr minmax(auto, 50em) 1fr;
-             grid-template-rows: 1fr repeat(4, auto) 4fr;
-             grid-template-areas: '. . .' '. title .' '. header .' '. body .' '. buttons .' '. . .'
-         }
-
-         #udr-edit-title {
-             grid-area: title;
-             background: #4D4D4d;		/* dark gray */
-             color: #FFFFFF;               /* white font */
-             padding: 0.3em;
-         }
-
-         #udr-edit-header {
-             grid-area: header;
-             background-color: #E4E4E4;
-             padding: 0.5em;
-         }
-
-         #udr-edit-body {
-             grid-area: body;
-             background-color: #E4E4E4;
-             padding: 0 0.5em;
-         }
-
-         #udr-edit-table {
+         #naming-schemes table, #naming-schemes td {
              border-collapse: collapse;
              border: none;
-             border-bottom: 1px solid black;
-             width: 100%;
-             padding: 5px;
-         }
-
-         #udr-edit-table thead tr {
-             display: block;
-             border: 2px solid black;
-         }
-
-         #udr-edit-table thead th {
-             width: 100em;
-             padding: 5px;
-             background-color: #D2D2D2;
-             border: none;
-         }
-
-         #udr-edit-table tbody {
-             display: block;
-             overflow: auto;
-             max-height: 19.5em; /* so we don't get default 'almost' alignment of table cells with table border */
-         }
-
-         #udr-edit-table tbody td {
-             width: 100em;
-             padding: 2px;
-             background-color: #FFFFFF;
-             border: 1px solid black;
-             border-bottom: none;
-         }
-
-         #udr-edit-table tbody textarea {
-             font-size: 12pt;
-             width: 100%;
-             height: 1.3em;
-             border: none;
-         }
-
-         .edit-buttons {
-             grid-area: buttons;
-             background-color: #E4E4E4;
-         }
-         .edit-button {
-             background-image: linear-gradient(#DDDDDD, #C0C0C0);
-             border: 1px solid #7E7E7E;
-             font-size: inherit;
-             height: 2em;
-             width: 5em;
-             margin: 0.5em;
-             float: right;
+             padding: 2px 0.2em 0;
          }
 
          /* Notes editor */
-         #notes-editor {
-             font-size: 12pt;
-             display: grid;
-             grid-template-columns: 1fr minmax(auto, 50em) 1fr;
-             grid-template-rows: 1fr repeat(2, auto) 4fr;
-             grid-template-areas: '. . .' '. textarea .' '. buttons .' '. . .';
-         }
-         #notes-edit-textarea {
-             grid-area: textarea;
-             background-color: #E4E4E4;		/* nearly white (~white smoke) */
-             padding: 0.5em 0.5em 0;
-         }
          #notes-textarea {
-             background-color: #F2F2F2;
+             font-size: 12pt;
+             max-width: 80em;
+             height: 10em;
              border: 1px solid black;
-             width: 100%;
-         }
-
-         /* Naming schemes */
-         #naming-schemes > .collapsible > .content {
-             padding-top: 0.5em;
          }
         </style>
 
@@ -301,13 +213,10 @@
          import {load} from './GroupInfo.js'
          window.addEventListener('load', () => check().then(load))
         </script>
-        <script src="https://sagecell.sagemath.org/static/embedded_sagecell.js"></script>
     </head>
 
     <body>
-        <table id="ScratchTable" style="width: 100%; display: none"></table>
-
-        <div id="header">
+        <div id="header" style="position: relative; z-index: 100">
             <div id="heading"></div>
 
             <div id="top-right-menu">
@@ -322,9 +231,9 @@
                         <i title="Help" class="fa fa-question-circle fa-2x trm-black"></i></a>
                     <a href='https://github.com/nathancarter/group-explorer'>
                         <i title="Source on GitHub" class="fa fa-github fa-2x trm-black"></i></a>
-                    <a href='' action="($('.toggled.content, .toggled.name-value-content, .gapcell.toggled, .less').show(), $('.summary.toggled, .more').hide())">
+                    <a href='' data-action="($('.toggled.content, .toggled.name-value-content, .less').show(), $('.summary.toggled, .more').hide())">
                         <i title="Expand all" class="fa fa-chevron-circle-down fa-2x trm-black"></i></a>
-                    <a href='' action="($('.toggled.content, .toggled.name-value-content, .gapcell.toggled, .less').hide(), $('.summary.toggled, .more').show())">
+                    <a href='' data-action="($('.toggled.content, .toggled.name-value-content, .less').hide(), $('.summary.toggled, .more').show())">
                         <i title="Collapse all" class="fa fa-chevron-circle-up fa-2x trm-black"></i></a>
                 </div>
                 <div id="version" style="float: right; font-size: small"></div>
@@ -343,11 +252,11 @@
             <span class="heading">Basic facts</span>
             <div class="name-value-content toggled">
                 <button class="gap-compute" style="grid-column: name / end; margin: 0.3em 0 0 2em"
-                        action="ShowGAPCode.setup('creating this group', Group)">Compute this in GAP</button>
+                        data-action="ShowGAPCode.setup('creating this group', Group)">Compute this in GAP</button>
             </div>
             <template id="basic-fact-template">
                 <div class="name" style="text-align: right">${basic_fact.name}</div>
-                <div class="value">${basic_fact.value}&nbsp;</div>
+                <div class="value">${basic_fact.value}</div>
             </template>
         </div>
 
@@ -368,7 +277,7 @@
                 <span class="comment" style="margin-top: 0.5em">Click any view to open a copy for exploration.</span>
                 <span class="comment">
                     To see all of these visualizations shown together on a sheet,
-                    <span action="showAllVisualizersSheet()" class="programLink">click here</span>.
+                    <span data-action="showAllVisualizersSheet()" class="programLink">click here</span>.
                 </span>
                 <span class="comment toggle" onclick="$('#views .toggled').toggle()" style="margin-top: 0.5em">
                     <span class="programLink less">...less</span>
@@ -396,7 +305,7 @@
                     <span class="toggled more"></span>
                     <span class="toggled hidden less"></span>
                 </span>
-                <span class="heading">Abelian group&nbsp;</span>
+                <span class="heading">Abelian group</span>
                 <span class="summary toggled"></span>
                 <div class="content hidden toggled"></div>
             </div>
@@ -406,7 +315,7 @@
                     <span class="toggled more"></span>
                     <span class="toggled hidden less"></span>
                 </span>
-                <span class="heading">Class equation&nbsp;</span>
+                <span class="heading">Class equation</span>
                 <span class="summary toggled"></span>
                 <div class="content hidden toggled"></div>
             </div>
@@ -416,7 +325,7 @@
                     <span class="toggled more"></span>
                     <span class="toggled hidden less"></span>
                 </span>
-                <span class="heading">Cyclic group&nbsp;</span>
+                <span class="heading">Cyclic group</span>
                 <span class="summary toggled"></span>
                 <div class="content hidden toggled"></div>
             </div>
@@ -426,7 +335,7 @@
                     <span class="toggled more"></span>
                     <span class="toggled hidden less"></span>
                 </span>
-                <span class="heading">Subgroups&nbsp;</span>
+                <span class="heading">Subgroups</span>
                 <span class="summary toggled"></span>
                 <div class="content hidden toggled"></div>
             </div>
@@ -436,7 +345,7 @@
                     <span class="toggled more"></span>
                     <span class="toggled hidden less"></span>
                 </span>
-                <span class="heading">Order classes&nbsp;</span>
+                <span class="heading">Order classes</span>
                 <span class="summary toggled"></span>
                 <div class="content hidden toggled"></div>
             </div>
@@ -446,7 +355,7 @@
                     <span class="toggled more"></span>
                     <span class="toggled hidden less"></span>
                 </span>
-                <span class="heading">Solvable group&nbsp;</span>
+                <span class="heading">Solvable group</span>
                 <span class="summary toggled"></span>
                 <div class="content hidden toggled"></div>
             </div>
@@ -484,7 +393,18 @@
                     <span class="toggled less"></span>
                 </span>
                 <span class="heading">Default element names</span>
-                <div class="content toggled"></div>
+                <div class="content toggled" style="max-width: 80em"></div>
+                <template id="default-name-template">
+                    <span class="default-name">${Group.representation[el]}${Group.order - 1 == inx ? '' : ','}</span>
+                </template>
+                <template id="default-name-source-template">
+                    <div style="display: ${Group.representationIsUserDefined ? 'block' : 'none'}">
+                        <br>This representation is user-defined; see below.
+                    </div>
+                    <div style="display: ${Group.representationIsUserDefined ? 'none' : 'block'}">
+                        <br>This representation was loaded from the group file.
+                    </div>
+                </template>
             </div>
 
             <div id="loaded-names" class="collapsible heading2 content toggled">
@@ -493,12 +413,23 @@
                     <span class="toggled less"></span>
                 </span>
                 <span class="heading">Loaded naming schemes</span>
-                <div class="content toggled"></div>
-                <template id="loadedSchemeChoice-template">
-                    <li>${scheme}
-                        <span action="setRep(${index})" class="programLink">Click here</span>
-                        to make this the default representation
-                    </li>
+                <div id="loaded-schemes" class="content toggled"></div>
+                <template id="loaded-scheme-template">
+                    <div style="display: flex; flex-direction: row">
+                        <div style="margin-right: 0.5em">${label}.</div>
+                        <div style="margin-bottom: 0.5em; margin-top: -2px">
+                            <table><tbody></tbody></table>
+                            <br><span data-action="setRepresentationIndex(${index})" class="programLink">Click here</span>
+                            to make this the default representation
+                        </div>
+                    </div>
+                </template>
+                <template id="loaded-representation-template">
+                    <tr>
+                        <td>${Group.representation[el]}</td>
+                        <td>=</td>
+                        <td>${representation[el]}</td>
+                    </tr>
                 </template>
             </div>
 
@@ -508,59 +439,51 @@
                     <span class="toggled less"></span>
                 </span>
                 <span class="heading">User-defined naming schemes</span>
-                <div class="content toggled"></div>
+                <div id="user-naming-schemes" class="content toggled"></div>
+                <div class="content toggled">
+                    <span data-action="UDR.create()" class="programLink">Click here</span>
+                    to add a new representation for this group.
+                </div>
             </div>
-            <template id="user-names-no-user-defined-names-template">
-                <i>none</i><br>
-            </template>
-            <template id="user-names-choice-template">
-                <li>${scheme}
-                    <span action="UDR.setRep(${index})" class="programLink">Click here</span> to make this the default representation.<br>
-                    <span action="UDR.edit(${index})" class="programLink">Click here</span> to edit this representation.<br>
-                    <span action="UDR.remove(${index})" class="programLink">Click here</span> to remove this representation.
-                </li>
-            </template>
-            <template id="user-names-scheme-in-use-template">
-                <li>The default naming scheme shown above<br>
-                    If you wish to edit or remove this representation, first make a different representation the default.
-                </li>
-            </template>
-            <template id="user-names-trailer-template">
-                <br><span action="UDR.create()" class="programLink">Click here</span> to add a new representation for this group.
-            </template>
-
-            <template id="udr-editor-template">
-                <div id="udr-editor" class="modal">
-                    <div id="udr-edit-title">Edit naming scheme for ${Group.name}</div>
-                    <div id="udr-edit-header">
-                        Below are all the naming schemes for ${Group.name}.  Edit the Custom
-                        representation column by clicking on the entries you wish to change and typing any plain text.
-                    </div>
-                    <div id="udr-edit-body">
-                        <table id="udr-edit-table">
-                            <thead>
-                                <tr>
-                                    <th>Default representation</th>
-                                    <th>Custom representation</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="edit-buttons">
-                        <button class="edit-button" action="UDR.closeEdit()">Cancel</button>
-                        <button class="edit-button" action="UDR.saveEdit()">OK</button>
+            <template id="user-naming-scheme-template">
+                <div style="display: flex; flex-direction: row">
+                    <div style="margin-right: 0.5em">${index + 1}.</div>
+                    <div style="margin-bottom: 0.5em; margin-top: -2px">
+                        <table><tbody></tbody></table>
+                        <div class="user-name-options"
+                             style="display: ${(-(index + 1) != Group.representationIndex) ? 'block' : 'none'}">
+                            <br><span data-action="UDR.setRepresentationIndex(${index})" class="programLink">Click here</span>
+                            to make this the default representation.
+                            <br><span data-action="UDR.edit(${index})" class="programLink">Click here</span>
+                            to edit this representation.
+                            <br><span data-action="UDR.remove(${index})" class="programLink">Click here</span>
+                            to remove this representation.
+                        </div>
+                        <div class="user-name-editing-options hidden">
+                            <br><span data-action="UDR.showEdit(${index})" class="programLink">Display changes</span>
+                            as they would appear, without saving them.
+                            <br><span data-action="UDR.closeEdit(${index})" class="programLink">Discard changes</span>
+                            and close editor.
+                            <br><span data-action="UDR.saveEdit(${index})" class="programLink">Save changes</span>
+                            and close editor.
+                        </div>
+                        <div style="display: ${(-(index + 1) == Group.representationIndex) ? 'block' : 'none'}">
+                            The default naming scheme is shown above<br>
+                            If you wish to edit or remove this representation,
+                            first make a different representation the default.
+                        </div>
                     </div>
                 </div>
             </template>
-            <template id="udr-edit-item-template">
-                <tr>
-                    <td>${Group.representation[inx]}</td>
-                    <td style="padding: 0px;">
-                        <textarea placeholder="change me" maxlength="50" rows="1">${rep}</textarea>
-                    </td>
-                </tr>
+            <template id="user-naming-editor-template">
+                <td style="padding-top: 0">
+                    <textarea style="resize: horizontal; font: 16px 'Math', 'Text', 'Text-Bold', 'Text-Italic'"
+                              placeholder="Enter representation" rows="1" cols="20">${representation}</textarea>
+                </td>
+            </template>
+
+            <template id="user-names-no-user-defined-names-template">
+                <i>none</i><br>
             </template>
         </div>
 
@@ -570,28 +493,28 @@
                 <span class="toggled hidden less"></span>
             </span>
             <span class="heading">Notes</span>
-            <div class="content toggled"></div>
-            <template id="notes-no-notes-template">
-                <i>none</i><br>
-            </template>
-            <template id="notes-trailer-template">
-                <br><span action="Notes.edit()" class="programLink">Click</span> to edit notes</span>
-            </template>
-            <template id="notes-editor-template">
-                <div id="notes-editor" class="modal">
-                    <div id="notes-edit-textarea">
-                        <textarea id="notes-textarea" maxlength="1000" rows="10"
-                                  placeholder="Enter notes here..." >${Group.userNotes}</textarea>
-                    </div>
-                    <div class="edit-buttons">
-                        <span style="display: inline-block; text-align: left; margin-top: 0.8em">
-                            Notes are formatted as HTML:
-                            "&lt;i&gt;H&lt;/i&gt;&lt;sub&gt;2&lt;/sub&gt;" will display as "<i>H</i><sub>2</sub>".
-                        </span>
-                        <button class="edit-button" action="Notes.close()">Cancel</button>
-                        <button class="edit-button" action="Notes.save()">Save</button>
-                    </div>
+            <div class="content toggled">
+                <div id="notes-display" style="margin-bottom: 1em"></div>
+
+                <div id="notes-trailer">
+                    <span data-action="Notes.edit()" class="programLink">Click</span> to edit notes
                 </div>
+
+                <div id="notes-editor" class="hidden">
+                    <textarea id="notes-textarea" rows="5" cols="80" placeholder="Enter notes here..."></textarea>
+                    <br>Notes are formatted as HTML:
+                    "&lt;i&gt;H&lt;/i&gt;&lt;sub&gt;2&lt;/sub&gt;" will display as <i>H</i><sub>2</sub>.
+                    Remember to use "&lt;br&gt;" for new line.
+                    <br><span data-action="Notes.showEdit()" class="programLink">Display changes</span>
+                    as they would appear, without saving them
+                    <br><span data-action="Notes.closeEdit()" class="programLink">Discard changes</span>
+                    and close editor
+                    <br><span data-action="Notes.saveEdit()" class="programLink">Save changes</span>
+                    and close editor
+                </div>
+            </div>
+            <template id="notes-no-notes-template">
+                <div><i>none</i></div>
             </template>
         </div>
 
@@ -604,10 +527,10 @@
                 <div class="name-value-content toggled"></div>
             <template id="file-data-template">
                 <div class="name">${file_datum.name}</div>
-                <div class="value">${file_datum.value}&nbsp;</div>
+                <div class="value">${file_datum.value}</div>
             </template>
-         </div>
+        </div>
 
-         <iframe id="gap-iframe"></iframe>
+        <iframe id="gap-iframe"></iframe>
     </body>
 </html>

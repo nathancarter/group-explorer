@@ -1,22 +1,23 @@
 // @flow
 
-import {DEFAULT_SPHERE_COLOR} from './js/AbstractDiagramDisplay.js';
-import BasicGroup from './js/BasicGroup.js';
-import BitSet from './js/BitSet.js';
-import {CayleyDiagramView, createUnlabelledCayleyDiagramView} from './js/CayleyDiagramView.js';
-import {CycleGraphView, createUnlabelledCycleGraphView} from './js/CycleGraphView.js';
-import GEUtils from './js/GEUtils.js';
-import IsomorphicGroups from './js/IsomorphicGroups.js';
+/* global $ */
+
+import { createUnlabelledCayleyDiagramView } from './js/CayleyDiagramView.js';
+import { createUnlabelledCycleGraphView } from './js/CycleGraphView.js';
 import * as Library from './js/Library.js';
-import Log from './js/Log.js';
-import MathUtils from './js/MathUtils.js';
-import Menu from './js/Menu.js';
-import {MulttableView, createMinimalMulttableView} from './js/MulttableView.js';
+import { createMinimalMulttableView } from './js/MulttableView.js';
 import * as SheetModel from './js/SheetModel.js';
 import * as ShowGAPCode from './js/ShowGAPCode.js'
-import {SymmetryObjectView, createStaticSymmetryObjectView} from './js/SymmetryObjectView.js';
+import { createStaticSymmetryObjectView } from './js/SymmetryObjectView.js';
 import Template from './js/Template.js';
-import XMLGroup from './js/XMLGroup.js';
+
+/*::
+  import {CayleyDiagramView} from './js/CayleyDiagramView.js';
+  import {CycleGraphView} from './js/CycleGraphView.js';
+  import {MulttableView} from './js/MulttableView.js';
+  import {SymmetryObjectView} from './js/SymmetryObjectView.js';
+  import XMLGroup from './js/XMLGroup.js';
+*/
 
 import * as AbelianInfo from './js/AbelianInfo.js';
 import * as ClassEquationInfo from './js/ClassEquationInfo.js';
@@ -234,58 +235,46 @@ function displayNamingSchemes () {
 
     // Default element names
     if (Group.representation.length != 0) {
-        const $frag = $(document.createDocumentFragment());
-        $frag.append(Group.elements.map((el) => Group.representation[el]).join(', '))
-        if (Group.representationIsUserDefined) {
-            $frag.append('<br>This representation is user-defined; see below.');
-        } else {
-            $frag.append('<br>This representation was loaded from the group file.');
-        }
+        const representations = Group.elements.map((el, inx) => eval(Template.HTML('default-name-template')))
+        const representationSource = eval(Template.HTML('default-name-source-template'))
+        const $frag = $(document.createDocumentFragment()).append(representations).append(representationSource)
         $('#default-names > .content').html( (($frag[0] /*: any */) /*: DocumentFragment */) );
     }
 
     const rowList = (representation) => {
-      return Group.elements.map((el) => `${Group.representation[el]} = ${representation[el]} <br>`).join('')
+      return Group.elements.map((el) => eval(Template.HTML('loaded-representation-template'))).join('')
     }
 
-    // Loaded element names
-    $('#loaded-names > .content').empty();
+  // Loaded element names
+    $('#loaded-names > .content').empty()
     if (Group.representations.length > 1 || Group.representationIsUserDefined) {
-        const $frag = Group
+       const [_, $frag] = Group
               .representations
-              .reduce( ($frag, representation, index) => {
-                  if (Group.representations[index] != Group.representation) {
-                    const scheme = rowList(representation)
-                    $frag.append(eval(Template.HTML('loadedSchemeChoice-template')));
-                  }
-                  return $frag;
-              }, $('<ol>') );
-        $('#loaded-names > .content').append($frag);
+              .reduce(([label, $frag], representation, index) => {
+                if (index != Group.representationIndex) {
+                  const $scheme = $(eval(Template.HTML('loaded-scheme-template')))
+                  $scheme.find('tbody').append(rowList(representation))
+                  return [label + 1, $frag.append($scheme)]
+                } else {
+                  return [label, $frag]
+                }
+              }, [1, $(document.createDocumentFragment())])
+       $('#loaded-schemes').html((($frag[0] /*: any */) /*: DocumentFragment */))
     }
 
     // User-defined naming schemes
-    {
-        const $frag = $(document.createDocumentFragment());
-
-        if (Group.userRepresentations.length == 0) {
-            $frag.append(eval(Template.HTML('user-names-no-user-defined-names-template')));
-        } else {
-            $frag.append(
-                Group
-                    .userRepresentations
-                    .reduce( ($frag, representation, index) => {
-                        if (Group.userRepresentations[index] == Group.representation) {
-                            $frag.append(eval(Template.HTML('user-names-scheme-in-use-template')));
-                        } else {
-                          const scheme = rowList(representation)
-                          $frag.append(eval(Template.HTML('user-names-choice-template')));
-                        }
-                        return $frag;
-                    }, $('<ol>') ) );
-        }
-        $frag.append(eval(Template.HTML('user-names-trailer-template')));
-        $('#user-names > .content').empty().append($frag);
-    }
+  if (Group.userRepresentations.length == 0) {
+    $('#user-naming-schemes').html(eval(Template.HTML('user-names-no-user-defined-names-template')))
+  } else {
+    const $frag = Group
+        .userRepresentations
+          .reduce( ($frag, representation, index) => {
+            const $scheme = $(eval(Template.HTML('user-naming-scheme-template')))
+            $scheme.find('tbody').append(rowList(representation))
+            return $frag.append($scheme)
+        }, $(document.createDocumentFragment()))
+    $('#user-naming-schemes').html((($frag[0] /*: any */) /*: DocumentFragment */))
+  }
 
     // Hide naming schemes the first time the page is displayed,
     //   but not when it is re-displayed after, e.g., changing the default naming scheme
@@ -295,8 +284,8 @@ function displayNamingSchemes () {
 }
 
 function displayNotes () {
-    const first_time_through = ($('#notes > .content').text().length == 0);
-    Notes.show();
+    const first_time_through = ($('#notes-display').text().length == 0);
+    Notes.display(Group.userNotes);
     // Hide notes the first time the page is displayed,
     //   but not after re-displaying the page after, e.g., editing the notes
     if (first_time_through) {
@@ -304,19 +293,19 @@ function displayNotes () {
     }
 }
 
-// find the nearest ancestor with an 'action' attribute and execute (eval) the action (if it exists)
+// find the nearest ancestor with an 'data-action' attribute and execute (eval) the action (if it exists)
 //   note that this requires that any function name referenced in the action be available to this routine
 //   many have to be exported/imported from the XXXInfo.js modules where they are defined
 function actionClickHandler(event /*: MouseEvent */) {
-    const $action = $(event.target).closest('[action]');
+    const $action = $(event.target).closest('[data-action]');
     if ($action.length != 0) {
         event.preventDefault();
         event.stopPropagation();
-        eval($action.attr('action'));
+        eval($action.attr('data-action'));
     }
 }
 
-function setRep(index /*: number */) {
+function setRepresentationIndex (index /*: number */) {
     Group.representation = Group.representations[index];
     Library.saveGroup(Group);
     displayDynamic();
@@ -324,83 +313,92 @@ function setRep(index /*: number */) {
 
 // User-defined representation editor
 class UDR {
-    /*::
-      static current_index : ?number;
-    */
-    static setRep(index /*: number */) {
-        Group.representation = Group.userRepresentations[index];
-        Library.saveGroup(Group);
-        displayDynamic();
-    }
+  /*::
+    static current_index : ?number;
+  */
+  static setRepresentationIndex (index /*: number */) {
+    Group.representation = Group.userRepresentations[index];
+    Library.saveGroup(Group);
+    displayDynamic();
+  }
 
-    static create() {
-        UDR.current_index = Group.userRepresentations.length;
-        UDR._showEditor(Array(Group.order).fill(''));
-    }
+  static create () {
+    Group.userRepresentations.push(Array(Group.order).fill(''))
+    Library.saveGroup(Group)
+    displayDynamic()
+  }
 
-    static edit(index /*: number */) {
-        UDR.current_index = index;
-        UDR._showEditor(Group.userRepresentations[index]);
+  static edit (index /*: number */) {
+    const userRepresentation = Group.userRepresentations[index]
+    const $scheme = $('#user-naming-schemes').children().eq(index)
+    const rows = $scheme.find('tr').toArray()
+    for (const [element, representation] of userRepresentation.entries()) {
+      $(rows[element]).append(eval(Template.HTML('user-naming-editor-template')))
     }
+    $scheme.find('.user-name-options').hide()
+    $scheme.find('.user-name-editing-options').show()
+  }
 
-    static _showEditor(representation /*: Array<html> */) {
-        const editor = $(eval(Template.HTML('udr-editor-template')));
-        const tableBody = editor.find('tbody');
-        representation.forEach( (rep, inx) => tableBody.append(eval(Template.HTML('udr-edit-item-template'))) );
-        $('body').append(editor).find('#udr-editor').show();
+  static closeEdit (index) {
+    const userRepresentation = Group.userRepresentations[index]
+    const $scheme = $('#user-naming-schemes').children().eq(index)
+    const rows = $scheme.find('tr').toArray()
+    for (const [element, representation] of userRepresentation.entries()) {
+      $(rows[element].children[2]).html(representation)
     }
+    $scheme.find('td:has("textarea")').remove()
+    $scheme.find('.user-name-options').show()
+    $scheme.find('.user-name-editing-options').hide()
+  }
 
-    static closeEdit() {
-        UDR.current_index = undefined;
-        $('#udr-editor').remove();
-    }
+  static saveEdit (index) {
+    Group.userRepresentations[index] =
+      $('#user-naming-schemes').eq(index).find('textarea').toArray().map((textarea) => textarea.value)
+    Library.saveGroup(Group);
+    UDR.closeEdit(index);
+  }
 
-    static saveEdit() {
-        Group.userRepresentations[((UDR.current_index /*: any */) /*: number */)] =
-            $('#udr-edit-table tbody textarea').map((_, el) => ((el /*: any */) /*: HTMLTextAreaElement */).value).toArray();
-        Library.saveGroup(Group);
-        UDR.closeEdit();
-        displayDynamic();
+  static showEdit (index) {
+    const rows = $('#user-naming-schemes').children().eq(index).find('tr').toArray()
+    for (const row of rows) {
+      $(row.children[2]).html(row.children[3].children[0].value)
     }
+  }
 
-    static remove(index /*: number */) {
-        Group.deleteUserRepresentation(index);
-        Library.saveGroup(Group);
-        displayDynamic();
-    }
+  static remove (index /*: number */) {
+    Group.deleteUserRepresentation(index);
+    Library.saveGroup(Group);
+    displayDynamic();
+  }
 }
 
 class Notes {
-    static show() {
-        const $frag = $(document.createDocumentFragment());
-        if (Group.userNotes.length == 0) {
-            $frag.append(eval(Template.HTML('notes-no-notes-template')));
-        } else {
-            $frag.append($('<div>').html(Group.userNotes));
-        }
-        $frag.append(eval(Template.HTML('notes-trailer-template')));
-        $('#notes > .content').empty().append($frag);
-    }
+  static display (notes) {
+    const notesHtml = (notes.length == 0) ? eval(Template.HTML('notes-no-notes-template')) : $('<div>').html(notes)
+    $('#notes-display').html(((notesHtml /*: any */) /*: html */))
+  }
 
-    static edit() {
-        const editor = $(eval(Template.HTML('notes-editor-template')));
-        $('body').append(editor).find('#notes-editor').show();
-    }
+  static edit () {
+    $('#notes-trailer').hide();
+    (($('#notes-textarea')[0] /*: any */) /*: HTMLTextAreaElement */).value = Group.userNotes
+    $('#notes-editor').show()
+  }
 
-    static clear() {
-        (($('#notes-textarea')[0] /*: any */) /*: HTMLTextAreaElement */).value = '';
-    }
+  static showEdit () {
+    Notes.display((($('#notes-textarea')[0] /*: any */) /*: HTMLTextAreaElement */).value)
+  }
 
-    static close() {
-        $('#notes-editor').remove();
-        Notes.show();
-    }
+  static closeEdit () {
+    $('#notes-editor').hide()
+    $('#notes-trailer').show()
+    Notes.display(Group.userNotes);
+  }
 
-    static save() {
-        Group.userNotes = (($('#notes-textarea')[0] /*: any */) /*: HTMLTextAreaElement */).value;
-        Library.saveGroup(Group);
-        Notes.close();
-    }
+  static saveEdit () {
+    Group.userNotes = (($('#notes-textarea')[0] /*: any */) /*: HTMLTextAreaElement */).value;
+    Library.saveGroup(Group);
+    Notes.closeEdit();
+  }
 }
 
 function showAllVisualizersSheet () {

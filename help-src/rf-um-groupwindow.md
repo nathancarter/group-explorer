@@ -81,12 +81,39 @@ the group.
 
 ![Group element naming scheme interface](illustration-namescheme.png)
 
-The left column lists the default element names, and you can click
-entries in the right column and type any (plain) text you like. As you can
-see in the image above, the user is typing the word "changing..." in the
-top right cell of the table. When you are done, if you choose OK, your
+The left column lists the default element names, the center column shows
+the current naming as it will be rendered elsewhere, and the right
+column contains a text area in which you can enter your own representation.
+The text area will display your entry as plain text, but elsewhere
+it will be displayed as HTML, so if you would like the permutation (0 1 2)
+to be shown as <i>r</i><sup>-1</sup> in a Cayley diagram,
+enter "&lt;i&gt;r&lt;/i&gt;&lt;sup&gt;-1&lt;/sup&gt;" into the text area, as
+shown in the illustration above. You can preview the HTML by clicking 
+"<span style='color: blue'>Display changes</span> as they would appear, without
+saving them.", and they will appear formatted in HTML in the center column. 
+When you are done, if you choose 
+"<span style='color: blue'>Save changes</span> and close editor.", your
 changes will be committed and you will have defined a new representation (or
 changed an old representation) of the elements of the group.
+
+A few notes about entering HTML in the text area:
+
+  * You may use any Unicode character you like, as well as HTML entities like
+  &amp;Zopf; or &amp;#8484;.
+
+  * HTML can be more verbose than plain text, so on platforms that support
+  it you can extend the text area by dragging the right-hand edge (as shown
+  above in the representation for (0 1)).
+
+  * Names can be blank, and they don't have to be unique. (In practice, this just
+  means you can save partially completed work that has blanks or duplications that
+  you intend to correct later.)
+
+  * While *Group Explorer* can generally makes sense of the HTML you enter, some
+  results may be unexpected. You can style the HTML using a construct like
+  &lt;i style="color: red"&gt;r&lt;/i&gt;, but the style may not work in all the
+  visualizers. And multi-line names (those containg &lt;br&gt; or &lt;hr&gt;
+  elements, for example), don't always display as desired. Try it out to make sure!
 
 Links in the group info window to edit representations are present only for
 representations that the user has created. Naming schemes built into the
@@ -97,8 +124,8 @@ group in *Group Explorer* are uneditable by the end user.
 Users can add their own personal notes to a group to supplement the default
 information in any way they see fit. Such information appears in this
 section, with controls for editing it. Notes will be displayed as HTML,
-as done in several [other dialog inputs](../rf-um-sheetwindow#dialog-inputs)
-in *Group Explorer*, and stored in the user's browser.
+as with user-defined [naming schemes](#naming-schemes), and stored in the
+user's browser.
 
 ## File data
 

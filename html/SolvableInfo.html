@@ -14,9 +14,9 @@
 
     <p>You can see a diagram of all the groups in the solvable decomposition,
         including quotient maps, by
-        <a href="" action="SolvableInfo.showSolvableDecompositionSheet('CDElement')">Cayley diagram</a>,
-        <a href="" action="SolvableInfo.showSolvableDecompositionSheet('CGElement')">cycle graph</a>, or
-        <a href="" action="SolvableInfo.showSolvableDecompositionSheet('MTElement')">multiplication table</a>.
+        <a href="" data-action="SolvableInfo.showSolvableDecompositionSheet('CDElement')">Cayley diagram</a>,
+        <a href="" data-action="SolvableInfo.showSolvableDecompositionSheet('CGElement')">cycle graph</a>, or
+        <a href="" data-action="SolvableInfo.showSolvableDecompositionSheet('MTElement')">multiplication table</a>.
     </p>
 </template>
 
@@ -63,9 +63,10 @@
 
 <template id="solvable-trailer-template">
     <button class="gap-compute" style="grid-column: content / end; margin-left: 1em"
-            action="ShowGAPCode.setup('checking if a group is solvable', Group)">Compute this in GAP</button>
+            data-action="ShowGAPCode.setup('checking if a group is solvable', Group)">Compute this in GAP</button>
 </template>
 
 <template id="group-reference-template">
-    <a href="" style="text-decoration: none" action="Library.openWithGroupURL('GroupInfo.html', '${G.URL}')">${G.name}</a>
+    <a href="" style="text-decoration: none"
+       data-action="Library.openWithGroupURL('GroupInfo.html', '${G.URL}')">${G.name}</a>
 </template>
