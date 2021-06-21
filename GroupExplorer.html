@@ -3,6 +3,7 @@
       <title>Group Explorer Library</title>
 
       <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+      <meta name="GE3-GITVersion" content="3.3.0">
 
       <link rel="icon" type="image/png" href="./images/favicon.png"></link>
       <link rel="stylesheet" href="./style/fonts.css" type="text/css"></link>
@@ -114,9 +115,10 @@
       </style>
 
       <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+      <script src="./refreshVersion.js"></script>
       <script type="module">
        import {check} from './js/Migration.js'
-       import {load} from "./GroupExplorer.js"
+       import {load} from './GroupExplorer.js'
        window.addEventListener('load', () => check().then(load))
       </script>
    </head>
@@ -143,7 +145,7 @@
                      </div>
                      <div id="version" style="float: right; font-size: small; color: #2196f3;"></div>
                      <script type="module">
-                      import {Version} from './Version.js';
+                      import * as Version from './Version.js';
                       document.getElementById("version").textContent = Version.label
                      </script>
                   </div>

@@ -2,22 +2,7 @@
 
 /* global localStorage */
 
-// final: keep list of pages that need to be loaded, make reference from Library to Migration to load module
-// GE-version -> Version
-// migration-todo -> space-separated page files (like GroupInfo.html)
-
-// $FlowFixMe -- flow doesn't recognize the Version module because of the query string
-import { Version } from '../Version.js?version=3.2.0' // use query string to make sure we get the latest Version
-
-const pagesToReload = [
-  'CayleyDiagram.html',
-  'CycleGraph.html',
-  'GroupExplorer.html',
-  'GroupInfo.html',
-  'Multtable.html',
-  'Sheet.html',
-  'SymmetryObject.html'
-]
+import * as Version from '../Version.js'
 
 const filesToReload = [
   'html/AbelianInfo.html',
@@ -76,6 +61,7 @@ const filesToReload = [
   'js/XMLGroup.js',
   'js/ZmnInfo.js',
   'Multtable.js',
+  'refreshVersion.js',
   'Sheet.js',
   'style/CayleyDiagramController.css',
   'style/fonts.css',
@@ -91,48 +77,85 @@ const filesToReload = [
   'visualizerFramework/visualizer.js'
 ]
 
-checkForReload(parseLocation()[0])
+/*
+ * Routine uses GE_version value in local storage, a label like 'GE 3.2.0'
+ * This is the version label as of the last time the files were refreshed
+ */
 
-function parseLocation () /*: [string, string] */ {
+async function refreshFiles () {
+  // Replace files cached by the browser with fresh copies, and update version in local storage
+  updateLocalStorage()
+
   const url = new URL(window.location.href)
   const urlString = url.origin + url.pathname // trim off query string
   const baseURL = urlString.slice(0, urlString.lastIndexOf('/') + 1) // baseURL is part up to last '/'
-  const pageName = urlString.slice(urlString.lastIndexOf('/') + 1) // page name is part after last '/'
-  return [pageName, baseURL]
+
+  await Promise.all([...filesToReload.map(async (url) => {
+    return await window
+      .fetch(baseURL + url, { cache: 'reload' })
+      .then(async (response) => await response.text())
+  })])
 }
 
-function checkForReload (pageName /*: string */) {
-  const todoList = localStorage.getItem('migration-todo')
-  if (todoList != null) {
-    const todoPages = todoList.split(' ')
-    if (todoPages.includes(pageName)) {
-      todoPages.splice(todoPages.indexOf(pageName), 1)
-      if (todoPages.length === 0) {
-        localStorage.removeItem('migration-todo')
-      } else {
-        localStorage.setItem('migration-todo', todoPages.join(' '))
-      }
+function reloadWebPage () {
+  window.location.reload(true)
+  return Promise.reject(new Error('restarting with updated GE3 files'))
+}
 
-      window.location.reload(true)
-      return Promise.reject(new Error('restarting with updated GE3 files')) // now start over
+function semanticVersion (label /*: ?string */) /*: ?{majorMinorHash: integer, patch: integer} */ {
+  let result = null
+  if (label != null) {
+    const labelMatch = label.match(/([0-9]+).([0-9]+).([0-9]+)/)
+    if (labelMatch != null) {
+      const [major, minor, patch] = labelMatch.splice(1, 3)
+      result = { majorMinorHash: 100000 * parseInt(major) + parseInt(minor), patch: parseInt(patch) }
     }
   }
+  return result
+}
+
+function updateLocalStorage () {
+  localStorage.setItem('GE-version', Version.label)
 }
 
 export async function check () {
-  const [pageName, baseURL] = parseLocation()
+  let result = Promise.resolve()
 
-  const versionString = localStorage.getItem('GE-version')
-  if (versionString !== Version.label) { // haven't installed this version
-    localStorage.setItem('GE-version', Version.label)
-    localStorage.setItem('migration-todo', pagesToReload.join(' '))
+  const thisLabel = Version.label
+  const storedLabel = localStorage.getItem('GE-version')
+  const storedVersion = semanticVersion(storedLabel)
+  const thisVersion = semanticVersion(thisLabel)
 
-    await Promise.all([...filesToReload.map(async (url) => { // Replace files cached by the browser with fresh copies
-      return await window
-        .fetch(baseURL + url, { cache: 'reload' })
-        .then(async (response) => await response.text())
-    })])
+  if (thisVersion == null) {
+    // web page has no version metadata so it's old => load new web page and let it work out whether to refresh files
+    result = reloadWebPage()
+  } else {
+    if (storedVersion == null) {
+      // local storage has no GE-version => this is a migration from a pre-3.2 version, or a new install
+      await refreshFiles()
+      result = reloadWebPage()
+    } else {
+      if (thisLabel !== storedLabel) { // files and web page are not in synch
+        if (thisVersion.majorMinorHash > storedVersion.majorMinorHash) {
+          // web page newer than, not compatible with files => refresh files
+          await refreshFiles()
+          result = reloadWebPage()
+        } else if (thisVersion.majorMinorHash < storedVersion.majorMinorHash) {
+          // web page older than files => load new web page
+          result = reloadWebPage()
+        } else if (thisVersion.patch < storedVersion.patch) {
+          // old web page, but compatible with files => just load new web page
+          result = reloadWebPage()
+        } else if (thisVersion.patch > storedVersion.patch) {
+          // new web page compatible with files
+          updateLocalStorage()
+        }
+      }
+    }
   }
+  return result
+}
 
-  return checkForReload(pageName)
+if (Version.label === '') {
+  reloadWebPage()
 }

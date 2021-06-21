@@ -24,7 +24,7 @@ import GEUtils from '../js/GEUtils.js'
 import IsomorphicGroups from '../js/IsomorphicGroups.js';
 import Log from '../js/Log.js';
 import XMLGroup from '../js/XMLGroup.js';
-import {Version} from '../Version.js';
+import * as Version from '../Version.js';
 
 const VISUALIZER_LAYOUT_URL = './visualizerFramework/visualizer.html';
 

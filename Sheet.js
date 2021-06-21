@@ -2,9 +2,6 @@
 
 /* global $ */
 
-// import Log from './js/Log.js'
-// import * as Version from './Version.js'
-
 import * as VC from './visualizerFramework/visualizer.js'
 
 import * as SheetModel from './js/SheetModel.js'

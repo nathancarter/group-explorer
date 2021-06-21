@@ -6,16 +6,22 @@
 #    build/%.js : %.js
 #               uglifyjs $< --compress --mangle -o $@
 
-all : Version.js docs
+GIT_VERSION := "$(shell git describe --abbrev=4 --dirty --always --tags)"
+SEMANTIC_VERSION := "$(shell git describe --abbrev=0 --tags)"
+
+PAGES = Multtable.html GroupExplorer.html GroupInfo.html Sheet.html CayleyDiagram.html SymmetryObject.html CycleGraph.html
+
+all : setGITVersion package # docs
+
+setGITVersion : $(PAGES)
+	sed -i 's/<meta name="GE3-GITVersion" content=".*">/<meta name="GE3-GITVersion" content=$(GIT_VERSION)>/g' $^
+
+package :
+	sed -i 's/"version": ".*",/"version": $(SEMANTIC_VERSION),/g' package.json
 
 clean :
-	rm -f *~ js/*~ visualizerFramework/*~ docs/*~
-	rm -f ${PRODUCTS} ${DOCS} Version.js
-
-#################
-
-Version.js: package.json
-	./versionjs
+	rm -f *~ */*~
+	rm -f ${DOCS}
 
 #################
 

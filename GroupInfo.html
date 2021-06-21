@@ -3,6 +3,7 @@
         <title>Group Info</title>
 
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta name="GE3-GITVersion" content="3.3.0">
 
         <link rel="icon" type="image/png" href="./images/favicon.png"></link>
 
@@ -208,6 +209,7 @@
         </style>
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+        <script src="./refreshVersion.js"></script>
         <script type="module">
          import {check} from './js/Migration.js'
          import {load} from './GroupInfo.js'
@@ -238,7 +240,7 @@
                 </div>
                 <div id="version" style="float: right; font-size: small"></div>
                 <script type="module">
-                 import {Version} from './Version.js'
+                 import * as Version from './Version.js'
                  document.getElementById('version').textContent = Version.label
                 </script>
             </div>
@@ -524,7 +526,7 @@
                 <span class="toggled hidden less"></span>
             </span>
             <span class="heading">File data</span>
-                <div class="name-value-content toggled"></div>
+            <div class="name-value-content toggled"></div>
             <template id="file-data-template">
                 <div class="name">${file_datum.name}</div>
                 <div class="value">${file_datum.value}</div>
