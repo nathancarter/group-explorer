@@ -7,6 +7,9 @@ as a desktop application, but was rewritten in 2019 as a web app.
 
 ## Status
 
+**Release 3.3.0:** Removed modal editors from Group Info page; improved
+version migration; internal improvements.
+
 **Release 3.2.0:** A new Sheets page, with improved stored sheets capabilies.
 Tell us what you think!
 
