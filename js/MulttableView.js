@@ -10,6 +10,7 @@ Controller interface:
     organizeBySubgroup
     swap rows/columns
     coloration Rainbow/Grayscale/None
+    colorReordering topRowFixed/elementColorsFixed
     highlight by Background/Border/Corner; clear
     pov -- zoom in/out, translate, recenter
     tooltip
@@ -34,6 +35,7 @@ import type {Tree} from './GEUtils.js';
 import {VizDisplay} from './SheetModel.js';
 
 export type Coloration = 'rainbow' | 'grayscale' | 'none';
+export type ColorReordering = 'topRowFixed' | 'elementColorsFixed';
 
 export type MulttableJSON = {
    groupURL: string,
@@ -77,6 +79,7 @@ export class MulttableView /*:: implements VizDisplay<MulttableJSON> */ {
     _separation: number;
     organizingSubgroup: number;
     _coloration: Coloration;
+    _colorReordering: ColorReordering;
     _colors: ?Array<color>;
     backgrounds: void | Array<color>;
     borders: void | Array<color | void>;
@@ -579,10 +582,14 @@ export class MulttableView /*:: implements VizDisplay<MulttableJSON> */ {
                 fn = (inx) => DEFAULT_BACKGROUND;
                 break;
             }
-            
-            this._colors = result = (this.elements.map( (el,inx) => [inx, el] ) /*: Array<[number, groupElement]> */)
-                .sort( ([_a, x], [_b, y]) => x - y )
-                .map( ([inx,_]) => fn(inx) );
+
+            if (this.colorReordering === 'elementColorsFixed') {
+                this._colors = result = this.group.elements.map((_el, inx) => fn(inx))
+            } else {
+                this._colors = result = (this.elements.map( (el,inx) => [inx, el] ) /*: Array<[number, groupElement]> */)
+                    .sort( ([_a, x], [_b, y]) => x - y )
+                    .map( ([inx,_]) => fn(inx) )
+            }
         }
 
         return result;
@@ -596,6 +603,17 @@ export class MulttableView /*:: implements VizDisplay<MulttableJSON> */ {
         this.queueShowGraphic();
         this._coloration = coloration;
         this._colors = null;
+    }
+
+    get colorReordering () /*: ColorReordering */ {
+      return this._colorReordering
+    }
+
+    set colorReordering (colorReordering /*: ColorReordering */) {
+      this.queueShowGraphic()
+      this._colorReordering = colorReordering
+      this._colors = null
+      return this._colorReordering
     }
 
     get stride () /*: number */ {
@@ -683,6 +701,7 @@ export class MulttableView /*:: implements VizDisplay<MulttableJSON> */ {
             separation: this.separation,
             organizingSubgroup: this.organizingSubgroup,
             coloration: this.coloration,
+            colorReordering: this.colorReordering,
             highlights: {
                 background: this.backgrounds,
                 border: this.borders,
@@ -696,14 +715,15 @@ export class MulttableView /*:: implements VizDisplay<MulttableJSON> */ {
     fromJSON (json /*: MulttableJSON */) {
         Object.keys(json).forEach( (name) => {
             switch (name) {
-            case 'elements':		this.elements = json.elements;				break;
-            case 'separation':		this.separation = json.separation;			break;
-            case 'organizingSubgroup':	this.organizingSubgroup = json.organizingSubgroup;	break;
-            case 'coloration':		this.coloration = json.coloration;			break;
-            case 'highlights':		this.backgrounds = json.highlights.background;
-					this.borders = json.highlights.border;
-					this.corners = json.highlights.corner;			break;
-            default:										break;
+            case 'elements':            this.elements = json.elements;                                  break;
+            case 'separation':          this.separation = json.separation;                              break;
+            case 'organizingSubgroup':  this.organizingSubgroup = json.organizingSubgroup;              break;
+            case 'coloration':          this.coloration = json.coloration;                              break;
+            case 'colorReordering':     this.colorReordering = json.colorReordering || 'topRowFixed';   break;
+            case 'highlights':          this.backgrounds = json.highlights.background;
+                                        this.borders = json.highlights.border;
+                                        this.corners = json.highlights.corner;                          break;
+            default:                                                                                    break;
             }
         } );
 

@@ -17,8 +17,8 @@ the multiplication table using your mouse. (Note that order of elements in
 the top row and left column determine the contents of the rest of the table.
 *Group Explorer* fills it out using the group operation.)
 
-To move an element from one point to another in the top row, shift-click on
-the element's cell in the table and drag [one-finger drag] it to the new position
+To move an element from one point to another in the top row, shift-click [tap-hold]
+on the element's cell in the table and drag [one-finger drag] it to the new position
 (left or right in the top row). To move an element in the left column, the
 procedure is the same, except vertical. Note that the top row and left
 column will stay synchronized, so no matter which one you reorder, both will
@@ -41,7 +41,7 @@ drag and pinch to translate and magnify the table with one gesture.]
 
 To restore the default magnification level (which re-centers the table and fits it
 into the view), right-click anywhere in the table [control click on Mac,
-tow-finger tap on touch device].
+two-finger tap on touch device].
 
 ## The Table tab
 
@@ -100,6 +100,30 @@ just black text on white background.
 Note that the colorization scheme you choose is overridden by any
 highlighting you do on the Subsets tab, documented on a separate page, as
 indicated below.
+
+### Element recoloring on reorganization
+
+When you change the rows and columns of the multiplication table, either by
+dragging one of the rows/columns to a new location or by organizing the table by a
+different subgroup, the colors of the cells change, too. *Group Explorer* does
+this in a couple of different ways: it can keep the the top row (and left-most
+column) colors as they are, updating only the labels to reflect the reorganization;
+or it can keep the color currently associated with each label, changing the
+coloring of the top row as the labels are rearranged. (In either case this
+determines the contents and coloring of the rest of the table, as described
+[above](#reordering-header-row-or-header-column).)
+
+The first approach, keeping the top row colors intact, generally makes it easier
+to spot large patterns in the multiplication table through their similar
+hue. For example, in the following image of the \(\mathbb{Z}_3 \rtimes
+\mathbb{Z}_4\) multiplication table organized by the \(H_2\) subgroup, it is
+easy to recognize the orange and yellow colors of the upper left-hand corner
+subgroup in blocks on the bottom and right, indicating that \(H_2\) is a normal
+subgroup. On the other hand, keeping the element colors unchanged makes it
+easier to follow the action of a particular element as the table is reorganized.
+Try them both!
+
+![A screen shot of Z_3 sdp Z_4 multiplication table](illustration-multtable-Z_3 sdp Z_4.png)
 
 ## Related interfaces
 

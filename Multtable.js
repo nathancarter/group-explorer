@@ -47,6 +47,10 @@ function registerCallbacks() {
    $('#grayscale')[0].addEventListener('click', () => chooseColoration('grayscale'));
    $('#none')[0].addEventListener('click', () => chooseColoration('none'));
 
+   $('#color-order-top-row-fixed')[0].addEventListener('click', () => chooseColorReordering('topRowFixed'));
+   $('#color-order-element-colors-fixed')[0].addEventListener('click', () => chooseColorReordering('elementColorsFixed'));
+   
+
    // Large graphic events
    LargeGraphic.init();
 
@@ -170,6 +174,11 @@ function separation() {
 /* Set coloration option in multtable, and re-draw graphic */
 function chooseColoration(coloration /*: 'rainbow' | 'grayscale' | 'none' */) {
    Multtable_View.coloration = coloration;
+}
+
+/* Set color order option in multtable, and re-draw graphic */
+function chooseColorReordering (colorReordering /*: 'classicColorOrder' | 'fixedToElement' */) {
+   Multtable_View.colorReordering = colorReordering;
 }
 
 // Resize the body, including the graphic

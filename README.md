@@ -7,6 +7,9 @@ as a desktop application, but was rewritten in 2019 as a web app.
 
 ## Status
 
+**Release 3.4.0:** In Multable, an option to keep element coloring fixed
+on table reorganization.
+
 **Release 3.3.0:** Removed modal editors from Group Info page; improved
 version migration; internal improvements.
 
