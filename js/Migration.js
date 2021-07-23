@@ -103,13 +103,13 @@ function reloadWebPage () {
   return Promise.reject(new Error('restarting with updated GE3 files'))
 }
 
-function semanticVersion (label /*: ?string */) /*: ?{majorMinorHash: integer, patch: integer} */ {
+function semanticVersion (label /*: ?string */) /*: ?{majorMinorHash: integer, patch: string} */ {
   let result = null
   if (label != null) {
-    const labelMatch = label.match(/([0-9]+).([0-9]+).([0-9]+)/)
+    const labelMatch = label.match(/([0-9]+).([0-9]+).([^-]+)/)
     if (labelMatch != null) {
       const [major, minor, patch] = labelMatch.splice(1, 3)
-      result = { majorMinorHash: 100000 * parseInt(major) + parseInt(minor), patch: parseInt(patch) }
+      result = { majorMinorHash: 100000 * parseInt(major) + parseInt(minor), patch: patch }
     }
   }
   return result
