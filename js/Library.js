@@ -76,14 +76,10 @@ export function getBaseURL () /*: string */ {
 
 // delete all group definitions from map and localStorage
 export function clear () {
-  const libraryLength = localStorage.length
-  for (let inx = libraryLength - 1; inx >= 0; inx--) {
-    const key = localStorage.key(inx)
-    if (key != null && key.startsWith('http')) {
-      localStorage.removeItem(key)
-      delete map[key]
-    }
+  for (const key in map) {
+    delete map[key]
   }
+  localStorage.setItem('groups', '{}')
 }
 
 // return array of groups from map/localStorage (no server contact)
