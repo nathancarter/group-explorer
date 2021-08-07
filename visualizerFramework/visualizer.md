@@ -5,7 +5,7 @@
 framework. It is called immediately after document load by CayleyDiagram.html, CycleGraph.html,
 Multtable.html, SymmetryObject.html, and Sheet.html
 
-[hideControls()](#hidecontrols) and [showControls()](#showcontrols) hide and expose the
+n[hideControls()](#hidecontrols) and [showControls()](#showcontrols) hide and expose the
 visualizer-specific control panels
 
 [showPanel(panel_name)](#showpanelpanel_name) switches from one visualizer-specific control panel
@@ -50,7 +50,7 @@ export async function load (group /*: ?XMLGroup */, help_page /*: string */) /*:
   const data = await GEUtils.ajaxLoad(VISUALIZER_LAYOUT_URL)
   $('#header').append(data) // append the top right-hand icon strip, etc. to header
   $('#show-controls').hide() // Hide top right-hand 'hide-controls' icon initially
-  if (group != undefined && group.URL != undefined)
+  if (group == null || group.URL == null)
     $('#find-group').hide()
   $('#version').text(Version.label)
 }
