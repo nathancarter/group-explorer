@@ -11,7 +11,7 @@ const filesToReload = [
   'html/ClassEquationInfo.html',
   'html/CyclicInfo.html',
   'html/OrderClassesInfo.html',
-  'html/ShoeGAPCode.html',
+  'html/ShowGAPCode.html',
   'html/SolvableInfo.html',
   'html/SubgroupInfo.html',
   'html/SubsetHighlightController.html',
