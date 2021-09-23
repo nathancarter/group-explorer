@@ -33,7 +33,6 @@ const filesToReload = [
   'js/CyclicInfo.js',
   'js/DefiningRelations.js',
   'js/DiagramDnD.js',
-  'js/DragResizeExtension.js',
   'js/ge-lib-endmatter.js',
   'js/ge-lib-preamble.js',
   'js/GEUtils.js',
