@@ -19,5 +19,13 @@
   },
   "devDependencies": {
     "flow-bin": "^0.118.0"
+  },
+  "standard": {
+    "globals": [
+      "$",
+      "alert",
+      "localStorage",
+      "performance"
+    ]
   }
 }

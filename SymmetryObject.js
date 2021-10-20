@@ -1,7 +1,5 @@
 // @flow
 
-/* global $ */
-
 import GEUtils from './js/GEUtils.js';
 import * as Library from './js/Library.js';
 import Log from './js/Log.js';

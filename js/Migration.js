@@ -1,7 +1,5 @@
 // @flow
 
-/* global localStorage */
-
 import * as Version from '../Version.js'
 
 const filesToReload = [

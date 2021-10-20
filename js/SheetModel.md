@@ -1,7 +1,5 @@
 // @flow
 
-/* global $ localStorage */
-
 import { createLabelledCycleGraphView } from './CycleGraphView.js'
 import { createFullMulttableView } from './MulttableView.js'
 import { createLabelledCayleyDiagramView } from './CayleyDiagramView.js'

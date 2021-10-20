@@ -1,7 +1,5 @@
 // @flow
 
-/* global $ */
-
 // to deal gracefully with old GE3 html pages that didn't have version metadata (e.g., 3.1 -> 3.3 migration)
 export const label =
   (getGITVersion() == null) ? '' : ('GE ' + ((semanticMatch(getGITVersion()) /*: any */) /*: RegExp$matchResult */)[0])

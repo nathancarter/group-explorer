@@ -16,8 +16,6 @@ A collection of utility routines used throughout GE3.
 ```javascript
  */
 
-/* global $ */
-
 /*::
 export type Tree<T> = Array< T | Tree<T> >;
  */

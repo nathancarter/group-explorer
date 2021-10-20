@@ -1,6 +1,6 @@
 // @flow
 
-/* global alert $ performance TouchEvent */
+/* global TouchEvent */
 
 import GEUtils from './GEUtils.js'
 import * as Library from './Library.js'

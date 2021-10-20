@@ -1,6 +1,6 @@
 // @flow
 
-/* global $ DOMRect MouseEvent ResizeObserver TouchEvent Touch */
+/* global DOMRect MouseEvent ResizeObserver TouchEvent Touch */
 
 import { THREE } from '../lib/externals.js'
 import * as SheetModel from './SheetModel.js'

@@ -1,7 +1,5 @@
 // @flow
 
-/* global $ */
-
 import { createUnlabelledCayleyDiagramView } from './js/CayleyDiagramView.js';
 import { createUnlabelledCycleGraphView } from './js/CycleGraphView.js';
 import * as Library from './js/Library.js';

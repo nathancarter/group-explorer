@@ -1,5 +1,6 @@
 // @flow
-/* global $ DOMRect TouchEvent */
+
+/* global DOMRect TouchEvent */
 
 /*
  * The functions in this script file define how Group Explorer

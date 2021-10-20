@@ -1,7 +1,5 @@
 // @flow
 
-/* global $ */
-
 import * as VC from './visualizerFramework/visualizer.js'
 
 import * as SheetModel from './js/SheetModel.js'

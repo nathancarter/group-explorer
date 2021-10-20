@@ -1,7 +1,5 @@
 // @flow
 
-/* global $ localStorage */
-
 /*
  * Class manages group definitions stored in localStorage
  *
