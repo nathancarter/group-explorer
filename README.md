@@ -1,11 +1,13 @@
 
-# Group Explorer 3.4
+# Group Explorer 3.5
 
 Group Explorer is visualization software for students and instructors of
 abstract algebra, specifically group theory.  It has been around since 2005
 as a desktop application, but was rewritten in 2019 as a web app.
 
 ## Status
+
+**Release 3.5.0:** Several minor bugfixes.
 
 **Release 3.4.0:** In Multable, an option to keep element coloring fixed
 on table reorganization.
@@ -26,7 +28,7 @@ We would still appreciate suggestions for enhancements or bug reports.
 can have a polished and reliable version ready for students in Fall 2019
 courses.
 
-[Try it live here here.](http://nathancarter.github.io/group-explorer/index.html)
+[Try it live here.](http://nathancarter.github.io/group-explorer/index.html)
 
 ![Samples of various group visualizations](images/screenshot-all-visualizers.png)
 
