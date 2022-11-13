@@ -31,36 +31,39 @@
          <div id="header">
              <div id="heading"></div>
          </div>
-         <div id="graphic">
-         <div id="controls"><div id="control">
-            <div style="margin: 1em 0 0.5em 0">View this symmetry object:</div>
-            <div id="diagram-select" class="faux-select" style="margin-bottom: 1em"
-                 onclick="$(this).find('.faux-select-options').toggle(); event.stopPropagation()">
-               <div class="faux-select-arrow"></div>
-               <div id="diagram-choice" class="faux-select-value"></div>
-               <ol id="diagram-choices" class="faux-select-options hidden display-none-on-clean"></ol>
-            </div>
-            <template id="diagram-choice-template">
-                <span data-symmetry-object-index="${index}">${symmetryObject.name}</span>
-            </template>
+				 <div id="display">
+					 <div id="graphic"></div>
+					 <div id="controls">
+						 <div id="control">
+							 <div style="margin: 1em 0 0.5em 0">View this symmetry object:</div>
+							 <div id="diagram-select" class="faux-select" style="margin-bottom: 1em"
+										onclick="$(this).find('.faux-select-options').toggle(); event.stopPropagation()">
+								 <div class="faux-select-arrow"></div>
+								 <div id="diagram-choice" class="faux-select-value"></div>
+								 <ol id="diagram-choices" class="faux-select-options hidden display-none-on-clean"></ol>
+							 </div>
+							 <template id="diagram-choice-template">
+								 <span data-symmetry-object-index="${index}">${symmetryObject.name}</span>
+							 </template>
 
-            <div>Zoom level:
-               <input id="zoom-level" type="range" min="-10" max="10" value="0">
-            </div>
+							 <div>Zoom level:
+								 <input id="zoom-level" type="range" min="-10" max="10" value="0">
+							 </div>
 
-            <div>Line thickness:
-               <input id="line-thickness" type="range" min="1" max="20" value="10">
-            </div>
+							 <div>Line thickness:
+								 <input id="line-thickness" type="range" min="1" max="20" value="10">
+							 </div>
 
-            <div>Node radius:
-               <input id="node-radius" type="range" min="-10" max="10" value="0">
-            </div>
+							 <div>Node radius:
+								 <input id="node-radius" type="range" min="-10" max="10" value="0">
+							 </div>
 
-            <div><input id="use-fog" type="checkbox">Use this much fog:
-               <input id="fog-level" type="range" min="1" max="10" value="5">
-            </div>
-         </div>
-         </div></div>
+							 <div><input id="use-fog" type="checkbox">Use this much fog:
+								 <input id="fog-level" type="range" min="1" max="10" value="5">
+							 </div>
+							 </div>
+					 </div>
+				 </div>
       </div>
    </body>
 </html>

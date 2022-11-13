@@ -1,63 +1,52 @@
 /* @flow
 
 # Cayley Diagram Manual Rearrangement
+
 The [Cayley diagram visulizer](../help/rf-um-cd-options/index.html) lets users customize the
 appearance of a [Cayley diagram](../help/rf-groupterms/#cayley-diagrams) by [repositioning the
 nodes](../help/rf-um-cd-options/index.html#changing-the-positions-of-nodes-in-the-diagram) and
-[adjusting the degree to which the arcs in the diagram are
-curved](../help/rf-um-cd-options/index.html#changing-the-arcing-of-arrows-in-the-diagram).  The
+[adjusting arcing of arrows in the
+diagram](../help/rf-um-cd-options/index.html#changing-the-arcing-of-arrows-in-the-diagram).  The
 **DiagramDnD** class in this file handles the drag-and-drop operations that implement this
-capability, updating the Cayley diagram and redrawing the graphic as needed.
+rearrangement capability, updating the Cayley diagram and redrawing the graphic as needed.
 
 ## Life cycle
+
 The [Cayley diagram visualizer page](../CayleyDiagram.js) creates a **DiagramDnD** instance during
 initialization and places a reference in the global variable `DnD_handler`. It is bound to the large
-Cayley diagram and listens to mouse/touch events on the canvas. (There is no use for this variable
-after initialization, it exists only for debugging.)
+Cayley diagram and listens to mouse/pen/touch pointer events on the canvas. (There is no use for
+this variable after initialization, it exists only for debugging.)
 
 ## Event handling
-The [DiagramDnD constructor](#constructor) sets up the event handlers to listen for the start of a
-rearrangement. Since mouse and touch events work a bit differently and it is confusing to handle
-both within the same code, there are separate [mouse](#mouse-event-handler) and
-[touch](#touch-event-handler) handlers in **DiagragDnD**. The event handlers recognize these events
-associated with diagram rearrangement:
-* The start of a rearrangement is indicated by a *shift-mousedown* or *one-point touchstart* over a
-  node or arc. The [pickedObject3D()](#find-picked-object) method returns the node or arc over which
-  the event occurred, or *null* if there isn't one (and thus the event is not the start of a
-  rearrangement). Upon starting a rearrangement the handlers register as listeners for *move* and
-  *end* events, which have been ignored until now in the interests of performance.
-* The handlers store location information from subsequent *shift-mousemove*\/*touchmove* events as
-  they are received, which are used by the [asynchronous painter](#asynchronous-painting) to perform
-  the actual diagram changes.
-* The end of an ongoing rearrangement is indicated by a *shift-mouseup* or *touchend* event. Upon
-  termination the handlers call[`repaint`](#asynchronous-painting)directly to update the diagram one
-  last time, followed by a call to [endDrag()](#end-drag) to clean up.
-* An unexpected event will abort a rearrangement in progress by calling [endDrag()](#end-drag).
 
-Note that **DiagramDnD** handles events for the &lt;canvas&gt; element, before they bubble up to
-the containing &lt;div&gt;. Thus, when the handler identifies a drag-and-drop-related event, it
-prevents it from propagating up the DOM tree, where it would be interpreted as a command to display
-a tooltip or to rotate the visualization.
- 
+The [DiagramDnD constructor](#constructor) sets up the DiagramDnD [event handler](#event-handler) to
+listen for the start of a rearrangement. Mouse and touch events are both handled by the same
+routine, using [pointer events](https://developer.mozilla.org/en-US/docs/Web/API/Pointer_events).
+The event handler captures events for the &lt;canvas&gt; element before they bubble up to other
+event handlers such as the [Cayley diagram tooltip handler](../CayleyDiagram.js) or the Three.js
+[TrackballControls](https://threejs.org/docs/#examples/en/controls/TrackballControls) handler.  When
+it identifies a drag-and-drop-related event, it stops it from propagating to further, so it won't be
+interpreted as a command to display a tooltip or to rotate the visualization.
+
 ## Drawing
+
 Redrawing the main graphic is done asynchronously to the main event handling in order to keep
 potentially time-consuming graphics operations from tying up the main thread and stacking up user
 interface events. Depending on the type of object originally picked, node or arc, the [asynchronous
 painting](#asynchronous-painting) routine
-calls[`redrawArc()`](#redraw-arc)or[`redrawSphere()`](#redraw-sphere)to rearrange the
-[DiagramDisplay scene](./DisplayDiagram.js#scene).  Actual rerendering of the scene occurs on the59
-next execution of the [DisplayDiagram render() automation routine](./DisplayDiagram.js#render).
+calls[`redrawArc()`](#redraw-arc)or[`redrawSphere()`](#redraw-sphere)to rearrange the scene defined in
+[AbstractDiagramDisplay](./AbstractDiagramDisplay.js).  Actual rerendering of the scene occurs on the
+next execution of the AbstractDiagramDisplay `render()` routine.
 
 ```js
 */
-import {CayleyDiagramView} from './CayleyDiagramView.js';
-import GEUtils from './GEUtils.js';
 import Log from './Log.js';
 
 // $FlowFixMe -- external module imports described in flow-typed directory
 import {THREE} from '../lib/externals.js';
 
 /*::
+import {CayleyDiagramView} from './CayleyDiagramView.js';
 import type {LineType, ArrowData, NodeData, LineUserData, SphereUserData} from './CayleyDiagramView.js';
 */
 
@@ -68,8 +57,8 @@ export default class DiagramDnD {
    eventLocation: THREE.Vector2;  // position of the last mouse/touch event
                                   //    (note that we don't drag-and-drop on multi-touch events)
    raycaster: THREE.Raycaster;
-   mouse_handler: (MouseEvent) => void;
-   touch_handler: (TouchEvent) => void;
+   event_handler: (PointerEvent) => void;
+   touch_event_handler: (TouchEvent) => void;
    async_painter: ?number;  // asyncPainter timeoutID; null if asyncPainter not queued
    start_time: number;  // time of first touch event
    picked_object: ?({node: NodeData} | {arrow: ArrowData});
@@ -77,7 +66,7 @@ export default class DiagramDnD {
 /*
 ```
 ### Constructor
-Registers event handlers for touch or non-touch devices, as appropriate.
+Initialize instance variables, Registers event handlers.
 ```js
 */
    constructor (cayley_diagram_view /*: CayleyDiagramView */) {
@@ -85,172 +74,121 @@ Registers event handlers for touch or non-touch devices, as appropriate.
       this.canvas = cayley_diagram_view.renderer.domElement;
       this.eventLocation = new THREE.Vector2();
       this.raycaster = new THREE.Raycaster();
-      this.raycaster.params.Line.threshold = 0.02;
+      this.raycaster.params.Line2 = { threshold: 10 } // Widen line capture region, for touch devices (pixels)
       this.async_painter = null;
       this.picked_object = null;
 
-      if (GEUtils.isTouchDevice()) {
-         this.touch_handler = (touchEvent /*: TouchEvent */) => this.touchHandler(touchEvent);
-         this.canvas.addEventListener('touchstart', this.touch_handler);
-      } else {
-         this.mouse_handler = (mouseEvent /*: MouseEvent */) => this.mouseHandler(mouseEvent);
-         this.canvas.addEventListener('mousedown', this.mouse_handler);
-      }
+      this.event_handler = (event) => this.eventHandler(event)
+      this.touch_event_handler = (event) => this.touchEventHandler(event)
+      this.canvas.addEventListener('pointerdown', this.event_handler)
+      
    }
 /*
 ```
-### Mouse event handler
+### Event handler
 
-The mouse event handler starts and stops the drag-and-drop operation and updates the current event
-location in`this.eventLocation.` Modifying the diagram is not generally done directly from this
-routine; that is usually done from[`asyncPainter().`](#asynchronous-painting) An exception occurs
-on normal termination by _shift-mouseup_, on which the handler
-calls[`repaint()`](#asynchronous-painter)directly to update the diagram one last time.
+The event handler initiates a drag-and-drop rearrangement and updates data fields that describe its
+progress, but it does not modify the diagram directly: that is done in
+[`this.asyncPainter().`](#asynchronous-painting) The normal event sequence in a drag-and-drop
+rearrangement is:
+
+* A *pointerdown* event occurs over a node or arc.  The [pickedObject3D()](#find-picked-object)
+  method returns the node or arc over which the event occurred, or *null.* If a picked object is
+  found indicating the start of a rearrangement, the handler
+
+    * registers as a listener for subsequent *pointermove*, *pointerup*, *pointerout". and
+      *pointerleave" evants, which have been ignored until now in the interest of performance
+
+    * stores the picked object and pointer location for later use by the [asynchronous
+      painter](#asynchronous-painting)
+
+    * starts the [asynchronous painter](#asynchronous-painting) to update the diagram outside the
+      main thread
+
+* A sequence of *pointermove* events occurs as the object is dragged across the screen. These are
+  handled by copying the current pointer position into `this.eventLocation,` where it is
+  accessed by the [asynchronous painter](#asynchronous-painting) routine.
+
+* A *pointerup* event terminates the ongoing rearrangement. The diagram is painted one last time by
+  `this.repaint(),` and [this.endDrag()](#end-drag) is called to stop the [asynchronous
+  painter](#asynchronous-painting) and clean up.
+
+When an event that breaks this sequence occurs, the rearrangement in progress is aborted by calling
+[endDrag().](#end-drag) This might be because the pointer was dragged off the screen, for example,
+indicated by a *pointerleave* event. If a second touch occurs, a non-primary *pointerdown* event
+indicating the start of a multi-touch gesture, all pointer event handling is suspended and only
+`touchend` events are handled. When a `touchend` event with an emtpy `touches` list arrives, normal
+operation is resumed.
 
 ```js
 */
-   mouseHandler (mouseEvent /*: MouseEvent */) {
-      if (!mouseEvent.shiftKey) {
-         this.endDrag();
-         return;
+   eventHandler (event /*: PointerEvent */) {
+      if ((event.type.startsWith('pointer') && event.pointerType == 'mouse') && !event.shiftKey) {
+         this.endDrag()
+         return
       }
 
-      const bounding_box = this.canvas.getBoundingClientRect();
-      this.eventLocation.x = ( (mouseEvent.clientX - bounding_box.left) / this.canvas.width) * 2 - 1;
-      this.eventLocation.y = -( (mouseEvent.clientY - bounding_box.top) / this.canvas.height) * 2 + 1;
+      const bounding_box = this.canvas.getBoundingClientRect()
+      this.eventLocation.x = ( (event.clientX - bounding_box.left) / this.canvas.width) * 2 - 1
+      this.eventLocation.y = -( (event.clientY - bounding_box.top) / this.canvas.height) * 2 + 1
 
-      mouseEvent.preventDefault();
-      mouseEvent.stopPropagation();
+      event.preventDefault()
 
-      switch (mouseEvent.type) {
-      case 'mousedown':
-         this.picked_object = this.pickedObject();
-         if (this.picked_object != undefined) {
-            this.canvas.addEventListener('mousemove', this.mouse_handler);
-            this.canvas.addEventListener('mouseup', this.mouse_handler);
-            this.canvas.style.cursor = 'move';  // change cursor to grab
-            this.asyncPainter();  // start asynch painting
+      switch (event.type) {
+      case 'pointerdown':
+         // A second touch has occurred: stop drag and wait until multi-touch gesture is complete
+         if (!event.isPrimary) {
+            this.endDrag()
+            this.canvas.removeEventListener('pointerdown', this.event_handler)
+            this.canvas.addEventListener('touchend', this.touch_event_handler)
+            break
          }
-         break;
 
-      case 'mousemove':
-         break;
+         this.picked_object = this.findPickedObject()
+         if (this.picked_object != undefined) {
+            this.canvas.addEventListener('pointermove', this.event_handler)
+            this.canvas.addEventListener('pointerup', this.event_handler)
+            this.canvas.addEventListener('pointerout', this.event_handler)
+            this.canvas.addEventListener('pointerleave', this.event_handler)
+            this.canvas.style.cursor = 'move' // change cursor to grab
+            this.asyncPainter() // start asynch painting
+            event.stopPropagation()
+         }
+         break
 
-      case 'mouseup':
-         this.repaint();
-         this.endDrag();
-         break;
+      case 'pointermove':
+         event.stopPropagation()
+         break
+
+      case 'pointerup':
+         this.repaint()
+         this.endDrag()
+         event.stopPropagation()
+         break
+
+      case 'pointerout':
+      case 'pointerleave':
+         this.endDrag()
+         break
 
          // Unexpected events
       default:
-         Log.warn(`DiagramDnD.mouseHandler unexpected event ${mouseEvent.type}`);
-         this.endDrag();
+         Log.warn(`DiagramDnD.eventHandler unexpected event ${event.type}`)
+         this.endDrag()
+         break
       }
    }
- /*
- ```
- ### Touch event handler
+
+	 touchEventHandler (touchEvent /*: TouchEvent */) {
+      if (touchEvent.type == 'touchend' && touchEvent.touches.length == 0) {
+         // Only listen for touchend events when waiting for a multi-touch gesture to complete
+         this.canvas.removeEventListener('touchend', this.touch_event_handler)
+         this.canvas.addEventListener('pointerdown', this.event_handler)
+			} else {
+         Log.warn(`DiagramDnD.touchEventHandler unexpected event ${touchEvent.type}`)
+			}
+	 }
  
-Like the [mouse event handler](#mouse-event-handler), the touch handler starts and stops the
-drag-and-drop operation and updates the current event location in`this.eventLocation.` Modifying the
-diagram is not generally done directly from this routine; that is usually done
-from[`asyncPainter().`](#asynchronous-painting) An exception occurs on normal termination by
-*shift-mouseup*, on which the handler calls[`repaint()`](#asynchronous-painter)directly to update
-the diagram one last time. There are a couple of significant differences, however:
-* Mouse events associated with diagram rearrangement are easy to recognize because they are all
- modified by the *shift* key; touch events have no such discriminant. To distinguish between a short
- tap intended to display a tooltip and a tap-hold intended to reposition a node, the initial
- *touchstart* event is first checked to see whether it happened over a node or an arc. If it
- happened over a node it might be the start of a short tap intended for the tooltip handler, so the
- repositioning operation is set up as in the mouse event handler, but it is not performed
- immediately.  Instead,[`asyncPainter`](#asynchronous-painting)execution queued with a 300ms delay,
- the time of the event is recorded in`this.start_time,`and the event is allowed to propagate. If a
- *touchend* event occurs before the 300ms have elapsed the event was evidently the start of a quick
- tap, not a tap-hold, and the queued execution of`asyncPainter()`is cancelled and`endDrag()`called
- to clean up.  If no such event occurs,`asyncPainter`executes and redraws the diagram just as in the
- mouse event handler.
-* It is straightforward to provide user feedback when a pick event using a mouse is successful: a
-cursor change is easy to see and well understood. On a touch device, however, the finger that
-performs the touch obscures the cursor, so another mechanism must be found. Nodes are easy to pick
-because they are pretty large and it's easy to see the slight jump that occurs when they are
-selected. (Since the touch is never in the exact center of the node, repainting the node with its
-center directly under the touch always moves it a little.) Arcs, however, have a much narrower
-target area and a much less noticeable jump, so on touch devices we change the color of the arc and
-its arrowhead when it is picked, and then change it back upon completion of the operation.
-
- ```js
- */ 
-   touchHandler (touchEvent /*: TouchEvent */) {
-      const touchCount = touchEvent.touches.length
-            + ((touchEvent.type == 'touchend') ? touchEvent.changedTouches.length : 0);
-      const touch = (touchEvent.type == 'touchend') ? touchEvent.changedTouches[0] : touchEvent.touches[0];
-      
-      if (touchCount != 1) {
-         this.endDrag();
-         return;
-      }
-
-      const bounding_box = this.canvas.getBoundingClientRect();
-      this.eventLocation.x = ( (touch.clientX - bounding_box.left) / this.canvas.width) * 2 - 1;
-      this.eventLocation.y = -( (touch.clientY - bounding_box.top) / this.canvas.height) * 2 + 1;
-
-      switch (touchEvent.type) {
-      case 'touchstart': {
-         this.picked_object = this.pickedObject();
-         if (this.picked_object != undefined) {
-            let picked_object = this.picked_object;
-            if (this.picked_object.hasOwnProperty('arrow')) {
-               const picked_object3d = ((this.findObject3DByUserData(picked_object) /*: any */) /*: ?LineType */);
-               if (picked_object3d != undefined) {
-                  picked_object3d.material.color.set('gray'); // turn arc gray to show it's been selected
-               }
-               this.asyncPainter();
-            } else {
-               this.async_painter = window.setTimeout(() => this.asyncPainter(), 300);
-            }
-            this.start_time = touchEvent.timeStamp;
-
-            this.canvas.addEventListener('touchmove', this.touch_handler);
-            this.canvas.addEventListener('touchend', this.touch_handler);
-         } }
-         break;
-
-      case 'touchmove':
-         if (this.picked_object != undefined) {
-            touchEvent.stopPropagation();
-            touchEvent.preventDefault();
-         }
-         break;
-
-      case 'touchend':
-         const picked_object = this.picked_object;
-         if (picked_object != undefined) {
-            // reset arc, arrowhead color
-            if (picked_object.hasOwnProperty('arrow')) {
-               const picked_object3d = ((this.findObject3DByUserData(picked_object) /*: any */) /*: ?LineType */);
-               if (picked_object3d != undefined) {
-                  picked_object3d.material.color.set(((picked_object /*: any */) /*: {arrow: ArrowData} */).arrow.color);
-               }
-            }
-
-            // don't redraw if this appears to be a short tap over a node (to display a tooltip)
-            //   redrawing makes the node jump in an unintended way
-            if (touchEvent.timeStamp - this.start_time > 300 || picked_object.hasOwnProperty('arrow')) {
-               this.repaint();
-               touchEvent.preventDefault();  // prevents generation of mouse-like events (like a click)
-            }
-
-            this.endDrag();
-            touchEvent.stopPropagation();  // prevents propagation that might cause, e.g., canvas rotation 
-         }
-         break;
-
-      default:
-         Log.warn(`DiagramDnD.touchHandler unexpected event ${touchEvent.type}`);
-         this.endDrag();
-      }
-   }
-
    findObject3DByUserData (userData /*: {node: NodeData} | {arrow: ArrowData} */) /*: ?THREE.Object3D */ {
       let object3d;
       if (userData.hasOwnProperty('node')) {
@@ -272,7 +210,7 @@ the [raycaster](https://threejs.org/docs/#api/en/core/Raycaster) class from [THR
 
 ```js
 */
-   pickedObject () /*: ?(SphereUserData | LineUserData) */ {
+   findPickedObject () /*: ?(SphereUserData | LineUserData) */ {
       // update the picking ray with the camera and mouse position
       this.raycaster.setFromCamera(this.eventLocation, this.cayley_diagram_view.camera);
 
@@ -294,10 +232,10 @@ the [raycaster](https://threejs.org/docs/#api/en/core/Raycaster) class from [THR
 ### End drag
 
 Generally clean up after a drag-and-drop operation
-* remove event handlers that are only used during a manual rearrangement
 * return the cursor to its default style (generally an arrow)
 * stop [asynchronous painting](#asynchronous-painting)
 * clear`this.picked_object`so even if the [asynchronous painter] runs it will exit without doing anything
+* remove event handlers that are only used during a manual rearrangement
 
 ```js
 */
@@ -306,18 +244,20 @@ Generally clean up after a drag-and-drop operation
       window.clearTimeout( ((this.async_painter /*: any */) /*: number */) );
       this.async_painter = null;
       this.picked_object = null;
-      if (GEUtils.isTouchDevice()) {
-         this.canvas.removeEventListener('touchmove', this.touch_handler);
-         this.canvas.removeEventListener('touchend', this.touch_handler);   
-      } else {
-         this.canvas.removeEventListener('mousemove', this.mouse_handler);
-         this.canvas.removeEventListener('mouseup', this.mouse_handler);
-      }
+
+      this.canvas.removeEventListener('pointermove', this.event_handler);
+      this.canvas.removeEventListener('pointerup', this.event_handler);
+      this.canvas.removeEventListener('pointerout', this.event_handler);
+      this.canvas.removeEventListener('pointerleave', this.event_handler);
    }
 /*
 ```
 ### Asynchronous painting
 Done asynchronously to avoid stacking up move events faster than we can paint them.
+
+`repaint()` is called directly from the [eventHandler](#event-handler) to repaint the screen for the
+last time.
+
 ```js
 */
    asyncPainter () {

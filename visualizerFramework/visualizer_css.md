@@ -65,6 +65,14 @@ body, #bodyDouble {
    background-color: rgba(0, 0, 0, 0);
 }
 
+#display {
+		position: relative;
+		flex-grow: 1;
+		overflow: hidden;
+		display: flex;
+		flex-direction: row;
+}
+
 /* container for main graphic, generally a <canvas>; fills the width available */
 #graphic {
    position: relative;

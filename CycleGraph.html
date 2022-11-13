@@ -27,27 +27,31 @@
       <script src="./refreshVersion.js"></script>
       <script type="module">
        import {check} from './js/Migration.js'
-       import {load} from "./CycleGraph.js";
-       window.addEventListener('load', () => check().then(load))
+			 import {load} from "./CycleGraph.js";
+ 			 window.addEventListener('load', () => check().then(load))
       </script>
    </head>
    <body>
-      <div id="bodyDouble">
-         <div id="header">
-             <div id="heading"></div>
-         </div>
+     <div id="bodyDouble">
+       <div id="header">
+         <div id="heading"></div>
+       </div>
+       <div id="display">
          <div id="graphic">
-            <div id="controls"><div id="control">
-            <div id="subset-control">
+           <template id="node-label-template">
+             <div id="node-label" class="tooltip remove-on-clean">
+               ${Group.representation[element]}
+             </div>
+           </template>
+         </div>          
+         <div id="controls">
+           <div id="control">
+             <div id="subset-control">
                <!-- This is filled in by subsetDisplay/subsets.html -->
-            </div>
-            <template id="node-label-template">
-               <div id="node-label" class="tooltip remove-on-clean">
-                  ${Group.representation[element]}
-               </div>
-            </template>
-            </div></div>
+             </div>
+           </div>
          </div>
-      </div>
+       </div>
+     </div>
    </body>
 </html>

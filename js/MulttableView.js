@@ -43,6 +43,7 @@ export type MulttableJSON = {
    separation: number,
    organizingSubgroup: number,
    coloration: Coloration,
+   colorReordering: ColorReordering,
    highlights: {
       background: void | Array<color>,
       border: void | Array<color | void>,
@@ -218,8 +219,8 @@ export class MulttableView /*:: implements VizDisplay<MulttableJSON> */ {
         this.transform.set(scale, 0,     x_translate + this.translate.dx,
                            0,     scale, y_translate + this.translate.dy,
                            0,     0,     1);
-        const UL = new THREE.Vector2(0, 0).applyMatrix3(new THREE.Matrix3().getInverse(this.transform));
-        const LR = new THREE.Vector2(this.canvas.width, this.canvas.height).applyMatrix3(new THREE.Matrix3().getInverse(this.transform));
+        const UL = new THREE.Vector2(0, 0).applyMatrix3(this.transform.clone().invert())
+        const LR = new THREE.Vector2(this.canvas.width, this.canvas.height).applyMatrix3(this.transform.clone().invert())
 
         const minX = this.index(UL.x) || 0;
         const minY = this.index(UL.y) || 0;
@@ -489,7 +490,7 @@ export class MulttableView /*:: implements VizDisplay<MulttableJSON> */ {
     // Compute Multtable 0-based row, column from canvas-relative screen coordinates by inverting this.transform
     //   returns null if point is outside Multtable
     xy2rowXcol (canvasX /*: number */, canvasY /*: number */) /*: ?{row: number, col: number} */ {
-        const mult = new THREE.Vector2(canvasX, canvasY).applyMatrix3(new THREE.Matrix3().getInverse(this.transform));
+        const mult = new THREE.Vector2(canvasX, canvasY).applyMatrix3(this.transform.clone().invert())
         const x = this.index(mult.x);
         const y = this.index(mult.y);
         return (x == undefined || y == undefined) ? null : {col: x, row: y};

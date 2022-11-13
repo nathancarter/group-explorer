@@ -1151,14 +1151,12 @@ export class CayleyDiagramView extends AbstractDiagramDisplay {
 
 export function createUnlabelledCayleyDiagramView(options /*: CayleyDiagramViewOptions */ = {}) {
     const display = new CayleyDiagramView(options);
-    display.use_fat_lines = false;
     display.display_labels = false;
     return display;
 }
 
 export function createLabelledCayleyDiagramView(options /*: CayleyDiagramViewOptions */ = {}) {
     const display = new CayleyDiagramView(options);
-    display.use_fat_lines = false;
     display.display_labels = true;
     return display;
 }
@@ -1166,6 +1164,5 @@ export function createLabelledCayleyDiagramView(options /*: CayleyDiagramViewOpt
 export function createInteractiveCayleyDiagramView(options /*: CayleyDiagramViewOptions */ = {}) {
     let display = new CayleyDiagramView(Object.assign({}, {height: 500, width: 500}, options));
     display.display_labels = true;
-    display.use_fat_lines = true;
     return display;
 }

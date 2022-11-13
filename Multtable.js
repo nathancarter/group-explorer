@@ -177,7 +177,7 @@ function chooseColoration(coloration /*: 'rainbow' | 'grayscale' | 'none' */) {
 }
 
 /* Set color order option in multtable, and re-draw graphic */
-function chooseColorReordering (colorReordering /*: 'classicColorOrder' | 'fixedToElement' */) {
+function chooseColorReordering (colorReordering /*: 'topRowFixed' | 'elementColorsFixed' */) {
    Multtable_View.colorReordering = colorReordering;
 }
 

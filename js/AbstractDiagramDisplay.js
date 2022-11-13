@@ -19,6 +19,7 @@ export type AbstractDiagramDisplayOptions = {
    container?: JQuery,
    width?: number,
    height?: number,
+   line_width?: number,
 };
 */
 
@@ -50,7 +51,6 @@ export class AbstractDiagramDisplay {
     sphere_base_radius: float;
     _sphere_scale_factor: float;
 
-    use_fat_lines: boolean;
     _line_width: number;
 */
     /*
@@ -90,6 +90,7 @@ export class AbstractDiagramDisplay {
         this.light_positions = DEFAULT_LIGHT_POSITIONS;
 
         const scene_diameter = Math.sqrt(this.size.w*this.size.w + this.size.h*this.size.h);
+        this._line_width = options.line_width || Math.max(5, 2000 / scene_diameter) // Heuristic
         this.sphere_facet_count = (scene_diameter < 100) ? 5 : (scene_diameter < 300) ? 10 : 20;
     }
 
@@ -97,17 +98,17 @@ export class AbstractDiagramDisplay {
      * Attributes
      */
     get background () /*: css_color */ {
-        return '#' + this.renderer.getClearColor().getHexString();
+      return '#' + this.scene.background.getHexString()
     }
 
     set background (background_color /*: THREE.Color | number | string */) {
-        const color = '#' + new THREE.Color(background_color).getHexString();
-        this.renderer.setClearColor(color, 1.0);
+        const color = new THREE.Color(background_color)
+        this.scene.background = color
         this.scene.fog.color.set(color);  // set Fog color to background
     }
 
     get canvas () /*: HTMLCanvasElement */ {
-	return this.renderer.domElement;
+        return this.renderer.domElement;
     }
 
     get container () /*: HTMLElement */ {
@@ -328,7 +329,7 @@ export class AbstractDiagramDisplay {
             this._line_width = DEFAULT_LINE_WIDTH;
         }
 
-        return this.use_fat_lines ? this._line_width : 1;
+        return this._line_width
     }
     
     set line_width (line_width /*: float */) {
@@ -339,25 +340,8 @@ export class AbstractDiagramDisplay {
         }
     }
 
+    // Create a line from an array of vertices
     createLine (vertices /*: Array<THREE.Vector3> */) /*: LineType */ {
-        const new_line = (this.use_fat_lines) ? this.createFatLine(vertices) : this.createWebglLine(vertices);
-        return new_line;
-    }
-
-    createWebglLine (vertices /*: Array<THREE.Vector3> */) /*: THREE.Line */ {
-        const geometry = new THREE.Geometry();
-        geometry.vertices = vertices;
-
-        const material = new THREE.LineBasicMaterial( {
-            linewidth: this.line_width,
-        } );
-            
-        const line = new THREE.Line(geometry, material);
-        return line;
-    }
-
-    // Create a fat line from an array of vertices
-    createFatLine (vertices /*: Array<THREE.Vector3> */) /*: LineType */ {
         const geometry = new LineGeometry();
         geometry.setPositions( vertices.reduce(
             (positions, vertex) => (positions.push(vertex.x, vertex.y, vertex.z), positions),
@@ -368,8 +352,8 @@ export class AbstractDiagramDisplay {
             resolution:  new THREE.Vector2(window.innerWidth, window.innerHeight),
         } );
             
-        const line = new Line2( geometry, material );
-        return line;
+        const new_line = new Line2( geometry, material );
+        return new_line;
     }
 
     deleteAllLines () {

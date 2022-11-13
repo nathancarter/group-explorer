@@ -70,7 +70,6 @@ export class SymmetryObjectView extends AbstractDiagramDisplay {
 
 export function createInteractiveSymmetryObjectView(options /*: SymmetryObjectViewOptions */ = {}) {
     const display = new SymmetryObjectView(options);
-    display.use_fat_lines = true;
     display.enableTrackballControl();
     display.render();
     return display;
@@ -78,6 +77,5 @@ export function createInteractiveSymmetryObjectView(options /*: SymmetryObjectVi
 
 export function createStaticSymmetryObjectView(options /*: SymmetryObjectViewOptions */ = {}) {
     const display = new SymmetryObjectView(options);
-    display.use_fat_lines = false;
     return display;
 }

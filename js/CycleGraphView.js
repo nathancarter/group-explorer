@@ -199,8 +199,8 @@ export class CycleGraphView /*:: implements VizDisplay<CycleGraphJSON> */ {
                            0,     scale, y_translate + this.translate.dy,
                            0,     0,     1);
         // calculate the pre_image of the screen, in order to skip drawing labels on nodes not in view
-        const upper_left = new THREE.Vector2(0, 0).applyMatrix3(new THREE.Matrix3().getInverse(this.transform));
-        const lower_right = new THREE.Vector2(this.canvas.width, this.canvas.height).applyMatrix3(new THREE.Matrix3().getInverse(this.transform));
+        const upper_left = new THREE.Vector2(0, 0).applyMatrix3(this.transform.clone().invert())
+        const lower_right = new THREE.Vector2(this.canvas.width, this.canvas.height).applyMatrix3(this.transform.clone().invert())
         const pre_image = {minX: upper_left.x, minY: upper_left.y, maxX: lower_right.x, maxY: lower_right.y};
 
         // draw all the paths first, because they're behind the vertices
@@ -369,7 +369,7 @@ export class CycleGraphView /*:: implements VizDisplay<CycleGraphJSON> */ {
     //   or 'undefined' if not within one radius
     select(screenX /*: number */, screenY /*: number */) /*: void | groupElement */ {
         // compute cycleGraph coordinates from screen coordinates by inverting this.transform
-        const cg_coords = new THREE.Vector2(screenX, screenY).applyMatrix3(new THREE.Matrix3().getInverse(this.transform));
+        const cg_coords = new THREE.Vector2(screenX, screenY).applyMatrix3(this.transform.clone().invert())
         const index = this.positions.findIndex( (pos) => {
             return Math.sqrt( Math.pow( pos.x - cg_coords.x, 2 ) + Math.pow( pos.y - cg_coords.y, 2 ) ) < this.radius
         } );

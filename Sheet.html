@@ -267,6 +267,14 @@
         </style>
         
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+				<script type="importmap">
+					{
+						"imports": {
+							"three": "https://cdn.jsdelivr.net/npm/three@0.146.0/build/three.module.js",
+							"three/": "https://cdn.jsdelivr.net/npm/three@0.146.0/"
+						}
+					}
+			</script>
         <script src="./refreshVersion.js"></script>
         <script type="module">
          import {check} from './js/Migration.js'

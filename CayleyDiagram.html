@@ -20,6 +20,7 @@
       <style>
        #graphic {
           background-color: #E8C8C8;
+          -webkit-user-select: none;
        }
 
        #controls {
@@ -45,37 +46,38 @@
       </script>
    </head>
    <body>
-      <div id="bodyDouble">
-          <div id="header">
-              <div id="heading"></div>
-          </div>
-         <div id="graphic">
-             <div id="controls">
-                 <div id="options">
-                     <button id="subset-button"
-                             onclick="$('#control > *').hide(); $('#subset-control').show()">Subsets</button>
-                     <button id="view-button"
-                             onclick="$('#control > *').hide(); $('#view-control').show()">View</button>
-                     <button id="diagram-button"
-                             onclick="$('#control > *').hide(); $('#diagram-control').show()">Diagram</button>
-                 </div>
+     <div id="bodyDouble">
+       <div id="header">
+         <div id="heading"></div>
+       </div>
+			 <div id="display">
+				 <div id="graphic"></div>
+         <div id="controls">
+           <div id="options">
+             <button id="subset-button"
+                     onclick="$('#control > *').hide(); $('#subset-control').show()">Subsets</button>
+             <button id="view-button"
+                     onclick="$('#control > *').hide(); $('#view-control').show()">View</button>
+             <button id="diagram-button"
+                     onclick="$('#control > *').hide(); $('#diagram-control').show()">Diagram</button>
+           </div>
 
-                 <div id="control">
-                     <div id="subset-control">
-                         <!-- This is filled in by subsetDisplay/subsets.html -->
-                     </div>
-
-                     <div id="view-control" class="hidden">
-                         <!-- This is filled in by cayleyViewController/view.html -->
-                     </div>
-
-                     <div id="diagram-control" class="hidden">
-                         <!-- This is filled in by diagramController/diagram.html -->
-                     </div>
-                 </div>
+           <div id="control">
+             <div id="subset-control">
+               <!-- This is filled in by subsetDisplay/subsets.html -->
              </div>
+
+             <div id="view-control" class="hidden">
+               <!-- This is filled in by cayleyViewController/view.html -->
+             </div>
+
+             <div id="diagram-control" class="hidden">
+               <!-- This is filled in by diagramController/diagram.html -->
+             </div>
+           </div>
          </div>
-      </div>
+			 </div>
+     </div>
    </body>
 
    <!-- Templates for tooltips -->

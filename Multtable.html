@@ -44,18 +44,20 @@
          <div id="header">
              <div id="heading"></div>
          </div>
-         <div id="graphic">
-            <template id="drag-image-template">
-               <img id="drag-image" src="${Multtable_View.canvas.toDataURL()}" class="remove-on-clean" swapping="${swapping}"
-                    start="${start}" style="${style}">
-            </template>
-
-            <template id="node-label-template">
-               <div id="node-label" class="tooltip remove-on-clean" row="${rowXcol.row}" col="${rowXcol.col}">
-                  ${Group.representation[element]}
-               </div>
-            </template>
-
+				 <div id="display">
+            <div id="graphic">
+               <template id="drag-image-template">
+                  <img id="drag-image" src="${Multtable_View.canvas.toDataURL()}" class="remove-on-clean" swapping="${swapping}"
+                       start="${start}" style="${style}">
+               </template>
+	 	 
+               <template id="node-label-template">
+                  <div id="node-label" class="tooltip remove-on-clean" row="${rowXcol.row}" col="${rowXcol.col}">
+                     ${Group.representation[element]}
+                  </div>
+               </template>
+	 	 			 </div>
+	 	 
             <div id="controls">
                 <div id="options">
                     <button id="subset-button"
@@ -63,12 +65,12 @@
                     <button id="table-button"
                             onclick="$('#control > *').hide(); $('#table-control').show()">Table</button>
                 </div>
-
+	 	 
                 <div id="control">
                     <div id="subset-control">
                         <!-- This is filled in by subsetDisplay/subsets.html -->
                     </div>
-
+	 	 
                     <div id="table-control" class="hidden">
                         <div class="graphic-lead">Organize by subgroup:</div>
                         <div id="organization-select" class="faux-select"
@@ -85,10 +87,10 @@
                                 <i>H</i><sub>${subgroupIndex}</sub>, a subgroup of order ${subgroup.order}.
                             </span>
                         </template>
-
+	 	 
                         <div class="graphic-lead" style="margin-top: 3em">Separate cosets by:</div>
                         <input id="separation-slider" type="range" min="0" max="100" value="0"> <!-- [0-100] => [0,box width] -->
-
+	 	 
                         <form id="coloration-choice" class="graphic-lead" style="margin-bottom: 0">
                             Default coloration:
                             <div>
@@ -104,7 +106,7 @@
                                 <label for="none">None</label>
                             </div>
                         </form>
-
+	 	 
                         <form id="color-order-choice" class="graphic-lead" type="radio" style="margin-bottom: 0">
                             Element coloring on reorganization:
                             <div>
@@ -117,7 +119,7 @@
                             </div>
                         </form>                   
                     </div>
-                </div>
+               </div>
             </div>
          </div>
       </div>
