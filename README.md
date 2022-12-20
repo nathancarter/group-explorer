@@ -1,11 +1,13 @@
 
-# Group Explorer 3.5
+# Group Explorer 3.6
 
 Group Explorer is visualization software for students and instructors of
 abstract algebra, specifically group theory.  It has been around since 2005
 as a desktop application, but was rewritten in 2019 as a web app.
 
 ## Status
+
+**Release 3.6.0:** Upgrade to jQuery 3.6.1, three.js r146
 
 **Release 3.5.0:** Several minor bugfixes.
 
