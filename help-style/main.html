@@ -43,7 +43,7 @@ img { border: 1px solid black; }
             <div class="w3-padding w3-card w3-bar-block">
                 {% if 'search' in config['plugins'] %}
                 <br>
-                <form action='search/index.html'>
+                <form action='{{ base_url }}/search/index.html'>
                     <input name='q' id='mkdocs-search-query' type='text'
                            placeholder='Enter search term'
                            title='Type search term here'/>
