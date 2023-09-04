@@ -9,7 +9,7 @@ function getGITVersion () /*: string */ {
 }
 
 function semanticMatch (gitVersion /*: string */) {
-  return gitVersion.match(/([0-9]+).([0-9]+).([^-]+)/)
+  return gitVersion.match(/([0-9]+).([0-9]+).([0-9]+)/)
 }
 
 // export Version, for compatibility during a 3.2 -> 3.3 migration

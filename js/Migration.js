@@ -100,16 +100,16 @@ function reloadWebPage () {
   return Promise.reject(new Error('restarting with updated GE3 files'))
 }
 
-function semanticVersion (label /*: ?string */) /*: ?{majorMinorHash: integer, patch: string} */ {
-  let result = null
+function semanticVersionHash (label /*: ?string */) /*: ?integer */ {
+  let versionHash = null
   if (label != null) {
-    const labelMatch = label.match(/([0-9]+).([0-9]+).([^-]+)/)
+    const labelMatch = label.match(/([0-9]+).([0-9]+).([0-9]+)/)
     if (labelMatch != null) {
       const [major, minor, patch] = labelMatch.splice(1, 3)
-      result = { majorMinorHash: 100000 * parseInt(major) + parseInt(minor), patch: patch }
+      versionHash = ((parseInt(major) * 100000) + parseInt(minor)) * 100000 + parseInt(patch)
     }
   }
-  return result
+  return versionHash
 }
 
 function updateLocalStorage () {
@@ -121,32 +121,26 @@ export async function check () {
 
   const thisLabel = Version.label
   const storedLabel = localStorage.getItem('GE-version')
-  const storedVersion = semanticVersion(storedLabel)
-  const thisVersion = semanticVersion(thisLabel)
+  const storedVersionHash = semanticVersionHash(storedLabel)
+  const thisVersionHash = semanticVersionHash(thisLabel)
 
-  if (thisVersion == null) {
+  if (thisVersionHash == null) {
     // web page has no version metadata so it's old => load new web page and let it work out whether to refresh files
     result = reloadWebPage()
   } else {
-    if (storedVersion == null) {
+    if (storedVersionHash == null) {
       // local storage has no GE-version => this is a migration from a pre-3.2 version, or a new install
       await refreshFiles()
       result = reloadWebPage()
     } else {
       if (thisLabel !== storedLabel) { // files and web page are not in synch
-        if (thisVersion.majorMinorHash > storedVersion.majorMinorHash) {
-          // web page newer than, not compatible with files => refresh files
+        if (thisVersionHash > storedVersionHash) {
+          // web page newer than files => refresh files
           await refreshFiles()
           result = reloadWebPage()
-        } else if (thisVersion.majorMinorHash < storedVersion.majorMinorHash) {
+        } else if (thisVersionHash < storedVersionHash) {
           // web page older than files => load new web page
           result = reloadWebPage()
-        } else if (thisVersion.patch < storedVersion.patch) {
-          // old web page, but compatible with files => just load new web page
-          result = reloadWebPage()
-        } else if (thisVersion.patch > storedVersion.patch) {
-          // new web page compatible with files
-          updateLocalStorage()
         }
       }
     }
