@@ -84,17 +84,21 @@ class Subgroup {
       return this._isNormal;
    }
 
-   // clone all fields except group reference
-   clone() /*: Subgroup */ {
-      const clone = new Subgroup();
-      for (const prop in this) {
-         ((clone /*: any */) /*: Obj */)[prop] =
-            (((this /*: any */) /*: Obj */)[prop] == undefined)
-               ? undefined
-               : (prop == 'group')
-                  ? this.group
-                  : ((this /*: any */) /*: Obj */)[prop].clone();
+  // clone/copy all fields except group reference
+   clone () /*: Subgroup */ {
+      const clone = new Subgroup()
+      const klone = ((clone /*: any */) /*: {[string]: ?mixed} */)
+      for (const [key, value] of Object.entries(this)) {
+         if (value === undefined) {
+            klone[key] = undefined
+         } else if (key === 'group') {  // avoid circular reference
+            klone[key] = value
+         } else if (typeof value === 'object') {  // copy objects
+            klone[key] = (value /*: any */).clone()
+         } else {
+            klone[key] = value
+         }
       }
-      return clone;
+      return clone
    }
 }
