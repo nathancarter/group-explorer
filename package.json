@@ -1,6 +1,6 @@
 {
   "name": "group-explorer",
-  "version": "3.6.0",
+  "version": "3.6.1",
   "description": "Group theory visualization application for the web",
   "main": "index.js",
   "scripts": {

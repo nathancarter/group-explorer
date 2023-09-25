@@ -7,6 +7,8 @@ as a desktop application, but was rewritten in 2019 as a web app.
 
 ## Status
 
+**Release 3.6.1:** Fix error in normalizer calculation
+
 **Release 3.6.0:** Upgrade to jQuery 3.6.1, three.js r146
 
 **Release 3.5.0:** Several minor bugfixes.
