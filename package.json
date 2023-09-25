@@ -15,7 +15,7 @@
   "author": "Ray Ellis and Nathan Carter",
   "license": "LGPL-3.0",
   "dependencies": {
-    "jquery": "3.4.1"
+    "jquery": "3.5.0"
   },
   "devDependencies": {
     "flow-bin": "^0.118.0"
